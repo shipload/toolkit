@@ -15,6 +15,7 @@ import {ChainDefinition} from '@wharfkit/session'
 import ContractKit, {Contract} from '@wharfkit/contract'
 import {findNearbyPlanets, hasSystem, travelplan} from './travel'
 import {Ship} from './ship'
+import {getCurrentEpoch} from './epoch'
 
 interface ShiploadOptions {
     platformContractName?: string
@@ -195,5 +196,10 @@ export class Shipload {
             .all()
 
         return cargoItems
+    }
+
+    async getCurrentEpoch(): Promise<UInt64> {
+        const game = await this.getGame()
+        return getCurrentEpoch(game)
     }
 }
