@@ -15,7 +15,7 @@ import {ChainDefinition} from '@wharfkit/session'
 import ContractKit, {Contract} from '@wharfkit/contract'
 import {findNearbyPlanets, hasSystem, travelplan} from './travel'
 import {Ship} from './ship'
-import {getCurrentEpoch} from './epoch'
+import {EpochInfo, getCurrentEpoch, getEpochInfo} from './epoch'
 
 interface ShiploadOptions {
     platformContractName?: string
@@ -32,6 +32,7 @@ export class Shipload {
     public client: APIClient
     public server: Contract
     public platform: Contract
+    public game: PlatformContract.Types.game_row | undefined
 
     constructor(chain: ChainDefinition, constructorOptions?: ShiploadConstructorOptions) {
         const {client, platformContract, serverContract} = constructorOptions || {}
@@ -75,11 +76,15 @@ export class Shipload {
         })
     }
 
-    async getGame(): Promise<PlatformContract.Types.game_row> {
+    async getGame(reload = false): Promise<PlatformContract.Types.game_row> {
+        if (!reload && this.game) {
+            return this.game
+        }
         const game = await this.platform.table('games').get()
         if (!game) {
             throw new Error(ERROR_SYSTEM_NOT_INITIALIZED)
         }
+        this.game = game
         return game
     }
 
@@ -198,8 +203,19 @@ export class Shipload {
         return cargoItems
     }
 
-    async getCurrentEpoch(): Promise<UInt64> {
+    async getCurrentEpochHeight(): Promise<UInt64> {
         const game = await this.getGame()
         return getCurrentEpoch(game)
+    }
+
+    async getCurrentEpoch(): Promise<EpochInfo> {
+        const game = await this.getGame()
+        const epoch = await this.getCurrentEpochHeight()
+        return getEpochInfo(game, epoch)
+    }
+
+    async getEpoch(height: UInt64Type): Promise<EpochInfo> {
+        const game = await this.getGame()
+        return getEpochInfo(game, UInt64.from(height))
     }
 }

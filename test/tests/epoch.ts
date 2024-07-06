@@ -15,9 +15,10 @@ suite('epoch', function () {
     //     }
     //     const epoch = getCurrentEpoch(game)
     //     console.log(epoch)
-    //     assert.equal(epoch.equals(4), true)
+    //     // assert.equal(epoch.equals(4), true)
     //     const info = getEpochInfo(game, epoch)
-    //     assert.deepEqual(info.start, new Date('2024-07-05T18:00:00.000Z'))
-    //     assert.deepEqual(info.end, new Date('2024-07-06T18:00:00.000Z'))
+    //     console.log(info)
+    //     // assert.deepEqual(info.start, new Date('2024-07-05T18:00:00.000Z'))
+    //     // assert.deepEqual(info.end, new Date('2024-07-06T18:00:00.000Z'))
     // })
 })
