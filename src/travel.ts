@@ -118,11 +118,14 @@ export function travelplan(
     cargos: ServerContract.Types.cargo_row[],
     origin: ServerContract.ActionParams.Type.coordinates,
     destination: ServerContract.ActionParams.Type.coordinates,
-    recharge: boolean
+    recharge: boolean,
+    alwaysValid = false
 ): ServerContract.Types.travel_plan {
-    const valid = hasSystem(game.config.seed, destination)
-    if (!valid) {
-        throw new Error('Invalid destination')
+    if (!alwaysValid) {
+        const valid = hasSystem(game.config.seed, destination)
+        if (!valid) {
+            throw new Error('Invalid destination')
+        }
     }
     const distance = distanceBetweenCoordinates(origin, destination)
     const mass = calc_ship_mass(ship, cargos) // Total mass of ship_id
