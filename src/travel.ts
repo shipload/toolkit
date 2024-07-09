@@ -18,6 +18,7 @@ export function travelplanDuration(travelplan: ServerContract.Types.travel_plan)
     return UInt32.from(travelplan.flighttime)
         .adding(travelplan.rechargetime)
         .adding(travelplan.loadtime)
+        .adding(travelplan.masspenalty)
 }
 
 export function distanceTraveled(
@@ -132,6 +133,7 @@ export function travelplan(
     const loadtime = calc_ship_loadtime(ship, cargos)
     const flighttime = calc_ship_flighttime(ship, mass, distance)
     const rechargetime = recharge ? calc_ship_rechargetime(ship) : 0
+    const masspenalty = calc_mass_penalty(ship, mass)
     const energyusage = calc_energyusage(distance, ship.stats.drain) // Energy usage from ship and flighttime
 
     return ServerContract.Types.travel_plan.from({
@@ -141,10 +143,21 @@ export function travelplan(
         loadtime,
         flighttime,
         rechargetime,
+        masspenalty,
         // TODO: Remove below, used for debugging
         energyusage,
         mass,
     })
+}
+
+export function calc_mass_penalty(ship: ServerContract.Types.ship_row, mass: UInt64Type): UInt32 {
+    const current = Number(mass)
+    const maximum = Number(ship.stats.maxmass)
+    if (mass > ship.stats.maxmass) {
+        // 1 second for every 1000 over maxmass
+        return UInt32.from((current - maximum) / 1000 / PRECISION)
+    }
+    return UInt32.from(0)
 }
 
 export function calc_rechargetime(
@@ -173,7 +186,7 @@ export function calc_ship_loadtime(
     const mass_load = UInt64.from(0)
     const mass_unload = UInt64.from(0)
     for (const cargo of cargos) {
-        const cargo_delta = Number(cargo.quantity) - Number(cargo.loaded)
+        const cargo_delta = Number(cargo.owned) - Number(cargo.loaded)
         if (cargo_delta !== 0) {
             const good_mass = getGood(cargo.good_id).mass
             const cargo_mass = good_mass.multiplying(Math.abs(cargo_delta))
@@ -242,7 +255,7 @@ export function calc_ship_mass(
     }
 
     for (const cargo of cargos) {
-        mass.add(getGood(cargo.good_id).mass.multiplying(cargo.quantity))
+        mass.add(getGood(cargo.good_id).mass.multiplying(cargo.owned))
     }
 
     return mass

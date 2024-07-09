@@ -11,6 +11,7 @@ const mockShipStats = ServerContract.Types.ship_stats.from({
     capacity: 5000000,
     drain: 250000,
     mass: 500000000,
+    maxmass: 1000000000,
     orbit: 1000,
     recharge: 100000,
     thrust: 10000000,
@@ -29,6 +30,7 @@ const mockTravelPlan = ServerContract.Types.travel_plan.from({
     flighttime: 43,
     loadtime: 0,
     rechargetime: 23,
+    masspenalty: 0,
     mass: 510000000,
     energyusage: 2358475,
 })
