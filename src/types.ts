@@ -2,6 +2,7 @@ import {UInt16, UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 
 export const PRECISION = 10000
+export const TRAVEL_MAXMASS_PENALTY = 5 // Penalty (in seconds) for exceeding the maximum mass per 1000 unit
 
 export interface CameraPosition extends ServerContract.ActionParams.Type.coordinates {
     z: number

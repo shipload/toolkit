@@ -11,7 +11,7 @@ import {
 
 import {PlatformContract, ServerContract} from './contracts'
 import {hash512} from './hash'
-import {Distance, PRECISION} from './types'
+import {Distance, PRECISION, TRAVEL_MAXMASS_PENALTY} from './types'
 import {getGood} from './goods'
 
 export function travelplanDuration(travelplan: ServerContract.Types.travel_plan) {
@@ -154,8 +154,7 @@ export function calc_mass_penalty(ship: ServerContract.Types.ship_row, mass: UIn
     const current = Number(mass)
     const maximum = Number(ship.stats.maxmass)
     if (mass > ship.stats.maxmass) {
-        // 1 second for every 1000 over maxmass
-        return UInt32.from((current - maximum) / 1000 / PRECISION)
+        return UInt32.from(((current - maximum) / 1000 / PRECISION) * TRAVEL_MAXMASS_PENALTY)
     }
     return UInt32.from(0)
 }
