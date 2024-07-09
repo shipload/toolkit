@@ -154,7 +154,9 @@ export function calc_mass_penalty(ship: ServerContract.Types.ship_row, mass: UIn
     const current = Number(mass)
     const maximum = Number(ship.stats.maxmass)
     if (mass > ship.stats.maxmass) {
-        return UInt32.from(((current - maximum) / 1000 / PRECISION) * TRAVEL_MAXMASS_PENALTY)
+        const overage = (current - maximum) / PRECISION
+        const penalty = TRAVEL_MAXMASS_PENALTY * Math.exp(0.00005 * overage)
+        return UInt32.from(penalty)
     }
     return UInt32.from(0)
 }
