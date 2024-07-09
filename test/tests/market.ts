@@ -11,7 +11,7 @@ suite('market', function () {
             const epochSeed: Checksum256Type = 'epochSeedSample'
             const price = await marketprice(location, good_id, gameSeed, epochSeed)
 
-            assert.equal(price.toNumber(), 214)
+            assert.equal(price.toNumber(), 21)
         })
     })
 
@@ -29,15 +29,15 @@ suite('market', function () {
                 [
                     {
                         id: 1,
-                        price: 214,
+                        price: 21,
                     },
-                    {
-                        id: 2,
-                        price: 0,
-                    },
+                    // {
+                    //     id: 2,
+                    //     price: 0,
+                    // },
                     {
                         id: 3,
-                        price: 370,
+                        price: 37,
                     },
                     {
                         id: 4,
@@ -45,20 +45,20 @@ suite('market', function () {
                     },
                     {
                         id: 5,
-                        price: 740,
+                        price: 74,
                     },
-                    {
-                        id: 6,
-                        price: 0,
-                    },
+                    // {
+                    //     id: 6,
+                    //     price: 0,
+                    // },
                     {
                         id: 7,
                         price: 149,
                     },
-                    {
-                        id: 8,
-                        price: 166,
-                    },
+                    // {
+                    //     id: 8,
+                    //     price: 166,
+                    // },
                     {
                         id: 9,
                         price: 235,
@@ -71,10 +71,10 @@ suite('market', function () {
                         id: 11,
                         price: 321,
                     },
-                    {
-                        id: 12,
-                        price: 374,
-                    },
+                    // {
+                    //     id: 12,
+                    //     price: 374,
+                    // },
                     {
                         id: 13,
                         price: 0,

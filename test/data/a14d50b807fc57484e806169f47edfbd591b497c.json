@@ -3,7 +3,7 @@
         "path": "https://jungle4.greymass.com/v1/chain/get_table_rows",
         "params": {
             "method": "POST",
-            "body": "{\"table\":\"ship\",\"code\":\"shipload.gm\",\"scope\":\"shipload.gm\",\"limit\":1,\"lower_bound\":\"1\",\"upper_bound\":\"1\",\"key_type\":\"i64\",\"json\":false}",
+            "body": "{\"json\":false,\"limit\":1000,\"table\":\"ship\",\"code\":\"shipload.gm\",\"scope\":\"shipload.gm\",\"index_position\":\"secondary\",\"key_type\":\"i128\",\"lower_bound\":\"302136950301645366037010457831317438464\",\"upper_bound\":\"302136950301645366055457201905026990079\"}",
             "headers": {}
         }
     },

@@ -2,7 +2,7 @@ import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
 import Shipload, {PRECISION, ServerContract} from '$lib'
 import {Chains} from '@wharfkit/common'
-import {BlockTimestamp, UInt64} from '@wharfkit/antelope'
+import {BlockTimestamp, Serializer, UInt64} from '@wharfkit/antelope'
 import {Ship} from 'src/ship'
 
 const client = makeClient('https://jungle4.greymass.com')
@@ -92,7 +92,7 @@ suite('Shipload', function () {
 
     suite('getShips', function () {
         test('success', async function () {
-            const ships = await shipload.getShips('npc1.gm')
+            const ships = await shipload.getShips('wharfkittest')
             assert.isArray(ships)
             assert.lengthOf(ships, 1)
             assert.instanceOf(ships[0], Ship)
@@ -143,26 +143,26 @@ suite('Shipload', function () {
 
     suite('getCargo', function () {
         test('success with ship_row', async function () {
-            const ship = await server.table('ship').get(UInt64.from(4))
+            const ship = await server.table('ship').get(UInt64.from(1))
             if (!ship) {
                 throw new Error('No ship found')
             }
             const cargoItems = await shipload.getCargo(ship)
-            assert.lengthOf(cargoItems, 2)
+            assert.lengthOf(cargoItems, 1)
             const cargoItem = cargoItems[0]
-            assert.equal(Number(cargoItem.ship_id), 4)
-            assert.equal(Number(cargoItem.good_id), 3)
-            assert.equal(Number(cargoItem.quantity), 1)
+            assert.equal(Number(cargoItem.ship_id), 1)
+            assert.equal(Number(cargoItem.good_id), 14)
+            assert.equal(Number(cargoItem.owned), 18)
         })
 
         test('success with UInt64Type', async function () {
-            const shipId = UInt64.from(4)
+            const shipId = UInt64.from(1)
             const cargoItems = await shipload.getCargo(shipId)
-            assert.lengthOf(cargoItems, 2)
+            assert.lengthOf(cargoItems, 1)
             const cargoItem = cargoItems[0]
-            assert.equal(Number(cargoItem.ship_id), 4)
-            assert.equal(Number(cargoItem.good_id), 3)
-            assert.equal(Number(cargoItem.quantity), 1)
+            assert.equal(Number(cargoItem.ship_id), 1)
+            assert.equal(Number(cargoItem.good_id), 14)
+            assert.equal(Number(cargoItem.owned), 18)
         })
     })
 })
