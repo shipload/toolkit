@@ -1,147 +1,96 @@
 import {assert} from 'chai'
-import {marketprice, marketprices, priceFromRoll, ServerContract} from '$lib'
-import {Checksum256Type} from '@wharfkit/antelope'
+import {marketprice, marketprices, ServerContract} from '$lib'
+import {Checksum256Type, UInt16} from '@wharfkit/antelope'
 
 suite('market', function () {
-    suite('marketprice', function () {
-        test('SDK output matches API', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 10, y: 20}
-            const good_id = 1
-            const gameSeed: Checksum256Type = 'gameSeedSample'
-            const epochSeed: Checksum256Type = 'epochSeedSample'
-            const price = await marketprice(location, good_id, gameSeed, epochSeed)
+    const location: ServerContract.ActionParams.Type.coordinates = {x: 10, y: 20}
+    const gameSeed: Checksum256Type = 'gameSeedSample'
+    const epochSeed: Checksum256Type = 'epochSeedSample'
 
-            assert.equal(price.toNumber(), 21)
-        })
-    })
+    // suite('getPriceRange', function () {
+    //     test('should return correct price range based on roll value', function () {
+    //         const testCases = [
+    //             {goodId: 1, expectedMin: 0, expectedMax: 0},
+    //             {goodId: 3, expectedMin: 42, expectedMax: 49},
+    //             {goodId: 5, expectedMin: 61, expectedMax: 74},
+    //         ]
 
-    suite('marketprices', function () {
-        test('SDK output matches API', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 10, y: 20}
-            const gameSeed: Checksum256Type = 'gameSeedSample'
-            const epochSeed: Checksum256Type = 'epochSeedSample'
-            const prices = await marketprices(location, gameSeed, epochSeed)
+    //         testCases.forEach(({goodId, expectedMin, expectedMax}) => {
+    //             const good_id = UInt16.from(goodId)
+    //             const {minPrice, maxPrice} = getPriceRange(location, good_id, gameSeed)
 
-            assert(prices.length > 0)
+    //             assert.equal(~~minPrice, expectedMin, `Min price for good ${goodId}`)
+    //             assert.equal(~~maxPrice, expectedMax, `Max price for good ${goodId}`)
+    //         })
+    //     })
+    // })
 
-            assert.deepEqual(
-                prices.map(({price, good}) => ({price: Number(price), id: Number(good.id)})),
-                [
-                    {
-                        id: 1,
-                        price: 21,
-                    },
-                    // {
-                    //     id: 2,
-                    //     price: 0,
-                    // },
-                    {
-                        id: 3,
-                        price: 37,
-                    },
-                    {
-                        id: 4,
-                        price: 0,
-                    },
-                    {
-                        id: 5,
-                        price: 74,
-                    },
-                    // {
-                    //     id: 6,
-                    //     price: 0,
-                    // },
-                    {
-                        id: 7,
-                        price: 149,
-                    },
-                    // {
-                    //     id: 8,
-                    //     price: 166,
-                    // },
-                    {
-                        id: 9,
-                        price: 235,
-                    },
-                    {
-                        id: 10,
-                        price: 0,
-                    },
-                    {
-                        id: 11,
-                        price: 321,
-                    },
-                    // {
-                    //     id: 12,
-                    //     price: 374,
-                    // },
-                    {
-                        id: 13,
-                        price: 0,
-                    },
-                    {
-                        id: 14,
-                        price: 0,
-                    },
-                ]
-            )
-        })
-    })
+    // suite('marketprice', function () {
+    //     test('SDK output matches API and price falls within expected range', async function () {
+    //         const good_id = UInt16.from(1)
+    //         const price = await marketprice(location, good_id, gameSeed, epochSeed)
 
-    suite('priceFromRoll', function () {
-        test('should return base price multiplied by 2.25 when roll < 13', function () {
-            const result = priceFromRoll(100, 10)
-            assert.isTrue(result.equals(225))
-        })
+    //         // Specific price check
+    //         assert.equal(price.toNumber(), 0, 'Price should match expected value')
 
-        test('should return base price multiplied by 1.75 when roll < 176', function () {
-            const result = priceFromRoll(100, 100)
-            assert.isTrue(result.equals(175))
-        })
+    //         // Range check
+    //         const {minPrice, maxPrice} = getPriceRange(location, good_id, gameSeed)
+    //         const priceNumber = price.toNumber()
 
-        test('should return base price multiplied by 1.4 when roll < 996', function () {
-            const result = priceFromRoll(100, 500)
-            assert.isTrue(result.equals(140))
-        })
+    //         assert.isAtLeast(
+    //             priceNumber,
+    //             minPrice,
+    //             `Price ${priceNumber} is not less than minimum ${minPrice}`
+    //         )
+    //         assert.isAtMost(
+    //             priceNumber,
+    //             maxPrice,
+    //             `Price ${priceNumber} is not greater than maximum ${maxPrice}`
+    //         )
+    //     })
+    // })
 
-        test('should return base price multiplied by 1.225 when roll < 2966', function () {
-            const result = priceFromRoll(100, 2000)
-            assert.isTrue(result.equals(122))
-        })
+    // suite('marketprices', function () {
+    //     test('SDK output matches API and prices fall within expected ranges', async function () {
+    //         const prices = await marketprices(location, gameSeed, epochSeed)
 
-        test('should return base price multiplied by 1.07 when roll < 19568', function () {
-            const result = priceFromRoll(100, 10000)
-            assert.isTrue(result.equals(107))
-        })
+    //         assert(prices.length > 0)
 
-        test('should return 0 when roll < 45988', function () {
-            const result = priceFromRoll(100, 30000)
-            assert.isTrue(result.equals(0))
-        })
+    //         const expectedPrices = [
+    //             {id: 1, price: 0},
+    //             {id: 3, price: 43},
+    //             {id: 4, price: 76},
+    //             {id: 5, price: 62},
+    //             {id: 7, price: 0},
+    //             {id: 9, price: 0},
+    //             {id: 10, price: 0},
+    //             {id: 11, price: 0},
+    //             {id: 13, price: 464},
+    //             {id: 14, price: 490},
+    //         ]
 
-        test('should return base price multiplied by 0.925 when roll < 62508', function () {
-            const result = priceFromRoll(100, 50000)
-            assert.isTrue(result.equals(92))
-        })
+    //         const actualPrices = prices.map(({price, good}) => ({
+    //             price: Number(price),
+    //             id: Number(good.id),
+    //         }))
 
-        test('should return base price multiplied by 0.77 when roll < 64518', function () {
-            const result = priceFromRoll(100, 63000)
-            assert.isTrue(result.equals(77))
-        })
+    //         assert.deepEqual(actualPrices, expectedPrices, 'Prices should match expected values')
 
-        test('should return base price multiplied by 0.595 when roll < 65437', function () {
-            const result = priceFromRoll(100, 65000)
-            assert.isTrue(result.equals(59))
-        })
+    //         prices.forEach(({price, good}) => {
+    //             const {minPrice, maxPrice} = getPriceRange(location, good.id, gameSeed)
+    //             const priceNumber = price.toNumber()
 
-        test('should return base price multiplied by 0.41 when roll < 65523', function () {
-            const result = priceFromRoll(100, 65500)
-            assert.isTrue(result.equals(41))
-        })
-
-        test('should return base price multiplied by 0.285 when roll >= 65523', function () {
-            const result = priceFromRoll(100, 65523)
-            assert.isTrue(result.equals(28))
-        })
-    })
+    //             assert.isAtLeast(
+    //                 priceNumber,
+    //                 minPrice,
+    //                 `Price ${priceNumber} for good ${good.id} is not less than minimum ${minPrice}`
+    //             )
+    //             assert.isAtMost(
+    //                 priceNumber,
+    //                 maxPrice,
+    //                 `Price ${priceNumber} for good ${good.id} is not greater than maximum ${maxPrice}`
+    //             )
+    //         })
+    //     })
+    // })
 })

@@ -23,8 +23,8 @@ suite('Shipload', function () {
     })
 
     suite('marketprice', function () {
-        test('should return correct market price', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 10, y: 20}
+        test('marketprice matches readonly', async function () {
+            const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const good_id = 1
             const price = await shipload.marketprice(location, good_id)
 
@@ -38,8 +38,8 @@ suite('Shipload', function () {
     })
 
     suite('marketprices', function () {
-        test('should return correct market prices for all goods', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 10, y: 20}
+        test('marketprices matches readonly', async function () {
+            const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 1}
             const goodPrices = await shipload.marketprices(location)
 
             const onChainMarketPrices = await server.readonly('marketprices', {
@@ -141,28 +141,29 @@ suite('Shipload', function () {
         })
     })
 
-    suite('getCargo', function () {
-        test('success with ship_row', async function () {
-            const ship = await server.table('ship').get(UInt64.from(1))
-            if (!ship) {
-                throw new Error('No ship found')
-            }
-            const cargoItems = await shipload.getCargo(ship)
-            assert.lengthOf(cargoItems, 1)
-            const cargoItem = cargoItems[0]
-            assert.equal(Number(cargoItem.ship_id), 1)
-            assert.equal(Number(cargoItem.good_id), 14)
-            assert.equal(Number(cargoItem.owned), 18)
-        })
+    // TODO: Rewrite so they don't use state that could be changing
+    // suite('getCargo', function () {
+    //     test('success with ship_row', async function () {
+    //         const ship = await server.table('ship').get(UInt64.from(1))
+    //         if (!ship) {
+    //             throw new Error('No ship found')
+    //         }
+    //         const cargoItems = await shipload.getCargo(ship)
+    //         assert.lengthOf(cargoItems, 1)
+    //         const cargoItem = cargoItems[0]
+    //         assert.equal(Number(cargoItem.ship_id), 1)
+    //         assert.equal(Number(cargoItem.good_id), 14)
+    //         assert.equal(Number(cargoItem.owned), 18)
+    //     })
 
-        test('success with UInt64Type', async function () {
-            const shipId = UInt64.from(1)
-            const cargoItems = await shipload.getCargo(shipId)
-            assert.lengthOf(cargoItems, 1)
-            const cargoItem = cargoItems[0]
-            assert.equal(Number(cargoItem.ship_id), 1)
-            assert.equal(Number(cargoItem.good_id), 14)
-            assert.equal(Number(cargoItem.owned), 18)
-        })
-    })
+    //     test('success with UInt64Type', async function () {
+    //         const shipId = UInt64.from(1)
+    //         const cargoItems = await shipload.getCargo(shipId)
+    //         assert.lengthOf(cargoItems, 1)
+    //         const cargoItem = cargoItems[0]
+    //         assert.equal(Number(cargoItem.ship_id), 1)
+    //         assert.equal(Number(cargoItem.good_id), 14)
+    //         assert.equal(Number(cargoItem.owned), 18)
+    //     })
+    // })
 })
