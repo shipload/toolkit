@@ -15,7 +15,7 @@ import {Distance, PRECISION, TRAVEL_MAXMASS_PENALTY} from './types'
 import {getGood} from './goods'
 
 export function travelplanDuration(travelplan: ServerContract.Types.travel_plan) {
-    return UInt32.from(travelplan.flighttime)
+    return UInt64.from(travelplan.flighttime)
         .adding(travelplan.rechargetime)
         .adding(travelplan.loadtime)
         .adding(travelplan.masspenalty)
