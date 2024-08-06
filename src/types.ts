@@ -1,4 +1,4 @@
-import {UInt16, UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {Struct, UInt16, UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 
 export const PRECISION = 10000
@@ -19,12 +19,18 @@ export interface Distance {
     distance: UInt16
 }
 
-export interface Good {
-    id: UInt16
-    name: string
-    description: string
-    base_price: UInt64
-    mass: UInt64
+@Struct.type('good')
+export class Good extends Struct {
+    @Struct.field(UInt16)
+    id!: UInt16
+    @Struct.field('string')
+    name!: string
+    @Struct.field('string')
+    description!: string
+    @Struct.field(UInt64)
+    base_price!: UInt64
+    @Struct.field(UInt64)
+    mass!: UInt64
 }
 
 export interface GoodType {
@@ -35,9 +41,16 @@ export interface GoodType {
     mass: UInt64Type
 }
 
-export interface GoodPrice {
-    good: Good
-    price: UInt64
+@Struct.type('GoodPrice')
+export class GoodPrice extends Struct {
+    @Struct.field(UInt16)
+    id!: UInt16
+    @Struct.field(Good)
+    good!: Good
+    @Struct.field(UInt64)
+    price!: UInt64
+    @Struct.field(UInt64)
+    supply!: UInt64
 }
 
 export interface Coordinates extends ServerContract.ActionParams.Type.coordinates {}

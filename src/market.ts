@@ -75,8 +75,8 @@ export function getRarity(
         // ~40.30% chance = no value change
         return {
             rarity: Rarities.trash,
-            minMultiplier: 0,
-            maxMultiplier: 0,
+            minMultiplier: 1,
+            maxMultiplier: 1.07,
         } // Product is not available
     } else if (rarityRoll < 62508) {
         // (White) ~25.33% chance = slightly lower value
@@ -161,18 +161,32 @@ export function getLocationMultiplier(
     }
 }
 
+export function getSupply(
+    gameSeed: Checksum256Type,
+    state: ServerContract.Types.state_row,
+    location: Coordinates,
+    good_id: UInt16Type
+): number {
+    const seed = `${state.seed}${location.x}${location.y}${good_id}supply`
+    const r = roll(gameSeed, seed)
+    const percent = r / 65535
+    const epoch = 1 + Number(state.epoch) / 90
+    const ship = Math.pow(Number(state.ships), 1 / 3)
+    return UInt64.from((128 / good_id) * percent * ship * epoch).toNumber()
+}
+
 export function marketprice(
     location: ServerContract.ActionParams.Type.coordinates,
     good_id: UInt16Type,
     gameSeed: Checksum256Type,
-    epochSeed: Checksum256Type
-): UInt64 {
-    const {base_price} = getGood(good_id)
-    let price = Number(base_price)
+    state: ServerContract.Types.state_row
+): GoodPrice {
+    const good = getGood(good_id)
+    let price = Number(good.base_price)
 
     // Rarity multiplier of the deal (changes with epoch)
     // Large impact range on price, from 0.285x to 3.0x
-    const rarityMultiplier = getRarityMultiplier(gameSeed, epochSeed, location, good_id)
+    const rarityMultiplier = getRarityMultiplier(gameSeed, state.seed, location, good_id)
     price *= rarityMultiplier
 
     // Location multiplier of the deal (static, based on game seed)
@@ -180,16 +194,21 @@ export function marketprice(
     const locationMultiplier = getLocationMultiplier(gameSeed, location, good_id)
     price *= locationMultiplier
 
-    return UInt64.from(price)
+    // Determine the current supply of the good at the location
+    const supply = getSupply(gameSeed, state, location, good_id)
+
+    return GoodPrice.from({
+        id: good_id,
+        good,
+        price: UInt64.from(price),
+        supply: UInt64.from(supply),
+    })
 }
 
 export function marketprices(
     location: ServerContract.ActionParams.Type.coordinates,
     gameSeed: Checksum256Type,
-    epochSeed: Checksum256Type
+    state: ServerContract.Types.state_row
 ): GoodPrice[] {
-    return getGoods().map((good) => {
-        const price = marketprice(location, good.id, gameSeed, epochSeed)
-        return {price, good: good}
-    })
+    return getGoods().map((good) => marketprice(location, good.id, gameSeed, state))
 }

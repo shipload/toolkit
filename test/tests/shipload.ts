@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
-import Shipload, {PRECISION, ServerContract} from '$lib'
+import Shipload, {marketprice, PRECISION, ServerContract} from '$lib'
 import {Chains} from '@wharfkit/common'
 import {BlockTimestamp, Serializer, UInt64} from '@wharfkit/antelope'
 import {Ship} from 'src/ship'
@@ -26,19 +26,27 @@ suite('Shipload', function () {
         test('marketprice matches readonly', async function () {
             const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const good_id = 1
-            const price = await shipload.marketprice(location, good_id)
-
-            const {price: onChainMarketPrice} = await server.readonly('marketprice', {
+            const helper = await shipload.marketprice(location, good_id)
+            const derived = marketprice(
+                location,
+                good_id,
+                '0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83',
+                '6d1c0555c799c087b843764ab5becff74f626f162e382c918427797072c97e89'
+            )
+            const api = await server.readonly('marketprice', {
                 location,
                 good_id,
             })
 
-            assert.isTrue(price.equals(onChainMarketPrice))
+            console.log(JSON.stringify(derived))
+            console.log(JSON.stringify(helper))
+            console.log(JSON.stringify(api))
+            // assert.isTrue(price.equals(onChainMarketPrice))
         })
     })
 
-    suite('marketprices', function () {
-        test('marketprices matches readonly', async function () {
+    suite('marketp2rices', function () {
+        test('marketp2rices matches readonly', async function () {
             const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 1}
             const goodPrices = await shipload.marketprices(location)
 

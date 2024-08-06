@@ -1,5 +1,7 @@
 import {
     APIClient,
+    Bytes,
+    Checksum256,
     Name,
     NameType,
     Serializer,
@@ -7,7 +9,7 @@ import {
     UInt64,
     UInt64Type,
 } from '@wharfkit/antelope'
-import {Distance, GoodPrice} from './types'
+import {Coordinates, Distance, GoodPrice} from './types'
 import {marketprice, marketprices} from './market'
 import {PlatformContract, ServerContract} from './contracts'
 import {ERROR_SYSTEM_NOT_INITIALIZED} from './errors'
@@ -138,10 +140,10 @@ export class Shipload {
     async marketprice(
         location: ServerContract.ActionParams.Type.coordinates,
         good_id: number
-    ): Promise<UInt64> {
+    ): Promise<GoodPrice> {
         const game = await this.getGame()
         const state = await this.getState()
-        return marketprice(location, good_id, game.config.seed, state.seed)
+        return marketprice(location, good_id, game.config.seed, state)
     }
 
     async marketprices(
@@ -149,7 +151,7 @@ export class Shipload {
     ): Promise<GoodPrice[]> {
         const game = await this.getGame()
         const state = await this.getState()
-        return marketprices(location, game.config.seed, state.seed)
+        return marketprices(location, game.config.seed, state)
     }
 
     async hasSystem(location: ServerContract.ActionParams.Type.coordinates): Promise<boolean> {
@@ -217,5 +219,14 @@ export class Shipload {
     async getEpoch(height: UInt64Type): Promise<EpochInfo> {
         const game = await this.getGame()
         return getEpochInfo(game, UInt64.from(height))
+    }
+
+    async getLocation(location: Coordinates) {
+        const hash = Checksum256.hash(Bytes.from(`${location.x}-${location.y}`, 'utf8'))
+        return this.server.table('location').all({
+            index_position: 'secondary',
+            from: hash,
+            to: hash,
+        })
     }
 }
