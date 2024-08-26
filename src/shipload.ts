@@ -15,9 +15,11 @@ import {PlatformContract, ServerContract} from './contracts'
 import {ERROR_SYSTEM_NOT_INITIALIZED} from './errors'
 import {ChainDefinition} from '@wharfkit/session'
 import ContractKit, {Contract} from '@wharfkit/contract'
-import {findNearbyPlanets, hasSystem, travelplan} from './travel'
+import {findNearbyPlanets, travelplan} from './travel'
+
 import {Ship} from './ship'
 import {EpochInfo, getCurrentEpoch, getEpochInfo} from './epoch'
+import {hasSystem} from './system'
 
 interface ShiploadOptions {
     platformContractName?: string

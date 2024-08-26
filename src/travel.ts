@@ -10,9 +10,9 @@ import {
 } from '@wharfkit/antelope'
 
 import {PlatformContract, ServerContract} from './contracts'
-import {hash512} from './hash'
 import {Distance, PRECISION, TRAVEL_MAXMASS_PENALTY} from './types'
 import {getGood} from './goods'
+import {hasSystem} from './system'
 
 export function travelplanDuration(travelplan: ServerContract.Types.travel_plan) {
     return UInt64.from(travelplan.flighttime)
@@ -67,14 +67,6 @@ export function rotation(
     destination: ServerContract.ActionParams.Type.coordinates
 ) {
     return Math.atan2(destination.y - origin.y, destination.x - origin.x) * (180 / Math.PI) + 90
-}
-
-export function hasSystem(
-    seed: Checksum256,
-    coordinates: ServerContract.ActionParams.Type.coordinates
-): boolean {
-    const str = ['system', coordinates.x, coordinates.y].join('-')
-    return String(hash512(seed, str)).slice(0, 2) === '00'
 }
 
 export function findNearbyPlanets(

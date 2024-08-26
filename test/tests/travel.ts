@@ -7,7 +7,7 @@ import Shipload, {
     travelplanDuration,
 } from '$lib'
 import {assert} from 'chai'
-import {Chains, Serializer} from '@wharfkit/session'
+import {Chains} from '@wharfkit/session'
 
 const client = makeClient('https://jungle4.greymass.com')
 const server = new ServerContract.Contract({client})
