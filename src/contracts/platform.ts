@@ -19,98 +19,98 @@ export namespace Types {
     @Struct.type('cleartable')
     export class cleartable extends Struct {
         @Struct.field(Name)
-        table_name!: Name
+        declare table_name: Name
         @Struct.field(Name, {optional: true})
-        scope?: Name
+        declare scope?: Name
         @Struct.field(UInt64, {optional: true})
-        max_rows?: UInt64
+        declare max_rows?: UInt64
     }
     @Struct.type('company_row')
     export class company_row extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field('string')
-        name!: string
+        declare name: string
     }
     @Struct.type('enable')
     export class enable extends Struct {
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
     }
     @Struct.type('enablegame')
     export class enablegame extends Struct {
         @Struct.field(Name)
-        contract!: Name
+        declare contract: Name
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
     }
     @Struct.type('foundcompany')
     export class foundcompany extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field('string')
-        name!: string
+        declare name: string
     }
     @Struct.type('game_config')
     export class game_config extends Struct {
         @Struct.field(Checksum256)
-        seed!: Checksum256
+        declare seed: Checksum256
         @Struct.field(UInt32)
-        epochtime!: UInt32
+        declare epochtime: UInt32
         @Struct.field(TimePointSec)
-        start!: TimePointSec
+        declare start: TimePointSec
         @Struct.field(TimePointSec)
-        end!: TimePointSec
+        declare end: TimePointSec
     }
     @Struct.type('game_meta')
     export class game_meta extends Struct {
         @Struct.field('string')
-        name!: string
+        declare name: string
         @Struct.field('string')
-        description!: string
+        declare description: string
         @Struct.field('string')
-        url!: string
+        declare url: string
         @Struct.field('string')
-        version!: string
+        declare version: string
     }
     @Struct.type('game_state')
     export class game_state extends Struct {
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
     }
     @Struct.type('game_row')
     export class game_row extends Struct {
         @Struct.field(Name)
-        contract!: Name
+        declare contract: Name
         @Struct.field(game_config)
-        config!: game_config
+        declare config: game_config
         @Struct.field(game_meta)
-        meta!: game_meta
+        declare meta: game_meta
         @Struct.field(game_state)
-        state!: game_state
+        declare state: game_state
     }
     @Struct.type('startgame')
     export class startgame extends Struct {
         @Struct.field(Name)
-        contract!: Name
+        declare contract: Name
         @Struct.field(game_config)
-        config!: game_config
+        declare config: game_config
         @Struct.field(game_meta)
-        meta!: game_meta
+        declare meta: game_meta
         @Struct.field(game_state)
-        state!: game_state
+        declare state: game_state
     }
     @Struct.type('state_row')
     export class state_row extends Struct {
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
     }
     @Struct.type('updategame')
     export class updategame extends Struct {
         @Struct.field(Name)
-        contract!: Name
+        declare contract: Name
         @Struct.field(game_meta)
-        meta!: game_meta
+        declare meta: game_meta
     }
     @Struct.type('wipe')
     export class wipe extends Struct {}

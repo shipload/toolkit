@@ -31,347 +31,347 @@ export namespace Types {
     @Struct.type('advance')
     export class advance extends Struct {
         @Struct.field('string')
-        reveal!: string
+        declare reveal: string
         @Struct.field(Checksum256)
-        commit!: Checksum256
+        declare commit: Checksum256
     }
     @Struct.type('arrive')
     export class arrive extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
     }
     @Struct.type('buygoods')
     export class buygoods extends Struct {
         @Struct.field(UInt64)
-        ship_id!: UInt64
+        declare ship_id: UInt64
         @Struct.field(UInt64)
-        good_id!: UInt64
+        declare good_id: UInt64
         @Struct.field(UInt64)
-        quantity!: UInt64
+        declare quantity: UInt64
     }
     @Struct.type('buyship')
     export class buyship extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field('string')
-        name!: string
+        declare name: string
     }
     @Struct.type('cargo_row')
     export class cargo_row extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(UInt64)
-        ship_id!: UInt64
+        declare ship_id: UInt64
         @Struct.field(UInt64)
-        good_id!: UInt64
+        declare good_id: UInt64
         @Struct.field(UInt64)
-        paid!: UInt64
+        declare paid: UInt64
         @Struct.field(UInt32)
-        owned!: UInt32
+        declare owned: UInt32
         @Struct.field(UInt32)
-        loaded!: UInt32
+        declare loaded: UInt32
     }
     @Struct.type('cleartable')
     export class cleartable extends Struct {
         @Struct.field(Name)
-        table_name!: Name
+        declare table_name: Name
         @Struct.field(Name, {optional: true})
-        scope?: Name
+        declare scope?: Name
         @Struct.field(UInt64, {optional: true})
-        max_rows?: UInt64
+        declare max_rows?: UInt64
     }
     @Struct.type('commit')
     export class commit extends Struct {
         @Struct.field(Checksum256)
-        commit!: Checksum256
+        declare commit: Checksum256
     }
     @Struct.type('coordinates')
     export class coordinates extends Struct {
         @Struct.field(Int64)
-        x!: Int64
+        declare x: Int64
         @Struct.field(Int64)
-        y!: Int64
+        declare y: Int64
     }
     @Struct.type('enable')
     export class enable extends Struct {
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
     }
     @Struct.type('good_price')
     export class good_price extends Struct {
         @Struct.field(UInt16)
-        id!: UInt16
+        declare id: UInt16
         @Struct.field(UInt64)
-        price!: UInt64
+        declare price: UInt64
         @Struct.field(UInt64)
-        supply!: UInt64
+        declare supply: UInt64
     }
     @Struct.type('hash')
     export class hash extends Struct {
         @Struct.field('string')
-        value!: string
+        declare value: string
     }
     @Struct.type('hash512')
     export class hash512 extends Struct {
         @Struct.field('string')
-        value!: string
+        declare value: string
     }
     @Struct.type('init')
     export class init extends Struct {
         @Struct.field(Checksum256)
-        seed!: Checksum256
+        declare seed: Checksum256
     }
     @Struct.type('jettison')
     export class jettison extends Struct {
         @Struct.field(UInt64)
-        ship_id!: UInt64
+        declare ship_id: UInt64
         @Struct.field(UInt16)
-        good_id!: UInt16
+        declare good_id: UInt16
         @Struct.field(UInt64)
-        quantity!: UInt64
+        declare quantity: UInt64
     }
     @Struct.type('join')
     export class join extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
     }
     @Struct.type('loader_stats')
     export class loader_stats extends Struct {
         @Struct.field(UInt32)
-        mass!: UInt32
+        declare mass: UInt32
         @Struct.field(UInt16)
-        quantity!: UInt16
+        declare quantity: UInt16
         @Struct.field(UInt32)
-        thrust!: UInt32
+        declare thrust: UInt32
     }
     @Struct.type('location_row')
     export class location_row extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(coordinates)
-        coordinates!: coordinates
+        declare coordinates: coordinates
         @Struct.field(UInt64)
-        epoch!: UInt64
+        declare epoch: UInt64
         @Struct.field(UInt16)
-        good_id!: UInt16
+        declare good_id: UInt16
         @Struct.field(UInt16)
-        supply!: UInt16
+        declare supply: UInt16
     }
     @Struct.type('marketprice')
     export class marketprice extends Struct {
         @Struct.field(coordinates)
-        location!: coordinates
+        declare location: coordinates
         @Struct.field(UInt16)
-        good_id!: UInt16
+        declare good_id: UInt16
     }
     @Struct.type('marketprices')
     export class marketprices extends Struct {
         @Struct.field(coordinates)
-        location!: coordinates
+        declare location: coordinates
     }
     @Struct.type('payloan')
     export class payloan extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field(UInt64)
-        amount!: UInt64
+        declare amount: UInt64
     }
     @Struct.type('player_row')
     export class player_row extends Struct {
         @Struct.field(Name)
-        owner!: Name
+        declare owner: Name
         @Struct.field(UInt64)
-        balance!: UInt64
+        declare balance: UInt64
         @Struct.field(UInt64)
-        debt!: UInt64
+        declare debt: UInt64
         @Struct.field(Int64)
-        networth!: Int64
+        declare networth: Int64
     }
     @Struct.type('salt')
     export class salt extends Struct {
         @Struct.field(UInt64)
-        salt!: UInt64
+        declare salt: UInt64
     }
     @Struct.type('sellgoods')
     export class sellgoods extends Struct {
         @Struct.field(UInt64)
-        ship_id!: UInt64
+        declare ship_id: UInt64
         @Struct.field(UInt64)
-        good_id!: UInt64
+        declare good_id: UInt64
         @Struct.field(UInt64)
-        quantity!: UInt64
+        declare quantity: UInt64
     }
     @Struct.type('sequence_row')
     export class sequence_row extends Struct {
         @Struct.field(Name)
-        key!: Name
+        declare key: Name
         @Struct.field(UInt64)
-        value!: UInt64
+        declare value: UInt64
     }
     @Struct.type('ship_state')
     export class ship_state extends Struct {
         @Struct.field(UInt32)
-        energy!: UInt32
+        declare energy: UInt32
     }
     @Struct.type('ship_stats')
     export class ship_stats extends Struct {
         @Struct.field(UInt32)
-        capacity!: UInt32
+        declare capacity: UInt32
         @Struct.field(UInt32)
-        drain!: UInt32
+        declare drain: UInt32
         @Struct.field(UInt64)
-        mass!: UInt64
+        declare mass: UInt64
         @Struct.field(UInt64)
-        maxmass!: UInt64
+        declare maxmass: UInt64
         @Struct.field(UInt16)
-        orbit!: UInt16
+        declare orbit: UInt16
         @Struct.field(UInt32)
-        recharge!: UInt32
+        declare recharge: UInt32
         @Struct.field(UInt64)
-        thrust!: UInt64
+        declare thrust: UInt64
     }
     @Struct.type('travel_plan')
     export class travel_plan extends Struct {
         @Struct.field(TimePoint)
-        departure!: TimePoint
+        declare departure: TimePoint
         @Struct.field(coordinates)
-        destination!: coordinates
+        declare destination: coordinates
         @Struct.field(UInt64)
-        distance!: UInt64
+        declare distance: UInt64
         @Struct.field(UInt32)
-        flighttime!: UInt32
+        declare flighttime: UInt32
         @Struct.field(UInt32)
-        loadtime!: UInt32
+        declare loadtime: UInt32
         @Struct.field(UInt32)
-        rechargetime!: UInt32
+        declare rechargetime: UInt32
         @Struct.field(UInt32)
-        masspenalty!: UInt32
+        declare masspenalty: UInt32
         @Struct.field(UInt64)
-        mass!: UInt64
+        declare mass: UInt64
         @Struct.field(UInt32)
-        energyusage!: UInt32
+        declare energyusage: UInt32
     }
     @Struct.type('ship_row')
     export class ship_row extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(Name)
-        owner!: Name
+        declare owner: Name
         @Struct.field('string')
-        name!: string
+        declare name: string
         @Struct.field(coordinates)
-        location!: coordinates
+        declare location: coordinates
         @Struct.field(UInt8)
-        skin!: UInt8
+        declare skin: UInt8
         @Struct.field(UInt8)
-        tier!: UInt8
+        declare tier: UInt8
         @Struct.field(ship_state)
-        state!: ship_state
+        declare state: ship_state
         @Struct.field(ship_stats)
-        stats!: ship_stats
+        declare stats: ship_stats
         @Struct.field(loader_stats)
-        loaders!: loader_stats
+        declare loaders: loader_stats
         @Struct.field(travel_plan, {optional: true})
-        travelplan?: travel_plan
+        declare travelplan?: travel_plan
     }
     @Struct.type('state_row')
     export class state_row extends Struct {
         @Struct.field('bool')
-        enabled!: boolean
+        declare enabled: boolean
         @Struct.field(UInt64)
-        epoch!: UInt64
+        declare epoch: UInt64
         @Struct.field(UInt64)
-        salt!: UInt64
+        declare salt: UInt64
         @Struct.field(UInt32)
-        ships!: UInt32
+        declare ships: UInt32
         @Struct.field(Checksum256)
-        seed!: Checksum256
+        declare seed: Checksum256
         @Struct.field(Checksum256)
-        commit!: Checksum256
+        declare commit: Checksum256
     }
     @Struct.type('takeloan')
     export class takeloan extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field(UInt64)
-        amount!: UInt64
+        declare amount: UInt64
     }
     @Struct.type('travel')
     export class travel extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(coordinates)
-        destination!: coordinates
+        declare destination: coordinates
         @Struct.field('bool')
-        recharge!: boolean
+        declare recharge: boolean
     }
     @Struct.type('travel_summary')
     export class travel_summary extends Struct {
         @Struct.field(ship_stats)
-        stats!: ship_stats
+        declare stats: ship_stats
         @Struct.field(loader_stats)
-        loaders!: loader_stats
+        declare loaders: loader_stats
         @Struct.field(coordinates)
-        origin!: coordinates
+        declare origin: coordinates
         @Struct.field(coordinates)
-        destination!: coordinates
+        declare destination: coordinates
         @Struct.field(UInt64)
-        distance!: UInt64
+        declare distance: UInt64
         @Struct.field(UInt64)
-        totalmass!: UInt64
+        declare totalmass: UInt64
         @Struct.field(Float64)
-        acceleration!: Float64
+        declare acceleration: Float64
         @Struct.field(UInt32)
-        flighttime!: UInt32
+        declare flighttime: UInt32
         @Struct.field(UInt32)
-        energyusage!: UInt32
+        declare energyusage: UInt32
         @Struct.field(UInt32)
-        rechargetime!: UInt32
+        declare rechargetime: UInt32
         @Struct.field(UInt32)
-        masspenalty!: UInt32
+        declare masspenalty: UInt32
         @Struct.field(UInt64)
-        loadtime!: UInt64
+        declare loadtime: UInt64
         @Struct.field(UInt64)
-        time!: UInt64
+        declare time: UInt64
     }
     @Struct.type('travelplan')
     export class travelplan extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(coordinates)
-        origin!: coordinates
+        declare origin: coordinates
         @Struct.field(coordinates)
-        destination!: coordinates
+        declare destination: coordinates
         @Struct.field('bool')
-        recharge!: boolean
+        declare recharge: boolean
     }
     @Struct.type('traveltime')
     export class traveltime extends Struct {
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
         @Struct.field(coordinates)
-        destination!: coordinates
+        declare destination: coordinates
     }
     @Struct.type('updatecredit')
     export class updatecredit extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field(Int64)
-        amount!: Int64
+        declare amount: Int64
     }
     @Struct.type('updatedebt')
     export class updatedebt extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field(Int64)
-        amount!: Int64
+        declare amount: Int64
     }
     @Struct.type('upgradeship')
     export class upgradeship extends Struct {
         @Struct.field(Name)
-        account!: Name
+        declare account: Name
         @Struct.field(UInt64)
-        id!: UInt64
+        declare id: UInt64
     }
     @Struct.type('wipe')
     export class wipe extends Struct {}
