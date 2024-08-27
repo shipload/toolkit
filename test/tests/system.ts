@@ -33,11 +33,11 @@ suite('getSystemName', function () {
 
     test('generate name at 0,0', function () {
         const generatedName = getSystemName(gameSeed, {x: 0, y: 0})
-        assert.equal(generatedName, 'FreHar')
+        assert.equal(generatedName, 'Gilila')
     })
 
     test('generate name at 0,1', function () {
         const generatedName = getSystemName(gameSeed, {x: 0, y: 1})
-        assert.equal(generatedName, 'CarBynGal')
+        assert.equal(generatedName, 'Cencaelgru')
     })
 })

@@ -21,7 +21,8 @@ export function getSystemName(gameSeed: Checksum256, location: Coordinates): str
     const name: string[] = []
     for (let i = 0; i < syllableCount; i++) {
         const index = hash.array[i] % syllables.length
-        name.push(syllables[index])
+        const syllable = syllables[index]
+        name.push(i > 0 ? syllable.toLowerCase() : syllable)
     }
 
     return name.join('')
