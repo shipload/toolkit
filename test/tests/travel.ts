@@ -45,7 +45,7 @@ suite('travel', function () {
     suite('travelplanDuration', () => {
         test('should return the correct duration', async () => {
             const duration = travelplanDuration(plan)
-            assert.equal(Number(duration), 14)
+            assert.equal(Number(duration), 96)
         })
     })
 

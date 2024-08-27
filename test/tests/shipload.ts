@@ -10,6 +10,14 @@ const platformContractName = 'platform.gm'
 const serverContractName = 'shipload.gm'
 
 const server = new ServerContract.Contract({client})
+const state = ServerContract.Types.state_row.from({
+    enabled: true,
+    epoch: 1,
+    salt: 1,
+    ships: 1,
+    seed: '6d1c0555c799c087b843764ab5becff74f626f162e382c918427797072c97e89',
+    commit: '6d1c0555c799c087b843764ab5becff74f626f162e382c918427797072c97e89',
+})
 
 suite('Shipload', function () {
     let shipload: Shipload
@@ -31,7 +39,7 @@ suite('Shipload', function () {
                 location,
                 good_id,
                 '0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83',
-                '6d1c0555c799c087b843764ab5becff74f626f162e382c918427797072c97e89'
+                state
             )
             const api = await server.readonly('marketprice', {
                 location,
@@ -65,7 +73,9 @@ suite('Shipload', function () {
     suite('getState', function () {
         test('should return the correct state', async function () {
             const state = await shipload.getState()
+            console.log(state)
             const expectedState = await server.table('state').get()
+            console.log(expectedState)
 
             assert.deepEqual(state, expectedState)
         })
@@ -102,7 +112,7 @@ suite('Shipload', function () {
         test('success', async function () {
             const ships = await shipload.getShips('wharfkittest')
             assert.isArray(ships)
-            assert.lengthOf(ships, 1)
+            assert.lengthOf(ships, 3)
             assert.instanceOf(ships[0], Ship)
         })
     })
