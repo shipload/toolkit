@@ -1,24 +1,155 @@
+import {assert} from 'chai'
+import {TimePointSec, UInt32, UInt64} from '@wharfkit/antelope'
 import {makeClient} from '@wharfkit/mock-data'
-import {getCurrentEpoch, getEpochInfo, hash, hash512, PlatformContract, ServerContract} from '$lib'
-import assert from 'assert'
-import {TimePointSec} from '@wharfkit/antelope'
+import {Chains} from '@wharfkit/common'
+import Shipload, {getCurrentEpoch, getEpochInfo, PlatformContract} from '$lib'
 
 const client = makeClient('https://jungle4.greymass.com')
-const platform = new PlatformContract.Contract({client})
-const server = new ServerContract.Contract({client})
+const platformContractName = 'platform.gm'
+const serverContractName = 'shipload.gm'
+
+function createMockGame(
+    startTimestamp: number,
+    epochtime: number
+): PlatformContract.Types.game_row {
+    const startSeconds = Math.floor(startTimestamp / 1000)
+    const endSeconds = startSeconds + 60 * 60 * 24 * 365
+    return PlatformContract.Types.game_row.from({
+        contract: 'shipload.gm',
+        config: {
+            start: TimePointSec.fromMilliseconds(startTimestamp),
+            end: TimePointSec.fromMilliseconds(endSeconds * 1000),
+            epochtime: UInt32.from(epochtime),
+            seed: '0000000000000000000000000000000000000000000000000000000000000000',
+        },
+        meta: {
+            name: 'Test Game',
+            description: 'Test game description',
+            url: 'https://test.com',
+            version: '1.0.0',
+        },
+        state: {
+            enabled: true,
+        },
+    })
+}
 
 suite('epoch', function () {
-    // test('getCurrentEpoch', async function () {
-    //     const game = await platform.table('games').get('shipload.gm')
-    //     if (!game) {
-    //         throw new Error('game not found')
-    //     }
-    //     const epoch = getCurrentEpoch(game)
-    //     console.log(epoch)
-    //     // assert.equal(epoch.equals(4), true)
-    //     const info = getEpochInfo(game, epoch)
-    //     console.log(info)
-    //     // assert.deepEqual(info.start, new Date('2024-07-05T18:00:00.000Z'))
-    //     // assert.deepEqual(info.end, new Date('2024-07-06T18:00:00.000Z'))
-    // })
+    suite('getCurrentEpoch', function () {
+        test('returns epoch 1 at game start', function () {
+            const now = Math.floor(Date.now() / 1000) * 1000
+            const game = createMockGame(now, 3600)
+
+            const epoch = getCurrentEpoch(game)
+            assert.equal(epoch.toNumber(), 1)
+        })
+
+        test('returns epoch 2 after one epoch time', function () {
+            const nowSec = Math.floor(Date.now() / 1000)
+            const epochtime = 3600
+            const startSec = nowSec - epochtime
+            const game = createMockGame(startSec * 1000, epochtime)
+
+            const epoch = getCurrentEpoch(game)
+            assert.equal(epoch.toNumber(), 2)
+        })
+
+        test('returns correct epoch after multiple epochs', function () {
+            const nowSec = Math.floor(Date.now() / 1000)
+            const epochtime = 3600
+            const startSec = nowSec - epochtime * 5
+            const game = createMockGame(startSec * 1000, epochtime)
+
+            const epoch = getCurrentEpoch(game)
+            assert.equal(epoch.toNumber(), 6)
+        })
+    })
+
+    suite('getEpochInfo', function () {
+        test('returns correct start and end dates for epoch 1', function () {
+            const startTimestamp = Math.floor(Date.now() / 1000) * 1000
+            const epochtime = 3600
+            const game = createMockGame(startTimestamp, epochtime)
+
+            const info = getEpochInfo(game, UInt64.from(1))
+
+            assert.equal(info.epoch.toNumber(), 1)
+            assert.equal(info.start.getTime(), startTimestamp)
+            assert.equal(info.end.getTime(), startTimestamp + epochtime * 1000)
+        })
+
+        test('returns correct start and end dates for epoch 2', function () {
+            const startTimestamp = Math.floor(Date.now() / 1000) * 1000
+            const epochtime = 3600
+            const game = createMockGame(startTimestamp, epochtime)
+
+            const info = getEpochInfo(game, UInt64.from(2))
+
+            assert.equal(info.epoch.toNumber(), 2)
+            assert.equal(info.start.getTime(), startTimestamp + epochtime * 1000)
+            assert.equal(info.end.getTime(), startTimestamp + epochtime * 1000 * 2)
+        })
+
+        test('calculates correct duration', function () {
+            const startTimestamp = Math.floor(Date.now() / 1000) * 1000
+            const epochtime = 7200
+            const game = createMockGame(startTimestamp, epochtime)
+
+            const info = getEpochInfo(game, UInt64.from(1))
+            const duration = info.end.getTime() - info.start.getTime()
+
+            assert.equal(duration, epochtime * 1000)
+        })
+    })
+
+    suite('EpochsManager', function () {
+        let shipload: Shipload
+
+        setup(async () => {
+            shipload = await Shipload.load(Chains.Jungle4, {
+                client,
+                platformContractName,
+                serverContractName,
+            })
+        })
+
+        test('getCurrentHeight returns a positive epoch', async function () {
+            const height = await shipload.epochs.getCurrentHeight()
+            assert.isTrue(height.gt(UInt64.from(0)))
+        })
+
+        test('getCurrent returns EpochInfo', async function () {
+            const info = await shipload.epochs.getCurrent()
+            assert.isDefined(info.epoch)
+            assert.isDefined(info.start)
+            assert.isDefined(info.end)
+            assert.instanceOf(info.start, Date)
+            assert.instanceOf(info.end, Date)
+        })
+
+        test('getByHeight returns EpochInfo for given height', async function () {
+            const info = await shipload.epochs.getByHeight(1)
+            assert.equal(info.epoch.toNumber(), 1)
+            assert.instanceOf(info.start, Date)
+            assert.instanceOf(info.end, Date)
+        })
+
+        test('getTimeRemaining returns non-negative number', async function () {
+            const remaining = await shipload.epochs.getTimeRemaining()
+            assert.isAtLeast(remaining, 0)
+        })
+
+        test('getProgress returns number between 0 and 1', async function () {
+            const progress = await shipload.epochs.getProgress()
+            assert.isAtLeast(progress, 0)
+            assert.isAtMost(progress, 1)
+        })
+
+        test('fitsInCurrentEpoch returns boolean', async function () {
+            const fitsShort = await shipload.epochs.fitsInCurrentEpoch(1000)
+            const fitsLong = await shipload.epochs.fitsInCurrentEpoch(1000 * 60 * 60 * 24 * 365)
+            assert.isBoolean(fitsShort)
+            assert.isBoolean(fitsLong)
+        })
+    })
 })

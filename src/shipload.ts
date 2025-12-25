@@ -1,25 +1,16 @@
-import {
-    APIClient,
-    Bytes,
-    Checksum256,
-    Name,
-    NameType,
-    Serializer,
-    UInt16Type,
-    UInt64,
-    UInt64Type,
-} from '@wharfkit/antelope'
-import {Coordinates, Distance, GoodPrice} from './types'
-import {marketprice, marketprices} from './market'
+import {APIClient} from '@wharfkit/antelope'
 import {PlatformContract, ServerContract} from './contracts'
-import {ERROR_SYSTEM_NOT_INITIALIZED} from './errors'
 import {ChainDefinition} from '@wharfkit/session'
 import ContractKit, {Contract} from '@wharfkit/contract'
-import {findNearbyPlanets, travelplan} from './travel'
 
-import {Ship} from './ship'
-import {EpochInfo, getCurrentEpoch, getEpochInfo} from './epoch'
-import {hasSystem} from './system'
+import {GameContext} from './managers/context'
+import {EntitiesManager} from './managers/entities'
+import {PlayersManager} from './managers/players'
+import {LocationsManager} from './managers/locations'
+import {TradesManager} from './managers/trades'
+import {EpochsManager} from './managers/epochs'
+import {ActionsManager} from './managers/actions'
+import {GameState} from './entities/gamestate'
 
 interface ShiploadOptions {
     platformContractName?: string
@@ -33,22 +24,21 @@ interface ShiploadConstructorOptions extends ShiploadOptions {
 }
 
 export class Shipload {
-    public client: APIClient
-    public server: Contract
-    public platform: Contract
-    public game: PlatformContract.Types.game_row | undefined
+    private readonly _context: GameContext
 
     constructor(chain: ChainDefinition, constructorOptions?: ShiploadConstructorOptions) {
         const {client, platformContract, serverContract} = constructorOptions || {}
-        this.client = client || new APIClient({url: chain.url})
+        const apiClient = client || new APIClient({url: chain.url})
 
-        this.platform = platformContract
+        const platform = platformContract
             ? platformContract
-            : new PlatformContract.Contract({client: this.client})
+            : new PlatformContract.Contract({client: apiClient})
 
-        this.server = serverContract
+        const server = serverContract
             ? serverContract
-            : new ServerContract.Contract({client: this.client})
+            : new ServerContract.Contract({client: apiClient})
+
+        this._context = new GameContext(apiClient, server, platform)
     }
 
     static async load(
@@ -80,155 +70,47 @@ export class Shipload {
         })
     }
 
+    get client(): APIClient {
+        return this._context.client
+    }
+
+    get server(): Contract {
+        return this._context.server
+    }
+
+    get platform(): Contract {
+        return this._context.platform
+    }
+
+    get entities(): EntitiesManager {
+        return this._context.entities
+    }
+
+    get players(): PlayersManager {
+        return this._context.players
+    }
+
+    get locations(): LocationsManager {
+        return this._context.locations
+    }
+
+    get trades(): TradesManager {
+        return this._context.trades
+    }
+
+    get epochs(): EpochsManager {
+        return this._context.epochs
+    }
+
+    get actions(): ActionsManager {
+        return this._context.actions
+    }
+
     async getGame(reload = false): Promise<PlatformContract.Types.game_row> {
-        if (!reload && this.game) {
-            return this.game
-        }
-        const game = await this.platform.table('games').get()
-        if (!game) {
-            throw new Error(ERROR_SYSTEM_NOT_INITIALIZED)
-        }
-        this.game = game
-        return game
+        return this._context.getGame(reload)
     }
 
-    async getState(): Promise<ServerContract.Types.state_row> {
-        const state = await this.server.table('state').get()
-        if (!state) {
-            throw new Error(ERROR_SYSTEM_NOT_INITIALIZED)
-        }
-        return state
-    }
-
-    async getShip(ship_id: UInt64Type): Promise<Ship> {
-        const ship = await this.server.table('ship').get(UInt64.from(ship_id))
-        if (!ship) {
-            throw new Error('No ship found')
-        }
-        return new Ship(ship)
-    }
-
-    async getShips(player: NameType | ServerContract.Types.player_row): Promise<Ship[]> {
-        let account: Name
-        if (player instanceof ServerContract.Types.player_row) {
-            account = player.owner
-        } else {
-            account = Name.from(player)
-        }
-        const from = Serializer.decode({
-            data:
-                Serializer.encode({object: UInt64.from(UInt64.min)}).hexString +
-                Serializer.encode({object: Name.from(account)}).hexString,
-            type: 'uint128',
-        })
-        const to = Serializer.decode({
-            data:
-                Serializer.encode({object: UInt64.from(UInt64.max)}).hexString +
-                Serializer.encode({object: Name.from(account)}).hexString,
-            type: 'uint128',
-        })
-        const ships = await this.server
-            .table('ship')
-            .query({
-                key_type: 'i128',
-                index_position: 'secondary',
-                from,
-                to,
-            })
-            .all()
-        return ships.map((ship) => new Ship(ship))
-    }
-
-    async marketprice(
-        location: ServerContract.ActionParams.Type.coordinates,
-        good_id: number
-    ): Promise<GoodPrice> {
-        const game = await this.getGame()
-        const state = await this.getState()
-        return marketprice(location, good_id, game.config.seed, state)
-    }
-
-    async marketprices(
-        location: ServerContract.ActionParams.Type.coordinates
-    ): Promise<GoodPrice[]> {
-        const game = await this.getGame()
-        const state = await this.getState()
-        return marketprices(location, game.config.seed, state)
-    }
-
-    async hasSystem(location: ServerContract.ActionParams.Type.coordinates): Promise<boolean> {
-        const game = await this.getGame()
-        return hasSystem(game.config.seed, location)
-    }
-
-    async findNearbyPlanets(
-        origin: ServerContract.ActionParams.Type.coordinates,
-        maxDistance: UInt16Type = 20
-    ): Promise<Distance[]> {
-        const game = await this.getGame()
-        return findNearbyPlanets(game.config.seed, origin, maxDistance)
-    }
-
-    async travelplan(
-        ship: ServerContract.Types.ship_row,
-        origin: ServerContract.ActionParams.Type.coordinates,
-        destination: ServerContract.ActionParams.Type.coordinates,
-        recharge = false
-    ): Promise<ServerContract.Types.travel_plan> {
-        const game = await this.getGame()
-        const cargos = await this.server.table('cargo').all({
-            from: ship.id,
-            to: ship.id,
-            index_position: 'secondary',
-        })
-        return travelplan(game, ship, cargos, origin, destination, recharge)
-    }
-
-    async getCargo(
-        ship: UInt64Type | ServerContract.Types.ship_row
-    ): Promise<ServerContract.Types.cargo_row[]> {
-        let shipId: UInt64
-        if (ship instanceof ServerContract.Types.ship_row) {
-            shipId = UInt64.from(ship.id)
-        } else {
-            shipId = UInt64.from(ship)
-        }
-
-        const cargoItems = await this.server
-            .table('cargo')
-            .query({
-                key_type: 'i64',
-                index_position: 'secondary',
-                from: shipId,
-                to: shipId,
-            })
-            .all()
-
-        return cargoItems
-    }
-
-    async getCurrentEpochHeight(): Promise<UInt64> {
-        const game = await this.getGame()
-        return getCurrentEpoch(game)
-    }
-
-    async getCurrentEpoch(): Promise<EpochInfo> {
-        const game = await this.getGame()
-        const epoch = await this.getCurrentEpochHeight()
-        return getEpochInfo(game, epoch)
-    }
-
-    async getEpoch(height: UInt64Type): Promise<EpochInfo> {
-        const game = await this.getGame()
-        return getEpochInfo(game, UInt64.from(height))
-    }
-
-    async getLocation(location: Coordinates) {
-        const hash = Checksum256.hash(Bytes.from(`${location.x}-${location.y}`, 'utf8'))
-        return this.server.table('location').all({
-            index_position: 'secondary',
-            from: hash,
-            to: hash,
-        })
+    async getState(reload = false): Promise<GameState> {
+        return this._context.getState(reload)
     }
 }

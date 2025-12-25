@@ -1,6 +1,6 @@
 import assert from 'assert'
-import {Checksum256} from '@wharfkit/antelope' // Adjust the import based on your actual usage
-import {roll} from '../../src/rolls'
+import {Checksum256} from '@wharfkit/antelope'
+import {roll} from '../../src/market/rolls'
 
 suite('roll', function () {
     test('roll values', function () {
