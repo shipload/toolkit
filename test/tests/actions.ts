@@ -1,9 +1,8 @@
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
-import Shipload, {Coordinates, ServerContract, EntityInventory} from '$lib'
+import Shipload, {Coordinates, EntityInventory, makeShip, ServerContract} from '$lib'
 import {Chains} from '@wharfkit/common'
 import {Int64, UInt64} from '@wharfkit/antelope'
-import {Ship} from 'src/ship'
 
 const client = makeClient('https://jungle4.greymass.com')
 const platformContractName = 'platform.gm'
@@ -102,12 +101,12 @@ suite('ActionsManager', function () {
 
     suite('sellAllCargo', function () {
         function createMockShip(cargo?: ServerContract.Types.cargo_item[]) {
-            return Ship.fromState({
+            return makeShip({
                 id: 1,
                 owner: 'testplayer',
                 name: 'Test Ship',
-                location: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
-                mass: 500000,
+                coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
+                hullmass: 500000,
                 capacity: 1000000000,
                 energy: 5000,
                 engines: ServerContract.Types.movement_stats.from({

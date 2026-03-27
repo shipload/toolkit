@@ -163,11 +163,10 @@ export function getSupply(
     const r = roll(gameSeed, seed)
     const percent = r / 65535
     const epoch = 1 + Number(state.epoch) / 90
-    // NOTE: Contract has bug where 1/3 is integer division = 0, so pow(ships, 0) = 1
-    // TODO: Update this when contract is fixed to use (double)1/(double)3
-    const ship = Math.pow(Number(state.ships), 0)
+    const ship = 1
     const goodIdNum = Number(goodId)
-    return Math.floor((128 / goodIdNum) * percent * ship * epoch)
+    const base = Math.floor(128 / goodIdNum)
+    return Math.floor(base * percent * ship * epoch)
 }
 
 export function marketPrice(

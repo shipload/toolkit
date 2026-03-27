@@ -8,6 +8,10 @@ export {Shipload} from './shipload'
 export {Ship} from './entities/ship'
 export type {ShipStateInput} from './entities/ship'
 export {Warehouse} from './entities/warehouse'
+export type {WarehouseStateInput} from './entities/warehouse'
+export {Container} from './entities/container'
+export type {ContainerStateInput} from './entities/container'
+export {makeShip, makeWarehouse, makeContainer} from './entities/makers'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
@@ -16,6 +20,14 @@ export type schedule = ServerContract.Types.schedule
 export type task = ServerContract.Types.task
 export type cargo_item = ServerContract.Types.cargo_item
 export type warehouse_row = ServerContract.Types.warehouse_row
+export type container_row = ServerContract.Types.container_row
+export type extractor_stats = ServerContract.Types.extractor_stats
+export type mixture_info = ServerContract.Types.mixture_info
+export type mixture_component = ServerContract.Types.mixture_component
+export type location_static = ServerContract.Types.location_static
+export type location_epoch = ServerContract.Types.location_epoch
+export type location_derived = ServerContract.Types.location_derived
+export type location_row = ServerContract.Types.location_row
 export {Player} from './entities/player'
 export type {PlayerStateInput} from './entities/player'
 export {EntityInventory} from './entities/entity-inventory'
@@ -31,13 +43,23 @@ export {
     ActionsManager,
 } from './managers'
 export type {EntityType} from './managers'
+export type {EntityRefInput} from './managers/actions'
 
 export {getGood, getGoods, goodIds} from './market/goods'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
 export {marketPrice, marketPrices, getRarity, Rarities} from './market/market'
 export type {Rarity} from './market/market'
-export {getSystemName, hasSystem} from './utils/system'
+export {
+    getSystemName,
+    hasSystem,
+    getLocationType,
+    isExtractableLocation,
+    deriveLocationStatic,
+    deriveLocationEpoch,
+    deriveLocation,
+    deriveLocationMixture,
+} from './utils/system'
 
 export {hash, hash512} from './utils/hash'
 
@@ -91,12 +113,16 @@ export {
     estimateTravelTime,
     estimateDealTravelTime,
     hasEnergyForDistance,
+    getFlightOrigin,
+    getDestinationLocation,
+    getPositionAt,
 } from './travel/travel'
 export type {
     LoadTimeBreakdown,
     EstimatedTravelTime,
     EstimateTravelTimeOptions,
     TransferEntity,
+    HasScheduleAndLocation,
 } from './travel/travel'
 
 export {
@@ -114,9 +140,16 @@ export type {TradeCalculation, TradeProfitResult} from './trading/trade'
 
 export * as schedule from './scheduling/schedule'
 export type {Scheduleable, ScheduleData} from './scheduling/schedule'
+export {ScheduleAccessor, createScheduleAccessor} from './scheduling/accessor'
+export {InventoryAccessor, createInventoryAccessor} from './entities/inventory-accessor'
+export type {HasCargo} from './entities/inventory-accessor'
 
 export * as cargoUtils from './entities/cargo-utils'
 export type {CargoData} from './entities/cargo-utils'
 
 export {projectEntity, projectEntityAt, createProjectedEntity} from './scheduling/projection'
 export type {Projectable, ProjectedEntity} from './scheduling/projection'
+
+export * from './types/capabilities'
+export * from './types/entity'
+export * from './capabilities'

@@ -83,7 +83,7 @@ export class TradesManager extends BaseManager {
         originLocation?: Coordinates,
         options: FindDealsOptions = {}
     ): Promise<Deal[]> {
-        const origin = originLocation || ship.currentLocation
+        const origin = originLocation || Coordinates.from(ship.coordinates)
         const callbacks = await this.createCallbacks()
 
         const deals = await findDealsForShip(
@@ -111,7 +111,7 @@ export class TradesManager extends BaseManager {
         arrivedAt?: Coordinates,
         options: CollectAnalysisOptions = {}
     ): Promise<CollectAnalysis> {
-        const location = arrivedAt || ship.currentLocation
+        const location = arrivedAt || Coordinates.from(ship.coordinates)
         const callbacks = await this.createCallbacks()
 
         return analyzeCollectOptions(ship, location, callbacks, options)

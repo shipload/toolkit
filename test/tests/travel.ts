@@ -40,7 +40,7 @@ const serverContractName = 'shipload.gm'
 
 function createMockShip(
     overrides: Partial<{
-        mass: number
+        hullmass: number
         capacity: number
         thrust: number
         energy: number
@@ -51,16 +51,18 @@ function createMockShip(
         loaderThrust: number
         locationZ: number
         generatorCapacity: number
+        cargomass: number
     }> = {}
 ) {
     return ServerContract.Types.ship_row.from({
         id: UInt64.from(1),
         owner: 'testplayer',
         name: 'Test Ship',
-        location: {x: 0, y: 0, z: overrides.locationZ},
-        mass: overrides.mass ?? 100000,
+        coordinates: {x: 0, y: 0, z: overrides.locationZ},
+        hullmass: overrides.hullmass ?? 100000,
         capacity: overrides.capacity ?? 500000,
         energy: overrides.energy ?? 500,
+        cargomass: overrides.cargomass ?? 0,
         engines: {
             thrust: overrides.thrust ?? 1000,
             drain: overrides.drain ?? 1,
@@ -212,7 +214,7 @@ suite('travel', function () {
 
     suite('calc_ship_flighttime', () => {
         test('calculates ship flight time', () => {
-            const mockShip = createMockShip({thrust: 1000, mass: 100000})
+            const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
             const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(10000))
             assert.isAbove(Number(time), 0)
         })
@@ -235,20 +237,20 @@ suite('travel', function () {
 
     suite('calc_ship_mass', () => {
         test('calculates mass without cargo', () => {
-            const mockShip = createMockShip({mass: 100000, loaderQuantity: 1, loaderMass: 5000})
+            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 1, loaderMass: 5000})
             const mass = calc_ship_mass(mockShip, [])
             assert.equal(Number(mass), 105000)
         })
 
         test('includes cargo mass', () => {
-            const mockShip = createMockShip({mass: 100000, loaderQuantity: 0, loaderMass: 0})
+            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 0, loaderMass: 0})
             const cargo = createMockCargo(1, 10)
             const mass = calc_ship_mass(mockShip, [cargo])
             assert.isAbove(Number(mass), 100000)
         })
 
         test('handles ship with no loaders', () => {
-            const mockShip = createMockShip({mass: 100000, loaderQuantity: 0, loaderMass: 5000})
+            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 0, loaderMass: 5000})
             const mass = calc_ship_mass(mockShip, [])
             assert.equal(Number(mass), 100000)
         })
@@ -313,13 +315,13 @@ suite('travel', function () {
 
         suite('calculateFlightTime', () => {
             test('calculates flight time', () => {
-                const mockShip = createMockShip({thrust: 1000, mass: 100000})
+                const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
                 const time = calculateFlightTime(mockShip, [], UInt64.from(10000))
                 assert.isAbove(Number(time), 0)
             })
 
             test('increases with distance', () => {
-                const mockShip = createMockShip({thrust: 1000, mass: 100000})
+                const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
                 const time1 = calculateFlightTime(mockShip, [], UInt64.from(10000))
                 const time2 = calculateFlightTime(mockShip, [], UInt64.from(20000))
                 assert.isAbove(Number(time2), Number(time1))
@@ -383,9 +385,9 @@ suite('travel', function () {
 
         test('calculates both unload and load times when both specified', () => {
             const ship = createMockShip({loaderQuantity: 2})
-            const cargos = [createMockCargo(1, 100), createMockCargo(3, 50)]
+            const cargos = [createMockCargo(1, 100), createMockCargo(26, 50)]
             const loadMap = new Map([[1, 20]])
-            const unloadMap = new Map([[3, 50]])
+            const unloadMap = new Map([[26, 50]])
             const breakdown = calculateLoadTimeBreakdown(ship, cargos, loadMap, unloadMap)
 
             assert.isAbove(breakdown.unloadTime, 0, 'Should have unload time')

@@ -1,15 +1,19 @@
-import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, PRECISION, TaskType} from '../types'
+import {
+    capsHasLoaders,
+    capsHasMovement,
+    capsHasStorage,
+    EntityCapabilities,
+    EntityState,
+} from '../types/capabilities'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
+import {calcCargoMass} from '../capabilities/storage'
 import {getGood} from '../market/goods'
 import * as schedule from './schedule'
 import {ScheduleData} from './schedule'
 
-/**
- * Projected state of an entity after scheduled tasks complete.
- * Mirrors contract's projected_entity struct.
- */
 export interface ProjectedEntity {
     location: Coordinates
     energy: UInt16
@@ -19,41 +23,56 @@ export interface ProjectedEntity {
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
     generator?: ServerContract.Types.energy_stats
+    trade?: ServerContract.Types.trade_stats
     readonly totalMass: UInt64
+
+    hasMovement(): boolean
+    hasStorage(): boolean
+    hasLoaders(): boolean
+    hasTrade(): boolean
+
+    capabilities(): EntityCapabilities
+    state(): EntityState
 }
 
-/**
- * Interface for entities that can be projected.
- * Ships and Warehouses both implement this.
- */
 export interface Projectable extends ScheduleData {
-    location: Coordinates
-    energy: UInt16
-    mass: UInt32
+    coordinates: Coordinates | ServerContract.Types.coordinates
+    energy?: UInt16
+    hullmass?: UInt32
     generator?: ServerContract.Types.energy_stats
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
-    capacity?: UInt64
-    calcCargoMass(): UInt64
+    trade?: ServerContract.Types.trade_stats
+    capacity?: UInt32
+    cargo: ServerContract.Types.cargo_item[]
+    cargomass: UInt32
+    owner?: Name
 }
 
-/**
- * Create initial projected entity state from a projectable entity.
- */
-export function createProjectedEntity(entity: Projectable): ProjectedEntity {
-    const cargoMass = entity.calcCargoMass()
-    const shipMass = UInt32.from(entity.mass)
-    const loaders = entity.loaders
+function getHullMass(entity: Projectable): UInt32 {
+    return UInt32.from(entity.hullmass ?? 0)
+}
 
-    return {
-        location: Coordinates.from(entity.location),
-        energy: UInt16.from(entity.energy),
+export function createProjectedEntity(entity: Projectable): ProjectedEntity {
+    const cargoMass = calcCargoMass(entity)
+    const shipMass = getHullMass(entity)
+    const loaders = entity.loaders
+    const engines = entity.engines
+    const generator = entity.generator
+    const trade = entity.trade
+    const capacity = entity.capacity
+
+    const projected: ProjectedEntity = {
+        location: Coordinates.from(entity.coordinates),
+        energy: UInt16.from(entity.energy ?? 0),
         cargoMass,
         shipMass,
-        capacity: entity.capacity,
-        engines: entity.engines,
-        generator: entity.generator,
+        capacity: capacity ? UInt64.from(capacity) : undefined,
+        engines,
+        generator,
         loaders,
+        trade,
+
         get totalMass() {
             let mass = UInt64.from(this.shipMass).adding(this.cargoMass)
             if (this.loaders) {
@@ -61,12 +80,48 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
             }
             return mass
         },
+
+        hasMovement() {
+            return capsHasMovement(this.capabilities())
+        },
+
+        hasStorage() {
+            return capsHasStorage(this.capabilities())
+        },
+
+        hasLoaders() {
+            return capsHasLoaders(this.capabilities())
+        },
+
+        hasTrade() {
+            return this.trade !== undefined
+        },
+
+        capabilities(): EntityCapabilities {
+            return {
+                hullmass: this.shipMass,
+                capacity: this.capacity ? UInt32.from(this.capacity) : undefined,
+                engines: this.engines,
+                generator: this.generator,
+                loaders: this.loaders,
+                trade: this.trade,
+            }
+        },
+
+        state(): EntityState {
+            return {
+                owner: entity.owner ?? Name.from(''),
+                location: ServerContract.Types.coordinates.from(this.location),
+                energy: this.energy,
+                cargomass: UInt32.from(this.cargoMass),
+                cargo: entity.cargo,
+            }
+        },
     }
+
+    return projected
 }
 
-/**
- * Apply a recharge task to projected state.
- */
 function applyRechargeTask(
     projected: ProjectedEntity,
     _task: ServerContract.Types.task,
@@ -84,19 +139,16 @@ function applyRechargeTask(
     }
 }
 
-/**
- * Apply a flight task to projected state.
- */
 function applyFlightTask(
     projected: ProjectedEntity,
     task: ServerContract.Types.task,
     options: {complete: boolean; progress?: number}
 ): void {
-    if (!task.location || !projected.engines) return
+    if (!task.coordinates || !projected.engines) return
 
     const origin = projected.location
-    const destination = Coordinates.from(task.location)
-    const distance = distanceBetweenCoordinates(origin, task.location)
+    const destination = Coordinates.from(task.coordinates)
+    const distance = distanceBetweenCoordinates(origin, task.coordinates)
     const energyUsage = distance.dividing(PRECISION).multiplying(projected.engines.drain)
 
     if (options.complete) {
@@ -117,33 +169,48 @@ function applyFlightTask(
     }
 }
 
-/**
- * Apply a load task to projected state.
- */
+function getGoodMass(good_id: UInt16 | number): UInt32 {
+    const good = getGood(good_id)
+    return good.mass
+}
+
 function applyLoadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good = getGood(item.good_id)
-        projected.cargoMass = projected.cargoMass.adding(good.mass.multiplying(item.quantity))
+        const good_mass = getGoodMass(item.good_id)
+        projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
     }
 }
 
-/**
- * Apply an unload task to projected state.
- */
 function applyUnloadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good = getGood(item.good_id)
-        const cargoMass = good.mass.multiplying(item.quantity)
+        const good_mass = getGoodMass(item.good_id)
+        const cargoMass = good_mass.multiplying(item.quantity)
         projected.cargoMass = projected.cargoMass.gt(cargoMass)
             ? projected.cargoMass.subtracting(cargoMass)
             : UInt64.from(0)
     }
 }
 
-/**
- * Project entity state after all scheduled tasks complete.
- * Mirrors contract's project_ship/project_warehouse methods.
- */
+function applyExtractTask(
+    projected: ProjectedEntity,
+    task: ServerContract.Types.task,
+    options: {complete: boolean}
+): void {
+    if (!options.complete) return
+
+    if (task.energy_cost) {
+        const energyCost = UInt16.from(task.energy_cost)
+        projected.energy = projected.energy.gt(energyCost)
+            ? UInt16.from(projected.energy.subtracting(energyCost))
+            : UInt16.from(0)
+    }
+
+    for (const item of task.cargo) {
+        const good_mass = getGoodMass(item.good_id)
+        projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
+    }
+}
+
 export function projectEntity(entity: Projectable): ProjectedEntity {
     const projected = createProjectedEntity(entity)
 
@@ -156,7 +223,7 @@ export function projectEntity(entity: Projectable): ProjectedEntity {
             case TaskType.RECHARGE:
                 applyRechargeTask(projected, task, {complete: true})
                 break
-            case TaskType.FLIGHT:
+            case TaskType.TRAVEL:
                 applyFlightTask(projected, task, {complete: true})
                 break
             case TaskType.LOAD:
@@ -165,15 +232,15 @@ export function projectEntity(entity: Projectable): ProjectedEntity {
             case TaskType.UNLOAD:
                 applyUnloadTask(projected, task)
                 break
+            case TaskType.EXTRACT:
+                applyExtractTask(projected, task, {complete: true})
+                break
         }
     }
 
     return projected
 }
 
-/**
- * Project entity state at a specific time (partial task execution).
- */
 export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity {
     const projected = createProjectedEntity(entity)
 
@@ -198,7 +265,7 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
             case TaskType.RECHARGE:
                 applyRechargeTask(projected, task, {complete: taskComplete, progress})
                 break
-            case TaskType.FLIGHT:
+            case TaskType.TRAVEL:
                 applyFlightTask(projected, task, {complete: taskComplete, progress})
                 break
             case TaskType.LOAD:
@@ -209,6 +276,11 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
             case TaskType.UNLOAD:
                 if (taskComplete) {
                     applyUnloadTask(projected, task)
+                }
+                break
+            case TaskType.EXTRACT:
+                if (taskComplete) {
+                    applyExtractTask(projected, task, {complete: true})
                 }
                 break
         }

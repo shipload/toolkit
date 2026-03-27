@@ -1,8 +1,8 @@
 import {assert} from 'chai'
 import {Checksum256, UInt64} from '@wharfkit/antelope'
-import {Coordinates, ServerContract} from '$lib'
+import {Coordinates, coordsToLocationId, ServerContract} from '$lib'
 import {Location, toLocation} from 'src/location'
-import {Good, GoodPrice, PRECISION} from 'src/types'
+import {Good, GoodPrice, LocationType, PRECISION} from 'src/types'
 
 const testSeed = Checksum256.from(
     'a3b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
@@ -33,7 +33,7 @@ function createLocationRow(
     goodId: number,
     supply: number
 ) {
-    return ServerContract.Types.location_row.from({
+    return ServerContract.Types.supply_row.from({
         id,
         coordinates: coords,
         epoch,
@@ -83,6 +83,83 @@ suite('Location', function () {
             )
             location.hasSystemAt(seed1)
             location.hasSystemAt(seed2)
+        })
+    })
+
+    suite('getLocationTypeAt', function () {
+        test('returns a LocationType value', function () {
+            const location = Location.from(origin)
+            const result = location.getLocationTypeAt(testSeed)
+            assert.include(
+                [
+                    LocationType.EMPTY,
+                    LocationType.PLANET,
+                    LocationType.ASTEROID,
+                    LocationType.NEBULA,
+                ],
+                result
+            )
+        })
+
+        test('consistent with hasSystemAt for EMPTY', function () {
+            const location = Location.from(origin)
+            const locationType = location.getLocationTypeAt(testSeed)
+            const hasSystem = location.hasSystemAt(testSeed)
+            assert.equal(hasSystem, locationType !== LocationType.EMPTY)
+        })
+    })
+
+    suite('isExtractableAt', function () {
+        test('returns true for asteroid locations', function () {
+            for (let x = 0; x < 100; x++) {
+                for (let y = 0; y < 100; y++) {
+                    const location = Location.from(Coordinates.from({x, y}))
+                    const locationType = location.getLocationTypeAt(testSeed)
+                    if (locationType === LocationType.ASTEROID) {
+                        assert.isTrue(location.isExtractableAt(testSeed))
+                        return
+                    }
+                }
+            }
+        })
+
+        test('returns true for nebula locations', function () {
+            for (let x = 0; x < 100; x++) {
+                for (let y = 0; y < 100; y++) {
+                    const location = Location.from(Coordinates.from({x, y}))
+                    const locationType = location.getLocationTypeAt(testSeed)
+                    if (locationType === LocationType.NEBULA) {
+                        assert.isTrue(location.isExtractableAt(testSeed))
+                        return
+                    }
+                }
+            }
+        })
+
+        test('returns false for planet locations', function () {
+            for (let x = 0; x < 100; x++) {
+                for (let y = 0; y < 100; y++) {
+                    const location = Location.from(Coordinates.from({x, y}))
+                    const locationType = location.getLocationTypeAt(testSeed)
+                    if (locationType === LocationType.PLANET) {
+                        assert.isFalse(location.isExtractableAt(testSeed))
+                        return
+                    }
+                }
+            }
+        })
+
+        test('returns false for empty locations', function () {
+            for (let x = 0; x < 100; x++) {
+                for (let y = 0; y < 100; y++) {
+                    const location = Location.from(Coordinates.from({x, y}))
+                    const locationType = location.getLocationTypeAt(testSeed)
+                    if (locationType === LocationType.EMPTY) {
+                        assert.isFalse(location.isExtractableAt(testSeed))
+                        return
+                    }
+                }
+            }
         })
     })
 
@@ -375,5 +452,53 @@ suite('toLocation helper', function () {
         assert.instanceOf(result, Location)
         assert.equal(result.coordinates.x.toNumber(), 5)
         assert.equal(result.coordinates.y.toNumber(), 10)
+    })
+})
+
+suite('coordsToLocationId', function () {
+    test('returns UInt64', function () {
+        const id = coordsToLocationId({x: 0, y: 0})
+        assert.instanceOf(id, UInt64)
+    })
+
+    test('same coordinates produce same ID', function () {
+        const id1 = coordsToLocationId({x: 5, y: 10})
+        const id2 = coordsToLocationId({x: 5, y: 10})
+        assert.isTrue(id1.equals(id2))
+    })
+
+    test('different coordinates produce different IDs', function () {
+        const id1 = coordsToLocationId({x: 0, y: 0})
+        const id2 = coordsToLocationId({x: 1, y: 0})
+        const id3 = coordsToLocationId({x: 0, y: 1})
+        assert.isFalse(id1.equals(id2))
+        assert.isFalse(id1.equals(id3))
+        assert.isFalse(id2.equals(id3))
+    })
+
+    test('handles negative coordinates', function () {
+        const id1 = coordsToLocationId({x: -5, y: -5})
+        const id2 = coordsToLocationId({x: -5, y: -5})
+        const id3 = coordsToLocationId({x: 5, y: 5})
+        assert.isTrue(id1.equals(id2))
+        assert.isFalse(id1.equals(id3))
+    })
+
+    test('origin (0,0) produces ID 0', function () {
+        const id = coordsToLocationId({x: 0, y: 0})
+        assert.equal(id.toNumber(), 0)
+    })
+
+    test('x in high bits, y in low bits', function () {
+        const id = coordsToLocationId({x: 1, y: 0})
+        const expected = BigInt(1) << BigInt(32)
+        assert.equal(id.toString(), expected.toString())
+    })
+
+    test('Coordinates.toLocationId() matches coordsToLocationId()', function () {
+        const coords = Coordinates.from({x: 7, y: 13})
+        const id1 = coords.toLocationId()
+        const id2 = coordsToLocationId(coords)
+        assert.isTrue(id1.equals(id2))
     })
 })

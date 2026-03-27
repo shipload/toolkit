@@ -7,7 +7,6 @@
     "main": "lib/shipload.js",
     "module": "lib/shipload.m.js",
     "types": "lib/shipload.d.ts",
-    "unpkg": "lib/shipload.bundle.js",
     "sideEffects": false,
     "files": [
         "lib/*",

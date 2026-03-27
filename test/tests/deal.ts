@@ -1,17 +1,16 @@
 import {assert} from 'chai'
 import {Int64, UInt16, UInt64} from '@wharfkit/antelope'
-import {findBestDeal, findDealsForShip, ServerContract} from '$lib'
-import {Ship} from 'src/ship'
+import {findBestDeal, findDealsForShip, makeShip, ServerContract} from '$lib'
 import {Location} from 'src/location'
 import {Coordinates, Good, GoodPrice, PRECISION} from 'src/types'
 
-function createShip(overrides: {capacity?: number; mass?: number} = {}) {
-    return Ship.fromState({
+function makeTestShip(overrides: {capacity?: number; hullmass?: number} = {}) {
+    return makeShip({
         id: 1,
         owner: 'testplayer',
         name: 'Test Ship',
-        location: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
-        mass: overrides.mass ?? 500000,
+        coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
+        hullmass: overrides.hullmass ?? 500000,
         capacity: overrides.capacity ?? 1000000000,
         energy: 5000,
         engines: ServerContract.Types.movement_stats.from({
@@ -54,7 +53,7 @@ function createGoodPrice(id: number, price: number, supply: number) {
 suite('deal', function () {
     suite('findDealsForShip', function () {
         test('finds profitable deals at nearby locations', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5), createLocation(10, 10)]
 
@@ -71,7 +70,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -83,7 +82,7 @@ suite('deal', function () {
         })
 
         test('returns empty array when no profitable deals', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -97,7 +96,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -107,7 +106,7 @@ suite('deal', function () {
         })
 
         test('filters by minimum profit per second', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(100, 100)]
 
@@ -121,7 +120,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {
@@ -134,7 +133,7 @@ suite('deal', function () {
         })
 
         test('filters by minimum margin percent', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -148,7 +147,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {
@@ -161,7 +160,7 @@ suite('deal', function () {
         })
 
         test('limits by player balance', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -175,7 +174,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {
@@ -188,7 +187,7 @@ suite('deal', function () {
         })
 
         test('limits by maxDeals option', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [
                 createLocation(5, 5),
@@ -206,7 +205,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {
@@ -218,7 +217,7 @@ suite('deal', function () {
         })
 
         test('sorts deals by profit per second descending', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5), createLocation(10, 10)]
 
@@ -235,7 +234,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -246,7 +245,7 @@ suite('deal', function () {
         })
 
         test('skips goods with zero supply', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -260,7 +259,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -269,7 +268,7 @@ suite('deal', function () {
         })
 
         test('skips goods not available at destination', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -283,7 +282,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -292,7 +291,7 @@ suite('deal', function () {
         })
 
         test('respects cargo capacity limits', async function () {
-            const ship = createShip({capacity: 1000000, mass: 999000})
+            const ship = makeTestShip({capacity: 1000000, hullmass: 999000})
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -306,7 +305,7 @@ suite('deal', function () {
 
             const deals = await findDealsForShip(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {
@@ -325,7 +324,7 @@ suite('deal', function () {
 
     suite('findBestDeal', function () {
         test('returns the best deal', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5), createLocation(10, 10)]
 
@@ -342,7 +341,7 @@ suite('deal', function () {
 
             const deal = await findBestDeal(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -352,7 +351,7 @@ suite('deal', function () {
         })
 
         test('returns undefined when no deals available', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -366,7 +365,7 @@ suite('deal', function () {
 
             const deal = await findBestDeal(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices
             )
@@ -375,7 +374,7 @@ suite('deal', function () {
         })
 
         test('passes options to findDealsForShip', async function () {
-            const ship = createShip()
+            const ship = makeTestShip()
 
             const getNearbyLocations = async () => [createLocation(5, 5)]
 
@@ -389,7 +388,7 @@ suite('deal', function () {
 
             const deal = await findBestDeal(
                 ship,
-                ship.currentLocation,
+                Coordinates.from(ship.coordinates),
                 getNearbyLocations,
                 getMarketPrices,
                 {

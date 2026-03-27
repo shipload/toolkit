@@ -7,14 +7,14 @@
         "mass": 15000
     },
     {
-        "id": 2,
+        "id": 26,
         "name": "Iron",
         "description": "A versatile metal used in construction and manufacturing.",
         "base_price": 125,
         "mass": 40000
     },
     {
-        "id": 3,
+        "id": 29,
         "name": "Copper",
         "description": "A conductive metal vital for electronics and wiring.",
         "base_price": 200,

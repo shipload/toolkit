@@ -3,35 +3,24 @@ import {ServerContract} from '../contracts'
 import {CoordinatesType} from '../types'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
-import {InventoryAccessor} from './inventory-accessor'
-import {EntityInventory} from './entity-inventory'
 import * as schedule from '../scheduling/schedule'
 
-export interface WarehouseStateInput {
+export interface ContainerStateInput {
     id: UInt64Type
     owner: string
     name: string
     coordinates: CoordinatesType | {x: number; y: number; z?: number}
+    hullmass: number
     capacity: number
-    loaders: ServerContract.Types.loader_stats
+    cargomass?: number
     schedule?: ServerContract.Types.schedule
-    cargo?: ServerContract.Types.cargo_item[]
 }
 
-export class Warehouse extends ServerContract.Types.entity_info {
+export class Container extends ServerContract.Types.entity_info {
     private _sched?: ScheduleAccessor
-    private _inv?: InventoryAccessor
 
     get name(): string {
         return this.entity_name
-    }
-
-    get inv(): InventoryAccessor {
-        return (this._inv ??= new InventoryAccessor(this))
-    }
-
-    get inventory(): EntityInventory[] {
-        return this.inv.items
     }
 
     get sched(): ScheduleAccessor {
@@ -54,12 +43,8 @@ export class Warehouse extends ServerContract.Types.entity_info {
         return Location.from(this.coordinates)
     }
 
-    get totalCargoMass(): UInt64 {
-        return this.inv.totalMass
-    }
-
-    get cargoValue(): UInt64 {
-        return this.inv.totalValue
+    get totalMass(): UInt64 {
+        return UInt64.from(this.hullmass ?? 0).adding(this.cargomass)
     }
 
     get maxCapacity(): UInt64 {
@@ -67,20 +52,16 @@ export class Warehouse extends ServerContract.Types.entity_info {
     }
 
     get availableCapacity(): UInt64 {
-        const cargo = this.totalCargoMass
+        const cargo = UInt64.from(this.cargomass)
         return cargo.gte(this.maxCapacity) ? UInt64.from(0) : this.maxCapacity.subtracting(cargo)
     }
 
-    hasSpace(goodMass: UInt64, quantity: number): boolean {
-        return this.totalCargoMass.adding(goodMass.multiplying(quantity)).lte(this.maxCapacity)
+    hasSpace(additionalMass: UInt64): boolean {
+        return UInt64.from(this.cargomass).adding(additionalMass).lte(this.maxCapacity)
     }
 
     get isFull(): boolean {
-        return this.totalCargoMass.gte(this.maxCapacity)
-    }
-
-    getCargoForGood(goodId: UInt64Type): EntityInventory | undefined {
-        return this.inv.forGood(goodId)
+        return UInt64.from(this.cargomass).gte(this.maxCapacity)
     }
 
     get orbitalAltitude(): number {

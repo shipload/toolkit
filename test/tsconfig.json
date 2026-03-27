@@ -16,6 +16,7 @@
             "src/location": ["src/entities/location"],
             "src/player": ["src/entities/player"],
             "src/warehouse": ["src/entities/warehouse"],
+            "src/container": ["src/entities/container"],
             "src/gamestate": ["src/entities/gamestate"],
             "src/cargo-utils": ["src/entities/cargo-utils"],
             "src/goods": ["src/market/goods"],

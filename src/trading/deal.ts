@@ -6,7 +6,6 @@ import {
     distanceBetweenCoordinates,
     type EstimatedTravelTime,
     estimateTravelTime,
-    hasEnergyForDistance,
 } from '../travel/travel'
 import {calculateProfitPerSecond, calculateTradeProfit, isProfitable} from './trade'
 

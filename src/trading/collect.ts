@@ -10,7 +10,6 @@ import {
     distanceBetweenCoordinates,
     EstimatedTravelTime,
     estimateTravelTime,
-    hasEnergyForDistance,
 } from '../travel/travel'
 import {getGood, getGoods} from '../market/goods'
 import {getRarity, Rarities} from '../market/market'

@@ -37,7 +37,8 @@ export class Player extends ServerContract.Types.player_row {
     }
     // Constants for game rules (match smart contract)
     private static readonly MAX_LOAN = 1000000
-    private static readonly BASE_SHIP_COST = 100 // pow(5, sequence) * 100
+    // Contract formula: 2500 * pow(5, sequence - 1) = 500 * pow(5, sequence)
+    private static readonly BASE_SHIP_COST = 500
     private static readonly SHIP_COST_MULTIPLIER = 5
 
     // Optional ship count for nextShipCost calculation

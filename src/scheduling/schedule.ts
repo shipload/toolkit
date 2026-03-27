@@ -153,3 +153,27 @@ export function scheduleProgress(entity: ScheduleData, now: Date): number {
     const elapsed = scheduleElapsed(entity, now)
     return Math.min(1, elapsed / duration)
 }
+
+export function isTaskType(entity: ScheduleData, taskType: TaskType, now: Date): boolean {
+    return currentTaskType(entity, now) === taskType
+}
+
+export function isInFlight(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.TRAVEL, now)
+}
+
+export function isRecharging(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.RECHARGE, now)
+}
+
+export function isLoading(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.LOAD, now)
+}
+
+export function isUnloading(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.UNLOAD, now)
+}
+
+export function isExtracting(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.EXTRACT, now)
+}

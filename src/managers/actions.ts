@@ -10,10 +10,9 @@ interface SellableCargo {
     hasCargo: boolean
 }
 
-export type CargoItemInput = {
-    goodId: UInt64Type
-    quantity: UInt64Type
-    unitCost?: UInt64Type
+export type EntityRefInput = {
+    entityType: EntityTypeName
+    entityId: UInt64Type
 }
 
 export class ActionsManager extends BaseManager {
@@ -24,6 +23,24 @@ export class ActionsManager extends BaseManager {
         return this.server.action('travel', {
             entity_type: EntityType.SHIP,
             id: UInt64.from(shipId),
+            x,
+            y,
+            recharge,
+        })
+    }
+
+    grouptravel(entities: EntityRefInput[], destination: CoordinatesType, recharge = true): Action {
+        const entityRefs = entities.map((e) =>
+            ServerContract.Types.entity_ref.from({
+                entity_type: e.entityType,
+                entity_id: UInt64.from(e.entityId),
+            })
+        )
+        const x = Int64.from(destination.x)
+        const y = Int64.from(destination.y)
+
+        return this.server.action('grouptravel', {
+            entities: entityRefs,
             x,
             y,
             recharge,
@@ -61,37 +78,44 @@ export class ActionsManager extends BaseManager {
         sourceId: UInt64Type,
         destType: EntityTypeName,
         destId: UInt64Type,
-        cargo: CargoItemInput[]
+        goodId: UInt64Type,
+        quantity: UInt64Type
     ): Action {
-        const cargoItems = cargo.map((c) =>
-            ServerContract.Types.cargo_item.from({
-                good_id: UInt16.from(c.goodId),
-                quantity: UInt32.from(c.quantity),
-                unit_cost: UInt64.from(c.unitCost || 0),
-            })
-        )
         return this.server.action('transfer', {
             source_type: sourceType,
             source_id: UInt64.from(sourceId),
             dest_type: destType,
             dest_id: UInt64.from(destId),
-            cargo: cargoItems,
+            good_id: UInt16.from(goodId),
+            quantity: UInt32.from(quantity),
         })
     }
 
-    buyGoods(shipId: UInt64Type, goodId: UInt64Type, quantity: UInt64Type): Action {
+    buyGoods(
+        entityId: UInt64Type,
+        goodId: UInt64Type,
+        quantity: UInt64Type,
+        entityType: EntityTypeName = EntityType.SHIP
+    ): Action {
         return this.server.action('buygoods', {
-            ship_id: UInt64.from(shipId),
-            good_id: UInt64.from(goodId),
-            quantity: UInt64.from(quantity),
+            entity_type: entityType,
+            id: UInt64.from(entityId),
+            good_id: UInt16.from(goodId),
+            quantity: UInt32.from(quantity),
         })
     }
 
-    sellGoods(shipId: UInt64Type, goodId: UInt64Type, quantity: UInt64Type): Action {
+    sellGoods(
+        entityId: UInt64Type,
+        goodId: UInt64Type,
+        quantity: UInt64Type,
+        entityType: EntityTypeName = EntityType.SHIP
+    ): Action {
         return this.server.action('sellgoods', {
-            ship_id: UInt64.from(shipId),
-            good_id: UInt64.from(goodId),
-            quantity: UInt64.from(quantity),
+            entity_type: entityType,
+            id: UInt64.from(entityId),
+            good_id: UInt16.from(goodId),
+            quantity: UInt32.from(quantity),
         })
     }
 
@@ -104,6 +128,14 @@ export class ActionsManager extends BaseManager {
 
     buyWarehouse(account: NameType, shipId: UInt64Type, name: string): Action {
         return this.server.action('buywarehouse', {
+            account: Name.from(account),
+            ship_id: UInt64.from(shipId),
+            name,
+        })
+    }
+
+    buyContainer(account: NameType, shipId: UInt64Type, name: string): Action {
+        return this.server.action('buycontainer', {
             account: Name.from(account),
             ship_id: UInt64.from(shipId),
             name,
@@ -137,6 +169,12 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    extract(shipId: UInt64Type): Action {
+        return this.server.action('extract', {
+            ship_id: UInt64.from(shipId),
+        })
+    }
+
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
     }
@@ -157,12 +195,6 @@ export class ActionsManager extends BaseManager {
 
         return shipCargo
             .filter((c) => c.hasCargo)
-            .map((c) =>
-                this.server.action('sellgoods', {
-                    ship_id: shipId,
-                    good_id: c.good_id,
-                    quantity: c.quantity,
-                })
-            )
+            .map((c) => this.sellGoods(shipId, c.good_id, c.quantity, EntityType.SHIP))
     }
 }

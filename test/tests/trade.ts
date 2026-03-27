@@ -11,9 +11,9 @@ import {
     Coordinates,
     findBestGoodToTrade,
     isProfitable,
+    makeShip,
     ServerContract,
 } from '$lib'
-import {Ship} from 'src/ship'
 import {Player} from 'src/player'
 import {Good, GoodPrice, PRECISION} from 'src/types'
 import {assertEq} from '../helpers'
@@ -252,13 +252,13 @@ suite('trade', function () {
     })
 
     suite('calculateMaxTradeQuantity', function () {
-        function createShip(capacity: number) {
-            return Ship.fromState({
+        function makeTestShip(capacity: number) {
+            return makeShip({
                 id: 1,
                 owner: 'testplayer',
                 name: 'Test Ship',
-                location: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
-                mass: 500000,
+                coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
+                hullmass: 500000,
                 capacity,
                 energy: 5000,
                 engines: ServerContract.Types.movement_stats.from({
@@ -278,7 +278,7 @@ suite('trade', function () {
             })
         }
 
-        function createPlayer(balance: number) {
+        function makeTestPlayer(balance: number) {
             return Player.from({
                 owner: 'testplayer',
                 balance: UInt64.from(balance),
@@ -304,8 +304,8 @@ suite('trade', function () {
         }
 
         test('calculates max quantity based on balance and space', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(10000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(10000)
             const goodPrice = createGoodPrice(1, 100, 35000)
 
             const result = calculateMaxTradeQuantity(ship, player, goodPrice)
@@ -317,8 +317,8 @@ suite('trade', function () {
         })
 
         test('limits by balance when low funds', function () {
-            const ship = createShip(4000000000)
-            const player = createPlayer(500)
+            const ship = makeTestShip(4000000000)
+            const player = makeTestPlayer(500)
             const goodPrice = createGoodPrice(1, 100, 35000)
 
             const result = calculateMaxTradeQuantity(ship, player, goodPrice)
@@ -328,8 +328,8 @@ suite('trade', function () {
         })
 
         test('limits by space when ship full', function () {
-            const ship = createShip(510000)
-            const player = createPlayer(1000000)
+            const ship = makeTestShip(510000)
+            const player = makeTestPlayer(1000000)
             const goodPrice = createGoodPrice(1, 100, 35000)
 
             const result = calculateMaxTradeQuantity(ship, player, goodPrice)
@@ -339,8 +339,8 @@ suite('trade', function () {
         })
 
         test('calculates correct total cost and mass', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(10000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(10000)
             const goodPrice = createGoodPrice(1, 100, 35000)
 
             const result = calculateMaxTradeQuantity(ship, player, goodPrice)
@@ -351,13 +351,13 @@ suite('trade', function () {
     })
 
     suite('findBestGoodToTrade', function () {
-        function createShip(capacity: number) {
-            return Ship.fromState({
+        function makeTestShip(capacity: number) {
+            return makeShip({
                 id: 1,
                 owner: 'testplayer',
                 name: 'Test Ship',
-                location: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
-                mass: 500000,
+                coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
+                hullmass: 500000,
                 capacity,
                 energy: 5000,
                 engines: ServerContract.Types.movement_stats.from({
@@ -377,7 +377,7 @@ suite('trade', function () {
             })
         }
 
-        function createPlayer(balance: number) {
+        function makeTestPlayer(balance: number) {
             return Player.from({
                 owner: 'testplayer',
                 balance: UInt64.from(balance),
@@ -403,8 +403,8 @@ suite('trade', function () {
         }
 
         test('finds the best profitable trade', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(100000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(100000)
 
             const originPrices = [createGoodPrice(1, 100, 35000), createGoodPrice(3, 200, 60000)]
             const destPrices = [createGoodPrice(1, 120, 35000), createGoodPrice(3, 300, 60000)]
@@ -417,8 +417,8 @@ suite('trade', function () {
         })
 
         test('returns null when no profitable trades', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(100000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(100000)
 
             const originPrices = [createGoodPrice(1, 100, 35000)]
             const destPrices = [createGoodPrice(1, 80, 35000)]
@@ -429,8 +429,8 @@ suite('trade', function () {
         })
 
         test('returns null when no matching goods', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(100000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(100000)
 
             const originPrices = [createGoodPrice(1, 100, 35000)]
             const destPrices = [createGoodPrice(3, 200, 60000)]
@@ -441,8 +441,8 @@ suite('trade', function () {
         })
 
         test('returns null when player cannot afford any goods', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(10)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(10)
 
             const originPrices = [createGoodPrice(1, 100, 35000)]
             const destPrices = [createGoodPrice(1, 200, 35000)]
@@ -453,8 +453,8 @@ suite('trade', function () {
         })
 
         test('selects trade with best profit per second', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(100000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(100000)
 
             const originPrices = [createGoodPrice(1, 100, 35000), createGoodPrice(3, 50, 60000)]
             const destPrices = [createGoodPrice(1, 150, 35000), createGoodPrice(3, 100, 60000)]
@@ -466,8 +466,8 @@ suite('trade', function () {
         })
 
         test('handles zero travel time by returning 0 profitPerSecond', function () {
-            const ship = createShip(1000000000)
-            const player = createPlayer(100000)
+            const ship = makeTestShip(1000000000)
+            const player = makeTestPlayer(100000)
 
             const originPrices = [createGoodPrice(1, 100, 35000)]
             const destPrices = [createGoodPrice(1, 150, 35000)]

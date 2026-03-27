@@ -1,10 +1,11 @@
-import {Bytes, Checksum256, UInt16Type, UInt64} from '@wharfkit/antelope'
+import {Bytes, Checksum256, UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {CoordinatesType, Distance, GoodPrice} from '../types'
+import {CoordinatesType, coordsToLocationId, Distance, GoodPrice} from '../types'
 import {marketPrice, marketPrices} from '../market/market'
 import {hasSystem} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 import {Location, toLocation} from '../entities/location'
+import {ServerContract} from '../contracts'
 
 export class LocationsManager extends BaseManager {
     async getMarketPrice(location: CoordinatesType, goodId: number): Promise<GoodPrice> {
@@ -20,16 +21,16 @@ export class LocationsManager extends BaseManager {
     }
 
     async getMarketPricesWithSupply(location: CoordinatesType): Promise<GoodPrice[]> {
-        const [game, state, locationRows] = await Promise.all([
+        const [game, state, supplyRows] = await Promise.all([
             this.getGame(),
             this.getState(),
-            this.getLocation(location),
+            this.getSupplyRows(location),
         ])
 
         const prices = marketPrices(location, game.config.seed, state)
 
         const supplyMap = new Map<number, number>()
-        for (const row of locationRows) {
+        for (const row of supplyRows) {
             if (UInt64.from(row.epoch).equals(state.epoch)) {
                 supplyMap.set(Number(row.good_id), Number(row.supply))
             }
@@ -62,9 +63,9 @@ export class LocationsManager extends BaseManager {
         return findNearbyPlanets(game.config.seed, origin, maxDistance)
     }
 
-    async getLocation(location: CoordinatesType) {
+    async getSupplyRows(location: CoordinatesType) {
         const hash = Checksum256.hash(Bytes.from(`${location.x}-${location.y}`, 'utf8'))
-        return this.server.table('location').all({
+        return this.server.table('supply').all({
             index_position: 'secondary',
             from: hash,
             to: hash,
@@ -81,7 +82,7 @@ export class LocationsManager extends BaseManager {
     async getLocationWithSupply(coords: CoordinatesType): Promise<Location> {
         const location = toLocation(coords)
         const [rows, state] = await Promise.all([
-            this.getLocation(location.coordinates),
+            this.getSupplyRows(location.coordinates),
             this.getState(),
         ])
         location.setLocationRows(rows, state.epoch)
@@ -92,12 +93,30 @@ export class LocationsManager extends BaseManager {
         const location = toLocation(coords)
         const [prices, rows, state] = await Promise.all([
             this.getMarketPrices(location.coordinates),
-            this.getLocation(location.coordinates),
+            this.getSupplyRows(location.coordinates),
             this.getState(),
         ])
 
         location.setMarketPrices(prices)
         location.setLocationRows(rows, state.epoch)
         return location
+    }
+
+    async getLocationEntity(
+        id: UInt64Type
+    ): Promise<ServerContract.Types.location_row | undefined> {
+        const row = await this.server.table('location').get(UInt64.from(id))
+        return row ?? undefined
+    }
+
+    async getLocationEntityAt(
+        coords: CoordinatesType
+    ): Promise<ServerContract.Types.location_row | undefined> {
+        const id = coordsToLocationId(coords)
+        return this.getLocationEntity(id)
+    }
+
+    async getAllLocationEntities(): Promise<ServerContract.Types.location_row[]> {
+        return this.server.table('location').all()
     }
 }

@@ -1,7 +1,7 @@
 import {Checksum256, Checksum256Type, UInt16, UInt16Type, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Coordinates, CoordinatesType, Distance, GoodPrice} from '../types'
-import {hasSystem} from '../utils/system'
+import {Coordinates, CoordinatesType, Distance, GoodPrice, LocationType} from '../types'
+import {getLocationType, hasSystem, isExtractableLocation} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 
 /**
@@ -13,7 +13,7 @@ export class Location {
     private _marketPrices?: GoodPrice[]
     private _gameSeed?: Checksum256
     private _hasSystem?: boolean
-    private _locationRows?: ServerContract.Types.location_row[]
+    private _locationRows?: ServerContract.Types.supply_row[]
     private _epoch?: UInt64
 
     constructor(coordinates: CoordinatesType) {
@@ -28,7 +28,7 @@ export class Location {
     }
 
     /**
-     * Check if this location has a system (planet)
+     * Check if this location has a system (planet, asteroid, or nebula)
      */
     hasSystemAt(gameSeed: Checksum256Type): boolean {
         const seed = Checksum256.from(gameSeed)
@@ -37,6 +37,20 @@ export class Location {
             this._hasSystem = hasSystem(seed, this.coordinates)
         }
         return this._hasSystem
+    }
+
+    /**
+     * Get the location type (EMPTY, PLANET, ASTEROID, or NEBULA)
+     */
+    getLocationTypeAt(gameSeed: Checksum256Type): LocationType {
+        return getLocationType(gameSeed, this.coordinates)
+    }
+
+    /**
+     * Check if this location is extractable (asteroid or nebula)
+     */
+    isExtractableAt(gameSeed: Checksum256Type): boolean {
+        return isExtractableLocation(this.getLocationTypeAt(gameSeed))
     }
 
     /**
@@ -79,7 +93,7 @@ export class Location {
     /**
      * Set location rows (supply data) for this location
      */
-    setLocationRows(rows: ServerContract.Types.location_row[], epoch: UInt64): void {
+    setLocationRows(rows: ServerContract.Types.supply_row[], epoch: UInt64): void {
         this._locationRows = rows
         this._epoch = epoch
     }
@@ -87,7 +101,7 @@ export class Location {
     /**
      * Get cached location rows (supply data)
      */
-    get locationRows(): ServerContract.Types.location_row[] | undefined {
+    get locationRows(): ServerContract.Types.supply_row[] | undefined {
         return this._locationRows
     }
 
@@ -107,7 +121,7 @@ export class Location {
      * Get all available goods at this location (goods with supply > 0)
      * Returns undefined if location rows not cached
      */
-    get availableGoods(): ServerContract.Types.location_row[] | undefined {
+    get availableGoods(): ServerContract.Types.supply_row[] | undefined {
         if (!this._locationRows) return undefined
         return this._locationRows.filter(
             (r) => this._epoch && r.epoch.equals(this._epoch) && r.supply.gt(UInt16.from(0))
@@ -209,7 +223,7 @@ export class Location {
                                 : UInt16.from(0)
                             : currentSupply.adding(quantityDelta)
 
-                    return ServerContract.Types.location_row.from({
+                    return ServerContract.Types.supply_row.from({
                         id: row.id,
                         coordinates: row.coordinates,
                         epoch: row.epoch,

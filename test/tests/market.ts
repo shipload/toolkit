@@ -253,8 +253,8 @@ suite('market', function () {
 
         test('returns correct good for good_id', function () {
             const state = createMockState(1, 10)
-            const price = marketPrice(location, 3, gameSeed, state)
-            const expectedGood = getGood(3)
+            const price = marketPrice(location, 26, gameSeed, state)
+            const expectedGood = getGood(26)
 
             assert.equal(price.good.name, expectedGood.name)
             assert.isTrue(price.good.id.equals(expectedGood.id))
