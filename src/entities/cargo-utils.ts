@@ -18,11 +18,11 @@ export function cargoValue(cargo: EntityInventory[]): UInt64 {
     }, UInt64.from(0))
 }
 
-export function getCargoForGood(
+export function getCargoForItem(
     cargo: EntityInventory[],
     goodId: UInt64Type
 ): EntityInventory | undefined {
-    return cargo.find((c) => c.good_id.equals(goodId))
+    return cargo.find((c) => c.item_id.equals(goodId))
 }
 
 export function hasSpace(
@@ -67,7 +67,7 @@ export function calculateSaleValue(
     for (const item of cargo) {
         if (UInt32.from(item.quantity).equals(UInt32.from(0))) continue
 
-        const goodId = Number(item.good_id)
+        const goodId = Number(item.item_id)
         const salePrice = prices.get(goodId)
 
         if (salePrice) {
@@ -97,7 +97,7 @@ export function calculateSaleValueFromArray(
     return calculateSaleValue(cargo, priceMap)
 }
 
-export function afterSellGoods(
+export function afterSellItems(
     cargo: ServerContract.Types.cargo_item[],
     goodsToSell: Array<{goodId: number; quantity: number}>
 ): EntityInventory[] {
@@ -106,7 +106,7 @@ export function afterSellGoods(
     }
 
     return cargo.map((item) => {
-        const saleItem = goodsToSell.find((s) => Number(item.good_id) === s.goodId)
+        const saleItem = goodsToSell.find((s) => Number(item.item_id) === s.goodId)
         if (!saleItem) {
             return new EntityInventory(item)
         }
@@ -116,7 +116,7 @@ export function afterSellGoods(
 
         return new EntityInventory(
             ServerContract.Types.cargo_item.from({
-                good_id: item.good_id,
+                item_id: item.item_id,
                 quantity: UInt32.from(newQty),
                 unit_cost: item.unit_cost,
             })
@@ -124,7 +124,7 @@ export function afterSellGoods(
     })
 }
 
-export function afterSellAllGoods(cargo: ServerContract.Types.cargo_item[]): EntityInventory[] {
+export function afterSellAllItems(cargo: ServerContract.Types.cargo_item[]): EntityInventory[] {
     if (cargo.length === 0) {
         return []
     }
@@ -133,7 +133,7 @@ export function afterSellAllGoods(cargo: ServerContract.Types.cargo_item[]): Ent
         (item) =>
             new EntityInventory(
                 ServerContract.Types.cargo_item.from({
-                    good_id: item.good_id,
+                    item_id: item.item_id,
                     quantity: UInt32.from(0),
                     unit_cost: item.unit_cost,
                 })

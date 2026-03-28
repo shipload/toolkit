@@ -113,6 +113,10 @@ export class Ship extends ServerContract.Types.entity_info {
         return this.extractor !== undefined
     }
 
+    get hasWarp(): boolean {
+        return this.warp !== undefined
+    }
+
     project(): ProjectedEntity {
         return sharedProjectEntity(this)
     }
@@ -155,8 +159,8 @@ export class Ship extends ServerContract.Types.entity_info {
             : this.maxCapacity.subtracting(this.totalMass)
     }
 
-    getCargoForGood(goodId: UInt64Type): EntityInventory | undefined {
-        return this.inv.forGood(goodId)
+    getCargoForItem(goodId: UInt64Type): EntityInventory | undefined {
+        return this.inv.forItem(goodId)
     }
 
     get sellableCargo(): EntityInventory[] {
@@ -198,11 +202,11 @@ export class Ship extends ServerContract.Types.entity_info {
         return cargoUtils.calculateSaleValueFromArray(this.cargo, prices)
     }
 
-    afterSellGoods(goodsToSell: Array<{goodId: number; quantity: number}>): EntityInventory[] {
-        return cargoUtils.afterSellGoods(this.cargo, goodsToSell)
+    afterSellItems(goodsToSell: Array<{goodId: number; quantity: number}>): EntityInventory[] {
+        return cargoUtils.afterSellItems(this.cargo, goodsToSell)
     }
 
-    afterSellAllGoods(): EntityInventory[] {
-        return cargoUtils.afterSellAllGoods(this.cargo)
+    afterSellAllItems(): EntityInventory[] {
+        return cargoUtils.afterSellAllItems(this.cargo)
     }
 }

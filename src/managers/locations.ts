@@ -1,6 +1,6 @@
 import {Bytes, Checksum256, UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {CoordinatesType, coordsToLocationId, Distance, GoodPrice} from '../types'
+import {CoordinatesType, coordsToLocationId, Distance, ItemPrice} from '../types'
 import {marketPrice, marketPrices} from '../market/market'
 import {hasSystem} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
@@ -8,19 +8,19 @@ import {Location, toLocation} from '../entities/location'
 import {ServerContract} from '../contracts'
 
 export class LocationsManager extends BaseManager {
-    async getMarketPrice(location: CoordinatesType, goodId: number): Promise<GoodPrice> {
+    async getMarketPrice(location: CoordinatesType, goodId: number): Promise<ItemPrice> {
         const game = await this.getGame()
         const state = await this.getState()
         return marketPrice(location, goodId, game.config.seed, state)
     }
 
-    async getMarketPrices(location: CoordinatesType): Promise<GoodPrice[]> {
+    async getMarketPrices(location: CoordinatesType): Promise<ItemPrice[]> {
         const game = await this.getGame()
         const state = await this.getState()
         return marketPrices(location, game.config.seed, state)
     }
 
-    async getMarketPricesWithSupply(location: CoordinatesType): Promise<GoodPrice[]> {
+    async getMarketPricesWithSupply(location: CoordinatesType): Promise<ItemPrice[]> {
         const [game, state, supplyRows] = await Promise.all([
             this.getGame(),
             this.getState(),
@@ -32,16 +32,16 @@ export class LocationsManager extends BaseManager {
         const supplyMap = new Map<number, number>()
         for (const row of supplyRows) {
             if (UInt64.from(row.epoch).equals(state.epoch)) {
-                supplyMap.set(Number(row.good_id), Number(row.supply))
+                supplyMap.set(Number(row.item_id), Number(row.supply))
             }
         }
 
         return prices.map((price) => {
             const actualSupply = supplyMap.get(Number(price.id))
             if (actualSupply !== undefined) {
-                return GoodPrice.from({
+                return ItemPrice.from({
                     id: price.id,
-                    good: price.good,
+                    item: price.item,
                     price: price.price,
                     supply: UInt64.from(actualSupply),
                 })

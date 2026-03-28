@@ -31,7 +31,7 @@ import {
     ShipLike,
     TaskType,
 } from '../types'
-import {getGood} from '../market/goods'
+import {getItem} from '../market/items'
 import {hasSystem} from '../utils/system'
 
 export function calc_orbital_altitude(mass: number): number {
@@ -165,7 +165,7 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     }
 
     for (const cargo of cargos) {
-        mass.add(getGood(cargo.good_id).mass.multiplying(cargo.quantity))
+        mass.add(getItem(cargo.item_id).mass.multiplying(cargo.quantity))
     }
 
     return mass
@@ -183,9 +183,9 @@ export function calculateTransferTime(
     let mass = UInt64.from(0)
 
     for (const cargo of cargos) {
-        const qty = quantities?.get(Number(cargo.good_id)) ?? 0
+        const qty = quantities?.get(Number(cargo.item_id)) ?? 0
         if (qty > 0) {
-            const good_mass = getGood(cargo.good_id).mass
+            const good_mass = getItem(cargo.item_id).mass
             const cargo_mass = good_mass.multiplying(qty)
             mass = UInt64.from(mass).adding(cargo_mass)
         }
@@ -231,12 +231,12 @@ export function calculateLoadTimeBreakdown(
     let mass_load = UInt64.from(0)
 
     for (const cargo of cargos) {
-        const goodId = Number(cargo.good_id)
+        const goodId = Number(cargo.item_id)
         const loadQty = loadQuantities?.get(goodId) ?? 0
         const unloadQty = unloadQuantities?.get(goodId) ?? 0
 
         if (loadQty > 0 || unloadQty > 0) {
-            const good = getGood(cargo.good_id)
+            const good = getItem(cargo.item_id)
 
             if (loadQty > 0) {
                 const cargo_mass = good.mass.multiplying(loadQty)

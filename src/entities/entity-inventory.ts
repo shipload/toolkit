@@ -1,24 +1,28 @@
 import {UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {getGood} from '../market/goods'
-import {Good} from '../types'
+import {getItem} from '../market/items'
+import {Item} from '../types'
 
 export class EntityInventory extends ServerContract.Types.cargo_item {
-    private _good?: Good
+    private _item?: Item
 
-    get good(): Good {
-        if (!this._good) {
-            this._good = getGood(this.good_id)
+    get item(): Item {
+        if (!this._item) {
+            this._item = getItem(this.item_id)
         }
-        return this._good
+        return this._item
+    }
+
+    get good(): Item {
+        return this.item
     }
 
     get name(): string {
-        return this.good.name
+        return this.item.name
     }
 
     get unitMass(): UInt32 {
-        return this.good.mass
+        return this.item.mass
     }
 
     get totalMass(): UInt64 {

@@ -62,7 +62,7 @@ export interface ShipLike {
 }
 
 export interface CargoMassInfo {
-    good_id: UInt16Type
+    item_id: UInt16Type
     quantity: UInt32Type
 }
 
@@ -73,6 +73,7 @@ export enum TaskType {
     LOAD = 3,
     UNLOAD = 4,
     EXTRACT = 5,
+    WARP = 6,
 }
 
 export enum LocationType {
@@ -131,8 +132,11 @@ export interface Distance {
     distance: UInt16
 }
 
-@Struct.type('good')
-export class Good extends Struct {
+export type ResourceCategory = 'metal' | 'gas' | 'mineral' | 'organic'
+export type ResourceRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+
+@Struct.type('item')
+export class Item extends Struct {
     @Struct.field(UInt16)
     id!: UInt16
     @Struct.field('string')
@@ -143,14 +147,20 @@ export class Good extends Struct {
     base_price!: UInt32
     @Struct.field(UInt32)
     mass!: UInt32
+    @Struct.field('string')
+    category!: ResourceCategory
+    @Struct.field('string')
+    rarity!: ResourceRarity
+    @Struct.field('string')
+    color!: string
 }
 
-@Struct.type('GoodPrice')
-export class GoodPrice extends Struct {
+@Struct.type('ItemPrice')
+export class ItemPrice extends Struct {
     @Struct.field(UInt16)
     id!: UInt16
-    @Struct.field(Good)
-    good!: Good
+    @Struct.field(Item)
+    item!: Item
     @Struct.field(UInt32)
     price!: UInt32
     @Struct.field(UInt16)

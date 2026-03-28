@@ -24,8 +24,8 @@ export class InventoryAccessor {
         return this.items.reduce((sum, c) => sum.adding(c.totalCost), UInt64.from(0))
     }
 
-    forGood(goodId: UInt64Type): EntityInventory | undefined {
-        return this.items.find((c) => c.good_id.equals(goodId))
+    forItem(goodId: UInt64Type): EntityInventory | undefined {
+        return this.items.find((c) => c.item_id.equals(goodId))
     }
 
     get sellable(): EntityInventory[] {

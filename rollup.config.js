@@ -16,7 +16,7 @@ export default [
             sourcemap: true,
             exports: 'named',
         },
-        plugins: [json(), typescript({target: 'es6'}), cleanup({extensions: ['js', 'ts']})],
+        plugins: [json(), typescript({target: 'es2020'}), cleanup({extensions: ['js', 'ts']})],
         external,
     },
     {

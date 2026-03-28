@@ -3,8 +3,7 @@ import {Checksum256} from '@wharfkit/antelope'
 import Shipload, {
     deriveLocation,
     deriveLocationEpoch,
-    deriveLocationMixture,
-    deriveLocationStatic,
+deriveLocationStatic,
     getSystemName,
     LocationType,
     PRECISION,
@@ -181,92 +180,5 @@ suite('deriveLocation', function () {
         const epochOnly = deriveLocationEpoch(testEpochSeed, coords)
         assert.equal(derived.epoch_props.active, epochOnly.active)
         assert.equal(derived.epoch_props.seed0.toNumber(), epochOnly.seed0.toNumber())
-    })
-})
-
-suite('deriveLocationMixture', function () {
-    test('NEBULA returns hydrogen only', function () {
-        for (let x = 0; x < 100; x++) {
-            for (let y = 0; y < 100; y++) {
-                const location = deriveLocation(testGameSeed, testEpochSeed, {x, y})
-                if (location.static_props.type.toNumber() === LocationType.NEBULA) {
-                    const mixture = deriveLocationMixture(location, testEpochSeed)
-                    assert.equal(mixture.components.length, 1)
-                    assert.equal(mixture.components[0].good_id.toNumber(), 1)
-                    assert.equal(mixture.components[0].purity.toNumber(), PRECISION)
-                    return
-                }
-            }
-        }
-        assert.fail('Could not find NEBULA location in search space')
-    })
-
-    test('ASTEROID returns iron and copper mix', function () {
-        for (let x = 0; x < 100; x++) {
-            for (let y = 0; y < 100; y++) {
-                const location = deriveLocation(testGameSeed, testEpochSeed, {x, y})
-                if (location.static_props.type.toNumber() === LocationType.ASTEROID) {
-                    const mixture = deriveLocationMixture(location, testEpochSeed)
-                    assert.equal(mixture.components.length, 2)
-                    const goodIds = mixture.components.map((c) => c.good_id.toNumber())
-                    assert.include(goodIds, 26)
-                    assert.include(goodIds, 29)
-                    const totalPurity = mixture.components.reduce(
-                        (sum, c) => sum + c.purity.toNumber(),
-                        0
-                    )
-                    assert.equal(totalPurity, PRECISION)
-                    return
-                }
-            }
-        }
-        assert.fail('Could not find ASTEROID location in search space')
-    })
-
-    test('PLANET returns empty components', function () {
-        for (let x = 0; x < 100; x++) {
-            for (let y = 0; y < 100; y++) {
-                const location = deriveLocation(testGameSeed, testEpochSeed, {x, y})
-                if (location.static_props.type.toNumber() === LocationType.PLANET) {
-                    const mixture = deriveLocationMixture(location, testEpochSeed)
-                    assert.equal(mixture.components.length, 0)
-                    return
-                }
-            }
-        }
-        assert.fail('Could not find PLANET location in search space')
-    })
-
-    test('EMPTY returns empty components', function () {
-        for (let x = 0; x < 100; x++) {
-            for (let y = 0; y < 100; y++) {
-                const location = deriveLocation(testGameSeed, testEpochSeed, {x, y})
-                if (location.static_props.type.toNumber() === LocationType.EMPTY) {
-                    const mixture = deriveLocationMixture(location, testEpochSeed)
-                    assert.equal(mixture.components.length, 0)
-                    return
-                }
-            }
-        }
-        assert.fail('Could not find EMPTY location in search space')
-    })
-
-    test('ASTEROID purity is within expected range', function () {
-        for (let x = 0; x < 100; x++) {
-            for (let y = 0; y < 100; y++) {
-                const location = deriveLocation(testGameSeed, testEpochSeed, {x, y})
-                if (location.static_props.type.toNumber() === LocationType.ASTEROID) {
-                    const mixture = deriveLocationMixture(location, testEpochSeed)
-                    const primaryPurity = Math.max(
-                        mixture.components[0].purity.toNumber(),
-                        mixture.components[1].purity.toNumber()
-                    )
-                    assert.isAtLeast(primaryPurity, 5000)
-                    assert.isAtMost(primaryPurity, 8000)
-                    return
-                }
-            }
-        }
-        assert.fail('Could not find ASTEROID location in search space')
     })
 })

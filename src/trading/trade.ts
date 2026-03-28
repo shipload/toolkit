@@ -1,7 +1,7 @@
 import {Int64, Int64Type, UInt32, UInt32Type, UInt64} from '@wharfkit/antelope'
 import {Ship} from '../entities/ship'
 import {Player} from '../entities/player'
-import {GoodPrice} from '../types'
+import {ItemPrice} from '../types'
 
 /**
  * Trade calculation result
@@ -53,10 +53,10 @@ export function calculateUpdatedCargoCost(
 export function calculateMaxTradeQuantity(
     ship: Ship,
     player: Player,
-    goodPrice: GoodPrice
+    goodPrice: ItemPrice
 ): TradeCalculation {
     const pricePerUnit = UInt32.from(goodPrice.price)
-    const massPerUnit = UInt32.from(goodPrice.good.mass)
+    const massPerUnit = UInt32.from(goodPrice.item.mass)
 
     const spaceForQuantity = ship.availableCapacity.dividing(massPerUnit)
     const affordableQuantity = player.balance.dividing(pricePerUnit)
@@ -128,21 +128,21 @@ export function calculateProfitPerSecond(profit: Int64Type, travelTimeSeconds: U
 /**
  * Find the best good to trade between two locations
  */
-export function findBestGoodToTrade(
+export function findBestItemToTrade(
     ship: Ship,
     player: Player,
-    originPrices: GoodPrice[],
-    destPrices: GoodPrice[],
+    originPrices: ItemPrice[],
+    destPrices: ItemPrice[],
     travelTimeSeconds: UInt32Type
 ): {
-    good: GoodPrice
+    item: ItemPrice
     quantity: number
     profit: number
     profitPerSecond: number
     margin: number
 } | null {
     let bestTrade: {
-        good: GoodPrice
+        item: ItemPrice
         quantity: number
         profit: number
         profitPerSecond: number
@@ -169,7 +169,7 @@ export function findBestGoodToTrade(
         if (profitPerSecond > bestProfitPerSecond) {
             bestProfitPerSecond = profitPerSecond
             bestTrade = {
-                good: originPrice,
+                item: originPrice,
                 quantity: calc.maxQuantity,
                 profit: Number(tradeResult.profit),
                 profitPerSecond,

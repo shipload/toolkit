@@ -5,7 +5,7 @@ import {CoordinatesType, EntityType, EntityTypeName} from '../types'
 import {ServerContract} from '../contracts'
 
 interface SellableCargo {
-    good_id: {toNumber(): number} | number
+    item_id: {toNumber(): number} | number
     quantity: {toNumber(): number} | number
     hasCargo: boolean
 }
@@ -86,35 +86,35 @@ export class ActionsManager extends BaseManager {
             source_id: UInt64.from(sourceId),
             dest_type: destType,
             dest_id: UInt64.from(destId),
-            good_id: UInt16.from(goodId),
+            item_id: UInt16.from(goodId),
             quantity: UInt32.from(quantity),
         })
     }
 
-    buyGoods(
+    buyItems(
         entityId: UInt64Type,
         goodId: UInt64Type,
         quantity: UInt64Type,
         entityType: EntityTypeName = EntityType.SHIP
     ): Action {
-        return this.server.action('buygoods', {
+        return this.server.action('buyitems', {
             entity_type: entityType,
             id: UInt64.from(entityId),
-            good_id: UInt16.from(goodId),
+            item_id: UInt16.from(goodId),
             quantity: UInt32.from(quantity),
         })
     }
 
-    sellGoods(
+    sellItems(
         entityId: UInt64Type,
         goodId: UInt64Type,
         quantity: UInt64Type,
         entityType: EntityTypeName = EntityType.SHIP
     ): Action {
-        return this.server.action('sellgoods', {
+        return this.server.action('sellitems', {
             entity_type: entityType,
             id: UInt64.from(entityId),
-            good_id: UInt16.from(goodId),
+            item_id: UInt16.from(goodId),
             quantity: UInt32.from(quantity),
         })
     }
@@ -175,6 +175,18 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    warp(shipId: UInt64Type, destination: CoordinatesType): Action {
+        const x = Int64.from(destination.x)
+        const y = Int64.from(destination.y)
+
+        return this.server.action('warp', {
+            entity_type: EntityType.SHIP,
+            id: UInt64.from(shipId),
+            x,
+            y,
+        })
+    }
+
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
     }
@@ -195,6 +207,6 @@ export class ActionsManager extends BaseManager {
 
         return shipCargo
             .filter((c) => c.hasCargo)
-            .map((c) => this.sellGoods(shipId, c.good_id, c.quantity, EntityType.SHIP))
+            .map((c) => this.sellItems(shipId, c.item_id, c.quantity, EntityType.SHIP))
     }
 }

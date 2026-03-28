@@ -1,6 +1,6 @@
 import {Checksum256, Checksum256Type, UInt16, UInt16Type, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Coordinates, CoordinatesType, Distance, GoodPrice, LocationType} from '../types'
+import {Coordinates, CoordinatesType, Distance, ItemPrice, LocationType} from '../types'
 import {getLocationType, hasSystem, isExtractableLocation} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 
@@ -10,7 +10,7 @@ import {findNearbyPlanets} from '../travel/travel'
  */
 export class Location {
     readonly coordinates: Coordinates
-    private _marketPrices?: GoodPrice[]
+    private _marketPrices?: ItemPrice[]
     private _gameSeed?: Checksum256
     private _hasSystem?: boolean
     private _locationRows?: ServerContract.Types.supply_row[]
@@ -56,21 +56,21 @@ export class Location {
     /**
      * Set cached market prices for this location
      */
-    setMarketPrices(prices: GoodPrice[]): void {
+    setMarketPrices(prices: ItemPrice[]): void {
         this._marketPrices = prices
     }
 
     /**
      * Get cached market prices (returns undefined if not cached)
      */
-    get marketPrices(): GoodPrice[] | undefined {
+    get marketPrices(): ItemPrice[] | undefined {
         return this._marketPrices
     }
 
     /**
      * Get price for a specific good (from cache)
      */
-    getPrice(goodId: UInt16Type): GoodPrice | undefined {
+    getPrice(goodId: UInt16Type): ItemPrice | undefined {
         if (!this._marketPrices) return undefined
         return this._marketPrices.find((p) => p.id.equals(goodId))
     }
@@ -112,7 +112,7 @@ export class Location {
     getSupply(goodId: UInt16Type): UInt16 | undefined {
         if (!this._locationRows) return undefined
         const row = this._locationRows.find(
-            (r) => r.good_id.equals(goodId) && this._epoch && r.epoch.equals(this._epoch)
+            (r) => r.item_id.equals(goodId) && this._epoch && r.epoch.equals(this._epoch)
         )
         return row ? row.supply : undefined
     }
@@ -199,9 +199,9 @@ export class Location {
                                 : UInt16.from(0)
                             : currentSupply.adding(quantityDelta)
 
-                    return GoodPrice.from({
+                    return ItemPrice.from({
                         id: price.id,
-                        good: price.good,
+                        item: price.item,
                         price: price.price,
                         supply: newSupply,
                     })
@@ -213,7 +213,7 @@ export class Location {
         // Copy location rows if cached
         if (this._locationRows && this._epoch) {
             newLocation._locationRows = this._locationRows.map((row) => {
-                if (row.good_id.equals(goodId) && row.epoch.equals(this._epoch!)) {
+                if (row.item_id.equals(goodId) && row.epoch.equals(this._epoch!)) {
                     const currentSupply = UInt16.from(row.supply)
                     const delta = UInt16.from(Math.abs(quantityDelta))
                     const newSupply =
@@ -227,7 +227,7 @@ export class Location {
                         id: row.id,
                         coordinates: row.coordinates,
                         epoch: row.epoch,
-                        good_id: row.good_id,
+                        item_id: row.item_id,
                         supply: newSupply,
                     })
                 }

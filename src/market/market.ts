@@ -1,5 +1,5 @@
-import {CoordinatesType, GoodPrice} from '../types'
-import {getGood, getGoods} from './goods'
+import {CoordinatesType, ItemPrice} from '../types'
+import {getItem, getItems} from './items'
 import {Checksum256Type, UInt16, UInt16Type, UInt32} from '@wharfkit/antelope'
 import {roll} from './rolls'
 import {ServerContract} from '../contracts'
@@ -174,9 +174,9 @@ export function marketPrice(
     goodId: UInt16Type,
     gameSeed: Checksum256Type,
     state: ServerContract.Types.state_row
-): GoodPrice {
-    const good = getGood(goodId)
-    let price = Number(good.base_price)
+): ItemPrice {
+    const item = getItem(goodId)
+    let price = Number(item.base_price)
 
     // Rarity multiplier of the deal (changes with epoch)
     // Large impact range on price, from 0.285x to 3.0x
@@ -191,9 +191,9 @@ export function marketPrice(
     // Determine the current supply of the good at the location
     const supply = getSupply(gameSeed, state, location, goodId)
 
-    return GoodPrice.from({
+    return ItemPrice.from({
         id: goodId,
-        good,
+        item,
         price: UInt32.from(price),
         supply: UInt16.from(supply),
     })
@@ -203,6 +203,6 @@ export function marketPrices(
     location: ServerContract.ActionParams.Type.coordinates,
     gameSeed: Checksum256Type,
     state: ServerContract.Types.state_row
-): GoodPrice[] {
-    return getGoods().map((good) => marketPrice(location, good.id, gameSeed, state))
+): ItemPrice[] {
+    return getItems().map((item) => marketPrice(location, item.id, gameSeed, state))
 }

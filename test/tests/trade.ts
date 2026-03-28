@@ -9,13 +9,13 @@ import {
     calculateTradeProfit,
     calculateUpdatedCargoCost,
     Coordinates,
-    findBestGoodToTrade,
+    findBestItemToTrade,
     isProfitable,
     makeShip,
     ServerContract,
 } from '$lib'
 import {Player} from 'src/player'
-import {Good, GoodPrice, PRECISION} from 'src/types'
+import {Item, ItemPrice, PRECISION} from 'src/types'
 import {assertEq} from '../helpers'
 
 suite('trade', function () {
@@ -287,17 +287,20 @@ suite('trade', function () {
             })
         }
 
-        function createGoodPrice(id: number, price: number, mass: number) {
-            const good = Good.from({
+        function createItemPrice(id: number, price: number, mass: number) {
+            const item = Item.from({
                 id: UInt16.from(id),
-                name: `Good ${id}`,
-                description: `Description for good ${id}`,
+                name: `Item ${id}`,
+                description: `Description for item ${id}`,
                 base_price: UInt64.from(price),
                 mass: UInt64.from(mass).multiplying(PRECISION),
+                category: 'metal',
+                rarity: 'common',
+                color: '#000000',
             })
-            return GoodPrice.from({
+            return ItemPrice.from({
                 id: UInt16.from(id),
-                good,
+                item,
                 price: UInt64.from(price),
                 supply: UInt64.from(1000),
             })
@@ -306,9 +309,9 @@ suite('trade', function () {
         test('calculates max quantity based on balance and space', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(10000)
-            const goodPrice = createGoodPrice(1, 100, 35000)
+            const itemPrice = createItemPrice(1, 100, 35000)
 
-            const result = calculateMaxTradeQuantity(ship, player, goodPrice)
+            const result = calculateMaxTradeQuantity(ship, player, itemPrice)
 
             assert.equal(result.affordableQuantity, 100)
             assert.isAbove(result.spaceForQuantity, 0)
@@ -319,9 +322,9 @@ suite('trade', function () {
         test('limits by balance when low funds', function () {
             const ship = makeTestShip(4000000000)
             const player = makeTestPlayer(500)
-            const goodPrice = createGoodPrice(1, 100, 35000)
+            const itemPrice = createItemPrice(1, 100, 35000)
 
-            const result = calculateMaxTradeQuantity(ship, player, goodPrice)
+            const result = calculateMaxTradeQuantity(ship, player, itemPrice)
 
             assert.equal(result.affordableQuantity, 5)
             assert.equal(result.maxQuantity, 5)
@@ -330,9 +333,9 @@ suite('trade', function () {
         test('limits by space when ship full', function () {
             const ship = makeTestShip(510000)
             const player = makeTestPlayer(1000000)
-            const goodPrice = createGoodPrice(1, 100, 35000)
+            const itemPrice = createItemPrice(1, 100, 35000)
 
-            const result = calculateMaxTradeQuantity(ship, player, goodPrice)
+            const result = calculateMaxTradeQuantity(ship, player, itemPrice)
 
             assert.isAtMost(result.maxQuantity, result.spaceForQuantity)
             assert.isBelow(result.maxQuantity, result.affordableQuantity)
@@ -341,16 +344,16 @@ suite('trade', function () {
         test('calculates correct total cost and mass', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(10000)
-            const goodPrice = createGoodPrice(1, 100, 35000)
+            const itemPrice = createItemPrice(1, 100, 35000)
 
-            const result = calculateMaxTradeQuantity(ship, player, goodPrice)
+            const result = calculateMaxTradeQuantity(ship, player, itemPrice)
 
             assert.equal(result.totalCost, result.maxQuantity * 100)
             assert.equal(result.totalMass.toNumber(), result.maxQuantity * 35000 * PRECISION)
         })
     })
 
-    suite('findBestGoodToTrade', function () {
+    suite('findBestItemToTrade', function () {
         function makeTestShip(capacity: number) {
             return makeShip({
                 id: 1,
@@ -386,17 +389,20 @@ suite('trade', function () {
             })
         }
 
-        function createGoodPrice(id: number, price: number, mass: number) {
-            const good = Good.from({
+        function createItemPrice(id: number, price: number, mass: number) {
+            const item = Item.from({
                 id: UInt16.from(id),
-                name: `Good ${id}`,
-                description: `Description for good ${id}`,
+                name: `Item ${id}`,
+                description: `Description for item ${id}`,
                 base_price: UInt64.from(price),
                 mass: UInt64.from(mass).multiplying(PRECISION),
+                category: 'metal',
+                rarity: 'common',
+                color: '#000000',
             })
-            return GoodPrice.from({
+            return ItemPrice.from({
                 id: UInt16.from(id),
-                good,
+                item,
                 price: UInt64.from(price),
                 supply: UInt64.from(1000),
             })
@@ -406,10 +412,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(100000)
 
-            const originPrices = [createGoodPrice(1, 100, 35000), createGoodPrice(3, 200, 60000)]
-            const destPrices = [createGoodPrice(1, 120, 35000), createGoodPrice(3, 300, 60000)]
+            const originPrices = [createItemPrice(1, 100, 35000), createItemPrice(3, 200, 60000)]
+            const destPrices = [createItemPrice(1, 120, 35000), createItemPrice(3, 300, 60000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 100)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 100)
 
             assert.isNotNull(result)
             assert.isAbove(result!.profit, 0)
@@ -420,10 +426,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(100000)
 
-            const originPrices = [createGoodPrice(1, 100, 35000)]
-            const destPrices = [createGoodPrice(1, 80, 35000)]
+            const originPrices = [createItemPrice(1, 100, 35000)]
+            const destPrices = [createItemPrice(1, 80, 35000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 100)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 100)
 
             assert.isNull(result)
         })
@@ -432,10 +438,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(100000)
 
-            const originPrices = [createGoodPrice(1, 100, 35000)]
-            const destPrices = [createGoodPrice(3, 200, 60000)]
+            const originPrices = [createItemPrice(1, 100, 35000)]
+            const destPrices = [createItemPrice(3, 200, 60000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 100)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 100)
 
             assert.isNull(result)
         })
@@ -444,10 +450,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(10)
 
-            const originPrices = [createGoodPrice(1, 100, 35000)]
-            const destPrices = [createGoodPrice(1, 200, 35000)]
+            const originPrices = [createItemPrice(1, 100, 35000)]
+            const destPrices = [createItemPrice(1, 200, 35000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 100)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 100)
 
             assert.isNull(result)
         })
@@ -456,10 +462,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(100000)
 
-            const originPrices = [createGoodPrice(1, 100, 35000), createGoodPrice(3, 50, 60000)]
-            const destPrices = [createGoodPrice(1, 150, 35000), createGoodPrice(3, 100, 60000)]
+            const originPrices = [createItemPrice(1, 100, 35000), createItemPrice(3, 50, 60000)]
+            const destPrices = [createItemPrice(1, 150, 35000), createItemPrice(3, 100, 60000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 100)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 100)
 
             assert.isNotNull(result)
             assert.isAbove(result!.profitPerSecond, 0)
@@ -469,10 +475,10 @@ suite('trade', function () {
             const ship = makeTestShip(1000000000)
             const player = makeTestPlayer(100000)
 
-            const originPrices = [createGoodPrice(1, 100, 35000)]
-            const destPrices = [createGoodPrice(1, 150, 35000)]
+            const originPrices = [createItemPrice(1, 100, 35000)]
+            const destPrices = [createItemPrice(1, 150, 35000)]
 
-            const result = findBestGoodToTrade(ship, player, originPrices, destPrices, 0)
+            const result = findBestItemToTrade(ship, player, originPrices, destPrices, 0)
 
             assert.isNull(result)
         })

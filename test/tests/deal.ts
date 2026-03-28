@@ -2,7 +2,7 @@ import {assert} from 'chai'
 import {Int64, UInt16, UInt64} from '@wharfkit/antelope'
 import {findBestDeal, findDealsForShip, makeShip, ServerContract} from '$lib'
 import {Location} from 'src/location'
-import {Coordinates, Good, GoodPrice, PRECISION} from 'src/types'
+import {Coordinates, Item, ItemPrice, PRECISION} from 'src/types'
 
 function makeTestShip(overrides: {capacity?: number; hullmass?: number} = {}) {
     return makeShip({
@@ -34,17 +34,20 @@ function createLocation(x: number, y: number) {
     return Location.from({x: Int64.from(x), y: Int64.from(y)})
 }
 
-function createGoodPrice(id: number, price: number, supply: number) {
-    const good = Good.from({
+function createItemPrice(id: number, price: number, supply: number) {
+    const item = Item.from({
         id: UInt16.from(id),
-        name: `Good ${id}`,
-        description: `Description for good ${id}`,
+        name: `Item ${id}`,
+        description: `Description for item ${id}`,
         base_price: UInt64.from(price),
         mass: UInt64.from(35000).multiplying(PRECISION),
+        category: 'metal',
+        rarity: 'common',
+        color: '#000000',
     })
-    return GoodPrice.from({
+    return ItemPrice.from({
         id: UInt16.from(id),
-        good,
+        item,
         price: UInt64.from(price),
         supply: UInt64.from(supply),
     })
@@ -60,12 +63,12 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
                 if (x === 5) {
-                    return [createGoodPrice(1, 150, 100)]
+                    return [createItemPrice(1, 150, 100)]
                 }
-                return [createGoodPrice(1, 200, 100)]
+                return [createItemPrice(1, 200, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -89,9 +92,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(1, 50, 100)]
+                return [createItemPrice(1, 50, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -113,9 +116,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(1, 101, 100)]
+                return [createItemPrice(1, 101, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -140,9 +143,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(1, 105, 100)]
+                return [createItemPrice(1, 105, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -167,9 +170,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 500)]
+                    return [createItemPrice(1, 100, 500)]
                 }
-                return [createGoodPrice(1, 200, 1000)]
+                return [createItemPrice(1, 200, 1000)]
             }
 
             const deals = await findDealsForShip(
@@ -198,9 +201,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 100), createGoodPrice(3, 200, 100)]
+                    return [createItemPrice(1, 100, 100), createItemPrice(3, 200, 100)]
                 }
-                return [createGoodPrice(1, 200, 100), createGoodPrice(3, 400, 100)]
+                return [createItemPrice(1, 200, 100), createItemPrice(3, 400, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -224,12 +227,12 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 100)]
+                    return [createItemPrice(1, 100, 100)]
                 }
                 if (x === 5) {
-                    return [createGoodPrice(1, 150, 100)]
+                    return [createItemPrice(1, 150, 100)]
                 }
-                return [createGoodPrice(1, 200, 100)]
+                return [createItemPrice(1, 200, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -252,9 +255,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 0)]
+                    return [createItemPrice(1, 100, 0)]
                 }
-                return [createGoodPrice(1, 200, 100)]
+                return [createItemPrice(1, 200, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -275,9 +278,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(3, 200, 100)]
+                return [createItemPrice(3, 200, 100)]
             }
 
             const deals = await findDealsForShip(
@@ -298,9 +301,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 1000)]
+                    return [createItemPrice(1, 100, 1000)]
                 }
-                return [createGoodPrice(1, 200, 1000)]
+                return [createItemPrice(1, 200, 1000)]
             }
 
             const deals = await findDealsForShip(
@@ -331,12 +334,12 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 100)]
+                    return [createItemPrice(1, 100, 100)]
                 }
                 if (x === 5) {
-                    return [createGoodPrice(1, 150, 100)]
+                    return [createItemPrice(1, 150, 100)]
                 }
-                return [createGoodPrice(1, 300, 100)]
+                return [createItemPrice(1, 300, 100)]
             }
 
             const deal = await findBestDeal(
@@ -358,9 +361,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(1, 50, 100)]
+                return [createItemPrice(1, 50, 100)]
             }
 
             const deal = await findBestDeal(
@@ -381,9 +384,9 @@ suite('deal', function () {
             const getMarketPrices = async (loc: Coordinates) => {
                 const x = Number(loc.x)
                 if (x === 0) {
-                    return [createGoodPrice(1, 100, 50)]
+                    return [createItemPrice(1, 100, 50)]
                 }
-                return [createGoodPrice(1, 105, 100)]
+                return [createItemPrice(1, 105, 100)]
             }
 
             const deal = await findBestDeal(

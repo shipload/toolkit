@@ -8,13 +8,13 @@ import {
     CollectAnalysisCallbacks,
     CollectAnalysisOptions,
 } from '../trading/collect'
-import {Coordinates, GoodPrice} from '../types'
+import {Coordinates, ItemPrice} from '../types'
 import {Location, toLocation} from '../entities/location'
 import {findNearbyPlanets} from '../travel/travel'
 import {getCurrentEpoch} from '../scheduling/epoch'
 
 export class TradesManager extends BaseManager {
-    private priceCache = new Map<string, GoodPrice[]>()
+    private priceCache = new Map<string, ItemPrice[]>()
     private priceCacheEpoch: UInt64 | undefined
 
     private makePriceCacheKey(location: Coordinates): string {
@@ -39,7 +39,7 @@ export class TradesManager extends BaseManager {
             return nearby.map((d) => toLocation(d.destination))
         }
 
-        const getMarketPrices = async (location: Coordinates): Promise<GoodPrice[]> => {
+        const getMarketPrices = async (location: Coordinates): Promise<ItemPrice[]> => {
             const cacheKey = this.makePriceCacheKey(location)
             const cached = this.priceCache.get(cacheKey)
             if (cached) {
@@ -53,9 +53,9 @@ export class TradesManager extends BaseManager {
                 const actualSupply = locationWithSupply.getSupply(price.id)
 
                 if (actualSupply !== undefined) {
-                    return GoodPrice.from({
+                    return ItemPrice.from({
                         id: price.id,
-                        good: price.good,
+                        item: price.item,
                         price: price.price,
                         supply: actualSupply,
                     })

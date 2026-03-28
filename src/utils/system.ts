@@ -1,6 +1,6 @@
 import {Checksum256, Checksum256Type, UInt8} from '@wharfkit/antelope'
 import {hash512} from './hash'
-import {Coordinates, CoordinatesType, LocationType, PRECISION} from '../types'
+import {Coordinates, CoordinatesType, LocationType} from '../types'
 import {ServerContract} from '../contracts'
 import syllables from '../data/syllables.json'
 
@@ -28,7 +28,7 @@ export function getLocationType(
 }
 
 export function isExtractableLocation(locationType: LocationType): boolean {
-    return locationType === LocationType.ASTEROID || locationType === LocationType.NEBULA
+    return locationType !== LocationType.EMPTY
 }
 
 export function getSystemName(gameSeed: Checksum256Type, location: CoordinatesType): string {
@@ -81,7 +81,11 @@ export function deriveLocationStatic(
         loc.type = UInt8.from(LocationType.NEBULA)
     }
 
-    loc.subtype = UInt8.from(hashResult.array[2])
+    loc.subtype = UInt8.from(
+        Number(loc.type) === LocationType.PLANET
+            ? hashResult.array[2] % 6
+            : hashResult.array[2]
+    )
     loc.seed0 = UInt8.from(hashResult.array[3])
     loc.seed1 = UInt8.from(hashResult.array[4])
 
@@ -113,43 +117,4 @@ export function deriveLocation(
         static_props: deriveLocationStatic(gameSeed, coordinates),
         epoch_props: deriveLocationEpoch(epochSeed, coordinates),
     })
-}
-
-export function deriveLocationMixture(
-    location: ServerContract.Types.location_derived,
-    epochSeed: Checksum256Type
-): ServerContract.Types.mixture_info {
-    const locationType = location.static_props.type.toNumber()
-
-    if (locationType === LocationType.NEBULA) {
-        return ServerContract.Types.mixture_info.from({
-            components: [{good_id: 1, purity: PRECISION}],
-        })
-    }
-
-    if (locationType === LocationType.ASTEROID) {
-        const seed = Checksum256.from(epochSeed)
-        const coords = location.static_props.coords
-        const str = `mixture-${coords.x}-${coords.y}`
-        const hashResult = hash512(seed, str)
-
-        const ironPrimary = location.static_props.subtype.toNumber() % 2 === 0
-        const purityRange = 0.3
-        const purityRoll = hashResult.array[0] / 255
-        const primaryPurity = 0.5 + purityRoll * purityRange
-
-        const primaryId = ironPrimary ? 26 : 29
-        const secondaryId = ironPrimary ? 29 : 26
-        const primaryAmt = Math.floor(primaryPurity * PRECISION)
-        const secondaryAmt = PRECISION - primaryAmt
-
-        return ServerContract.Types.mixture_info.from({
-            components: [
-                {good_id: primaryId, purity: primaryAmt},
-                {good_id: secondaryId, purity: secondaryAmt},
-            ],
-        })
-    }
-
-    return ServerContract.Types.mixture_info.from({components: []})
 }

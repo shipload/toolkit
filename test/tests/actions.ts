@@ -51,18 +51,18 @@ suite('ActionsManager', function () {
         })
     })
 
-    suite('buyGoods', function () {
-        test('creates buygoods action', function () {
-            const action = shipload.actions.buyGoods(1, 3, 10)
-            assert.equal(action.name.toString(), 'buygoods')
+    suite('buyItems', function () {
+        test('creates buyitems action', function () {
+            const action = shipload.actions.buyItems(1, 3, 10)
+            assert.equal(action.name.toString(), 'buyitems')
             assert.isDefined(action.data)
         })
     })
 
-    suite('sellGoods', function () {
-        test('creates sellgoods action', function () {
-            const action = shipload.actions.sellGoods(1, 3, 10)
-            assert.equal(action.name.toString(), 'sellgoods')
+    suite('sellItems', function () {
+        test('creates sellitems action', function () {
+            const action = shipload.actions.sellItems(1, 3, 10)
+            assert.equal(action.name.toString(), 'sellitems')
             assert.isDefined(action.data)
         })
     })
@@ -99,6 +99,20 @@ suite('ActionsManager', function () {
         })
     })
 
+    suite('warp', function () {
+        test('creates warp action with number coordinates', function () {
+            const action = shipload.actions.warp(1, {x: 5, y: 10})
+            assert.equal(action.name.toString(), 'warp')
+            assert.isDefined(action.data)
+        })
+
+        test('creates warp action with Int64 coordinates', function () {
+            const action = shipload.actions.warp(1, {x: Int64.from(5), y: Int64.from(10)})
+            assert.equal(action.name.toString(), 'warp')
+            assert.isDefined(action.data)
+        })
+    })
+
     suite('sellAllCargo', function () {
         function createMockShip(cargo?: ServerContract.Types.cargo_item[]) {
             return makeShip({
@@ -128,7 +142,7 @@ suite('ActionsManager', function () {
 
         function createMockCargo(goodId: number, quantity: number) {
             return ServerContract.Types.cargo_item.from({
-                good_id: goodId,
+                item_id: goodId,
                 quantity,
                 unit_cost: 50,
             })
@@ -141,7 +155,7 @@ suite('ActionsManager', function () {
 
             assert.lengthOf(actions, 2)
             actions.forEach((action) => {
-                assert.equal(action.name.toString(), 'sellgoods')
+                assert.equal(action.name.toString(), 'sellitems')
             })
         })
 

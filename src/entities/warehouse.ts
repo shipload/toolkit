@@ -79,8 +79,8 @@ export class Warehouse extends ServerContract.Types.entity_info {
         return this.totalCargoMass.gte(this.maxCapacity)
     }
 
-    getCargoForGood(goodId: UInt64Type): EntityInventory | undefined {
-        return this.inv.forGood(goodId)
+    getCargoForItem(goodId: UInt64Type): EntityInventory | undefined {
+        return this.inv.forItem(goodId)
     }
 
     get orbitalAltitude(): number {

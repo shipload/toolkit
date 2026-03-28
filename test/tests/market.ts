@@ -10,7 +10,7 @@ import {
     Rarities,
 } from 'src/market'
 import {ServerContract} from 'src/contracts'
-import {getGood, getGoods} from 'src/goods'
+import {getItem, getItems} from 'src/items'
 
 function createMockState(epoch: number, ships: number, seedValue = 'testseed123') {
     const seed = Checksum256.hash(Bytes.from(seedValue, 'utf8'))
@@ -67,7 +67,7 @@ suite('market', function () {
 
         test('different good_ids produce different rarities', function () {
             const state = createMockState(1, 10)
-            const goods = getGoods()
+            const goods = getItems()
             const rarities = new Set<Rarities>()
 
             for (let loc = 0; loc < 100; loc++) {
@@ -189,7 +189,7 @@ suite('market', function () {
 
         test('supply varies by good_id', function () {
             const state = createMockState(1, 10)
-            const goods = getGoods()
+            const goods = getItems()
             const supplies = new Set<number>()
 
             for (const good of goods) {
@@ -234,12 +234,12 @@ suite('market', function () {
     })
 
     suite('marketPrice', function () {
-        test('returns GoodPrice with correct structure', function () {
+        test('returns ItemPrice with correct structure', function () {
             const state = createMockState(1, 10)
             const price = marketPrice(location, 1, gameSeed, state)
 
             assert.property(price, 'id')
-            assert.property(price, 'good')
+            assert.property(price, 'item')
             assert.property(price, 'price')
             assert.property(price, 'supply')
         })
@@ -254,15 +254,15 @@ suite('market', function () {
         test('returns correct good for good_id', function () {
             const state = createMockState(1, 10)
             const price = marketPrice(location, 26, gameSeed, state)
-            const expectedGood = getGood(26)
+            const expectedGood = getItem(26)
 
-            assert.equal(price.good.name, expectedGood.name)
-            assert.isTrue(price.good.id.equals(expectedGood.id))
+            assert.equal(price.item.name, expectedGood.name)
+            assert.isTrue(price.item.id.equals(expectedGood.id))
         })
 
         test('price is influenced by rarity and location multipliers', function () {
             const state = createMockState(1, 10)
-            const good = getGood(1)
+            const good = getItem(1)
             const basePrice = Number(good.base_price)
             const price = marketPrice(location, 1, gameSeed, state)
 
@@ -287,12 +287,12 @@ suite('market', function () {
     })
 
     suite('marketPrices', function () {
-        test('returns array of GoodPrice for all goods', function () {
+        test('returns array of ItemPrice for all items', function () {
             const state = createMockState(1, 10)
             const prices = marketPrices(location, gameSeed, state)
 
             assert.isArray(prices)
-            assert.equal(prices.length, getGoods().length)
+            assert.equal(prices.length, getItems().length)
         })
 
         test('each price corresponds to a different good', function () {
@@ -309,7 +309,7 @@ suite('market', function () {
             const prices = marketPrices(location, gameSeed, state)
 
             prices.forEach((p) => {
-                assert.isTrue(p.price.toNumber() > 0, `Price for ${p.good.name} should be positive`)
+                assert.isTrue(p.price.toNumber() > 0, `Price for ${p.item.name} should be positive`)
             })
         })
     })

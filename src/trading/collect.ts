@@ -1,7 +1,7 @@
 import {Checksum256Type, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {Ship} from '../entities/ship'
 import {Location} from '../entities/location'
-import {Coordinates, GoodPrice, ShipLike} from '../types'
+import {Coordinates, ItemPrice, ShipLike} from '../types'
 import {Deal, findDealsForShip} from './deal'
 
 import {EntityInventory} from '../entities/entity-inventory'
@@ -11,7 +11,7 @@ import {
     EstimatedTravelTime,
     estimateTravelTime,
 } from '../travel/travel'
-import {getGood, getGoods} from '../market/goods'
+import {getItem, getItems} from '../market/items'
 import {getRarity, Rarities} from '../market/market'
 import {ServerContract} from '../contracts'
 
@@ -23,7 +23,7 @@ function calculateCargoMass(cargo: EntityInventory[]): UInt32 {
     let mass = UInt32.from(0)
     for (const c of cargo) {
         if (UInt64.from(c.quantity).gt(UInt64.zero)) {
-            const goodMass = getGood(c.good_id).mass
+            const goodMass = getItem(c.item_id).mass
             mass = mass.adding(goodMass.multiplying(c.quantity))
         }
     }
@@ -102,7 +102,7 @@ export interface CollectOption {
     /** Detailed breakdown of travel time components */
     travelTimeBreakdown?: EstimatedTravelTime
     /** Info about a discounted good at the destination (for explore options) */
-    discountedGood?: DiscountedGoodInfo
+    discountedGood?: DiscountedItemInfo
     /** Top potential deals available at destination (for explore options) */
     potentialDeals?: PotentialDeal[]
     /** Details of cargo being sold (if selling cargo) */
@@ -190,7 +190,7 @@ export function analyzeCargoSale(
     for (const c of cargo) {
         if (UInt64.from(c.quantity).equals(UInt64.zero)) continue
 
-        const goodId = Number(c.good_id)
+        const goodId = Number(c.item_id)
         const salePrice = prices.get(goodId)
 
         if (salePrice) {
@@ -219,7 +219,7 @@ export function buildCargoSaleItems(
     for (const c of cargo) {
         if (UInt64.from(c.quantity).equals(UInt64.zero)) continue
 
-        const goodId = Number(c.good_id)
+        const goodId = Number(c.item_id)
         const salePrice = prices.get(goodId)
         const pricePerUnit = salePrice ? UInt32.from(salePrice) : UInt32.zero
         const revenue = UInt64.from(pricePerUnit).multiplying(c.quantity)
@@ -227,8 +227,8 @@ export function buildCargoSaleItems(
         const profit = Int64.from(revenue).subtracting(cost)
 
         items.push({
-            goodId: c.good_id,
-            goodName: c.good?.name ?? `Good #${goodId}`,
+            goodId: c.item_id,
+            goodName: c.item?.name ?? `Item #${goodId}`,
             quantity: UInt32.from(c.quantity),
             pricePerUnit,
             revenue,
@@ -271,10 +271,10 @@ export function createSellAndTradeOption(
         : undefined
 
     return {
-        id: `sell-trade-${deal.destination.coordinates.x}-${deal.destination.coordinates.y}-${deal.good.id}`,
+        id: `sell-trade-${deal.destination.coordinates.x}-${deal.destination.coordinates.y}-${deal.item.id}`,
         type: 'sell-and-trade',
-        title: `Trade ${deal.good.good.name}`,
-        description: `Sell cargo, buy ${deal.maxQuantity} ${deal.good.good.name}, deliver to (${deal.destination.coordinates.x}, ${deal.destination.coordinates.y})`,
+        title: `Trade ${deal.item.item.name}`,
+        description: `Sell cargo, buy ${deal.maxQuantity} ${deal.item.item.name}, deliver to (${deal.destination.coordinates.x}, ${deal.destination.coordinates.y})`,
         reason: `${deal.marginPercent.toFixed(0)}% margin, ${deal.profitPerSecond.toFixed(
             1
         )}/s profit rate`,
@@ -363,7 +363,7 @@ export function createSellAndRepositionOption(
         id: `sell-reposition-${reposition.location.coordinates.x}-${reposition.location.coordinates.y}`,
         type: 'sell-and-reposition',
         title: 'Sell & Move',
-        description: `Sell cargo here, travel empty to buy ${deal.good.good.name}`,
+        description: `Sell cargo here, travel empty to buy ${deal.item.item.name}`,
         reason: `No good trades here — ${deal.marginPercent.toFixed(
             0
         )}% margin trade available at destination`,
@@ -455,7 +455,7 @@ export interface CargoSaleItem {
 /**
  * Info about a discounted good for explore options
  */
-export interface DiscountedGoodInfo {
+export interface DiscountedItemInfo {
     goodId: number
     name: string
     rarity: string
@@ -479,7 +479,7 @@ export interface PotentialDeal {
 export function createExploreOption(
     destination: Location,
     travelTime?: UInt32,
-    discountedGood?: DiscountedGoodInfo,
+    discountedGood?: DiscountedItemInfo,
     travelTimeBreakdown?: EstimatedTravelTime,
     potentialDeals?: PotentialDeal[]
 ): CollectOption {
@@ -536,7 +536,7 @@ export function createExploreOption(
  */
 export interface CollectAnalysisCallbacks {
     getNearbyLocations: (origin: Coordinates, maxDistance: number) => Promise<Location[]>
-    getMarketPrices: (location: Coordinates) => Promise<GoodPrice[]>
+    getMarketPrices: (location: Coordinates) => Promise<ItemPrice[]>
     getGameSeed?: () => Checksum256Type
     getState?: () => ServerContract.Types.state_row
 }
@@ -582,10 +582,10 @@ export async function analyzeCollectOptions(
     )
 
     if (hasCargo && dealsAtOrigin.length > 0) {
-        const cargoGoodIds = new Set(cargo.map((c) => Number(c.good_id)))
+        const cargoGoodIds = new Set(cargo.map((c) => Number(c.item_id)))
 
         for (const deal of dealsAtOrigin.slice(0, 3)) {
-            const dealGoodId = Number(deal.good.id)
+            const dealGoodId = Number(deal.item.id)
             if (cargoGoodIds.has(dealGoodId)) {
                 continue
             }
@@ -767,10 +767,10 @@ export async function analyzeCollectOptions(
     if (!hasCargo && dealsAtOrigin.length > 0) {
         for (const deal of dealsAtOrigin.slice(0, 3)) {
             const option: CollectOption = {
-                id: `trade-${deal.destination.coordinates.x}-${deal.destination.coordinates.y}-${deal.good.id}`,
+                id: `trade-${deal.destination.coordinates.x}-${deal.destination.coordinates.y}-${deal.item.id}`,
                 type: 'sell-and-trade',
-                title: `Trade ${deal.good.good.name}`,
-                description: `Buy ${deal.maxQuantity} ${deal.good.good.name}, deliver to (${deal.destination.coordinates.x}, ${deal.destination.coordinates.y})`,
+                title: `Trade ${deal.item.item.name}`,
+                description: `Buy ${deal.maxQuantity} ${deal.item.item.name}, deliver to (${deal.destination.coordinates.x}, ${deal.destination.coordinates.y})`,
                 reason: `${deal.marginPercent.toFixed(0)}% margin, ${deal.profitPerSecond.toFixed(
                     1
                 )}/s profit rate`,
@@ -804,7 +804,7 @@ export async function analyzeCollectOptions(
             dest: Location
             travelTime: UInt32
             travelTimeBreakdown: EstimatedTravelTime
-            discountedGood?: DiscountedGoodInfo
+            discountedGood?: DiscountedItemInfo
             bestDiscount: number
             potentialDeals?: PotentialDeal[]
             score: number
@@ -821,11 +821,11 @@ export async function analyzeCollectOptions(
                 unloadMass,
             })
 
-            let discountedGood: DiscountedGoodInfo | undefined
+            let discountedGood: DiscountedItemInfo | undefined
             let bestDiscount = 0
 
             if (gameSeed && state) {
-                const allGoods = getGoods()
+                const allGoods = getItems()
                 for (const good of allGoods) {
                     const rarity = getRarity(gameSeed, state.seed, dest.coordinates, good.id)
                     if (rarity.minMultiplier < 1.0) {
@@ -862,8 +862,8 @@ export async function analyzeCollectOptions(
             )
 
             const potentialDeals: PotentialDeal[] = destDeals.map((d) => ({
-                goodId: Number(d.good.id),
-                goodName: d.good.good.name,
+                goodId: Number(d.item.id),
+                goodName: d.item.item.name,
                 destinationCoords: d.destination.coordinates,
                 marginPercent: d.marginPercent,
                 profitPerSecond: d.profitPerSecond,

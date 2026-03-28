@@ -1,0 +1,16 @@
+[
+    {"id": 1, "name": "Hydrogen", "description": "A lightweight gas used for fuel cells and propulsion.", "base_price": 50, "mass": 15000, "category": "gas", "rarity": "common", "color": "#7EC8E3"},
+    {"id": 2, "name": "Helium", "description": "An inert noble gas used in energy systems.", "base_price": 75, "mass": 2000, "category": "gas", "rarity": "uncommon", "color": "#F5E6CC"},
+    {"id": 6, "name": "Carbon", "description": "A versatile element for life support and coatings.", "base_price": 100, "mass": 12000, "category": "organic", "rarity": "common", "color": "#4A4A4A"},
+    {"id": 14, "name": "Silicon", "description": "A semiconductor used in sensors and computing.", "base_price": 150, "mass": 28000, "category": "mineral", "rarity": "common", "color": "#B8A9C9"},
+    {"id": 18, "name": "Argon", "description": "A noble gas used in industrial and energy applications.", "base_price": 60, "mass": 8000, "category": "gas", "rarity": "rare", "color": "#9B59B6"},
+    {"id": 22, "name": "Titanium", "description": "A strong, lightweight metal for ship construction.", "base_price": 300, "mass": 48000, "category": "metal", "rarity": "rare", "color": "#C0C0C0"},
+    {"id": 26, "name": "Iron", "description": "A versatile metal used in hulls and structures.", "base_price": 125, "mass": 40000, "category": "metal", "rarity": "common", "color": "#B7410E"},
+    {"id": 29, "name": "Copper", "description": "A conductive metal for electronics and wiring.", "base_price": 200, "mass": 60000, "category": "metal", "rarity": "uncommon", "color": "#B87333"},
+    {"id": 54, "name": "Xenon", "description": "A rare noble gas for advanced propulsion systems.", "base_price": 175, "mass": 20000, "category": "gas", "rarity": "epic", "color": "#5B2C6F"},
+    {"id": 74, "name": "Tungsten", "description": "An extremely dense metal for heavy-duty applications.", "base_price": 500, "mass": 80000, "category": "metal", "rarity": "epic", "color": "#708090"},
+    {"id": 1000, "name": "Quartz", "description": "A crystalline mineral for sensors and optics.", "base_price": 200, "mass": 35000, "category": "mineral", "rarity": "uncommon", "color": "#E8D5B7"},
+    {"id": 1001, "name": "Sapphire", "description": "A precious crystal for precision instruments.", "base_price": 400, "mass": 45000, "category": "mineral", "rarity": "rare", "color": "#0F52BA"},
+    {"id": 1002, "name": "Polymers", "description": "Synthetic materials for coatings and consumables.", "base_price": 150, "mass": 25000, "category": "organic", "rarity": "rare", "color": "#2ECC71"},
+    {"id": 1003, "name": "Biomass", "description": "Organic matter for life support systems.", "base_price": 100, "mass": 30000, "category": "organic", "rarity": "uncommon", "color": "#8B4513"}
+]

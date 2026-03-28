@@ -10,7 +10,7 @@ import {
 } from '../types/capabilities'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {calcCargoMass} from '../capabilities/storage'
-import {getGood} from '../market/goods'
+import {getItem} from '../market/items'
 import * as schedule from './schedule'
 import {ScheduleData} from './schedule'
 
@@ -169,21 +169,21 @@ function applyFlightTask(
     }
 }
 
-function getGoodMass(good_id: UInt16 | number): UInt32 {
-    const good = getGood(good_id)
-    return good.mass
+function getItemMass(item_id: UInt16 | number): UInt32 {
+    const item = getItem(item_id)
+    return item.mass
 }
 
 function applyLoadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good_mass = getGoodMass(item.good_id)
+        const good_mass = getItemMass(item.item_id)
         projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
     }
 }
 
 function applyUnloadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good_mass = getGoodMass(item.good_id)
+        const good_mass = getItemMass(item.item_id)
         const cargoMass = good_mass.multiplying(item.quantity)
         projected.cargoMass = projected.cargoMass.gt(cargoMass)
             ? projected.cargoMass.subtracting(cargoMass)
@@ -206,7 +206,7 @@ function applyExtractTask(
     }
 
     for (const item of task.cargo) {
-        const good_mass = getGoodMass(item.good_id)
+        const good_mass = getItemMass(item.item_id)
         projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
     }
 }

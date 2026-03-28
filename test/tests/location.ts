@@ -2,7 +2,7 @@ import {assert} from 'chai'
 import {Checksum256, UInt64} from '@wharfkit/antelope'
 import {Coordinates, coordsToLocationId, ServerContract} from '$lib'
 import {Location, toLocation} from 'src/location'
-import {Good, GoodPrice, LocationType, PRECISION} from 'src/types'
+import {Item, ItemPrice, LocationType, PRECISION} from 'src/types'
 
 const testSeed = Checksum256.from(
     'a3b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
@@ -10,17 +10,20 @@ const testSeed = Checksum256.from(
 
 const origin = Coordinates.from({x: 0, y: 0})
 
-function createGoodPrice(id: number, price: number, supply: number): GoodPrice {
-    const good = Good.from({
+function createItemPrice(id: number, price: number, supply: number): ItemPrice {
+    const item = Item.from({
         id,
-        name: `Good ${id}`,
-        description: `Description for good ${id}`,
+        name: `Item ${id}`,
+        description: `Description for item ${id}`,
         base_price: UInt64.from(price),
         mass: UInt64.from(1000).multiplying(PRECISION),
+        category: 'metal',
+        rarity: 'common',
+        color: '#000000',
     })
-    return GoodPrice.from({
+    return ItemPrice.from({
         id,
-        good,
+        item,
         price: UInt64.from(price),
         supply: UInt64.from(supply),
     })
@@ -37,7 +40,7 @@ function createLocationRow(
         id,
         coordinates: coords,
         epoch,
-        good_id: goodId,
+        item_id: goodId,
         supply,
     })
 }
@@ -136,13 +139,13 @@ suite('Location', function () {
             }
         })
 
-        test('returns false for planet locations', function () {
+        test('returns true for planet locations', function () {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
                     const locationType = location.getLocationTypeAt(testSeed)
                     if (locationType === LocationType.PLANET) {
-                        assert.isFalse(location.isExtractableAt(testSeed))
+                        assert.isTrue(location.isExtractableAt(testSeed))
                         return
                     }
                 }
@@ -171,14 +174,14 @@ suite('Location', function () {
 
         test('setMarketPrices and marketPrices work together', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50), createGoodPrice(3, 200, 30)]
+            const prices = [createItemPrice(1, 100, 50), createItemPrice(3, 200, 30)]
             location.setMarketPrices(prices)
             assert.lengthOf(location.marketPrices!, 2)
         })
 
         test('getPrice returns price for specific good', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50), createGoodPrice(3, 200, 30)]
+            const prices = [createItemPrice(1, 100, 50), createItemPrice(3, 200, 30)]
             location.setMarketPrices(prices)
             const price = location.getPrice(1)
             assert.isDefined(price)
@@ -187,7 +190,7 @@ suite('Location', function () {
 
         test('getPrice returns undefined for missing good', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50)]
+            const prices = [createItemPrice(1, 100, 50)]
             location.setMarketPrices(prices)
             assert.isUndefined(location.getPrice(99))
         })
@@ -327,7 +330,7 @@ suite('Location', function () {
 
         test('hasCachedData returns true after setting prices', function () {
             const location = Location.from(origin)
-            location.setMarketPrices([createGoodPrice(1, 100, 50)])
+            location.setMarketPrices([createItemPrice(1, 100, 50)])
             assert.isTrue(location.hasCachedData)
         })
 
@@ -355,7 +358,7 @@ suite('Location', function () {
         test('clears all cached data', function () {
             const location = Location.from(origin)
             const epoch = UInt64.from(1)
-            location.setMarketPrices([createGoodPrice(1, 100, 50)])
+            location.setMarketPrices([createItemPrice(1, 100, 50)])
             location.setLocationRows([createLocationRow(1, origin, epoch, 1, 100)], epoch)
             assert.isTrue(location.hasCachedData)
 
@@ -370,7 +373,7 @@ suite('Location', function () {
     suite('withUpdatedSupply', function () {
         test('creates new location with updated market price supply', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50)]
+            const prices = [createItemPrice(1, 100, 50)]
             location.setMarketPrices(prices)
 
             const newLocation = location.withUpdatedSupply(1, -10)
@@ -379,7 +382,7 @@ suite('Location', function () {
 
         test('creates new location with increased supply', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50)]
+            const prices = [createItemPrice(1, 100, 50)]
             location.setMarketPrices(prices)
 
             const newLocation = location.withUpdatedSupply(1, 10)
@@ -398,7 +401,7 @@ suite('Location', function () {
 
         test('does not modify original location', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50)]
+            const prices = [createItemPrice(1, 100, 50)]
             location.setMarketPrices(prices)
 
             location.withUpdatedSupply(1, -10)
@@ -407,7 +410,7 @@ suite('Location', function () {
 
         test('preserves other goods', function () {
             const location = Location.from(origin)
-            const prices = [createGoodPrice(1, 100, 50), createGoodPrice(3, 200, 30)]
+            const prices = [createItemPrice(1, 100, 50), createItemPrice(3, 200, 30)]
             location.setMarketPrices(prices)
 
             const newLocation = location.withUpdatedSupply(1, -10)

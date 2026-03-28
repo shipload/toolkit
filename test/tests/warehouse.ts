@@ -12,7 +12,7 @@ function createMockLoaders() {
 
 function createCargoItem(goodId: number, quantity: number, unitCost: number) {
     return ServerContract.Types.cargo_item.from({
-        good_id: goodId,
+        item_id: goodId,
         quantity,
         unit_cost: unitCost,
     })
@@ -140,17 +140,17 @@ suite('Warehouse', function () {
             assert.isTrue(warehouse.cargoValue.gt(UInt64.from(0)))
         })
 
-        test('getCargoForGood returns undefined when no cargo', function () {
+        test('getCargoForItem returns undefined when no cargo', function () {
             const warehouse = makeStationaryWarehouse()
-            assert.isUndefined(warehouse.getCargoForGood(1))
+            assert.isUndefined(warehouse.getCargoForItem(1))
         })
 
-        test('getCargoForGood returns cargo for good', function () {
+        test('getCargoForItem returns cargo for good', function () {
             const cargo = createCargoItem(1, 100, 50)
             const warehouse = makeStationaryWarehouse([cargo])
-            const found = warehouse.getCargoForGood(1)
+            const found = warehouse.getCargoForItem(1)
             assert.isDefined(found)
-            assert.isTrue(found!.good_id.equals(1))
+            assert.isTrue(found!.item_id.equals(1))
         })
     })
 

@@ -22,8 +22,7 @@ export type cargo_item = ServerContract.Types.cargo_item
 export type warehouse_row = ServerContract.Types.warehouse_row
 export type container_row = ServerContract.Types.container_row
 export type extractor_stats = ServerContract.Types.extractor_stats
-export type mixture_info = ServerContract.Types.mixture_info
-export type mixture_component = ServerContract.Types.mixture_component
+
 export type location_static = ServerContract.Types.location_static
 export type location_epoch = ServerContract.Types.location_epoch
 export type location_derived = ServerContract.Types.location_derived
@@ -45,7 +44,7 @@ export {
 export type {EntityType} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
-export {getGood, getGoods, goodIds} from './market/goods'
+export {getItem, getItems, itemIds} from './market/items'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
 export {marketPrice, marketPrices, getRarity, Rarities} from './market/market'
@@ -58,8 +57,34 @@ export {
     deriveLocationStatic,
     deriveLocationEpoch,
     deriveLocation,
-    deriveLocationMixture,
 } from './utils/system'
+
+export {
+    deriveStratum,
+    deriveResourceStats,
+    deriveLocationSize,
+    getEligibleResources,
+    getResourceWeight,
+    getLocationCandidates,
+    getDepthThreshold,
+    getResourceRarity,
+    depthScaleFactor,
+    DEPTH_THRESHOLD_COMMON,
+    DEPTH_THRESHOLD_UNCOMMON,
+    DEPTH_THRESHOLD_RARE,
+    DEPTH_THRESHOLD_EPIC,
+    DEPTH_THRESHOLD_LEGENDARY,
+    LOCATION_MIN_DEPTH,
+    LOCATION_MAX_DEPTH,
+    PLANET_SUBTYPE_GAS_GIANT,
+    PLANET_SUBTYPE_ROCKY,
+    PLANET_SUBTYPE_TERRESTRIAL,
+    PLANET_SUBTYPE_ICY,
+    PLANET_SUBTYPE_OCEAN,
+    PLANET_SUBTYPE_INDUSTRIAL,
+} from './derivation'
+
+export type {StratumInfo, ResourceStats} from './derivation'
 
 export {hash, hash512} from './utils/hash'
 
@@ -74,7 +99,7 @@ export type {
     CollectAnalysisCallbacks,
     BetterSaleLocation,
     RepositionLocation,
-    DiscountedGoodInfo,
+    DiscountedItemInfo,
     PotentialDeal,
     CargoSaleItem,
 } from './trading/collect'
@@ -131,7 +156,7 @@ export {
     calculateTradeProfit,
     calculateProfitPerMass,
     calculateProfitPerSecond,
-    findBestGoodToTrade,
+    findBestItemToTrade,
     calculateBreakEvenPrice,
     isProfitable,
     calculateROI,

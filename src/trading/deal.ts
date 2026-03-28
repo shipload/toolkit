@@ -1,5 +1,5 @@
 import {Int64, UInt16, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
-import {Coordinates, GoodPrice, PRECISION, ShipLike} from '../types'
+import {Coordinates, ItemPrice, PRECISION, ShipLike} from '../types'
 import {Location} from '../entities/location'
 import {Ship} from '../entities/ship'
 import {
@@ -17,8 +17,8 @@ export interface Deal {
     origin: Location
     /** Destination location */
     destination: Location
-    /** Good to trade */
-    good: GoodPrice
+    /** Item to trade */
+    item: ItemPrice
     /** Distance between origin and destination */
     distance: UInt64
     /** Available supply at origin */
@@ -68,7 +68,7 @@ export async function findDealsForShip(
     ship: Ship,
     originLocation: Coordinates,
     getNearbyLocations: (origin: Coordinates, maxDistance: number) => Promise<Location[]>,
-    getMarketPrices: (location: Coordinates) => Promise<GoodPrice[]>,
+    getMarketPrices: (location: Coordinates) => Promise<ItemPrice[]>,
     options: FindDealsOptions = {}
 ): Promise<Deal[]> {
     const {
@@ -123,7 +123,7 @@ export async function findDealsForShip(
                 balance !== undefined
                     ? balance.dividing(originGood.price)
                     : UInt64.from(Number.MAX_SAFE_INTEGER)
-            const canHaul = effectiveAvailableMass.dividing(originGood.good.mass)
+            const canHaul = effectiveAvailableMass.dividing(originGood.item.mass)
             const supplyLimit = UInt64.from(originGood.supply)
 
             // Find minimum of canAfford, canHaul, supplyLimit
@@ -134,7 +134,7 @@ export async function findDealsForShip(
             if (maxQuantity.equals(UInt64.zero)) continue
 
             // Calculate travel time with cargo (includes recharge + load time)
-            const cargoMass = originGood.good.mass.multiplying(maxQuantity)
+            const cargoMass = originGood.item.mass.multiplying(maxQuantity)
             const availableSpaceUInt = UInt64.from(availableSpace)
             const baseMass =
                 availableSpace !== undefined
@@ -161,7 +161,7 @@ export async function findDealsForShip(
             deals.push({
                 origin,
                 destination: destLocation,
-                good: originGood,
+                item: originGood,
                 distance,
                 supply: originGood.supply,
                 buyPrice: originGood.price,
@@ -190,7 +190,7 @@ export async function findBestDeal(
     ship: Ship,
     originLocation: Coordinates,
     getNearbyLocations: (origin: Coordinates, maxDistance: number) => Promise<Location[]>,
-    getMarketPrices: (location: Coordinates) => Promise<GoodPrice[]>,
+    getMarketPrices: (location: Coordinates) => Promise<ItemPrice[]>,
     options: FindDealsOptions = {}
 ): Promise<Deal | undefined> {
     const deals = await findDealsForShip(

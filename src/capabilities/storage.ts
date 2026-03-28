@@ -1,7 +1,7 @@
 import {UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {StorageCapability} from '../types/capabilities'
-import {getGood} from '../market/goods'
+import {getItem} from '../market/items'
 
 export interface HasCargo {
     cargo: ServerContract.Types.cargo_item[]
@@ -18,7 +18,7 @@ export interface HasCargomass {
 export function calcCargoMass(entity: HasCargo): UInt64 {
     let mass = UInt64.from(0)
     for (const item of entity.cargo) {
-        const good = getGood(item.good_id)
+        const good = getItem(item.item_id)
         mass = mass.adding(good.mass.multiplying(item.quantity))
     }
     return mass

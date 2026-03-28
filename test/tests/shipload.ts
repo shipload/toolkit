@@ -79,7 +79,7 @@ suite('Shipload', function () {
                 x: location.x,
                 y: location.y,
             })
-            const goodInfo = api.goods.find((g) => g.id.equals(good_id))
+            const goodInfo = api.items.find((g) => g.id.equals(good_id))
             assert.isDefined(goodInfo)
             assert.isTrue(helper.price.equals(goodInfo!.price))
         })
@@ -95,10 +95,10 @@ suite('Shipload', function () {
                 y: location.y,
             })
 
-            assert.equal(goodPrices.length, onChainLocation.goods.length)
-            goodPrices.forEach((goodPrice: {price: UInt64; good: {id: UInt64}}, index: number) => {
-                assert.isTrue(goodPrice.price.equals(onChainLocation.goods[index].price))
-                assert(goodPrice.good.id.equals(onChainLocation.goods[index].id))
+            assert.equal(goodPrices.length, onChainLocation.items.length)
+            goodPrices.forEach((goodPrice: {price: UInt64; item: {id: UInt64}}, index: number) => {
+                assert.isTrue(goodPrice.price.equals(onChainLocation.items[index].price))
+                assert(goodPrice.item.id.equals(onChainLocation.items[index].id))
             })
         })
     })

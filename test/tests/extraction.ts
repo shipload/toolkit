@@ -111,8 +111,8 @@ suite('extraction', function () {
             assert.isTrue(isExtractableLocation(LocationType.NEBULA))
         })
 
-        test('PLANET is not extractable', function () {
-            assert.isFalse(isExtractableLocation(LocationType.PLANET))
+        test('PLANET is extractable', function () {
+            assert.isTrue(isExtractableLocation(LocationType.PLANET))
         })
 
         test('EMPTY is not extractable', function () {
@@ -191,55 +191,59 @@ suite('extraction', function () {
             rate: UInt16.from(700),
             drain: UInt16.from(2500),
             efficiency: UInt16.from(5000),
-        })
-
-        const loaders = ServerContract.Types.loader_stats.from({
-            mass: UInt16.from(1000),
-            thrust: UInt16.from(1000),
-            quantity: UInt16.from(2),
+            depth: UInt16.from(0),
+            drill: UInt16.from(100),
         })
 
         test('returns UInt32', function () {
-            const duration = calc_extraction_duration(extractor, loaders, 1000, 10000)
+            const duration = calc_extraction_duration(extractor, 10000, 0, 5000)
             assert.ok(duration.toNumber !== undefined)
         })
 
-        test('returns 0 for zero batch mass', function () {
-            const duration = calc_extraction_duration(extractor, loaders, 1000, 0)
+        test('returns 0 for zero rate product', function () {
+            const zeroEfficiency = ServerContract.Types.extractor_stats.from({
+                rate: UInt16.from(700),
+                drain: UInt16.from(2500),
+                efficiency: UInt16.from(0),
+                depth: UInt16.from(0),
+                drill: UInt16.from(100),
+            })
+            const duration = calc_extraction_duration(zeroEfficiency, 10000, 0, 5000)
             assert.equal(duration.toNumber(), 0)
         })
 
-        test('duration increases with batch mass', function () {
-            const small = calc_extraction_duration(extractor, loaders, 1000, 10000)
-            const large = calc_extraction_duration(extractor, loaders, 1000, 50000)
+        test('duration increases with cargo mass', function () {
+            const small = calc_extraction_duration(extractor, 10000, 0, 5000)
+            const large = calc_extraction_duration(extractor, 50000, 0, 5000)
             assert.isAbove(large.toNumber(), small.toNumber())
         })
 
-        test('duration is based on extraction time', function () {
-            const batchMass = 70000
-            const duration = calc_extraction_duration(extractor, loaders, 1000, batchMass)
-            const expectedExtractionTime = Math.floor(batchMass / extractor.rate.toNumber())
-            assert.isAtLeast(duration.toNumber(), expectedExtractionTime)
+        test('duration increases with stratum depth', function () {
+            const shallow = calc_extraction_duration(extractor, 10000, 100, 5000)
+            const deep = calc_extraction_duration(extractor, 10000, 500, 5000)
+            assert.isAbove(deep.toNumber(), shallow.toNumber())
         })
 
-        test('handles zero loader quantity', function () {
-            const noLoaders = ServerContract.Types.loader_stats.from({
-                mass: UInt16.from(1000),
-                thrust: UInt16.from(1000),
-                quantity: UInt16.from(0),
-            })
-            const duration = calc_extraction_duration(extractor, noLoaders, 1000, 10000)
-            assert.isAbove(duration.toNumber(), 0)
+        test('higher richness reduces duration', function () {
+            const lowRichness = calc_extraction_duration(extractor, 10000, 0, 2500)
+            const highRichness = calc_extraction_duration(extractor, 10000, 0, 7500)
+            assert.isBelow(highRichness.toNumber(), lowRichness.toNumber())
         })
 
-        test('handles zero loader thrust', function () {
-            const noThrust = ServerContract.Types.loader_stats.from({
-                mass: UInt16.from(1000),
-                thrust: UInt16.from(0),
-                quantity: UInt16.from(2),
-            })
-            const duration = calc_extraction_duration(extractor, noThrust, 1000, 10000)
-            assert.isAbove(duration.toNumber(), 0)
+        test('calculation matches expected formula', function () {
+            const cargoMass = 50000
+            const stratum = 200
+            const richness = 5000
+            const PRECISION_VAL = 10000
+            const rate = extractor.rate.toNumber()
+            const efficiency = extractor.efficiency.toNumber()
+            const drill = extractor.drill.toNumber()
+            const rateProduct = Math.floor((rate * richness * efficiency) / PRECISION_VAL)
+            const expectedExtractionTime = Math.floor((cargoMass * PRECISION_VAL) / rateProduct)
+            const expectedDrillTime = Math.floor(stratum / drill)
+            const expected = expectedExtractionTime + expectedDrillTime
+            const duration = calc_extraction_duration(extractor, cargoMass, stratum, richness)
+            assert.equal(duration.toNumber(), expected)
         })
     })
 
@@ -248,6 +252,8 @@ suite('extraction', function () {
             rate: UInt16.from(700),
             drain: UInt16.from(2500),
             efficiency: UInt16.from(5000),
+            depth: UInt16.from(0),
+            drill: UInt16.from(0),
         })
 
         test('returns UInt16', function () {
@@ -271,11 +277,15 @@ suite('extraction', function () {
                 rate: UInt16.from(700),
                 drain: UInt16.from(1000),
                 efficiency: UInt16.from(5000),
+                depth: UInt16.from(0),
+                drill: UInt16.from(0),
             })
             const highDrain = ServerContract.Types.extractor_stats.from({
                 rate: UInt16.from(700),
                 drain: UInt16.from(5000),
                 efficiency: UInt16.from(5000),
+                depth: UInt16.from(0),
+                drill: UInt16.from(0),
             })
             const lowEnergy = calc_extraction_energy(lowDrain, 1000)
             const highEnergy = calc_extraction_energy(highDrain, 1000)
@@ -315,7 +325,7 @@ suite('extraction', function () {
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
-                            cargo: [{good_id: 1, quantity: 1, unit_cost: 0}],
+                            cargo: [{item_id: 1, quantity: 1, unit_cost: 0}],
                             energy_cost: 50,
                         }),
                     ],
@@ -352,7 +362,7 @@ suite('extraction', function () {
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
-                            cargo: [{good_id: 1, quantity: 1, unit_cost: 0}],
+                            cargo: [{item_id: 1, quantity: 1, unit_cost: 0}],
                             energy_cost: 50,
                         }),
                     ],
