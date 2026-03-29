@@ -1,19 +1,12 @@
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
-import Shipload, {
+import {
     deriveLocation,
     deriveLocationEpoch,
-deriveLocationStatic,
+    deriveLocationStatic,
     getSystemName,
     LocationType,
-    PRECISION,
 } from '$lib'
-import {Chains} from '@wharfkit/session'
-import {makeClient} from '@wharfkit/mock-data'
-
-const client = makeClient('https://jungle4.greymass.com')
-const platformContractName = 'platform.gm'
-const serverContractName = 'shipload.gm'
 
 const testGameSeed = Checksum256.from(
     'a3b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
@@ -23,36 +16,43 @@ const testEpochSeed = Checksum256.from(
 )
 
 suite('getSystemName', function () {
-    let shipload: Shipload
-    let gameSeed: Checksum256
-
-    setup(async () => {
-        shipload = await Shipload.load(Chains.Jungle4, {
-            client,
-            platformContractName,
-            serverContractName,
-        })
-        const game = await shipload.getGame()
-        gameSeed = game.config.seed
-    })
     test('should throw an error if system does not exist', function () {
-        const locationWithNoPlanet = {x: 0, y: 2}
+        const locationWithNoPlanet = {x: 0, y: 0}
 
         assert.throws(
-            () => getSystemName(gameSeed, locationWithNoPlanet),
+            () => getSystemName(testGameSeed, locationWithNoPlanet),
             /System doesn't exist at location/,
             'Expected an error when the system does not exist'
         )
     })
 
-    test('generate name at 0,0', function () {
-        const generatedName = getSystemName(gameSeed, {x: 0, y: 0})
-        assert.equal(generatedName, 'Gilila')
+    test('planet name is syllable-based', function () {
+        const name = getSystemName(testGameSeed, {x: 1, y: 17})
+        assert.equal(name, 'Zulmeirsum')
     })
 
-    test('generate name at 0,1', function () {
-        const generatedName = getSystemName(gameSeed, {x: 0, y: 1})
-        assert.equal(generatedName, 'Cencaelgru')
+    test('asteroid name is alphanumeric designation', function () {
+        const name = getSystemName(testGameSeed, {x: 0, y: 1})
+        assert.equal(name, 'SZ-1724')
+        assert.match(name, /^[A-Z]{2}-\d{4}$/)
+    })
+
+    test('nebula name is two descriptive words', function () {
+        const name = getSystemName(testGameSeed, {x: 0, y: 15})
+        assert.equal(name, 'Slate Rib')
+        assert.include(name, ' ')
+    })
+
+    test('is deterministic', function () {
+        const name1 = getSystemName(testGameSeed, {x: 7, y: 2})
+        const name2 = getSystemName(testGameSeed, {x: 7, y: 2})
+        assert.equal(name1, name2)
+    })
+
+    test('different coordinates produce different names', function () {
+        const name1 = getSystemName(testGameSeed, {x: 1, y: 17})
+        const name2 = getSystemName(testGameSeed, {x: 7, y: 2})
+        assert.notEqual(name1, name2)
     })
 })
 
