@@ -100,17 +100,19 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
     const hashResult = Checksum256.hash(Bytes.from(data))
     const hashBytes = hashResult.array
 
-    const extractU32 = (offset: number): number =>
-        ((hashBytes[offset] << 24) |
-            (hashBytes[offset + 1] << 16) |
-            (hashBytes[offset + 2] << 8) |
-            hashBytes[offset + 3]) >>>
-        0
+    const extractU16 = (offset: number): number => (hashBytes[offset] << 8) | hashBytes[offset + 1]
+
+    const weibullStat = (raw: number): number => {
+        const u = raw / 65536
+        let x = 0.27 * Math.sqrt(-Math.log(1 - u))
+        if (x > 1) x = 1
+        return Math.floor(x * 999) + 1
+    }
 
     return {
-        purity: (extractU32(0) % 1000) + 1,
-        density: (extractU32(4) % 1000) + 1,
-        reactivity: (extractU32(8) % 1000) + 1,
-        resonance: (extractU32(12) % 1000) + 1,
+        purity: weibullStat(extractU16(0)),
+        density: weibullStat(extractU16(2)),
+        reactivity: weibullStat(extractU16(4)),
+        resonance: weibullStat(extractU16(6)),
     }
 }
