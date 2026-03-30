@@ -16,10 +16,9 @@ export interface StratumInfo {
 }
 
 export interface ResourceStats {
-    purity: number
-    density: number
-    reactivity: number
-    resonance: number
+    stat1: number
+    stat2: number
+    stat3: number
 }
 
 export function deriveStratum(
@@ -94,15 +93,17 @@ export function deriveStratum(
 }
 
 export function deriveResourceStats(seed: bigint): ResourceStats {
-    const seedStr = seed.toString()
-    const encoder = new TextEncoder()
-    const data = encoder.encode(seedStr)
-    const hashResult = Checksum256.hash(Bytes.from(data))
+    const seedBytes = new Uint8Array(8)
+    for (let i = 7; i >= 0; i--) {
+        seedBytes[i] = Number(seed & 0xFFn)
+        seed >>= 8n
+    }
+    const hashResult = Checksum256.hash(Bytes.from(seedBytes))
     const hashBytes = hashResult.array
 
     const extractU16 = (offset: number): number => (hashBytes[offset] << 8) | hashBytes[offset + 1]
 
-    const weibullStat = (raw: number): number => {
+    const weibull = (raw: number): number => {
         const u = raw / 65536
         let x = 0.27 * Math.sqrt(-Math.log(1 - u))
         if (x > 1) x = 1
@@ -110,9 +111,8 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
     }
 
     return {
-        purity: weibullStat(extractU16(0)),
-        density: weibullStat(extractU16(2)),
-        reactivity: weibullStat(extractU16(4)),
-        resonance: weibullStat(extractU16(6)),
+        stat1: weibull(extractU16(0)),
+        stat2: weibull(extractU16(2)),
+        stat3: weibull(extractU16(4)),
     }
 }

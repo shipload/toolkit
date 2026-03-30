@@ -1,10 +1,10 @@
-import {ResourceRarity} from '../types'
+import {ResourceTier} from '../types'
 
-export const DEPTH_THRESHOLD_COMMON = 0
-export const DEPTH_THRESHOLD_UNCOMMON = 2000
-export const DEPTH_THRESHOLD_RARE = 10000
-export const DEPTH_THRESHOLD_EPIC = 30000
-export const DEPTH_THRESHOLD_LEGENDARY = 55000
+export const DEPTH_THRESHOLD_T1 = 0
+export const DEPTH_THRESHOLD_T2 = 2000
+export const DEPTH_THRESHOLD_T3 = 10000
+export const DEPTH_THRESHOLD_T4 = 30000
+export const DEPTH_THRESHOLD_T5 = 55000
 
 export const LOCATION_MIN_DEPTH = 500
 export const LOCATION_MAX_DEPTH = 65535
@@ -20,84 +20,85 @@ export const PLANET_SUBTYPE_INDUSTRIAL = 5
 
 interface ResourceEntry {
     id: number
-    rarity: ResourceRarity
+    tier: ResourceTier
 }
 
 const RESOURCE_CATALOG: ResourceEntry[] = [
-    {id: 26, rarity: 'common'},
-    {id: 1, rarity: 'common'},
-    {id: 14, rarity: 'common'},
-    {id: 6, rarity: 'common'},
-    {id: 29, rarity: 'uncommon'},
-    {id: 2, rarity: 'uncommon'},
-    {id: 1000, rarity: 'uncommon'},
-    {id: 1003, rarity: 'uncommon'},
-    {id: 22, rarity: 'rare'},
-    {id: 18, rarity: 'rare'},
-    {id: 1001, rarity: 'rare'},
-    {id: 1002, rarity: 'rare'},
-    {id: 74, rarity: 'epic'},
-    {id: 54, rarity: 'epic'},
+    {id: 26, tier: 't1'},
+    {id: 13, tier: 't2'},
+    {id: 24, tier: 't3'},
+    {id: 29, tier: 't1'},
+    {id: 47, tier: 't2'},
+    {id: 79, tier: 't3'},
+    {id: 1, tier: 't1'},
+    {id: 2, tier: 't2'},
+    {id: 18, tier: 't3'},
+    {id: 14, tier: 't1'},
+    {id: 1000, tier: 't2'},
+    {id: 1001, tier: 't3'},
+    {id: 6, tier: 't1'},
+    {id: 1003, tier: 't2'},
+    {id: 1002, tier: 't3'},
 ]
 
-export function getDepthThreshold(rarity: ResourceRarity): number {
-    switch (rarity) {
-        case 'common':
-            return DEPTH_THRESHOLD_COMMON
-        case 'uncommon':
-            return DEPTH_THRESHOLD_UNCOMMON
-        case 'rare':
-            return DEPTH_THRESHOLD_RARE
-        case 'epic':
-            return DEPTH_THRESHOLD_EPIC
-        case 'legendary':
-            return DEPTH_THRESHOLD_LEGENDARY
+export function getDepthThreshold(tier: ResourceTier): number {
+    switch (tier) {
+        case 't1':
+            return DEPTH_THRESHOLD_T1
+        case 't2':
+            return DEPTH_THRESHOLD_T2
+        case 't3':
+            return DEPTH_THRESHOLD_T3
+        case 't4':
+            return DEPTH_THRESHOLD_T4
+        case 't5':
+            return DEPTH_THRESHOLD_T5
     }
 }
 
-export function getResourceRarity(itemId: number): ResourceRarity {
+export function getResourceTier(itemId: number): ResourceTier {
     const entry = RESOURCE_CATALOG.find((r) => r.id === itemId)
-    return entry ? entry.rarity : 'legendary'
+    return entry ? entry.tier : 't5'
 }
 
 export function getResourceWeight(itemId: number, stratum: number): number {
-    const rarity = getResourceRarity(itemId)
-    const threshold = getDepthThreshold(rarity)
+    const tier = getResourceTier(itemId)
+    const threshold = getDepthThreshold(tier)
     if (stratum < threshold) return 0
 
     const depthAbove = stratum - threshold
 
-    switch (rarity) {
-        case 'common':
+    switch (tier) {
+        case 't1':
             if (stratum < 2000) return 100
             if (stratum < 10000) return 80
             if (stratum < 30000) return 50
             return 30
-        case 'uncommon':
+        case 't2':
             if (depthAbove < 3000) return 40
             if (depthAbove < 8000) return 60
             return 50
-        case 'rare':
+        case 't3':
             if (depthAbove < 5000) return 20
             if (depthAbove < 15000) return 35
             return 40
-        case 'epic':
+        case 't4':
             if (depthAbove < 10000) return 10
             if (depthAbove < 25000) return 20
             return 30
-        case 'legendary':
+        case 't5':
             return 10
     }
 }
 
-const ASTEROID_RESOURCES = [26, 29, 22, 74, 14, 1000, 1001]
-const NEBULA_RESOURCES = [1, 2, 18, 54]
-const GAS_GIANT_RESOURCES = [1, 2, 18, 54]
-const ROCKY_RESOURCES = [26, 29, 22, 74, 6, 1003, 1002]
-const TERRESTRIAL_RESOURCES = [6, 1003, 1002, 1001]
-const ICY_RESOURCES = [6, 14, 1000, 1001, 18]
-const OCEAN_RESOURCES = [1, 2, 1003, 1002]
-const INDUSTRIAL_RESOURCES = [26, 29, 22, 74, 14, 1000, 54]
+const ASTEROID_RESOURCES = [26, 13, 24, 29, 47]
+const NEBULA_RESOURCES = [47, 79, 1, 2, 18]
+const GAS_GIANT_RESOURCES = [1, 2, 18, 14, 6]
+const ROCKY_RESOURCES = [26, 13, 24, 14, 1000, 1001, 1002]
+const TERRESTRIAL_RESOURCES = [29, 47, 14, 1000, 6, 1003, 1002]
+const ICY_RESOURCES = [26, 1, 2, 14, 1001, 6, 1003]
+const OCEAN_RESOURCES = [29, 79, 1, 18, 6, 1003, 1002]
+const INDUSTRIAL_RESOURCES = [26, 13, 24, 29, 79, 1000, 1001]
 
 export function getLocationCandidates(locationType: number, subtype: number): number[] {
     if (locationType === 2) return ASTEROID_RESOURCES
@@ -128,8 +129,8 @@ export function getEligibleResources(
 ): number[] {
     const candidates = getLocationCandidates(locationType, subtype)
     return candidates.filter((itemId) => {
-        const rarity = getResourceRarity(itemId)
-        const threshold = getDepthThreshold(rarity)
+        const tier = getResourceTier(itemId)
+        const threshold = getDepthThreshold(tier)
         return stratum >= threshold
     })
 }

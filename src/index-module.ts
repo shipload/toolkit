@@ -47,7 +47,7 @@ export type {EntityRefInput} from './managers/actions'
 export {getItem, getItems, itemIds} from './market/items'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
-export {marketPrice, marketPrices, getRarity, Rarities} from './market/market'
+export {marketPrice, marketPrices, getRarity, getRarityMultiplier, Rarities} from './market/market'
 export type {Rarity} from './market/market'
 export {
     getSystemName,
@@ -67,13 +67,13 @@ export {
     getResourceWeight,
     getLocationCandidates,
     getDepthThreshold,
-    getResourceRarity,
+    getResourceTier,
     depthScaleFactor,
-    DEPTH_THRESHOLD_COMMON,
-    DEPTH_THRESHOLD_UNCOMMON,
-    DEPTH_THRESHOLD_RARE,
-    DEPTH_THRESHOLD_EPIC,
-    DEPTH_THRESHOLD_LEGENDARY,
+    DEPTH_THRESHOLD_T1,
+    DEPTH_THRESHOLD_T2,
+    DEPTH_THRESHOLD_T3,
+    DEPTH_THRESHOLD_T4,
+    DEPTH_THRESHOLD_T5,
     LOCATION_MIN_DEPTH,
     LOCATION_MAX_DEPTH,
     PLANET_SUBTYPE_GAS_GIANT,
@@ -85,6 +85,9 @@ export {
 } from './derivation'
 
 export type {StratumInfo, ResourceStats} from './derivation'
+
+export {getStatDefinitions, getStatName, resolveStats} from './derivation'
+export type {StatDefinition, NamedStats} from './derivation'
 
 export {hash, hash512} from './utils/hash'
 

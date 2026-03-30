@@ -14,9 +14,9 @@ export enum Rarities {
 }
 
 export interface Rarity {
-    rarity: Rarities // The rarity description of this price
-    minMultiplier: number // The minimum multiplier for this rarity
-    maxMultiplier: number // The maximum multiplier for this rarity
+    rarity: Rarities
+    minMultiplier: number
+    maxMultiplier: number
 }
 
 export function getRarity(
@@ -29,77 +29,66 @@ export function getRarity(
     const rarityRoll = roll(gameSeed, seed)
 
     if (rarityRoll < 13) {
-        // (Orange) ~0.02% chance = incredibly high value
         return {
             rarity: Rarities.legendary,
             minMultiplier: 2.25,
             maxMultiplier: 3.0,
         }
     } else if (rarityRoll < 176) {
-        // (Purple) ~0.25% chance = super high value
         return {
             rarity: Rarities.epic,
             minMultiplier: 1.75,
             maxMultiplier: 2.25,
         }
     } else if (rarityRoll < 996) {
-        // (Blue) ~1.25% chance = very high value
         return {
             rarity: Rarities.rare,
             minMultiplier: 1.4,
             maxMultiplier: 1.75,
         }
     } else if (rarityRoll < 2966) {
-        // (Green) ~3.00% chance = high value
         return {
             rarity: Rarities.uncommon,
             minMultiplier: 1.225,
             maxMultiplier: 1.4,
         }
     } else if (rarityRoll < 19568) {
-        // (White) ~25.33% chance = slightly higher value
         return {
             rarity: Rarities.common,
             minMultiplier: 1.07,
             maxMultiplier: 1.225,
         }
     } else if (rarityRoll < 45988) {
-        // ~40.30% chance = no value change
         return {
             rarity: Rarities.trash,
             minMultiplier: 1,
             maxMultiplier: 1.07,
-        } // Product is not available
+        }
     } else if (rarityRoll < 62508) {
-        // (White) ~25.33% chance = slightly lower value
         return {
             rarity: Rarities.common,
             minMultiplier: 0.925,
             maxMultiplier: 1,
         }
     } else if (rarityRoll < 64518) {
-        // (Green) ~3.00% chance = low value
         return {
             rarity: Rarities.uncommon,
             minMultiplier: 0.77,
             maxMultiplier: 0.925,
         }
     } else if (rarityRoll < 65437) {
-        // (Blue) ~1.25% chance = very low value
         return {
             rarity: Rarities.rare,
             minMultiplier: 0.595,
             maxMultiplier: 0.77,
         }
     } else if (rarityRoll < 65523) {
-        // (Purple) ~0.25% chance = super low value
         return {
             rarity: Rarities.epic,
             minMultiplier: 0.41,
             maxMultiplier: 0.595,
         }
     } else {
-        // (Orange) ~0.02% chance = incredibly low value
         return {
             rarity: Rarities.legendary,
             minMultiplier: 0.285,
@@ -178,8 +167,6 @@ export function marketPrice(
     const item = getItem(goodId)
     let price = Number(item.base_price)
 
-    // Rarity multiplier of the deal (changes with epoch)
-    // Large impact range on price, from 0.285x to 3.0x
     const rarityMultiplier = getRarityMultiplier(gameSeed, state.seed, location, goodId)
     price *= rarityMultiplier
 

@@ -10,7 +10,7 @@ const items: Item[] = itemsData.map((g) =>
         base_price: g.base_price,
         mass: g.mass,
         category: g.category,
-        rarity: g.rarity,
+        tier: g.tier,
         color: g.color,
     })
 )

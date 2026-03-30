@@ -6,13 +6,13 @@ export {
     getResourceWeight,
     getLocationCandidates,
     getDepthThreshold,
-    getResourceRarity,
+    getResourceTier,
     depthScaleFactor,
-    DEPTH_THRESHOLD_COMMON,
-    DEPTH_THRESHOLD_UNCOMMON,
-    DEPTH_THRESHOLD_RARE,
-    DEPTH_THRESHOLD_EPIC,
-    DEPTH_THRESHOLD_LEGENDARY,
+    DEPTH_THRESHOLD_T1,
+    DEPTH_THRESHOLD_T2,
+    DEPTH_THRESHOLD_T3,
+    DEPTH_THRESHOLD_T4,
+    DEPTH_THRESHOLD_T5,
     LOCATION_MIN_DEPTH,
     LOCATION_MAX_DEPTH,
     YIELD_THRESHOLD,
@@ -23,3 +23,5 @@ export {
     PLANET_SUBTYPE_OCEAN,
     PLANET_SUBTYPE_INDUSTRIAL,
 } from './resources'
+
+export * from './stats'

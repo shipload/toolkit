@@ -132,8 +132,8 @@ export interface Distance {
     distance: UInt16
 }
 
-export type ResourceCategory = 'metal' | 'gas' | 'mineral' | 'organic'
-export type ResourceRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+export type ResourceCategory = 'metal' | 'precious' | 'gas' | 'mineral' | 'organic'
+export type ResourceTier = 't1' | 't2' | 't3' | 't4' | 't5'
 
 @Struct.type('item')
 export class Item extends Struct {
@@ -150,7 +150,7 @@ export class Item extends Struct {
     @Struct.field('string')
     category!: ResourceCategory
     @Struct.field('string')
-    rarity!: ResourceRarity
+    tier!: ResourceTier
     @Struct.field('string')
     color!: string
 }
