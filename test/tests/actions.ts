@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
-import Shipload, {Coordinates, EntityInventory, makeShip, ServerContract} from '$lib'
+import Shipload from '$lib'
 import {Chains} from '@wharfkit/common'
 import {Int64, UInt64} from '@wharfkit/antelope'
 
@@ -51,46 +51,6 @@ suite('ActionsManager', function () {
         })
     })
 
-    suite('buyItems', function () {
-        test('creates buyitems action', function () {
-            const action = shipload.actions.buyItems(1, 3, 10)
-            assert.equal(action.name.toString(), 'buyitems')
-            assert.isDefined(action.data)
-        })
-    })
-
-    suite('sellItems', function () {
-        test('creates sellitems action', function () {
-            const action = shipload.actions.sellItems(1, 3, 10)
-            assert.equal(action.name.toString(), 'sellitems')
-            assert.isDefined(action.data)
-        })
-    })
-
-    suite('buyShip', function () {
-        test('creates buyship action', function () {
-            const action = shipload.actions.buyShip('testaccount', 'My Ship')
-            assert.equal(action.name.toString(), 'buyship')
-            assert.isDefined(action.data)
-        })
-    })
-
-    suite('takeLoan', function () {
-        test('creates takeloan action', function () {
-            const action = shipload.actions.takeLoan('testaccount', 1000)
-            assert.equal(action.name.toString(), 'takeloan')
-            assert.isDefined(action.data)
-        })
-    })
-
-    suite('payLoan', function () {
-        test('creates payloan action', function () {
-            const action = shipload.actions.payLoan('testaccount', 500)
-            assert.equal(action.name.toString(), 'payloan')
-            assert.isDefined(action.data)
-        })
-    })
-
     suite('join', function () {
         test('creates join action', function () {
             const action = shipload.actions.join('newplayer')
@@ -110,87 +70,6 @@ suite('ActionsManager', function () {
             const action = shipload.actions.warp(1, {x: Int64.from(5), y: Int64.from(10)})
             assert.equal(action.name.toString(), 'warp')
             assert.isDefined(action.data)
-        })
-    })
-
-    suite('sellAllCargo', function () {
-        function createMockShip(cargo?: ServerContract.Types.cargo_item[]) {
-            return makeShip({
-                id: 1,
-                owner: 'testplayer',
-                name: 'Test Ship',
-                coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
-                hullmass: 500000,
-                capacity: 1000000000,
-                energy: 5000,
-                engines: ServerContract.Types.movement_stats.from({
-                    thrust: 100000,
-                    drain: 250,
-                }),
-                generator: ServerContract.Types.energy_stats.from({
-                    capacity: 5000,
-                    recharge: 100,
-                }),
-                loaders: ServerContract.Types.loader_stats.from({
-                    mass: 100000,
-                    quantity: 1,
-                    thrust: 100,
-                }),
-                cargo,
-            })
-        }
-
-        function createMockCargo(goodId: number, quantity: number) {
-            return ServerContract.Types.cargo_item.from({
-                item_id: goodId,
-                quantity,
-                unit_cost: 50,
-            })
-        }
-
-        test('creates sell actions for loaded cargo on Ship object', function () {
-            const ship = createMockShip([createMockCargo(1, 100), createMockCargo(3, 50)])
-
-            const actions = shipload.actions.sellAllCargo(ship)
-
-            assert.lengthOf(actions, 2)
-            actions.forEach((action) => {
-                assert.equal(action.name.toString(), 'sellitems')
-            })
-        })
-
-        test('skips cargo with no owned quantity', function () {
-            const ship = createMockShip([createMockCargo(1, 0), createMockCargo(3, 50)])
-
-            const actions = shipload.actions.sellAllCargo(ship)
-
-            assert.lengthOf(actions, 1)
-        })
-
-        test('uses provided cargo array with UInt64 ship id', function () {
-            const cargo = [new EntityInventory(createMockCargo(1, 100))]
-
-            const actions = shipload.actions.sellAllCargo(UInt64.from(5), cargo)
-
-            assert.lengthOf(actions, 1)
-        })
-
-        test('throws when cargo not provided with UInt64 ship id', function () {
-            assert.throws(() => {
-                shipload.actions.sellAllCargo(UInt64.from(5))
-            }, 'cargo parameter required when ship is a UInt64Type')
-        })
-
-        test('uses provided cargo array even with Ship object', function () {
-            const ship = createMockShip([createMockCargo(1, 100)])
-
-            const providedCargo = [
-                new EntityInventory(createMockCargo(3, 50)),
-                new EntityInventory(createMockCargo(4, 30)),
-            ]
-            const actions = shipload.actions.sellAllCargo(ship, providedCargo)
-
-            assert.lengthOf(actions, 2)
         })
     })
 })

@@ -6,7 +6,6 @@ import {GameState} from '../entities/gamestate'
 import {EntitiesManager} from './entities'
 import {PlayersManager} from './players'
 import {LocationsManager} from './locations'
-import {TradesManager} from './trades'
 import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
 
@@ -14,7 +13,6 @@ export class GameContext {
     private _entities?: EntitiesManager
     private _players?: PlayersManager
     private _locations?: LocationsManager
-    private _trades?: TradesManager
     private _epochs?: EpochsManager
     private _actions?: ActionsManager
 
@@ -46,13 +44,6 @@ export class GameContext {
             this._locations = new LocationsManager(this)
         }
         return this._locations
-    }
-
-    get trades(): TradesManager {
-        if (!this._trades) {
-            this._trades = new TradesManager(this)
-        }
-        return this._trades
     }
 
     get epochs(): EpochsManager {

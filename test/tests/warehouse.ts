@@ -10,11 +10,10 @@ function createMockLoaders() {
     })
 }
 
-function createCargoItem(goodId: number, quantity: number, unitCost: number) {
+function createCargoItem(goodId: number, quantity: number) {
     return ServerContract.Types.cargo_item.from({
         item_id: goodId,
         quantity,
-        unit_cost: unitCost,
     })
 }
 
@@ -112,8 +111,8 @@ suite('Warehouse', function () {
         })
 
         test('cargo returns cargo items when provided', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(3, 50, 100)
+            const cargo1 = createCargoItem(1, 100)
+            const cargo2 = createCargoItem(3, 50)
             const warehouse = makeStationaryWarehouse([cargo1, cargo2])
             assert.lengthOf(warehouse.cargo, 2)
         })
@@ -124,20 +123,9 @@ suite('Warehouse', function () {
         })
 
         test('totalCargoMass calculates mass of all cargo', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             assert.isTrue(warehouse.totalCargoMass.gt(UInt64.from(0)))
-        })
-
-        test('cargoValue returns 0 when no cargo', function () {
-            const warehouse = makeStationaryWarehouse()
-            assert.equal(warehouse.cargoValue.toNumber(), 0)
-        })
-
-        test('cargoValue calculates total cost', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const warehouse = makeStationaryWarehouse([cargo])
-            assert.isTrue(warehouse.cargoValue.gt(UInt64.from(0)))
         })
 
         test('getCargoForItem returns undefined when no cargo', function () {
@@ -146,7 +134,7 @@ suite('Warehouse', function () {
         })
 
         test('getCargoForItem returns cargo for good', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             const found = warehouse.getCargoForItem(1)
             assert.isDefined(found)
@@ -161,7 +149,7 @@ suite('Warehouse', function () {
         })
 
         test('returns reduced capacity when cargo loaded', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             assert.isTrue(warehouse.availableCapacity.lt(UInt64.from(10000000)))
         })

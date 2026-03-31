@@ -7,7 +7,6 @@ import {GameContext} from './managers/context'
 import {EntitiesManager} from './managers/entities'
 import {PlayersManager} from './managers/players'
 import {LocationsManager} from './managers/locations'
-import {TradesManager} from './managers/trades'
 import {EpochsManager} from './managers/epochs'
 import {ActionsManager} from './managers/actions'
 import {GameState} from './entities/gamestate'
@@ -92,10 +91,6 @@ export class Shipload {
 
     get locations(): LocationsManager {
         return this._context.locations
-    }
-
-    get trades(): TradesManager {
-        return this._context.trades
     }
 
     get epochs(): EpochsManager {

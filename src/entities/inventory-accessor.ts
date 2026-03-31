@@ -20,10 +20,6 @@ export class InventoryAccessor {
         return this.items.reduce((sum, c) => sum.adding(c.totalMass), UInt64.from(0))
     }
 
-    get totalValue(): UInt64 {
-        return this.items.reduce((sum, c) => sum.adding(c.totalCost), UInt64.from(0))
-    }
-
     forItem(goodId: UInt64Type): EntityInventory | undefined {
         return this.items.find((c) => c.item_id.equals(goodId))
     }

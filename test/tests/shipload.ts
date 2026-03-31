@@ -8,10 +8,9 @@ import Shipload, {
     PlayersManager,
     PRECISION,
     ServerContract,
-    TradesManager,
 } from '$lib'
 import {Chains} from '@wharfkit/common'
-import {APIClient, UInt64} from '@wharfkit/antelope'
+import {APIClient} from '@wharfkit/antelope'
 import {Ship} from 'src/ship'
 import {Contract} from '@wharfkit/contract'
 
@@ -57,49 +56,12 @@ suite('Shipload', function () {
             assert.instanceOf(shipload.locations, LocationsManager)
         })
 
-        test('trades returns TradesManager', function () {
-            assert.instanceOf(shipload.trades, TradesManager)
-        })
-
         test('epochs returns EpochsManager', function () {
             assert.instanceOf(shipload.epochs, EpochsManager)
         })
 
         test('actions returns ActionsManager', function () {
             assert.instanceOf(shipload.actions, ActionsManager)
-        })
-    })
-
-    suite('getMarketPrice', function () {
-        test('getMarketPrice matches readonly', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
-            const good_id = 1
-            const helper = await shipload.locations.getMarketPrice(location, good_id)
-            const api = await server.readonly('getlocation', {
-                x: location.x,
-                y: location.y,
-            })
-            const goodInfo = api.items.find((g) => g.id.equals(good_id))
-            assert.isDefined(goodInfo)
-            assert.isTrue(helper.price.equals(goodInfo!.price))
-        })
-    })
-
-    suite('getMarketPrices', function () {
-        test('getMarketPrices matches readonly', async function () {
-            const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 1}
-            const goodPrices = await shipload.locations.getMarketPrices(location)
-
-            const onChainLocation = await server.readonly('getlocation', {
-                x: location.x,
-                y: location.y,
-            })
-
-            assert.equal(goodPrices.length, onChainLocation.items.length)
-            goodPrices.forEach((goodPrice: {price: UInt64; item: {id: UInt64}}, index: number) => {
-                assert.isTrue(goodPrice.price.equals(onChainLocation.items[index].price))
-                assert(goodPrice.item.id.equals(onChainLocation.items[index].id))
-            })
         })
     })
 

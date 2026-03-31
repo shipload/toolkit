@@ -83,7 +83,6 @@ function createMockCargo(goodId: number, quantity: number) {
     return ServerContract.Types.cargo_item.from({
         item_id: goodId,
         quantity,
-        unit_cost: UInt64.from(100),
     })
 }
 

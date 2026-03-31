@@ -7,7 +7,6 @@ const items: Item[] = itemsData.map((g) =>
         id: g.id,
         name: g.name,
         description: g.description,
-        base_price: g.base_price,
         mass: g.mass,
         category: g.category,
         tier: g.tier,

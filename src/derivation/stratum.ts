@@ -85,7 +85,7 @@ export function deriveStratum(
 
     let depthBonus = 0
     if (stratum > 1) {
-        depthBonus = 50 * Math.log(stratum) / Math.log(65535)
+        depthBonus = (50 * Math.log(stratum)) / Math.log(65535)
     }
     const richness = Math.min(Math.floor(baseRichness + depthBonus), 1000)
 
@@ -95,7 +95,7 @@ export function deriveStratum(
 export function deriveResourceStats(seed: bigint): ResourceStats {
     const seedBytes = new Uint8Array(8)
     for (let i = 7; i >= 0; i--) {
-        seedBytes[i] = Number(seed & 0xFFn)
+        seedBytes[i] = Number(seed & 0xffn)
         seed >>= 8n
     }
     const hashResult = Checksum256.hash(Bytes.from(seedBytes))

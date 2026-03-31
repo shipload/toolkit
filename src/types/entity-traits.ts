@@ -11,7 +11,6 @@ export interface EntityTraits {
     isMovable: boolean
     hasEnergy: boolean
     hasLoaders: boolean
-    hasTrade: boolean
     notFoundError: string
 }
 
@@ -20,7 +19,7 @@ export const shipTraits: EntityTraits = {
     isMovable: true,
     hasEnergy: true,
     hasLoaders: true,
-    hasTrade: true,
+
     notFoundError: 'ship not found',
 }
 
@@ -29,7 +28,7 @@ export const warehouseTraits: EntityTraits = {
     isMovable: false,
     hasEnergy: false,
     hasLoaders: true,
-    hasTrade: false,
+
     notFoundError: 'warehouse not found',
 }
 
@@ -38,7 +37,7 @@ export const containerTraits: EntityTraits = {
     isMovable: true,
     hasEnergy: false,
     hasLoaders: false,
-    hasTrade: false,
+
     notFoundError: 'container not found',
 }
 

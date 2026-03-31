@@ -1,5 +1,6 @@
 import {assert} from 'chai'
 import {Int64, UInt32, UInt64} from '@wharfkit/antelope'
+
 import {Coordinates, makeShip, ServerContract} from '$lib'
 
 function createMockEngines() {
@@ -24,11 +25,10 @@ function createMockLoaders() {
     })
 }
 
-function createCargoItem(goodId: number, quantity: number, unitCost: number) {
+function createCargoItem(goodId: number, quantity: number) {
     return ServerContract.Types.cargo_item.from({
         item_id: goodId,
         quantity: UInt32.from(quantity),
-        unit_cost: UInt64.from(unitCost),
     })
 }
 
@@ -136,8 +136,8 @@ suite('Ship', function () {
         })
 
         test('cargo returns items when ship has cargo', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(3, 50, 100)
+            const cargo1 = createCargoItem(1, 100)
+            const cargo2 = createCargoItem(3, 50)
             const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
             assert.lengthOf(ship.cargo, 2)
             assert.isTrue(ship.hasSellableCargo)
@@ -149,20 +149,9 @@ suite('Ship', function () {
         })
 
         test('totalCargoMass calculates mass of all cargo', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isTrue(ship.totalCargoMass.gt(UInt64.from(0)))
-        })
-
-        test('cargoValue returns 0 if no cargo', function () {
-            const ship = makeStationaryShip()
-            assert.equal(ship.cargoValue.toNumber(), 0)
-        })
-
-        test('cargoValue calculates total cost', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-            assert.isTrue(ship.cargoValue.gt(UInt64.from(0)))
         })
 
         test('getCargoForItem returns undefined if no cargo', function () {
@@ -171,7 +160,7 @@ suite('Ship', function () {
         })
 
         test('getCargoForItem returns cargo for good', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             const found = ship.getCargoForItem(1)
             assert.isDefined(found)
@@ -179,21 +168,21 @@ suite('Ship', function () {
         })
 
         test('sellableCargo returns cargo with quantity > 0', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(3, 0, 100)
+            const cargo1 = createCargoItem(1, 100)
+            const cargo2 = createCargoItem(3, 0)
             const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
             const sellable = ship.sellableCargo
             assert.lengthOf(sellable, 1)
         })
 
         test('hasSellableCargo returns true when cargo exists', function () {
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isTrue(ship.hasSellableCargo)
         })
 
         test('hasSellableCargo returns false with zero quantity cargo', function () {
-            const cargo = createCargoItem(1, 0, 50)
+            const cargo = createCargoItem(1, 0)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isFalse(ship.hasSellableCargo)
         })
@@ -209,7 +198,7 @@ suite('Ship', function () {
         test('includes cargo mass when present', function () {
             const shipWithoutCargo = makeStationaryShip()
             const massWithoutCargo = shipWithoutCargo.totalMass
-            const cargo = createCargoItem(1, 100, 50)
+            const cargo = createCargoItem(1, 100)
             const shipWithCargo = makeStationaryShip({cargo: [cargo]})
             const massWithCargo = shipWithCargo.totalMass
             assert.isTrue(massWithCargo.gt(massWithoutCargo))
@@ -289,184 +278,6 @@ suite('Ship', function () {
         test('returns false when insufficient energy', function () {
             const ship = makeStationaryShip()
             assert.isFalse(ship.hasEnergyFor(UInt64.from(100000000)))
-        })
-    })
-
-    suite('calculateSaleValue', function () {
-        test('returns zeros with no cargo', function () {
-            const ship = makeStationaryShip()
-            const result = ship.calculateSaleValue(new Map())
-            assert.equal(result.revenue.toNumber(), 0)
-            assert.equal(result.profit.toNumber(), 0)
-            assert.equal(result.cost.toNumber(), 0)
-        })
-
-        test('calculates sale value with cargo and prices', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const prices = new Map<number, UInt64>()
-            prices.set(1, UInt64.from(100))
-
-            const result = ship.calculateSaleValue(prices)
-            assert.isTrue(result.revenue.gt(UInt64.from(0)))
-        })
-
-        test('handles missing price for good', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const prices = new Map<number, UInt64>()
-
-            const result = ship.calculateSaleValue(prices)
-            assert.equal(result.revenue.toNumber(), 0)
-        })
-
-        test('calculates profit correctly', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const prices = new Map<number, UInt64>()
-            prices.set(1, UInt64.from(100))
-
-            const result = ship.calculateSaleValue(prices)
-            const expectedRevenue = 100 * 100
-            const expectedCost = 50 * 100
-            const expectedProfit = expectedRevenue - expectedCost
-
-            assert.equal(result.revenue.toNumber(), expectedRevenue)
-            assert.equal(result.cost.toNumber(), expectedCost)
-            assert.equal(result.profit.toNumber(), expectedProfit)
-        })
-
-        test('profit is zero when cost exceeds revenue', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const prices = new Map<number, UInt64>()
-            prices.set(1, UInt64.from(10))
-
-            const result = ship.calculateSaleValue(prices)
-            assert.equal(result.profit.toNumber(), 0)
-        })
-
-        test('skips cargo with zero quantity', function () {
-            const cargoWithQty = createCargoItem(1, 100, 50)
-            const cargoEmpty = createCargoItem(3, 0, 50)
-            const ship = makeStationaryShip({cargo: [cargoWithQty, cargoEmpty]})
-
-            const prices = new Map<number, UInt64>()
-            prices.set(1, UInt64.from(100))
-            prices.set(3, UInt64.from(200))
-
-            const result = ship.calculateSaleValue(prices)
-            const expectedRevenue = 100 * 100
-            const expectedCost = 50 * 100
-            assert.equal(result.revenue.toNumber(), expectedRevenue)
-            assert.equal(result.cost.toNumber(), expectedCost)
-        })
-    })
-
-    suite('calculateSaleValueFromArray', function () {
-        test('converts array to map and calculates', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const prices = [UInt64.from(0), UInt64.from(100)]
-
-            const result = ship.calculateSaleValueFromArray(prices)
-            assert.isTrue(result.revenue.gt(UInt64.from(0)))
-        })
-    })
-
-    suite('afterSellItems', function () {
-        test('returns empty array when no cargo', function () {
-            const ship = makeStationaryShip()
-            const result = ship.afterSellItems([{goodId: 1, quantity: 5}])
-            assert.lengthOf(result, 0)
-        })
-
-        test('decreases quantity by sold amount', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(2, 50, 100)
-            const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
-
-            const result = ship.afterSellItems([{goodId: 1, quantity: 30}])
-
-            assert.lengthOf(result, 2)
-            assert.equal(result[0].quantity.toNumber(), 70)
-            assert.equal(result[1].quantity.toNumber(), 50)
-        })
-
-        test('sets quantity to 0 when selling more than available', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const result = ship.afterSellItems([{goodId: 1, quantity: 150}])
-
-            assert.lengthOf(result, 1)
-            assert.equal(result[0].quantity.toNumber(), 0)
-        })
-
-        test('only affects goods being sold', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(2, 50, 100)
-            const cargo3 = createCargoItem(3, 75, 80)
-            const ship = makeStationaryShip({cargo: [cargo1, cargo2, cargo3]})
-
-            const result = ship.afterSellItems([
-                {goodId: 1, quantity: 20},
-                {goodId: 3, quantity: 75},
-            ])
-
-            assert.equal(result[0].quantity.toNumber(), 80)
-            assert.equal(result[1].quantity.toNumber(), 50)
-            assert.equal(result[2].quantity.toNumber(), 0)
-        })
-
-        test('does not modify original cargo', function () {
-            const cargo = createCargoItem(1, 100, 50)
-            const ship = makeStationaryShip({cargo: [cargo]})
-
-            const result = ship.afterSellItems([{goodId: 1, quantity: 30}])
-
-            assert.equal(ship.cargo[0].quantity.toNumber(), 100)
-            assert.equal(result[0].quantity.toNumber(), 70)
-        })
-    })
-
-    suite('afterSellAllItems', function () {
-        test('returns empty array when no cargo', function () {
-            const ship = makeStationaryShip()
-            const result = ship.afterSellAllItems()
-            assert.lengthOf(result, 0)
-        })
-
-        test('sets quantity to 0 for all cargo', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(2, 50, 100)
-            const cargo3 = createCargoItem(3, 75, 80)
-            const ship = makeStationaryShip({cargo: [cargo1, cargo2, cargo3]})
-
-            const result = ship.afterSellAllItems()
-
-            assert.lengthOf(result, 3)
-            assert.equal(result[0].quantity.toNumber(), 0)
-            assert.equal(result[1].quantity.toNumber(), 0)
-            assert.equal(result[2].quantity.toNumber(), 0)
-        })
-
-        test('does not modify original cargo', function () {
-            const cargo1 = createCargoItem(1, 100, 50)
-            const cargo2 = createCargoItem(2, 50, 100)
-            const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
-
-            const result = ship.afterSellAllItems()
-
-            assert.equal(ship.cargo[0].quantity.toNumber(), 100)
-            assert.equal(ship.cargo[1].quantity.toNumber(), 50)
-            assert.equal(result[0].quantity.toNumber(), 0)
-            assert.equal(result[1].quantity.toNumber(), 0)
         })
     })
 })

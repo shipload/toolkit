@@ -20,10 +20,6 @@ export interface LoaderCapability {
     loaders: ServerContract.Types.loader_stats
 }
 
-export interface TradeCapability {
-    trade: ServerContract.Types.trade_stats
-}
-
 export interface ExtractorCapability {
     extractor: ServerContract.Types.extractor_stats
 }
@@ -42,7 +38,6 @@ export interface EntityCapabilities {
     engines?: ServerContract.Types.movement_stats
     generator?: ServerContract.Types.energy_stats
     loaders?: ServerContract.Types.loader_stats
-    trade?: ServerContract.Types.trade_stats
     extractor?: ServerContract.Types.extractor_stats
 }
 
@@ -64,10 +59,6 @@ export function capsHasStorage(caps: EntityCapabilities): boolean {
 
 export function capsHasLoaders(caps: EntityCapabilities): boolean {
     return caps.loaders !== undefined
-}
-
-export function capsHasTrade(caps: EntityCapabilities): boolean {
-    return caps.trade !== undefined
 }
 
 export function capsHasExtractor(caps: EntityCapabilities): boolean {

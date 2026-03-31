@@ -2,6 +2,7 @@ import {Checksum256, Checksum256Type, Checksum512, UInt8} from '@wharfkit/antelo
 import {hash512} from './hash'
 import {Coordinates, CoordinatesType, LocationType} from '../types'
 import {ServerContract} from '../contracts'
+import {deriveLocationSize} from '../derivation/location-size'
 import syllables from '../data/syllables.json'
 import nebulaAdjectives from '../data/nebula-adjectives.json'
 import nebulaNouns from '../data/nebula-nouns.json'
@@ -116,9 +117,7 @@ export function deriveLocationStatic(
     }
 
     loc.subtype = UInt8.from(
-        Number(loc.type) === LocationType.PLANET
-            ? hashResult.array[2] % 6
-            : hashResult.array[2]
+        Number(loc.type) === LocationType.PLANET ? hashResult.array[2] % 6 : hashResult.array[2]
     )
     loc.seed0 = UInt8.from(hashResult.array[3])
     loc.seed1 = UInt8.from(hashResult.array[4])
@@ -147,8 +146,10 @@ export function deriveLocation(
     epochSeed: Checksum256Type,
     coordinates: CoordinatesType
 ): ServerContract.Types.location_derived {
+    const staticProps = deriveLocationStatic(gameSeed, coordinates)
     return ServerContract.Types.location_derived.from({
-        static_props: deriveLocationStatic(gameSeed, coordinates),
+        static_props: staticProps,
         epoch_props: deriveLocationEpoch(epochSeed, coordinates),
+        size: deriveLocationSize(staticProps),
     })
 }

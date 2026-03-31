@@ -25,7 +25,6 @@ export type ShipEntity = Entity &
     LoaderCapability &
     MassCapability &
     ScheduleCapability & {
-        trade?: ServerContract.Types.trade_stats
         extractor?: ServerContract.Types.extractor_stats
     }
 

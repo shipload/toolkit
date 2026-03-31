@@ -23,13 +23,11 @@ export interface ProjectedEntity {
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
     generator?: ServerContract.Types.energy_stats
-    trade?: ServerContract.Types.trade_stats
     readonly totalMass: UInt64
 
     hasMovement(): boolean
     hasStorage(): boolean
     hasLoaders(): boolean
-    hasTrade(): boolean
 
     capabilities(): EntityCapabilities
     state(): EntityState
@@ -42,7 +40,6 @@ export interface Projectable extends ScheduleData {
     generator?: ServerContract.Types.energy_stats
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
-    trade?: ServerContract.Types.trade_stats
     capacity?: UInt32
     cargo: ServerContract.Types.cargo_item[]
     cargomass: UInt32
@@ -59,7 +56,6 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const loaders = entity.loaders
     const engines = entity.engines
     const generator = entity.generator
-    const trade = entity.trade
     const capacity = entity.capacity
 
     const projected: ProjectedEntity = {
@@ -71,7 +67,6 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         engines,
         generator,
         loaders,
-        trade,
 
         get totalMass() {
             let mass = UInt64.from(this.shipMass).adding(this.cargoMass)
@@ -93,10 +88,6 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
             return capsHasLoaders(this.capabilities())
         },
 
-        hasTrade() {
-            return this.trade !== undefined
-        },
-
         capabilities(): EntityCapabilities {
             return {
                 hullmass: this.shipMass,
@@ -104,7 +95,6 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
                 engines: this.engines,
                 generator: this.generator,
                 loaders: this.loaders,
-                trade: this.trade,
             }
         },
 

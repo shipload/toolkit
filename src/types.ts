@@ -12,7 +12,6 @@ import {ServerContract} from './contracts'
 
 export const PRECISION = 10000
 
-// Ship constants
 export const INITIAL_SHIP_GENERATOR_CAPACITY = 350
 export const INITIAL_SHIP_DRAIN = 25
 export const INITIAL_SHIP_ENERGY = 350
@@ -22,31 +21,24 @@ export const INITIAL_SHIP_Z = 800
 export const INITIAL_SHIP_RECHARGE = 10
 export const INITIAL_SHIP_THRUST = 250
 
-// Loader constants
 export const INITIAL_LOADER_MASS = 1000
 export const INITIAL_LOADER_QUANTITY = 1
 export const INITIAL_LOADER_THRUST = 1
 
-// Warehouse constants
 export const WAREHOUSE_Z = 500
 export const INITIAL_WAREHOUSE_CAPACITY = 10000000
 
-// Container constants
 export const CONTAINER_Z = 300
 export const INITIAL_CONTAINER_HULLMASS = 50000
 export const INITIAL_CONTAINER_CAPACITY = 2000000
 
-// Mechanics
 export const TRAVEL_MAX_DURATION = 86400
 
-// Altitude limits (for UI/calculations)
 export const MIN_ORBITAL_ALTITUDE = 800
 export const MAX_ORBITAL_ALTITUDE = 3000
 
-// Legacy alias (deprecated, use INITIAL_SHIP_CAPACITY)
 export const INITIAL_SHIP_MASS = 500000
 
-// Extractor constants
 export const INITIAL_EXTRACTOR_RATE = 700
 export const INITIAL_EXTRACTOR_DRAIN = 2500
 export const INITIAL_EXTRACTOR_EFFICIENCY = 5000
@@ -84,9 +76,9 @@ export enum LocationType {
 }
 
 export enum TaskCancelable {
-    NEVER = 0, // Task cannot be cancelled
-    BEFORE_START = 1, // Task can only be cancelled before it starts
-    ALWAYS = 2, // Task can always be cancelled
+    NEVER = 0,
+    BEFORE_START = 1,
+    ALWAYS = 2,
 }
 
 export const EntityType = {
@@ -144,8 +136,6 @@ export class Item extends Struct {
     @Struct.field('string')
     description!: string
     @Struct.field(UInt32)
-    base_price!: UInt32
-    @Struct.field(UInt32)
     mass!: UInt32
     @Struct.field('string')
     category!: ResourceCategory
@@ -153,16 +143,4 @@ export class Item extends Struct {
     tier!: ResourceTier
     @Struct.field('string')
     color!: string
-}
-
-@Struct.type('ItemPrice')
-export class ItemPrice extends Struct {
-    @Struct.field(UInt16)
-    id!: UInt16
-    @Struct.field(Item)
-    item!: Item
-    @Struct.field(UInt32)
-    price!: UInt32
-    @Struct.field(UInt16)
-    supply!: UInt16
 }

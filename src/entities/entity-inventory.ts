@@ -29,10 +29,6 @@ export class EntityInventory extends ServerContract.Types.cargo_item {
         return UInt64.from(this.unitMass).multiplying(this.quantity)
     }
 
-    get totalCost(): UInt64 {
-        return this.unit_cost.multiplying(this.quantity)
-    }
-
     get hasCargo(): boolean {
         return UInt32.from(this.quantity).gt(UInt32.from(0))
     }

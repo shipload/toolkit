@@ -6,7 +6,6 @@ import {
     MovementCapability,
     ScheduleCapability,
     StorageCapability,
-    TradeCapability,
 } from '../types/capabilities'
 import {Entity} from '../types/entity'
 
@@ -24,10 +23,6 @@ export function hasStorage(e: Entity): e is Entity & StorageCapability {
 
 export function hasLoaders(e: Entity): e is Entity & LoaderCapability {
     return 'loaders' in e && e.loaders !== undefined
-}
-
-export function hasTrade(e: Entity): e is Entity & TradeCapability {
-    return 'trade' in e && e.trade !== undefined
 }
 
 export function hasMass(e: Entity): e is Entity & MassCapability {

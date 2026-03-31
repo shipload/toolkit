@@ -37,7 +37,6 @@ export {
     EntitiesManager,
     PlayersManager,
     LocationsManager,
-    TradesManager,
     EpochsManager,
     ActionsManager,
 } from './managers'
@@ -47,8 +46,6 @@ export type {EntityRefInput} from './managers/actions'
 export {getItem, getItems, itemIds} from './market/items'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
-export {marketPrice, marketPrices, getRarity, getRarityMultiplier, Rarities} from './market/market'
-export type {Rarity} from './market/market'
 export {
     getSystemName,
     hasSystem,
@@ -91,31 +88,6 @@ export type {StatDefinition, NamedStats} from './derivation'
 
 export {hash, hash512} from './utils/hash'
 
-export type {Deal, FindDealsOptions} from './trading/deal'
-export {findDealsForShip, findBestDeal} from './trading/deal'
-
-export type {
-    CollectActionType,
-    CollectOption,
-    CollectAnalysis,
-    CollectAnalysisOptions,
-    CollectAnalysisCallbacks,
-    BetterSaleLocation,
-    RepositionLocation,
-    DiscountedItemInfo,
-    PotentialDeal,
-    CargoSaleItem,
-} from './trading/collect'
-export {
-    analyzeCollectOptions,
-    analyzeCargoSale,
-    createSellAndTradeOption,
-    createTravelToSellOption,
-    createSellAndRepositionOption,
-    createSellAndStayOption,
-    createExploreOption,
-} from './trading/collect'
-
 export {
     distanceBetweenCoordinates,
     distanceBetweenPoints,
@@ -152,19 +124,6 @@ export type {
     TransferEntity,
     HasScheduleAndLocation,
 } from './travel/travel'
-
-export {
-    calculateUpdatedCargoCost,
-    calculateMaxTradeQuantity,
-    calculateTradeProfit,
-    calculateProfitPerMass,
-    calculateProfitPerSecond,
-    findBestItemToTrade,
-    calculateBreakEvenPrice,
-    isProfitable,
-    calculateROI,
-} from './trading/trade'
-export type {TradeCalculation, TradeProfitResult} from './trading/trade'
 
 export * as schedule from './scheduling/schedule'
 export type {Scheduleable, ScheduleData} from './scheduling/schedule'

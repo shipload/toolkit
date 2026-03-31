@@ -58,10 +58,6 @@ export class Warehouse extends ServerContract.Types.entity_info {
         return this.inv.totalMass
     }
 
-    get cargoValue(): UInt64 {
-        return this.inv.totalValue
-    }
-
     get maxCapacity(): UInt64 {
         return UInt64.from(this.capacity)
     }

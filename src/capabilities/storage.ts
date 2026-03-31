@@ -24,14 +24,6 @@ export function calcCargoMass(entity: HasCargo): UInt64 {
     return mass
 }
 
-export function calcCargoValue(entity: HasCargo): UInt64 {
-    let value = UInt64.from(0)
-    for (const item of entity.cargo) {
-        value = value.adding(item.unit_cost.multiplying(item.quantity))
-    }
-    return value
-}
-
 export function availableCapacity(entity: StorageCapability): UInt64 {
     const cargoMass = calcCargoMass(entity)
     return entity.capacity.gt(cargoMass)

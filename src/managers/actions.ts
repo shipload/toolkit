@@ -1,14 +1,7 @@
 import {Action, Int64, Name, NameType, UInt16, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {Ship} from '../entities/ship'
 import {CoordinatesType, EntityType, EntityTypeName} from '../types'
 import {ServerContract} from '../contracts'
-
-interface SellableCargo {
-    item_id: {toNumber(): number} | number
-    quantity: {toNumber(): number} | number
-    hasCargo: boolean
-}
 
 export type EntityRefInput = {
     entityType: EntityTypeName
@@ -91,71 +84,6 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    buyItems(
-        entityId: UInt64Type,
-        goodId: UInt64Type,
-        quantity: UInt64Type,
-        entityType: EntityTypeName = EntityType.SHIP
-    ): Action {
-        return this.server.action('buyitems', {
-            entity_type: entityType,
-            id: UInt64.from(entityId),
-            item_id: UInt16.from(goodId),
-            quantity: UInt32.from(quantity),
-        })
-    }
-
-    sellItems(
-        entityId: UInt64Type,
-        goodId: UInt64Type,
-        quantity: UInt64Type,
-        entityType: EntityTypeName = EntityType.SHIP
-    ): Action {
-        return this.server.action('sellitems', {
-            entity_type: entityType,
-            id: UInt64.from(entityId),
-            item_id: UInt16.from(goodId),
-            quantity: UInt32.from(quantity),
-        })
-    }
-
-    buyShip(account: NameType, name: string): Action {
-        return this.server.action('buyship', {
-            account: Name.from(account),
-            name,
-        })
-    }
-
-    buyWarehouse(account: NameType, shipId: UInt64Type, name: string): Action {
-        return this.server.action('buywarehouse', {
-            account: Name.from(account),
-            ship_id: UInt64.from(shipId),
-            name,
-        })
-    }
-
-    buyContainer(account: NameType, shipId: UInt64Type, name: string): Action {
-        return this.server.action('buycontainer', {
-            account: Name.from(account),
-            ship_id: UInt64.from(shipId),
-            name,
-        })
-    }
-
-    takeLoan(account: NameType, amount: UInt64Type): Action {
-        return this.server.action('takeloan', {
-            account: Name.from(account),
-            amount: UInt64.from(amount),
-        })
-    }
-
-    payLoan(account: NameType, amount: UInt64Type): Action {
-        return this.server.action('payloan', {
-            account: Name.from(account),
-            amount: UInt64.from(amount),
-        })
-    }
-
     foundCompany(account: NameType, name: string): Action {
         return this.platform.action('foundcompany', {
             account: Name.from(account),
@@ -189,24 +117,5 @@ export class ActionsManager extends BaseManager {
 
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
-    }
-
-    sellAllCargo(ship: Ship | UInt64Type, cargo?: SellableCargo[]): Action[] {
-        let shipCargo: SellableCargo[]
-
-        if (ship instanceof Ship) {
-            shipCargo = cargo || ship.inventory
-        } else {
-            if (!cargo) {
-                throw new Error('cargo parameter required when ship is a UInt64Type')
-            }
-            shipCargo = cargo
-        }
-
-        const shipId = ship instanceof Ship ? ship.id : UInt64.from(ship)
-
-        return shipCargo
-            .filter((c) => c.hasCargo)
-            .map((c) => this.sellItems(shipId, c.item_id, c.quantity, EntityType.SHIP))
     }
 }

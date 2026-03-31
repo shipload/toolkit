@@ -21,7 +21,6 @@ import {
     hasEnergyForDistance,
     maxTravelDistance,
 } from '../capabilities/movement'
-import * as cargoUtils from './cargo-utils'
 import * as schedule from '../scheduling/schedule'
 
 export interface ShipStateInput {
@@ -133,10 +132,6 @@ export class Ship extends ServerContract.Types.entity_info {
         return this.inv.totalMass
     }
 
-    get cargoValue(): UInt64 {
-        return this.inv.totalValue
-    }
-
     get totalMass(): UInt64 {
         let mass = UInt64.from(this.hullmass ?? 0).adding(this.totalCargoMass)
         if (this.loaders) {
@@ -192,21 +187,5 @@ export class Ship extends ServerContract.Types.entity_info {
     hasEnergyFor(distance: UInt64): boolean {
         if (!this.engines || !this.generator || this.energy === undefined) return false
         return hasEnergyForDistance(this as MovementEntity, distance)
-    }
-
-    calculateSaleValue(prices: Map<number, UInt64>): cargoUtils.SaleValue {
-        return cargoUtils.calculateSaleValue(this.cargo, prices)
-    }
-
-    calculateSaleValueFromArray(prices: UInt64[]): cargoUtils.SaleValue {
-        return cargoUtils.calculateSaleValueFromArray(this.cargo, prices)
-    }
-
-    afterSellItems(goodsToSell: Array<{goodId: number; quantity: number}>): EntityInventory[] {
-        return cargoUtils.afterSellItems(this.cargo, goodsToSell)
-    }
-
-    afterSellAllItems(): EntityInventory[] {
-        return cargoUtils.afterSellAllItems(this.cargo)
     }
 }

@@ -12,12 +12,6 @@ export function totalCargoMass(cargo: EntityInventory[]): UInt64 {
     }, UInt64.from(0))
 }
 
-export function cargoValue(cargo: EntityInventory[]): UInt64 {
-    return cargo.reduce((sum, c) => {
-        return sum.adding(c.totalCost)
-    }, UInt64.from(0))
-}
-
 export function getCargoForItem(
     cargo: EntityInventory[],
     goodId: UInt64Type
@@ -47,84 +41,33 @@ export function isFull(currentMass: UInt64, maxCapacity: UInt64): boolean {
     return currentMass.gte(maxCapacity)
 }
 
-export interface SaleValue {
-    revenue: UInt64
-    profit: UInt64
-    cost: UInt64
-}
-
-export function calculateSaleValue(
+export function afterRemoveItems(
     cargo: ServerContract.Types.cargo_item[],
-    prices: Map<number, UInt64>
-): SaleValue {
-    if (cargo.length === 0) {
-        return {revenue: UInt64.from(0), profit: UInt64.from(0), cost: UInt64.from(0)}
-    }
-
-    let revenue = UInt64.from(0)
-    let cost = UInt64.from(0)
-
-    for (const item of cargo) {
-        if (UInt32.from(item.quantity).equals(UInt32.from(0))) continue
-
-        const goodId = Number(item.item_id)
-        const salePrice = prices.get(goodId)
-
-        if (salePrice) {
-            revenue = revenue.adding(salePrice.multiplying(item.quantity))
-        }
-
-        cost = cost.adding(item.unit_cost.multiplying(item.quantity))
-    }
-
-    const profit = revenue.gte(cost) ? revenue.subtracting(cost) : UInt64.from(0)
-
-    return {
-        revenue,
-        profit,
-        cost,
-    }
-}
-
-export function calculateSaleValueFromArray(
-    cargo: ServerContract.Types.cargo_item[],
-    prices: UInt64[]
-): SaleValue {
-    const priceMap = new Map<number, UInt64>()
-    prices.forEach((price, index) => {
-        priceMap.set(index, price)
-    })
-    return calculateSaleValue(cargo, priceMap)
-}
-
-export function afterSellItems(
-    cargo: ServerContract.Types.cargo_item[],
-    goodsToSell: Array<{goodId: number; quantity: number}>
+    goodsToRemove: Array<{goodId: number; quantity: number}>
 ): EntityInventory[] {
     if (cargo.length === 0) {
         return []
     }
 
     return cargo.map((item) => {
-        const saleItem = goodsToSell.find((s) => Number(item.item_id) === s.goodId)
-        if (!saleItem) {
+        const removeItem = goodsToRemove.find((s) => Number(item.item_id) === s.goodId)
+        if (!removeItem) {
             return new EntityInventory(item)
         }
 
         const currentQty = Number(item.quantity)
-        const newQty = Math.max(0, currentQty - saleItem.quantity)
+        const newQty = Math.max(0, currentQty - removeItem.quantity)
 
         return new EntityInventory(
             ServerContract.Types.cargo_item.from({
                 item_id: item.item_id,
                 quantity: UInt32.from(newQty),
-                unit_cost: item.unit_cost,
             })
         )
     })
 }
 
-export function afterSellAllItems(cargo: ServerContract.Types.cargo_item[]): EntityInventory[] {
+export function afterRemoveAllItems(cargo: ServerContract.Types.cargo_item[]): EntityInventory[] {
     if (cargo.length === 0) {
         return []
     }
@@ -135,7 +78,6 @@ export function afterSellAllItems(cargo: ServerContract.Types.cargo_item[]): Ent
                 ServerContract.Types.cargo_item.from({
                     item_id: item.item_id,
                     quantity: UInt32.from(0),
-                    unit_cost: item.unit_cost,
                 })
             )
     )
