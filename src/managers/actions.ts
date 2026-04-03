@@ -115,6 +115,45 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    craft(
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        recipeId: number,
+        quantity: number,
+        inputs: {itemId: number; quantity: number; seed?: bigint}[]
+    ): Action {
+        const cargoInputs = inputs.map((i) =>
+            ServerContract.Types.cargo_item.from({
+                item_id: UInt16.from(i.itemId),
+                quantity: UInt32.from(i.quantity),
+                seed: i.seed !== undefined ? UInt64.from(i.seed) : null,
+            })
+        )
+        return this.server.action('craft', {
+            entity_type: entityType,
+            id: UInt64.from(entityId),
+            recipe_id: UInt16.from(recipeId),
+            quantity: UInt32.from(quantity),
+            inputs: cargoInputs,
+        })
+    }
+
+    deploy(
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        packedItemId: number,
+        seed: bigint,
+        entityName: string
+    ): Action {
+        return this.server.action('deploy', {
+            entity_type: entityType,
+            id: UInt64.from(entityId),
+            packed_item_id: UInt16.from(packedItemId),
+            seed: UInt64.from(seed),
+            entity_name: entityName,
+        })
+    }
+
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
     }

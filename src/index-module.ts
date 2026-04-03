@@ -140,3 +140,37 @@ export type {Projectable, ProjectedEntity} from './scheduling/projection'
 export * from './types/capabilities'
 export * from './types/entity'
 export * from './capabilities'
+
+export {
+   components,
+   entityRecipes,
+   getComponentById,
+   getEntityRecipe,
+   getEntityRecipeByItemId,
+   getAllCraftableItems,
+   getComponentsForCategory,
+   getComponentsForStat,
+   ITEM_HULL_PLATES,
+   ITEM_CARGO_LINING,
+   ITEM_CONTAINER_PACKED,
+} from './data/recipes'
+export type {
+   ComponentDefinition,
+   ComponentStat,
+   RecipeInput,
+   EntityRecipe,
+   CraftableItem,
+} from './data/recipes'
+
+export {
+   encodeStats,
+   decodeStats,
+   decodeCraftedItemStats,
+   blendStacks,
+   computeComponentStats,
+   blendComponentStacks,
+   computeEntityStats,
+} from './derivation/crafting'
+export type {StackInput, CategoryStacks} from './derivation/crafting'
+
+export {computeContainerCapabilities} from './entities/container'

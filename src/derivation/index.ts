@@ -25,3 +25,4 @@ export {
 } from './resources'
 
 export * from './stats'
+export * from './crafting'

@@ -39,6 +39,7 @@ export interface EntityCapabilities {
     generator?: ServerContract.Types.energy_stats
     loaders?: ServerContract.Types.loader_stats
     extractor?: ServerContract.Types.extractor_stats
+    crafter?: ServerContract.Types.crafter_stats
 }
 
 export interface EntityState {

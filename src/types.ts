@@ -66,6 +66,8 @@ export enum TaskType {
     UNLOAD = 4,
     EXTRACT = 5,
     WARP = 6,
+    CRAFT = 7,
+    DEPLOY = 8,
 }
 
 export enum LocationType {

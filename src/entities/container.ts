@@ -68,3 +68,21 @@ export class Container extends ServerContract.Types.entity_info {
         return this.coordinates.z?.toNumber() || 0
     }
 }
+
+export function computeContainerCapabilities(stats: Record<string, number>): {
+	hullmass: number
+	capacity: number
+} {
+	const density = stats['density'] ?? 500
+	const strength = stats['strength'] ?? 500
+	const ductility = stats['ductility'] ?? 500
+	const purity = stats['purity'] ?? 500
+
+	const hullmass = 25000 + 75 * density
+
+	const statSum = strength + ductility + purity
+	const exponent = statSum / 2997
+	const capacity = Math.floor(1000000 * Math.pow(10, exponent))
+
+	return {hullmass, capacity}
+}
