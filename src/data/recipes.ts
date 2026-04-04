@@ -67,7 +67,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'strength', source: 'metal'},
 			{key: 'density', source: 'metal'},
 		],
-		recipe: [{category: 'metal', quantity: 40}],
+		recipe: [{category: 'metal', quantity: 15}],
 		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Ship T1'}],
 	},
 	{
@@ -82,8 +82,8 @@ export const components: ComponentDefinition[] = [
 			{key: 'purity', source: 'organic'},
 		],
 		recipe: [
-			{category: 'precious', quantity: 10},
-			{category: 'organic', quantity: 20},
+			{category: 'precious', quantity: 6},
+			{category: 'organic', quantity: 14},
 		],
 		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Ship T1'}],
 	},
@@ -97,7 +97,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'volatility', source: 'gas'},
 			{key: 'thermal', source: 'gas'},
 		],
-		recipe: [{category: 'gas' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
 		usedIn: [{type: 'module', name: 'Engine Module T1'}],
 	},
 	{
@@ -110,7 +110,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'resonance', source: 'mineral'},
 			{key: 'clarity', source: 'mineral'},
 		],
-		recipe: [{category: 'mineral' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'mineral' as ResourceCategory, quantity: 20}],
 		usedIn: [{type: 'module', name: 'Generator Module T1'}],
 	},
 	{
@@ -123,7 +123,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'strength', source: 'metal'},
 			{key: 'tolerance', source: 'metal'},
 		],
-		recipe: [{category: 'metal' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'metal' as ResourceCategory, quantity: 15}],
 		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
 	},
 	{
@@ -136,7 +136,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'conductivity', source: 'precious'},
 			{key: 'reflectivity', source: 'precious'},
 		],
-		recipe: [{category: 'precious' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'precious' as ResourceCategory, quantity: 10}],
 		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
 	},
 	{
@@ -149,7 +149,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'plasticity', source: 'organic'},
 			{key: 'insulation', source: 'organic'},
 		],
-		recipe: [{category: 'organic' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'organic' as ResourceCategory, quantity: 32}],
 		usedIn: [{type: 'module', name: 'Loader Module T1'}],
 	},
 	{
@@ -162,7 +162,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'hardness', source: 'mineral'},
 			{key: 'clarity', source: 'mineral'},
 		],
-		recipe: [{category: 'mineral' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'mineral' as ResourceCategory, quantity: 20}],
 		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
 	},
 	{
@@ -175,7 +175,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'reactivity', source: 'gas'},
 			{key: 'thermal', source: 'gas'},
 		],
-		recipe: [{category: 'gas' as ResourceCategory, quantity: 30}],
+		recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
 		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
 	},
 ]
@@ -205,7 +205,7 @@ export const entityRecipes: EntityRecipe[] = [
 		color: '#4AE898',
 		packedItemId: ITEM_SHIP_T1_PACKED,
 		recipe: [
-			{itemId: ITEM_HULL_PLATES, quantity: 12},
+			{itemId: ITEM_HULL_PLATES, quantity: 8},
 			{itemId: ITEM_CARGO_LINING, quantity: 4},
 		],
 		stats: [

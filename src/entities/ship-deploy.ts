@@ -23,8 +23,8 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
     const thm = stats.thermal ?? 500
 
     return {
-        thrust: 100 + Math.floor(vol * 4 / 10),
-        drain: Math.max(10, 50 - Math.floor(thm * 4 / 100)),
+        thrust: 400 + Math.floor(vol * 3 / 4),
+        drain: Math.max(16, 30 - Math.floor(thm / 70)),
     }
 }
 
@@ -36,7 +36,7 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     const clr = stats.clarity ?? 500
 
     return {
-        capacity: 150 + Math.floor(res * 45 / 100),
+        capacity: 300 + Math.floor(res / 6),
         recharge: 5 + Math.floor(clr * 15 / 1000),
     }
 }
@@ -57,7 +57,7 @@ export function computeExtractorCapabilities(stats: Record<string, number>): {
         rate: 200 + str,
         drain: Math.max(10, 50 - Math.floor(con / 20)),
         efficiency: 2000 + Math.floor(ref * 6),
-        depth: 20 + Math.floor(tol * 4 / 25),
+        depth: 200 + Math.floor(tol * 3 / 2),
         drill: 100 + Math.floor(ref * 4 / 5),
     }
 }

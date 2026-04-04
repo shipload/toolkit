@@ -63,37 +63,37 @@ suite('ship deploy formulas', function () {
 
     test('engine formula exact values at min', function () {
         const r = computeEngineCapabilities({volatility: 1, thermal: 1})
-        assert.equal(r.thrust, 100)
-        assert.equal(r.drain, 50)
+        assert.equal(r.thrust, 400)
+        assert.equal(r.drain, 30)
     })
 
     test('engine formula exact values at mid', function () {
         const r = computeEngineCapabilities({volatility: 500, thermal: 500})
-        assert.equal(r.thrust, 300)
-        assert.equal(r.drain, 30)
+        assert.equal(r.thrust, 775)
+        assert.equal(r.drain, 23)
     })
 
     test('engine formula exact values at max', function () {
         const r = computeEngineCapabilities({volatility: 999, thermal: 999})
-        assert.equal(r.thrust, 499)
-        assert.equal(r.drain, 11)
+        assert.equal(r.thrust, 1149)
+        assert.equal(r.drain, 16)
     })
 
     test('generator formula exact values at min', function () {
         const r = computeGeneratorCapabilities({resonance: 1, clarity: 1})
-        assert.equal(r.capacity, 150)
+        assert.equal(r.capacity, 300)
         assert.equal(r.recharge, 5)
     })
 
     test('generator formula exact values at mid', function () {
         const r = computeGeneratorCapabilities({resonance: 500, clarity: 500})
-        assert.equal(r.capacity, 375)
+        assert.equal(r.capacity, 383)
         assert.equal(r.recharge, 12)
     })
 
     test('generator formula exact values at max', function () {
         const r = computeGeneratorCapabilities({resonance: 999, clarity: 999})
-        assert.equal(r.capacity, 599)
+        assert.equal(r.capacity, 466)
         assert.equal(r.recharge, 19)
     })
 
@@ -120,7 +120,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.rate, 201)
         assert.equal(r.drain, 50)
         assert.equal(r.efficiency, 2006)
-        assert.equal(r.depth, 20)
+        assert.equal(r.depth, 201)
         assert.equal(r.drill, 100)
     })
 
@@ -129,7 +129,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.rate, 700)
         assert.equal(r.drain, 25)
         assert.equal(r.efficiency, 5000)
-        assert.equal(r.depth, 100)
+        assert.equal(r.depth, 950)
         assert.equal(r.drill, 500)
     })
 
@@ -138,7 +138,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.rate, 1199)
         assert.equal(r.drain, 10)
         assert.equal(r.efficiency, 7994)
-        assert.equal(r.depth, 179)
+        assert.equal(r.depth, 1698)
         assert.equal(r.drill, 899)
     })
 
