@@ -1,9 +1,10 @@
 import type {ResourceCategory} from '../types'
 import {
-	components,
 	entityRecipes,
 	getComponentById,
 	getEntityRecipe,
+	getModuleRecipe,
+	moduleRecipes,
 } from '../data/recipes'
 
 export interface StackInput {
@@ -32,26 +33,24 @@ export function decodeStats(seed: bigint, count: number): number[] {
 	return stats
 }
 
+function mapStatsToKeys(seed: bigint, statDefs: {key: string}[]): Record<string, number> {
+	const values = decodeStats(seed, statDefs.length)
+	const result: Record<string, number> = {}
+	for (let i = 0; i < statDefs.length; i++) {
+		result[statDefs[i].key] = values[i]
+	}
+	return result
+}
+
 export function decodeCraftedItemStats(itemId: number, seed: bigint): Record<string, number> {
 	const comp = getComponentById(itemId)
-	if (comp) {
-		const values = decodeStats(seed, comp.stats.length)
-		const result: Record<string, number> = {}
-		for (let i = 0; i < comp.stats.length; i++) {
-			result[comp.stats[i].key] = values[i]
-		}
-		return result
-	}
+	if (comp) return mapStatsToKeys(seed, comp.stats)
 
 	const entityRecipe = entityRecipes.find((r) => r.packedItemId === itemId)
-	if (entityRecipe) {
-		const values = decodeStats(seed, entityRecipe.stats.length)
-		const result: Record<string, number> = {}
-		for (let i = 0; i < entityRecipe.stats.length; i++) {
-			result[entityRecipe.stats[i].key] = values[i]
-		}
-		return result
-	}
+	if (entityRecipe) return mapStatsToKeys(seed, entityRecipe.stats)
+
+	const moduleRecipe = moduleRecipes.find((r) => r.itemId === itemId)
+	if (moduleRecipe) return mapStatsToKeys(seed, moduleRecipe.stats)
 
 	return {}
 }
@@ -65,7 +64,7 @@ export function blendStacks(stacks: StackInput[], statKey: string): number {
 		totalQty += stack.quantity
 	}
 	if (totalQty === 0) return 0
-	return Math.round(weightedSum / totalQty)
+	return Math.floor(weightedSum / totalQty)
 }
 
 export function computeComponentStats(
@@ -104,7 +103,7 @@ export function computeEntityStats(
 	entityRecipeId: string,
 	componentStacks: Record<number, {quantity: number; stats: Record<string, number>}[]>
 ): {key: string; value: number}[] {
-	const recipe = getEntityRecipe(entityRecipeId)
+	const recipe = getEntityRecipe(entityRecipeId) ?? getModuleRecipe(entityRecipeId)
 	if (!recipe) return []
 
 	const blendedByComponent: Record<number, Record<string, number>> = {}

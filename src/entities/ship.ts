@@ -28,12 +28,12 @@ export interface ShipStateInput {
     owner: string
     name: string
     coordinates: CoordinatesType | {x: number; y: number; z?: number}
-    hullmass: number
-    capacity: number
-    energy: number
-    engines: ServerContract.Types.movement_stats
-    generator: ServerContract.Types.energy_stats
-    loaders: ServerContract.Types.loader_stats
+    hullmass?: number
+    capacity?: number
+    energy?: number
+    engines?: ServerContract.Types.movement_stats
+    generator?: ServerContract.Types.energy_stats
+    loaders?: ServerContract.Types.loader_stats
     schedule?: ServerContract.Types.schedule
     cargo?: ServerContract.Types.cargo_item[]
 }
@@ -106,6 +106,14 @@ export class Ship extends ServerContract.Types.entity_info {
 
     isExtracting(now: Date): boolean {
         return schedule.isExtracting(this, now)
+    }
+
+    get hasEngines(): boolean {
+        return this.engines !== undefined
+    }
+
+    get hasGenerator(): boolean {
+        return this.generator !== undefined
     }
 
     get hasExtractor(): boolean {

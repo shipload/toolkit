@@ -144,21 +144,30 @@ export * from './capabilities'
 export {
    components,
    entityRecipes,
+   moduleRecipes,
    getComponentById,
    getEntityRecipe,
    getEntityRecipeByItemId,
+   getModuleRecipe,
+   getModuleRecipeByItemId,
    getAllCraftableItems,
    getComponentsForCategory,
    getComponentsForStat,
    ITEM_HULL_PLATES,
    ITEM_CARGO_LINING,
    ITEM_CONTAINER_PACKED,
+   ITEM_THRUSTER_CORE,
+   ITEM_POWER_CELL,
+   ITEM_ENGINE_T1,
+   ITEM_GENERATOR_T1,
+   ITEM_SHIP_T1_PACKED,
 } from './data/recipes'
 export type {
    ComponentDefinition,
    ComponentStat,
    RecipeInput,
    EntityRecipe,
+   ModuleRecipe,
    CraftableItem,
 } from './data/recipes'
 
@@ -174,3 +183,9 @@ export {
 export type {StackInput, CategoryStacks} from './derivation/crafting'
 
 export {computeContainerCapabilities} from './entities/container'
+
+export {
+    computeShipHullCapabilities,
+    computeEngineCapabilities,
+    computeGeneratorCapabilities,
+} from './entities/ship-deploy'

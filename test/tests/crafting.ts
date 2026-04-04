@@ -52,7 +52,7 @@ suite('Crafting', function () {
                 ],
                 'strength'
             )
-            assert.equal(result, 518)
+            assert.equal(result, 517)
         })
 
         test('single stack returns its value', function () {
@@ -83,8 +83,8 @@ suite('Crafting', function () {
             assert.equal(stats.length, 2)
             const str = stats.find((s) => s.key === 'strength')
             const den = stats.find((s) => s.key === 'density')
-            assert.equal(str!.value, 518)
-            assert.equal(den!.value, 263)
+            assert.equal(str!.value, 517)
+            assert.equal(den!.value, 262)
         })
 
         test('cargo lining from precious + organic', function () {
@@ -119,7 +119,7 @@ suite('Crafting', function () {
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
-            assert.equal(str!.value, 467)
+            assert.equal(str!.value, 466)
         })
     })
 

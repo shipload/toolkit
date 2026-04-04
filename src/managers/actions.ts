@@ -154,6 +154,36 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    addmodule(
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        moduleIndex: number,
+        moduleCargoId: UInt64Type,
+        targetCargoId: UInt64Type = UInt64.from(0)
+    ): Action {
+        return this.server.action('addmodule', {
+            entity_type: entityType,
+            entity_id: UInt64.from(entityId),
+            module_index: moduleIndex,
+            module_cargo_id: UInt64.from(moduleCargoId),
+            target_cargo_id: UInt64.from(targetCargoId),
+        })
+    }
+
+    rmmodule(
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        moduleIndex: number,
+        targetCargoId: UInt64Type = UInt64.from(0)
+    ): Action {
+        return this.server.action('rmmodule', {
+            entity_type: entityType,
+            entity_id: UInt64.from(entityId),
+            module_index: moduleIndex,
+            target_cargo_id: UInt64.from(targetCargoId),
+        })
+    }
+
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
     }

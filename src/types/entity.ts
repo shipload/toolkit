@@ -19,10 +19,10 @@ export interface Entity {
 }
 
 export type ShipEntity = Entity &
-    MovementCapability &
-    EnergyCapability &
+    Partial<MovementCapability> &
+    Partial<EnergyCapability> &
     StorageCapability &
-    LoaderCapability &
+    Partial<LoaderCapability> &
     MassCapability &
     ScheduleCapability & {
         extractor?: ServerContract.Types.extractor_stats
