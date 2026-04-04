@@ -3,10 +3,16 @@ import {
     getModuleCapabilityType,
     isModuleItem,
     ITEM_ENGINE_T1,
+    ITEM_EXTRACTOR_T1,
     ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
+    ITEM_MANUFACTURING_T1,
     MODULE_ANY,
+    MODULE_CRAFTER,
     MODULE_ENGINE,
+    MODULE_EXTRACTOR,
     MODULE_GENERATOR,
+    MODULE_LOADER,
     moduleAccepts,
 } from '$lib'
 
@@ -30,5 +36,32 @@ suite('modules', function () {
         assert.isTrue(isModuleItem(ITEM_ENGINE_T1))
         assert.isTrue(isModuleItem(ITEM_GENERATOR_T1))
         assert.isFalse(isModuleItem(10001))
+    })
+
+    test('MODULE_ANY accepts new module types', function () {
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_EXTRACTOR))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_LOADER))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_CRAFTER))
+    })
+
+    test('typed slots accept matching new types', function () {
+        assert.isTrue(moduleAccepts(MODULE_EXTRACTOR, MODULE_EXTRACTOR))
+        assert.isFalse(moduleAccepts(MODULE_EXTRACTOR, MODULE_ENGINE))
+        assert.isTrue(moduleAccepts(MODULE_LOADER, MODULE_LOADER))
+        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_GENERATOR))
+        assert.isTrue(moduleAccepts(MODULE_CRAFTER, MODULE_CRAFTER))
+        assert.isFalse(moduleAccepts(MODULE_CRAFTER, MODULE_EXTRACTOR))
+    })
+
+    test('getModuleCapabilityType returns correct type for new modules', function () {
+        assert.equal(getModuleCapabilityType(ITEM_EXTRACTOR_T1), MODULE_EXTRACTOR)
+        assert.equal(getModuleCapabilityType(ITEM_LOADER_T1), MODULE_LOADER)
+        assert.equal(getModuleCapabilityType(ITEM_MANUFACTURING_T1), MODULE_CRAFTER)
+    })
+
+    test('isModuleItem identifies new modules', function () {
+        assert.isTrue(isModuleItem(ITEM_EXTRACTOR_T1))
+        assert.isTrue(isModuleItem(ITEM_LOADER_T1))
+        assert.isTrue(isModuleItem(ITEM_MANUFACTURING_T1))
     })
 })

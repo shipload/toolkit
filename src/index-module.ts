@@ -161,6 +161,14 @@ export {
    ITEM_ENGINE_T1,
    ITEM_GENERATOR_T1,
    ITEM_SHIP_T1_PACKED,
+   ITEM_DRILL_SHAFT,
+   ITEM_EXTRACTION_PROBE,
+   ITEM_CARGO_ARM,
+   ITEM_TOOL_BIT,
+   ITEM_REACTION_CHAMBER,
+   ITEM_EXTRACTOR_T1,
+   ITEM_LOADER_T1,
+   ITEM_MANUFACTURING_T1,
 } from './data/recipes'
 export type {
    ComponentDefinition,
@@ -188,4 +196,7 @@ export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
     computeGeneratorCapabilities,
+    computeExtractorCapabilities,
+    computeLoaderCapabilities,
+    computeManufacturingCapabilities,
 } from './entities/ship-deploy'

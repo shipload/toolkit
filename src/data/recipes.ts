@@ -1,7 +1,13 @@
-import {MODULE_ENGINE, MODULE_GENERATOR, ITEM_ENGINE_T1, ITEM_GENERATOR_T1} from '../capabilities/modules'
+import {MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1} from '../capabilities/modules'
 import type {ResourceCategory} from '../types'
 
-export {ITEM_ENGINE_T1, ITEM_GENERATOR_T1}
+export {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1}
+
+export const ITEM_DRILL_SHAFT = 10009
+export const ITEM_EXTRACTION_PROBE = 10010
+export const ITEM_CARGO_ARM = 10011
+export const ITEM_TOOL_BIT = 10012
+export const ITEM_REACTION_CHAMBER = 10013
 
 export const ITEM_HULL_PLATES = 10001
 export const ITEM_CARGO_LINING = 10002
@@ -107,6 +113,71 @@ export const components: ComponentDefinition[] = [
 		recipe: [{category: 'mineral' as ResourceCategory, quantity: 30}],
 		usedIn: [{type: 'module', name: 'Generator Module T1'}],
 	},
+	{
+		id: ITEM_DRILL_SHAFT,
+		name: 'Drill Shaft',
+		description: 'Heavy-duty metal shaft used in extraction equipment.',
+		color: '#7B8D9E',
+		mass: 50000,
+		stats: [
+			{key: 'strength', source: 'metal'},
+			{key: 'tolerance', source: 'metal'},
+		],
+		recipe: [{category: 'metal' as ResourceCategory, quantity: 30}],
+		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
+	},
+	{
+		id: ITEM_EXTRACTION_PROBE,
+		name: 'Extraction Probe',
+		description: 'Precious metal sensor array for deep resource detection.',
+		color: '#D4A843',
+		mass: 30000,
+		stats: [
+			{key: 'conductivity', source: 'precious'},
+			{key: 'reflectivity', source: 'precious'},
+		],
+		recipe: [{category: 'precious' as ResourceCategory, quantity: 30}],
+		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
+	},
+	{
+		id: ITEM_CARGO_ARM,
+		name: 'Cargo Arm',
+		description: 'Flexible organic composite arm for cargo handling.',
+		color: '#6B8E5A',
+		mass: 30000,
+		stats: [
+			{key: 'plasticity', source: 'organic'},
+			{key: 'insulation', source: 'organic'},
+		],
+		recipe: [{category: 'organic' as ResourceCategory, quantity: 30}],
+		usedIn: [{type: 'module', name: 'Loader Module T1'}],
+	},
+	{
+		id: ITEM_TOOL_BIT,
+		name: 'Tool Bit',
+		description: 'Dense mineral cutting head for manufacturing operations.',
+		color: '#B8A9C9',
+		mass: 30000,
+		stats: [
+			{key: 'hardness', source: 'mineral'},
+			{key: 'clarity', source: 'mineral'},
+		],
+		recipe: [{category: 'mineral' as ResourceCategory, quantity: 30}],
+		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
+	},
+	{
+		id: ITEM_REACTION_CHAMBER,
+		name: 'Reaction Chamber',
+		description: 'Gas-pressurized vessel for controlled manufacturing reactions.',
+		color: '#7EC8E3',
+		mass: 50000,
+		stats: [
+			{key: 'reactivity', source: 'gas'},
+			{key: 'thermal', source: 'gas'},
+		],
+		recipe: [{category: 'gas' as ResourceCategory, quantity: 30}],
+		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
+	},
 ]
 
 export const entityRecipes: EntityRecipe[] = [
@@ -182,6 +253,57 @@ export const moduleRecipes: ModuleRecipe[] = [
 		stats: [
 			{key: 'resonance', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'resonance'},
 			{key: 'clarity', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'clarity'},
+		],
+	},
+	{
+		id: 'extractor-t1',
+		name: 'Extractor Module T1',
+		description: 'Basic extraction system. Drills and probes for raw resources.',
+		color: '#7B8D9E',
+		itemId: ITEM_EXTRACTOR_T1,
+		moduleType: MODULE_EXTRACTOR,
+		recipe: [
+			{itemId: ITEM_DRILL_SHAFT, quantity: 4},
+			{itemId: ITEM_EXTRACTION_PROBE, quantity: 3},
+		],
+		stats: [
+			{key: 'strength', sourceComponentId: ITEM_DRILL_SHAFT, sourceStatKey: 'strength'},
+			{key: 'tolerance', sourceComponentId: ITEM_DRILL_SHAFT, sourceStatKey: 'tolerance'},
+			{key: 'reflectivity', sourceComponentId: ITEM_EXTRACTION_PROBE, sourceStatKey: 'reflectivity'},
+			{key: 'conductivity', sourceComponentId: ITEM_EXTRACTION_PROBE, sourceStatKey: 'conductivity'},
+			{key: 'reflectivity_drill', sourceComponentId: ITEM_EXTRACTION_PROBE, sourceStatKey: 'reflectivity'},
+		],
+	},
+	{
+		id: 'loader-t1',
+		name: 'Loader Module T1',
+		description: 'Basic cargo handling system. Loads and unloads cargo with articulated arms.',
+		color: '#6B8E5A',
+		itemId: ITEM_LOADER_T1,
+		moduleType: MODULE_LOADER,
+		recipe: [
+			{itemId: ITEM_CARGO_LINING, quantity: 3},
+			{itemId: ITEM_CARGO_ARM, quantity: 3},
+		],
+		stats: [
+			{key: 'ductility', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'ductility'},
+			{key: 'plasticity', sourceComponentId: ITEM_CARGO_ARM, sourceStatKey: 'plasticity'},
+		],
+	},
+	{
+		id: 'manufacturing-t1',
+		name: 'Manufacturing Module T1',
+		description: 'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
+		color: '#7EC8E3',
+		itemId: ITEM_MANUFACTURING_T1,
+		moduleType: MODULE_CRAFTER,
+		recipe: [
+			{itemId: ITEM_TOOL_BIT, quantity: 3},
+			{itemId: ITEM_REACTION_CHAMBER, quantity: 3},
+		],
+		stats: [
+			{key: 'reactivity', sourceComponentId: ITEM_REACTION_CHAMBER, sourceStatKey: 'reactivity'},
+			{key: 'clarity', sourceComponentId: ITEM_TOOL_BIT, sourceStatKey: 'clarity'},
 		],
 	},
 ]

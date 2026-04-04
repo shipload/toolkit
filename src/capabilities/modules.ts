@@ -1,5 +1,8 @@
 export const ITEM_ENGINE_T1 = 10006
 export const ITEM_GENERATOR_T1 = 10007
+export const ITEM_EXTRACTOR_T1 = 10014
+export const ITEM_LOADER_T1 = 10015
+export const ITEM_MANUFACTURING_T1 = 10016
 
 export const MODULE_ANY = 0
 export const MODULE_ENGINE = 1
@@ -30,6 +33,12 @@ export function getModuleCapabilityType(itemId: number): number {
             return MODULE_ENGINE
         case ITEM_GENERATOR_T1:
             return MODULE_GENERATOR
+        case ITEM_EXTRACTOR_T1:
+            return MODULE_EXTRACTOR
+        case ITEM_LOADER_T1:
+            return MODULE_LOADER
+        case ITEM_MANUFACTURING_T1:
+            return MODULE_CRAFTER
         default:
             return 0xff
     }

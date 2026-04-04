@@ -40,3 +40,52 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
         recharge: 5 + Math.floor(clr * 15 / 1000),
     }
 }
+
+export function computeExtractorCapabilities(stats: Record<string, number>): {
+    rate: number
+    drain: number
+    efficiency: number
+    depth: number
+    drill: number
+} {
+    const str = stats.strength ?? 500
+    const con = stats.conductivity ?? 500
+    const ref = stats.reflectivity ?? 500
+    const tol = stats.tolerance ?? 500
+
+    return {
+        rate: 200 + str,
+        drain: Math.max(10, 50 - Math.floor(con / 20)),
+        efficiency: 2000 + Math.floor(ref * 6),
+        depth: 20 + Math.floor(tol * 4 / 25),
+        drill: 100 + Math.floor(ref * 4 / 5),
+    }
+}
+
+export function computeLoaderCapabilities(stats: Record<string, number>): {
+    mass: number
+    thrust: number
+    quantity: number
+} {
+    const duc = stats.ductility ?? 500
+    const pla = stats.plasticity ?? 500
+
+    return {
+        mass: Math.max(200, 2000 - Math.floor(duc * 2)),
+        thrust: 1 + Math.floor(pla / 500),
+        quantity: 1,
+    }
+}
+
+export function computeManufacturingCapabilities(stats: Record<string, number>): {
+    speed: number
+    drain: number
+} {
+    const rea = stats.reactivity ?? 500
+    const clr = stats.clarity ?? 500
+
+    return {
+        speed: 100 + Math.floor(rea * 4 / 5),
+        drain: Math.max(5, 30 - Math.floor(clr / 33)),
+    }
+}
