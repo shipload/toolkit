@@ -141,8 +141,6 @@ export namespace Types {
         @Struct.field(UInt16)
         declare drain: UInt16
         @Struct.field(UInt16)
-        declare efficiency: UInt16
-        @Struct.field(UInt16)
         declare depth: UInt16
         @Struct.field(UInt16)
         declare drill: UInt16
@@ -161,26 +159,6 @@ export namespace Types {
     }
     @Struct.type('entity_defaults')
     export class entity_defaults extends Struct {
-        @Struct.field(UInt32)
-        declare ship_hullmass: UInt32
-        @Struct.field(UInt32)
-        declare ship_capacity: UInt32
-        @Struct.field(UInt16)
-        declare ship_energy: UInt16
-        @Struct.field(UInt16)
-        declare ship_z: UInt16
-        @Struct.field(movement_stats)
-        declare ship_engines: movement_stats
-        @Struct.field(energy_stats)
-        declare ship_generator: energy_stats
-        @Struct.field(loader_stats)
-        declare ship_loaders: loader_stats
-        @Struct.field(extractor_stats)
-        declare ship_extractor: extractor_stats
-        @Struct.field(warp_stats)
-        declare ship_warp: warp_stats
-        @Struct.field(crafter_stats)
-        declare ship_crafter: crafter_stats
         @Struct.field(UInt32)
         declare warehouse_capacity: UInt32
         @Struct.field(UInt16)
@@ -463,8 +441,6 @@ export namespace Types {
         @Struct.field(Name)
         declare account: Name
     }
-    @Struct.type('getstarter')
-    export class getstarter extends Struct {}
     @Struct.type('getstratum')
     export class getstratum extends Struct {
         @Struct.field(Int64)
@@ -741,11 +717,6 @@ export namespace Types {
         @Struct.field(UInt64)
         declare quantity: UInt64
     }
-    @Struct.type('starter_info')
-    export class starter_info extends Struct {
-        @Struct.field(entity_info)
-        declare ship: entity_info
-    }
     @Struct.type('state_row')
     export class state_row extends Struct {
         @Struct.field('bool')
@@ -818,8 +789,6 @@ export namespace Types {
         declare id: UInt64
         @Struct.field(entity_summary)
         declare entity_summary_type: entity_summary
-        @Struct.field(starter_info)
-        declare starter_info_type: starter_info
         @Struct.field(game_config)
         declare game_config_type: game_config
     }
@@ -894,16 +863,6 @@ export namespace ActionParams {
             items: Type.item_def[]
         }
         export interface entity_defaults {
-            ship_hullmass: UInt32Type
-            ship_capacity: UInt32Type
-            ship_energy: UInt16Type
-            ship_z: UInt16Type
-            ship_engines: Type.movement_stats
-            ship_generator: Type.energy_stats
-            ship_loaders: Type.loader_stats
-            ship_extractor: Type.extractor_stats
-            ship_warp: Type.warp_stats
-            ship_crafter: Type.crafter_stats
             warehouse_capacity: UInt32Type
             warehouse_z: UInt16Type
             warehouse_loaders: Type.loader_stats
@@ -927,7 +886,6 @@ export namespace ActionParams {
         export interface extractor_stats {
             rate: UInt16Type
             drain: UInt16Type
-            efficiency: UInt16Type
             depth: UInt16Type
             drill: UInt16Type
         }
@@ -1058,7 +1016,6 @@ export namespace ActionParams {
     export interface getplayer {
         account: NameType
     }
-    export interface getstarter {}
     export interface getstratum {
         x: Int64Type
         y: Int64Type
@@ -1150,7 +1107,6 @@ export interface ActionNameParams {
     getlocdata: ActionParams.getlocdata
     getnearby: ActionParams.getnearby
     getplayer: ActionParams.getplayer
-    getstarter: ActionParams.getstarter
     getstratum: ActionParams.getstratum
     getsummaries: ActionParams.getsummaries
     grouptravel: ActionParams.grouptravel
@@ -1183,7 +1139,6 @@ export interface ActionReturnValues {
     getlocdata: Types.location_derived
     getnearby: Types.nearby_info
     getplayer: Types.player_info
-    getstarter: Types.starter_info
     getstratum: Types.stratum_data
     getsummaries: Types.entity_summary[]
     grouptravel: Types.task_results

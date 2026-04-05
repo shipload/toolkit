@@ -25,7 +25,7 @@ import {
     lerp,
     rotation,
 } from 'src/travel'
-import {INITIAL_SHIP_MASS, MAX_ORBITAL_ALTITUDE, MIN_ORBITAL_ALTITUDE} from 'src/types'
+import {BASE_ORBITAL_MASS, MAX_ORBITAL_ALTITUDE, MIN_ORBITAL_ALTITUDE} from 'src/types'
 import {assert} from 'chai'
 import {Chains} from '@wharfkit/session'
 import {UInt64} from '@wharfkit/antelope'
@@ -420,26 +420,26 @@ suite('travel', function () {
 
     suite('calc_orbital_altitude', () => {
         test('returns MIN_ORBITAL_ALTITUDE for initial ship mass', () => {
-            const altitude = calc_orbital_altitude(INITIAL_SHIP_MASS)
+            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS)
             assert.equal(altitude, MIN_ORBITAL_ALTITUDE)
         })
 
         test('returns MIN_ORBITAL_ALTITUDE for mass below initial', () => {
-            const altitude = calc_orbital_altitude(INITIAL_SHIP_MASS / 2)
+            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS / 2)
             assert.equal(altitude, MIN_ORBITAL_ALTITUDE)
         })
 
         test('increases with heavier mass', () => {
-            const alt1 = calc_orbital_altitude(INITIAL_SHIP_MASS)
-            const alt2 = calc_orbital_altitude(INITIAL_SHIP_MASS * 2)
-            const alt3 = calc_orbital_altitude(INITIAL_SHIP_MASS * 5)
+            const alt1 = calc_orbital_altitude(BASE_ORBITAL_MASS)
+            const alt2 = calc_orbital_altitude(BASE_ORBITAL_MASS * 2)
+            const alt3 = calc_orbital_altitude(BASE_ORBITAL_MASS * 5)
 
             assert.isAtLeast(alt2, alt1)
             assert.isAtLeast(alt3, alt2)
         })
 
         test('caps at MAX_ORBITAL_ALTITUDE for very heavy mass', () => {
-            const altitude = calc_orbital_altitude(INITIAL_SHIP_MASS * 100)
+            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS * 100)
             assert.isAtMost(altitude, MAX_ORBITAL_ALTITUDE)
         })
     })

@@ -12,6 +12,8 @@ import {
     ITEM_CARGO_LINING,
     ITEM_CONTAINER_PACKED,
     computeContainerCapabilities,
+    calc_craft_duration,
+    calc_craft_energy,
 } from '$lib'
 
 suite('Crafting', function () {
@@ -200,6 +202,48 @@ suite('Crafting', function () {
             const low = computeContainerCapabilities({density: 100, strength: 500, ductility: 500, purity: 500})
             const high = computeContainerCapabilities({density: 900, strength: 500, ductility: 500, purity: 500})
             assert.isBelow(low.hullmass, high.hullmass)
+        })
+    })
+
+    suite('calc_craft_duration', function () {
+        test('basic duration calculation', function () {
+            const duration = calc_craft_duration(500, 450000, 1)
+            assert.equal(duration.toNumber(), 900)
+        })
+
+        test('batch quantity multiplies input mass', function () {
+            const single = calc_craft_duration(500, 450000, 1)
+            const batch = calc_craft_duration(500, 450000, 8)
+            assert.equal(batch.toNumber(), single.toNumber() * 8)
+        })
+
+        test('higher speed reduces duration', function () {
+            const slow = calc_craft_duration(200, 450000, 1)
+            const fast = calc_craft_duration(800, 450000, 1)
+            assert.isAbove(slow.toNumber(), fast.toNumber())
+        })
+
+        test('minimum duration is 1', function () {
+            const duration = calc_craft_duration(999, 1, 1)
+            assert.isAtLeast(duration.toNumber(), 1)
+        })
+    })
+
+    suite('calc_craft_energy', function () {
+        test('basic energy calculation', function () {
+            const energy = calc_craft_energy(15, 900)
+            assert.equal(energy.toNumber(), 1)
+        })
+
+        test('higher drain costs more energy', function () {
+            const low = calc_craft_energy(5, 1000)
+            const high = calc_craft_energy(30, 1000)
+            assert.isAbove(high.toNumber(), low.toNumber())
+        })
+
+        test('zero duration costs zero energy', function () {
+            const energy = calc_craft_energy(15, 0)
+            assert.equal(energy.toNumber(), 0)
         })
     })
 })

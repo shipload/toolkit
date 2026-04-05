@@ -12,19 +12,6 @@ import {ServerContract} from './contracts'
 
 export const PRECISION = 10000
 
-export const INITIAL_SHIP_GENERATOR_CAPACITY = 350
-export const INITIAL_SHIP_DRAIN = 25
-export const INITIAL_SHIP_ENERGY = 350
-export const INITIAL_SHIP_HULLMASS = 100000
-export const INITIAL_SHIP_CAPACITY = 500000
-export const INITIAL_SHIP_Z = 800
-export const INITIAL_SHIP_RECHARGE = 10
-export const INITIAL_SHIP_THRUST = 250
-
-export const INITIAL_LOADER_MASS = 1000
-export const INITIAL_LOADER_QUANTITY = 1
-export const INITIAL_LOADER_THRUST = 1
-
 export const WAREHOUSE_Z = 500
 export const INITIAL_WAREHOUSE_CAPACITY = 10000000
 
@@ -37,11 +24,7 @@ export const TRAVEL_MAX_DURATION = 86400
 export const MIN_ORBITAL_ALTITUDE = 800
 export const MAX_ORBITAL_ALTITUDE = 3000
 
-export const INITIAL_SHIP_MASS = 500000
-
-export const INITIAL_EXTRACTOR_RATE = 700
-export const INITIAL_EXTRACTOR_DRAIN = 2500
-export const INITIAL_EXTRACTOR_EFFICIENCY = 5000
+export const BASE_ORBITAL_MASS = 100000
 
 export interface ShipLike {
     coordinates: ServerContract.Types.coordinates

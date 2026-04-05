@@ -119,7 +119,6 @@ suite('ship deploy formulas', function () {
         const r = computeExtractorCapabilities({strength: 1, tolerance: 1, conductivity: 1, reflectivity: 1})
         assert.equal(r.rate, 201)
         assert.equal(r.drain, 50)
-        assert.equal(r.efficiency, 2006)
         assert.equal(r.depth, 201)
         assert.equal(r.drill, 100)
     })
@@ -128,7 +127,6 @@ suite('ship deploy formulas', function () {
         const r = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 500})
         assert.equal(r.rate, 700)
         assert.equal(r.drain, 25)
-        assert.equal(r.efficiency, 5000)
         assert.equal(r.depth, 950)
         assert.equal(r.drill, 500)
     })
@@ -137,7 +135,6 @@ suite('ship deploy formulas', function () {
         const r = computeExtractorCapabilities({strength: 999, tolerance: 999, conductivity: 999, reflectivity: 999})
         assert.equal(r.rate, 1199)
         assert.equal(r.drain, 10)
-        assert.equal(r.efficiency, 7994)
         assert.equal(r.depth, 1698)
         assert.equal(r.drill, 899)
     })
@@ -154,10 +151,9 @@ suite('ship deploy formulas', function () {
         assert.isAbove(low.drain, high.drain)
     })
 
-    test('higher REF = higher efficiency AND drill', function () {
+    test('higher REF = higher drill', function () {
         const low = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 100})
         const high = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 900})
-        assert.isBelow(low.efficiency, high.efficiency)
         assert.isBelow(low.drill, high.drill)
     })
 

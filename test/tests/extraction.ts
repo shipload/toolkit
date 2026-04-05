@@ -6,9 +6,6 @@ import {
     capsHasExtractor,
     getLocationType,
     hasExtractor,
-    INITIAL_EXTRACTOR_DRAIN,
-    INITIAL_EXTRACTOR_EFFICIENCY,
-    INITIAL_EXTRACTOR_RATE,
     isExtractableLocation,
     LocationType,
     PRECISION,
@@ -49,20 +46,6 @@ suite('extraction', function () {
 
         test('NEBULA equals 3', function () {
             assert.equal(LocationType.NEBULA, 3)
-        })
-    })
-
-    suite('extractor constants', function () {
-        test('INITIAL_EXTRACTOR_RATE equals 700', function () {
-            assert.equal(INITIAL_EXTRACTOR_RATE, 700)
-        })
-
-        test('INITIAL_EXTRACTOR_DRAIN equals 2500', function () {
-            assert.equal(INITIAL_EXTRACTOR_DRAIN, 2500)
-        })
-
-        test('INITIAL_EXTRACTOR_EFFICIENCY equals 5000', function () {
-            assert.equal(INITIAL_EXTRACTOR_EFFICIENCY, 5000)
         })
     })
 
@@ -130,8 +113,7 @@ suite('extraction', function () {
                 coordinates: {x: 0, y: 0},
                 extractor: {
                     rate: UInt16.from(700),
-                    drain: UInt16.from(2500),
-                    efficiency: UInt16.from(5000),
+                    drain: UInt16.from(25),
                 },
             }
             assert.isTrue(hasExtractor(entity as any))
@@ -166,8 +148,7 @@ suite('extraction', function () {
             const caps = {
                 extractor: {
                     rate: UInt16.from(700),
-                    drain: UInt16.from(2500),
-                    efficiency: UInt16.from(5000),
+                    drain: UInt16.from(25),
                 },
             }
             assert.isTrue(capsHasExtractor(caps as any))
@@ -189,60 +170,70 @@ suite('extraction', function () {
     suite('calc_extraction_duration', function () {
         const extractor = ServerContract.Types.extractor_stats.from({
             rate: UInt16.from(700),
-            drain: UInt16.from(2500),
-            efficiency: UInt16.from(5000),
-            depth: UInt16.from(0),
-            drill: UInt16.from(100),
+            drain: UInt16.from(25),
+            depth: UInt16.from(950),
+            drill: UInt16.from(500),
         })
 
-        test('returns UInt32', function () {
-            const duration = calc_extraction_duration(extractor, 10000, 0, 5000)
-            assert.ok(duration.toNumber !== undefined)
+        test('duration increases with quantity', function () {
+            const one = calc_extraction_duration(extractor, 15000, 1, 600, 500)
+            const five = calc_extraction_duration(extractor, 15000, 5, 600, 500)
+            assert.isAbove(five.toNumber(), one.toNumber())
         })
 
-        test('returns 0 for zero rate product', function () {
-            const zeroEfficiency = ServerContract.Types.extractor_stats.from({
-                rate: UInt16.from(700),
-                drain: UInt16.from(2500),
-                efficiency: UInt16.from(0),
-                depth: UInt16.from(0),
-                drill: UInt16.from(100),
-            })
-            const duration = calc_extraction_duration(zeroEfficiency, 10000, 0, 5000)
-            assert.equal(duration.toNumber(), 0)
+        test('heavier mass increases duration', function () {
+            const light = calc_extraction_duration(extractor, 15000, 1, 600, 500)
+            const heavy = calc_extraction_duration(extractor, 40000, 1, 600, 500)
+            assert.isAbove(heavy.toNumber(), light.toNumber())
         })
 
-        test('duration increases with cargo mass', function () {
-            const small = calc_extraction_duration(extractor, 10000, 0, 5000)
-            const large = calc_extraction_duration(extractor, 50000, 0, 5000)
-            assert.isAbove(large.toNumber(), small.toNumber())
-        })
-
-        test('duration increases with stratum depth', function () {
-            const shallow = calc_extraction_duration(extractor, 10000, 100, 5000)
-            const deep = calc_extraction_duration(extractor, 10000, 500, 5000)
+        test('deeper stratum increases duration', function () {
+            const shallow = calc_extraction_duration(extractor, 15000, 1, 100, 500)
+            const deep = calc_extraction_duration(extractor, 15000, 1, 900, 500)
             assert.isAbove(deep.toNumber(), shallow.toNumber())
         })
 
         test('higher richness reduces duration', function () {
-            const lowRichness = calc_extraction_duration(extractor, 10000, 0, 2500)
-            const highRichness = calc_extraction_duration(extractor, 10000, 0, 7500)
+            const lowRichness = calc_extraction_duration(extractor, 15000, 1, 600, 250)
+            const highRichness = calc_extraction_duration(extractor, 15000, 1, 600, 750)
             assert.isBelow(highRichness.toNumber(), lowRichness.toNumber())
         })
 
-        test('calculation matches expected formula', function () {
-            const cargoMass = 50000
-            const stratum = 200
-            const richness = 5000
-            const PRECISION_VAL = 10000
+        test('returns 0 for zero rate', function () {
+            const zeroRate = ServerContract.Types.extractor_stats.from({
+                rate: UInt16.from(0),
+                drain: UInt16.from(25),
+                depth: UInt16.from(950),
+                drill: UInt16.from(500),
+            })
+            const duration = calc_extraction_duration(zeroRate, 15000, 1, 600, 500)
+            assert.equal(duration.toNumber(), 0)
+        })
+
+        test('median hydrogen at stratum 600', function () {
+            const duration = calc_extraction_duration(extractor, 15000, 1, 600, 500)
+            assert.equal(duration.toNumber(), 275)
+        })
+
+        test('median copper at stratum 600', function () {
+            const duration = calc_extraction_duration(extractor, 40000, 1, 600, 500)
+            assert.equal(duration.toNumber(), 300)
+        })
+
+        test('exact formula calculation', function () {
+            const itemMass = 15000
+            const quantity = 3
+            const stratum = 600
+            const richness = 500
             const rate = extractor.rate.toNumber()
-            const efficiency = extractor.efficiency.toNumber()
             const drill = extractor.drill.toNumber()
-            const rateProduct = Math.floor((rate * richness * efficiency) / PRECISION_VAL)
-            const expectedExtractionTime = Math.floor((cargoMass * PRECISION_VAL) / rateProduct)
-            const expectedDrillTime = Math.floor(stratum / drill)
-            const expected = expectedExtractionTime + expectedDrillTime
-            const duration = calc_extraction_duration(extractor, cargoMass, stratum, richness)
+            const massFactor = Math.sqrt(itemMass)
+            const depthPenalty = 1 + stratum / 5000
+            const richnessMul = richness / 1000
+            const extractionTime = quantity * massFactor * 100 * depthPenalty / (rate * richnessMul)
+            const drillTime = 300 * Math.log(1 + stratum / drill)
+            const expected = Math.floor(extractionTime + drillTime)
+            const duration = calc_extraction_duration(extractor, itemMass, quantity, stratum, richness)
             assert.equal(duration.toNumber(), expected)
         })
     })
@@ -250,10 +241,9 @@ suite('extraction', function () {
     suite('calc_extraction_energy', function () {
         const extractor = ServerContract.Types.extractor_stats.from({
             rate: UInt16.from(700),
-            drain: UInt16.from(2500),
-            efficiency: UInt16.from(5000),
-            depth: UInt16.from(0),
-            drill: UInt16.from(0),
+            drain: UInt16.from(25),
+            depth: UInt16.from(950),
+            drill: UInt16.from(500),
         })
 
         test('returns UInt16', function () {
@@ -275,17 +265,15 @@ suite('extraction', function () {
         test('energy scales with drain rate', function () {
             const lowDrain = ServerContract.Types.extractor_stats.from({
                 rate: UInt16.from(700),
-                drain: UInt16.from(1000),
-                efficiency: UInt16.from(5000),
-                depth: UInt16.from(0),
-                drill: UInt16.from(0),
+                drain: UInt16.from(10),
+                depth: UInt16.from(950),
+                drill: UInt16.from(500),
             })
             const highDrain = ServerContract.Types.extractor_stats.from({
                 rate: UInt16.from(700),
-                drain: UInt16.from(5000),
-                efficiency: UInt16.from(5000),
-                depth: UInt16.from(0),
-                drill: UInt16.from(0),
+                drain: UInt16.from(50),
+                depth: UInt16.from(950),
+                drill: UInt16.from(500),
             })
             const lowEnergy = calc_extraction_energy(lowDrain, 1000)
             const highEnergy = calc_extraction_energy(highDrain, 1000)

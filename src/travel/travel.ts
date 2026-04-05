@@ -24,7 +24,7 @@ import {ServerContract} from '../contracts'
 import {
     CargoMassInfo,
     Distance,
-    INITIAL_SHIP_MASS,
+    BASE_ORBITAL_MASS,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     PRECISION,
@@ -35,11 +35,11 @@ import {getItem} from '../market/items'
 import {hasSystem} from '../utils/system'
 
 export function calc_orbital_altitude(mass: number): number {
-    if (mass <= INITIAL_SHIP_MASS) {
+    if (mass <= BASE_ORBITAL_MASS) {
         return MIN_ORBITAL_ALTITUDE
     }
 
-    const ratio = mass / INITIAL_SHIP_MASS
+    const ratio = mass / BASE_ORBITAL_MASS
     const capRatio = 10.0
     let scale = Math.log(ratio) / Math.log(capRatio)
     scale = Math.min(scale, 1.0)

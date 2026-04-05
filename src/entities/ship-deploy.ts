@@ -44,7 +44,6 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
 export function computeExtractorCapabilities(stats: Record<string, number>): {
     rate: number
     drain: number
-    efficiency: number
     depth: number
     drill: number
 } {
@@ -56,7 +55,6 @@ export function computeExtractorCapabilities(stats: Record<string, number>): {
     return {
         rate: 200 + str,
         drain: Math.max(10, 50 - Math.floor(con / 20)),
-        efficiency: 2000 + Math.floor(ref * 6),
         depth: 200 + Math.floor(tol * 3 / 2),
         drill: 100 + Math.floor(ref * 4 / 5),
     }
