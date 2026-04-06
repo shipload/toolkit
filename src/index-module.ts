@@ -141,6 +141,8 @@ export * from './types/capabilities'
 export * from './types/entity'
 export * from './capabilities'
 
+export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon} from './data/colors'
+
 export {
    components,
    entityRecipes,
@@ -201,3 +203,6 @@ export {
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
 } from './entities/ship-deploy'
+
+export {resolveItem} from './resolution/resolve-item'
+export type {ResolvedItem, ResolvedItemStat, ResolvedAttributeGroup, ResolvedItemType} from './resolution/resolve-item'
