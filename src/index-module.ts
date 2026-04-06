@@ -141,7 +141,7 @@ export * from './types/capabilities'
 export * from './types/entity'
 export * from './capabilities'
 
-export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon} from './data/colors'
+export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon, itemIcons} from './data/colors'
 
 export {
    components,
@@ -178,6 +178,7 @@ export type {
    RecipeInput,
    EntityRecipe,
    ModuleRecipe,
+   ModuleSlot,
    CraftableItem,
 } from './data/recipes'
 
@@ -205,4 +206,4 @@ export {
 } from './entities/ship-deploy'
 
 export {resolveItem} from './resolution/resolve-item'
-export type {ResolvedItem, ResolvedItemStat, ResolvedAttributeGroup, ResolvedItemType} from './resolution/resolve-item'
+export type {ResolvedItem, ResolvedItemStat, ResolvedAttributeGroup, ResolvedModuleSlot, ResolvedItemType} from './resolution/resolve-item'

@@ -9,7 +9,7 @@ import {deriveResourceStats} from '../derivation/stratum'
 import {getStatDefinitions} from '../derivation/stats'
 import {computeShipHullCapabilities, computeEngineCapabilities, computeGeneratorCapabilities, computeExtractorCapabilities, computeLoaderCapabilities, computeManufacturingCapabilities} from '../entities/ship-deploy'
 import {computeContainerCapabilities} from '../entities/container'
-import {categoryColors, categoryIcons, componentIcon, moduleIcon} from '../data/colors'
+import {categoryColors, categoryIcons, componentIcon, moduleIcon, itemIcons} from '../data/colors'
 import {ServerContract} from '../contracts'
 
 export interface ResolvedItemStat {
@@ -29,6 +29,12 @@ export interface ResolvedAttributeGroup {
 
 export type ResolvedItemType = 'resource' | 'component' | 'module' | 'entity'
 
+export interface ResolvedModuleSlot {
+    name?: string
+    installed: boolean
+    attributes?: {label: string; value: number}[]
+}
+
 export interface ResolvedItem {
     itemId: number
     name: string
@@ -39,6 +45,7 @@ export interface ResolvedItem {
     itemType: ResolvedItemType
     stats?: ResolvedItemStat[]
     attributes?: ResolvedAttributeGroup[]
+    moduleSlots?: ResolvedModuleSlot[]
 }
 
 function toNum(v: UInt16Type): number {
@@ -107,7 +114,7 @@ function resolveComponent(id: number, seed?: UInt64Type): ResolvedItem {
     return {
         itemId: id,
         name: comp.name,
-        icon: componentIcon,
+        icon: itemIcons[id] ?? componentIcon,
         tier: 't1' as ResourceTier,
         mass: comp.mass,
         itemType: 'component',
@@ -172,7 +179,7 @@ function resolveModule(id: number, seed?: UInt64Type): ResolvedItem {
     return {
         itemId: id,
         name: recipe.name,
-        icon: moduleIcon,
+        icon: itemIcons[id] ?? moduleIcon,
         tier: 't1' as ResourceTier,
         mass: 0,
         itemType: 'module',
@@ -183,6 +190,8 @@ function resolveModule(id: number, seed?: UInt64Type): ResolvedItem {
 function resolveEntity(id: number, seed?: UInt64Type, modules?: ServerContract.Types.module_entry[]): ResolvedItem {
     const recipe = getEntityRecipeByItemId(id)!
     let attributes: ResolvedAttributeGroup[] | undefined
+    let moduleSlots: ResolvedModuleSlot[] | undefined
+
     if (seed !== undefined) {
         const stats = decodeCraftedItemStats(id, toBigSeed(seed))
         attributes = []
@@ -201,27 +210,37 @@ function resolveEntity(id: number, seed?: UInt64Type, modules?: ServerContract.T
                 {label: 'Capacity', value: containerCaps.capacity},
             ]})
         }
+    }
 
-        if (modules) {
-            for (const mod of modules) {
-                if (!mod.installed) continue
+    if (recipe.moduleSlots) {
+        moduleSlots = recipe.moduleSlots.map((slot, i) => {
+            const mod = modules?.[i]
+            if (mod?.installed) {
                 const modItemId = Number(mod.installed.item_id.value.toString())
                 const modSeed = BigInt(mod.installed.seed.toString())
                 const modStats = decodeCraftedItemStats(modItemId, modSeed)
                 const modType = getModuleCapabilityType(modItemId)
                 const group = computeCapabilityGroup(modType, modStats)
-                if (group) attributes.push(group)
+                const modRecipe = getModuleRecipeByItemId(modItemId)
+                return {
+                    name: modRecipe?.name ?? 'Module',
+                    installed: true,
+                    attributes: group?.attributes,
+                }
             }
-        }
+            return {installed: false}
+        })
     }
+
     return {
         itemId: id,
         name: recipe.name,
-        icon: componentIcon,
+        icon: itemIcons[id] ?? componentIcon,
         tier: 't1' as ResourceTier,
         mass: 0,
         itemType: 'entity',
         attributes,
+        moduleSlots,
     }
 }
 

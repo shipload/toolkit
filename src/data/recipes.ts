@@ -1,4 +1,4 @@
-import {MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1} from '../capabilities/modules'
+import {MODULE_ANY, MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1} from '../capabilities/modules'
 import type {ResourceCategory} from '../types'
 
 export {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1}
@@ -38,6 +38,10 @@ export interface ComponentDefinition {
 	usedIn: {type: 'entity' | 'module'; name: string}[]
 }
 
+export interface ModuleSlot {
+	type: number
+}
+
 export interface EntityRecipe {
 	id: string
 	name: string
@@ -46,6 +50,7 @@ export interface EntityRecipe {
 	packedItemId: number
 	recipe: RecipeInput[]
 	stats: {key: string; sourceComponentId: number; sourceStatKey: string}[]
+	moduleSlots?: ModuleSlot[]
 }
 
 export interface CraftableItem {
@@ -98,7 +103,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'thermal', source: 'gas'},
 		],
 		recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
-		usedIn: [{type: 'module', name: 'Engine Module T1'}],
+		usedIn: [{type: 'module', name: 'Engine'}],
 	},
 	{
 		id: ITEM_POWER_CELL,
@@ -111,7 +116,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'clarity', source: 'mineral'},
 		],
 		recipe: [{category: 'mineral' as ResourceCategory, quantity: 20}],
-		usedIn: [{type: 'module', name: 'Generator Module T1'}],
+		usedIn: [{type: 'module', name: 'Generator'}],
 	},
 	{
 		id: ITEM_DRILL_SHAFT,
@@ -124,7 +129,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'tolerance', source: 'metal'},
 		],
 		recipe: [{category: 'metal' as ResourceCategory, quantity: 15}],
-		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
+		usedIn: [{type: 'module', name: 'Extractor'}],
 	},
 	{
 		id: ITEM_EXTRACTION_PROBE,
@@ -137,7 +142,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'reflectivity', source: 'precious'},
 		],
 		recipe: [{category: 'precious' as ResourceCategory, quantity: 10}],
-		usedIn: [{type: 'module', name: 'Extractor Module T1'}],
+		usedIn: [{type: 'module', name: 'Extractor'}],
 	},
 	{
 		id: ITEM_CARGO_ARM,
@@ -150,7 +155,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'insulation', source: 'organic'},
 		],
 		recipe: [{category: 'organic' as ResourceCategory, quantity: 32}],
-		usedIn: [{type: 'module', name: 'Loader Module T1'}],
+		usedIn: [{type: 'module', name: 'Loader'}],
 	},
 	{
 		id: ITEM_TOOL_BIT,
@@ -163,7 +168,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'clarity', source: 'mineral'},
 		],
 		recipe: [{category: 'mineral' as ResourceCategory, quantity: 20}],
-		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
+		usedIn: [{type: 'module', name: 'Manufacturing'}],
 	},
 	{
 		id: ITEM_REACTION_CHAMBER,
@@ -176,7 +181,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'thermal', source: 'gas'},
 		],
 		recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
-		usedIn: [{type: 'module', name: 'Manufacturing Module T1'}],
+		usedIn: [{type: 'module', name: 'Manufacturing'}],
 	},
 ]
 
@@ -214,6 +219,13 @@ export const entityRecipes: EntityRecipe[] = [
 			{key: 'ductility', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'ductility'},
 			{key: 'purity', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'purity'},
 		],
+		moduleSlots: [
+			{type: MODULE_ANY},
+			{type: MODULE_ANY},
+			{type: MODULE_ANY},
+			{type: MODULE_ANY},
+			{type: MODULE_ANY},
+		],
 	},
 ]
 
@@ -231,7 +243,7 @@ export interface ModuleRecipe {
 export const moduleRecipes: ModuleRecipe[] = [
 	{
 		id: 'engine-t1',
-		name: 'Engine Module T1',
+		name: 'Engine',
 		description: 'Basic propulsion system. Converts volatile gases into thrust.',
 		color: '#E86344',
 		itemId: ITEM_ENGINE_T1,
@@ -244,7 +256,7 @@ export const moduleRecipes: ModuleRecipe[] = [
 	},
 	{
 		id: 'generator-t1',
-		name: 'Generator Module T1',
+		name: 'Generator',
 		description: 'Basic energy system. Stores and recharges energy from resonant minerals.',
 		color: '#7B5AE8',
 		itemId: ITEM_GENERATOR_T1,
@@ -257,7 +269,7 @@ export const moduleRecipes: ModuleRecipe[] = [
 	},
 	{
 		id: 'extractor-t1',
-		name: 'Extractor Module T1',
+		name: 'Extractor',
 		description: 'Basic extraction system. Drills and probes for raw resources.',
 		color: '#7B8D9E',
 		itemId: ITEM_EXTRACTOR_T1,
@@ -276,7 +288,7 @@ export const moduleRecipes: ModuleRecipe[] = [
 	},
 	{
 		id: 'loader-t1',
-		name: 'Loader Module T1',
+		name: 'Loader',
 		description: 'Basic cargo handling system. Loads and unloads cargo with articulated arms.',
 		color: '#6B8E5A',
 		itemId: ITEM_LOADER_T1,
@@ -292,7 +304,7 @@ export const moduleRecipes: ModuleRecipe[] = [
 	},
 	{
 		id: 'manufacturing-t1',
-		name: 'Manufacturing Module T1',
+		name: 'Manufacturing',
 		description: 'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
 		color: '#7EC8E3',
 		itemId: ITEM_MANUFACTURING_T1,
