@@ -187,6 +187,7 @@ export {
    computeComponentStats,
    blendComponentStacks,
    computeEntityStats,
+   blendCargoStacks,
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks} from './derivation/crafting'
 

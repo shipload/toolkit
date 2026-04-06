@@ -120,20 +120,31 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         recipeId: number,
         quantity: number,
-        inputs: {itemId: number; quantity: number; seed?: bigint}[]
+        inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
         const cargoInputs = inputs.map((i) =>
-            ServerContract.Types.cargo_item.from({
-                item_id: UInt16.from(i.itemId),
-                quantity: UInt32.from(i.quantity),
-                seed: i.seed !== undefined ? UInt64.from(i.seed) : null,
-            })
+            ServerContract.Types.cargo_item.from(i)
         )
         return this.server.action('craft', {
             entity_type: entityType,
             id: UInt64.from(entityId),
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
+            inputs: cargoInputs,
+        })
+    }
+
+    blend(
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        inputs: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        const cargoInputs = inputs.map((i) =>
+            ServerContract.Types.cargo_item.from(i)
+        )
+        return this.server.action('blend', {
+            entity_type: entityType,
+            id: UInt64.from(entityId),
             inputs: cargoInputs,
         })
     }

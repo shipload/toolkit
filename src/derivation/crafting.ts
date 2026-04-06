@@ -1,3 +1,4 @@
+import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
 import {
 	entityRecipes,
@@ -6,6 +7,7 @@ import {
 	getModuleRecipe,
 	moduleRecipes,
 } from '../data/recipes'
+import {deriveResourceStats} from './stratum'
 
 export interface StackInput {
 	quantity: number
@@ -116,4 +118,25 @@ export function computeEntityStats(
 		const value = blended[stat.sourceStatKey] ?? 0
 		return {key: stat.key, value: Math.max(1, Math.min(999, value))}
 	})
+}
+
+function decodeStackStats(itemId: number, seed: UInt64): Record<string, number> {
+	if (itemId >= 10000) {
+		return decodeCraftedItemStats(itemId, BigInt(seed.toString()))
+	}
+	const raw = deriveResourceStats(BigInt(seed.toString()))
+	return {stat1: raw.stat1, stat2: raw.stat2, stat3: raw.stat3}
+}
+
+export function blendCargoStacks(
+	itemId: number,
+	stacks: {quantity: number; seed: UInt64}[]
+): UInt64 {
+	const decoded = stacks.map((s) => ({
+		quantity: s.quantity,
+		stats: decodeStackStats(itemId, s.seed),
+	}))
+	const allKeys = Object.keys(decoded[0]?.stats ?? {})
+	const blended = allKeys.map((key) => Math.max(1, Math.min(999, blendStacks(decoded, key))))
+	return UInt64.from(encodeStats(blended))
 }
