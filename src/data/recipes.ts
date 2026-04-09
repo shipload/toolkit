@@ -11,10 +11,11 @@ export const ITEM_REACTION_CHAMBER = 10013
 
 export const ITEM_HULL_PLATES = 10001
 export const ITEM_CARGO_LINING = 10002
-export const ITEM_CONTAINER_PACKED = 10003
+export const ITEM_CONTAINER_T1_PACKED = 10003
 export const ITEM_THRUSTER_CORE = 10004
 export const ITEM_POWER_CELL = 10005
 export const ITEM_SHIP_T1_PACKED = 10008
+export const ITEM_WAREHOUSE_T1_PACKED = 10017
 
 export interface RecipeInput {
 	category?: ResourceCategory
@@ -73,7 +74,7 @@ export const components: ComponentDefinition[] = [
 			{key: 'density', source: 'metal'},
 		],
 		recipe: [{category: 'metal', quantity: 15}],
-		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Ship T1'}],
+		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Warehouse T1'}, {type: 'entity', name: 'Ship T1'}],
 	},
 	{
 		id: ITEM_CARGO_LINING,
@@ -90,7 +91,7 @@ export const components: ComponentDefinition[] = [
 			{category: 'precious', quantity: 6},
 			{category: 'organic', quantity: 14},
 		],
-		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Ship T1'}],
+		usedIn: [{type: 'entity', name: 'Container'}, {type: 'entity', name: 'Warehouse T1'}, {type: 'entity', name: 'Ship T1'}],
 	},
 	{
 		id: ITEM_THRUSTER_CORE,
@@ -191,7 +192,7 @@ export const entityRecipes: EntityRecipe[] = [
 		name: 'Container',
 		description: 'Passive floating cargo storage in space. Towed by ships.',
 		color: '#7B8D9E',
-		packedItemId: ITEM_CONTAINER_PACKED,
+		packedItemId: ITEM_CONTAINER_T1_PACKED,
 		recipe: [
 			{itemId: ITEM_HULL_PLATES, quantity: 6},
 			{itemId: ITEM_CARGO_LINING, quantity: 2},
@@ -225,6 +226,26 @@ export const entityRecipes: EntityRecipe[] = [
 			{type: MODULE_ANY},
 			{type: MODULE_ANY},
 			{type: MODULE_ANY},
+		],
+	},
+	{
+		id: 'warehouse-t1',
+		name: 'Warehouse T1',
+		description: 'Massive stationary storage facility with a single loader module slot.',
+		color: '#EAB308',
+		packedItemId: ITEM_WAREHOUSE_T1_PACKED,
+		recipe: [
+			{itemId: ITEM_HULL_PLATES, quantity: 20},
+			{itemId: ITEM_CARGO_LINING, quantity: 10},
+		],
+		stats: [
+			{key: 'strength', sourceComponentId: ITEM_HULL_PLATES, sourceStatKey: 'strength'},
+			{key: 'density', sourceComponentId: ITEM_HULL_PLATES, sourceStatKey: 'density'},
+			{key: 'ductility', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'ductility'},
+			{key: 'purity', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'purity'},
+		],
+		moduleSlots: [
+			{type: MODULE_LOADER},
 		],
 	},
 ]

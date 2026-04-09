@@ -24,7 +24,7 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
 
     return {
         thrust: 400 + Math.floor(vol * 3 / 4),
-        drain: Math.max(16, 30 - Math.floor(thm / 70)),
+        drain: Math.max(30, 50 - Math.floor(thm / 70)),
     }
 }
 
@@ -86,4 +86,21 @@ export function computeManufacturingCapabilities(stats: Record<string, number>):
         speed: 100 + Math.floor(rea * 4 / 5),
         drain: Math.max(5, 30 - Math.floor(clr / 33)),
     }
+}
+
+export function computeWarehouseHullCapabilities(stats: Record<string, number>): {
+    hullmass: number
+    capacity: number
+} {
+    const density = stats.density ?? 500
+    const strength = stats.strength ?? 500
+    const ductility = stats.ductility ?? 500
+    const purity = stats.purity ?? 500
+
+    const hullmass = 25000 + 75 * density
+    const statSum = strength + ductility + purity
+    const exponent = statSum / 2997.0
+    const capacity = Math.floor(20000000 * Math.pow(10, exponent))
+
+    return {hullmass, capacity}
 }

@@ -28,12 +28,12 @@ export const BASE_ORBITAL_MASS = 100000
 
 export interface ShipLike {
     coordinates: ServerContract.Types.coordinates
-    hullmass: UInt32
-    energy: UInt16
-    engines: ServerContract.Types.movement_stats
-    generator: ServerContract.Types.energy_stats
-    loaders: ServerContract.Types.loader_stats
-    capacity: UInt32
+    hullmass?: UInt32
+    energy?: UInt16
+    engines?: ServerContract.Types.movement_stats
+    generator?: ServerContract.Types.energy_stats
+    loaders?: ServerContract.Types.loader_stats
+    capacity?: UInt32
 }
 
 export interface CargoMassInfo {

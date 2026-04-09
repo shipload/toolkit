@@ -10,10 +10,12 @@ import {
     computeEntityStats,
     ITEM_HULL_PLATES,
     ITEM_CARGO_LINING,
-    ITEM_CONTAINER_PACKED,
+    ITEM_CONTAINER_T1_PACKED,
     computeContainerCapabilities,
     calc_craft_duration,
     calc_craft_energy,
+    computeInputMass,
+    categoryItemMass,
 } from '$lib'
 
 suite('Crafting', function () {
@@ -135,7 +137,7 @@ suite('Crafting', function () {
 
         test('decode container packed seed', function () {
             const seed = encodeStats([500, 300, 600, 700])
-            const stats = decodeCraftedItemStats(ITEM_CONTAINER_PACKED, seed)
+            const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
             assert.equal(stats['density'], 300)
             assert.equal(stats['ductility'], 600)
@@ -226,6 +228,34 @@ suite('Crafting', function () {
         test('minimum duration is 1', function () {
             const duration = calc_craft_duration(999, 1, 1)
             assert.isAtLeast(duration.toNumber(), 1)
+        })
+    })
+
+    suite('computeInputMass', function () {
+        test('component returns positive mass', function () {
+            const mass = computeInputMass(ITEM_HULL_PLATES, 'component')
+            assert.isAbove(mass, 0)
+            assert.equal(mass, 15 * categoryItemMass['metal'])
+        })
+
+        test('module returns positive mass', function () {
+            const mass = computeInputMass('engine-t1', 'module')
+            assert.isAbove(mass, 0)
+        })
+
+        test('entity returns positive mass', function () {
+            const mass = computeInputMass('container', 'entity')
+            assert.isAbove(mass, 0)
+        })
+
+        test('unknown component returns 0', function () {
+            const mass = computeInputMass(99999, 'component')
+            assert.equal(mass, 0)
+        })
+
+        test('unknown module returns 0', function () {
+            const mass = computeInputMass('nonexistent', 'module')
+            assert.equal(mass, 0)
         })
     })
 

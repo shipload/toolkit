@@ -9,7 +9,7 @@ import {
     ITEM_EXTRACTOR_T1,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
-    ITEM_CONTAINER_PACKED,
+    ITEM_CONTAINER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     encodeStats,
 } from '$lib'
@@ -46,7 +46,7 @@ suite('resolveItem', function () {
     test('resolves a component by item ID', function () {
         const result = resolveItem(UInt16.from(ITEM_HULL_PLATES))
         assert.equal(result.itemType, 'component')
-        assert.equal(result.icon, '▣')
+        assert.equal(result.icon, 'HP')
         assert.isUndefined(result.stats)
     })
 
@@ -61,7 +61,7 @@ suite('resolveItem', function () {
     test('resolves a module by item ID', function () {
         const result = resolveItem(UInt16.from(ITEM_ENGINE_T1))
         assert.equal(result.itemType, 'module')
-        assert.equal(result.icon, '⬢')
+        assert.equal(result.icon, 'EN')
         assert.isUndefined(result.stats)
         assert.isUndefined(result.attributes)
     })
@@ -98,7 +98,7 @@ suite('resolveItem', function () {
     })
 
     test('resolves a packed entity by item ID', function () {
-        const result = resolveItem(UInt16.from(ITEM_CONTAINER_PACKED))
+        const result = resolveItem(UInt16.from(ITEM_CONTAINER_T1_PACKED))
         assert.equal(result.itemType, 'entity')
         assert.isUndefined(result.stats)
     })

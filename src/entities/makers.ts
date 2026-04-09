@@ -30,7 +30,7 @@ export function makeShip(state: ShipStateInput): Ship {
 }
 
 export function makeWarehouse(state: WarehouseStateInput): Warehouse {
-    const entityInfo = ServerContract.Types.entity_info.from({
+    const info: Record<string, unknown> = {
         type: Name.from('warehouse'),
         id: UInt64.from(state.id),
         owner: Name.from(state.owner),
@@ -39,13 +39,15 @@ export function makeWarehouse(state: WarehouseStateInput): Warehouse {
         capacity: UInt32.from(state.capacity),
         cargomass: UInt32.from(0),
         cargo: state.cargo || [],
-        loaders: state.loaders,
         is_idle: !state.schedule,
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
-        schedule: state.schedule,
-    })
+    }
+    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
+    if (state.loaders) info.loaders = state.loaders
+    if (state.schedule) info.schedule = state.schedule
+    const entityInfo = ServerContract.Types.entity_info.from(info)
     return new Warehouse(entityInfo)
 }
 

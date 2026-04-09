@@ -128,6 +128,45 @@ function decodeStackStats(itemId: number, seed: UInt64): Record<string, number> 
 	return {stat1: raw.stat1, stat2: raw.stat2, stat3: raw.stat3}
 }
 
+export const categoryItemMass: Record<string, number> = {
+	metal: 30000,
+	precious: 40000,
+	gas: 15000,
+	mineral: 22000,
+	organic: 15000,
+}
+
+export function computeInputMass(
+	itemId: string | number,
+	itemType: 'component' | 'module' | 'entity'
+): number {
+	if (itemType === 'component') {
+		const comp = getComponentById(itemId as number)
+		if (!comp) return 0
+		return comp.recipe.reduce((sum, input) => {
+			const mass = input.category ? (categoryItemMass[input.category] ?? 0) : 0
+			return sum + mass * input.quantity
+		}, 0)
+	}
+	if (itemType === 'module') {
+		const mod = getModuleRecipe(itemId as string)
+		if (!mod) return 0
+		return mod.recipe.reduce((sum, input) => {
+			const comp = input.itemId ? getComponentById(input.itemId) : undefined
+			return sum + (comp?.mass ?? 0) * input.quantity
+		}, 0)
+	}
+	if (itemType === 'entity') {
+		const ent = getEntityRecipe(itemId as string)
+		if (!ent) return 0
+		return ent.recipe.reduce((sum, input) => {
+			const comp = input.itemId ? getComponentById(input.itemId) : undefined
+			return sum + (comp?.mass ?? 0) * input.quantity
+		}, 0)
+	}
+	return 0
+}
+
 export function blendCargoStacks(
 	itemId: number,
 	stacks: {quantity: number; seed: UInt64}[]

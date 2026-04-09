@@ -1,11 +1,13 @@
 import {assert} from 'chai'
 import {
+    computeContainerCapabilities,
     computeEngineCapabilities,
     computeExtractorCapabilities,
     computeGeneratorCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
     computeShipHullCapabilities,
+    computeWarehouseHullCapabilities,
 } from '$lib'
 
 suite('ship deploy formulas', function () {
@@ -64,19 +66,19 @@ suite('ship deploy formulas', function () {
     test('engine formula exact values at min', function () {
         const r = computeEngineCapabilities({volatility: 1, thermal: 1})
         assert.equal(r.thrust, 400)
-        assert.equal(r.drain, 30)
+        assert.equal(r.drain, 50)
     })
 
     test('engine formula exact values at mid', function () {
         const r = computeEngineCapabilities({volatility: 500, thermal: 500})
         assert.equal(r.thrust, 775)
-        assert.equal(r.drain, 23)
+        assert.equal(r.drain, 43)
     })
 
     test('engine formula exact values at max', function () {
         const r = computeEngineCapabilities({volatility: 999, thermal: 999})
         assert.equal(r.thrust, 1149)
-        assert.equal(r.drain, 16)
+        assert.equal(r.drain, 36)
     })
 
     test('generator formula exact values at min', function () {
@@ -212,5 +214,38 @@ suite('ship deploy formulas', function () {
         const low = computeManufacturingCapabilities({reactivity: 500, clarity: 100})
         const high = computeManufacturingCapabilities({reactivity: 500, clarity: 900})
         assert.isAbove(low.drain, high.drain)
+    })
+
+    test('warehouse hull capabilities with zero stats', function () {
+        const r = computeWarehouseHullCapabilities({density: 0, strength: 0, ductility: 0, purity: 0})
+        assert.equal(r.hullmass, 25000)
+        assert.equal(r.capacity, 20000000)
+    })
+
+    test('warehouse hull capabilities at mid stats', function () {
+        const r = computeWarehouseHullCapabilities({density: 500, strength: 500, ductility: 500, purity: 500})
+        assert.equal(r.hullmass, 62500)
+        assert.isAbove(r.capacity, 20000000)
+    })
+
+    test('warehouse capacity is ~20x container capacity', function () {
+        const stats = {density: 500, strength: 500, ductility: 500, purity: 500}
+        const wh = computeWarehouseHullCapabilities(stats)
+        const ct = computeContainerCapabilities(stats)
+        const ratio = wh.capacity / ct.capacity
+        assert.isAbove(ratio, 19)
+        assert.isBelow(ratio, 21)
+    })
+
+    test('warehouse hullmass matches container/ship formula', function () {
+        const stats = {density: 500, strength: 500, ductility: 500, purity: 500}
+        const wh = computeWarehouseHullCapabilities(stats)
+        const ship = computeShipHullCapabilities(stats)
+        assert.equal(wh.hullmass, ship.hullmass)
+    })
+
+    test('warehouse max capacity with max stats', function () {
+        const r = computeWarehouseHullCapabilities({density: 999, strength: 999, ductility: 999, purity: 999})
+        assert.isAbove(r.capacity, 190000000)
     })
 })

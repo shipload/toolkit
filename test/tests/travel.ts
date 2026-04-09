@@ -76,6 +76,7 @@ function createMockShip(
             mass: overrides.loaderMass ?? 5000,
             thrust: overrides.loaderThrust ?? 100,
         },
+        modules: [],
     })
 }
 
@@ -83,6 +84,7 @@ function createMockCargo(goodId: number, quantity: number) {
     return ServerContract.Types.cargo_item.from({
         item_id: goodId,
         quantity,
+        modules: [],
     })
 }
 

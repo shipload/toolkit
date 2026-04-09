@@ -14,6 +14,7 @@ import {
     Checksum256,
     Int64,
     Int64Type,
+    UInt16,
     UInt32,
     UInt32Type,
     UInt64,
@@ -126,7 +127,8 @@ export function calc_rechargetime(
 }
 
 export function calc_ship_rechargetime(ship: ShipLike): UInt32 {
-    return calc_rechargetime(ship.generator.capacity, ship.energy, ship.generator.recharge)
+    if (!ship.generator) return UInt32.from(0)
+    return calc_rechargetime(ship.generator.capacity, ship.energy ?? UInt16.from(0), ship.generator.recharge)
 }
 
 export function calc_flighttime(distance: UInt64Type, acceleration: number): UInt32 {
@@ -139,7 +141,9 @@ export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: 
 }
 
 export function calc_loader_acceleration(ship: ShipLike, mass: UInt64): number {
-    return calc_acceleration(Number(ship.loaders.thrust), Number(mass) + Number(ship.loaders.mass))
+    const thrust = ship.loaders ? Number(ship.loaders.thrust) : 0
+    const loaderMass = ship.loaders ? Number(ship.loaders.mass) : 0
+    return calc_acceleration(thrust, Number(mass) + loaderMass)
 }
 
 export function calc_ship_flighttime(ship: ShipLike, mass: UInt64, distance: UInt64): UInt32 {
@@ -148,7 +152,8 @@ export function calc_ship_flighttime(ship: ShipLike, mass: UInt64, distance: UIn
 }
 
 export function calc_ship_acceleration(ship: ShipLike, mass: UInt64): number {
-    return calc_acceleration(Number(ship.engines.thrust), Number(mass))
+    const thrust = ship.engines ? Number(ship.engines.thrust) : 0
+    return calc_acceleration(thrust, Number(mass))
 }
 
 export function calc_acceleration(thrust: number, mass: number): number {
@@ -160,7 +165,7 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
 
     mass.add(ship.hullmass)
 
-    if (ship.loaders.quantity.gt(UInt32.zero)) {
+    if (ship.loaders && ship.loaders.quantity.gt(UInt32.zero)) {
         mass.add(ship.loaders.mass.multiplying(ship.loaders.quantity))
     }
 
@@ -195,6 +200,7 @@ export function calculateTransferTime(
         return UInt32.from(0)
     }
 
+    if (!ship.loaders) return UInt32.from(0)
     mass = UInt64.from(mass).adding(ship.loaders.mass)
     const transfer_time = calc_loader_flighttime(ship, mass)
     return transfer_time.dividing(ship.loaders.quantity)
@@ -252,17 +258,17 @@ export function calculateLoadTimeBreakdown(
     let unloadTime = 0
     let loadTime = 0
 
-    if (mass_unload.gt(UInt64.zero)) {
+    if (mass_unload.gt(UInt64.zero) && ship.loaders) {
         const totalMass = UInt64.from(mass_unload).adding(ship.loaders.mass)
         unloadTime = Number(calc_loader_flighttime(ship, totalMass))
     }
 
-    if (mass_load.gt(UInt64.zero)) {
+    if (mass_load.gt(UInt64.zero) && ship.loaders) {
         const totalMass = UInt64.from(mass_load).adding(ship.loaders.mass)
         loadTime = Number(calc_loader_flighttime(ship, totalMass))
     }
 
-    const numLoaders = Number(ship.loaders.quantity)
+    const numLoaders = ship.loaders ? Number(ship.loaders.quantity) : 0
     const totalTime = numLoaders > 0 ? (unloadTime + loadTime) / numLoaders : 0
     const unloadTimePerLoader = numLoaders > 0 ? unloadTime / numLoaders : 0
     const loadTimePerLoader = numLoaders > 0 ? loadTime / numLoaders : 0
@@ -307,6 +313,7 @@ export function estimateTravelTime(
     if (
         loadMass &&
         UInt32.from(loadMass).gt(UInt32.zero) &&
+        ship.loaders &&
         ship.loaders.quantity.gt(UInt32.zero)
     ) {
         const totalMass = UInt64.from(loadMass).adding(ship.loaders.mass)
@@ -316,6 +323,7 @@ export function estimateTravelTime(
     if (
         unloadMass &&
         UInt32.from(unloadMass).gt(UInt32.zero) &&
+        ship.loaders &&
         ship.loaders.quantity.gt(UInt32.zero)
     ) {
         const totalMass = UInt64.from(unloadMass).adding(ship.loaders.mass)
@@ -346,8 +354,9 @@ export function estimateDealTravelTime(
 }
 
 export function hasEnergyForDistance(ship: ShipLike, distance: UInt64Type): boolean {
+    if (!ship.engines) return false
     const energyNeeded = UInt64.from(distance).dividing(PRECISION).multiplying(ship.engines.drain)
-    return UInt64.from(ship.energy).gte(energyNeeded)
+    return UInt64.from(ship.energy ?? 0).gte(energyNeeded)
 }
 
 export interface TransferEntity {

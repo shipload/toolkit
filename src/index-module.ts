@@ -143,6 +143,24 @@ export * from './capabilities'
 
 export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon, itemIcons} from './data/colors'
 
+export {getCategoryInfo} from './data/categories'
+export type {CategoryInfo} from './data/categories'
+
+export {getPlanetSubtypes, getPlanetSubtype} from './data/locations'
+export type {PlanetSubtypeInfo} from './data/locations'
+
+export {
+    capabilityNames,
+    capabilityAttributes,
+    statMappings,
+    isInvertedAttribute,
+    getCapabilityAttributes,
+    getStatMappings,
+    getStatMappingsForStat,
+    getStatMappingsForCapability,
+} from './data/capabilities'
+export type {CapabilityAttribute, StatMapping} from './data/capabilities'
+
 export {
    components,
    entityRecipes,
@@ -157,12 +175,13 @@ export {
    getComponentsForStat,
    ITEM_HULL_PLATES,
    ITEM_CARGO_LINING,
-   ITEM_CONTAINER_PACKED,
+   ITEM_CONTAINER_T1_PACKED,
    ITEM_THRUSTER_CORE,
    ITEM_POWER_CELL,
    ITEM_ENGINE_T1,
    ITEM_GENERATOR_T1,
    ITEM_SHIP_T1_PACKED,
+   ITEM_WAREHOUSE_T1_PACKED,
    ITEM_DRILL_SHAFT,
    ITEM_EXTRACTION_PROBE,
    ITEM_CARGO_ARM,
@@ -191,6 +210,8 @@ export {
    blendComponentStacks,
    computeEntityStats,
    blendCargoStacks,
+   categoryItemMass,
+   computeInputMass,
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks} from './derivation/crafting'
 
@@ -203,6 +224,7 @@ export {
     computeExtractorCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
+    computeWarehouseHullCapabilities,
 } from './entities/ship-deploy'
 
 export {resolveItem} from './resolution/resolve-item'

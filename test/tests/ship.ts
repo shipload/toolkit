@@ -29,6 +29,7 @@ function createCargoItem(goodId: number, quantity: number) {
     return ServerContract.Types.cargo_item.from({
         item_id: goodId,
         quantity: UInt32.from(quantity),
+        modules: [],
     })
 }
 

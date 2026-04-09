@@ -1,0 +1,58 @@
+import {assert} from 'chai'
+
+import {
+    capabilityNames,
+    capabilityAttributes,
+    statMappings,
+    isInvertedAttribute,
+    getCapabilityAttributes,
+    getStatMappings,
+    getStatMappingsForStat,
+    getStatMappingsForCapability,
+} from '$lib'
+
+suite('Capabilities', function () {
+    test('capabilityNames has 9 entries', function () {
+        assert.equal(capabilityNames.length, 9)
+    })
+
+    test('getCapabilityAttributes returns all attributes', function () {
+        const all = getCapabilityAttributes()
+        assert.equal(all.length, capabilityAttributes.length)
+        assert.equal(all.length, 19)
+    })
+
+    test('getCapabilityAttributes filters by capability', function () {
+        const extraction = getCapabilityAttributes('Extraction')
+        assert.equal(extraction.length, 4)
+        assert.isTrue(extraction.every((a) => a.capability === 'Extraction'))
+    })
+
+    test('getStatMappings returns all mappings', function () {
+        const all = getStatMappings()
+        assert.equal(all.length, statMappings.length)
+    })
+
+    test('getStatMappingsForStat filters correctly', function () {
+        const strength = getStatMappingsForStat('Strength')
+        assert.equal(strength.length, 3)
+        assert.isTrue(strength.every((m) => m.stat === 'Strength'))
+    })
+
+    test('getStatMappingsForCapability filters correctly', function () {
+        const manufacturing = getStatMappingsForCapability('Manufacturing')
+        assert.isTrue(manufacturing.length > 0)
+        assert.isTrue(manufacturing.every((m) => m.capability === 'Manufacturing'))
+    })
+
+    test('isInvertedAttribute returns true for drain and mass', function () {
+        assert.isTrue(isInvertedAttribute('drain'))
+        assert.isTrue(isInvertedAttribute('mass'))
+    })
+
+    test('isInvertedAttribute returns false for non-inverted attributes', function () {
+        assert.isFalse(isInvertedAttribute('thrust'))
+        assert.isFalse(isInvertedAttribute('capacity'))
+        assert.isFalse(isInvertedAttribute('rate'))
+    })
+})

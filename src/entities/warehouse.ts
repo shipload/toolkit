@@ -12,8 +12,9 @@ export interface WarehouseStateInput {
     owner: string
     name: string
     coordinates: CoordinatesType | {x: number; y: number; z?: number}
+    hullmass?: number
     capacity: number
-    loaders: ServerContract.Types.loader_stats
+    loaders?: ServerContract.Types.loader_stats
     schedule?: ServerContract.Types.schedule
     cargo?: ServerContract.Types.cargo_item[]
 }
@@ -81,5 +82,10 @@ export class Warehouse extends ServerContract.Types.entity_info {
 
     get orbitalAltitude(): number {
         return this.coordinates.z?.toNumber() || 0
+    }
+
+    get totalMass(): UInt64 {
+        const hull = this.hullmass ? UInt64.from(this.hullmass) : UInt64.from(0)
+        return hull.adding(this.totalCargoMass)
     }
 }
