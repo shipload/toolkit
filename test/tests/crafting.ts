@@ -8,10 +8,12 @@ import {
     computeComponentStats,
     blendComponentStacks,
     computeEntityStats,
+    blendCrossGroup,
     ITEM_HULL_PLATES,
     ITEM_CARGO_LINING,
     ITEM_CONTAINER_T1_PACKED,
     computeContainerCapabilities,
+    computeContainerT2Capabilities,
     calc_craft_duration,
     calc_craft_energy,
     computeInputMass,
@@ -207,6 +209,29 @@ suite('Crafting', function () {
         })
     })
 
+    suite('T2 Container Capabilities', function () {
+        test('T2 container has lighter hullmass than T1 at same density', function () {
+            const t1 = computeContainerCapabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            const t2 = computeContainerT2Capabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            assert.isBelow(t2.hullmass, t1.hullmass)
+        })
+
+        test('T2 container has greater capacity than T1 at same stats', function () {
+            const t1 = computeContainerCapabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            const t2 = computeContainerT2Capabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            assert.isAbove(t2.capacity, t1.capacity)
+        })
+
+        test('T2 container formulas match contract', function () {
+            const stats = {strength: 400, density: 300, ductility: 600, purity: 200}
+            const caps = computeContainerT2Capabilities(stats)
+            assert.equal(caps.hullmass, 20000 + 50 * 300)
+            const statSum = 400 + 600 + 200
+            const expected = Math.floor(1500000 * Math.pow(10, statSum / 2500))
+            assert.equal(caps.capacity, expected)
+        })
+    })
+
     suite('calc_craft_duration', function () {
         test('basic duration calculation', function () {
             const duration = calc_craft_duration(500, 450000, 1)
@@ -256,6 +281,27 @@ suite('Crafting', function () {
         test('unknown module returns 0', function () {
             const mass = computeInputMass('nonexistent', 'module')
             assert.equal(mass, 0)
+        })
+    })
+
+    suite('T2 cross-group blending', function () {
+        test('blendCrossGroup averages stats from two groups with equal weights', function () {
+            const result = blendCrossGroup(
+                [{value: 400, weight: 1}, {value: 600, weight: 1}]
+            )
+            assert.equal(result, 500)
+        })
+
+        test('blendCrossGroup respects unequal weights', function () {
+            const result = blendCrossGroup(
+                [{value: 400, weight: 3}, {value: 800, weight: 1}]
+            )
+            assert.equal(result, 500)
+        })
+
+        test('blendCrossGroup clamps to 1-999', function () {
+            assert.equal(blendCrossGroup([{value: 0, weight: 1}]), 1)
+            assert.equal(blendCrossGroup([{value: 1500, weight: 1}]), 999)
         })
     })
 

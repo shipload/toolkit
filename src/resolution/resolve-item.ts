@@ -3,7 +3,7 @@ import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
 import type {ResourceCategory, ResourceTier} from '../types'
 import {getItem} from '../market/items'
 import {getComponentById, getModuleRecipeByItemId, getEntityRecipeByItemId} from '../data/recipes'
-import {isModuleItem, getModuleCapabilityType, MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER} from '../capabilities/modules'
+import {isModuleItem, getModuleCapabilityType, MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, MODULE_STORAGE} from '../capabilities/modules'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 import {deriveResourceStats} from '../derivation/stratum'
 import {getStatDefinitions} from '../derivation/stats'
@@ -160,6 +160,16 @@ function computeCapabilityGroup(moduleType: number, stats: Record<string, number
             return {capability: 'Manufacturing', attributes: [
                 {label: 'Speed', value: caps.speed},
                 {label: 'Drain', value: caps.drain},
+            ]}
+        }
+        case MODULE_STORAGE: {
+            const str = stats.strength ?? 500
+            const duc = stats.ductility ?? 500
+            const pur = stats.purity ?? 500
+            const statSum = str + duc + pur
+            const pct = 10 + Math.floor(statSum * 10 / 2997)
+            return {capability: 'Storage', attributes: [
+                {label: 'Capacity Bonus', value: pct},
             ]}
         }
         default:

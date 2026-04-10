@@ -167,6 +167,20 @@ export function computeInputMass(
 	return 0
 }
 
+export function blendCrossGroup(
+	sources: {value: number; weight: number}[]
+): number {
+	let weightedSum = 0
+	let totalWeight = 0
+	for (const src of sources) {
+		weightedSum += src.value * src.weight
+		totalWeight += src.weight
+	}
+	if (totalWeight === 0) return 1
+	const result = Math.floor(weightedSum / totalWeight)
+	return Math.max(1, Math.min(999, result))
+}
+
 export function blendCargoStacks(
 	itemId: number,
 	stacks: {quantity: number; seed: UInt64}[]

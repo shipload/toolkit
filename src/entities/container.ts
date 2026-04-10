@@ -86,3 +86,21 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
 
 	return {hullmass, capacity}
 }
+
+export function computeContainerT2Capabilities(stats: Record<string, number>): {
+	hullmass: number
+	capacity: number
+} {
+	const strength = stats['strength'] ?? 0
+	const density = stats['density'] ?? 0
+	const ductility = stats['ductility'] ?? 0
+	const purity = stats['purity'] ?? 0
+
+	const hullmass = 20000 + 50 * density
+
+	const statSum = strength + ductility + purity
+	const exponent = statSum / 2500
+	const capacity = Math.floor(1500000 * Math.pow(10, exponent))
+
+	return {hullmass, capacity}
+}

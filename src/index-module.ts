@@ -143,6 +143,9 @@ export * from './capabilities'
 
 export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon, itemIcons} from './data/colors'
 
+export {itemTier, itemOffset, itemCategory, isRelatedItem, isCraftedItem} from './data/tiers'
+export type {CraftedItemCategory} from './data/tiers'
+
 export {getCategoryInfo} from './data/categories'
 export type {CategoryInfo} from './data/categories'
 
@@ -190,6 +193,10 @@ export {
    ITEM_EXTRACTOR_T1,
    ITEM_LOADER_T1,
    ITEM_MANUFACTURING_T1,
+   ITEM_STORAGE_T1,
+   ITEM_HULL_PLATES_T2,
+   ITEM_CARGO_LINING_T2,
+   ITEM_CONTAINER_T2_PACKED,
 } from './data/recipes'
 export type {
    ComponentDefinition,
@@ -210,12 +217,13 @@ export {
    blendComponentStacks,
    computeEntityStats,
    blendCargoStacks,
+   blendCrossGroup,
    categoryItemMass,
    computeInputMass,
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks} from './derivation/crafting'
 
-export {computeContainerCapabilities} from './entities/container'
+export {computeContainerCapabilities, computeContainerT2Capabilities} from './entities/container'
 
 export {
     computeShipHullCapabilities,
@@ -225,6 +233,7 @@ export {
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
     computeWarehouseHullCapabilities,
+    computeStorageCapabilities,
 } from './entities/ship-deploy'
 
 export {resolveItem} from './resolution/resolve-item'

@@ -1,21 +1,25 @@
-import {MODULE_ANY, MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1} from '../capabilities/modules'
+import {MODULE_ANY, MODULE_ENGINE, MODULE_GENERATOR, MODULE_EXTRACTOR, MODULE_LOADER, MODULE_CRAFTER, MODULE_STORAGE, ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1, ITEM_STORAGE_T1} from '../capabilities/modules'
 import type {ResourceCategory} from '../types'
 
-export {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1}
+export {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_EXTRACTOR_T1, ITEM_LOADER_T1, ITEM_MANUFACTURING_T1, ITEM_STORAGE_T1}
 
-export const ITEM_DRILL_SHAFT = 10009
-export const ITEM_EXTRACTION_PROBE = 10010
-export const ITEM_CARGO_ARM = 10011
-export const ITEM_TOOL_BIT = 10012
-export const ITEM_REACTION_CHAMBER = 10013
+export const ITEM_DRILL_SHAFT = 10005
+export const ITEM_EXTRACTION_PROBE = 10006
+export const ITEM_CARGO_ARM = 10007
+export const ITEM_TOOL_BIT = 10008
+export const ITEM_REACTION_CHAMBER = 10009
 
 export const ITEM_HULL_PLATES = 10001
 export const ITEM_CARGO_LINING = 10002
-export const ITEM_CONTAINER_T1_PACKED = 10003
-export const ITEM_THRUSTER_CORE = 10004
-export const ITEM_POWER_CELL = 10005
-export const ITEM_SHIP_T1_PACKED = 10008
-export const ITEM_WAREHOUSE_T1_PACKED = 10017
+export const ITEM_CONTAINER_T1_PACKED = 10200
+export const ITEM_THRUSTER_CORE = 10003
+export const ITEM_POWER_CELL = 10004
+export const ITEM_SHIP_T1_PACKED = 10201
+export const ITEM_WAREHOUSE_T1_PACKED = 10202
+
+export const ITEM_HULL_PLATES_T2 = 20001
+export const ITEM_CARGO_LINING_T2 = 20002
+export const ITEM_CONTAINER_T2_PACKED = 20200
 
 export interface RecipeInput {
 	category?: ResourceCategory
@@ -41,6 +45,7 @@ export interface ComponentDefinition {
 
 export interface ModuleSlot {
 	type: number
+	label?: string
 }
 
 export interface EntityRecipe {
@@ -184,6 +189,39 @@ export const components: ComponentDefinition[] = [
 		recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
 		usedIn: [{type: 'module', name: 'Manufacturing'}],
 	},
+	{
+		id: ITEM_HULL_PLATES_T2,
+		name: 'Hull Plates T2',
+		description: 'Advanced structural plating reinforced with tier 2 metals.',
+		color: '#9BADB8',
+		mass: 50000,
+		stats: [
+			{key: 'strength', source: 'metal'},
+			{key: 'density', source: 'metal'},
+		],
+		recipe: [
+			{itemId: ITEM_HULL_PLATES, quantity: 2},
+			{category: 'metal', quantity: 15},
+		],
+		usedIn: [{type: 'entity', name: 'Container T2'}],
+	},
+	{
+		id: ITEM_CARGO_LINING_T2,
+		name: 'Cargo Lining T2',
+		description: 'Advanced composite lining with improved storage properties.',
+		color: '#E0B84D',
+		mass: 30000,
+		stats: [
+			{key: 'ductility', source: 'precious'},
+			{key: 'purity', source: 'organic'},
+		],
+		recipe: [
+			{itemId: ITEM_CARGO_LINING, quantity: 2},
+			{category: 'precious', quantity: 6},
+			{category: 'organic', quantity: 14},
+		],
+		usedIn: [{type: 'entity', name: 'Container T2'}],
+	},
 ]
 
 export const entityRecipes: EntityRecipe[] = [
@@ -245,7 +283,28 @@ export const entityRecipes: EntityRecipe[] = [
 			{key: 'purity', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'purity'},
 		],
 		moduleSlots: [
-			{type: MODULE_LOADER},
+			{type: MODULE_LOADER, label: 'Loader'},
+			{type: MODULE_STORAGE, label: 'Storage'},
+			{type: MODULE_STORAGE, label: 'Storage'},
+			{type: MODULE_STORAGE, label: 'Storage'},
+			{type: MODULE_STORAGE, label: 'Storage'},
+		],
+	},
+	{
+		id: 'container-t2',
+		name: 'Container T2',
+		description: 'Advanced cargo container with improved capacity formulas.',
+		color: '#9BADB8',
+		packedItemId: ITEM_CONTAINER_T2_PACKED,
+		recipe: [
+			{itemId: ITEM_HULL_PLATES_T2, quantity: 6},
+			{itemId: ITEM_CARGO_LINING_T2, quantity: 2},
+		],
+		stats: [
+			{key: 'strength', sourceComponentId: ITEM_HULL_PLATES_T2, sourceStatKey: 'strength'},
+			{key: 'density', sourceComponentId: ITEM_HULL_PLATES_T2, sourceStatKey: 'density'},
+			{key: 'ductility', sourceComponentId: ITEM_CARGO_LINING_T2, sourceStatKey: 'ductility'},
+			{key: 'purity', sourceComponentId: ITEM_CARGO_LINING_T2, sourceStatKey: 'purity'},
 		],
 	},
 ]
@@ -337,6 +396,24 @@ export const moduleRecipes: ModuleRecipe[] = [
 		stats: [
 			{key: 'reactivity', sourceComponentId: ITEM_REACTION_CHAMBER, sourceStatKey: 'reactivity'},
 			{key: 'clarity', sourceComponentId: ITEM_TOOL_BIT, sourceStatKey: 'clarity'},
+		],
+	},
+	{
+		id: 'storage-t1',
+		name: 'Storage',
+		description: 'Expands cargo capacity based on hull material quality',
+		color: '#8B7355',
+		itemId: ITEM_STORAGE_T1,
+		moduleType: MODULE_STORAGE,
+		recipe: [
+			{itemId: ITEM_HULL_PLATES, quantity: 8},
+			{itemId: ITEM_CARGO_LINING, quantity: 4},
+		],
+		stats: [
+			{key: 'strength', sourceComponentId: ITEM_HULL_PLATES, sourceStatKey: 'strength'},
+			{key: 'ductility', sourceComponentId: ITEM_HULL_PLATES, sourceStatKey: 'ductility'},
+			{key: 'purity', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'purity'},
+			{key: 'density', sourceComponentId: ITEM_CARGO_LINING, sourceStatKey: 'density'},
 		],
 	},
 ]

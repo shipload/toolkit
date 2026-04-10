@@ -88,6 +88,22 @@ export function computeManufacturingCapabilities(stats: Record<string, number>):
     }
 }
 
+export function computeStorageCapabilities(
+    stats: Record<string, number>,
+    baseCapacity: number
+): {
+    capacityBonus: number
+} {
+    const strength = stats.strength ?? 500
+    const ductility = stats.ductility ?? 500
+    const purity = stats.purity ?? 500
+
+    const statSum = strength + ductility + purity
+    const capacityBonus = Math.floor(baseCapacity * (10 + Math.floor(statSum * 10 / 2997)) / 100)
+
+    return {capacityBonus}
+}
+
 export function computeWarehouseHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
