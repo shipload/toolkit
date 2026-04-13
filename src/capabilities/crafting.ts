@@ -1,5 +1,5 @@
 import {UInt16, UInt32} from '@wharfkit/antelope'
-import {PRECISION} from '../types'
+import {CRAFT_ENERGY_DIVISOR} from '../types'
 import type {EntityCapabilities} from '../types/capabilities'
 import {ServerContract} from '../contracts'
 
@@ -22,7 +22,8 @@ export function calc_craft_duration(
 
 export function calc_craft_energy(
     drain: number,
-    duration: number
+    totalInputMass: number
 ): UInt16 {
-    return UInt16.from(Math.floor((duration * drain) / PRECISION))
+    const raw = Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR)
+    return UInt16.from(Math.min(raw, 65535))
 }

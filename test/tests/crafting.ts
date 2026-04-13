@@ -307,19 +307,31 @@ suite('Crafting', function () {
 
     suite('calc_craft_energy', function () {
         test('basic energy calculation', function () {
-            const energy = calc_craft_energy(15, 900)
-            assert.equal(energy.toNumber(), 1)
+            // Hull Plates: 450K input_mass × drain 17 / 150K = 51
+            const energy = calc_craft_energy(17, 450000)
+            assert.equal(energy.toNumber(), 51)
         })
 
         test('higher drain costs more energy', function () {
-            const low = calc_craft_energy(5, 1000)
-            const high = calc_craft_energy(30, 1000)
+            const low = calc_craft_energy(5, 450000)
+            const high = calc_craft_energy(30, 450000)
             assert.isAbove(high.toNumber(), low.toNumber())
         })
 
-        test('zero duration costs zero energy', function () {
-            const energy = calc_craft_energy(15, 0)
+        test('zero input costs zero energy', function () {
+            const energy = calc_craft_energy(17, 0)
             assert.equal(energy.toNumber(), 0)
+        })
+
+        test('scales linearly with batched input mass', function () {
+            const single = calc_craft_energy(17, 450000)
+            const batch = calc_craft_energy(17, 1350000)
+            assert.equal(batch.toNumber(), single.toNumber() * 3)
+        })
+
+        test('energy clamps to uint16 max on oversized input', function () {
+            const energy = calc_craft_energy(30, 450_000_000)
+            assert.equal(energy.toNumber(), 65535)
         })
     })
 })
