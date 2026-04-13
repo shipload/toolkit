@@ -210,6 +210,7 @@ export type {
 
 export {
    encodeStats,
+   decodeStat,
    decodeStats,
    decodeCraftedItemStats,
    blendStacks,
@@ -238,3 +239,39 @@ export {
 
 export {resolveItem} from './resolution/resolve-item'
 export type {ResolvedItem, ResolvedItemStat, ResolvedAttributeGroup, ResolvedModuleSlot, ResolvedItemType} from './resolution/resolve-item'
+
+export * as NFT from './nft'
+export {
+    deserializeAsset,
+    deserializeResource,
+    deserializeComponent,
+    deserializeModule,
+    deserializeEntity,
+    readCommonBase,
+} from './nft/deserializers'
+export type {NFTCargoItem, NFTModuleSlot, NFTInstalledModule, NFTCommonBase} from './nft/deserializers'
+
+export {
+    buildEntityDescription,
+    formatModuleLine,
+    entityDisplayName,
+    moduleDisplayName,
+    computeBaseHullmass,
+    computeBaseCapacityShip,
+    computeBaseCapacityWarehouse,
+    computeEngineThrust,
+    computeEngineDrain,
+    computeGeneratorCap,
+    computeGeneratorRech,
+    computeExtractorRate,
+    computeExtractorDrain,
+    computeExtractorDepth,
+    computeExtractorDrill,
+    computeLoaderMass,
+    computeLoaderThrust,
+    computeCrafterSpeed,
+    computeCrafterDrain,
+} from './nft/description'
+
+export {getEntitySlotLayout} from './data/recipes'
+export {ITEM_TYPE_RESOURCE, ITEM_TYPE_COMPONENT, ITEM_TYPE_MODULE, ITEM_TYPE_ENTITY, itemTypeCode} from './data/tiers'

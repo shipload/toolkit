@@ -438,6 +438,11 @@ export function getEntityRecipeByItemId(itemId: number): EntityRecipe | undefine
 	return entityRecipes.find((r) => r.packedItemId === itemId)
 }
 
+export function getEntitySlotLayout(packedItemId: number): ModuleSlot[] {
+	const recipe = getEntityRecipeByItemId(packedItemId)
+	return recipe?.moduleSlots ?? []
+}
+
 export function getAllCraftableItems(): CraftableItem[] {
 	const items: CraftableItem[] = []
 	for (const comp of components) {

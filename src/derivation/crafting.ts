@@ -27,10 +27,14 @@ export function encodeStats(values: number[]): bigint {
 	return seed
 }
 
+export function decodeStat(seed: bigint, index: number): number {
+	return Number((seed >> BigInt(index * 10)) & 0x3ffn)
+}
+
 export function decodeStats(seed: bigint, count: number): number[] {
 	const stats: number[] = []
 	for (let i = 0; i < count; i++) {
-		stats.push(Number((seed >> BigInt(i * 10)) & 0x3ffn))
+		stats.push(decodeStat(seed, i))
 	}
 	return stats
 }

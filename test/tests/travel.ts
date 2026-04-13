@@ -58,6 +58,7 @@ function createMockShip(
         id: UInt64.from(1),
         owner: 'testplayer',
         name: 'Test Ship',
+        seed: UInt64.from(0),
         coordinates: {x: 0, y: 0, z: overrides.locationZ},
         hullmass: overrides.hullmass ?? 100000,
         capacity: overrides.capacity ?? 500000,
