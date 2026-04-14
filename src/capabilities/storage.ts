@@ -15,11 +15,24 @@ export interface HasCargomass {
     cargomass: UInt32
 }
 
+export function calcCargoItemMass(item: ServerContract.Types.cargo_item): UInt64 {
+    const itemDef = getItem(item.item_id)
+    let mass = UInt64.from(itemDef.mass).multiplying(item.quantity)
+
+    for (const mod of item.modules) {
+        if (mod.installed) {
+            const modDef = getItem(mod.installed.item_id)
+            mass = mass.adding(modDef.mass)
+        }
+    }
+
+    return mass
+}
+
 export function calcCargoMass(entity: HasCargo): UInt64 {
     let mass = UInt64.from(0)
     for (const item of entity.cargo) {
-        const good = getItem(item.item_id)
-        mass = mass.adding(good.mass.multiplying(item.quantity))
+        mass = mass.adding(calcCargoItemMass(item))
     }
     return mass
 }

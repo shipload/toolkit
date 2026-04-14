@@ -52,6 +52,7 @@ export enum TaskType {
     WARP = 6,
     CRAFT = 7,
     DEPLOY = 8,
+    DEPLOY_SHIP = 9,
 }
 
 export enum LocationType {

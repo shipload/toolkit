@@ -9,8 +9,7 @@ import {
     EntityState,
 } from '../types/capabilities'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
-import {calcCargoMass} from '../capabilities/storage'
-import {getItem} from '../market/items'
+import {calcCargoMass, calcCargoItemMass} from '../capabilities/storage'
 import * as schedule from './schedule'
 import {ScheduleData} from './schedule'
 
@@ -159,26 +158,27 @@ function applyFlightTask(
     }
 }
 
-function getItemMass(item_id: UInt16 | number): UInt32 {
-    const item = getItem(item_id)
-    return item.mass
-}
-
 function applyLoadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good_mass = getItemMass(item.item_id)
-        projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
+        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(item))
     }
 }
 
 function applyUnloadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const good_mass = getItemMass(item.item_id)
-        const cargoMass = good_mass.multiplying(item.quantity)
+        const cargoMass = calcCargoItemMass(item)
         projected.cargoMass = projected.cargoMass.gt(cargoMass)
             ? projected.cargoMass.subtracting(cargoMass)
             : UInt64.from(0)
     }
+}
+
+function applyEnergyCost(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    if (!task.energy_cost) return
+    const energyCost = UInt16.from(task.energy_cost)
+    projected.energy = projected.energy.gt(energyCost)
+        ? UInt16.from(projected.energy.subtracting(energyCost))
+        : UInt16.from(0)
 }
 
 function applyExtractTask(
@@ -188,16 +188,36 @@ function applyExtractTask(
 ): void {
     if (!options.complete) return
 
-    if (task.energy_cost) {
-        const energyCost = UInt16.from(task.energy_cost)
-        projected.energy = projected.energy.gt(energyCost)
-            ? UInt16.from(projected.energy.subtracting(energyCost))
-            : UInt16.from(0)
-    }
+    applyEnergyCost(projected, task)
 
     for (const item of task.cargo) {
-        const good_mass = getItemMass(item.item_id)
-        projected.cargoMass = projected.cargoMass.adding(good_mass.multiplying(item.quantity))
+        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(item))
+    }
+}
+
+function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    applyEnergyCost(projected, task)
+
+    if (task.cargo.length > 0) {
+        for (let i = 0; i < task.cargo.length - 1; i++) {
+            const inputMass = calcCargoItemMass(task.cargo[i])
+            projected.cargoMass = projected.cargoMass.gt(inputMass)
+                ? projected.cargoMass.subtracting(inputMass)
+                : UInt64.from(0)
+        }
+        const output = task.cargo[task.cargo.length - 1]
+        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(output))
+    }
+}
+
+function applyDeployTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    applyEnergyCost(projected, task)
+
+    if (task.cargo.length > 0) {
+        const mass = calcCargoItemMass(task.cargo[0])
+        projected.cargoMass = projected.cargoMass.gt(mass)
+            ? projected.cargoMass.subtracting(mass)
+            : UInt64.from(0)
     }
 }
 
@@ -224,6 +244,13 @@ export function projectEntity(entity: Projectable): ProjectedEntity {
                 break
             case TaskType.EXTRACT:
                 applyExtractTask(projected, task, {complete: true})
+                break
+            case TaskType.CRAFT:
+                applyCraftTask(projected, task)
+                break
+            case TaskType.DEPLOY:
+            case TaskType.DEPLOY_SHIP:
+                applyDeployTask(projected, task)
                 break
         }
     }
@@ -271,6 +298,17 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
             case TaskType.EXTRACT:
                 if (taskComplete) {
                     applyExtractTask(projected, task, {complete: true})
+                }
+                break
+            case TaskType.CRAFT:
+                if (taskComplete) {
+                    applyCraftTask(projected, task)
+                }
+                break
+            case TaskType.DEPLOY:
+            case TaskType.DEPLOY_SHIP:
+                if (taskComplete) {
+                    applyDeployTask(projected, task)
                 }
                 break
         }
