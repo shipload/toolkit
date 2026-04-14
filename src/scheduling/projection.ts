@@ -9,7 +9,7 @@ import {
     EntityState,
 } from '../types/capabilities'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
-import {calcCargoMass, calcCargoItemMass} from '../capabilities/storage'
+import {calcCargoItemMass, calcCargoMass} from '../capabilities/storage'
 import * as schedule from './schedule'
 import {ScheduleData} from './schedule'
 
@@ -22,6 +22,7 @@ export interface ProjectedEntity {
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
     generator?: ServerContract.Types.energy_stats
+    hauler?: ServerContract.Types.hauler_stats
     readonly totalMass: UInt64
 
     hasMovement(): boolean
@@ -39,6 +40,7 @@ export interface Projectable extends ScheduleData {
     generator?: ServerContract.Types.energy_stats
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
+    hauler?: ServerContract.Types.hauler_stats
     capacity?: UInt32
     cargo: ServerContract.Types.cargo_item[]
     cargomass: UInt32
@@ -55,6 +57,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const loaders = entity.loaders
     const engines = entity.engines
     const generator = entity.generator
+    const hauler = entity.hauler
     const capacity = entity.capacity
 
     const projected: ProjectedEntity = {
@@ -65,6 +68,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         capacity: capacity ? UInt64.from(capacity) : undefined,
         engines,
         generator,
+        hauler,
         loaders,
 
         get totalMass() {

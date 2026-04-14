@@ -1,19 +1,17 @@
 import {assert} from 'chai'
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import {
-    resolveItem,
-    ITEM_HULL_PLATES,
-    ITEM_THRUSTER_CORE,
+    ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
-    ITEM_GENERATOR_T1,
     ITEM_EXTRACTOR_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_HULL_PLATES,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
-    ITEM_CONTAINER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
-    encodeStats,
+    ITEM_THRUSTER_CORE,
+    resolveItem,
 } from '$lib'
-import type {ResolvedItem} from '$lib'
 
 suite('resolveItem', function () {
     test('resolves a resource by item ID without seed', function () {

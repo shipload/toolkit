@@ -21,6 +21,7 @@ export const capabilityNames: string[] = [
     'Warp',
     'Manufacturing',
     'Launch',
+    'Hauler',
 ]
 
 export const capabilityAttributes: CapabilityAttribute[] = [
@@ -47,6 +48,21 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Launch', attribute: 'range', description: 'Maximum launch distance'},
     {capability: 'Launch', attribute: 'capacity', description: 'Maximum mass per launch'},
     {capability: 'Launch', attribute: 'drain', description: 'Energy consumed per launch'},
+    {
+        capability: 'Hauler',
+        attribute: 'capacity',
+        description: 'Number of targets the haul beam can lock onto simultaneously',
+    },
+    {
+        capability: 'Hauler',
+        attribute: 'efficiency',
+        description: 'Thrust penalty reduction per hauled target',
+    },
+    {
+        capability: 'Hauler',
+        attribute: 'drain',
+        description: 'Energy consumed per target during haul-beam operation',
+    },
 ]
 
 export const statMappings: StatMapping[] = [
@@ -343,6 +359,26 @@ export const statMappings: StatMapping[] = [
         capability: 'Energy',
         attribute: 'capacity',
         rationale: 'Purer organic electrolytes store more charge',
+    },
+    {
+        stat: 'Resonance',
+        capability: 'Hauler',
+        attribute: 'capacity',
+        rationale:
+            'Resonant field strength determines how many targets the haul beam can lock onto simultaneously.',
+    },
+    {
+        stat: 'Conductivity',
+        capability: 'Hauler',
+        attribute: 'efficiency',
+        rationale: 'Energy-transfer efficiency reduces the thrust penalty from each hauled target.',
+    },
+    {
+        stat: 'Clarity',
+        capability: 'Hauler',
+        attribute: 'drain',
+        rationale:
+            'Clarity-focused energy routing reduces per-target drain during haul-beam operation.',
     },
 ]
 

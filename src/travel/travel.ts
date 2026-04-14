@@ -23,9 +23,9 @@ import {
 
 import {ServerContract} from '../contracts'
 import {
+    BASE_ORBITAL_MASS,
     CargoMassInfo,
     Distance,
-    BASE_ORBITAL_MASS,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     PRECISION,
@@ -128,7 +128,11 @@ export function calc_rechargetime(
 
 export function calc_ship_rechargetime(ship: ShipLike): UInt32 {
     if (!ship.generator) return UInt32.from(0)
-    return calc_rechargetime(ship.generator.capacity, ship.energy ?? UInt16.from(0), ship.generator.recharge)
+    return calc_rechargetime(
+        ship.generator.capacity,
+        ship.energy ?? UInt16.from(0),
+        ship.generator.recharge
+    )
 }
 
 export function calc_flighttime(distance: UInt64Type, acceleration: number): UInt32 {

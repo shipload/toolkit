@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {itemTier, itemOffset, isRelatedItem, isCraftedItem, itemCategory} from '$lib'
+import {isCraftedItem, isRelatedItem, itemCategory, itemOffset, itemTier} from '$lib'
 
 suite('tier utilities', function () {
     test('itemTier returns tier from item ID', function () {

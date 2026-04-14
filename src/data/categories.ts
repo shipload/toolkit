@@ -37,7 +37,8 @@ const categories: CategoryInfo[] = [
         id: 'mineral',
         name: 'Minerals',
         label: 'Mineral',
-        description: 'Crystalline, hard, precise — sensors, optics, energy storage, cutting surfaces',
+        description:
+            'Crystalline, hard, precise — sensors, optics, energy storage, cutting surfaces',
         color: categoryColors.mineral,
     },
     {

@@ -4,6 +4,7 @@ export const ITEM_EXTRACTOR_T1 = 10102
 export const ITEM_LOADER_T1 = 10103
 export const ITEM_MANUFACTURING_T1 = 10104
 export const ITEM_STORAGE_T1 = 10105
+export const ITEM_HAULER_T1 = 10106
 
 export const MODULE_ANY = 0
 export const MODULE_ENGINE = 1
@@ -14,6 +15,7 @@ export const MODULE_WARP = 5
 export const MODULE_CRAFTER = 6
 export const MODULE_LAUNCHER = 7
 export const MODULE_STORAGE = 8
+export const MODULE_HAULER = 9
 
 export interface CargoSeed {
     itemId: number
@@ -43,6 +45,8 @@ export function getModuleCapabilityType(itemId: number): number {
             return MODULE_CRAFTER
         case ITEM_STORAGE_T1:
             return MODULE_STORAGE
+        case ITEM_HAULER_T1:
+            return MODULE_HAULER
         default:
             return 0xff
     }

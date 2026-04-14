@@ -141,7 +141,14 @@ export * from './types/capabilities'
 export * from './types/entity'
 export * from './capabilities'
 
-export {categoryColors, tierColors, categoryIcons, componentIcon, moduleIcon, itemIcons} from './data/colors'
+export {
+    categoryColors,
+    tierColors,
+    categoryIcons,
+    componentIcon,
+    moduleIcon,
+    itemIcons,
+} from './data/colors'
 
 export {itemTier, itemOffset, itemCategory, isRelatedItem, isCraftedItem} from './data/tiers'
 export type {CraftedItemCategory} from './data/tiers'
@@ -165,62 +172,63 @@ export {
 export type {CapabilityAttribute, StatMapping} from './data/capabilities'
 
 export {
-   components,
-   entityRecipes,
-   moduleRecipes,
-   getComponentById,
-   getEntityRecipe,
-   getEntityRecipeByItemId,
-   getModuleRecipe,
-   getModuleRecipeByItemId,
-   getAllCraftableItems,
-   getComponentsForCategory,
-   getComponentsForStat,
-   ITEM_HULL_PLATES,
-   ITEM_CARGO_LINING,
-   ITEM_CONTAINER_T1_PACKED,
-   ITEM_THRUSTER_CORE,
-   ITEM_POWER_CELL,
-   ITEM_ENGINE_T1,
-   ITEM_GENERATOR_T1,
-   ITEM_SHIP_T1_PACKED,
-   ITEM_WAREHOUSE_T1_PACKED,
-   ITEM_DRILL_SHAFT,
-   ITEM_EXTRACTION_PROBE,
-   ITEM_CARGO_ARM,
-   ITEM_TOOL_BIT,
-   ITEM_REACTION_CHAMBER,
-   ITEM_EXTRACTOR_T1,
-   ITEM_LOADER_T1,
-   ITEM_MANUFACTURING_T1,
-   ITEM_STORAGE_T1,
-   ITEM_HULL_PLATES_T2,
-   ITEM_CARGO_LINING_T2,
-   ITEM_CONTAINER_T2_PACKED,
+    components,
+    entityRecipes,
+    moduleRecipes,
+    getComponentById,
+    getEntityRecipe,
+    getEntityRecipeByItemId,
+    getModuleRecipe,
+    getModuleRecipeByItemId,
+    getAllCraftableItems,
+    getComponentsForCategory,
+    getComponentsForStat,
+    ITEM_HULL_PLATES,
+    ITEM_CARGO_LINING,
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_THRUSTER_CORE,
+    ITEM_POWER_CELL,
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_DRILL_SHAFT,
+    ITEM_EXTRACTION_PROBE,
+    ITEM_CARGO_ARM,
+    ITEM_TOOL_BIT,
+    ITEM_REACTION_CHAMBER,
+    ITEM_EXTRACTOR_T1,
+    ITEM_LOADER_T1,
+    ITEM_MANUFACTURING_T1,
+    ITEM_STORAGE_T1,
+    ITEM_HULL_PLATES_T2,
+    ITEM_CARGO_LINING_T2,
+    ITEM_CONTAINER_T2_PACKED,
+    ITEM_FOCUSING_ARRAY,
 } from './data/recipes'
 export type {
-   ComponentDefinition,
-   ComponentStat,
-   RecipeInput,
-   EntityRecipe,
-   ModuleRecipe,
-   ModuleSlot,
-   CraftableItem,
+    ComponentDefinition,
+    ComponentStat,
+    RecipeInput,
+    EntityRecipe,
+    ModuleRecipe,
+    ModuleSlot,
+    CraftableItem,
 } from './data/recipes'
 
 export {
-   encodeStats,
-   decodeStat,
-   decodeStats,
-   decodeCraftedItemStats,
-   blendStacks,
-   computeComponentStats,
-   blendComponentStacks,
-   computeEntityStats,
-   blendCargoStacks,
-   blendCrossGroup,
-   categoryItemMass,
-   computeInputMass,
+    encodeStats,
+    decodeStat,
+    decodeStats,
+    decodeCraftedItemStats,
+    blendStacks,
+    computeComponentStats,
+    blendComponentStacks,
+    computeEntityStats,
+    blendCargoStacks,
+    blendCrossGroup,
+    categoryItemMass,
+    computeInputMass,
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks} from './derivation/crafting'
 
@@ -231,14 +239,23 @@ export {
     computeEngineCapabilities,
     computeGeneratorCapabilities,
     computeExtractorCapabilities,
+    computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
+    computeShipCapabilities,
 } from './entities/ship-deploy'
+export type {ShipCapabilities} from './entities/ship-deploy'
 
 export {resolveItem} from './resolution/resolve-item'
-export type {ResolvedItem, ResolvedItemStat, ResolvedAttributeGroup, ResolvedModuleSlot, ResolvedItemType} from './resolution/resolve-item'
+export type {
+    ResolvedItem,
+    ResolvedItemStat,
+    ResolvedAttributeGroup,
+    ResolvedModuleSlot,
+    ResolvedItemType,
+} from './resolution/resolve-item'
 
 export * as NFT from './nft'
 export {
@@ -249,7 +266,12 @@ export {
     deserializeEntity,
     readCommonBase,
 } from './nft/deserializers'
-export type {NFTCargoItem, NFTModuleSlot, NFTInstalledModule, NFTCommonBase} from './nft/deserializers'
+export type {
+    NFTCargoItem,
+    NFTModuleSlot,
+    NFTInstalledModule,
+    NFTCommonBase,
+} from './nft/deserializers'
 
 export {
     buildEntityDescription,
@@ -274,4 +296,10 @@ export {
 } from './nft/description'
 
 export {getEntitySlotLayout} from './data/recipes'
-export {ITEM_TYPE_RESOURCE, ITEM_TYPE_COMPONENT, ITEM_TYPE_MODULE, ITEM_TYPE_ENTITY, itemTypeCode} from './data/tiers'
+export {
+    ITEM_TYPE_RESOURCE,
+    ITEM_TYPE_COMPONENT,
+    ITEM_TYPE_MODULE,
+    ITEM_TYPE_ENTITY,
+    itemTypeCode,
+} from './data/tiers'

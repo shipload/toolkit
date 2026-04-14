@@ -1,23 +1,23 @@
 import {assert} from 'chai'
 
 import {
-    encodeStats,
-    decodeStats,
-    decodeCraftedItemStats,
-    blendStacks,
-    computeComponentStats,
-    blendComponentStacks,
-    computeEntityStats,
     blendCrossGroup,
-    ITEM_HULL_PLATES,
-    ITEM_CARGO_LINING,
-    ITEM_CONTAINER_T1_PACKED,
-    computeContainerCapabilities,
-    computeContainerT2Capabilities,
+    blendStacks,
     calc_craft_duration,
     calc_craft_energy,
-    computeInputMass,
     categoryItemMass,
+    computeComponentStats,
+    computeContainerCapabilities,
+    computeContainerT2Capabilities,
+    computeEntityStats,
+    computeInputMass,
+    decodeCraftedItemStats,
+    decodeStats,
+    encodeStats,
+    ITEM_CARGO_LINING,
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_FOCUSING_ARRAY,
+    ITEM_HULL_PLATES,
 } from '$lib'
 
 suite('Crafting', function () {
@@ -62,10 +62,7 @@ suite('Crafting', function () {
         })
 
         test('single stack returns its value', function () {
-            const result = blendStacks(
-                [{quantity: 40, stats: {strength: 600}}],
-                'strength'
-            )
+            const result = blendStacks([{quantity: 40, stats: {strength: 600}}], 'strength')
             assert.equal(result, 600)
         })
 
@@ -93,15 +90,45 @@ suite('Crafting', function () {
             assert.equal(den!.value, 262)
         })
 
+        test('focusing array from precious stacks blends weighted average', function () {
+            const stats = computeComponentStats(ITEM_FOCUSING_ARRAY, [
+                {
+                    category: 'precious',
+                    stacks: [
+                        {
+                            quantity: 10,
+                            stats: {conductivity: 200, ductility: 200, reflectivity: 200},
+                        },
+                        {
+                            quantity: 15,
+                            stats: {conductivity: 800, ductility: 800, reflectivity: 800},
+                        },
+                    ],
+                },
+            ])
+            assert.equal(stats.length, 2)
+            const cond = stats.find((s) => s.key === 'conductivity')
+            const duc = stats.find((s) => s.key === 'ductility')
+            assert.equal(cond!.value, 560)
+            assert.equal(duc!.value, 560)
+        })
+
         test('cargo lining from precious + organic', function () {
             const stats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
                     category: 'precious',
-                    stacks: [{quantity: 10, stats: {conductivity: 500, ductility: 700, reflectivity: 300}}],
+                    stacks: [
+                        {
+                            quantity: 10,
+                            stats: {conductivity: 500, ductility: 700, reflectivity: 300},
+                        },
+                    ],
                 },
                 {
                     category: 'organic',
-                    stacks: [{quantity: 20, stats: {plasticity: 400, insulation: 200, purity: 800}}],
+                    stacks: [
+                        {quantity: 20, stats: {plasticity: 400, insulation: 200, purity: 800}},
+                    ],
                 },
             ])
             assert.equal(stats.length, 2)
@@ -119,9 +146,7 @@ suite('Crafting', function () {
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 400, density: 200}},
                 ],
-                [ITEM_CARGO_LINING]: [
-                    {quantity: 2, stats: {ductility: 600, purity: 700}},
-                ],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {ductility: 600, purity: 700}}],
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
@@ -189,36 +214,86 @@ suite('Crafting', function () {
         })
 
         test('hullmass range is 25k-100k', function () {
-            const min = computeContainerCapabilities({density: 1, strength: 500, ductility: 500, purity: 500})
-            const max = computeContainerCapabilities({density: 999, strength: 500, ductility: 500, purity: 500})
+            const min = computeContainerCapabilities({
+                density: 1,
+                strength: 500,
+                ductility: 500,
+                purity: 500,
+            })
+            const max = computeContainerCapabilities({
+                density: 999,
+                strength: 500,
+                ductility: 500,
+                purity: 500,
+            })
             assert.isAtLeast(min.hullmass, 25000)
             assert.isAtMost(max.hullmass, 100000)
         })
 
         test('capacity range is 1M-10M', function () {
-            const min = computeContainerCapabilities({strength: 1, ductility: 1, purity: 1, density: 500})
-            const max = computeContainerCapabilities({strength: 999, ductility: 999, purity: 999, density: 500})
+            const min = computeContainerCapabilities({
+                strength: 1,
+                ductility: 1,
+                purity: 1,
+                density: 500,
+            })
+            const max = computeContainerCapabilities({
+                strength: 999,
+                ductility: 999,
+                purity: 999,
+                density: 500,
+            })
             assert.isAtLeast(min.capacity, 1000000)
             assert.isAtMost(max.capacity, 10100000)
         })
 
         test('density is inverted - lower density means lighter hull', function () {
-            const low = computeContainerCapabilities({density: 100, strength: 500, ductility: 500, purity: 500})
-            const high = computeContainerCapabilities({density: 900, strength: 500, ductility: 500, purity: 500})
+            const low = computeContainerCapabilities({
+                density: 100,
+                strength: 500,
+                ductility: 500,
+                purity: 500,
+            })
+            const high = computeContainerCapabilities({
+                density: 900,
+                strength: 500,
+                ductility: 500,
+                purity: 500,
+            })
             assert.isBelow(low.hullmass, high.hullmass)
         })
     })
 
     suite('T2 Container Capabilities', function () {
         test('T2 container has lighter hullmass than T1 at same density', function () {
-            const t1 = computeContainerCapabilities({strength: 500, density: 500, ductility: 500, purity: 500})
-            const t2 = computeContainerT2Capabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            const t1 = computeContainerCapabilities({
+                strength: 500,
+                density: 500,
+                ductility: 500,
+                purity: 500,
+            })
+            const t2 = computeContainerT2Capabilities({
+                strength: 500,
+                density: 500,
+                ductility: 500,
+                purity: 500,
+            })
             assert.isBelow(t2.hullmass, t1.hullmass)
         })
 
         test('T2 container has greater capacity than T1 at same stats', function () {
-            const t1 = computeContainerCapabilities({strength: 500, density: 500, ductility: 500, purity: 500})
-            const t2 = computeContainerT2Capabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+            const t1 = computeContainerCapabilities({
+                strength: 500,
+                density: 500,
+                ductility: 500,
+                purity: 500,
+            })
+            const t2 = computeContainerT2Capabilities({
+                strength: 500,
+                density: 500,
+                ductility: 500,
+                purity: 500,
+            })
             assert.isAbove(t2.capacity, t1.capacity)
         })
 
@@ -286,16 +361,18 @@ suite('Crafting', function () {
 
     suite('T2 cross-group blending', function () {
         test('blendCrossGroup averages stats from two groups with equal weights', function () {
-            const result = blendCrossGroup(
-                [{value: 400, weight: 1}, {value: 600, weight: 1}]
-            )
+            const result = blendCrossGroup([
+                {value: 400, weight: 1},
+                {value: 600, weight: 1},
+            ])
             assert.equal(result, 500)
         })
 
         test('blendCrossGroup respects unequal weights', function () {
-            const result = blendCrossGroup(
-                [{value: 400, weight: 3}, {value: 800, weight: 1}]
-            )
+            const result = blendCrossGroup([
+                {value: 400, weight: 3},
+                {value: 800, weight: 1},
+            ])
             assert.equal(result, 500)
         })
 

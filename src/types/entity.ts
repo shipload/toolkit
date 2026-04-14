@@ -28,7 +28,11 @@ export type ShipEntity = Entity &
         extractor?: ServerContract.Types.extractor_stats
     }
 
-export type WarehouseEntity = Entity & StorageCapability & Partial<LoaderCapability> & MassCapability & ScheduleCapability
+export type WarehouseEntity = Entity &
+    StorageCapability &
+    Partial<LoaderCapability> &
+    MassCapability &
+    ScheduleCapability
 
 export type ContainerEntity = Entity & StorageCapability & MassCapability & ScheduleCapability
 

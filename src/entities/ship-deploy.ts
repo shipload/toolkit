@@ -1,3 +1,14 @@
+import {decodeCraftedItemStats} from '../derivation/crafting'
+import {
+    getModuleCapabilityType,
+    MODULE_CRAFTER,
+    MODULE_ENGINE,
+    MODULE_EXTRACTOR,
+    MODULE_GENERATOR,
+    MODULE_HAULER,
+    MODULE_LOADER,
+} from '../capabilities/modules'
+
 export function computeShipHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
@@ -23,7 +34,7 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
     const thm = stats.thermal ?? 500
 
     return {
-        thrust: 400 + Math.floor(vol * 3 / 4),
+        thrust: 400 + Math.floor((vol * 3) / 4),
         drain: Math.max(30, 50 - Math.floor(thm / 70)),
     }
 }
@@ -37,7 +48,7 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
 
     return {
         capacity: 300 + Math.floor(res / 6),
-        recharge: 5 + Math.floor(clr * 15 / 1000),
+        recharge: 5 + Math.floor((clr * 15) / 1000),
     }
 }
 
@@ -55,8 +66,8 @@ export function computeExtractorCapabilities(stats: Record<string, number>): {
     return {
         rate: 200 + str,
         drain: Math.max(10, 50 - Math.floor(con / 20)),
-        depth: 200 + Math.floor(tol * 3 / 2),
-        drill: 100 + Math.floor(ref * 4 / 5),
+        depth: 200 + Math.floor((tol * 3) / 2),
+        drill: 100 + Math.floor((ref * 4) / 5),
     }
 }
 
@@ -83,8 +94,24 @@ export function computeManufacturingCapabilities(stats: Record<string, number>):
     const clr = stats.clarity ?? 500
 
     return {
-        speed: 100 + Math.floor(rea * 4 / 5),
+        speed: 100 + Math.floor((rea * 4) / 5),
         drain: Math.max(5, 30 - Math.floor(clr / 33)),
+    }
+}
+
+export function computeHaulerCapabilities(stats: Record<string, number>): {
+    capacity: number
+    efficiency: number
+    drain: number
+} {
+    const res = stats.resonance ?? 500
+    const con = stats.conductivity ?? 500
+    const clr = stats.clarity ?? 500
+
+    return {
+        capacity: Math.max(1, 1 + Math.floor(res / 400)),
+        efficiency: 2000 + con * 6,
+        drain: Math.max(3, 15 - Math.floor(clr / 80)),
     }
 }
 
@@ -99,7 +126,9 @@ export function computeStorageCapabilities(
     const purity = stats.purity ?? 500
 
     const statSum = strength + ductility + purity
-    const capacityBonus = Math.floor(baseCapacity * (10 + Math.floor(statSum * 10 / 2997)) / 100)
+    const capacityBonus = Math.floor(
+        (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
+    )
 
     return {capacityBonus}
 }
@@ -119,4 +148,116 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const capacity = Math.floor(20000000 * Math.pow(10, exponent))
 
     return {hullmass, capacity}
+}
+
+export interface ShipCapabilities {
+    engines?: {thrust: number; drain: number}
+    generator?: {capacity: number; recharge: number}
+    extractor?: {rate: number; drain: number; depth: number; drill: number}
+    hauler?: {capacity: number; efficiency: number; drain: number}
+    loaders?: {mass: number; thrust: number; quantity: number}
+    crafter?: {speed: number; drain: number}
+}
+
+export function computeShipCapabilities(
+    modules: {itemId: number; seed: bigint}[]
+): ShipCapabilities {
+    const ship: ShipCapabilities = {}
+
+    const engineModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_ENGINE)
+    if (engineModules.length > 0) {
+        let totalThrust = 0
+        let totalDrain = 0
+        for (const m of engineModules) {
+            const caps = computeEngineCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalThrust += caps.thrust
+            totalDrain += caps.drain
+        }
+        ship.engines = {thrust: totalThrust, drain: totalDrain}
+    }
+
+    const generatorModules = modules.filter(
+        (m) => getModuleCapabilityType(m.itemId) === MODULE_GENERATOR
+    )
+    if (generatorModules.length > 0) {
+        let totalCapacity = 0
+        let totalRecharge = 0
+        for (const m of generatorModules) {
+            const caps = computeGeneratorCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalCapacity += caps.capacity
+            totalRecharge += caps.recharge
+        }
+        ship.generator = {capacity: totalCapacity, recharge: totalRecharge}
+    }
+
+    const extractorModules = modules.filter(
+        (m) => getModuleCapabilityType(m.itemId) === MODULE_EXTRACTOR
+    )
+    if (extractorModules.length > 0) {
+        let totalRate = 0
+        let totalDrain = 0
+        let totalDepth = 0
+        let totalDrill = 0
+        for (const m of extractorModules) {
+            const caps = computeExtractorCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalRate += caps.rate
+            totalDrain += caps.drain
+            totalDepth += caps.depth
+            totalDrill += caps.drill
+        }
+        ship.extractor = {rate: totalRate, drain: totalDrain, depth: totalDepth, drill: totalDrill}
+    }
+
+    const haulerModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_HAULER)
+    if (haulerModules.length > 0) {
+        let totalCapacity = 0
+        let weightedEffNum = 0
+        let totalDrain = 0
+        for (const m of haulerModules) {
+            const decoded = decodeCraftedItemStats(m.itemId, m.seed)
+            const caps = computeHaulerCapabilities({
+                resonance: decoded.capacity,
+                conductivity: decoded.efficiency,
+                clarity: decoded.drain,
+            })
+            totalCapacity += caps.capacity
+            weightedEffNum += caps.efficiency * caps.capacity
+            totalDrain += caps.drain
+        }
+        ship.hauler = {
+            capacity: totalCapacity,
+            efficiency: totalCapacity > 0 ? Math.floor(weightedEffNum / totalCapacity) : 0,
+            drain: totalDrain,
+        }
+    }
+
+    const loaderModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_LOADER)
+    if (loaderModules.length > 0) {
+        let totalMass = 0
+        let totalThrust = 0
+        let totalQuantity = 0
+        for (const m of loaderModules) {
+            const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalMass += caps.mass
+            totalThrust += caps.thrust
+            totalQuantity += caps.quantity
+        }
+        ship.loaders = {mass: totalMass, thrust: totalThrust, quantity: totalQuantity}
+    }
+
+    const crafterModules = modules.filter(
+        (m) => getModuleCapabilityType(m.itemId) === MODULE_CRAFTER
+    )
+    if (crafterModules.length > 0) {
+        let totalSpeed = 0
+        let totalDrain = 0
+        for (const m of crafterModules) {
+            const caps = computeManufacturingCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalSpeed += caps.speed
+            totalDrain += caps.drain
+        }
+        ship.crafter = {speed: totalSpeed, drain: totalDrain}
+    }
+
+    return ship
 }

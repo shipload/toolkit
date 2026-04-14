@@ -34,6 +34,7 @@ export interface ShipLike {
     engines?: ServerContract.Types.movement_stats
     generator?: ServerContract.Types.energy_stats
     loaders?: ServerContract.Types.loader_stats
+    hauler?: ServerContract.Types.hauler_stats
     capacity?: UInt32
 }
 

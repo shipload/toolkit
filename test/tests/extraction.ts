@@ -230,10 +230,17 @@ suite('extraction', function () {
             const massFactor = Math.sqrt(itemMass)
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
-            const extractionTime = quantity * massFactor * 100 * depthPenalty / (rate * richnessMul)
+            const extractionTime =
+                (quantity * massFactor * 100 * depthPenalty) / (rate * richnessMul)
             const drillTime = 300 * Math.log(1 + stratum / drill)
             const expected = Math.floor(extractionTime + drillTime)
-            const duration = calc_extraction_duration(extractor, itemMass, quantity, stratum, richness)
+            const duration = calc_extraction_duration(
+                extractor,
+                itemMass,
+                quantity,
+                stratum,
+                richness
+            )
             assert.equal(duration.toNumber(), expected)
         })
     })

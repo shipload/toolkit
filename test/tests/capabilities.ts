@@ -1,25 +1,25 @@
 import {assert} from 'chai'
 
 import {
-    capabilityNames,
     capabilityAttributes,
-    statMappings,
-    isInvertedAttribute,
+    capabilityNames,
     getCapabilityAttributes,
     getStatMappings,
-    getStatMappingsForStat,
     getStatMappingsForCapability,
+    getStatMappingsForStat,
+    isInvertedAttribute,
+    statMappings,
 } from '$lib'
 
 suite('Capabilities', function () {
-    test('capabilityNames has 9 entries', function () {
-        assert.equal(capabilityNames.length, 9)
+    test('capabilityNames has 10 entries', function () {
+        assert.equal(capabilityNames.length, 10)
     })
 
     test('getCapabilityAttributes returns all attributes', function () {
         const all = getCapabilityAttributes()
         assert.equal(all.length, capabilityAttributes.length)
-        assert.equal(all.length, 19)
+        assert.equal(all.length, 22)
     })
 
     test('getCapabilityAttributes filters by capability', function () {

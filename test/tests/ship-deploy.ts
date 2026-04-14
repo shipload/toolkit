@@ -4,10 +4,14 @@ import {
     computeEngineCapabilities,
     computeExtractorCapabilities,
     computeGeneratorCapabilities,
+    computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
+    computeShipCapabilities,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
+    encodeStats,
+    ITEM_HAULER_T1,
 } from '$lib'
 
 suite('ship deploy formulas', function () {
@@ -106,19 +110,34 @@ suite('ship deploy formulas', function () {
     })
 
     test('hull formula exact values at mid', function () {
-        const r = computeShipHullCapabilities({strength: 500, density: 500, ductility: 500, purity: 500})
+        const r = computeShipHullCapabilities({
+            strength: 500,
+            density: 500,
+            ductility: 500,
+            purity: 500,
+        })
         assert.equal(r.hullmass, 62500)
         assert.equal(r.capacity, 3165924)
     })
 
     test('hull formula exact values at max', function () {
-        const r = computeShipHullCapabilities({strength: 999, density: 999, ductility: 999, purity: 999})
+        const r = computeShipHullCapabilities({
+            strength: 999,
+            density: 999,
+            ductility: 999,
+            purity: 999,
+        })
         assert.equal(r.hullmass, 99925)
         assert.equal(r.capacity, 10000000)
     })
 
     test('extractor formula exact values at min', function () {
-        const r = computeExtractorCapabilities({strength: 1, tolerance: 1, conductivity: 1, reflectivity: 1})
+        const r = computeExtractorCapabilities({
+            strength: 1,
+            tolerance: 1,
+            conductivity: 1,
+            reflectivity: 1,
+        })
         assert.equal(r.rate, 201)
         assert.equal(r.drain, 50)
         assert.equal(r.depth, 201)
@@ -126,7 +145,12 @@ suite('ship deploy formulas', function () {
     })
 
     test('extractor formula exact values at mid', function () {
-        const r = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 500})
+        const r = computeExtractorCapabilities({
+            strength: 500,
+            tolerance: 500,
+            conductivity: 500,
+            reflectivity: 500,
+        })
         assert.equal(r.rate, 700)
         assert.equal(r.drain, 25)
         assert.equal(r.depth, 950)
@@ -134,7 +158,12 @@ suite('ship deploy formulas', function () {
     })
 
     test('extractor formula exact values at max', function () {
-        const r = computeExtractorCapabilities({strength: 999, tolerance: 999, conductivity: 999, reflectivity: 999})
+        const r = computeExtractorCapabilities({
+            strength: 999,
+            tolerance: 999,
+            conductivity: 999,
+            reflectivity: 999,
+        })
         assert.equal(r.rate, 1199)
         assert.equal(r.drain, 10)
         assert.equal(r.depth, 1698)
@@ -142,20 +171,50 @@ suite('ship deploy formulas', function () {
     })
 
     test('higher STR = higher extractor rate', function () {
-        const low = computeExtractorCapabilities({strength: 100, tolerance: 500, conductivity: 500, reflectivity: 500})
-        const high = computeExtractorCapabilities({strength: 900, tolerance: 500, conductivity: 500, reflectivity: 500})
+        const low = computeExtractorCapabilities({
+            strength: 100,
+            tolerance: 500,
+            conductivity: 500,
+            reflectivity: 500,
+        })
+        const high = computeExtractorCapabilities({
+            strength: 900,
+            tolerance: 500,
+            conductivity: 500,
+            reflectivity: 500,
+        })
         assert.isBelow(low.rate, high.rate)
     })
 
     test('higher CON = lower extractor drain', function () {
-        const low = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 100, reflectivity: 500})
-        const high = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 900, reflectivity: 500})
+        const low = computeExtractorCapabilities({
+            strength: 500,
+            tolerance: 500,
+            conductivity: 100,
+            reflectivity: 500,
+        })
+        const high = computeExtractorCapabilities({
+            strength: 500,
+            tolerance: 500,
+            conductivity: 900,
+            reflectivity: 500,
+        })
         assert.isAbove(low.drain, high.drain)
     })
 
     test('higher REF = higher drill', function () {
-        const low = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 100})
-        const high = computeExtractorCapabilities({strength: 500, tolerance: 500, conductivity: 500, reflectivity: 900})
+        const low = computeExtractorCapabilities({
+            strength: 500,
+            tolerance: 500,
+            conductivity: 500,
+            reflectivity: 100,
+        })
+        const high = computeExtractorCapabilities({
+            strength: 500,
+            tolerance: 500,
+            conductivity: 500,
+            reflectivity: 900,
+        })
         assert.isBelow(low.drill, high.drill)
     })
 
@@ -217,13 +276,23 @@ suite('ship deploy formulas', function () {
     })
 
     test('warehouse hull capabilities with zero stats', function () {
-        const r = computeWarehouseHullCapabilities({density: 0, strength: 0, ductility: 0, purity: 0})
+        const r = computeWarehouseHullCapabilities({
+            density: 0,
+            strength: 0,
+            ductility: 0,
+            purity: 0,
+        })
         assert.equal(r.hullmass, 25000)
         assert.equal(r.capacity, 20000000)
     })
 
     test('warehouse hull capabilities at mid stats', function () {
-        const r = computeWarehouseHullCapabilities({density: 500, strength: 500, ductility: 500, purity: 500})
+        const r = computeWarehouseHullCapabilities({
+            density: 500,
+            strength: 500,
+            ductility: 500,
+            purity: 500,
+        })
         assert.equal(r.hullmass, 62500)
         assert.isAbove(r.capacity, 20000000)
     })
@@ -245,7 +314,79 @@ suite('ship deploy formulas', function () {
     })
 
     test('warehouse max capacity with max stats', function () {
-        const r = computeWarehouseHullCapabilities({density: 999, strength: 999, ductility: 999, purity: 999})
+        const r = computeWarehouseHullCapabilities({
+            density: 999,
+            strength: 999,
+            ductility: 999,
+            purity: 999,
+        })
         assert.isAbove(r.capacity, 190000000)
+    })
+
+    test('hauler formula exact values at min', function () {
+        const r = computeHaulerCapabilities({resonance: 1, conductivity: 1, clarity: 1})
+        assert.equal(r.capacity, 1)
+        assert.equal(r.efficiency, 2006)
+        assert.equal(r.drain, 15)
+    })
+
+    test('hauler formula exact values at mid', function () {
+        const r = computeHaulerCapabilities({resonance: 500, conductivity: 500, clarity: 500})
+        assert.equal(r.capacity, 2)
+        assert.equal(r.efficiency, 5000)
+        assert.equal(r.drain, 9)
+    })
+
+    test('hauler formula exact values at max', function () {
+        const r = computeHaulerCapabilities({resonance: 999, conductivity: 999, clarity: 999})
+        assert.equal(r.capacity, 3)
+        assert.equal(r.efficiency, 7994)
+        assert.equal(r.drain, 3)
+    })
+
+    test('higher RES = higher hauler capacity', function () {
+        const low = computeHaulerCapabilities({resonance: 0, conductivity: 500, clarity: 500})
+        const high = computeHaulerCapabilities({resonance: 999, conductivity: 500, clarity: 500})
+        assert.isBelow(low.capacity, high.capacity)
+    })
+
+    test('higher CON = higher hauler efficiency', function () {
+        const low = computeHaulerCapabilities({resonance: 500, conductivity: 0, clarity: 500})
+        const high = computeHaulerCapabilities({resonance: 500, conductivity: 999, clarity: 500})
+        assert.isBelow(low.efficiency, high.efficiency)
+    })
+
+    test('higher CLR = lower hauler drain', function () {
+        const low = computeHaulerCapabilities({resonance: 500, conductivity: 500, clarity: 0})
+        const high = computeHaulerCapabilities({resonance: 500, conductivity: 500, clarity: 999})
+        assert.isBelow(high.drain, low.drain)
+    })
+
+    test('computeShipCapabilities stacks two hauler modules', function () {
+        const seedA = encodeStats([0, 0, 0, 0])
+        const seedB = encodeStats([999, 999, 999, 999])
+        const modules = [
+            {itemId: ITEM_HAULER_T1, seed: seedA},
+            {itemId: ITEM_HAULER_T1, seed: seedB},
+        ]
+        const caps = computeShipCapabilities(modules)
+        assert.exists(caps.hauler)
+        assert.equal(caps.hauler!.capacity, 4)
+        assert.equal(caps.hauler!.efficiency, 6495)
+        assert.equal(caps.hauler!.drain, 18)
+    })
+
+    test('computeShipCapabilities single hauler module', function () {
+        const seed = encodeStats([500, 500, 500, 500])
+        const caps = computeShipCapabilities([{itemId: ITEM_HAULER_T1, seed}])
+        assert.exists(caps.hauler)
+        assert.equal(caps.hauler!.capacity, 2)
+        assert.equal(caps.hauler!.efficiency, 5000)
+        assert.equal(caps.hauler!.drain, 9)
+    })
+
+    test('computeShipCapabilities with no hauler modules returns no hauler', function () {
+        const caps = computeShipCapabilities([])
+        assert.isUndefined(caps.hauler)
     })
 })

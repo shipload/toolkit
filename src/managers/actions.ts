@@ -122,9 +122,7 @@ export class ActionsManager extends BaseManager {
         quantity: number,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const cargoInputs = inputs.map((i) =>
-            ServerContract.Types.cargo_item.from(i)
-        )
+        const cargoInputs = inputs.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('craft', {
             entity_type: entityType,
             id: UInt64.from(entityId),
@@ -139,9 +137,7 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const cargoInputs = inputs.map((i) =>
-            ServerContract.Types.cargo_item.from(i)
-        )
+        const cargoInputs = inputs.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('blend', {
             entity_type: entityType,
             id: UInt64.from(entityId),

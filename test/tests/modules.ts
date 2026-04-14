@@ -5,6 +5,7 @@ import {
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1,
     ITEM_GENERATOR_T1,
+    ITEM_HAULER_T1,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
     MODULE_ANY,
@@ -12,6 +13,7 @@ import {
     MODULE_ENGINE,
     MODULE_EXTRACTOR,
     MODULE_GENERATOR,
+    MODULE_HAULER,
     MODULE_LOADER,
     moduleAccepts,
 } from '$lib'
@@ -63,5 +65,21 @@ suite('modules', function () {
         assert.isTrue(isModuleItem(ITEM_EXTRACTOR_T1))
         assert.isTrue(isModuleItem(ITEM_LOADER_T1))
         assert.isTrue(isModuleItem(ITEM_MANUFACTURING_T1))
+    })
+
+    test('MODULE_ANY accepts MODULE_HAULER', function () {
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_HAULER))
+    })
+
+    test('MODULE_LOADER slot rejects MODULE_HAULER', function () {
+        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_HAULER))
+    })
+
+    test('getModuleCapabilityType returns MODULE_HAULER for ITEM_HAULER_T1', function () {
+        assert.equal(getModuleCapabilityType(ITEM_HAULER_T1), MODULE_HAULER)
+    })
+
+    test('isModuleItem identifies ITEM_HAULER_T1', function () {
+        assert.isTrue(isModuleItem(ITEM_HAULER_T1))
     })
 })

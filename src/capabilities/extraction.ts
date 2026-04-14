@@ -21,8 +21,8 @@ export function calc_extraction_duration(
     const massFactor = Math.sqrt(itemMass)
     const depthPenalty = 1 + stratum / DEPTH_PENALTY_DIVISOR
     const richnessMul = richness / 1000
-    const extractionTime = quantity * massFactor * EXTRACTION_TIME_SCALE * depthPenalty
-                         / (rate * richnessMul)
+    const extractionTime =
+        (quantity * massFactor * EXTRACTION_TIME_SCALE * depthPenalty) / (rate * richnessMul)
     const drillTime = DRILL_TIME_SCALE * Math.log(1 + stratum / drill)
     return UInt32.from(Math.floor(extractionTime + drillTime))
 }

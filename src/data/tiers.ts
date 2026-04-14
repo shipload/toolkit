@@ -7,10 +7,14 @@ export const ITEM_TYPE_ENTITY = 3
 
 export function itemTypeCode(id: number): number {
     switch (itemCategory(id)) {
-        case 'resource': return ITEM_TYPE_RESOURCE
-        case 'component': return ITEM_TYPE_COMPONENT
-        case 'module': return ITEM_TYPE_MODULE
-        case 'entity': return ITEM_TYPE_ENTITY
+        case 'resource':
+            return ITEM_TYPE_RESOURCE
+        case 'component':
+            return ITEM_TYPE_COMPONENT
+        case 'module':
+            return ITEM_TYPE_MODULE
+        case 'entity':
+            return ITEM_TYPE_ENTITY
     }
 }
 

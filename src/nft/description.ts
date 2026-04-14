@@ -1,4 +1,5 @@
 import {
+    getModuleCapabilityType,
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1,
     ITEM_GENERATOR_T1,
@@ -11,7 +12,6 @@ import {
     MODULE_GENERATOR,
     MODULE_LOADER,
     MODULE_STORAGE,
-    getModuleCapabilityType,
 } from '../capabilities/modules'
 import {
     ITEM_CONTAINER_T1_PACKED,
@@ -115,7 +115,9 @@ export function formatModuleLine(slot: number, itemId: number, seed: bigint): st
             const tol = decodeStat(seed, 1)
             const con = decodeStat(seed, 3)
             const ref = decodeStat(seed, 4)
-            out += `  Rate ${computeExtractorRate(str)}  Depth ${computeExtractorDepth(tol)}  Drill ${computeExtractorDrill(ref)}  Drain ${computeExtractorDrain(con)}`
+            out += `  Rate ${computeExtractorRate(str)}  Depth ${computeExtractorDepth(
+                tol
+            )}  Drill ${computeExtractorDrill(ref)}  Drain ${computeExtractorDrain(con)}`
             break
         }
         case MODULE_LOADER: {
