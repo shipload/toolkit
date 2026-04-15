@@ -37,6 +37,7 @@ export const itemIcons: Record<number, string> = {
     10007: 'CA',
     10008: 'TB',
     10009: 'RC',
+    10010: 'FA',
     10100: 'EN',
     10101: 'GN',
     10102: 'EX',

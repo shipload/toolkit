@@ -34,6 +34,15 @@ export function isExtractableLocation(locationType: LocationType): boolean {
     return locationType !== LocationType.EMPTY
 }
 
+export function getLocationTypeName(type: LocationType): string {
+    switch (type) {
+        case LocationType.EMPTY: return 'Empty'
+        case LocationType.PLANET: return 'Planet'
+        case LocationType.ASTEROID: return 'Asteroid'
+        case LocationType.NEBULA: return 'Nebula'
+    }
+}
+
 function uint16(hash: Checksum512, offset: number): number {
     return (hash.array[offset] << 8) | hash.array[offset + 1]
 }

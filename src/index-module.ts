@@ -50,6 +50,7 @@ export {
     getSystemName,
     hasSystem,
     getLocationType,
+    getLocationTypeName,
     isExtractableLocation,
     deriveLocationStatic,
     deriveLocationEpoch,
