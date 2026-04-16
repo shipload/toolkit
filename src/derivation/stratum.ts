@@ -109,7 +109,7 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
 
     const weibull = (raw: number): number => {
         const u = raw / 4294967296
-        let x = 0.27 * Math.sqrt(-Math.log(1 - u))
+        let x = 0.24 * Math.sqrt(-Math.log(1 - u))
         if (x > 1) x = 1
         let val = Math.floor(x * 999) + 1
         if (val > 999) val = 999
