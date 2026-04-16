@@ -25,7 +25,7 @@ export type ShipEntity = Entity &
     Partial<LoaderCapability> &
     MassCapability &
     ScheduleCapability & {
-        extractor?: ServerContract.Types.extractor_stats
+        gatherer?: ServerContract.Types.gatherer_stats
     }
 
 export type WarehouseEntity = Entity &

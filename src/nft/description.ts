@@ -1,14 +1,14 @@
 import {
     getModuleCapabilityType,
     ITEM_ENGINE_T1,
-    ITEM_EXTRACTOR_T1,
+    ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
     ITEM_STORAGE_T1,
     MODULE_CRAFTER,
     MODULE_ENGINE,
-    MODULE_EXTRACTOR,
+    MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_LOADER,
     MODULE_STORAGE,
@@ -44,10 +44,10 @@ export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 
 export const computeEngineDrain = (thm: number): number => Math.max(30, 50 - idiv(thm, 70))
 export const computeGeneratorCap = (res: number): number => 300 + idiv(res, 6)
 export const computeGeneratorRech = (clr: number): number => 5 + idiv(clr * 15, 1000)
-export const computeExtractorRate = (str: number): number => 200 + str
-export const computeExtractorDrain = (con: number): number => Math.max(10, 50 - idiv(con, 20))
-export const computeExtractorDepth = (tol: number): number => 200 + idiv(tol * 3, 2)
-export const computeExtractorDrill = (ref: number): number => 100 + idiv(ref * 4, 5)
+export const computeGathererYield = (str: number): number => 200 + str
+export const computeGathererDrain = (con: number): number => Math.max(10, 50 - idiv(con, 20))
+export const computeGathererDepth = (tol: number): number => 200 + idiv(tol * 3, 2)
+export const computeGathererSpeed = (ref: number): number => 100 + idiv(ref * 4, 5)
 export const computeLoaderMass = (duc: number): number => Math.max(200, 2000 - duc * 2)
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
@@ -74,8 +74,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Engine T1'
         case ITEM_GENERATOR_T1:
             return 'Generator T1'
-        case ITEM_EXTRACTOR_T1:
-            return 'Extractor T1'
+        case ITEM_GATHERER_T1:
+            return 'Gatherer T1'
         case ITEM_LOADER_T1:
             return 'Loader T1'
         case ITEM_MANUFACTURING_T1:
@@ -110,14 +110,14 @@ export function formatModuleLine(slot: number, itemId: number, seed: bigint): st
             out += `  Capacity ${computeGeneratorCap(res)}  Recharge ${computeGeneratorRech(clr)}`
             break
         }
-        case MODULE_EXTRACTOR: {
+        case MODULE_GATHERER: {
             const str = decodeStat(seed, 0)
             const tol = decodeStat(seed, 1)
             const con = decodeStat(seed, 3)
             const ref = decodeStat(seed, 4)
-            out += `  Rate ${computeExtractorRate(str)}  Depth ${computeExtractorDepth(
+            out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
                 tol
-            )}  Drill ${computeExtractorDrill(ref)}  Drain ${computeExtractorDrain(con)}`
+            )}  Speed ${computeGathererSpeed(ref)}  Drain ${computeGathererDrain(con)}`
             break
         }
         case MODULE_LOADER: {

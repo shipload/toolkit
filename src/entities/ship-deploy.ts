@@ -3,7 +3,7 @@ import {
     getModuleCapabilityType,
     MODULE_CRAFTER,
     MODULE_ENGINE,
-    MODULE_EXTRACTOR,
+    MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_HAULER,
     MODULE_LOADER,
@@ -52,11 +52,11 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     }
 }
 
-export function computeExtractorCapabilities(stats: Record<string, number>): {
-    rate: number
+export function computeGathererCapabilities(stats: Record<string, number>): {
+    yield: number
     drain: number
     depth: number
-    drill: number
+    speed: number
 } {
     const str = stats.strength ?? 500
     const con = stats.conductivity ?? 500
@@ -64,10 +64,10 @@ export function computeExtractorCapabilities(stats: Record<string, number>): {
     const tol = stats.tolerance ?? 500
 
     return {
-        rate: 200 + str,
+        yield: 200 + str,
         drain: Math.max(10, 50 - Math.floor(con / 20)),
         depth: 200 + Math.floor((tol * 3) / 2),
-        drill: 100 + Math.floor((ref * 4) / 5),
+        speed: 100 + Math.floor((ref * 4) / 5),
     }
 }
 
@@ -153,7 +153,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
 export interface ShipCapabilities {
     engines?: {thrust: number; drain: number}
     generator?: {capacity: number; recharge: number}
-    extractor?: {rate: number; drain: number; depth: number; drill: number}
+    gatherer?: {yield: number; drain: number; depth: number; speed: number}
     hauler?: {capacity: number; efficiency: number; drain: number}
     loaders?: {mass: number; thrust: number; quantity: number}
     crafter?: {speed: number; drain: number}
@@ -190,22 +190,22 @@ export function computeShipCapabilities(
         ship.generator = {capacity: totalCapacity, recharge: totalRecharge}
     }
 
-    const extractorModules = modules.filter(
-        (m) => getModuleCapabilityType(m.itemId) === MODULE_EXTRACTOR
+    const gathererModules = modules.filter(
+        (m) => getModuleCapabilityType(m.itemId) === MODULE_GATHERER
     )
-    if (extractorModules.length > 0) {
-        let totalRate = 0
+    if (gathererModules.length > 0) {
+        let totalYield = 0
         let totalDrain = 0
         let totalDepth = 0
-        let totalDrill = 0
-        for (const m of extractorModules) {
-            const caps = computeExtractorCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
-            totalRate += caps.rate
+        let totalSpeed = 0
+        for (const m of gathererModules) {
+            const caps = computeGathererCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            totalYield += caps.yield
             totalDrain += caps.drain
             totalDepth += caps.depth
-            totalDrill += caps.drill
+            totalSpeed += caps.speed
         }
-        ship.extractor = {rate: totalRate, drain: totalDrain, depth: totalDepth, drill: totalDrill}
+        ship.gatherer = {yield: totalYield, drain: totalDrain, depth: totalDepth, speed: totalSpeed}
     }
 
     const haulerModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_HAULER)

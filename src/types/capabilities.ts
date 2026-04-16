@@ -20,8 +20,8 @@ export interface LoaderCapability {
     loaders: ServerContract.Types.loader_stats
 }
 
-export interface ExtractorCapability {
-    extractor: ServerContract.Types.extractor_stats
+export interface GathererCapability {
+    gatherer: ServerContract.Types.gatherer_stats
 }
 
 export interface MassCapability {
@@ -38,7 +38,7 @@ export interface EntityCapabilities {
     engines?: ServerContract.Types.movement_stats
     generator?: ServerContract.Types.energy_stats
     loaders?: ServerContract.Types.loader_stats
-    extractor?: ServerContract.Types.extractor_stats
+    gatherer?: ServerContract.Types.gatherer_stats
     crafter?: ServerContract.Types.crafter_stats
 }
 
@@ -62,8 +62,8 @@ export function capsHasLoaders(caps: EntityCapabilities): boolean {
     return caps.loaders !== undefined
 }
 
-export function capsHasExtractor(caps: EntityCapabilities): boolean {
-    return caps.extractor !== undefined
+export function capsHasGatherer(caps: EntityCapabilities): boolean {
+    return caps.gatherer !== undefined
 }
 
 export function capsHasMass(caps: EntityCapabilities): boolean {

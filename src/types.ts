@@ -49,7 +49,7 @@ export enum TaskType {
     RECHARGE = 2,
     LOAD = 3,
     UNLOAD = 4,
-    EXTRACT = 5,
+    GATHER = 5,
     WARP = 6,
     CRAFT = 7,
     DEPLOY = 8,

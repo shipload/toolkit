@@ -21,7 +21,7 @@ export type task = ServerContract.Types.task
 export type cargo_item = ServerContract.Types.cargo_item
 export type warehouse_row = ServerContract.Types.warehouse_row
 export type container_row = ServerContract.Types.container_row
-export type extractor_stats = ServerContract.Types.extractor_stats
+export type gatherer_stats = ServerContract.Types.gatherer_stats
 
 export type location_static = ServerContract.Types.location_static
 export type location_epoch = ServerContract.Types.location_epoch
@@ -51,7 +51,7 @@ export {
     hasSystem,
     getLocationType,
     getLocationTypeName,
-    isExtractableLocation,
+    isGatherableLocation,
     deriveLocationStatic,
     deriveLocationEpoch,
     deriveLocation,
@@ -193,12 +193,12 @@ export {
     ITEM_GENERATOR_T1,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_DRILL_SHAFT,
-    ITEM_EXTRACTION_PROBE,
+    ITEM_MATTER_CONDUIT,
+    ITEM_SURVEY_PROBE,
     ITEM_CARGO_ARM,
     ITEM_TOOL_BIT,
     ITEM_REACTION_CHAMBER,
-    ITEM_EXTRACTOR_T1,
+    ITEM_GATHERER_T1,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
     ITEM_STORAGE_T1,
@@ -239,7 +239,7 @@ export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
     computeGeneratorCapabilities,
-    computeExtractorCapabilities,
+    computeGathererCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
@@ -286,10 +286,10 @@ export {
     computeEngineDrain,
     computeGeneratorCap,
     computeGeneratorRech,
-    computeExtractorRate,
-    computeExtractorDrain,
-    computeExtractorDepth,
-    computeExtractorDrill,
+    computeGathererYield,
+    computeGathererDrain,
+    computeGathererDepth,
+    computeGathererSpeed,
     computeLoaderMass,
     computeLoaderThrust,
     computeCrafterSpeed,

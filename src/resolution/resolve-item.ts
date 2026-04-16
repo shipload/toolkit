@@ -8,7 +8,7 @@ import {
     isModuleItem,
     MODULE_CRAFTER,
     MODULE_ENGINE,
-    MODULE_EXTRACTOR,
+    MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_LOADER,
     MODULE_STORAGE,
@@ -18,7 +18,7 @@ import {deriveResourceStats} from '../derivation/stratum'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeEngineCapabilities,
-    computeExtractorCapabilities,
+    computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
@@ -163,15 +163,15 @@ function computeCapabilityGroup(
                 ],
             }
         }
-        case MODULE_EXTRACTOR: {
-            const caps = computeExtractorCapabilities(stats)
+        case MODULE_GATHERER: {
+            const caps = computeGathererCapabilities(stats)
             return {
-                capability: 'Extractor',
+                capability: 'Gatherer',
                 attributes: [
-                    {label: 'Rate', value: caps.rate},
+                    {label: 'Yield', value: caps.yield},
                     {label: 'Drain', value: caps.drain},
                     {label: 'Depth', value: caps.depth},
-                    {label: 'Drill', value: caps.drill},
+                    {label: 'Speed', value: caps.speed},
                 ],
             }
         }

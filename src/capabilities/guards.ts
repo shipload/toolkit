@@ -1,6 +1,6 @@
 import {
     EnergyCapability,
-    ExtractorCapability,
+    GathererCapability,
     LoaderCapability,
     MassCapability,
     MovementCapability,
@@ -33,6 +33,6 @@ export function hasSchedule(e: Entity): e is Entity & ScheduleCapability {
     return 'schedule' in e
 }
 
-export function hasExtractor(e: Entity): e is Entity & ExtractorCapability {
-    return 'extractor' in e && e.extractor !== undefined
+export function hasGatherer(e: Entity): e is Entity & GathererCapability {
+    return 'gatherer' in e && e.gatherer !== undefined
 }

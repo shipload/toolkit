@@ -2,7 +2,7 @@ import {assert} from 'chai'
 import {
     computeContainerCapabilities,
     computeEngineCapabilities,
-    computeExtractorCapabilities,
+    computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
@@ -131,69 +131,69 @@ suite('ship deploy formulas', function () {
         assert.equal(r.capacity, 10000000)
     })
 
-    test('extractor formula exact values at min', function () {
-        const r = computeExtractorCapabilities({
+    test('gatherer formula exact values at min', function () {
+        const r = computeGathererCapabilities({
             strength: 1,
             tolerance: 1,
             conductivity: 1,
             reflectivity: 1,
         })
-        assert.equal(r.rate, 201)
+        assert.equal(r.yield, 201)
         assert.equal(r.drain, 50)
         assert.equal(r.depth, 201)
-        assert.equal(r.drill, 100)
+        assert.equal(r.speed, 100)
     })
 
-    test('extractor formula exact values at mid', function () {
-        const r = computeExtractorCapabilities({
+    test('gatherer formula exact values at mid', function () {
+        const r = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
             conductivity: 500,
             reflectivity: 500,
         })
-        assert.equal(r.rate, 700)
+        assert.equal(r.yield, 700)
         assert.equal(r.drain, 25)
         assert.equal(r.depth, 950)
-        assert.equal(r.drill, 500)
+        assert.equal(r.speed, 500)
     })
 
-    test('extractor formula exact values at max', function () {
-        const r = computeExtractorCapabilities({
+    test('gatherer formula exact values at max', function () {
+        const r = computeGathererCapabilities({
             strength: 999,
             tolerance: 999,
             conductivity: 999,
             reflectivity: 999,
         })
-        assert.equal(r.rate, 1199)
+        assert.equal(r.yield, 1199)
         assert.equal(r.drain, 10)
         assert.equal(r.depth, 1698)
-        assert.equal(r.drill, 899)
+        assert.equal(r.speed, 899)
     })
 
-    test('higher STR = higher extractor rate', function () {
-        const low = computeExtractorCapabilities({
+    test('higher STR = higher gatherer yield', function () {
+        const low = computeGathererCapabilities({
             strength: 100,
             tolerance: 500,
             conductivity: 500,
             reflectivity: 500,
         })
-        const high = computeExtractorCapabilities({
+        const high = computeGathererCapabilities({
             strength: 900,
             tolerance: 500,
             conductivity: 500,
             reflectivity: 500,
         })
-        assert.isBelow(low.rate, high.rate)
+        assert.isBelow(low.yield, high.yield)
     })
 
-    test('higher CON = lower extractor drain', function () {
-        const low = computeExtractorCapabilities({
+    test('higher CON = lower gatherer drain', function () {
+        const low = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
             conductivity: 100,
             reflectivity: 500,
         })
-        const high = computeExtractorCapabilities({
+        const high = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
             conductivity: 900,
@@ -202,20 +202,20 @@ suite('ship deploy formulas', function () {
         assert.isAbove(low.drain, high.drain)
     })
 
-    test('higher REF = higher drill', function () {
-        const low = computeExtractorCapabilities({
+    test('higher REF = higher speed', function () {
+        const low = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
             conductivity: 500,
             reflectivity: 100,
         })
-        const high = computeExtractorCapabilities({
+        const high = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
             conductivity: 500,
             reflectivity: 900,
         })
-        assert.isBelow(low.drill, high.drill)
+        assert.isBelow(low.speed, high.speed)
     })
 
     test('loader formula exact values at min', function () {

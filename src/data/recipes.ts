@@ -1,6 +1,6 @@
 import {
     ITEM_ENGINE_T1,
-    ITEM_EXTRACTOR_T1,
+    ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
@@ -9,7 +9,7 @@ import {
     MODULE_ANY,
     MODULE_CRAFTER,
     MODULE_ENGINE,
-    MODULE_EXTRACTOR,
+    MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_HAULER,
     MODULE_LOADER,
@@ -20,15 +20,15 @@ import type {ResourceCategory} from '../types'
 export {
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
-    ITEM_EXTRACTOR_T1,
+    ITEM_GATHERER_T1,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
     ITEM_STORAGE_T1,
     ITEM_HAULER_T1,
 }
 
-export const ITEM_DRILL_SHAFT = 10005
-export const ITEM_EXTRACTION_PROBE = 10006
+export const ITEM_MATTER_CONDUIT = 10005
+export const ITEM_SURVEY_PROBE = 10006
 export const ITEM_CARGO_ARM = 10007
 export const ITEM_TOOL_BIT = 10008
 export const ITEM_REACTION_CHAMBER = 10009
@@ -158,9 +158,9 @@ export const components: ComponentDefinition[] = [
         usedIn: [{type: 'module', name: 'Generator'}],
     },
     {
-        id: ITEM_DRILL_SHAFT,
-        name: 'Drill Shaft',
-        description: 'Heavy-duty metal shaft used in extraction equipment.',
+        id: ITEM_MATTER_CONDUIT,
+        name: 'Matter Conduit',
+        description: 'Heavy-duty metal shaft used in gathering equipment.',
         color: '#7B8D9E',
         mass: 50000,
         stats: [
@@ -168,11 +168,11 @@ export const components: ComponentDefinition[] = [
             {key: 'tolerance', source: 'metal'},
         ],
         recipe: [{category: 'metal' as ResourceCategory, quantity: 15}],
-        usedIn: [{type: 'module', name: 'Extractor'}],
+        usedIn: [{type: 'module', name: 'Gatherer'}],
     },
     {
-        id: ITEM_EXTRACTION_PROBE,
-        name: 'Extraction Probe',
+        id: ITEM_SURVEY_PROBE,
+        name: 'Survey Probe',
         description: 'Precious metal sensor array for deep resource detection.',
         color: '#D4A843',
         mass: 30000,
@@ -181,7 +181,7 @@ export const components: ComponentDefinition[] = [
             {key: 'reflectivity', source: 'precious'},
         ],
         recipe: [{category: 'precious' as ResourceCategory, quantity: 10}],
-        usedIn: [{type: 'module', name: 'Extractor'}],
+        usedIn: [{type: 'module', name: 'Gatherer'}],
     },
     {
         id: ITEM_CARGO_ARM,
@@ -395,32 +395,32 @@ export const moduleRecipes: ModuleRecipe[] = [
         ],
     },
     {
-        id: 'extractor-t1',
-        name: 'Extractor',
-        description: 'Basic extraction system. Drills and probes for raw resources.',
+        id: 'gatherer-t1',
+        name: 'Gatherer',
+        description: 'Basic gathering system. Probes and conduits for raw resources.',
         color: '#7B8D9E',
-        itemId: ITEM_EXTRACTOR_T1,
-        moduleType: MODULE_EXTRACTOR,
+        itemId: ITEM_GATHERER_T1,
+        moduleType: MODULE_GATHERER,
         recipe: [
-            {itemId: ITEM_DRILL_SHAFT, quantity: 4},
-            {itemId: ITEM_EXTRACTION_PROBE, quantity: 3},
+            {itemId: ITEM_MATTER_CONDUIT, quantity: 4},
+            {itemId: ITEM_SURVEY_PROBE, quantity: 3},
         ],
         stats: [
-            {key: 'strength', sourceComponentId: ITEM_DRILL_SHAFT, sourceStatKey: 'strength'},
-            {key: 'tolerance', sourceComponentId: ITEM_DRILL_SHAFT, sourceStatKey: 'tolerance'},
+            {key: 'strength', sourceComponentId: ITEM_MATTER_CONDUIT, sourceStatKey: 'strength'},
+            {key: 'tolerance', sourceComponentId: ITEM_MATTER_CONDUIT, sourceStatKey: 'tolerance'},
             {
                 key: 'reflectivity',
-                sourceComponentId: ITEM_EXTRACTION_PROBE,
+                sourceComponentId: ITEM_SURVEY_PROBE,
                 sourceStatKey: 'reflectivity',
             },
             {
                 key: 'conductivity',
-                sourceComponentId: ITEM_EXTRACTION_PROBE,
+                sourceComponentId: ITEM_SURVEY_PROBE,
                 sourceStatKey: 'conductivity',
             },
             {
-                key: 'reflectivity_drill',
-                sourceComponentId: ITEM_EXTRACTION_PROBE,
+                key: 'reflectivity_speed',
+                sourceComponentId: ITEM_SURVEY_PROBE,
                 sourceStatKey: 'reflectivity',
             },
         ],

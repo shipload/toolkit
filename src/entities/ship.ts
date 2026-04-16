@@ -104,8 +104,8 @@ export class Ship extends ServerContract.Types.entity_info {
         return schedule.isUnloading(this, now)
     }
 
-    isExtracting(now: Date): boolean {
-        return schedule.isExtracting(this, now)
+    isGathering(now: Date): boolean {
+        return schedule.isGathering(this, now)
     }
 
     get hasEngines(): boolean {
@@ -116,8 +116,8 @@ export class Ship extends ServerContract.Types.entity_info {
         return this.generator !== undefined
     }
 
-    get hasExtractor(): boolean {
-        return this.extractor !== undefined
+    get hasGatherer(): boolean {
+        return this.gatherer !== undefined
     }
 
     get hasWarp(): boolean {

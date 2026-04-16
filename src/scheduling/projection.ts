@@ -185,7 +185,7 @@ function applyEnergyCost(projected: ProjectedEntity, task: ServerContract.Types.
         : UInt16.from(0)
 }
 
-function applyExtractTask(
+function applyGatherTask(
     projected: ProjectedEntity,
     task: ServerContract.Types.task,
     options: {complete: boolean}
@@ -246,8 +246,8 @@ export function projectEntity(entity: Projectable): ProjectedEntity {
             case TaskType.UNLOAD:
                 applyUnloadTask(projected, task)
                 break
-            case TaskType.EXTRACT:
-                applyExtractTask(projected, task, {complete: true})
+            case TaskType.GATHER:
+                applyGatherTask(projected, task, {complete: true})
                 break
             case TaskType.CRAFT:
                 applyCraftTask(projected, task)
@@ -299,9 +299,9 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                     applyUnloadTask(projected, task)
                 }
                 break
-            case TaskType.EXTRACT:
+            case TaskType.GATHER:
                 if (taskComplete) {
-                    applyExtractTask(projected, task, {complete: true})
+                    applyGatherTask(projected, task, {complete: true})
                 }
                 break
             case TaskType.CRAFT:

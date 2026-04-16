@@ -1,12 +1,12 @@
 import {Checksum256, Name, TimePoint, UInt16, UInt64} from '@wharfkit/antelope'
 import {assert} from 'chai'
 import {
-    calc_extraction_duration,
-    calc_extraction_energy,
-    capsHasExtractor,
+    calc_gather_duration,
+    calc_gather_energy,
+    capsHasGatherer,
     getLocationType,
-    hasExtractor,
-    isExtractableLocation,
+    hasGatherer,
+    isGatherableLocation,
     LocationType,
     PRECISION,
     projectEntity,
@@ -15,10 +15,10 @@ import {
 } from '../../src'
 import {makeShip} from '../../src/entities/makers'
 
-suite('extraction', function () {
+suite('gathering', function () {
     suite('TaskType', function () {
-        test('EXTRACT equals 5', function () {
-            assert.equal(TaskType.EXTRACT, 5)
+        test('GATHER equals 5', function () {
+            assert.equal(TaskType.GATHER, 5)
         })
 
         test('all task types have correct values', function () {
@@ -27,7 +27,7 @@ suite('extraction', function () {
             assert.equal(TaskType.RECHARGE, 2)
             assert.equal(TaskType.LOAD, 3)
             assert.equal(TaskType.UNLOAD, 4)
-            assert.equal(TaskType.EXTRACT, 5)
+            assert.equal(TaskType.GATHER, 5)
         })
     })
 
@@ -85,41 +85,41 @@ suite('extraction', function () {
         })
     })
 
-    suite('isExtractableLocation', function () {
-        test('ASTEROID is extractable', function () {
-            assert.isTrue(isExtractableLocation(LocationType.ASTEROID))
+    suite('isGatherableLocation', function () {
+        test('ASTEROID is gatherable', function () {
+            assert.isTrue(isGatherableLocation(LocationType.ASTEROID))
         })
 
-        test('NEBULA is extractable', function () {
-            assert.isTrue(isExtractableLocation(LocationType.NEBULA))
+        test('NEBULA is gatherable', function () {
+            assert.isTrue(isGatherableLocation(LocationType.NEBULA))
         })
 
-        test('PLANET is extractable', function () {
-            assert.isTrue(isExtractableLocation(LocationType.PLANET))
+        test('PLANET is gatherable', function () {
+            assert.isTrue(isGatherableLocation(LocationType.PLANET))
         })
 
-        test('EMPTY is not extractable', function () {
-            assert.isFalse(isExtractableLocation(LocationType.EMPTY))
+        test('EMPTY is not gatherable', function () {
+            assert.isFalse(isGatherableLocation(LocationType.EMPTY))
         })
     })
 
-    suite('hasExtractor type guard', function () {
-        test('returns true for entity with extractor', function () {
+    suite('hasGatherer type guard', function () {
+        test('returns true for entity with gatherer', function () {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('ship'),
                 owner: Name.from('test'),
                 entity_name: 'Test Ship',
                 coordinates: {x: 0, y: 0},
-                extractor: {
-                    rate: UInt16.from(700),
+                gatherer: {
+                    yield: UInt16.from(700),
                     drain: UInt16.from(25),
                 },
             }
-            assert.isTrue(hasExtractor(entity as any))
+            assert.isTrue(hasGatherer(entity as any))
         })
 
-        test('returns false for entity without extractor', function () {
+        test('returns false for entity without gatherer', function () {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('warehouse'),
@@ -127,96 +127,96 @@ suite('extraction', function () {
                 entity_name: 'Test Warehouse',
                 coordinates: {x: 0, y: 0},
             }
-            assert.isFalse(hasExtractor(entity as any))
+            assert.isFalse(hasGatherer(entity as any))
         })
 
-        test('returns false for entity with undefined extractor', function () {
+        test('returns false for entity with undefined gatherer', function () {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('ship'),
                 owner: Name.from('test'),
                 entity_name: 'Test Ship',
                 coordinates: {x: 0, y: 0},
-                extractor: undefined,
+                gatherer: undefined,
             }
-            assert.isFalse(hasExtractor(entity as any))
+            assert.isFalse(hasGatherer(entity as any))
         })
     })
 
-    suite('capsHasExtractor', function () {
-        test('returns true when extractor is present', function () {
+    suite('capsHasGatherer', function () {
+        test('returns true when gatherer is present', function () {
             const caps = {
-                extractor: {
-                    rate: UInt16.from(700),
+                gatherer: {
+                    yield: UInt16.from(700),
                     drain: UInt16.from(25),
                 },
             }
-            assert.isTrue(capsHasExtractor(caps as any))
+            assert.isTrue(capsHasGatherer(caps as any))
         })
 
-        test('returns false when extractor is undefined', function () {
+        test('returns false when gatherer is undefined', function () {
             const caps = {
-                extractor: undefined,
+                gatherer: undefined,
             }
-            assert.isFalse(capsHasExtractor(caps as any))
+            assert.isFalse(capsHasGatherer(caps as any))
         })
 
-        test('returns false when extractor is missing', function () {
+        test('returns false when gatherer is missing', function () {
             const caps = {}
-            assert.isFalse(capsHasExtractor(caps as any))
+            assert.isFalse(capsHasGatherer(caps as any))
         })
     })
 
-    suite('calc_extraction_duration', function () {
-        const extractor = ServerContract.Types.extractor_stats.from({
-            rate: UInt16.from(700),
+    suite('calc_gather_duration', function () {
+        const gatherer = ServerContract.Types.gatherer_stats.from({
+            yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
-            drill: UInt16.from(500),
+            speed: UInt16.from(500),
         })
 
         test('duration increases with quantity', function () {
-            const one = calc_extraction_duration(extractor, 15000, 1, 600, 500)
-            const five = calc_extraction_duration(extractor, 15000, 5, 600, 500)
+            const one = calc_gather_duration(gatherer, 15000, 1, 600, 500)
+            const five = calc_gather_duration(gatherer, 15000, 5, 600, 500)
             assert.isAbove(five.toNumber(), one.toNumber())
         })
 
         test('heavier mass increases duration', function () {
-            const light = calc_extraction_duration(extractor, 15000, 1, 600, 500)
-            const heavy = calc_extraction_duration(extractor, 40000, 1, 600, 500)
+            const light = calc_gather_duration(gatherer, 15000, 1, 600, 500)
+            const heavy = calc_gather_duration(gatherer, 40000, 1, 600, 500)
             assert.isAbove(heavy.toNumber(), light.toNumber())
         })
 
         test('deeper stratum increases duration', function () {
-            const shallow = calc_extraction_duration(extractor, 15000, 1, 100, 500)
-            const deep = calc_extraction_duration(extractor, 15000, 1, 900, 500)
+            const shallow = calc_gather_duration(gatherer, 15000, 1, 100, 500)
+            const deep = calc_gather_duration(gatherer, 15000, 1, 900, 500)
             assert.isAbove(deep.toNumber(), shallow.toNumber())
         })
 
         test('higher richness reduces duration', function () {
-            const lowRichness = calc_extraction_duration(extractor, 15000, 1, 600, 250)
-            const highRichness = calc_extraction_duration(extractor, 15000, 1, 600, 750)
+            const lowRichness = calc_gather_duration(gatherer, 15000, 1, 600, 250)
+            const highRichness = calc_gather_duration(gatherer, 15000, 1, 600, 750)
             assert.isBelow(highRichness.toNumber(), lowRichness.toNumber())
         })
 
-        test('returns 0 for zero rate', function () {
-            const zeroRate = ServerContract.Types.extractor_stats.from({
-                rate: UInt16.from(0),
+        test('returns 0 for zero yield', function () {
+            const zeroYield = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(0),
                 drain: UInt16.from(25),
                 depth: UInt16.from(950),
-                drill: UInt16.from(500),
+                speed: UInt16.from(500),
             })
-            const duration = calc_extraction_duration(zeroRate, 15000, 1, 600, 500)
+            const duration = calc_gather_duration(zeroYield, 15000, 1, 600, 500)
             assert.equal(duration.toNumber(), 0)
         })
 
         test('median hydrogen at stratum 600', function () {
-            const duration = calc_extraction_duration(extractor, 15000, 1, 600, 500)
+            const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
             assert.equal(duration.toNumber(), 275)
         })
 
         test('median copper at stratum 600', function () {
-            const duration = calc_extraction_duration(extractor, 40000, 1, 600, 500)
+            const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
             assert.equal(duration.toNumber(), 300)
         })
 
@@ -225,78 +225,72 @@ suite('extraction', function () {
             const quantity = 3
             const stratum = 600
             const richness = 500
-            const rate = extractor.rate.toNumber()
-            const drill = extractor.drill.toNumber()
+            const yieldValue = gatherer.yield.toNumber()
+            const speed = gatherer.speed.toNumber()
             const massFactor = Math.sqrt(itemMass)
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
-            const extractionTime =
-                (quantity * massFactor * 100 * depthPenalty) / (rate * richnessMul)
-            const drillTime = 300 * Math.log(1 + stratum / drill)
-            const expected = Math.floor(extractionTime + drillTime)
-            const duration = calc_extraction_duration(
-                extractor,
-                itemMass,
-                quantity,
-                stratum,
-                richness
-            )
+            const gatherTime =
+                (quantity * massFactor * 100 * depthPenalty) / (yieldValue * richnessMul)
+            const speedTime = 300 * Math.log(1 + stratum / speed)
+            const expected = Math.floor(gatherTime + speedTime)
+            const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness)
             assert.equal(duration.toNumber(), expected)
         })
     })
 
-    suite('calc_extraction_energy', function () {
-        const extractor = ServerContract.Types.extractor_stats.from({
-            rate: UInt16.from(700),
+    suite('calc_gather_energy', function () {
+        const gatherer = ServerContract.Types.gatherer_stats.from({
+            yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
-            drill: UInt16.from(500),
+            speed: UInt16.from(500),
         })
 
         test('returns UInt16', function () {
-            const energy = calc_extraction_energy(extractor, 100)
+            const energy = calc_gather_energy(gatherer, 100)
             assert.ok(energy.toNumber !== undefined)
         })
 
         test('returns 0 for zero duration', function () {
-            const energy = calc_extraction_energy(extractor, 0)
+            const energy = calc_gather_energy(gatherer, 0)
             assert.equal(energy.toNumber(), 0)
         })
 
         test('energy increases with duration', function () {
-            const short = calc_extraction_energy(extractor, 100)
-            const long = calc_extraction_energy(extractor, 1000)
+            const short = calc_gather_energy(gatherer, 100)
+            const long = calc_gather_energy(gatherer, 1000)
             assert.isAbove(long.toNumber(), short.toNumber())
         })
 
         test('energy scales with drain rate', function () {
-            const lowDrain = ServerContract.Types.extractor_stats.from({
-                rate: UInt16.from(700),
+            const lowDrain = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(700),
                 drain: UInt16.from(10),
                 depth: UInt16.from(950),
-                drill: UInt16.from(500),
+                speed: UInt16.from(500),
             })
-            const highDrain = ServerContract.Types.extractor_stats.from({
-                rate: UInt16.from(700),
+            const highDrain = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(700),
                 drain: UInt16.from(50),
                 depth: UInt16.from(950),
-                drill: UInt16.from(500),
+                speed: UInt16.from(500),
             })
-            const lowEnergy = calc_extraction_energy(lowDrain, 1000)
-            const highEnergy = calc_extraction_energy(highDrain, 1000)
+            const lowEnergy = calc_gather_energy(lowDrain, 1000)
+            const highEnergy = calc_gather_energy(highDrain, 1000)
             assert.isAbove(highEnergy.toNumber(), lowEnergy.toNumber())
         })
 
         test('calculation matches expected formula', function () {
             const duration = 1000
-            const expected = Math.floor((duration * extractor.drain.toNumber()) / PRECISION)
-            const energy = calc_extraction_energy(extractor, duration)
+            const expected = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
+            const energy = calc_gather_energy(gatherer, duration)
             assert.equal(energy.toNumber(), expected)
         })
     })
 
-    suite('projection with TASK_EXTRACT', function () {
-        test('applies energy cost on complete extract task', function () {
+    suite('projection with TASK_GATHER', function () {
+        test('applies energy cost on complete gather task', function () {
             const ship = makeShip({
                 id: 1,
                 owner: 'test',
@@ -316,7 +310,7 @@ suite('extraction', function () {
                     started: TimePoint.fromMilliseconds(Date.now() - 60000),
                     tasks: [
                         ServerContract.Types.task.from({
-                            type: TaskType.EXTRACT,
+                            type: TaskType.GATHER,
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
@@ -333,7 +327,7 @@ suite('extraction', function () {
             assert.equal(Number(projected.energy), 300)
         })
 
-        test('adds cargo mass on complete extract task', function () {
+        test('adds cargo mass on complete gather task', function () {
             const ship = makeShip({
                 id: 1,
                 owner: 'test',
@@ -353,7 +347,7 @@ suite('extraction', function () {
                     started: TimePoint.fromMilliseconds(Date.now() - 60000),
                     tasks: [
                         ServerContract.Types.task.from({
-                            type: TaskType.EXTRACT,
+                            type: TaskType.GATHER,
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
@@ -370,7 +364,7 @@ suite('extraction', function () {
             assert.isAbove(
                 Number(projected.cargoMass),
                 0,
-                'Cargo mass should increase from extraction'
+                'Cargo mass should increase from gathering'
             )
         })
     })

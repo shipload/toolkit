@@ -117,12 +117,12 @@ suite('Shipload', function () {
     suite('findNearbyPlanets', function () {
         test('should return nearby planets', async function () {
             const origin: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
-            const maxDistance = 1 * PRECISION
+            const maxDistance = 2 * PRECISION
             const nearbyPlanets = await shipload.locations.findNearbyPlanets(origin, maxDistance)
             const closestPlanet = nearbyPlanets[0]
 
-            assert.deepEqual(closestPlanet.destination, {x: 0, y: 1})
-            assert.equal(Number(closestPlanet.distance), 1 * PRECISION)
+            assert.deepEqual(closestPlanet.destination, {x: -1, y: -1})
+            assert.equal(Number(closestPlanet.distance), Math.floor(Math.sqrt(2) * PRECISION))
             assert.deepEqual(closestPlanet.origin, {
                 x: 0,
                 y: 0,

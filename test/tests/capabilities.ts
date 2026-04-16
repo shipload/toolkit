@@ -23,9 +23,9 @@ suite('Capabilities', function () {
     })
 
     test('getCapabilityAttributes filters by capability', function () {
-        const extraction = getCapabilityAttributes('Extraction')
-        assert.equal(extraction.length, 4)
-        assert.isTrue(extraction.every((a) => a.capability === 'Extraction'))
+        const gathering = getCapabilityAttributes('Gathering')
+        assert.equal(gathering.length, 4)
+        assert.isTrue(gathering.every((a) => a.capability === 'Gathering'))
     })
 
     test('getStatMappings returns all mappings', function () {
@@ -53,6 +53,6 @@ suite('Capabilities', function () {
     test('isInvertedAttribute returns false for non-inverted attributes', function () {
         assert.isFalse(isInvertedAttribute('thrust'))
         assert.isFalse(isInvertedAttribute('capacity'))
-        assert.isFalse(isInvertedAttribute('rate'))
+        assert.isFalse(isInvertedAttribute('yield'))
     })
 })

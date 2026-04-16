@@ -17,7 +17,7 @@ export const capabilityNames: string[] = [
     'Movement',
     'Energy',
     'Loader',
-    'Extraction',
+    'Gathering',
     'Warp',
     'Manufacturing',
     'Launch',
@@ -33,10 +33,10 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Energy', attribute: 'recharge', description: 'Energy regeneration rate'},
     {capability: 'Loader', attribute: 'mass', description: 'Weight of the loader unit itself'},
     {capability: 'Loader', attribute: 'thrust', description: 'Loading speed/force'},
-    {capability: 'Extraction', attribute: 'rate', description: 'Mass extracted per second'},
-    {capability: 'Extraction', attribute: 'drain', description: 'Energy consumed per extraction'},
-    {capability: 'Extraction', attribute: 'depth', description: 'Maximum extraction depth'},
-    {capability: 'Extraction', attribute: 'drill', description: 'Drilling speed/penetration'},
+    {capability: 'Gathering', attribute: 'yield', description: 'Mass gathered per second'},
+    {capability: 'Gathering', attribute: 'drain', description: 'Energy consumed per gather'},
+    {capability: 'Gathering', attribute: 'depth', description: 'Maximum gather depth'},
+    {capability: 'Gathering', attribute: 'speed', description: 'Gathering speed/penetration'},
     {capability: 'Warp', attribute: 'range', description: 'Maximum warp distance'},
     {capability: 'Manufacturing', attribute: 'speed', description: 'Crafting time per item'},
     {
@@ -68,9 +68,9 @@ export const capabilityAttributes: CapabilityAttribute[] = [
 export const statMappings: StatMapping[] = [
     {
         stat: 'Strength',
-        capability: 'Extraction',
-        attribute: 'rate',
-        rationale: 'Raw mechanical force drives faster extraction',
+        capability: 'Gathering',
+        attribute: 'yield',
+        rationale: 'Raw mechanical force drives faster gathering',
     },
     {
         stat: 'Strength',
@@ -98,7 +98,7 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Tolerance',
-        capability: 'Extraction',
+        capability: 'Gathering',
         attribute: 'depth',
         rationale: 'Housing withstands pressure/heat at extreme depths',
     },
@@ -134,9 +134,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Conductivity',
-        capability: 'Extraction',
+        capability: 'Gathering',
         attribute: 'drain',
-        rationale: 'Efficient energy transfer reduces extraction energy cost',
+        rationale: 'Efficient energy transfer reduces gathering energy cost',
     },
     {
         stat: 'Conductivity',
@@ -158,9 +158,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Ductility',
-        capability: 'Extraction',
-        attribute: 'rate',
-        rationale: 'Precisely shaped drill components extract faster',
+        capability: 'Gathering',
+        attribute: 'yield',
+        rationale: 'Precisely shaped conduit components gather faster',
     },
     {
         stat: 'Ductility',
@@ -176,7 +176,7 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Reflectivity',
-        capability: 'Extraction',
+        capability: 'Gathering',
         attribute: 'depth',
         rationale: 'Reflective heat shielding protects equipment at depth',
     },
@@ -188,9 +188,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Volatility',
-        capability: 'Extraction',
-        attribute: 'rate',
-        rationale: 'Energy release powers faster extraction',
+        capability: 'Gathering',
+        attribute: 'yield',
+        rationale: 'Energy release powers faster gathering',
     },
     {
         stat: 'Volatility',
@@ -218,9 +218,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Reactivity',
-        capability: 'Extraction',
-        attribute: 'drill',
-        rationale: 'Reactive gases manage heat/friction during drilling',
+        capability: 'Gathering',
+        attribute: 'speed',
+        rationale: 'Reactive gases manage heat/friction during gathering',
     },
     {
         stat: 'Reactivity',
@@ -236,9 +236,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Thermal',
-        capability: 'Extraction',
+        capability: 'Gathering',
         attribute: 'drain',
-        rationale: 'Thermal management reduces energy waste during extraction',
+        rationale: 'Thermal management reduces energy waste during gathering',
     },
     {
         stat: 'Thermal',
@@ -326,9 +326,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Insulation',
-        capability: 'Extraction',
+        capability: 'Gathering',
         attribute: 'drain',
-        rationale: 'Better insulation reduces energy loss during extraction',
+        rationale: 'Better insulation reduces energy loss during gathering',
     },
     {
         stat: 'Insulation',
@@ -350,9 +350,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Purity',
-        capability: 'Extraction',
-        attribute: 'drill',
-        rationale: 'Purer bio-lubricants reduce friction during drilling',
+        capability: 'Gathering',
+        attribute: 'speed',
+        rationale: 'Purer bio-lubricants reduce friction during gathering',
     },
     {
         stat: 'Purity',

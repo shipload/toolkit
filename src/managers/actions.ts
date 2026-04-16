@@ -97,9 +97,12 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    extract(shipId: UInt64Type): Action {
-        return this.server.action('extract', {
-            ship_id: UInt64.from(shipId),
+    gather(shipId: UInt64Type, stratum: number, quantity: number): Action {
+        return this.server.action('gather', {
+            entity_type: EntityType.SHIP,
+            id: UInt64.from(shipId),
+            stratum: UInt16.from(stratum),
+            quantity: UInt32.from(quantity),
         })
     }
 

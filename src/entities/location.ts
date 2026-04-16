@@ -1,6 +1,6 @@
 import {Checksum256, Checksum256Type, UInt16Type, UInt64} from '@wharfkit/antelope'
 import {Coordinates, CoordinatesType, Distance, LocationType} from '../types'
-import {getLocationType, hasSystem, isExtractableLocation} from '../utils/system'
+import {getLocationType, hasSystem, isGatherableLocation} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 
 export class Location {
@@ -30,8 +30,8 @@ export class Location {
         return getLocationType(gameSeed, this.coordinates)
     }
 
-    isExtractableAt(gameSeed: Checksum256Type): boolean {
-        return isExtractableLocation(this.getLocationTypeAt(gameSeed))
+    isGatherableAt(gameSeed: Checksum256Type): boolean {
+        return isGatherableLocation(this.getLocationTypeAt(gameSeed))
     }
 
     findNearby(gameSeed: Checksum256Type, maxDistance: UInt16Type = 20): Distance[] {

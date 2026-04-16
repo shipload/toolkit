@@ -30,7 +30,7 @@ export function getLocationType(
     return LocationType.NEBULA
 }
 
-export function isExtractableLocation(locationType: LocationType): boolean {
+export function isGatherableLocation(locationType: LocationType): boolean {
     return locationType !== LocationType.EMPTY
 }
 

@@ -174,6 +174,6 @@ export function isUnloading(entity: ScheduleData, now: Date): boolean {
     return isTaskType(entity, TaskType.UNLOAD, now)
 }
 
-export function isExtracting(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.EXTRACT, now)
+export function isGathering(entity: ScheduleData, now: Date): boolean {
+    return isTaskType(entity, TaskType.GATHER, now)
 }

@@ -3,7 +3,7 @@ import {UInt16, UInt64} from '@wharfkit/antelope'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
-    ITEM_EXTRACTOR_T1,
+    ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HULL_PLATES,
     ITEM_LOADER_T1,
@@ -80,7 +80,7 @@ suite('resolveItem', function () {
         const expectations: [number, string, string[]][] = [
             [ITEM_ENGINE_T1, 'Engine', ['Thrust', 'Drain']],
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
-            [ITEM_EXTRACTOR_T1, 'Extractor', ['Rate', 'Drain', 'Depth', 'Drill']],
+            [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth', 'Speed']],
             [ITEM_LOADER_T1, 'Loader', ['Mass', 'Thrust', 'Quantity']],
             [ITEM_MANUFACTURING_T1, 'Manufacturing', ['Speed', 'Drain']],
         ]

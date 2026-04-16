@@ -77,14 +77,14 @@ suite('Location', function () {
         })
     })
 
-    suite('isExtractableAt', function () {
+    suite('isGatherableAt', function () {
         test('returns true for asteroid locations', function () {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
                     const locationType = location.getLocationTypeAt(testSeed)
                     if (locationType === LocationType.ASTEROID) {
-                        assert.isTrue(location.isExtractableAt(testSeed))
+                        assert.isTrue(location.isGatherableAt(testSeed))
                         return
                     }
                 }
@@ -97,7 +97,7 @@ suite('Location', function () {
                     const location = Location.from(Coordinates.from({x, y}))
                     const locationType = location.getLocationTypeAt(testSeed)
                     if (locationType === LocationType.NEBULA) {
-                        assert.isTrue(location.isExtractableAt(testSeed))
+                        assert.isTrue(location.isGatherableAt(testSeed))
                         return
                     }
                 }
@@ -110,7 +110,7 @@ suite('Location', function () {
                     const location = Location.from(Coordinates.from({x, y}))
                     const locationType = location.getLocationTypeAt(testSeed)
                     if (locationType === LocationType.PLANET) {
-                        assert.isTrue(location.isExtractableAt(testSeed))
+                        assert.isTrue(location.isGatherableAt(testSeed))
                         return
                     }
                 }
@@ -123,7 +123,7 @@ suite('Location', function () {
                     const location = Location.from(Coordinates.from({x, y}))
                     const locationType = location.getLocationTypeAt(testSeed)
                     if (locationType === LocationType.EMPTY) {
-                        assert.isFalse(location.isExtractableAt(testSeed))
+                        assert.isFalse(location.isGatherableAt(testSeed))
                         return
                     }
                 }
