@@ -94,25 +94,31 @@ export function deriveStratum(
 
 export function deriveResourceStats(seed: bigint): ResourceStats {
     const seedBytes = new Uint8Array(8)
-    for (let i = 7; i >= 0; i--) {
+    for (let i = 0; i < 8; i++) {
         seedBytes[i] = Number(seed & 0xffn)
         seed >>= 8n
     }
     const hashResult = Checksum256.hash(Bytes.from(seedBytes))
     const hashBytes = hashResult.array
 
-    const extractU16 = (offset: number): number => (hashBytes[offset] << 8) | hashBytes[offset + 1]
+    const extractU32 = (offset: number): number =>
+        (hashBytes[offset] * 0x1000000 +
+            (hashBytes[offset + 1] << 16) +
+            (hashBytes[offset + 2] << 8) +
+            hashBytes[offset + 3]) >>> 0
 
     const weibull = (raw: number): number => {
-        const u = raw / 65536
+        const u = raw / 4294967296
         let x = 0.27 * Math.sqrt(-Math.log(1 - u))
         if (x > 1) x = 1
-        return Math.floor(x * 999) + 1
+        let val = Math.floor(x * 999) + 1
+        if (val > 999) val = 999
+        return val
     }
 
     return {
-        stat1: weibull(extractU16(0)),
-        stat2: weibull(extractU16(2)),
-        stat3: weibull(extractU16(4)),
+        stat1: weibull(extractU32(0)),
+        stat2: weibull(extractU32(4)),
+        stat3: weibull(extractU32(8)),
     }
 }
