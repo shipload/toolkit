@@ -20,7 +20,7 @@ const categories: CategoryInfo[] = [
     {
         id: 'precious',
         name: 'Precious Metals',
-        label: 'Precious',
+        label: 'Precious Metal',
         description:
             'Conductive, corrosion-resistant — electronics, energy systems, precision components',
         color: categoryColors.precious,
