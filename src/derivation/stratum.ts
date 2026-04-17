@@ -1,12 +1,8 @@
 import {Bytes, Checksum256, Checksum256Type} from '@wharfkit/antelope'
 import {hash512} from '../utils/hash'
 import {Coordinates, CoordinatesType} from '../types'
-import {
-    depthScaleFactor,
-    getEligibleResources,
-    getResourceWeight,
-    YIELD_THRESHOLD,
-} from './resources'
+import {getEligibleResources, getResourceWeight, YIELD_THRESHOLD} from './resources'
+import {RESERVE_TIERS, rollTier, rollWithinTier} from './tiers'
 
 export interface StratumInfo {
     itemId: number
@@ -39,9 +35,10 @@ export function deriveStratum(
 
     let reserve = 0
     if (rawReserve <= YIELD_THRESHOLD) {
-        const baseReserve = (rawReserve % 333) + 1
-        const scale = depthScaleFactor(stratum)
-        reserve = Math.floor(baseReserve * scale)
+        const tierRoll = ((bytes[18] << 8) | bytes[19]) >>> 0
+        const withinRoll = ((bytes[20] << 8) | bytes[21]) >>> 0
+        const tier = rollTier(tierRoll, stratum)
+        reserve = rollWithinTier(withinRoll, RESERVE_TIERS[tier])
     }
 
     if (reserve === 0) return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
@@ -105,7 +102,8 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
         (hashBytes[offset] * 0x1000000 +
             (hashBytes[offset + 1] << 16) +
             (hashBytes[offset + 2] << 8) +
-            hashBytes[offset + 3]) >>> 0
+            hashBytes[offset + 3]) >>>
+        0
 
     const weibull = (raw: number): number => {
         const u = raw / 4294967296

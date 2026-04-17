@@ -36,10 +36,14 @@ export function isGatherableLocation(locationType: LocationType): boolean {
 
 export function getLocationTypeName(type: LocationType): string {
     switch (type) {
-        case LocationType.EMPTY: return 'Empty'
-        case LocationType.PLANET: return 'Planet'
-        case LocationType.ASTEROID: return 'Asteroid'
-        case LocationType.NEBULA: return 'Nebula'
+        case LocationType.EMPTY:
+            return 'Empty'
+        case LocationType.PLANET:
+            return 'Planet'
+        case LocationType.ASTEROID:
+            return 'Asteroid'
+        case LocationType.NEBULA:
+            return 'Nebula'
     }
 }
 

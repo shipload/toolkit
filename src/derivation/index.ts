@@ -7,7 +7,6 @@ export {
     getLocationCandidates,
     getDepthThreshold,
     getResourceTier,
-    depthScaleFactor,
     DEPTH_THRESHOLD_T1,
     DEPTH_THRESHOLD_T2,
     DEPTH_THRESHOLD_T3,
@@ -23,6 +22,9 @@ export {
     PLANET_SUBTYPE_OCEAN,
     PLANET_SUBTYPE_INDUSTRIAL,
 } from './resources'
+
+export {RESERVE_TIERS, TIER_ROLL_MAX, rollTier, rollWithinTier} from './tiers'
+export type {ReserveTier, TierRange} from './tiers'
 
 export * from './stats'
 export * from './crafting'

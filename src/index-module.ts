@@ -66,7 +66,6 @@ export {
     getLocationCandidates,
     getDepthThreshold,
     getResourceTier,
-    depthScaleFactor,
     DEPTH_THRESHOLD_T1,
     DEPTH_THRESHOLD_T2,
     DEPTH_THRESHOLD_T3,
@@ -83,6 +82,9 @@ export {
 } from './derivation'
 
 export type {StratumInfo, ResourceStats} from './derivation'
+
+export {RESERVE_TIERS, TIER_ROLL_MAX, rollTier, rollWithinTier} from './derivation'
+export type {ReserveTier, TierRange} from './derivation'
 
 export {getStatDefinitions, getStatName, resolveStats} from './derivation'
 export type {StatDefinition, NamedStats} from './derivation'

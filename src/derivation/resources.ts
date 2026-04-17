@@ -9,7 +9,7 @@ export const DEPTH_THRESHOLD_T5 = 55000
 export const LOCATION_MIN_DEPTH = 500
 export const LOCATION_MAX_DEPTH = 65535
 
-export const YIELD_THRESHOLD = Math.floor(0.003 * 0xffffffff)
+export const YIELD_THRESHOLD = Math.floor(0.001 * 0xffffffff)
 
 export const PLANET_SUBTYPE_GAS_GIANT = 0
 export const PLANET_SUBTYPE_ROCKY = 1
@@ -133,10 +133,4 @@ export function getEligibleResources(
         const threshold = getDepthThreshold(tier)
         return stratum >= threshold
     })
-}
-
-export function depthScaleFactor(stratum: number): number {
-    if (stratum <= 1) return 1.0
-    const logScale = Math.log(stratum) / Math.log(65535)
-    return 1.0 + logScale * 2.0
 }
