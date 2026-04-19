@@ -2,11 +2,7 @@ import {UInt16, UInt16Type} from '@wharfkit/antelope'
 import {Item} from '../types'
 import itemsData from '../data/items.json'
 import {computeInputMass} from '../derivation/crafting'
-import {
-    getComponentById,
-    getEntityRecipeByItemId,
-    getModuleRecipeByItemId,
-} from '../data/recipes'
+import {getComponentById, getEntityRecipeByItemId, getModuleRecipeByItemId} from '../data/recipes'
 
 const itemsById: Map<number, Item> = new Map()
 const synthesizedCache: Map<number, Item> = new Map()
