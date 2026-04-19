@@ -88,19 +88,19 @@ suite('ship deploy formulas', function () {
     test('generator formula exact values at min', function () {
         const r = computeGeneratorCapabilities({resonance: 1, clarity: 1})
         assert.equal(r.capacity, 300)
-        assert.equal(r.recharge, 5)
+        assert.equal(r.recharge, 1)
     })
 
     test('generator formula exact values at mid', function () {
         const r = computeGeneratorCapabilities({resonance: 500, clarity: 500})
         assert.equal(r.capacity, 383)
-        assert.equal(r.recharge, 12)
+        assert.equal(r.recharge, 2)
     })
 
     test('generator formula exact values at max', function () {
         const r = computeGeneratorCapabilities({resonance: 999, clarity: 999})
         assert.equal(r.capacity, 466)
-        assert.equal(r.recharge, 19)
+        assert.equal(r.recharge, 3)
     })
 
     test('hull formula exact values at min', function () {
@@ -139,7 +139,7 @@ suite('ship deploy formulas', function () {
             reflectivity: 1,
         })
         assert.equal(r.yield, 201)
-        assert.equal(r.drain, 50)
+        assert.equal(r.drain, 1249)
         assert.equal(r.depth, 201)
         assert.equal(r.speed, 100)
     })
@@ -152,7 +152,7 @@ suite('ship deploy formulas', function () {
             reflectivity: 500,
         })
         assert.equal(r.yield, 700)
-        assert.equal(r.drain, 25)
+        assert.equal(r.drain, 625)
         assert.equal(r.depth, 950)
         assert.equal(r.speed, 500)
     })
@@ -165,7 +165,7 @@ suite('ship deploy formulas', function () {
             reflectivity: 999,
         })
         assert.equal(r.yield, 1199)
-        assert.equal(r.drain, 10)
+        assert.equal(r.drain, 250)
         assert.equal(r.depth, 1698)
         assert.equal(r.speed, 899)
     })

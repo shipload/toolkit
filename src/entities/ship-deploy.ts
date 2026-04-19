@@ -48,7 +48,7 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
 
     return {
         capacity: 300 + Math.floor(res / 6),
-        recharge: 5 + Math.floor((clr * 15) / 1000),
+        recharge: 1 + Math.floor((clr * 3) / 1000),
     }
 }
 
@@ -65,7 +65,7 @@ export function computeGathererCapabilities(stats: Record<string, number>): {
 
     return {
         yield: 200 + str,
-        drain: Math.max(10, 50 - Math.floor(con / 20)),
+        drain: Math.max(250, 1250 - Math.floor((con * 25) / 20)),
         depth: 200 + Math.floor((tol * 3) / 2),
         speed: 100 + Math.floor((ref * 4) / 5),
     }
