@@ -137,7 +137,12 @@ export type {HasCargo} from './entities/inventory-accessor'
 export * as cargoUtils from './entities/cargo-utils'
 export type {CargoData} from './entities/cargo-utils'
 
-export {projectEntity, projectEntityAt, createProjectedEntity} from './scheduling/projection'
+export {
+    createProjectedEntity,
+    projectEntity,
+    projectEntityAt,
+    validateSchedule,
+} from './scheduling/projection'
 export type {Projectable, ProjectedEntity} from './scheduling/projection'
 
 export * from './types/capabilities'
@@ -232,8 +237,9 @@ export {
     blendCrossGroup,
     categoryItemMass,
     computeInputMass,
+    computeCraftedOutputSeed,
 } from './derivation/crafting'
-export type {StackInput, CategoryStacks} from './derivation/crafting'
+export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
 
 export {computeContainerCapabilities, computeContainerT2Capabilities} from './entities/container'
 

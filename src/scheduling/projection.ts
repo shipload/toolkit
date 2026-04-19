@@ -8,21 +8,30 @@ import {
     EntityCapabilities,
     EntityState,
 } from '../types/capabilities'
+import {ENTITY_CAPACITY_EXCEEDED} from '../errors'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
-import {calcCargoItemMass, calcCargoMass} from '../capabilities/storage'
+import {
+    calcStacksMass,
+    cargoItemToStack,
+    CargoStack,
+    mergeStacks,
+    removeFromStacks,
+    stackToCargoItem,
+} from '../capabilities/storage'
 import * as schedule from './schedule'
 import {ScheduleData} from './schedule'
 
 export interface ProjectedEntity {
     location: Coordinates
     energy: UInt16
-    cargoMass: UInt64
+    cargo: CargoStack[]
     shipMass: UInt32
     capacity?: UInt64
     engines?: ServerContract.Types.movement_stats
     loaders?: ServerContract.Types.loader_stats
     generator?: ServerContract.Types.energy_stats
     hauler?: ServerContract.Types.hauler_stats
+    readonly cargoMass: UInt64
     readonly totalMass: UInt64
 
     hasMovement(): boolean
@@ -52,7 +61,6 @@ function getHullMass(entity: Projectable): UInt32 {
 }
 
 export function createProjectedEntity(entity: Projectable): ProjectedEntity {
-    const cargoMass = calcCargoMass(entity)
     const shipMass = getHullMass(entity)
     const loaders = entity.loaders
     const engines = entity.engines
@@ -60,16 +68,22 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const hauler = entity.hauler
     const capacity = entity.capacity
 
+    const cargo: CargoStack[] = entity.cargo.map(cargoItemToStack)
+
     const projected: ProjectedEntity = {
         location: Coordinates.from(entity.coordinates),
         energy: UInt16.from(entity.energy ?? 0),
-        cargoMass,
+        cargo,
         shipMass,
         capacity: capacity ? UInt64.from(capacity) : undefined,
         engines,
         generator,
         hauler,
         loaders,
+
+        get cargoMass() {
+            return calcStacksMass(this.cargo)
+        },
 
         get totalMass() {
             let mass = UInt64.from(this.shipMass).adding(this.cargoMass)
@@ -107,7 +121,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
                 location: ServerContract.Types.coordinates.from(this.location),
                 energy: this.energy,
                 cargomass: UInt32.from(this.cargoMass),
-                cargo: entity.cargo,
+                cargo: this.cargo.map(stackToCargoItem),
             }
         },
     }
@@ -162,18 +176,23 @@ function applyFlightTask(
     }
 }
 
-function applyLoadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+function addCargoItem(projected: ProjectedEntity, item: ServerContract.Types.cargo_item): void {
+    projected.cargo = mergeStacks(projected.cargo, cargoItemToStack(item))
+}
+
+function removeCargoItem(projected: ProjectedEntity, item: ServerContract.Types.cargo_item): void {
+    projected.cargo = removeFromStacks(projected.cargo, cargoItemToStack(item))
+}
+
+function applyAddCargoTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(item))
+        addCargoItem(projected, item)
     }
 }
 
-function applyUnloadTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+function applyRemoveCargoTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     for (const item of task.cargo) {
-        const cargoMass = calcCargoItemMass(item)
-        projected.cargoMass = projected.cargoMass.gt(cargoMass)
-            ? projected.cargoMass.subtracting(cargoMass)
-            : UInt64.from(0)
+        removeCargoItem(projected, item)
     }
 }
 
@@ -191,75 +210,74 @@ function applyGatherTask(
     options: {complete: boolean}
 ): void {
     if (!options.complete) return
-
     applyEnergyCost(projected, task)
-
-    for (const item of task.cargo) {
-        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(item))
-    }
+    applyAddCargoTask(projected, task)
 }
 
 function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     applyEnergyCost(projected, task)
+    if (task.cargo.length === 0) return
 
-    if (task.cargo.length > 0) {
-        for (let i = 0; i < task.cargo.length - 1; i++) {
-            const inputMass = calcCargoItemMass(task.cargo[i])
-            projected.cargoMass = projected.cargoMass.gt(inputMass)
-                ? projected.cargoMass.subtracting(inputMass)
-                : UInt64.from(0)
-        }
-        const output = task.cargo[task.cargo.length - 1]
-        projected.cargoMass = projected.cargoMass.adding(calcCargoItemMass(output))
+    for (let i = 0; i < task.cargo.length - 1; i++) {
+        removeCargoItem(projected, task.cargo[i])
     }
+    addCargoItem(projected, task.cargo[task.cargo.length - 1])
 }
 
 function applyDeployTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     applyEnergyCost(projected, task)
-
     if (task.cargo.length > 0) {
-        const mass = calcCargoItemMass(task.cargo[0])
-        projected.cargoMass = projected.cargoMass.gt(mass)
-            ? projected.cargoMass.subtracting(mass)
-            : UInt64.from(0)
+        removeCargoItem(projected, task.cargo[0])
+    }
+}
+
+function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    switch (task.type.toNumber()) {
+        case TaskType.RECHARGE:
+            applyRechargeTask(projected, task, {complete: true})
+            break
+        case TaskType.TRAVEL:
+            applyFlightTask(projected, task, {complete: true})
+            break
+        case TaskType.LOAD:
+        case TaskType.UNWRAP:
+            applyAddCargoTask(projected, task)
+            break
+        case TaskType.UNLOAD:
+        case TaskType.WRAP:
+            applyRemoveCargoTask(projected, task)
+            break
+        case TaskType.GATHER:
+            applyGatherTask(projected, task, {complete: true})
+            break
+        case TaskType.CRAFT:
+            applyCraftTask(projected, task)
+            break
+        case TaskType.DEPLOY:
+            applyDeployTask(projected, task)
+            break
     }
 }
 
 export function projectEntity(entity: Projectable): ProjectedEntity {
     const projected = createProjectedEntity(entity)
-
-    if (!entity.schedule) {
-        return projected
-    }
-
+    if (!entity.schedule || entity.schedule.tasks.length === 0) return projected
     for (const task of entity.schedule.tasks) {
-        switch (task.type.toNumber()) {
-            case TaskType.RECHARGE:
-                applyRechargeTask(projected, task, {complete: true})
-                break
-            case TaskType.TRAVEL:
-                applyFlightTask(projected, task, {complete: true})
-                break
-            case TaskType.LOAD:
-                applyLoadTask(projected, task)
-                break
-            case TaskType.UNLOAD:
-                applyUnloadTask(projected, task)
-                break
-            case TaskType.GATHER:
-                applyGatherTask(projected, task, {complete: true})
-                break
-            case TaskType.CRAFT:
-                applyCraftTask(projected, task)
-                break
-            case TaskType.DEPLOY:
-            case TaskType.DEPLOY_SHIP:
-                applyDeployTask(projected, task)
-                break
+        applyTask(projected, task)
+    }
+    return projected
+}
+
+export function validateSchedule(entity: Projectable): void {
+    if (!entity.schedule || entity.schedule.tasks.length === 0) return
+
+    const projected = createProjectedEntity(entity)
+    for (const task of entity.schedule.tasks) {
+        applyTask(projected, task)
+        if (projected.capacity && projected.cargoMass.gt(projected.capacity)) {
+            throw new Error(ENTITY_CAPACITY_EXCEEDED)
         }
     }
-
-    return projected
 }
 
 export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity {
@@ -290,30 +308,21 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 applyFlightTask(projected, task, {complete: taskComplete, progress})
                 break
             case TaskType.LOAD:
-                if (taskComplete) {
-                    applyLoadTask(projected, task)
-                }
+            case TaskType.UNWRAP:
+                if (taskComplete) applyAddCargoTask(projected, task)
                 break
             case TaskType.UNLOAD:
-                if (taskComplete) {
-                    applyUnloadTask(projected, task)
-                }
+            case TaskType.WRAP:
+                if (taskComplete) applyRemoveCargoTask(projected, task)
                 break
             case TaskType.GATHER:
-                if (taskComplete) {
-                    applyGatherTask(projected, task, {complete: true})
-                }
+                if (taskComplete) applyGatherTask(projected, task, {complete: true})
                 break
             case TaskType.CRAFT:
-                if (taskComplete) {
-                    applyCraftTask(projected, task)
-                }
+                if (taskComplete) applyCraftTask(projected, task)
                 break
             case TaskType.DEPLOY:
-            case TaskType.DEPLOY_SHIP:
-                if (taskComplete) {
-                    applyDeployTask(projected, task)
-                }
+                if (taskComplete) applyDeployTask(projected, task)
                 break
         }
     }

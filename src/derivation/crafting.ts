@@ -4,9 +4,11 @@ import {
     entityRecipes,
     getComponentById,
     getEntityRecipe,
+    getEntityRecipeByItemId,
     getModuleRecipe,
     moduleRecipes,
 } from '../data/recipes'
+import {getStatDefinitions} from './stats'
 import {deriveResourceStats} from './stratum'
 
 export interface StackInput {
@@ -194,4 +196,78 @@ export function blendCargoStacks(
     const allKeys = Object.keys(decoded[0]?.stats ?? {})
     const blended = allKeys.map((key) => Math.max(1, Math.min(999, blendStacks(decoded, key))))
     return UInt64.from(encodeStats(blended))
+}
+
+export interface RecipeSlotInput {
+    itemId: number
+    category: ResourceCategory | undefined
+    stacks: {quantity: number; seed: bigint}[]
+}
+
+function decodeRawStackToCategoryStats(
+    seed: bigint,
+    category: ResourceCategory
+): Record<string, number> {
+    const raw = deriveResourceStats(seed)
+    const defs = getStatDefinitions(category)
+    const result: Record<string, number> = {}
+    if (defs[0]) result[defs[0].key] = raw.stat1
+    if (defs[1]) result[defs[1].key] = raw.stat2
+    if (defs[2]) result[defs[2].key] = raw.stat3
+    return result
+}
+
+export function computeCraftedOutputSeed(
+    outputItemId: number,
+    slotInputs: RecipeSlotInput[]
+): UInt64 {
+    const component = getComponentById(outputItemId)
+    if (component) {
+        const categoryStacks: CategoryStacks[] = []
+        for (const slot of slotInputs) {
+            if (!slot.category) continue
+            const slotIsComponent = getComponentById(slot.itemId) !== undefined
+            const stacks: StackInput[] = slot.stacks.map((s) => ({
+                quantity: s.quantity,
+                stats: slotIsComponent
+                    ? decodeCraftedItemStats(slot.itemId, s.seed)
+                    : decodeRawStackToCategoryStats(s.seed, slot.category!),
+            }))
+            categoryStacks.push({category: slot.category, stacks})
+        }
+        const stats = computeComponentStats(outputItemId, categoryStacks)
+        const ordered = component.stats.map((statDef) => {
+            const found = stats.find((s) => s.key === statDef.key)
+            return found ? found.value : 0
+        })
+        return UInt64.from(encodeStats(ordered))
+    }
+
+    const entityRecipe = getEntityRecipeByItemId(outputItemId)
+    if (entityRecipe) {
+        const componentStacks: Record<number, {quantity: number; stats: Record<string, number>}[]> =
+            {}
+        for (const slot of slotInputs) {
+            if (slot.category !== undefined) {
+                throw new Error(
+                    `entity recipe ${entityRecipe.id} expects component inputs but slot itemId=${slot.itemId} has category=${slot.category}`
+                )
+            }
+            const list = (componentStacks[slot.itemId] ??= [])
+            for (const s of slot.stacks) {
+                list.push({
+                    quantity: s.quantity,
+                    stats: decodeCraftedItemStats(slot.itemId, s.seed),
+                })
+            }
+        }
+        const stats = computeEntityStats(entityRecipe.id, componentStacks)
+        const ordered = entityRecipe.stats.map((statDef) => {
+            const found = stats.find((s) => s.key === statDef.key)
+            return found ? found.value : 0
+        })
+        return UInt64.from(encodeStats(ordered))
+    }
+
+    throw new Error(`computeCraftedOutputSeed: no recipe found for outputItemId=${outputItemId}`)
 }

@@ -9,15 +9,19 @@ import {
     computeComponentStats,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
+    computeCraftedOutputSeed,
     computeEntityStats,
     computeInputMass,
     decodeCraftedItemStats,
     decodeStats,
+    deriveResourceStats,
     encodeStats,
     ITEM_CARGO_LINING,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_FOCUSING_ARRAY,
     ITEM_HULL_PLATES,
+    ITEM_THRUSTER_CORE,
+    type RecipeSlotInput,
 } from '$lib'
 
 suite('Crafting', function () {
@@ -169,6 +173,174 @@ suite('Crafting', function () {
             assert.equal(stats['density'], 300)
             assert.equal(stats['ductility'], 600)
             assert.equal(stats['purity'], 700)
+        })
+    })
+
+    suite('computeCraftedOutputSeed', function () {
+        test('single-input single-category component (Thruster Core from gas)', function () {
+            const seedA = 0x123456789abcdef0n
+            const seedB = 0xfedcba9876543210n
+            const slotInputs: RecipeSlotInput[] = [
+                {
+                    itemId: 1003,
+                    category: 'gas',
+                    stacks: [
+                        {quantity: 20, seed: seedA},
+                        {quantity: 12, seed: seedB},
+                    ],
+                },
+            ]
+            const outputSeed = computeCraftedOutputSeed(ITEM_THRUSTER_CORE, slotInputs)
+
+            const rawA = deriveResourceStats(seedA)
+            const rawB = deriveResourceStats(seedB)
+            const expectedStats = computeComponentStats(ITEM_THRUSTER_CORE, [
+                {
+                    category: 'gas',
+                    stacks: [
+                        {
+                            quantity: 20,
+                            stats: {
+                                volatility: rawA.stat1,
+                                reactivity: rawA.stat2,
+                                thermal: rawA.stat3,
+                            },
+                        },
+                        {
+                            quantity: 12,
+                            stats: {
+                                volatility: rawB.stat1,
+                                reactivity: rawB.stat2,
+                                thermal: rawB.stat3,
+                            },
+                        },
+                    ],
+                },
+            ])
+            const decoded = decodeCraftedItemStats(
+                ITEM_THRUSTER_CORE,
+                BigInt(outputSeed.toString())
+            )
+            const vol = expectedStats.find((s) => s.key === 'volatility')!.value
+            const thm = expectedStats.find((s) => s.key === 'thermal')!.value
+            assert.equal(decoded['volatility'], vol)
+            assert.equal(decoded['thermal'], thm)
+        })
+
+        test('multi-input multi-category component (Cargo Lining from precious + organic)', function () {
+            const preciousSeed = 0x1111222233334444n
+            const organicSeed = 0xaaaabbbbccccddddn
+            const slotInputs: RecipeSlotInput[] = [
+                {
+                    itemId: 200,
+                    category: 'precious',
+                    stacks: [{quantity: 6, seed: preciousSeed}],
+                },
+                {
+                    itemId: 500,
+                    category: 'organic',
+                    stacks: [{quantity: 14, seed: organicSeed}],
+                },
+            ]
+            const outputSeed = computeCraftedOutputSeed(ITEM_CARGO_LINING, slotInputs)
+
+            const rawP = deriveResourceStats(preciousSeed)
+            const rawO = deriveResourceStats(organicSeed)
+            const expectedStats = computeComponentStats(ITEM_CARGO_LINING, [
+                {
+                    category: 'precious',
+                    stacks: [
+                        {
+                            quantity: 6,
+                            stats: {
+                                conductivity: rawP.stat1,
+                                ductility: rawP.stat2,
+                                reflectivity: rawP.stat3,
+                            },
+                        },
+                    ],
+                },
+                {
+                    category: 'organic',
+                    stacks: [
+                        {
+                            quantity: 14,
+                            stats: {
+                                plasticity: rawO.stat1,
+                                insulation: rawO.stat2,
+                                purity: rawO.stat3,
+                            },
+                        },
+                    ],
+                },
+            ])
+            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING, BigInt(outputSeed.toString()))
+            const duc = expectedStats.find((s) => s.key === 'ductility')!.value
+            const pur = expectedStats.find((s) => s.key === 'purity')!.value
+            assert.equal(decoded['ductility'], duc)
+            assert.equal(decoded['purity'], pur)
+            assert.equal(decoded['ductility'], rawP.stat2)
+            assert.equal(decoded['purity'], rawO.stat3)
+        })
+
+        test('entity recipe (Container packed from hull_plates + cargo_lining)', function () {
+            const hullSeedA = encodeStats([500, 300])
+            const hullSeedB = encodeStats([700, 400])
+            const liningSeed = encodeStats([600, 800])
+
+            const slotInputs: RecipeSlotInput[] = [
+                {
+                    itemId: ITEM_HULL_PLATES,
+                    category: undefined,
+                    stacks: [
+                        {quantity: 4, seed: hullSeedA},
+                        {quantity: 2, seed: hullSeedB},
+                    ],
+                },
+                {
+                    itemId: ITEM_CARGO_LINING,
+                    category: undefined,
+                    stacks: [{quantity: 2, seed: liningSeed}],
+                },
+            ]
+            const outputSeed = computeCraftedOutputSeed(ITEM_CONTAINER_T1_PACKED, slotInputs)
+
+            const expectedStats = computeEntityStats('container', {
+                [ITEM_HULL_PLATES]: [
+                    {quantity: 4, stats: {strength: 500, density: 300}},
+                    {quantity: 2, stats: {strength: 700, density: 400}},
+                ],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {ductility: 600, purity: 800}}],
+            })
+            const decoded = decodeCraftedItemStats(
+                ITEM_CONTAINER_T1_PACKED,
+                BigInt(outputSeed.toString())
+            )
+            for (const stat of expectedStats) {
+                assert.equal(decoded[stat.key], stat.value, `mismatch on ${stat.key}`)
+            }
+            assert.equal(decoded['strength'], 566)
+            assert.equal(decoded['density'], 333)
+            assert.equal(decoded['ductility'], 600)
+            assert.equal(decoded['purity'], 800)
+        })
+
+        test('throws for unknown output item id', function () {
+            assert.throws(() => computeCraftedOutputSeed(99999, []), /no recipe found/)
+        })
+
+        test('throws when entity recipe receives a category-only slot', function () {
+            assert.throws(
+                () =>
+                    computeCraftedOutputSeed(ITEM_CONTAINER_T1_PACKED, [
+                        {
+                            itemId: 200,
+                            category: 'precious',
+                            stacks: [{quantity: 1, seed: 0n}],
+                        },
+                    ]),
+                /expects component inputs/
+            )
         })
     })
 
