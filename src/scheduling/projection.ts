@@ -259,11 +259,22 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
     }
 }
 
-export function projectEntity(entity: Projectable): ProjectedEntity {
+export interface ProjectionOptions {
+    upToTaskIndex?: number
+}
+
+export function projectEntity(entity: Projectable, options?: ProjectionOptions): ProjectedEntity {
     const projected = createProjectedEntity(entity)
     if (!entity.schedule || entity.schedule.tasks.length === 0) return projected
-    for (const task of entity.schedule.tasks) {
-        applyTask(projected, task)
+
+    const tasks = entity.schedule.tasks
+    const taskCount =
+        options?.upToTaskIndex !== undefined
+            ? Math.max(0, Math.min(options.upToTaskIndex, tasks.length))
+            : tasks.length
+
+    for (let i = 0; i < taskCount; i++) {
+        applyTask(projected, tasks[i])
     }
     return projected
 }
