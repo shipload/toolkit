@@ -30,7 +30,20 @@ export const colors = {
     t4: '#f4c96b',
     t5: '#ff4f9a',
   },
+  accent: {
+    component: '#8f98a8',
+  },
+  capability: {
+    engine: '#4a8abf',
+    generator: '#22c55e',
+    gatherer: '#f59e0b',
+    loader: '#eab308',
+    manufacturing: '#a855f7',
+    storage: '#14b8a6',
+    hauler: '#f97316',
+  },
 } as const
 
 export type CategoryColorKey = keyof typeof colors.category
 export type TierColorKey = keyof typeof colors.tier
+export type CapabilityColorKey = keyof typeof colors.capability
