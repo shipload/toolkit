@@ -1,5 +1,5 @@
-import error400 from './assets/error-400.svg' with { type: 'text' }
-import error404 from './assets/error-404.svg' with { type: 'text' }
+import error400 from './assets/error-400.svg'
+import error404 from './assets/error-404.svg'
 
 export type ErrorCode = 400 | 404
 

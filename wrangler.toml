@@ -9,6 +9,9 @@ rules = [
   { type = "Text",         globs = ["**/*.svg"],   fallthrough = false }
 ]
 
+[alias]
+elliptic = "./src/shims/elliptic-empty.cjs"
+
 [env.production]
 routes = [
   { pattern = "img.shiploadgame.com/*", zone_name = "shiploadgame.com" }
