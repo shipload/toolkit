@@ -1,0 +1,40 @@
+{
+  "name": "@shipload/item-renderer",
+  "version": "0.1.0",
+  "description": "Deterministic SVG rendering for Shipload items",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./fonts": {
+      "types": "./src/fonts/index.ts",
+      "default": "./src/fonts/index.ts"
+    }
+  },
+  "files": ["src", "!src/**/*.test.ts"],
+  "scripts": {
+    "test": "bun test",
+    "test:pixel": "bun test test/pixel.test.ts",
+    "dev:preview": "bun run scripts/preview.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src test scripts",
+    "fonts:subset": "bun run scripts/subset-fonts.ts"
+  },
+  "dependencies": {
+    "@shipload/sdk": "^2.0.0-rc13",
+    "@wharfkit/antelope": "^1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.0",
+    "@resvg/resvg-js": "^2.6.0",
+    "@types/bun": "latest",
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^7.0.0",
+    "subset-font": "^2.3.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,6 @@
+node_modules/
+bun.lockb
+dist/
+.DS_Store
+test/__image_snapshots__/*.diff.png
+coverage/
