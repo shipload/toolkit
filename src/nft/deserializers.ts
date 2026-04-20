@@ -9,7 +9,7 @@ import {
 
 export interface NFTInstalledModule {
     item_id: number
-    seed: string
+    stats: string
 }
 
 export interface NFTModuleSlot {
@@ -20,13 +20,13 @@ export interface NFTModuleSlot {
 export interface NFTCargoItem {
     item_id: number
     quantity: number
-    seed: string
+    stats: string
     modules?: NFTModuleSlot[]
 }
 
 export interface NFTCommonBase {
     quantity: number
-    seed: string
+    stats: string
     origin_x: string
     origin_y: string
 }
@@ -34,7 +34,7 @@ export interface NFTCommonBase {
 export function readCommonBase(data: Record<string, any>): NFTCommonBase {
     return {
         quantity: Number(data.quantity),
-        seed: String(data.seed),
+        stats: String(data.stats),
         origin_x: String(data.origin_x),
         origin_y: String(data.origin_y),
     }
@@ -42,7 +42,7 @@ export function readCommonBase(data: Record<string, any>): NFTCommonBase {
 
 export function deserializeScalar(data: Record<string, any>, itemId: number): NFTCargoItem {
     const base = readCommonBase(data)
-    return {item_id: itemId, quantity: base.quantity, seed: base.seed}
+    return {item_id: itemId, quantity: base.quantity, stats: base.stats}
 }
 
 export const deserializeResource = deserializeScalar
@@ -52,18 +52,18 @@ export const deserializeModule = deserializeScalar
 export function deserializeEntity(data: Record<string, any>, itemId: number): NFTCargoItem {
     const base = readCommonBase(data)
     const moduleItems: number[] = (data.module_items ?? []).map((v: any) => Number(v))
-    const moduleSeeds: string[] = (data.module_seeds ?? []).map((v: any) => String(v))
+    const moduleStats: string[] = (data.module_stats ?? []).map((v: any) => String(v))
     const layout = getEntitySlotLayout(itemId)
 
     const modules: NFTModuleSlot[] = layout.map((slot, i) => ({
         type: slot.type,
         installed:
             moduleItems[i] && moduleItems[i] !== 0
-                ? {item_id: moduleItems[i], seed: moduleSeeds[i]}
+                ? {item_id: moduleItems[i], stats: moduleStats[i]}
                 : undefined,
     }))
 
-    return {item_id: itemId, quantity: base.quantity, seed: base.seed, modules}
+    return {item_id: itemId, quantity: base.quantity, stats: base.stats, modules}
 }
 
 export function deserializeAsset(data: Record<string, any>, itemId: number): NFTCargoItem {

@@ -9,11 +9,11 @@ import {
     stacksEqual,
 } from '$lib'
 
-function stack(item_id: number, quantity: number, seed?: number): CargoStack {
+function stack(item_id: number, quantity: number, stats?: number): CargoStack {
     return {
         item_id: UInt16.from(item_id),
         quantity: UInt32.from(quantity),
-        seed: seed === undefined ? undefined : UInt64.from(seed),
+        stats: stats === undefined ? UInt64.from(0) : UInt64.from(stats),
         modules: [],
     }
 }

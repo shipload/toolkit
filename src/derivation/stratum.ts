@@ -89,6 +89,18 @@ export function deriveStratum(
     return {itemId: selectedItemId, seed: seedBigInt, richness, reserve}
 }
 
+/**
+ * Derives the three stat values for a raw resource from a deposit's
+ * entropy seed (hash-based, weibull-transformed).
+ *
+ * **Use only on deposit seeds** — the bigint returned by `deriveStratum`
+ * or carried on a `MassDeposit`. Do NOT call this on a cargo item's
+ * `stats` field; cargo stats are bit-packed and must be read via
+ * `decodeStat` (or `decodeStackStats` for category-mapped output).
+ *
+ * Passing a cargo `stats` value here produces meaningless output
+ * (hash of the packed bits, unrelated to the actual stats).
+ */
 export function deriveResourceStats(seed: bigint): ResourceStats {
     const seedBytes = new Uint8Array(8)
     for (let i = 0; i < 8; i++) {

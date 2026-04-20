@@ -366,8 +366,8 @@ suite('ship deploy formulas', function () {
         const seedA = encodeStats([0, 0, 0, 0])
         const seedB = encodeStats([999, 999, 999, 999])
         const modules = [
-            {itemId: ITEM_HAULER_T1, seed: seedA},
-            {itemId: ITEM_HAULER_T1, seed: seedB},
+            {itemId: ITEM_HAULER_T1, stats: seedA},
+            {itemId: ITEM_HAULER_T1, stats: seedB},
         ]
         const caps = computeShipCapabilities(modules)
         assert.exists(caps.hauler)
@@ -378,7 +378,7 @@ suite('ship deploy formulas', function () {
 
     test('computeShipCapabilities single hauler module', function () {
         const seed = encodeStats([500, 500, 500, 500])
-        const caps = computeShipCapabilities([{itemId: ITEM_HAULER_T1, seed}])
+        const caps = computeShipCapabilities([{itemId: ITEM_HAULER_T1, stats: seed}])
         assert.exists(caps.hauler)
         assert.equal(caps.hauler!.capacity, 2)
         assert.equal(caps.hauler!.efficiency, 5000)

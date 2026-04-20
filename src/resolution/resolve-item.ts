@@ -13,8 +13,7 @@ import {
     MODULE_LOADER,
     MODULE_STORAGE,
 } from '../capabilities/modules'
-import {decodeCraftedItemStats} from '../derivation/crafting'
-import {deriveResourceStats} from '../derivation/stratum'
+import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeEngineCapabilities,
@@ -68,19 +67,19 @@ function toNum(v: UInt16Type): number {
     return Number(UInt16.from(v).value.toString())
 }
 
-function toBigSeed(v: UInt64Type): bigint {
+function toBigStats(v: UInt64Type): bigint {
     return BigInt(UInt64.from(v).toString())
 }
 
-function resolveResource(id: number, seed?: UInt64Type): ResolvedItem {
+function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
     const item = getItem(id)
     const cat = item.category
-    let stats: ResolvedItemStat[] | undefined
-    if (seed !== undefined) {
-        const derived = deriveResourceStats(toBigSeed(seed))
+    let resolvedStats: ResolvedItemStat[] | undefined
+    if (stats !== undefined) {
+        const bigStats = toBigStats(stats)
         const defs = getStatDefinitions(cat)
-        const values = [derived.stat1, derived.stat2, derived.stat3]
-        stats = defs.map((d, i) => ({
+        const values = [decodeStat(bigStats, 0), decodeStat(bigStats, 1), decodeStat(bigStats, 2)]
+        resolvedStats = defs.map((d, i) => ({
             key: d.key,
             label: d.label,
             abbreviation: d.abbreviation,
@@ -98,16 +97,16 @@ function resolveResource(id: number, seed?: UInt64Type): ResolvedItem {
         tier: item.tier,
         mass: Number(item.mass.value.toString()),
         itemType: 'resource',
-        stats,
+        stats: resolvedStats,
     }
 }
 
-function resolveComponent(id: number, seed?: UInt64Type): ResolvedItem {
+function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
     const comp = getComponentById(id)!
-    let stats: ResolvedItemStat[] | undefined
-    if (seed !== undefined) {
-        const decoded = decodeCraftedItemStats(id, toBigSeed(seed))
-        stats = Object.entries(decoded).map(([key, value]) => {
+    let resolvedStats: ResolvedItemStat[] | undefined
+    if (stats !== undefined) {
+        const decoded = decodeCraftedItemStats(id, toBigStats(stats))
+        resolvedStats = Object.entries(decoded).map(([key, value]) => {
             const allDefs = getStatDefinitions('metal')
                 .concat(getStatDefinitions('precious'))
                 .concat(getStatDefinitions('gas'))
@@ -134,7 +133,7 @@ function resolveComponent(id: number, seed?: UInt64Type): ResolvedItem {
         tier: 't1' as ResourceTier,
         mass: comp.mass,
         itemType: 'component',
-        stats,
+        stats: resolvedStats,
     }
 }
 
@@ -209,13 +208,13 @@ function computeCapabilityGroup(
     }
 }
 
-function resolveModule(id: number, seed?: UInt64Type): ResolvedItem {
+function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
     const recipe = getModuleRecipeByItemId(id)!
     let attributes: ResolvedAttributeGroup[] | undefined
-    if (seed !== undefined) {
-        const stats = decodeCraftedItemStats(id, toBigSeed(seed))
+    if (stats !== undefined) {
+        const decoded = decodeCraftedItemStats(id, toBigStats(stats))
         const modType = getModuleCapabilityType(id)
-        const group = computeCapabilityGroup(modType, stats)
+        const group = computeCapabilityGroup(modType, decoded)
         if (group) attributes = [group]
     }
     return {
@@ -231,20 +230,20 @@ function resolveModule(id: number, seed?: UInt64Type): ResolvedItem {
 
 function resolveEntity(
     id: number,
-    seed?: UInt64Type,
+    stats?: UInt64Type,
     modules?: ServerContract.Types.module_entry[]
 ): ResolvedItem {
     const recipe = getEntityRecipeByItemId(id)!
     let attributes: ResolvedAttributeGroup[] | undefined
     let moduleSlots: ResolvedModuleSlot[] | undefined
 
-    if (seed !== undefined) {
-        const stats = decodeCraftedItemStats(id, toBigSeed(seed))
+    if (stats !== undefined) {
+        const decoded = decodeCraftedItemStats(id, toBigStats(stats))
         attributes = []
 
         const isShip = recipe.id === 'ship-t1'
         if (isShip) {
-            const hullCaps = computeShipHullCapabilities(stats)
+            const hullCaps = computeShipHullCapabilities(decoded)
             attributes.push({
                 capability: 'Hull',
                 attributes: [
@@ -253,7 +252,7 @@ function resolveEntity(
                 ],
             })
         } else {
-            const containerCaps = computeContainerCapabilities(stats)
+            const containerCaps = computeContainerCapabilities(decoded)
             attributes.push({
                 capability: 'Hull',
                 attributes: [
@@ -269,10 +268,10 @@ function resolveEntity(
             const mod = modules?.[i]
             if (mod?.installed) {
                 const modItemId = Number(mod.installed.item_id.value.toString())
-                const modSeed = BigInt(mod.installed.seed.toString())
-                const modStats = decodeCraftedItemStats(modItemId, modSeed)
+                const modStats = BigInt(mod.installed.stats.toString())
+                const decodedStats = decodeCraftedItemStats(modItemId, modStats)
                 const modType = getModuleCapabilityType(modItemId)
-                const group = computeCapabilityGroup(modType, modStats)
+                const group = computeCapabilityGroup(modType, decodedStats)
                 const modRecipe = getModuleRecipeByItemId(modItemId)
                 return {
                     name: modRecipe?.name ?? 'Module',
@@ -298,16 +297,16 @@ function resolveEntity(
 
 export function resolveItem(
     itemId: UInt16Type,
-    seed?: UInt64Type,
+    stats?: UInt64Type,
     modules?: ServerContract.Types.module_entry[]
 ): ResolvedItem {
     const id = toNum(itemId)
 
-    if (isModuleItem(id)) return resolveModule(id, seed)
+    if (isModuleItem(id)) return resolveModule(id, stats)
 
-    if (getComponentById(id)) return resolveComponent(id, seed)
+    if (getComponentById(id)) return resolveComponent(id, stats)
 
-    if (getEntityRecipeByItemId(id)) return resolveEntity(id, seed, modules)
+    if (getEntityRecipeByItemId(id)) return resolveEntity(id, stats, modules)
 
-    return resolveResource(id, seed)
+    return resolveResource(id, stats)
 }

@@ -12,10 +12,10 @@ import {UInt16, UInt32} from '@wharfkit/antelope'
 import {registerItem} from 'src/market/items'
 import {makeShipFixture, makeTask} from '../helpers'
 
-function getStack(cargo: CargoStack[], item_id: number, seed?: number): CargoStack | undefined {
-    const seedKey = seed === undefined ? '0' : String(seed)
+function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoStack | undefined {
+    const statsKey = stats === undefined ? '0' : String(stats)
     return cargo.find(
-        (s) => s.item_id.toNumber() === item_id && (s.seed ? s.seed.toString() : '0') === seedKey
+        (s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey
     )
 }
 
@@ -23,7 +23,7 @@ suite('projectEntity (stack-aware)', function () {
     suite('initial cargo', function () {
         test('returns initial cargo when no schedule', function () {
             const ship = makeShipFixture({
-                cargo: [{item_id: 1, quantity: 10, seed: 100}],
+                cargo: [{item_id: 1, quantity: 10, stats: 100}],
             })
             const projected = projectEntity(ship)
             assert.equal(projected.cargo.length, 1)
@@ -45,7 +45,7 @@ suite('projectEntity (stack-aware)', function () {
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
                     makeTask(TaskType.GATHER, {
-                        cargo: [{item_id: 5, quantity: 100, seed: 200}],
+                        cargo: [{item_id: 5, quantity: 100, stats: 200}],
                     }),
                 ],
             })
@@ -59,8 +59,8 @@ suite('projectEntity (stack-aware)', function () {
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
-                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 30, seed: 200}]}),
-                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 70, seed: 200}]}),
+                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 30, stats: 200}]}),
+                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 70, stats: 200}]}),
                 ],
             })
             const projected = projectEntity(ship)
@@ -73,8 +73,8 @@ suite('projectEntity (stack-aware)', function () {
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
-                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 30, seed: 200}]}),
-                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 70, seed: 300}]}),
+                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 30, stats: 200}]}),
+                    makeTask(TaskType.GATHER, {cargo: [{item_id: 5, quantity: 70, stats: 300}]}),
                 ],
             })
             const projected = projectEntity(ship)
@@ -86,8 +86,8 @@ suite('projectEntity (stack-aware)', function () {
         test('removes inputs and adds output (last cargo entry)', function () {
             const ship = makeShipFixture({
                 cargo: [
-                    {item_id: 1, quantity: 5, seed: 100},
-                    {item_id: 2, quantity: 3, seed: 200},
+                    {item_id: 1, quantity: 5, stats: 100},
+                    {item_id: 2, quantity: 3, stats: 200},
                 ],
             })
             ship.schedule = ServerContract.Types.schedule.from({
@@ -95,9 +95,9 @@ suite('projectEntity (stack-aware)', function () {
                 tasks: [
                     makeTask(TaskType.CRAFT, {
                         cargo: [
-                            {item_id: 1, quantity: 5, seed: 100},
-                            {item_id: 2, quantity: 3, seed: 200},
-                            {item_id: 99, quantity: 1, seed: 999},
+                            {item_id: 1, quantity: 5, stats: 100},
+                            {item_id: 2, quantity: 3, stats: 200},
+                            {item_id: 99, quantity: 1, stats: 999},
                         ],
                     }),
                 ],
@@ -111,10 +111,10 @@ suite('projectEntity (stack-aware)', function () {
 
     suite('WRAP / UNWRAP', function () {
         test('WRAP removes cargo (mirrors UNLOAD)', function () {
-            const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, seed: 200}]})
+            const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 200}]})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
-                tasks: [makeTask(TaskType.WRAP, {cargo: [{item_id: 5, quantity: 4, seed: 200}]})],
+                tasks: [makeTask(TaskType.WRAP, {cargo: [{item_id: 5, quantity: 4, stats: 200}]})],
             })
             const projected = projectEntity(ship)
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 6)
@@ -124,7 +124,7 @@ suite('projectEntity (stack-aware)', function () {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
-                tasks: [makeTask(TaskType.UNWRAP, {cargo: [{item_id: 5, quantity: 4, seed: 200}]})],
+                tasks: [makeTask(TaskType.UNWRAP, {cargo: [{item_id: 5, quantity: 4, stats: 200}]})],
             })
             const projected = projectEntity(ship)
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 4)
@@ -138,7 +138,7 @@ suite('projectEntity (stack-aware)', function () {
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
                     makeTask(TaskType.GATHER, {
-                        cargo: [{item_id: 5, quantity: 50, seed: 200}],
+                        cargo: [{item_id: 5, quantity: 50, stats: 200}],
                     }),
                 ],
             })
@@ -151,7 +151,7 @@ suite('projectEntity (stack-aware)', function () {
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
                     makeTask(TaskType.GATHER, {
-                        cargo: [{item_id: 5, quantity: 10, seed: 200}],
+                        cargo: [{item_id: 5, quantity: 10, stats: 200}],
                     }),
                 ],
             })
@@ -186,12 +186,12 @@ suite('projectEntity (stack-aware)', function () {
                 started: '2024-06-04T23:41:09.000',
                 tasks: [
                     makeTask(TaskType.GATHER, {
-                        cargo: [{item_id: RESOURCE_ID, quantity: INPUT_QTY, seed: RESOURCE_SEED}],
+                        cargo: [{item_id: RESOURCE_ID, quantity: INPUT_QTY, stats: RESOURCE_SEED}],
                     }),
                     makeTask(TaskType.CRAFT, {
                         cargo: [
-                            {item_id: RESOURCE_ID, quantity: INPUT_QTY, seed: RESOURCE_SEED},
-                            {item_id: COMPONENT_ID, quantity: OUTPUT_QTY, seed: COMPONENT_SEED},
+                            {item_id: RESOURCE_ID, quantity: INPUT_QTY, stats: RESOURCE_SEED},
+                            {item_id: COMPONENT_ID, quantity: OUTPUT_QTY, stats: COMPONENT_SEED},
                         ],
                     }),
                 ],

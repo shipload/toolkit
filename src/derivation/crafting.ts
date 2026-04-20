@@ -22,27 +22,27 @@ export interface CategoryStacks {
 }
 
 export function encodeStats(values: number[]): bigint {
-    let seed = 0n
+    let stats = 0n
     for (let i = 0; i < values.length && i < 6; i++) {
-        seed |= BigInt(values[i] & 0x3ff) << BigInt(i * 10)
-    }
-    return seed
-}
-
-export function decodeStat(seed: bigint, index: number): number {
-    return Number((seed >> BigInt(index * 10)) & 0x3ffn)
-}
-
-export function decodeStats(seed: bigint, count: number): number[] {
-    const stats: number[] = []
-    for (let i = 0; i < count; i++) {
-        stats.push(decodeStat(seed, i))
+        stats |= BigInt(values[i] & 0x3ff) << BigInt(i * 10)
     }
     return stats
 }
 
-function mapStatsToKeys(seed: bigint, statDefs: {key: string}[]): Record<string, number> {
-    const values = decodeStats(seed, statDefs.length)
+export function decodeStat(stats: bigint, index: number): number {
+    return Number((stats >> BigInt(index * 10)) & 0x3ffn)
+}
+
+export function decodeStats(stats: bigint, count: number): number[] {
+    const result: number[] = []
+    for (let i = 0; i < count; i++) {
+        result.push(decodeStat(stats, i))
+    }
+    return result
+}
+
+function mapStatsToKeys(stats: bigint, statDefs: {key: string}[]): Record<string, number> {
+    const values = decodeStats(stats, statDefs.length)
     const result: Record<string, number> = {}
     for (let i = 0; i < statDefs.length; i++) {
         result[statDefs[i].key] = values[i]
@@ -50,15 +50,15 @@ function mapStatsToKeys(seed: bigint, statDefs: {key: string}[]): Record<string,
     return result
 }
 
-export function decodeCraftedItemStats(itemId: number, seed: bigint): Record<string, number> {
+export function decodeCraftedItemStats(itemId: number, stats: bigint): Record<string, number> {
     const comp = getComponentById(itemId)
-    if (comp) return mapStatsToKeys(seed, comp.stats)
+    if (comp) return mapStatsToKeys(stats, comp.stats)
 
     const entityRecipe = entityRecipes.find((r) => r.packedItemId === itemId)
-    if (entityRecipe) return mapStatsToKeys(seed, entityRecipe.stats)
+    if (entityRecipe) return mapStatsToKeys(stats, entityRecipe.stats)
 
     const moduleRecipe = moduleRecipes.find((r) => r.itemId === itemId)
-    if (moduleRecipe) return mapStatsToKeys(seed, moduleRecipe.stats)
+    if (moduleRecipe) return mapStatsToKeys(stats, moduleRecipe.stats)
 
     return {}
 }
@@ -126,12 +126,12 @@ export function computeEntityStats(
     })
 }
 
-function decodeStackStats(itemId: number, seed: UInt64): Record<string, number> {
+function decodeStackStats(itemId: number, stats: UInt64): Record<string, number> {
     if (itemId >= 10000) {
-        return decodeCraftedItemStats(itemId, BigInt(seed.toString()))
+        return decodeCraftedItemStats(itemId, BigInt(stats.toString()))
     }
-    const raw = deriveResourceStats(BigInt(seed.toString()))
-    return {stat1: raw.stat1, stat2: raw.stat2, stat3: raw.stat3}
+    const s = BigInt(stats.toString())
+    return {stat1: decodeStat(s, 0), stat2: decodeStat(s, 1), stat3: decodeStat(s, 2)}
 }
 
 export const categoryItemMass: Record<string, number> = {
@@ -187,11 +187,11 @@ export function blendCrossGroup(sources: {value: number; weight: number}[]): num
 
 export function blendCargoStacks(
     itemId: number,
-    stacks: {quantity: number; seed: UInt64}[]
+    stacks: {quantity: number; stats: UInt64}[]
 ): UInt64 {
     const decoded = stacks.map((s) => ({
         quantity: s.quantity,
-        stats: decodeStackStats(itemId, s.seed),
+        stats: decodeStackStats(itemId, s.stats),
     }))
     const allKeys = Object.keys(decoded[0]?.stats ?? {})
     const blended = allKeys.map((key) => Math.max(1, Math.min(999, blendStacks(decoded, key))))
@@ -201,23 +201,22 @@ export function blendCargoStacks(
 export interface RecipeSlotInput {
     itemId: number
     category: ResourceCategory | undefined
-    stacks: {quantity: number; seed: bigint}[]
+    stacks: {quantity: number; stats: bigint}[]
 }
 
 function decodeRawStackToCategoryStats(
-    seed: bigint,
+    stats: bigint,
     category: ResourceCategory
 ): Record<string, number> {
-    const raw = deriveResourceStats(seed)
     const defs = getStatDefinitions(category)
     const result: Record<string, number> = {}
-    if (defs[0]) result[defs[0].key] = raw.stat1
-    if (defs[1]) result[defs[1].key] = raw.stat2
-    if (defs[2]) result[defs[2].key] = raw.stat3
+    if (defs[0]) result[defs[0].key] = decodeStat(stats, 0)
+    if (defs[1]) result[defs[1].key] = decodeStat(stats, 1)
+    if (defs[2]) result[defs[2].key] = decodeStat(stats, 2)
     return result
 }
 
-export function computeCraftedOutputSeed(
+export function computeCraftedOutputStats(
     outputItemId: number,
     slotInputs: RecipeSlotInput[]
 ): UInt64 {
@@ -230,8 +229,8 @@ export function computeCraftedOutputSeed(
             const stacks: StackInput[] = slot.stacks.map((s) => ({
                 quantity: s.quantity,
                 stats: slotIsComponent
-                    ? decodeCraftedItemStats(slot.itemId, s.seed)
-                    : decodeRawStackToCategoryStats(s.seed, slot.category!),
+                    ? decodeCraftedItemStats(slot.itemId, s.stats)
+                    : decodeRawStackToCategoryStats(s.stats, slot.category!),
             }))
             categoryStacks.push({category: slot.category, stacks})
         }
@@ -257,7 +256,7 @@ export function computeCraftedOutputSeed(
             for (const s of slot.stacks) {
                 list.push({
                     quantity: s.quantity,
-                    stats: decodeCraftedItemStats(slot.itemId, s.seed),
+                    stats: decodeCraftedItemStats(slot.itemId, s.stats),
                 })
             }
         }
@@ -269,5 +268,20 @@ export function computeCraftedOutputSeed(
         return UInt64.from(encodeStats(ordered))
     }
 
-    throw new Error(`computeCraftedOutputSeed: no recipe found for outputItemId=${outputItemId}`)
+    throw new Error(`computeCraftedOutputStats: no recipe found for outputItemId=${outputItemId}`)
+}
+
+/**
+ * Mirrors the contract's gather-time transform. Takes a deposit's entropy
+ * seed (bigint from deriveStratum), derives stats via weibull hashing, and
+ * returns a UInt64 whose bit-packed form matches what the contract writes
+ * to cargo_item.stats on gather.
+ *
+ * Use this whenever off-chain code simulates a gather (testmap, player
+ * scanners that project cargo outcomes) and needs a value that matches
+ * what on-chain cargo would carry.
+ */
+export function encodeGatheredCargoStats(depositSeed: bigint): UInt64 {
+    const raw = deriveResourceStats(depositSeed)
+    return UInt64.from(encodeStats([raw.stat1, raw.stat2, raw.stat3]))
 }

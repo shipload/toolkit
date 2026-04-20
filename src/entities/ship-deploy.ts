@@ -160,7 +160,7 @@ export interface ShipCapabilities {
 }
 
 export function computeShipCapabilities(
-    modules: {itemId: number; seed: bigint}[]
+    modules: {itemId: number; stats: bigint}[]
 ): ShipCapabilities {
     const ship: ShipCapabilities = {}
 
@@ -169,7 +169,7 @@ export function computeShipCapabilities(
         let totalThrust = 0
         let totalDrain = 0
         for (const m of engineModules) {
-            const caps = computeEngineCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            const caps = computeEngineCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalThrust += caps.thrust
             totalDrain += caps.drain
         }
@@ -183,7 +183,7 @@ export function computeShipCapabilities(
         let totalCapacity = 0
         let totalRecharge = 0
         for (const m of generatorModules) {
-            const caps = computeGeneratorCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            const caps = computeGeneratorCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalCapacity += caps.capacity
             totalRecharge += caps.recharge
         }
@@ -199,7 +199,7 @@ export function computeShipCapabilities(
         let totalDepth = 0
         let totalSpeed = 0
         for (const m of gathererModules) {
-            const caps = computeGathererCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            const caps = computeGathererCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalYield += caps.yield
             totalDrain += caps.drain
             totalDepth += caps.depth
@@ -214,7 +214,7 @@ export function computeShipCapabilities(
         let weightedEffNum = 0
         let totalDrain = 0
         for (const m of haulerModules) {
-            const decoded = decodeCraftedItemStats(m.itemId, m.seed)
+            const decoded = decodeCraftedItemStats(m.itemId, m.stats)
             const caps = computeHaulerCapabilities({
                 resonance: decoded.capacity,
                 conductivity: decoded.efficiency,
@@ -237,7 +237,7 @@ export function computeShipCapabilities(
         let totalThrust = 0
         let totalQuantity = 0
         for (const m of loaderModules) {
-            const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalMass += caps.mass
             totalThrust += caps.thrust
             totalQuantity += caps.quantity
@@ -252,7 +252,7 @@ export function computeShipCapabilities(
         let totalSpeed = 0
         let totalDrain = 0
         for (const m of crafterModules) {
-            const caps = computeManufacturingCapabilities(decodeCraftedItemStats(m.itemId, m.seed))
+            const caps = computeManufacturingCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalSpeed += caps.speed
             totalDrain += caps.drain
         }

@@ -226,6 +226,7 @@ export type {
 
 export {
     encodeStats,
+    encodeGatheredCargoStats,
     decodeStat,
     decodeStats,
     decodeCraftedItemStats,
@@ -237,7 +238,7 @@ export {
     blendCrossGroup,
     categoryItemMass,
     computeInputMass,
-    computeCraftedOutputSeed,
+    computeCraftedOutputStats,
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
 

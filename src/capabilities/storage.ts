@@ -89,7 +89,7 @@ export function isFullFromMass(capacity: UInt64Type, cargoMass: UInt64Type): boo
 export interface CargoStack {
     item_id: UInt16
     quantity: UInt32
-    seed?: UInt64
+    stats: UInt64
     modules: ServerContract.Types.module_entry[]
 }
 
@@ -97,7 +97,7 @@ export function cargoItemToStack(item: ServerContract.Types.cargo_item): CargoSt
     return {
         item_id: UInt16.from(item.item_id),
         quantity: UInt32.from(item.quantity),
-        seed: item.seed,
+        stats: item.stats,
         modules: item.modules ?? [],
     }
 }
@@ -106,24 +106,21 @@ export function stackToCargoItem(stack: CargoStack): ServerContract.Types.cargo_
     return ServerContract.Types.cargo_item.from({
         item_id: stack.item_id,
         quantity: stack.quantity,
-        seed: stack.seed,
+        stats: stack.stats,
         modules: stack.modules,
     })
 }
 
-function seedEquals(a?: UInt64, b?: UInt64): boolean {
-    if (!a && !b) return true
-    if (!a || !b) return false
+function statsEquals(a: UInt64, b: UInt64): boolean {
     return a.equals(b)
 }
 
 function stackIdentityEqual(a: CargoStack, b: CargoStack): boolean {
-    return a.item_id.equals(b.item_id) && seedEquals(a.seed, b.seed)
+    return a.item_id.equals(b.item_id) && statsEquals(a.stats, b.stats)
 }
 
 export function stackKey(s: CargoStack): string {
-    const seedVal = s.seed ? s.seed.toString() : '0'
-    return `${s.item_id.toNumber()}:${seedVal}`
+    return `${s.item_id.toNumber()}:${s.stats.toString()}`
 }
 
 export function stacksEqual(a: CargoStack, b: CargoStack): boolean {

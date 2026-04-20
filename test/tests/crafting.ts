@@ -1,6 +1,8 @@
 import {assert} from 'chai'
+import {UInt64} from '@wharfkit/antelope'
 
 import {
+    blendCargoStacks,
     blendCrossGroup,
     blendStacks,
     calc_craft_duration,
@@ -9,12 +11,14 @@ import {
     computeComponentStats,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
-    computeCraftedOutputSeed,
+    computeCraftedOutputStats,
     computeEntityStats,
     computeInputMass,
     decodeCraftedItemStats,
+    decodeStat,
     decodeStats,
     deriveResourceStats,
+    encodeGatheredCargoStats,
     encodeStats,
     ITEM_CARGO_LINING,
     ITEM_CONTAINER_T1_PACKED,
@@ -176,7 +180,37 @@ suite('Crafting', function () {
         })
     })
 
-    suite('computeCraftedOutputSeed', function () {
+    suite('encodeGatheredCargoStats', function () {
+        test('round-trips derived stats via bit decode', function () {
+            const depositSeed = 0x0badf00dcafebaben
+            const encoded = encodeGatheredCargoStats(depositSeed)
+            const raw = deriveResourceStats(depositSeed)
+            const seed = BigInt(encoded.toString())
+            assert.equal(decodeStat(seed, 0), raw.stat1)
+            assert.equal(decodeStat(seed, 1), raw.stat2)
+            assert.equal(decodeStat(seed, 2), raw.stat3)
+        })
+
+        test('returns a UInt64 instance', function () {
+            const encoded = encodeGatheredCargoStats(0x123456789abcdef0n)
+            assert.isFunction(encoded.toString)
+            const second = encodeGatheredCargoStats(0x123456789abcdef0n)
+            assert.isTrue(encoded.equals(second))
+        })
+    })
+
+    suite('blendCargoStacks', function () {
+        test('decodes raw-item stats via bit decode, not hash', function () {
+            const packed = UInt64.from(encodeStats([278, 142, 162]))
+            const result = blendCargoStacks(6, [{quantity: 1, stats: packed}])
+            const decoded = decodeStats(BigInt(result.toString()), 3)
+            assert.equal(decoded[0], 278)
+            assert.equal(decoded[1], 142)
+            assert.equal(decoded[2], 162)
+        })
+    })
+
+    suite('computeCraftedOutputStats', function () {
         test('single-input single-category component (Thruster Core from gas)', function () {
             const seedA = 0x123456789abcdef0n
             const seedB = 0xfedcba9876543210n
@@ -185,15 +219,23 @@ suite('Crafting', function () {
                     itemId: 1003,
                     category: 'gas',
                     stacks: [
-                        {quantity: 20, seed: seedA},
-                        {quantity: 12, seed: seedB},
+                        {quantity: 20, stats: seedA},
+                        {quantity: 12, stats: seedB},
                     ],
                 },
             ]
-            const outputSeed = computeCraftedOutputSeed(ITEM_THRUSTER_CORE, slotInputs)
+            const outputStats = computeCraftedOutputStats(ITEM_THRUSTER_CORE, slotInputs)
 
-            const rawA = deriveResourceStats(seedA)
-            const rawB = deriveResourceStats(seedB)
+            const rawA = {
+                stat1: decodeStat(seedA, 0),
+                stat2: decodeStat(seedA, 1),
+                stat3: decodeStat(seedA, 2),
+            }
+            const rawB = {
+                stat1: decodeStat(seedB, 0),
+                stat2: decodeStat(seedB, 1),
+                stat3: decodeStat(seedB, 2),
+            }
             const expectedStats = computeComponentStats(ITEM_THRUSTER_CORE, [
                 {
                     category: 'gas',
@@ -219,7 +261,7 @@ suite('Crafting', function () {
             ])
             const decoded = decodeCraftedItemStats(
                 ITEM_THRUSTER_CORE,
-                BigInt(outputSeed.toString())
+                BigInt(outputStats.toString())
             )
             const vol = expectedStats.find((s) => s.key === 'volatility')!.value
             const thm = expectedStats.find((s) => s.key === 'thermal')!.value
@@ -234,18 +276,26 @@ suite('Crafting', function () {
                 {
                     itemId: 200,
                     category: 'precious',
-                    stacks: [{quantity: 6, seed: preciousSeed}],
+                    stacks: [{quantity: 6, stats: preciousSeed}],
                 },
                 {
                     itemId: 500,
                     category: 'organic',
-                    stacks: [{quantity: 14, seed: organicSeed}],
+                    stacks: [{quantity: 14, stats: organicSeed}],
                 },
             ]
-            const outputSeed = computeCraftedOutputSeed(ITEM_CARGO_LINING, slotInputs)
+            const outputStats = computeCraftedOutputStats(ITEM_CARGO_LINING, slotInputs)
 
-            const rawP = deriveResourceStats(preciousSeed)
-            const rawO = deriveResourceStats(organicSeed)
+            const rawP = {
+                stat1: decodeStat(preciousSeed, 0),
+                stat2: decodeStat(preciousSeed, 1),
+                stat3: decodeStat(preciousSeed, 2),
+            }
+            const rawO = {
+                stat1: decodeStat(organicSeed, 0),
+                stat2: decodeStat(organicSeed, 1),
+                stat3: decodeStat(organicSeed, 2),
+            }
             const expectedStats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
                     category: 'precious',
@@ -274,7 +324,7 @@ suite('Crafting', function () {
                     ],
                 },
             ])
-            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING, BigInt(outputSeed.toString()))
+            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING, BigInt(outputStats.toString()))
             const duc = expectedStats.find((s) => s.key === 'ductility')!.value
             const pur = expectedStats.find((s) => s.key === 'purity')!.value
             assert.equal(decoded['ductility'], duc)
@@ -293,17 +343,17 @@ suite('Crafting', function () {
                     itemId: ITEM_HULL_PLATES,
                     category: undefined,
                     stacks: [
-                        {quantity: 4, seed: hullSeedA},
-                        {quantity: 2, seed: hullSeedB},
+                        {quantity: 4, stats: hullSeedA},
+                        {quantity: 2, stats: hullSeedB},
                     ],
                 },
                 {
                     itemId: ITEM_CARGO_LINING,
                     category: undefined,
-                    stacks: [{quantity: 2, seed: liningSeed}],
+                    stacks: [{quantity: 2, stats: liningSeed}],
                 },
             ]
-            const outputSeed = computeCraftedOutputSeed(ITEM_CONTAINER_T1_PACKED, slotInputs)
+            const outputStats = computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, slotInputs)
 
             const expectedStats = computeEntityStats('container', {
                 [ITEM_HULL_PLATES]: [
@@ -314,7 +364,7 @@ suite('Crafting', function () {
             })
             const decoded = decodeCraftedItemStats(
                 ITEM_CONTAINER_T1_PACKED,
-                BigInt(outputSeed.toString())
+                BigInt(outputStats.toString())
             )
             for (const stat of expectedStats) {
                 assert.equal(decoded[stat.key], stat.value, `mismatch on ${stat.key}`)
@@ -326,17 +376,17 @@ suite('Crafting', function () {
         })
 
         test('throws for unknown output item id', function () {
-            assert.throws(() => computeCraftedOutputSeed(99999, []), /no recipe found/)
+            assert.throws(() => computeCraftedOutputStats(99999, []), /no recipe found/)
         })
 
         test('throws when entity recipe receives a category-only slot', function () {
             assert.throws(
                 () =>
-                    computeCraftedOutputSeed(ITEM_CONTAINER_T1_PACKED, [
+                    computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, [
                         {
                             itemId: 200,
                             category: 'precious',
-                            stacks: [{quantity: 1, seed: 0n}],
+                            stacks: [{quantity: 1, stats: 0n}],
                         },
                     ]),
                 /expects component inputs/

@@ -17,14 +17,14 @@ export const MODULE_LAUNCHER = 7
 export const MODULE_STORAGE = 8
 export const MODULE_HAULER = 9
 
-export interface CargoSeed {
+export interface PackedModule {
     itemId: number
-    seed: bigint
+    stats: bigint
 }
 
 export interface ModuleEntry {
     type: number
-    installed?: CargoSeed
+    installed?: PackedModule
 }
 
 export function moduleAccepts(slotType: number, moduleType: number): boolean {

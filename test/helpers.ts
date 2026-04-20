@@ -45,7 +45,7 @@ export function assertAtMost(actual: AnyInt, expected: AnyInt, msg?: string) {
 
 export function makeShipFixture(
     overrides: {
-        cargo?: Array<{item_id: number; quantity: number; seed?: number; mass?: number}>
+        cargo?: Array<{item_id: number; quantity: number; stats?: number; mass?: number}>
         capacity?: number
         hullmass?: number
         energy?: number
@@ -56,7 +56,7 @@ export function makeShipFixture(
         return ServerContract.Types.cargo_item.from({
             item_id: UInt16.from(item.item_id),
             quantity: UInt32.from(item.quantity),
-            seed: item.seed !== undefined ? UInt64.from(item.seed) : undefined,
+            stats: item.stats !== undefined ? UInt64.from(item.stats) : UInt64.from(0),
             modules: [],
         })
     })
@@ -89,7 +89,7 @@ export function makeShipFixture(
 export function makeTask(
     type: TaskType,
     overrides: {
-        cargo?: Array<{item_id: number; quantity: number; seed?: number}>
+        cargo?: Array<{item_id: number; quantity: number; stats?: number}>
         coordinates?: {x: number; y: number; z?: number}
         duration?: number
         energy_cost?: number
@@ -100,7 +100,7 @@ export function makeTask(
         return ServerContract.Types.cargo_item.from({
             item_id: UInt16.from(item.item_id),
             quantity: UInt32.from(item.quantity),
-            seed: item.seed !== undefined ? UInt64.from(item.seed) : undefined,
+            stats: item.stats !== undefined ? UInt64.from(item.stats) : UInt64.from(0),
             modules: [],
         })
     })

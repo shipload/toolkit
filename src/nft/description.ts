@@ -25,18 +25,18 @@ function idiv(a: number, b: number): number {
     return Math.floor(a / b)
 }
 
-export function computeBaseHullmass(seed: bigint): number {
-    const density = decodeStat(seed, 1)
+export function computeBaseHullmass(stats: bigint): number {
+    const density = decodeStat(stats, 1)
     return 25000 + 75 * density
 }
 
-export function computeBaseCapacityShip(seed: bigint): number {
-    const s = decodeStat(seed, 0) + decodeStat(seed, 2) + decodeStat(seed, 3)
+export function computeBaseCapacityShip(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
     return Math.floor(1_000_000 * Math.pow(10, s / 2997))
 }
 
-export function computeBaseCapacityWarehouse(seed: bigint): number {
-    const s = decodeStat(seed, 0) + decodeStat(seed, 2) + decodeStat(seed, 3)
+export function computeBaseCapacityWarehouse(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
     return Math.floor(20_000_000 * Math.pow(10, s / 2997))
 }
 
@@ -87,7 +87,7 @@ export function moduleDisplayName(itemId: number): string {
     }
 }
 
-export function formatModuleLine(slot: number, itemId: number, seed: bigint): string {
+export function formatModuleLine(slot: number, itemId: number, stats: bigint): string {
     let out = `Slot ${slot} - `
     if (itemId === 0) {
         out += '(empty)'
@@ -99,43 +99,43 @@ export function formatModuleLine(slot: number, itemId: number, seed: bigint): st
 
     switch (subtype) {
         case MODULE_ENGINE: {
-            const vol = decodeStat(seed, 0)
-            const thm = decodeStat(seed, 1)
+            const vol = decodeStat(stats, 0)
+            const thm = decodeStat(stats, 1)
             out += `  Thrust ${computeEngineThrust(vol)}  Drain ${computeEngineDrain(thm)}`
             break
         }
         case MODULE_GENERATOR: {
-            const res = decodeStat(seed, 0)
-            const clr = decodeStat(seed, 1)
+            const res = decodeStat(stats, 0)
+            const clr = decodeStat(stats, 1)
             out += `  Capacity ${computeGeneratorCap(res)}  Recharge ${computeGeneratorRech(clr)}`
             break
         }
         case MODULE_GATHERER: {
-            const str = decodeStat(seed, 0)
-            const tol = decodeStat(seed, 1)
-            const con = decodeStat(seed, 3)
-            const ref = decodeStat(seed, 4)
+            const str = decodeStat(stats, 0)
+            const tol = decodeStat(stats, 1)
+            const con = decodeStat(stats, 3)
+            const ref = decodeStat(stats, 4)
             out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
                 tol
             )}  Speed ${computeGathererSpeed(ref)}  Drain ${computeGathererDrain(con)}`
             break
         }
         case MODULE_LOADER: {
-            const duc = decodeStat(seed, 0)
-            const pla = decodeStat(seed, 1)
+            const duc = decodeStat(stats, 0)
+            const pla = decodeStat(stats, 1)
             out += `  Mass ${computeLoaderMass(duc)}  Thrust ${computeLoaderThrust(pla)}`
             break
         }
         case MODULE_CRAFTER: {
-            const rea = decodeStat(seed, 0)
-            const clr = decodeStat(seed, 1)
+            const rea = decodeStat(stats, 0)
+            const clr = decodeStat(stats, 1)
             out += `  Speed ${computeCrafterSpeed(rea)}  Drain ${computeCrafterDrain(clr)}`
             break
         }
         case MODULE_STORAGE: {
-            const str = decodeStat(seed, 0)
-            const duc = decodeStat(seed, 1)
-            const pur = decodeStat(seed, 2)
+            const str = decodeStat(stats, 0)
+            const duc = decodeStat(stats, 1)
+            const pur = decodeStat(stats, 2)
             const sum = str + duc + pur
             const pct = 10 + idiv(sum * 10, 2997)
             out += `  +${pct}% capacity`
@@ -147,16 +147,16 @@ export function formatModuleLine(slot: number, itemId: number, seed: bigint): st
 
 export function buildEntityDescription(
     itemId: number,
-    hullSeed: bigint,
+    hullStats: bigint,
     moduleItems: number[],
-    moduleSeeds: bigint[]
+    moduleStats: bigint[]
 ): string {
-    const hullMass = computeBaseHullmass(hullSeed)
+    const hullMass = computeBaseHullmass(hullStats)
     let baseCapacity = 0
     if (itemId === ITEM_SHIP_T1_PACKED) {
-        baseCapacity = computeBaseCapacityShip(hullSeed)
+        baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
-        baseCapacity = computeBaseCapacityWarehouse(hullSeed)
+        baseCapacity = computeBaseCapacityWarehouse(hullStats)
     }
 
     let out = entityDisplayName(itemId)
@@ -167,7 +167,7 @@ export function buildEntityDescription(
     out += '\n\n'
 
     for (let i = 0; i < moduleItems.length; i++) {
-        out += formatModuleLine(i, moduleItems[i], moduleSeeds[i] ?? 0n)
+        out += formatModuleLine(i, moduleItems[i], moduleStats[i] ?? 0n)
         out += '\n'
     }
 
