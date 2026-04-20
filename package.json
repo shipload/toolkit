@@ -13,6 +13,10 @@
     "./fonts": {
       "types": "./src/fonts/index.ts",
       "default": "./src/fonts/index.ts"
+    },
+    "./fonts/load-bun": {
+      "types": "./src/fonts/load-bun.ts",
+      "default": "./src/fonts/load-bun.ts"
     }
   },
   "files": ["src", "!src/**/*.test.ts"],
@@ -22,7 +26,7 @@
     "dev:preview": "bun run scripts/preview.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src test scripts",
-    "fonts:subset": "bun run scripts/subset-fonts.ts"
+    "fonts:copy": "bun run scripts/copy-fonts.ts"
   },
   "dependencies": {
     "@shipload/sdk": "^2.0.0-rc13",
@@ -30,11 +34,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/orbitron": "^5.2.8",
     "@resvg/resvg-js": "^2.6.0",
     "@types/bun": "latest",
     "pixelmatch": "^6.0.0",
     "pngjs": "^7.0.0",
-    "subset-font": "^2.3.0",
     "typescript": "^5.4.0"
   }
 }
