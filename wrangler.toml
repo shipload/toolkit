@@ -5,7 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 rules = [
   { type = "CompiledWasm", globs = ["**/*.wasm"],  fallthrough = false },
-  { type = "Data",         globs = ["**/*.woff2"], fallthrough = false }
+  { type = "Data",         globs = ["**/*.woff2"], fallthrough = false },
+  { type = "Text",         globs = ["**/*.svg"],   fallthrough = false }
 ]
 
 [env.production]
