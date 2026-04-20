@@ -4,11 +4,13 @@ import { text } from '../src/primitives/text.ts'
 import { divider } from '../src/primitives/divider.ts'
 import { wrapText } from '../src/primitives/wrap.ts'
 
-test('panel renders a rect with width, height, and corner radius', () => {
+test('panel renders a rect inset by 0.5px so the 1px stroke stays inside the viewBox', () => {
   const svg = panel({ width: 280, height: 120 })
   expect(svg).toContain('<rect')
-  expect(svg).toContain('width="280"')
-  expect(svg).toContain('height="120"')
+  expect(svg).toContain('x="0.5"')
+  expect(svg).toContain('y="0.5"')
+  expect(svg).toContain('width="279"')
+  expect(svg).toContain('height="119"')
   expect(svg).toContain('rx="10"')
 })
 

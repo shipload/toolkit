@@ -11,10 +11,10 @@ export function panel(props: PanelProps): string {
   const { width, height, borderColor } = props
   const r = tokens.spacing.cornerRadius
   return el('rect', {
-    x: 0,
-    y: 0,
-    width,
-    height,
+    x: 0.5,
+    y: 0.5,
+    width: width - 1,
+    height: height - 1,
     rx: r,
     ry: r,
     fill: tokens.colors.surface.panel,
