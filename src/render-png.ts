@@ -9,19 +9,18 @@ import jetbrains500 from './assets/jetbrains-500.woff2'
 let wasmReady: Promise<void> | null = null
 
 async function ensureWasm(): Promise<void> {
-  wasmReady ??= initWasm(resvgWasm as WebAssembly.Module)
+  wasmReady ??= initWasm(resvgWasm).catch((e) => {
+    wasmReady = null
+    throw e
+  })
   return wasmReady
 }
 
-function toBytes(buf: ArrayBuffer | Uint8Array): Uint8Array {
-  return buf instanceof Uint8Array ? buf : new Uint8Array(buf)
-}
-
 const FONT_DATA: Record<FontKey, Uint8Array> = {
-  'orbitron-700': toBytes(orbitron700 as unknown as ArrayBuffer),
-  'inter-400':    toBytes(inter400    as unknown as ArrayBuffer),
-  'inter-600':    toBytes(inter600    as unknown as ArrayBuffer),
-  'jetbrains-500': toBytes(jetbrains500 as unknown as ArrayBuffer),
+  'orbitron-700': new Uint8Array(orbitron700),
+  'inter-400':    new Uint8Array(inter400),
+  'inter-600':    new Uint8Array(inter600),
+  'jetbrains-500': new Uint8Array(jetbrains500),
 }
 
 export async function renderPng(svg: string): Promise<Uint8Array> {
