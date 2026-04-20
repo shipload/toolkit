@@ -5,6 +5,7 @@ import {
 } from '@shipload/item-renderer'
 import { CACHE_TTL_SECONDS, MAX_PAYLOAD_CHARS } from './config.ts'
 import { errorSvgResponse, errorTextResponse } from './errors.ts'
+import { renderPng } from './render-png.ts'
 
 type Ext = 'png' | 'svg'
 
@@ -42,8 +43,8 @@ async function handleItem(payload: string, ext: Ext): Promise<Response> {
     return new Response(svg, { headers: immutableHeaders('image/svg+xml') })
   }
 
-  // PNG path — implemented in Task 21
-  return errorTextResponse(501, 'png path not yet implemented')
+  const png = await renderPng(svg)
+  return new Response(png, { headers: immutableHeaders('image/png') })
 }
 
 export default {
