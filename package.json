@@ -17,7 +17,8 @@
     "./fonts/load-bun": {
       "types": "./src/fonts/load-bun.ts",
       "default": "./src/fonts/load-bun.ts"
-    }
+    },
+    "./fonts/*.woff2": "./src/fonts/*.woff2"
   },
   "files": ["src", "!src/**/*.test.ts"],
   "scripts": {
