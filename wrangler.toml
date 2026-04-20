@@ -1,0 +1,14 @@
+name = "item-image-worker"
+main = "src/index.ts"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+rules = [
+  { type = "CompiledWasm", globs = ["**/*.wasm"],  fallthrough = false },
+  { type = "Data",         globs = ["**/*.woff2"], fallthrough = false }
+]
+
+[env.production]
+routes = [
+  { pattern = "img.shiploadgame.com/*", zone_name = "shiploadgame.com" }
+]
