@@ -43,6 +43,8 @@ export function cargoShipT1Packed(opts?: {
   })
 }
 
+export const ITEM_HULL_PLATES = 10001
+
 export const FIXTURES = {
   iron: cargoIron('0x123456789ABCDEF'),
   ironStackOf50: cargoIron('0x123456789ABCDEF', 50),
@@ -51,6 +53,12 @@ export const FIXTURES = {
     item_id: ITEM_HELIUM,
     quantity: 1,
     stats: '0xDEADBEEF1234',
+    modules: [],
+  }),
+  hullPlates: ServerContract.Types.cargo_item.from({
+    item_id: ITEM_HULL_PLATES,
+    quantity: 1,
+    stats: '0xBAA4',
     modules: [],
   }),
   shipT1NoModules: ServerContract.Types.cargo_item.from({

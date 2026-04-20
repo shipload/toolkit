@@ -3,6 +3,7 @@ import type { CargoItem } from '../payload/codec.ts'
 import { RenderError } from '../errors.ts'
 import { renderResource } from './resource.ts'
 import { renderPackedEntity } from './packed-entity.ts'
+import { renderComponent } from './component.ts'
 
 export function renderByType(item: CargoItem, resolved: ResolvedItem): string {
   switch (resolved.itemType) {
@@ -11,6 +12,7 @@ export function renderByType(item: CargoItem, resolved: ResolvedItem): string {
     case 'entity':
       return renderPackedEntity(item, resolved)
     case 'component':
+      return renderComponent(item, resolved)
     case 'module':
       throw new RenderError(
         `itemType '${resolved.itemType}' not supported in v1 (item ${resolved.itemId})`,
