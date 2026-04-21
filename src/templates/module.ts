@@ -1,4 +1,5 @@
 import type { ResolvedItem } from '@shipload/sdk'
+import { describeModuleForItem, renderDescription } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -6,6 +7,7 @@ import { text } from '../primitives/text.ts'
 import { divider } from '../primitives/divider.ts'
 import { compactRow } from '../primitives/compact-row.ts'
 import { quantityBadge } from '../primitives/quantity-badge.ts'
+import { spanParagraph } from '../primitives/span-paragraph.ts'
 import { tokens } from '../tokens/index.ts'
 import { shortCode, formatMass, tierBorder } from './_shared.ts'
 
@@ -21,12 +23,35 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
 
   const group = resolved.attributes?.[0]
   const attrs = group?.attributes ?? []
+  const desc = describeModuleForItem(resolved)
 
   const headerH = 48
   const metaRowH = 28
-  const capHeaderH = attrs.length > 0 ? 22 : 0
-  const attrsH = attrs.length * 18
-  const height = headerH + metaRowH + 14 + (attrs.length > 0 ? capHeaderH + attrsH + 8 : 0) + pad
+  const sepY = pad + headerH + metaRowH + 6
+
+  let bodyHeight = 0
+  if (desc && group) {
+    const plain = renderDescription(desc)
+      .map((s) => s.text)
+      .join('')
+    const lines = plain.split(/\s+/).reduce(
+      (acc, word) => {
+        const last = acc[acc.length - 1] ?? ''
+        if (last.length === 0) return [...acc.slice(0, -1), word]
+        if (last.length + 1 + word.length <= 36) return [...acc.slice(0, -1), `${last} ${word}`]
+        return [...acc, word]
+      },
+      [''],
+    )
+    const lineCount = lines.filter((l) => l.length > 0).length
+    bodyHeight = 20 + lineCount * 14 + 8
+  } else if (group && attrs.length > 0) {
+    const capHeaderH = 22
+    const attrsH = attrs.length * 18
+    bodyHeight = capHeaderH + attrsH + 8
+  }
+
+  const height = headerH + metaRowH + 14 + bodyHeight + pad
 
   const chrome = panel({ width: w, height, borderColor: tierBorder(resolved.tier) })
 
@@ -83,12 +108,32 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
     anchor: 'end',
   })
 
-  const sepY = pad + headerH + metaRowH + 6
   const sep = divider({ x: pad, y: sepY, width: innerW })
 
   let capSection = ''
-  if (attrs.length > 0 && group) {
-    const capY = sepY + capHeaderH
+  if (desc && group) {
+    const accentColor = capabilityColor(group.capability)
+    const capHeader = text({
+      x: pad,
+      y: sepY + 16,
+      value: group.capability.toUpperCase(),
+      size: tokens.typography.sizes.subtitle,
+      weight: 700,
+      family: tokens.typography.sans,
+      color: accentColor,
+      letterSpacing: 1,
+    })
+    const spans = renderDescription(desc)
+    const { svg: paraSvg } = spanParagraph({
+      x: pad,
+      y: sepY + 36,
+      spans,
+      charsPerLine: 36,
+      lineHeight: 14,
+    })
+    capSection = capHeader + paraSvg
+  } else if (group && attrs.length > 0) {
+    const capY = sepY + 22
     const capHeader = text({
       x: pad,
       y: capY,

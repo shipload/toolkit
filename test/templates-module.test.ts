@@ -21,3 +21,20 @@ for (const name of CASES) {
     expect(svg).toMatchSnapshot(`module-${name}.svg`)
   })
 }
+
+test('Engine template embeds the narrative description', () => {
+  const item = FIXTURES.engineT1
+  const resolved = resolveItem(item.item_id, item.stats, item.modules)
+  const svg = renderModule(item, resolved)
+  expect(svg).toContain('generates')
+  expect(svg).toContain('thrust for travel')
+  expect(svg).toContain('while draining')
+  expect(svg).toContain('distance travelled')
+})
+
+test('Hauler template falls back to compact rows when description is null', () => {
+  const item = FIXTURES.haulerT1
+  const resolved = resolveItem(item.item_id, item.stats, item.modules)
+  const svg = renderModule(item, resolved)
+  expect(svg).toContain('Hauler')
+})
