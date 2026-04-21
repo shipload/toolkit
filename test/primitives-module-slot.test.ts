@@ -2,7 +2,7 @@ import { test, expect } from 'bun:test'
 import { moduleSlot } from '../src/primitives/module-slot.ts'
 import type { TextSpan } from '@shipload/sdk'
 
-test('string description renders as before (single-color wrapped lines)', () => {
+test('string description flows inline with the bold capability label', () => {
   const svg = moduleSlot({
     x: 14,
     y: 40,
@@ -13,8 +13,9 @@ test('string description renders as before (single-color wrapped lines)', () => 
     accentColor: '#2fd6d1',
   })
   expect(svg).toContain('<polygon')
-  expect(svg).toContain('Engine:')
-  expect(svg).toContain('generates 700 thrust for travel')
+  expect(svg).toContain('Engine: ')
+  expect(svg).toContain('font-weight="600"')
+  expect(svg).toContain('generates 700 thrust for')
 })
 
 test('TextSpan[] description renders each span; highlighted spans get accent color', () => {

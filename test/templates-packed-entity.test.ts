@@ -40,8 +40,8 @@ test('ship with two modules renders SDK-sourced narrative descriptions', () => {
   const item = FIXTURES.shipT1TwoModules
   const resolved = resolveItem(item.item_id, item.stats, item.modules)
   const svg = renderPackedEntity(item, resolved)
+  expect(svg).toContain('Engine: ')
   expect(svg).toContain('generates')
-  expect(svg).toContain('thrust for travel')
+  expect(svg).toContain('Generator: ')
   expect(svg).toContain('holds')
-  expect(svg).toContain('maximum energy')
 })

@@ -72,64 +72,76 @@ export function moduleSlot(props: ModuleSlotProps): string {
   }
 
   const accent = props.accentColor ?? tokens.colors.text.accent
-  const headline =
-    FILLED_DIAMOND(iconX, iconY, accent) +
-    text({
-      x: textX,
-      y: iconY + 3,
-      value: `${props.capability ?? 'Module'}:`,
-      size: tokens.typography.sizes.body,
-      weight: 600,
-      color: tokens.colors.text.primary,
-    })
+  const label = `${props.capability ?? 'Module'}: `
 
   const desc = props.description
   const isEmpty =
     !desc ||
     (typeof desc === 'string' && desc.length === 0) ||
     (Array.isArray(desc) && desc.length === 0)
-  if (isEmpty) return headline
 
-  if (typeof desc === 'string') {
-    const descLines = wrapText({ value: desc, charsPerLine: 36 })
-    const descOut = descLines
-      .map((line, i) =>
-        text({
-          x: textX,
-          y: iconY + 20 + i * 14,
-          value: line,
-          size: tokens.typography.sizes.body,
-          color: tokens.colors.text.secondary,
-        }),
-      )
-      .join('')
-    return headline + descOut
+  if (isEmpty) {
+    return (
+      FILLED_DIAMOND(iconX, iconY, accent) +
+      text({
+        x: textX,
+        y: iconY + 3,
+        value: label.trimEnd(),
+        size: tokens.typography.sizes.body,
+        weight: 600,
+        color: tokens.colors.text.primary,
+      })
+    )
   }
 
-  const spans: TextSpan[] = desc
-  const plain = spans.map((s) => s.text).join('')
-  const lines = wrapText({ value: plain, charsPerLine: 36 })
+  const descSpans: TextSpan[] = typeof desc === 'string' ? [{ text: desc }] : desc
+  const descPlain = descSpans.map((s) => s.text).join('')
+  const combined = label + descPlain
+  const lines = wrapText({ value: combined, charsPerLine: 36 })
+
   const highlightColor = tokens.colors.text.accent
   const bodyColor = tokens.colors.text.secondary
+  const labelColor = tokens.colors.text.primary
   const size = tokens.typography.sizes.body
+  const fontFamily = escapeXml(tokens.typography.sans)
+  const labelEnd = label.length
 
   let offset = 0
-  const descOut = lines
+  const textBlocks = lines
     .map((line, i) => {
-      const lineStart = plain.indexOf(line, offset)
+      const lineStart = combined.indexOf(line, offset)
       const lineEnd = lineStart + line.length
       offset = lineEnd
-      const lineSpans = sliceSpans(spans, lineStart, lineEnd)
-      const y = iconY + 20 + i * 14
-      const tspans = lineSpans
-        .map((s) => {
+      const y = iconY + 3 + i * 14
+
+      const tspans: string[] = []
+
+      if (lineStart < labelEnd) {
+        const labelSliceEnd = Math.min(lineEnd, labelEnd)
+        const labelText = combined.slice(lineStart, labelSliceEnd)
+        if (labelText.length > 0) {
+          tspans.push(
+            `<tspan font-weight="600" fill="${labelColor}">${escapeXml(labelText)}</tspan>`,
+          )
+        }
+        if (lineEnd > labelEnd) {
+          const descSlice = sliceSpans(descSpans, 0, lineEnd - labelEnd)
+          for (const s of descSlice) {
+            const fill = s.highlight ? highlightColor : bodyColor
+            tspans.push(`<tspan fill="${fill}">${escapeXml(s.text)}</tspan>`)
+          }
+        }
+      } else {
+        const descSlice = sliceSpans(descSpans, lineStart - labelEnd, lineEnd - labelEnd)
+        for (const s of descSlice) {
           const fill = s.highlight ? highlightColor : bodyColor
-          return `<tspan fill="${fill}">${escapeXml(s.text)}</tspan>`
-        })
-        .join('')
-      return `<text x="${textX}" y="${y}" font-family="${escapeXml(tokens.typography.sans)}" font-size="${size}">${tspans}</text>`
+          tspans.push(`<tspan fill="${fill}">${escapeXml(s.text)}</tspan>`)
+        }
+      }
+
+      return `<text x="${textX}" y="${y}" font-family="${fontFamily}" font-size="${size}">${tspans.join('')}</text>`
     })
     .join('')
 
-  return headline + descOut
+  return FILLED_DIAMOND(iconX, iconY, accent) + textBlocks
 }

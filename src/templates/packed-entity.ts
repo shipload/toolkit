@@ -48,15 +48,18 @@ function buildModuleGroups(
   })
 }
 
-function rowHeightFor(m: { description: TextSpan[] | string; installed: boolean }): number {
+const MODULE_LABEL_PREFIX = (capability: string) => `${capability}: `
+
+function rowHeightFor(m: { capability: string; description: TextSpan[] | string; installed: boolean }): number {
   if (!m.installed) return 24
   const plain =
     typeof m.description === 'string'
       ? m.description
       : m.description.map((s) => s.text).join('')
-  if (plain.length === 0) return 28
-  const lineCount = Math.max(1, wrapText({ value: plain, charsPerLine: 36 }).length)
-  return 22 + lineCount * 14 + 6
+  if (plain.length === 0) return 24
+  const combined = MODULE_LABEL_PREFIX(m.capability) + plain
+  const lineCount = Math.max(1, wrapText({ value: combined, charsPerLine: 36 }).length)
+  return 10 + lineCount * 14
 }
 
 export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): string {
