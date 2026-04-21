@@ -102,8 +102,7 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
 
     const attrRows = attrs
       .map((attr, i) => {
-        const unit = (attr as { label: string; value: number; unit?: string }).unit
-        const displayValue = unit ? `${attr.value} ${unit}` : String(attr.value)
+        const displayValue = String(attr.value)
         return compactRow({
           x: pad,
           y: capY + 14 + i * 18,

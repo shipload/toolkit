@@ -69,37 +69,37 @@ export const FIXTURES = {
   engineT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_ENGINE_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '358800',
     modules: [],
   }),
   generatorT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_GENERATOR_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '683908',
     modules: [],
   }),
   gathererT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_GATHERER_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '138255128433040',
     modules: [],
   }),
   loaderT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_LOADER_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '512750',
     modules: [],
   }),
   crafterT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_MANUFACTURING_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '512600',
     modules: [],
   }),
   storageT1: ServerContract.Types.cargo_item.from({
     item_id: ITEM_STORAGE_T1,
     quantity: 1,
-    stats: '0x3E8',
+    stats: '537605632700',
     modules: [],
   }),
   haulerT1: ServerContract.Types.cargo_item.from({
