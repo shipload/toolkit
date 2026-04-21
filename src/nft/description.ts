@@ -45,7 +45,8 @@ export const computeEngineDrain = (thm: number): number => Math.max(30, 50 - idi
 export const computeGeneratorCap = (res: number): number => 300 + idiv(res, 6)
 export const computeGeneratorRech = (clr: number): number => 1 + idiv(clr * 3, 1000)
 export const computeGathererYield = (str: number): number => 200 + str
-export const computeGathererDrain = (con: number): number => Math.max(250, 1250 - idiv(con * 25, 20))
+export const computeGathererDrain = (con: number): number =>
+    Math.max(250, 1250 - idiv(con * 25, 20))
 export const computeGathererDepth = (tol: number): number => 200 + idiv(tol * 3, 2)
 export const computeGathererSpeed = (ref: number): number => 100 + idiv(ref * 4, 5)
 export const computeLoaderMass = (duc: number): number => Math.max(200, 2000 - duc * 2)

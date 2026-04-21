@@ -324,7 +324,10 @@ suite('Crafting', function () {
                     ],
                 },
             ])
-            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING, BigInt(outputStats.toString()))
+            const decoded = decodeCraftedItemStats(
+                ITEM_CARGO_LINING,
+                BigInt(outputStats.toString())
+            )
             const duc = expectedStats.find((s) => s.key === 'ductility')!.value
             const pur = expectedStats.find((s) => s.key === 'purity')!.value
             assert.equal(decoded['ductility'], duc)

@@ -211,7 +211,9 @@ function applyGatherTask(
 ): void {
     if (!options.complete) return
     applyEnergyCost(projected, task)
-    applyAddCargoTask(projected, task)
+    if (!task.entitytarget) {
+        applyAddCargoTask(projected, task)
+    }
 }
 
 function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {

@@ -14,9 +14,7 @@ import {makeShipFixture, makeTask} from '../helpers'
 
 function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoStack | undefined {
     const statsKey = stats === undefined ? '0' : String(stats)
-    return cargo.find(
-        (s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey
-    )
+    return cargo.find((s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey)
 }
 
 suite('projectEntity (stack-aware)', function () {
@@ -124,7 +122,9 @@ suite('projectEntity (stack-aware)', function () {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
-                tasks: [makeTask(TaskType.UNWRAP, {cargo: [{item_id: 5, quantity: 4, stats: 200}]})],
+                tasks: [
+                    makeTask(TaskType.UNWRAP, {cargo: [{item_id: 5, quantity: 4, stats: 200}]}),
+                ],
             })
             const projected = projectEntity(ship)
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 4)

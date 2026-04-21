@@ -1,4 +1,15 @@
-import {Action, Int64, Name, NameType, UInt16, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {
+    Action,
+    Int64,
+    Name,
+    NameType,
+    UInt16,
+    UInt16Type,
+    UInt32,
+    UInt32Type,
+    UInt64,
+    UInt64Type,
+} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {CoordinatesType, EntityType, EntityTypeName} from '../types'
 import {ServerContract} from '../contracts'
@@ -99,10 +110,21 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    gather(shipId: UInt64Type, stratum: number, quantity: number): Action {
+    gather(
+        source: EntityRefInput,
+        destination: EntityRefInput,
+        stratum: UInt16Type,
+        quantity: UInt32Type
+    ): Action {
         return this.server.action('gather', {
-            entity_type: EntityType.SHIP,
-            id: UInt64.from(shipId),
+            source: ServerContract.Types.entity_ref.from({
+                entity_type: source.entityType,
+                entity_id: UInt64.from(source.entityId),
+            }),
+            destination: ServerContract.Types.entity_ref.from({
+                entity_type: destination.entityType,
+                entity_id: UInt64.from(destination.entityId),
+            }),
             stratum: UInt16.from(stratum),
             quantity: UInt32.from(quantity),
         })

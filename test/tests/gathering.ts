@@ -367,5 +367,57 @@ suite('gathering', function () {
                 'Cargo mass should increase from gathering'
             )
         })
+
+        test('skips cargo add when gather targets another entity', function () {
+            const ship = makeShip({
+                id: 1,
+                owner: 'test',
+                name: 'Test Ship',
+                coordinates: {x: 0, y: 0},
+                hullmass: 100000,
+                capacity: 500000,
+                energy: 350,
+                engines: ServerContract.Types.movement_stats.from({thrust: 250, drain: 25}),
+                generator: ServerContract.Types.energy_stats.from({capacity: 350, recharge: 10}),
+                loaders: ServerContract.Types.loader_stats.from({
+                    mass: 1000,
+                    thrust: 1,
+                    quantity: 1,
+                }),
+                schedule: ServerContract.Types.schedule.from({
+                    started: TimePoint.fromMilliseconds(Date.now() - 60000),
+                    tasks: [
+                        ServerContract.Types.task.from({
+                            type: TaskType.GATHER,
+                            duration: 30,
+                            cancelable: 1,
+                            coordinates: {x: 0, y: 0},
+                            cargo: [{item_id: 1, quantity: 1, stats: 0, modules: []}],
+                            entitytarget: {entity_type: 'ship', entity_id: 2},
+                            energy_cost: 50,
+                        }),
+                    ],
+                }),
+                cargo: [],
+            })
+
+            const projected = projectEntity(ship)
+
+            assert.equal(
+                Number(projected.cargoMass),
+                0,
+                'Cross-entity gather should not add cargo to source'
+            )
+            assert.equal(
+                projected.cargo.length,
+                0,
+                'Cross-entity gather should not add cargo stacks to source'
+            )
+            assert.equal(
+                Number(projected.energy),
+                300,
+                'Energy cost still applies on cross-entity gather'
+            )
+        })
     })
 })
