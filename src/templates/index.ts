@@ -4,6 +4,7 @@ import { RenderError } from '../errors.ts'
 import { renderResource } from './resource.ts'
 import { renderPackedEntity } from './packed-entity.ts'
 import { renderComponent } from './component.ts'
+import { renderModule } from './module.ts'
 
 export function renderByType(item: CargoItem, resolved: ResolvedItem): string {
   switch (resolved.itemType) {
@@ -14,9 +15,7 @@ export function renderByType(item: CargoItem, resolved: ResolvedItem): string {
     case 'component':
       return renderComponent(item, resolved)
     case 'module':
-      throw new RenderError(
-        `itemType '${resolved.itemType}' not supported in v1 (item ${resolved.itemId})`,
-      )
+      return renderModule(item, resolved)
     default:
       throw new RenderError(`unknown itemType '${String(resolved.itemType)}'`)
   }

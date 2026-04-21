@@ -19,9 +19,16 @@ test('renderItem dispatches to packed entity template for entities', () => {
   expect(svg).toContain('HULL')
 })
 
-test('renderItem throws RenderError for unsupported types (v1)', () => {
+test('renderItem dispatches to module template for modules', () => {
+  const item = FIXTURES.engineT1
+  const resolved = resolveItem(item.item_id, item.stats, item.modules)
+  const svg = renderItem(item, resolved)
+  expect(svg).toContain('MODULE')
+})
+
+test('renderItem throws RenderError for unknown types', () => {
   const item = FIXTURES.iron
-  const fake = { ...resolveItem(item.item_id, item.stats, item.modules), itemType: 'module' as const }
+  const fake = { ...resolveItem(item.item_id, item.stats, item.modules), itemType: 'unknown' as never }
   expect(() => renderItem(item, fake)).toThrow(RenderError)
 })
 
