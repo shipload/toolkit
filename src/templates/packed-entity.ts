@@ -54,9 +54,9 @@ function rowHeightFor(m: { description: TextSpan[] | string; installed: boolean 
     typeof m.description === 'string'
       ? m.description
       : m.description.map((s) => s.text).join('')
-  if (plain.length === 0) return 32
+  if (plain.length === 0) return 28
   const lineCount = Math.max(1, wrapText({ value: plain, charsPerLine: 36 }).length)
-  return 22 + lineCount * 14 + 16
+  return 22 + lineCount * 14 + 6
 }
 
 export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): string {
