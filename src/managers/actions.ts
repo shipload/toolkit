@@ -71,7 +71,8 @@ export class ActionsManager extends BaseManager {
         sourceId: UInt64Type,
         destType: EntityTypeName,
         destId: UInt64Type,
-        goodId: UInt64Type,
+        itemId: UInt64Type,
+        stats: UInt64Type,
         quantity: UInt64Type
     ): Action {
         return this.server.action('transfer', {
@@ -79,7 +80,8 @@ export class ActionsManager extends BaseManager {
             source_id: UInt64.from(sourceId),
             dest_type: destType,
             dest_id: UInt64.from(destId),
-            item_id: UInt16.from(goodId),
+            item_id: UInt16.from(itemId),
+            stats: UInt64.from(stats),
             quantity: UInt32.from(quantity),
         })
     }
