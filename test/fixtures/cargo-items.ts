@@ -58,7 +58,7 @@ export const FIXTURES = {
   hullPlates: ServerContract.Types.cargo_item.from({
     item_id: ITEM_HULL_PLATES,
     quantity: 1,
-    stats: '0xBAA4',
+    stats: '0x7FFF',
     modules: [],
   }),
   shipT1NoModules: ServerContract.Types.cargo_item.from({

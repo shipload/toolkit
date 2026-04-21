@@ -7,6 +7,7 @@ import { divider } from '../primitives/divider.ts'
 import { statBar } from '../primitives/stat-bar.ts'
 import { quantityBadge } from '../primitives/quantity-badge.ts'
 import { tokens } from '../tokens/index.ts'
+import { shortCode, formatMass, tierBorder } from './_shared.ts'
 
 const CATEGORY_LABELS: Record<string, string> = {
   metal: 'Metals',
@@ -14,15 +15,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   mineral: 'Minerals',
   organic: 'Organic',
   precious: 'Precious',
-}
-
-function formatMass(n: number): string {
-  return n.toLocaleString('en-US')
-}
-
-function tierBorder(tier: string): string {
-  const key = tier.toLowerCase() as keyof typeof tokens.colors.tier
-  return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
 }
 
 function categoryColor(category?: string): string {

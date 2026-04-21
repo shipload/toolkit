@@ -7,20 +7,7 @@ import { divider } from '../primitives/divider.ts'
 import { statBar } from '../primitives/stat-bar.ts'
 import { quantityBadge } from '../primitives/quantity-badge.ts'
 import { tokens } from '../tokens/index.ts'
-
-function formatMass(n: number): string {
-  return n.toLocaleString('en-US')
-}
-
-function tierBorder(tier: string): string {
-  const key = tier.toLowerCase() as keyof typeof tokens.colors.tier
-  return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
-}
-
-function shortCode(itemId: number): string {
-  const str = itemId.toString(10)
-  return str.slice(-2).padStart(2, '0')
-}
+import { shortCode, formatMass, tierBorder } from './_shared.ts'
 
 export function renderComponent(item: CargoItem, resolved: ResolvedItem): string {
   const w = tokens.spacing.panelWidth
