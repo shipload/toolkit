@@ -59,14 +59,19 @@ export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): str
   const headerH = 48
   const hullHeaderH = 20
   const hullRowH = 22
-  const moduleRowH = 52
+  const filledModuleRowH = 52
+  const emptyModuleRowH = 24
   const sectionGap = 12
+  const modulesHeight = moduleGroups.reduce(
+    (sum, m) => sum + (m.installed ? filledModuleRowH : emptyModuleRowH),
+    0,
+  )
   const height =
     headerH +
     hullHeaderH +
     hullRows.length * hullRowH +
     sectionGap +
-    moduleGroups.length * moduleRowH +
+    modulesHeight +
     pad
 
   const chrome = panel({ width: w, height, borderColor: tierBorder(resolved.tier) })
@@ -134,7 +139,7 @@ export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): str
       description: m.description,
       accentColor: tokens.colors.brand.teal,
     })
-    y += moduleRowH
+    y += m.installed ? filledModuleRowH : emptyModuleRowH
   }
 
   const inner = `${chrome}${icon}${name}${badge}${hullHeader}${hullSvg}${modulesSvg}`
