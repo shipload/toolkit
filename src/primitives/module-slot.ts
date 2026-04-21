@@ -127,7 +127,7 @@ export function moduleSlot(props: ModuleSlotProps): string {
           return `<tspan fill="${fill}">${escapeXml(s.text)}</tspan>`
         })
         .join('')
-      return `<text x="${textX}" y="${y}" font-family="${tokens.typography.sans}" font-size="${size}">${tspans}</text>`
+      return `<text x="${textX}" y="${y}" font-family="${escapeXml(tokens.typography.sans)}" font-size="${size}">${tspans}</text>`
     })
     .join('')
 
