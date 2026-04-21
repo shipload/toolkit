@@ -72,4 +72,12 @@ suite('ActionsManager', function () {
             assert.isDefined(action.data)
         })
     })
+
+    suite('wrap', function () {
+        test('creates wrap action', function () {
+            const action = shipload.actions.wrap('alice', 'ship', 42, 7, 5)
+            assert.equal(action.name.toString(), 'wrap')
+            assert.isDefined(action.data)
+        })
+    })
 })

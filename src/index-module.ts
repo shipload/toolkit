@@ -267,6 +267,19 @@ export type {
     ResolvedItemType,
 } from './resolution/resolve-item'
 
+export {
+    describeModule,
+    describeModuleForItem,
+    describeModuleForSlot,
+    renderDescription,
+} from './resolution/describe-module'
+export type {
+    TextSpan,
+    CapabilityInput,
+    ModuleDescription,
+    RenderDescriptionOptions,
+} from './resolution/describe-module'
+
 export * as NFT from './nft'
 export {
     deserializeAsset,
