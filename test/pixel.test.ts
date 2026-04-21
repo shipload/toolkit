@@ -28,6 +28,9 @@ const CASES = [
   { name: 'resource-iron', fixture: FIXTURES.iron },
   { name: 'packed-entity-ship-t1-two-modules', fixture: FIXTURES.shipT1TwoModules },
   { name: 'packed-entity-ship-t1-mixed', fixture: FIXTURES.shipT1OneFilledOneEmpty },
+  { name: 'component-hull-plates', fixture: FIXTURES.hullPlates },
+  { name: 'module-engine-t1', fixture: FIXTURES.engineT1 },
+  { name: 'module-storage-t1', fixture: FIXTURES.storageT1 },
 ] as const
 
 for (const c of CASES) {
