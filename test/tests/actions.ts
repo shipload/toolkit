@@ -3,6 +3,7 @@ import {makeClient} from '@wharfkit/mock-data'
 import Shipload from '$lib'
 import {Chains} from '@wharfkit/common'
 import {Int64, UInt64} from '@wharfkit/antelope'
+import {EntityType} from 'src/types'
 
 const client = makeClient('https://jungle4.greymass.com')
 const platformContractName = 'platform.gm'
@@ -75,7 +76,7 @@ suite('ActionsManager', function () {
 
     suite('wrap', function () {
         test('creates wrap action', function () {
-            const action = shipload.actions.wrap('alice', 'ship', 42, 7, 5)
+            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, 7, 5)
             assert.equal(action.name.toString(), 'wrap')
             assert.isDefined(action.data)
         })

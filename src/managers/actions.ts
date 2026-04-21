@@ -218,6 +218,22 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    wrap(
+        owner: NameType,
+        entityType: EntityTypeName,
+        entityId: UInt64Type,
+        cargoId: UInt64Type,
+        quantity: UInt64Type
+    ): Action {
+        return this.server.action('wrap', {
+            owner: Name.from(owner),
+            entity_type: entityType,
+            entity_id: UInt64.from(entityId),
+            cargo_id: UInt64.from(cargoId),
+            quantity: UInt64.from(quantity),
+        })
+    }
+
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
     }
