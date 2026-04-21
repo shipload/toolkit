@@ -27,7 +27,7 @@ export function cargoShipT1Packed(opts?: {
   stats?: string
   engineStats?: string
   generatorStats?: string
-  includeEmptySlot?: boolean
+  onlyEngine?: boolean
 }) {
   const o = opts ?? {}
   const modules: unknown[] = []
@@ -35,11 +35,12 @@ export function cargoShipT1Packed(opts?: {
     type: MODULE_ENGINE,
     installed: { item_id: ITEM_ENGINE_T1, stats: o.engineStats ?? '0x2A4F6B8C' },
   })
-  modules.push({
-    type: MODULE_GENERATOR,
-    installed: { item_id: ITEM_GENERATOR_T1, stats: o.generatorStats ?? '0x1B2D4F' },
-  })
-  if (o.includeEmptySlot) modules.push({ type: 0, installed: undefined })
+  if (!o.onlyEngine) {
+    modules.push({
+      type: MODULE_GENERATOR,
+      installed: { item_id: ITEM_GENERATOR_T1, stats: o.generatorStats ?? '0x1B2D4F' },
+    })
+  }
   return ServerContract.Types.cargo_item.from({
     item_id: ITEM_SHIP_T1_PACKED,
     quantity: 1,
@@ -115,7 +116,7 @@ export const FIXTURES = {
     modules: [],
   }),
   shipT1TwoModules: cargoShipT1Packed(),
-  shipT1OneFilledOneEmpty: cargoShipT1Packed({ includeEmptySlot: true }),
+  shipT1OnlyEngine: cargoShipT1Packed({ onlyEngine: true }),
 } as const
 
 export type FixtureName = keyof typeof FIXTURES

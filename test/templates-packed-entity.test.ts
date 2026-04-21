@@ -29,9 +29,9 @@ test('matches the committed Ship T1 (two modules) snapshot', async () => {
   expect(svg).toMatchSnapshot('packed-entity-ship-t1-two-modules.svg')
 })
 
-test('matches the committed Ship T1 (mixed filled/empty) snapshot', async () => {
-  const item = FIXTURES.shipT1OneFilledOneEmpty
+test('matches the committed Ship T1 (only engine) snapshot', async () => {
+  const item = FIXTURES.shipT1OnlyEngine
   const resolved = resolveItem(item.item_id, item.stats, item.modules)
   const svg = renderPackedEntity(item, resolved)
-  expect(svg).toMatchSnapshot('packed-entity-ship-t1-mixed.svg')
+  expect(svg).toMatchSnapshot('packed-entity-ship-t1-only-engine.svg')
 })
