@@ -18,7 +18,11 @@
       "types": "./src/fonts/load-bun.ts",
       "default": "./src/fonts/load-bun.ts"
     },
-    "./fonts/*.woff2": "./src/fonts/*.woff2"
+    "./fonts/*.woff2": "./src/fonts/*.woff2",
+    "./test/fixtures": {
+      "types": "./test/fixtures/cargo-items.ts",
+      "default": "./test/fixtures/cargo-items.ts"
+    }
   },
   "files": ["src", "!src/**/*.test.ts"],
   "scripts": {
