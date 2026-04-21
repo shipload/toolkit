@@ -1,4 +1,4 @@
-import type { ResolvedItem } from '@shipload/sdk'
+import { describeModuleForSlot, renderDescription, type ResolvedItem, type TextSpan } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -6,6 +6,7 @@ import { text } from '../primitives/text.ts'
 import { divider } from '../primitives/divider.ts'
 import { moduleSlot } from '../primitives/module-slot.ts'
 import { quantityBadge } from '../primitives/quantity-badge.ts'
+import { wrapText } from '../primitives/wrap.ts'
 import { tokens } from '../tokens/index.ts'
 
 function formatNumber(n: number): string {
@@ -17,11 +18,6 @@ function tierBorder(tier: string): string {
   return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
 }
 
-function describe(attributes: { label: string; value: number }[]): string {
-  const parts = attributes.map((a) => `${a.value} ${a.label.toLowerCase()}`)
-  return parts.join(' · ')
-}
-
 function buildHullRows(
   resolved: ResolvedItem,
 ): { label: string; value: number }[] {
@@ -31,18 +27,36 @@ function buildHullRows(
 
 function buildModuleGroups(
   resolved: ResolvedItem,
-): { capability: string; description: string; installed: boolean }[] {
+): { capability: string; description: TextSpan[] | string; installed: boolean }[] {
   const slots = resolved.moduleSlots ?? []
   return slots.map((slot) => {
     if (!slot.installed || !slot.attributes || !slot.name) {
       return { capability: 'Module', description: '', installed: false }
     }
-    return {
-      capability: slot.name,
-      description: describe(slot.attributes),
-      installed: true,
+    const desc = describeModuleForSlot(slot)
+    if (desc) {
+      return {
+        capability: slot.name,
+        description: renderDescription(desc),
+        installed: true,
+      }
     }
+    const shorthand = slot.attributes
+      .map((a) => `${a.value} ${a.label.toLowerCase()}`)
+      .join(' · ')
+    return { capability: slot.name, description: shorthand, installed: true }
   })
+}
+
+function rowHeightFor(m: { description: TextSpan[] | string; installed: boolean }): number {
+  if (!m.installed) return 24
+  const plain =
+    typeof m.description === 'string'
+      ? m.description
+      : m.description.map((s) => s.text).join('')
+  if (plain.length === 0) return 32
+  const lineCount = Math.max(1, wrapText({ value: plain, charsPerLine: 36 }).length)
+  return 22 + lineCount * 14 + 16
 }
 
 export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): string {
@@ -59,13 +73,9 @@ export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): str
   const headerH = 48
   const hullHeaderH = 20
   const hullRowH = 22
-  const filledModuleRowH = 52
-  const emptyModuleRowH = 24
   const sectionGap = 12
-  const modulesHeight = moduleGroups.reduce(
-    (sum, m) => sum + (m.installed ? filledModuleRowH : emptyModuleRowH),
-    0,
-  )
+  const rowHeights = moduleGroups.map(rowHeightFor)
+  const modulesHeight = rowHeights.reduce((a, b) => a + b, 0)
   const height =
     headerH +
     hullHeaderH +
@@ -129,7 +139,8 @@ export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): str
 
   y += sectionGap
   let modulesSvg = ''
-  for (const m of moduleGroups) {
+  for (let i = 0; i < moduleGroups.length; i++) {
+    const m = moduleGroups[i]!
     modulesSvg += moduleSlot({
       x: pad,
       y,
@@ -139,7 +150,7 @@ export function renderPackedEntity(item: CargoItem, resolved: ResolvedItem): str
       description: m.description,
       accentColor: tokens.colors.brand.teal,
     })
-    y += m.installed ? filledModuleRowH : emptyModuleRowH
+    y += rowHeights[i]!
   }
 
   const inner = `${chrome}${icon}${name}${badge}${hullHeader}${hullSvg}${modulesSvg}`
