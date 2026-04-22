@@ -20,6 +20,10 @@ export type { ItemPageMeta, ItemPageMetaOptions } from './meta.ts'
 export { tokens } from './tokens/index.ts'
 export type { Tokens, CategoryColorKey, TierColorKey } from './tokens/colors.ts'
 
+// Category icon primitive
+export { categoryIconSvg, categoryIconPath } from './primitives/category-icon.ts'
+export type { CategoryIconPathOpts, CategoryIconSvgOpts } from './primitives/category-icon.ts'
+
 // Re-exports from sdkv2 so consumers only need one import boundary
 export {
   resolveItem,
@@ -30,3 +34,4 @@ export {
   type ResolvedModuleSlot,
   type ResolvedAttributeGroup,
 } from '@shipload/sdk'
+export type { CategoryIconShape } from '@shipload/sdk'
