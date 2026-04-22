@@ -16,7 +16,7 @@ test('linkToItemPage accepts a custom base URL', () => {
 
 test('linkToItemImage builds a PNG URL', () => {
   const url = linkToItemImage(FIXTURES.iron, 'png')
-  expect(url).toMatch(/^https:\/\/img\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
+  expect(url).toMatch(/^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
 })
 
 test('linkToItemImage builds an SVG URL', () => {
@@ -30,5 +30,5 @@ test('itemPageMeta produces title, description, and ogImage', () => {
   const meta = itemPageMeta(item, resolved)
   expect(meta.title).toContain('Iron')
   expect(meta.description.length).toBeGreaterThan(0)
-  expect(meta.ogImage).toMatch(/^https:\/\/img\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
+  expect(meta.ogImage).toMatch(/^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
 })
