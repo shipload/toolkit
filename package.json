@@ -8,8 +8,6 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --env production",
     "fonts:sync": "bun run scripts/sync-fonts.ts",
-    "predeploy": "bun run fonts:sync",
-    "pretest": "bun run fonts:sync",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

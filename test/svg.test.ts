@@ -15,7 +15,7 @@ function ironPayload(): string {
 
 describe('GET /item/<payload>.svg', () => {
   it('returns an SVG with immutable cache headers', async () => {
-    const res = await SELF.fetch(`https://img.shiploadgame.com/item/${ironPayload()}.svg`)
+    const res = await SELF.fetch(`https://item.shiploadgame.com/item/${ironPayload()}.svg`)
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('image/svg+xml')
     expect(res.headers.get('cache-control')).toContain('immutable')
@@ -26,12 +26,12 @@ describe('GET /item/<payload>.svg', () => {
   })
 
   it('returns 400 for malformed payload', async () => {
-    const res = await SELF.fetch('https://img.shiploadgame.com/item/!!!not-valid!!!.svg')
+    const res = await SELF.fetch('https://item.shiploadgame.com/item/!!!not-valid!!!.svg')
     expect(res.status).toBe(400)
   })
 
   it('returns 404 for unknown paths', async () => {
-    const res = await SELF.fetch('https://img.shiploadgame.com/nope')
+    const res = await SELF.fetch('https://item.shiploadgame.com/nope')
     expect(res.status).toBe(404)
   })
 })

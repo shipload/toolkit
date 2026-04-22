@@ -17,7 +17,7 @@ const PNG_MAGIC = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])
 
 describe('GET /item/<payload>.png', () => {
   it('returns a PNG with immutable cache headers', async () => {
-    const res = await SELF.fetch(`https://img.shiploadgame.com/item/${ironPayload()}.png`)
+    const res = await SELF.fetch(`https://item.shiploadgame.com/item/${ironPayload()}.png`)
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('image/png')
     expect(res.headers.get('cache-control')).toContain('immutable')
@@ -29,7 +29,7 @@ describe('GET /item/<payload>.png', () => {
   })
 
   it('returns 400 for malformed payload', async () => {
-    const res = await SELF.fetch('https://img.shiploadgame.com/item/!!!not-valid!!!.png')
+    const res = await SELF.fetch('https://item.shiploadgame.com/item/!!!not-valid!!!.png')
     expect(res.status).toBe(400)
   })
 })

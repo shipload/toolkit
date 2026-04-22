@@ -14,5 +14,5 @@ elliptic = "./src/shims/elliptic-empty.cjs"
 
 [env.production]
 routes = [
-  { pattern = "img.shiploadgame.com/*", zone_name = "shiploadgame.com" }
+  { pattern = "item.shiploadgame.com/*", zone_name = "shiploadgame.com" }
 ]

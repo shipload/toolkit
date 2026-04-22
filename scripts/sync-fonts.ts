@@ -1,11 +1,14 @@
 #!/usr/bin/env bun
 import { readdirSync, copyFileSync, statSync, mkdirSync, existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const workerRoot = resolve(scriptDir, '..')
-const rendererFontsDir = resolve(workerRoot, '../item-renderer/src/fonts')
+const require = createRequire(import.meta.url)
+const rendererRoot = dirname(require.resolve('@shipload/item-renderer/package.json'))
+const rendererFontsDir = resolve(rendererRoot, 'src/fonts')
 const workerAssetsDir = resolve(workerRoot, 'src/assets')
 
 if (!existsSync(rendererFontsDir)) {
