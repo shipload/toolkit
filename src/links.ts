@@ -2,7 +2,7 @@ import type { CargoItem } from './payload/codec.ts'
 import { encodePayload } from './payload/codec.ts'
 
 const DEFAULT_WEBSITE_BASE = 'https://shiploadgame.com'
-const DEFAULT_IMAGE_BASE = 'https://img.shiploadgame.com'
+const DEFAULT_IMAGE_BASE = 'https://item.shiploadgame.com'
 
 export function linkToItemPage(item: CargoItem, baseUrl = DEFAULT_WEBSITE_BASE): string {
   const payload = encodePayload(item)
