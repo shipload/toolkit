@@ -62,3 +62,18 @@ test('square shape produces a <rect> element', () => {
   expect(path).toContain('x="30"')
   expect(path).toContain('y="30"')
 })
+
+test('strokeWidth renders outline mode: fill=none, stroke=color', () => {
+  for (const shape of ['hex', 'diamond', 'star', 'circle', 'square'] as const) {
+    const path = categoryIconPath({ shape, cx: 50, cy: 50, size: 40, color: '#ff0000', strokeWidth: 2 })
+    expect(path).toContain('fill="none"')
+    expect(path).toContain('stroke="#ff0000"')
+    expect(path).toContain('stroke-width="2"')
+  }
+})
+
+test('fill mode (no strokeWidth) does not produce stroke attributes', () => {
+  const path = categoryIconPath({ shape: 'hex', cx: 50, cy: 50, size: 40, color: '#ff0000' })
+  expect(path).toContain('fill="#ff0000"')
+  expect(path).not.toContain('stroke=')
+})

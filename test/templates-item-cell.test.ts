@@ -7,7 +7,7 @@ test('renderItemCell returns a self-contained <svg>', () => {
   const resolved = resolveItem(ITEM_HULL_PLATES)
   const svg = renderItemCell({ resolved, size: 48 })
   expect(svg.startsWith('<svg ')).toBe(true)
-  expect(svg).toContain('viewBox="0 0 48 48"')
+  expect(svg).toContain('viewBox="0 0 48 60"')
   expect(svg.endsWith('</svg>')).toBe(true)
 })
 
@@ -36,18 +36,19 @@ test('resource cell renders category icon (no abbreviation)', () => {
   expect(svg).toMatch(/<(polygon|circle|rect)\b/)
 })
 
-test('quantity badge appears when quantity > 1', () => {
+test('quantity renders as plain bold number when quantity > 1', () => {
   const resolved = resolveItem(ITEM_HULL_PLATES)
   const svg = renderItemCell({ resolved, quantity: 42, size: 48 })
-  expect(svg).toContain('×42')
+  expect(svg).toContain('>42<')
+  expect(svg).not.toContain('×')
 })
 
-test('no quantity badge when quantity is 1 or omitted', () => {
+test('no quantity text when quantity is 1 or omitted', () => {
   const resolved = resolveItem(ITEM_HULL_PLATES)
   const svgNoQty = renderItemCell({ resolved, size: 48 })
   const svgOne = renderItemCell({ resolved, quantity: 1, size: 48 })
-  expect(svgNoQty).not.toContain('×')
-  expect(svgOne).not.toContain('×')
+  expect(svgNoQty).not.toContain('>1<')
+  expect(svgOne).not.toContain('>1<')
 })
 
 test('itemCellGroup returns <g> with translate, no <svg> wrapper', () => {
@@ -68,8 +69,15 @@ test('abbreviation cell uses proportional font size for different sizes', () => 
   const resolved = resolveItem(ITEM_HULL_PLATES)
   const svg28 = renderItemCell({ resolved, size: 28 })
   const svg80 = renderItemCell({ resolved, size: 80 })
-  expect(svg28).toContain('font-size="10"')
-  expect(svg80).toContain('font-size="29"')
+  expect(svg28).toContain('font-size="8"')
+  expect(svg80).toContain('font-size="22"')
+})
+
+test('resource icon renders in stroke-only mode', () => {
+  const resolved = resolveItem(26)
+  const svg = renderItemCell({ resolved, size: 48 })
+  expect(svg).toContain('fill="none"')
+  expect(svg).toContain('stroke-width="1.5"')
 })
 
 test('matches golden SVG snapshot per itemType', () => {

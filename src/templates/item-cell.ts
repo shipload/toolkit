@@ -3,7 +3,6 @@ import { tierColors, categoryColors, categoryIconShapes } from '@shipload/sdk'
 import { el } from '../primitives/svg.ts'
 import { text } from '../primitives/text.ts'
 import { categoryIconPath } from '../primitives/category-icon.ts'
-import { quantityBadge } from '../primitives/quantity-badge.ts'
 import { tokens } from '../tokens/index.ts'
 
 export interface ItemCellProps {
@@ -19,15 +18,15 @@ export interface ItemCellGroupProps extends ItemCellProps {
 
 function cellInner(props: ItemCellProps): string {
   const size = props.size ?? 48
+  const height = Math.round(size * 1.25)
   const r = Math.max(4, Math.round(size * 0.12))
   const cx = size / 2
-  const cy = size / 2
 
   const border = el('rect', {
     x: 0.5,
     y: 0.5,
     width: size - 1,
-    height: size - 1,
+    height: height - 1,
     rx: r,
     ry: r,
     fill: tokens.colors.surface.panel,
@@ -37,11 +36,12 @@ function cellInner(props: ItemCellProps): string {
 
   let content = ''
   if (props.resolved.abbreviation) {
+    const iconCy = size * 0.45
     content = text({
       x: cx,
-      y: cy + size * 0.12,
+      y: iconCy,
       value: props.resolved.abbreviation,
-      size: Math.round(size * 0.36),
+      size: Math.round(size * 0.28),
       weight: 700,
       anchor: 'middle',
       color: tokens.colors.text.primary,
@@ -50,13 +50,26 @@ function cellInner(props: ItemCellProps): string {
   } else if (props.resolved.category) {
     const shape = categoryIconShapes[props.resolved.category]
     const color = categoryColors[props.resolved.category]
-    content = categoryIconPath({ shape, cx, cy, size: size * 0.55, color })
+    const iconCy = size * 0.4
+    content = categoryIconPath({ shape, cx, cy: iconCy, size: size * 0.32, color, strokeWidth: 1.5 })
   }
 
-  const badgeY = size - tokens.spacing.quantityBadgeHeight - 2
-  const badge = quantityBadge({ x: size, y: badgeY, quantity: props.quantity ?? 0 })
+  const qty = props.quantity ?? 0
+  let quantityText = ''
+  if (qty > 1) {
+    quantityText = text({
+      x: size - Math.round(size * 0.12),
+      y: height - Math.round(size * 0.12),
+      value: String(qty),
+      size: Math.round(size * 0.22),
+      weight: 700,
+      anchor: 'end',
+      color: tokens.colors.text.primary,
+      family: tokens.typography.display,
+    })
+  }
 
-  return border + content + badge
+  return border + content + quantityText
 }
 
 export function itemCellGroup(props: ItemCellGroupProps): string {
@@ -65,5 +78,6 @@ export function itemCellGroup(props: ItemCellGroupProps): string {
 
 export function renderItemCell(props: ItemCellProps): string {
   const size = props.size ?? 48
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${cellInner(props)}</svg>`
+  const height = Math.round(size * 1.25)
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 ${size} ${height}">${cellInner(props)}</svg>`
 }

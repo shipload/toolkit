@@ -7,6 +7,7 @@ export interface CategoryIconPathOpts {
   cy: number
   size: number
   color: string
+  strokeWidth?: number
 }
 
 export interface CategoryIconSvgOpts {
@@ -43,19 +44,23 @@ function starPoints(cx: number, cy: number, r: number): string {
   return pts.join(' ')
 }
 
-export function categoryIconPath({ shape, cx, cy, size, color }: CategoryIconPathOpts): string {
+export function categoryIconPath({ shape, cx, cy, size, color, strokeWidth }: CategoryIconPathOpts): string {
   const r = size / 2
+  const stroked = strokeWidth && strokeWidth > 0
+  const shapeAttrs = stroked
+    ? { fill: 'none', stroke: color, 'stroke-width': strokeWidth, 'stroke-linejoin': 'round' as const }
+    : { fill: color }
   switch (shape) {
     case 'hex':
-      return el('polygon', { points: hexPoints(cx, cy, r), fill: color })
+      return el('polygon', { points: hexPoints(cx, cy, r), ...shapeAttrs })
     case 'diamond':
-      return el('polygon', { points: diamondPoints(cx, cy, r), fill: color })
+      return el('polygon', { points: diamondPoints(cx, cy, r), ...shapeAttrs })
     case 'star':
-      return el('polygon', { points: starPoints(cx, cy, r), fill: color })
+      return el('polygon', { points: starPoints(cx, cy, r), ...shapeAttrs })
     case 'circle':
-      return el('circle', { cx, cy, r, fill: color })
+      return el('circle', { cx, cy, r, ...shapeAttrs })
     case 'square':
-      return el('rect', { x: cx - r, y: cy - r, width: size, height: size, fill: color })
+      return el('rect', { x: cx - r, y: cy - r, width: size, height: size, ...shapeAttrs })
   }
   const _exhaustive: never = shape
   throw new Error(`Unknown CategoryIconShape: ${String(_exhaustive)}`)
