@@ -1,3 +1,5 @@
+import { tierColors } from '@shipload/sdk'
+
 export const colors = {
   surface: {
     background: '#0a0a0c',
@@ -23,13 +25,7 @@ export const colors = {
     organic: '#58d08c',
     precious: '#f4c96b',
   },
-  tier: {
-    t1: '#8f98a8',
-    t2: '#6cb9ff',
-    t3: '#b38aff',
-    t4: '#f4c96b',
-    t5: '#ff4f9a',
-  },
+  tier: tierColors,
   accent: {
     component: '#8f98a8',
   },
