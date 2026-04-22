@@ -1,7 +1,7 @@
 import type { ResolvedItem } from '@shipload/sdk'
 import type { CargoItem } from './payload/codec.ts'
 import { linkToItemImage } from './links.ts'
-import { renderItem } from './render.ts'
+import { SOCIAL_CARD_WIDTH, SOCIAL_CARD_HEIGHT } from './templates/social-card.ts'
 
 function tierLabel(tier: string): string {
   return tier.toUpperCase()
@@ -38,7 +38,6 @@ export interface ItemPageMeta {
 
 export interface ItemPageMetaOptions {
   imageBaseUrl?: string
-  svg?: string
 }
 
 export function itemPageMeta(
@@ -46,13 +45,11 @@ export function itemPageMeta(
   resolved: ResolvedItem,
   opts?: ItemPageMetaOptions,
 ): ItemPageMeta {
-  const svg = opts?.svg ?? renderItem(item, resolved)
-  const { width, height } = svgDimensions(svg)
   return {
     title: `${resolved.name} · Shipload Guide`,
     description: describeItem(resolved),
     ogImage: linkToItemImage(item, 'png', opts?.imageBaseUrl),
-    ogImageWidth: width,
-    ogImageHeight: height,
+    ogImageWidth: SOCIAL_CARD_WIDTH,
+    ogImageHeight: SOCIAL_CARD_HEIGHT,
   }
 }

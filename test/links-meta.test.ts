@@ -31,4 +31,6 @@ test('itemPageMeta produces title, description, and ogImage', () => {
   expect(meta.title).toContain('Iron')
   expect(meta.description.length).toBeGreaterThan(0)
   expect(meta.ogImage).toMatch(/^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
+  expect(meta.ogImageWidth).toBe(1200)
+  expect(meta.ogImageHeight).toBe(630)
 })

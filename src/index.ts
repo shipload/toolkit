@@ -30,6 +30,13 @@ export type { CategoryIconPathOpts, CategoryIconSvgOpts } from './primitives/cat
 export { renderItemCell, itemCellGroup } from './templates/item-cell.ts'
 export type { ItemCellProps, ItemCellGroupProps } from './templates/item-cell.ts'
 
+// Social card template (1200x630 OG image)
+export {
+  socialCardSvg,
+  SOCIAL_CARD_WIDTH,
+  SOCIAL_CARD_HEIGHT,
+} from './templates/social-card.ts'
+
 // Ship panel template
 export { renderShipPanel } from './templates/ship-panel.ts'
 export type { ShipPanelProps, ShipPanelSlot } from './templates/ship-panel.ts'
