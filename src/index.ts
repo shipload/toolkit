@@ -10,6 +10,7 @@ export type { CargoItem, CargoItemLike } from './payload/codec.ts'
 
 // Rendering
 export { renderItem, renderFromPayload, type RenderOptions } from './render.ts'
+export { renderByType, type RenderByTypeOpts } from './templates/index.ts'
 
 // Links + meta
 export { linkToItemPage, linkToItemImage } from './links.ts'
