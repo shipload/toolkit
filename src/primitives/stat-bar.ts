@@ -8,7 +8,7 @@ export interface StatBarProps {
   width: number
   label: string
   abbreviation: string
-  value: number // 0..1023
+  value: number | null // 0..1023, or null for ranges mode (no value text, no fill)
   color: string
   inverted?: boolean
 }
@@ -24,11 +24,8 @@ export function statBar({
   inverted,
 }: StatBarProps): string {
   const h = tokens.spacing.statBarHeight
-  const clamped = Math.max(0, Math.min(1023, value))
-  const displayFraction = inverted ? 1 - clamped / 1023 : clamped / 1023
-  const filled = Math.floor(width * displayFraction)
 
-  const labelOut =
+  let labelOut =
     text({
       x,
       y: y - 6,
@@ -45,15 +42,6 @@ export function statBar({
       size: tokens.typography.sizes.stat,
       weight: 400,
       color: tokens.colors.text.primary,
-    }) +
-    text({
-      x: x + width,
-      y: y - 6,
-      value: String(clamped),
-      size: tokens.typography.sizes.statValue,
-      weight: 700,
-      color,
-      anchor: 'end',
     })
 
   const track = el('rect', {
@@ -65,14 +53,33 @@ export function statBar({
     ry: h / 2,
     fill: tokens.colors.surface.panelBorder,
   })
-  const bar = el('rect', {
-    x,
-    y,
-    width: filled,
-    height: h,
-    rx: h / 2,
-    ry: h / 2,
-    fill: color,
-  })
-  return labelOut + track + bar
+
+  if (value !== null) {
+    const clamped = Math.max(0, Math.min(1023, value))
+    const displayFraction = inverted ? 1 - clamped / 1023 : clamped / 1023
+    const filled = Math.floor(width * displayFraction)
+
+    labelOut += text({
+      x: x + width,
+      y: y - 6,
+      value: String(clamped),
+      size: tokens.typography.sizes.statValue,
+      weight: 700,
+      color,
+      anchor: 'end',
+    })
+
+    const bar = el('rect', {
+      x,
+      y,
+      width: filled,
+      height: h,
+      rx: h / 2,
+      ry: h / 2,
+      fill: color,
+    })
+    return labelOut + track + bar
+  }
+
+  return labelOut + track
 }

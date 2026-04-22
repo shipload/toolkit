@@ -1,4 +1,5 @@
 import type { ResolvedItem } from '@shipload/sdk'
+import { getStatDefinitions, categoryColors } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -23,20 +24,54 @@ function categoryColor(category?: string): string {
   return tokens.colors.category[key] ?? tokens.colors.text.muted
 }
 
-function shortCode(itemId: number): string {
-  const str = itemId.toString(10)
-  return str.slice(-2).padStart(2, '0')
+export interface RenderResourceOpts {
+  mode?: 'values' | 'ranges'
 }
 
-export function renderResource(item: CargoItem, resolved: ResolvedItem): string {
+type StatRow = {
+  label: string
+  abbreviation: string
+  value: number | null
+  color: string
+  inverted?: boolean
+}
+
+export function renderResource(
+  item: CargoItem,
+  resolved: ResolvedItem,
+  opts?: RenderResourceOpts,
+): string {
+  const mode = opts?.mode ?? 'values'
   const w = tokens.spacing.panelWidth
   const pad = tokens.spacing.panelPadding
   const innerW = w - pad * 2
 
-  const stats = resolved.stats ?? []
+  let rows: StatRow[]
+  if (mode === 'values') {
+    rows = (resolved.stats ?? []).map(s => ({
+      label: s.label,
+      abbreviation: s.abbreviation,
+      value: s.value,
+      color: s.color,
+      inverted: s.inverted,
+    }))
+  } else {
+    const defs = resolved.category ? getStatDefinitions(resolved.category) : []
+    const color = resolved.category
+      ? categoryColors[resolved.category]
+      : tokens.colors.text.muted
+    rows = defs.map(d => ({
+      label: d.label,
+      abbreviation: d.abbreviation,
+      value: null,
+      color,
+      inverted: d.inverted,
+    }))
+  }
+
   const headerH = 48
   const metaRowH = 28
-  const statsH = stats.length * 26 + 8
+  const statsH = rows.length * 26 + 8
   const height = headerH + metaRowH + 14 + statsH + pad
 
   const chrome = panel({ width: w, height, borderColor: tierBorder(resolved.tier) })
@@ -95,17 +130,17 @@ export function renderResource(item: CargoItem, resolved: ResolvedItem): string 
   const sepY = pad + headerH + metaRowH + 6
   const sep = divider({ x: pad, y: sepY, width: innerW })
 
-  const statsSvg = stats
-    .map((stat, i) =>
+  const statsSvg = rows
+    .map((row, i) =>
       statBar({
         x: pad,
         y: sepY + 18 + i * 26,
         width: innerW,
-        label: stat.label,
-        abbreviation: stat.abbreviation,
-        value: stat.value,
-        color: stat.color,
-        inverted: stat.inverted,
+        label: row.label,
+        abbreviation: row.abbreviation,
+        value: row.value,
+        color: row.color,
+        inverted: row.inverted,
       }),
     )
     .join('')
