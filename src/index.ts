@@ -28,6 +28,10 @@ export type { CategoryIconPathOpts, CategoryIconSvgOpts } from './primitives/cat
 export { renderItemCell, itemCellGroup } from './templates/item-cell.ts'
 export type { ItemCellProps, ItemCellGroupProps } from './templates/item-cell.ts'
 
+// Ship panel template
+export { renderShipPanel } from './templates/ship-panel.ts'
+export type { ShipPanelProps, ShipPanelSlot } from './templates/ship-panel.ts'
+
 // Re-exports from sdkv2 so consumers only need one import boundary
 export {
   resolveItem,
