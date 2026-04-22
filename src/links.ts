@@ -17,3 +17,8 @@ export function linkToItemImage(
   const payload = encodePayload(item)
   return `${baseUrl}/item/${payload}.${ext}`
 }
+
+export function linkToItemSocial(item: CargoItem, baseUrl = DEFAULT_IMAGE_BASE): string {
+  const payload = encodePayload(item)
+  return `${baseUrl}/social/${payload}.png`
+}

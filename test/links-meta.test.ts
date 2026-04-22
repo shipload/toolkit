@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { resolveItem } from '@shipload/sdk'
-import { linkToItemImage, linkToItemPage } from '../src/links.ts'
+import { linkToItemImage, linkToItemPage, linkToItemSocial } from '../src/links.ts'
 import { itemPageMeta } from '../src/meta.ts'
 import { FIXTURES } from './fixtures/cargo-items.ts'
 
@@ -24,13 +24,18 @@ test('linkToItemImage builds an SVG URL', () => {
   expect(url).toMatch(/\.svg$/)
 })
 
-test('itemPageMeta produces title, description, and ogImage', () => {
+test('linkToItemSocial builds a social card URL', () => {
+  const url = linkToItemSocial(FIXTURES.iron)
+  expect(url).toMatch(/^https:\/\/item\.shiploadgame\.com\/social\/[A-Za-z0-9_-]+\.png$/)
+})
+
+test('itemPageMeta produces title, description, and ogImage (social card)', () => {
   const item = FIXTURES.iron
   const resolved = resolveItem(item.item_id, item.stats, item.modules)
   const meta = itemPageMeta(item, resolved)
   expect(meta.title).toContain('Iron')
   expect(meta.description.length).toBeGreaterThan(0)
-  expect(meta.ogImage).toMatch(/^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
+  expect(meta.ogImage).toMatch(/^https:\/\/item\.shiploadgame\.com\/social\/[A-Za-z0-9_-]+\.png$/)
   expect(meta.ogImageWidth).toBe(1200)
   expect(meta.ogImageHeight).toBe(630)
 })

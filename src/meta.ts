@@ -1,6 +1,6 @@
 import type { ResolvedItem } from '@shipload/sdk'
 import type { CargoItem } from './payload/codec.ts'
-import { linkToItemImage } from './links.ts'
+import { linkToItemSocial } from './links.ts'
 import { SOCIAL_CARD_WIDTH, SOCIAL_CARD_HEIGHT } from './templates/social-card.ts'
 
 function tierLabel(tier: string): string {
@@ -48,7 +48,7 @@ export function itemPageMeta(
   return {
     title: `${resolved.name} · Shipload Guide`,
     description: describeItem(resolved),
-    ogImage: linkToItemImage(item, 'png', opts?.imageBaseUrl),
+    ogImage: linkToItemSocial(item, opts?.imageBaseUrl),
     ogImageWidth: SOCIAL_CARD_WIDTH,
     ogImageHeight: SOCIAL_CARD_HEIGHT,
   }

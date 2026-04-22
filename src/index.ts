@@ -13,7 +13,7 @@ export { renderItem, renderFromPayload, type RenderOptions } from './render.ts'
 export { renderByType, type RenderByTypeOpts } from './templates/index.ts'
 
 // Links + meta
-export { linkToItemPage, linkToItemImage } from './links.ts'
+export { linkToItemPage, linkToItemImage, linkToItemSocial } from './links.ts'
 export { itemPageMeta, svgDimensions } from './meta.ts'
 export type { ItemPageMeta, ItemPageMetaOptions } from './meta.ts'
 
