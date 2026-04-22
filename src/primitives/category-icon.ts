@@ -57,6 +57,8 @@ export function categoryIconPath({ shape, cx, cy, size, color }: CategoryIconPat
     case 'square':
       return el('rect', { x: cx - r, y: cy - r, width: size, height: size, fill: color })
   }
+  const _exhaustive: never = shape
+  throw new Error(`Unknown CategoryIconShape: ${String(_exhaustive)}`)
 }
 
 export function categoryIconSvg(shape: CategoryIconShape, opts: CategoryIconSvgOpts = {}): string {
