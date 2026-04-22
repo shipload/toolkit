@@ -13,6 +13,7 @@ export interface ContainerStateInput {
     hullmass: number
     capacity: number
     cargomass?: number
+    cargo?: ServerContract.Types.cargo_item[]
     schedule?: ServerContract.Types.schedule
 }
 

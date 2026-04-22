@@ -4,7 +4,7 @@ import {makeContainer, ServerContract} from '$lib'
 
 function makeStationaryContainer() {
     return makeContainer({
-        id: 1,
+        id: UInt64.from(1),
         owner: 'teamgreymass',
         name: 'Test Container',
         coordinates: {x: 5, y: 10, z: 1000},
@@ -15,7 +15,7 @@ function makeStationaryContainer() {
 
 function makeContainerWithCargo() {
     return makeContainer({
-        id: 2,
+        id: UInt64.from(2),
         owner: 'teamgreymass',
         name: 'Loaded Container',
         coordinates: {x: 5, y: 10, z: 1000},
@@ -27,7 +27,7 @@ function makeContainerWithCargo() {
 
 function makeContainerWithSchedule() {
     return makeContainer({
-        id: 3,
+        id: UInt64.from(3),
         owner: 'teamgreymass',
         name: 'Container With Schedule',
         coordinates: {x: 0, y: 0, z: 1200},
@@ -104,7 +104,7 @@ suite('Container', function () {
 
         test('returns 0 when z is undefined', function () {
             const container = makeContainer({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'teamgreymass',
                 name: 'Test Container',
                 coordinates: {x: 5, y: 10},
@@ -166,7 +166,7 @@ suite('Container', function () {
 
         test('returns true when at capacity', function () {
             const container = makeContainer({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'teamgreymass',
                 name: 'Full Container',
                 coordinates: {x: 5, y: 10},

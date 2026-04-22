@@ -1,6 +1,16 @@
 import {assert} from 'chai'
 import {AnyInt, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
-import {Coordinates, Item, makeShip, ServerContract, TaskType} from '$lib'
+import {
+    Coordinates,
+    encodeStats,
+    Item,
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
+    makeShip,
+    ServerContract,
+    TaskType,
+} from '$lib'
 import {getItem, registerItem} from 'src/items'
 
 function ensureTestItem(itemId: number, mass?: number): void {
@@ -61,27 +71,20 @@ export function makeShipFixture(
         })
     })
 
+    const seed = encodeStats([500, 500, 500, 500])
     return makeShip({
-        id: 1,
+        id: UInt64.from(1),
         owner: 'teamgreymass',
         name: 'Test Ship',
         coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
         hullmass: overrides.hullmass ?? 1000,
         capacity: overrides.capacity ?? 1000000,
         energy: overrides.energy ?? 1000,
-        engines: ServerContract.Types.movement_stats.from({
-            thrust: 100000,
-            drain: 250,
-        }),
-        generator: ServerContract.Types.energy_stats.from({
-            capacity: 5000,
-            recharge: 100,
-        }),
-        loaders: ServerContract.Types.loader_stats.from({
-            mass: 100000,
-            quantity: 1,
-            thrust: 100,
-        }),
+        modules: [
+            {itemId: ITEM_ENGINE_T1, stats: seed},
+            {itemId: ITEM_GENERATOR_T1, stats: seed},
+            {itemId: ITEM_LOADER_T1, stats: seed},
+        ],
         cargo: cargoItems,
     })
 }

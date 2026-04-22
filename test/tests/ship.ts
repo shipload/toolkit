@@ -1,28 +1,24 @@
 import {assert} from 'chai'
 import {Int64, UInt32, UInt64} from '@wharfkit/antelope'
 
-import {Coordinates, makeShip, ServerContract} from '$lib'
+import {
+    Coordinates,
+    encodeStats,
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
+    makeShip,
+    ServerContract,
+} from '$lib'
 
-function createMockEngines() {
-    return ServerContract.Types.movement_stats.from({
-        thrust: 100000,
-        drain: 250,
-    })
-}
+const seed = encodeStats([500, 500, 500, 500])
 
-function createMockGenerator() {
-    return ServerContract.Types.energy_stats.from({
-        capacity: 5000,
-        recharge: 100,
-    })
-}
-
-function createMockLoaders() {
-    return ServerContract.Types.loader_stats.from({
-        mass: 100000,
-        quantity: 1,
-        thrust: 100,
-    })
+function mockModules() {
+    return [
+        {itemId: ITEM_ENGINE_T1, stats: seed},
+        {itemId: ITEM_GENERATOR_T1, stats: seed},
+        {itemId: ITEM_LOADER_T1, stats: seed},
+    ]
 }
 
 function createCargoItem(goodId: number, quantity: number) {
@@ -42,32 +38,28 @@ interface ShipOverrides {
 
 function makeStationaryShip(overrides: ShipOverrides = {}) {
     return makeShip({
-        id: 2,
+        id: UInt64.from(2),
         owner: 'teamgreymass',
         name: 'Stationary Ship',
         coordinates: Coordinates.from({x: Int64.from(5), y: Int64.from(10)}),
         hullmass: 500000,
         capacity: overrides.capacity ?? 1000000000,
         energy: overrides.energy ?? 5000,
-        engines: createMockEngines(),
-        generator: createMockGenerator(),
-        loaders: createMockLoaders(),
+        modules: mockModules(),
         cargo: overrides.cargo ?? [],
     })
 }
 
 function makeShipWithSchedule() {
     return makeShip({
-        id: 3,
+        id: UInt64.from(3),
         owner: 'teamgreymass',
         name: 'Ship With Schedule',
         coordinates: Coordinates.from({x: Int64.from(0), y: Int64.from(0)}),
         hullmass: 500000,
         capacity: 1000000000,
         energy: 5000,
-        engines: createMockEngines(),
-        generator: createMockGenerator(),
-        loaders: createMockLoaders(),
+        modules: mockModules(),
         cargo: [],
         schedule: ServerContract.Types.schedule.from({
             started: '2024-06-04T23:41:09.000',
@@ -88,8 +80,9 @@ suite('Ship', function () {
     suite('maxDistance', function () {
         test('calculates max distance from capacity/drain', function () {
             const ship = makeStationaryShip()
-            assert.isTrue(ship.maxDistance.equals(200000))
-            assert.equal(Number(ship.maxDistance), 200000)
+            // seed [500,500,500,500] → gen.capacity=383, eng.drain=43 → floor(383/43)*10000 = 80000
+            assert.isTrue(ship.maxDistance.equals(80000))
+            assert.equal(Number(ship.maxDistance), 80000)
         })
     })
 
@@ -227,7 +220,8 @@ suite('Ship', function () {
         })
 
         test('returns 0 when full', function () {
-            const ship = makeStationaryShip({capacity: 600000})
+            // hullmass=500_000 + loader mass 1000*1 = 501_000 → capacity=501_000 is full
+            const ship = makeStationaryShip({capacity: 501000})
             assert.isTrue(ship.availableCapacity.equals(UInt64.from(0)))
         })
     })
@@ -247,26 +241,30 @@ suite('Ship', function () {
         })
 
         test('returns true when at max mass', function () {
-            const ship = makeStationaryShip({capacity: 600000})
+            // hullmass=500_000 + loader mass 1000*1 = 501_000 → capacity=501_000 is full
+            const ship = makeStationaryShip({capacity: 501000})
             assert.isTrue(ship.isFull)
         })
     })
 
     suite('energyPercent', function () {
         test('calculates energy percentage', function () {
-            const ship = makeStationaryShip()
+            // energy=383 matches gen.capacity=383 for seed [500,500,500,500] → 100%
+            const ship = makeStationaryShip({energy: 383})
             assert.equal(ship.energyPercent, 100)
         })
     })
 
     suite('needsRecharge', function () {
         test('returns false when fully charged', function () {
+            // energy=5000 > gen.capacity=383 → fully charged
             const ship = makeStationaryShip()
             assert.isFalse(ship.needsRecharge)
         })
 
         test('returns true when not fully charged', function () {
-            const ship = makeStationaryShip({energy: 1000})
+            // energy=100 < gen.capacity=383 → needs recharge
+            const ship = makeStationaryShip({energy: 100})
             assert.isTrue(ship.needsRecharge)
         })
     })

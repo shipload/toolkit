@@ -10,6 +10,7 @@ import {
     MODULE_ENGINE,
     MODULE_GATHERER,
     MODULE_GENERATOR,
+    MODULE_HAULER,
     MODULE_LOADER,
     MODULE_STORAGE,
 } from '../capabilities/modules'
@@ -19,12 +20,19 @@ import {
     computeEngineCapabilities,
     computeGathererCapabilities,
     computeGeneratorCapabilities,
+    computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeManufacturingCapabilities,
     computeShipHullCapabilities,
 } from '../entities/ship-deploy'
 import {computeContainerCapabilities} from '../entities/container'
-import {categoryColors, categoryIcons, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
+import {
+    categoryColors,
+    categoryIcons,
+    componentIcon,
+    itemAbbreviations,
+    moduleIcon,
+} from '../data/colors'
 import {ServerContract} from '../contracts'
 
 export interface ResolvedItemStat {
@@ -194,6 +202,17 @@ function computeCapabilityGroup(
                 capability: 'Manufacturing',
                 attributes: [
                     {label: 'Speed', value: caps.speed},
+                    {label: 'Drain', value: caps.drain},
+                ],
+            }
+        }
+        case MODULE_HAULER: {
+            const caps = computeHaulerCapabilities(stats)
+            return {
+                capability: 'Hauler',
+                attributes: [
+                    {label: 'Capacity', value: caps.capacity},
+                    {label: 'Efficiency', value: caps.efficiency},
                     {label: 'Drain', value: caps.drain},
                 ],
             }

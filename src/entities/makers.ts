@@ -1,8 +1,86 @@
-import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Ship, ShipStateInput} from './ship'
-import {Warehouse, WarehouseStateInput} from './warehouse'
+import {PackedModuleInput, Ship, ShipStateInput} from './ship'
+import {computeWarehouseCapabilities, Warehouse, WarehouseStateInput} from './warehouse'
 import {Container, ContainerStateInput} from './container'
+import {
+    getEntitySlotLayout,
+    getModuleRecipeByItemId,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+} from '../data/recipes'
+import {getModuleCapabilityType, MODULE_STORAGE, moduleAccepts} from '../capabilities/modules'
+import {computeShipCapabilities, computeStorageCapabilities} from './ship-deploy'
+import {decodeCraftedItemStats} from '../derivation/crafting'
+
+function assignModulesToSlots(
+    packedEntityItemId: number,
+    modules: PackedModuleInput[],
+    entityLabel: string
+): ServerContract.Types.module_entry[] {
+    const slots = getEntitySlotLayout(packedEntityItemId)
+    const result: Array<{type: number; installed?: ServerContract.Types.packed_module}> = slots.map(
+        (s) => ({type: s.type, installed: undefined})
+    )
+
+    for (const mod of modules) {
+        const itemId = Number(UInt16.from(mod.itemId).value.toString())
+        const modType = getModuleCapabilityType(itemId)
+        const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType))
+        if (slotIdx === -1) {
+            const recipe = getModuleRecipeByItemId(itemId)
+            const modName = recipe?.name ?? `item ${itemId}`
+            throw new Error(
+                `No compatible slot for module ${modName} (type ${modType}) on ${entityLabel}`
+            )
+        }
+        result[slotIdx].installed = ServerContract.Types.packed_module.from({
+            item_id: UInt16.from(mod.itemId),
+            stats: UInt64.from(mod.stats),
+        })
+    }
+
+    return result.map((r) =>
+        ServerContract.Types.module_entry.from({
+            type: UInt8.from(r.type),
+            installed: r.installed,
+        })
+    )
+}
+
+function decodePackedInput(m: PackedModuleInput): {itemId: number; stats: bigint} {
+    return {
+        itemId: Number(UInt16.from(m.itemId).value.toString()),
+        stats: BigInt(UInt64.from(m.stats).toString()),
+    }
+}
+
+function computeStorageBonus(
+    decoded: {itemId: number; stats: bigint}[],
+    baseCapacity: number
+): number {
+    let totalBonus = 0
+    for (const m of decoded) {
+        if (getModuleCapabilityType(m.itemId) !== MODULE_STORAGE) continue
+        const stats = decodeCraftedItemStats(m.itemId, m.stats)
+        const {capacityBonus} = computeStorageCapabilities(stats, baseCapacity)
+        totalBonus += capacityBonus
+    }
+    return totalBonus
+}
+
+function deriveShipFromModules(
+    modules: PackedModuleInput[],
+    baseCapacity: number
+): {
+    capabilities: ReturnType<typeof computeShipCapabilities>
+    finalCapacity: number
+} {
+    const decoded = modules.map(decodePackedInput)
+    const capabilities = computeShipCapabilities(decoded)
+    const totalBonus = computeStorageBonus(decoded, baseCapacity)
+    return {capabilities, finalCapacity: baseCapacity + totalBonus}
+}
 
 export function makeShip(state: ShipStateInput): Ship {
     const info: Record<string, unknown> = {
@@ -19,14 +97,32 @@ export function makeShip(state: ShipStateInput): Ship {
         pending_tasks: [],
     }
     if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
-    if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
     if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
-    if (state.engines) info.engines = state.engines
-    if (state.generator) info.generator = state.generator
-    if (state.loaders) info.loaders = state.loaders
     if (state.schedule) info.schedule = state.schedule
+
+    let moduleEntries: ServerContract.Types.module_entry[] = []
+    if (state.modules && state.modules.length > 0) {
+        moduleEntries = assignModulesToSlots(ITEM_SHIP_T1_PACKED, state.modules, 'Ship T1')
+        const {capabilities, finalCapacity} = deriveShipFromModules(
+            state.modules,
+            state.capacity ?? 0
+        )
+        if (capabilities.engines) info.engines = capabilities.engines
+        if (capabilities.generator) info.generator = capabilities.generator
+        if (capabilities.gatherer) info.gatherer = capabilities.gatherer
+        if (capabilities.hauler) info.hauler = capabilities.hauler
+        if (capabilities.loaders) info.loaders = capabilities.loaders
+        if (capabilities.crafter) info.crafter = capabilities.crafter
+        if (state.capacity !== undefined) info.capacity = UInt32.from(finalCapacity)
+    } else {
+        moduleEntries = assignModulesToSlots(ITEM_SHIP_T1_PACKED, [], 'Ship T1')
+        if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
+    }
+
     const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Ship(entityInfo)
+    const ship = new Ship(entityInfo)
+    ship.setModules(moduleEntries)
+    return ship
 }
 
 export function makeWarehouse(state: WarehouseStateInput): Warehouse {
@@ -45,10 +141,29 @@ export function makeWarehouse(state: WarehouseStateInput): Warehouse {
         pending_tasks: [],
     }
     if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
-    if (state.loaders) info.loaders = state.loaders
     if (state.schedule) info.schedule = state.schedule
+
+    let moduleEntries: ServerContract.Types.module_entry[] = []
+    if (state.modules && state.modules.length > 0) {
+        moduleEntries = assignModulesToSlots(
+            ITEM_WAREHOUSE_T1_PACKED,
+            state.modules,
+            'Warehouse T1'
+        )
+        const decoded = state.modules.map(decodePackedInput)
+        const capabilities = computeWarehouseCapabilities(decoded)
+        if (capabilities.loaders) info.loaders = capabilities.loaders
+
+        const totalBonus = computeStorageBonus(decoded, state.capacity)
+        info.capacity = UInt32.from(state.capacity + totalBonus)
+    } else {
+        moduleEntries = assignModulesToSlots(ITEM_WAREHOUSE_T1_PACKED, [], 'Warehouse T1')
+    }
+
     const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Warehouse(entityInfo)
+    const warehouse = new Warehouse(entityInfo)
+    warehouse.setModules(moduleEntries)
+    return warehouse
 }
 
 export function makeContainer(state: ContainerStateInput): Container {
@@ -61,7 +176,7 @@ export function makeContainer(state: ContainerStateInput): Container {
         hullmass: UInt32.from(state.hullmass),
         capacity: UInt32.from(state.capacity),
         cargomass: UInt32.from(state.cargomass || 0),
-        cargo: [],
+        cargo: state.cargo || [],
         is_idle: !state.schedule,
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),

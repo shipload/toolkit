@@ -1,5 +1,13 @@
 import {assert} from 'chai'
-import {tierLabels, categoryIconShapes, type CategoryIconShape, itemAbbreviations, ITEM_HULL_PLATES, ITEM_SHIP_T1_PACKED, ITEM_ENGINE_T1} from '../../src'
+import {
+    type CategoryIconShape,
+    categoryIconShapes,
+    ITEM_ENGINE_T1,
+    ITEM_HULL_PLATES,
+    ITEM_SHIP_T1_PACKED,
+    itemAbbreviations,
+    tierLabels,
+} from '../../src'
 
 suite('tokens', function () {
     suite('tierLabels', function () {

@@ -6,6 +6,10 @@ import {ScheduleAccessor} from '../scheduling/accessor'
 import {InventoryAccessor} from './inventory-accessor'
 import {EntityInventory} from './entity-inventory'
 import * as schedule from '../scheduling/schedule'
+import type {PackedModuleInput} from './ship'
+import {decodeCraftedItemStats} from '../derivation/crafting'
+import {getModuleCapabilityType, MODULE_LOADER} from '../capabilities/modules'
+import {computeLoaderCapabilities} from './ship-deploy'
 
 export interface WarehouseStateInput {
     id: UInt64Type
@@ -14,7 +18,7 @@ export interface WarehouseStateInput {
     coordinates: CoordinatesType | {x: number; y: number; z?: number}
     hullmass?: number
     capacity: number
-    loaders?: ServerContract.Types.loader_stats
+    modules?: PackedModuleInput[]
     schedule?: ServerContract.Types.schedule
     cargo?: ServerContract.Types.cargo_item[]
 }
@@ -22,9 +26,18 @@ export interface WarehouseStateInput {
 export class Warehouse extends ServerContract.Types.entity_info {
     private _sched?: ScheduleAccessor
     private _inv?: InventoryAccessor
+    private _modules: ServerContract.Types.module_entry[] = []
 
     get name(): string {
         return this.entity_name
+    }
+
+    get modules(): ServerContract.Types.module_entry[] {
+        return this._modules
+    }
+
+    setModules(modules: ServerContract.Types.module_entry[]): void {
+        this._modules = modules
     }
 
     get inv(): InventoryAccessor {
@@ -88,4 +101,26 @@ export class Warehouse extends ServerContract.Types.entity_info {
         const hull = this.hullmass ? UInt64.from(this.hullmass) : UInt64.from(0)
         return hull.adding(this.totalCargoMass)
     }
+}
+
+export function computeWarehouseCapabilities(modules: {itemId: number; stats: bigint}[]): {
+    loaders?: {mass: number; thrust: number; quantity: number}
+} {
+    const warehouse: {loaders?: {mass: number; thrust: number; quantity: number}} = {}
+
+    const loaderModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_LOADER)
+    if (loaderModules.length > 0) {
+        let totalMass = 0
+        let totalThrust = 0
+        let totalQuantity = 0
+        for (const m of loaderModules) {
+            const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
+            totalMass += caps.mass
+            totalThrust += caps.thrust
+            totalQuantity += caps.quantity
+        }
+        warehouse.loaders = {mass: totalMass, thrust: totalThrust, quantity: totalQuantity}
+    }
+
+    return warehouse
 }

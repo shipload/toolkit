@@ -3,11 +3,14 @@ import {assert} from 'chai'
 import {
     capabilityAttributes,
     capabilityNames,
+    capsHasHauler,
+    EntityCapabilities,
     getCapabilityAttributes,
     getStatMappings,
     getStatMappingsForCapability,
     getStatMappingsForStat,
     isInvertedAttribute,
+    ServerContract,
     statMappings,
 } from '$lib'
 
@@ -54,5 +57,21 @@ suite('Capabilities', function () {
         assert.isFalse(isInvertedAttribute('thrust'))
         assert.isFalse(isInvertedAttribute('capacity'))
         assert.isFalse(isInvertedAttribute('yield'))
+    })
+
+    test('capsHasHauler returns true when hauler is present', function () {
+        const caps: EntityCapabilities = {
+            hauler: ServerContract.Types.hauler_stats.from({
+                capacity: 2,
+                efficiency: 5000,
+                drain: 9,
+            }),
+        }
+        assert.isTrue(capsHasHauler(caps))
+    })
+
+    test('capsHasHauler returns false when hauler is absent', function () {
+        const caps: EntityCapabilities = {}
+        assert.isFalse(capsHasHauler(caps))
     })
 })

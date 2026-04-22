@@ -4,9 +4,14 @@ import {
     calc_gather_duration,
     calc_gather_energy,
     capsHasGatherer,
+    encodeStats,
     getLocationType,
     hasGatherer,
     isGatherableLocation,
+    ITEM_ENGINE_T1,
+    ITEM_GATHERER_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
     LocationType,
     PRECISION,
     projectEntity,
@@ -14,6 +19,8 @@ import {
     TaskType,
 } from '../../src'
 import {makeShip} from '../../src/entities/makers'
+
+const seed = encodeStats([500, 500, 500, 500])
 
 suite('gathering', function () {
     suite('TaskType', function () {
@@ -292,20 +299,19 @@ suite('gathering', function () {
     suite('projection with TASK_GATHER', function () {
         test('applies energy cost on complete gather task', function () {
             const ship = makeShip({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'test',
                 name: 'Test Ship',
                 coordinates: {x: 0, y: 0},
                 hullmass: 100000,
                 capacity: 500000,
                 energy: 350,
-                engines: ServerContract.Types.movement_stats.from({thrust: 250, drain: 25}),
-                generator: ServerContract.Types.energy_stats.from({capacity: 350, recharge: 10}),
-                loaders: ServerContract.Types.loader_stats.from({
-                    mass: 1000,
-                    thrust: 1,
-                    quantity: 1,
-                }),
+                modules: [
+                    {itemId: ITEM_ENGINE_T1, stats: seed},
+                    {itemId: ITEM_GENERATOR_T1, stats: seed},
+                    {itemId: ITEM_LOADER_T1, stats: seed},
+                    {itemId: ITEM_GATHERER_T1, stats: seed},
+                ],
                 schedule: ServerContract.Types.schedule.from({
                     started: TimePoint.fromMilliseconds(Date.now() - 60000),
                     tasks: [
@@ -329,20 +335,19 @@ suite('gathering', function () {
 
         test('adds cargo mass on complete gather task', function () {
             const ship = makeShip({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'test',
                 name: 'Test Ship',
                 coordinates: {x: 0, y: 0},
                 hullmass: 100000,
                 capacity: 500000,
                 energy: 350,
-                engines: ServerContract.Types.movement_stats.from({thrust: 250, drain: 25}),
-                generator: ServerContract.Types.energy_stats.from({capacity: 350, recharge: 10}),
-                loaders: ServerContract.Types.loader_stats.from({
-                    mass: 1000,
-                    thrust: 1,
-                    quantity: 1,
-                }),
+                modules: [
+                    {itemId: ITEM_ENGINE_T1, stats: seed},
+                    {itemId: ITEM_GENERATOR_T1, stats: seed},
+                    {itemId: ITEM_LOADER_T1, stats: seed},
+                    {itemId: ITEM_GATHERER_T1, stats: seed},
+                ],
                 schedule: ServerContract.Types.schedule.from({
                     started: TimePoint.fromMilliseconds(Date.now() - 60000),
                     tasks: [
@@ -370,20 +375,19 @@ suite('gathering', function () {
 
         test('skips cargo add when gather targets another entity', function () {
             const ship = makeShip({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'test',
                 name: 'Test Ship',
                 coordinates: {x: 0, y: 0},
                 hullmass: 100000,
                 capacity: 500000,
                 energy: 350,
-                engines: ServerContract.Types.movement_stats.from({thrust: 250, drain: 25}),
-                generator: ServerContract.Types.energy_stats.from({capacity: 350, recharge: 10}),
-                loaders: ServerContract.Types.loader_stats.from({
-                    mass: 1000,
-                    thrust: 1,
-                    quantity: 1,
-                }),
+                modules: [
+                    {itemId: ITEM_ENGINE_T1, stats: seed},
+                    {itemId: ITEM_GENERATOR_T1, stats: seed},
+                    {itemId: ITEM_LOADER_T1, stats: seed},
+                    {itemId: ITEM_GATHERER_T1, stats: seed},
+                ],
                 schedule: ServerContract.Types.schedule.from({
                     started: TimePoint.fromMilliseconds(Date.now() - 60000),
                     tasks: [

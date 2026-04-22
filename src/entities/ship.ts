@@ -1,4 +1,4 @@
-import {UInt16, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {UInt16, UInt16Type, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, CoordinatesType} from '../types'
 import {
@@ -23,6 +23,11 @@ import {
 } from '../capabilities/movement'
 import * as schedule from '../scheduling/schedule'
 
+export interface PackedModuleInput {
+    itemId: UInt16Type
+    stats: UInt64Type
+}
+
 export interface ShipStateInput {
     id: UInt64Type
     owner: string
@@ -31,9 +36,7 @@ export interface ShipStateInput {
     hullmass?: number
     capacity?: number
     energy?: number
-    engines?: ServerContract.Types.movement_stats
-    generator?: ServerContract.Types.energy_stats
-    loaders?: ServerContract.Types.loader_stats
+    modules?: PackedModuleInput[]
     schedule?: ServerContract.Types.schedule
     cargo?: ServerContract.Types.cargo_item[]
 }
@@ -47,9 +50,18 @@ type MovementEntity = {
 export class Ship extends ServerContract.Types.entity_info {
     private _sched?: ScheduleAccessor
     private _inv?: InventoryAccessor
+    private _modules: ServerContract.Types.module_entry[] = []
 
     get name(): string {
         return this.entity_name
+    }
+
+    get modules(): ServerContract.Types.module_entry[] {
+        return this._modules
+    }
+
+    setModules(modules: ServerContract.Types.module_entry[]): void {
+        this._modules = modules
     }
 
     get inv(): InventoryAccessor {

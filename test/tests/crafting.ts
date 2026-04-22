@@ -23,6 +23,7 @@ import {
     ITEM_CARGO_LINING,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_FOCUSING_ARRAY,
+    ITEM_HAULER_T1,
     ITEM_HULL_PLATES,
     ITEM_THRUSTER_CORE,
     type RecipeSlotInput,
@@ -177,6 +178,18 @@ suite('Crafting', function () {
             assert.equal(stats['density'], 300)
             assert.equal(stats['ductility'], 600)
             assert.equal(stats['purity'], 700)
+        })
+
+        test('decoded hauler stats use input stat key names', function () {
+            const seed = encodeStats([500, 500, 500, 500])
+            const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
+            assert.property(decoded, 'resonance')
+            assert.property(decoded, 'conductivity')
+            assert.property(decoded, 'clarity')
+            assert.property(decoded, 'ductility')
+            assert.notProperty(decoded, 'capacity')
+            assert.notProperty(decoded, 'efficiency')
+            assert.notProperty(decoded, 'drain')
         })
     })
 

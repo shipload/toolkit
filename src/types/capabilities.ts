@@ -40,6 +40,7 @@ export interface EntityCapabilities {
     loaders?: ServerContract.Types.loader_stats
     gatherer?: ServerContract.Types.gatherer_stats
     crafter?: ServerContract.Types.crafter_stats
+    hauler?: ServerContract.Types.hauler_stats
 }
 
 export interface EntityState {
@@ -68,4 +69,8 @@ export function capsHasGatherer(caps: EntityCapabilities): boolean {
 
 export function capsHasMass(caps: EntityCapabilities): boolean {
     return caps.hullmass !== undefined
+}
+
+export function capsHasHauler(caps: EntityCapabilities): boolean {
+    return caps.hauler !== undefined
 }

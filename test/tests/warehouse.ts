@@ -1,13 +1,11 @@
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
-import {makeWarehouse, ServerContract} from '$lib'
+import {encodeStats, ITEM_LOADER_T1, makeWarehouse, ServerContract} from '$lib'
 
-function createMockLoaders() {
-    return ServerContract.Types.loader_stats.from({
-        mass: 100000,
-        quantity: 1,
-        thrust: 100,
-    })
+const loaderSeed = encodeStats([500, 500, 500, 500])
+
+function mockLoaderModules() {
+    return [{itemId: ITEM_LOADER_T1, stats: loaderSeed}]
 }
 
 function createCargoItem(goodId: number, quantity: number) {
@@ -21,24 +19,24 @@ function createCargoItem(goodId: number, quantity: number) {
 
 function makeStationaryWarehouse(cargo: ServerContract.Types.cargo_item[] = []) {
     return makeWarehouse({
-        id: 1,
+        id: UInt64.from(1),
         owner: 'teamgreymass',
         name: 'Test Warehouse',
         coordinates: {x: 5, y: 10, z: 1000},
         capacity: 10000000,
-        loaders: createMockLoaders(),
+        modules: mockLoaderModules(),
         cargo,
     })
 }
 
 function makeWarehouseWithSchedule() {
     return makeWarehouse({
-        id: 2,
+        id: UInt64.from(2),
         owner: 'teamgreymass',
         name: 'Warehouse With Schedule',
         coordinates: {x: 0, y: 0, z: 1200},
         capacity: 10000000,
-        loaders: createMockLoaders(),
+        modules: mockLoaderModules(),
         schedule: ServerContract.Types.schedule.from({
             started: '2024-06-04T23:41:09.000',
             tasks: [
@@ -95,12 +93,12 @@ suite('Warehouse', function () {
 
         test('returns 0 when z is undefined', function () {
             const warehouse = makeWarehouse({
-                id: 1,
+                id: UInt64.from(1),
                 owner: 'teamgreymass',
                 name: 'Test Warehouse',
                 coordinates: {x: 5, y: 10},
                 capacity: 10000000,
-                loaders: createMockLoaders(),
+                modules: mockLoaderModules(),
             })
             assert.equal(warehouse.orbitalAltitude, 0)
         })

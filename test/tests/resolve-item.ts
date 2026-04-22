@@ -1,10 +1,12 @@
 import {assert} from 'chai'
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import {
+    encodeStats,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
+    ITEM_HAULER_T1,
     ITEM_HULL_PLATES,
     ITEM_LOADER_T1,
     ITEM_MANUFACTURING_T1,
@@ -115,6 +117,23 @@ suite('resolveItem', function () {
     test('accepts plain numbers for itemId and seed', function () {
         const result = resolveItem(26, 12345)
         assert.equal(result.itemType, 'resource')
+    })
+
+    test('resolveItem(ITEM_HAULER_T1) returns Hauler capability group', function () {
+        const seed = encodeStats([500, 500, 500, 500])
+        const resolved = resolveItem(UInt16.from(ITEM_HAULER_T1), UInt64.from(seed))
+        assert.equal(resolved.itemType, 'module')
+        assert.equal(resolved.name, 'Hauler Module T1')
+        assert.isArray(resolved.attributes)
+        assert.lengthOf(resolved.attributes!, 1)
+
+        const group = resolved.attributes![0]
+        assert.equal(group.capability, 'Hauler')
+        assert.lengthOf(group.attributes, 3)
+
+        assert.deepEqual(group.attributes[0], {label: 'Capacity', value: 2})
+        assert.deepEqual(group.attributes[1], {label: 'Efficiency', value: 5000})
+        assert.deepEqual(group.attributes[2], {label: 'Drain', value: 9})
     })
 })
 

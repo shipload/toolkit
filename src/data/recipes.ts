@@ -493,13 +493,13 @@ export const moduleRecipes: ModuleRecipe[] = [
             {itemId: ITEM_FOCUSING_ARRAY, quantity: 3},
         ],
         stats: [
-            {key: 'capacity', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'resonance'},
+            {key: 'resonance', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'resonance'},
             {
-                key: 'efficiency',
+                key: 'conductivity',
                 sourceComponentId: ITEM_FOCUSING_ARRAY,
                 sourceStatKey: 'conductivity',
             },
-            {key: 'drain', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'clarity'},
+            {key: 'clarity', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'clarity'},
             {key: 'ductility', sourceComponentId: ITEM_FOCUSING_ARRAY, sourceStatKey: 'ductility'},
         ],
     },

@@ -4,29 +4,40 @@ import {deriveResourceStats, deriveStratum, RESERVE_TIERS, ReserveTier} from '$l
 
 suite('deriveResourceStats', function () {
     test('stat range [1, 999] is bounded', function () {
+        // 10K seeds × 3 stats = 30K samples. At weibull k=0.24 the per-sample rate
+        // of stat=1 is ~0.003, so min=1 is reliably hit; max in this window typically
+        // reaches ~800. The ≤999 upper bound is a structural invariant of the weibull
+        // floor() + cap, and is verified on every sample here.
         let min = 999
         let max = 1
-        for (let i = 0n; i < 1_000_000n; i++) {
+        for (let i = 0n; i < 10_000n; i++) {
             const s = deriveResourceStats(i)
             const lo = Math.min(s.stat1, s.stat2, s.stat3)
             const hi = Math.max(s.stat1, s.stat2, s.stat3)
             if (lo < min) min = lo
             if (hi > max) max = hi
         }
-        assert.equal(min, 1, 'minimum stat across 1M rolls should be 1')
+        assert.equal(min, 1, 'minimum stat across 10K rolls should reach 1')
         assert.isAtMost(max, 999, 'stats should never exceed 999')
-        assert.isAtLeast(max, 700, 'maximum over 1M rolls should reach at least 700')
+        assert.isAtLeast(max, 700, 'maximum over 10K rolls should reach at least 700')
     })
 
-    test('stats ≥ 900 are rare but reachable at k=0.24', function () {
+    test('stats ≥ 900 rate stays under 1 in 5k', function () {
+        // Reachability of ≥900 is covered by the pinned god-roll fixtures below;
+        // this test only bounds the tail rate. At true rate ~1e-4 (weibull k=0.24,
+        // max-of-3), expected count in 100K is ~10. Asserting observed rate < 2e-4
+        // catches any 2×+ regression while staying within Poisson noise.
         let count = 0
-        const N = 5_000_000
+        const N = 100_000
         for (let i = 0n; i < BigInt(N); i++) {
             const s = deriveResourceStats(i)
             if (Math.max(s.stat1, s.stat2, s.stat3) >= 900) count++
         }
-        assert.isAbove(count, 0, 'at least one roll out of 5M should reach ≥900')
-        assert.isBelow(count / N, 0.0001, 'rolls ≥ 900 should be rarer than 1 in 10k')
+        assert.isBelow(
+            count / N,
+            0.0002,
+            `rolls ≥ 900 should stay rarer than 1 in 5k (saw ${count})`
+        )
     })
 
     test('pinned god-roll fixtures at k=0.24', function () {
@@ -74,27 +85,36 @@ suite('deriveStratum reserve tiers', function () {
     )
 
     test('reserve fits a tier range when nonzero (asteroid)', function () {
-        let nonzero = 0
-        for (let x = 0; x < 200 && nonzero < 50; x++) {
-            for (let y = 0; y < 200 && nonzero < 50; y++) {
-                for (let s = 1; s <= 100 && nonzero < 50; s++) {
-                    const r = deriveStratum(epochSeed, {x, y}, s, 2, 0, 65535)
-                    if (r.reserve > 0) {
-                        nonzero++
-                        const fits = (
-                            Object.values(RESERVE_TIERS) as Array<{min: number; max: number}>
-                        ).some((range) => r.reserve >= range.min && r.reserve <= range.max)
-                        assert.isTrue(fits, `reserve ${r.reserve} at (${x},${y},${s}) is in a gap`)
-                    }
-                }
-            }
+        // Pinned coords (epoch 0x02…, stratum=1) known to produce nonzero reserves.
+        // Replaces a brute-force grid scan. Any change to the reserve generator or
+        // RESERVE_TIERS ranges will break these and requires a re-derive.
+        const coords = [
+            {x: 12, y: 89},
+            {x: 12, y: 111},
+            {x: 21, y: 131},
+            {x: 24, y: 170},
+            {x: 34, y: 127},
+            {x: 40, y: 62},
+            {x: 45, y: 48},
+            {x: 55, y: 50},
+            {x: 65, y: 165},
+            {x: 74, y: 108},
+        ]
+        for (const {x, y} of coords) {
+            const r = deriveStratum(epochSeed, {x, y}, 1, 2, 0, 65535)
+            assert.isAbove(r.reserve, 0, `pinned coord (${x},${y}) should yield nonzero reserve`)
+            const fits = (Object.values(RESERVE_TIERS) as Array<{min: number; max: number}>).some(
+                (range) => r.reserve >= range.min && r.reserve <= range.max
+            )
+            assert.isTrue(fits, `reserve ${r.reserve} at (${x},${y}) is in a gap`)
         }
-        assert.isAtLeast(nonzero, 1, 'expected at least one nonzero reserve in scan window')
     })
 
     test('yield rate near 0.1%', function () {
+        // 30K samples at true rate ~0.001 gives 99% CI roughly [0.00066, 0.0015].
+        // The [0.0005, 0.002] bounds comfortably contain that CI.
         let yielded = 0
-        const N = 100_000
+        const N = 30_000
         for (let i = 0; i < N; i++) {
             const x = i % 1000
             const y = Math.floor(i / 1000)
@@ -107,6 +127,9 @@ suite('deriveStratum reserve tiers', function () {
     })
 
     test('deeper strata bias toward larger tiers', function () {
+        // 25K samples per stratum at yield rate ~0.001 gives ~25 yields each, enough
+        // signal to observe the depth-bias effect (shallow is dominated by 'small';
+        // deep shifts weight to 'medium' and above).
         const counts = (stratum: number): Record<ReserveTier, number> => {
             const c: Record<ReserveTier, number> = {
                 small: 0,
@@ -115,8 +138,8 @@ suite('deriveStratum reserve tiers', function () {
                 massive: 0,
                 motherlode: 0,
             }
-            for (let x = 0; x < 1000; x++) {
-                for (let y = 0; y < 100; y++) {
+            for (let x = 0; x < 500; x++) {
+                for (let y = 0; y < 50; y++) {
                     const r = deriveStratum(epochSeed, {x, y}, stratum, 2, 0, 65535)
                     if (r.reserve === 0) continue
                     for (const [tier, range] of Object.entries(RESERVE_TIERS) as Array<

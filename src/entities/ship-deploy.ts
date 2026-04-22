@@ -214,12 +214,7 @@ export function computeShipCapabilities(
         let weightedEffNum = 0
         let totalDrain = 0
         for (const m of haulerModules) {
-            const decoded = decodeCraftedItemStats(m.itemId, m.stats)
-            const caps = computeHaulerCapabilities({
-                resonance: decoded.capacity,
-                conductivity: decoded.efficiency,
-                clarity: decoded.drain,
-            })
+            const caps = computeHaulerCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalCapacity += caps.capacity
             weightedEffNum += caps.efficiency * caps.capacity
             totalDrain += caps.drain

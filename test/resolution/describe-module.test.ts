@@ -8,7 +8,6 @@ import {
     renderDescription,
     type ResolvedItem,
     type ResolvedModuleSlot,
-    type TextSpan,
 } from '../../src/index-module'
 
 describe('describeModule', () => {
