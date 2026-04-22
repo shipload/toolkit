@@ -14,7 +14,7 @@ export { renderByType, type RenderByTypeOpts } from './templates/index.ts'
 
 // Links + meta
 export { linkToItemPage, linkToItemImage } from './links.ts'
-export { itemPageMeta } from './meta.ts'
+export { itemPageMeta, svgDimensions } from './meta.ts'
 export type { ItemPageMeta, ItemPageMetaOptions } from './meta.ts'
 
 // Tokens (consumed by testmap tailwind.config)
