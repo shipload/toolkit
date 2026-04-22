@@ -24,6 +24,10 @@ export type { Tokens, CategoryColorKey, TierColorKey } from './tokens/colors.ts'
 export { categoryIconSvg, categoryIconPath } from './primitives/category-icon.ts'
 export type { CategoryIconPathOpts, CategoryIconSvgOpts } from './primitives/category-icon.ts'
 
+// Item cell templates
+export { renderItemCell, itemCellGroup } from './templates/item-cell.ts'
+export type { ItemCellProps, ItemCellGroupProps } from './templates/item-cell.ts'
+
 // Re-exports from sdkv2 so consumers only need one import boundary
 export {
   resolveItem,
