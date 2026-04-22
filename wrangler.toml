@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2026-04-01"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+  { pattern = "item.shiploadgame.com/*", zone_name = "shiploadgame.com" }
+]
+
 rules = [
   { type = "CompiledWasm", globs = ["**/*.wasm"],  fallthrough = false },
   { type = "Data",         globs = ["**/*.woff2"], fallthrough = false },
@@ -11,8 +15,3 @@ rules = [
 
 [alias]
 elliptic = "./src/shims/elliptic-empty.cjs"
-
-[env.production]
-routes = [
-  { pattern = "item.shiploadgame.com/*", zone_name = "shiploadgame.com" }
-]

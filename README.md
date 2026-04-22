@@ -49,12 +49,12 @@ bun run test         # vitest via @cloudflare/vitest-pool-workers
 
 Deploys are continuous via **Cloudflare Workers Builds**. Push to `master` →
 CF's build container runs `bun install` and `bun run deploy` (the latter is
-`wrangler deploy --env production`). The deploy token is injected by CF, so no
-secrets are stored in this repo.
+`wrangler deploy`). The deploy token is injected by CF, so no secrets are
+stored in this repo.
 
 Prereqs for the first deploy: `shiploadgame.com` zone is onboarded in
 Cloudflare, and DNS for `item.shiploadgame.com` points at Cloudflare
-(orange-cloud). The route binding lives in `wrangler.toml [env.production]`.
+(orange-cloud). The route binding lives at the top level of `wrangler.toml`.
 
 To deploy manually (e.g. for debugging):
 
