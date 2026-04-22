@@ -1,4 +1,5 @@
 import type { ResolvedItem } from '@shipload/sdk'
+import { getComponentById, getStatDefinitions, categoryColors } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -9,15 +10,56 @@ import { quantityBadge } from '../primitives/quantity-badge.ts'
 import { tokens } from '../tokens/index.ts'
 import { shortCode, formatMass, tierBorder } from './_shared.ts'
 
-export function renderComponent(item: CargoItem, resolved: ResolvedItem): string {
+export interface RenderComponentOpts {
+  mode?: 'values' | 'ranges'
+}
+
+type StatRow = {
+  label: string
+  abbreviation: string
+  value: number | null
+  color: string
+  inverted?: boolean
+}
+
+export function renderComponent(
+  item: CargoItem,
+  resolved: ResolvedItem,
+  opts?: RenderComponentOpts,
+): string {
+  const mode = opts?.mode ?? 'values'
   const w = tokens.spacing.panelWidth
   const pad = tokens.spacing.panelPadding
   const innerW = w - pad * 2
 
-  const stats = resolved.stats ?? []
+  let rows: StatRow[]
+  if (mode === 'values') {
+    rows = (resolved.stats ?? []).map(s => ({
+      label: s.label,
+      abbreviation: s.abbreviation,
+      value: s.value,
+      color: s.color,
+      inverted: s.inverted,
+    }))
+  } else {
+    const comp = getComponentById(resolved.itemId)
+    rows = (comp?.stats ?? []).flatMap(stat => {
+      const defs = getStatDefinitions(stat.source)
+      const def = defs.find(d => d.key === stat.key)
+      if (!def) return []
+      return [{
+        label: def.label,
+        abbreviation: def.abbreviation,
+        value: null,
+        color: categoryColors[stat.source],
+        inverted: def.inverted,
+      }]
+    })
+  }
+
   const headerH = 48
   const metaRowH = 28
-  const statsH = stats.length * 26 + 8
+  const statsH = rows.length * 26 + 8
   const height = headerH + metaRowH + 14 + statsH + pad
 
   const chrome = panel({ width: w, height, borderColor: tierBorder(resolved.tier) })
@@ -76,17 +118,17 @@ export function renderComponent(item: CargoItem, resolved: ResolvedItem): string
   const sepY = pad + headerH + metaRowH + 6
   const sep = divider({ x: pad, y: sepY, width: innerW })
 
-  const statsSvg = stats
-    .map((stat, i) =>
+  const statsSvg = rows
+    .map((row, i) =>
       statBar({
         x: pad,
         y: sepY + 18 + i * 26,
         width: innerW,
-        label: stat.label,
-        abbreviation: stat.abbreviation,
-        value: stat.value,
-        color: stat.color,
-        inverted: stat.inverted,
+        label: row.label,
+        abbreviation: row.abbreviation,
+        value: row.value,
+        color: row.color,
+        inverted: row.inverted,
       }),
     )
     .join('')
