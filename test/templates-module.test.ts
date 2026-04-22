@@ -38,3 +38,26 @@ test('Hauler template falls back to compact rows when description is null', () =
   const svg = renderModule(item, resolved)
   expect(svg).toContain('Hauler')
 })
+
+test('renderModule ranges mode shows capability header without narrative or attribute values', () => {
+  const item = FIXTURES.engineT1
+  const resolved = resolveItem(item.item_id)
+  const svg = renderModule(item, resolved, { mode: 'ranges' })
+  expect(svg).toContain('ENGINE')
+  expect(svg).not.toMatch(/>\d{3,}<\/(text|tspan)>/)
+  expect(svg).toContain('MODULE')
+})
+
+test('renderModule values mode (default) still shows narrative', () => {
+  const item = FIXTURES.engineT1
+  const resolved = resolveItem(item.item_id, item.stats)
+  const svg = renderModule(item, resolved)
+  expect(svg).toMatch(/thrust|energy|generates/)
+})
+
+test('renderModule ranges mode matches snapshot', () => {
+  const item = FIXTURES.engineT1
+  const resolved = resolveItem(item.item_id)
+  const svg = renderModule(item, resolved, { mode: 'ranges' })
+  expect(svg).toMatchSnapshot('module-ranges')
+})

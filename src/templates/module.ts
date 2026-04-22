@@ -16,21 +16,32 @@ function capabilityColor(name: string): string {
   return tokens.colors.capability[key] ?? tokens.colors.accent.component
 }
 
-export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
+export interface RenderModuleOpts {
+  mode?: 'values' | 'ranges'
+}
+
+export function renderModule(item: CargoItem, resolved: ResolvedItem, opts?: RenderModuleOpts): string {
+  const mode = opts?.mode ?? 'values'
   const w = tokens.spacing.panelWidth
   const pad = tokens.spacing.panelPadding
   const innerW = w - pad * 2
 
   const group = resolved.attributes?.[0]
   const attrs = group?.attributes ?? []
-  const desc = describeModuleForItem(resolved)
+  const desc = mode === 'values' ? describeModuleForItem(resolved) : undefined
+
+  const capabilityName =
+    group?.capability ??
+    resolved.name.replace(/\s+T\d+$/i, '')
 
   const headerH = 48
   const metaRowH = 28
   const sepY = pad + headerH + metaRowH + 6
 
   let bodyHeight = 0
-  if (desc && group) {
+  if (mode === 'ranges') {
+    bodyHeight = 20 + 8
+  } else if (desc && group) {
     const plain = renderDescription(desc)
       .map((s) => s.text)
       .join('')
@@ -58,7 +69,7 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
   const quantity = Number(BigInt(item.quantity.toString()))
   const badge = quantityBadge({ x: w - pad, y: pad, quantity })
 
-  const iconColor = group ? capabilityColor(group.capability) : tokens.colors.accent.component
+  const iconColor = group ? capabilityColor(group.capability) : capabilityColor(capabilityName)
   const icon = iconHex({
     x: pad,
     y: pad + 4,
@@ -111,7 +122,19 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem): string {
   const sep = divider({ x: pad, y: sepY, width: innerW })
 
   let capSection = ''
-  if (desc && group) {
+  if (mode === 'ranges') {
+    const accentColor = capabilityColor(capabilityName)
+    capSection = text({
+      x: pad,
+      y: sepY + 16,
+      value: capabilityName.toUpperCase(),
+      size: tokens.typography.sizes.subtitle,
+      weight: 700,
+      family: tokens.typography.sans,
+      color: accentColor,
+      letterSpacing: 1,
+    })
+  } else if (desc && group) {
     const accentColor = capabilityColor(group.capability)
     const capHeader = text({
       x: pad,
