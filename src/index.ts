@@ -19,7 +19,8 @@ export type { ItemPageMeta, ItemPageMetaOptions } from './meta.ts'
 
 // Tokens (consumed by testmap tailwind.config)
 export { tokens } from './tokens/index.ts'
-export type { Tokens, CategoryColorKey, TierColorKey } from './tokens/colors.ts'
+export type { Tokens } from './tokens/index.ts'
+export type { CategoryColorKey, TierColorKey } from './tokens/colors.ts'
 
 // Category icon primitive
 export { categoryIconSvg, categoryIconPath } from './primitives/category-icon.ts'
