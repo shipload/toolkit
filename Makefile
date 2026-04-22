@@ -6,7 +6,7 @@ dev: node_modules
 
 .PHONY: deploy
 deploy: node_modules
-	bunx wrangler deploy
+	bunx wrangler deploy --env production
 
 .PHONY: test
 test: node_modules
