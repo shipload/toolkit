@@ -24,7 +24,7 @@ import {
     computeShipHullCapabilities,
 } from '../entities/ship-deploy'
 import {computeContainerCapabilities} from '../entities/container'
-import {categoryColors, categoryIcons, componentIcon, itemIcons, moduleIcon} from '../data/colors'
+import {categoryColors, categoryIcons, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
 import {ServerContract} from '../contracts'
 
 export interface ResolvedItemStat {
@@ -54,6 +54,7 @@ export interface ResolvedItem {
     itemId: number
     name: string
     icon: string
+    abbreviation: string | null
     category?: ResourceCategory
     tier: ResourceTier
     mass: number
@@ -93,6 +94,7 @@ function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
         itemId: id,
         name: String(item.name),
         icon: categoryIcons[cat] ?? '⬡',
+        abbreviation: null,
         category: cat,
         tier: item.tier,
         mass: Number(item.mass.value.toString()),
@@ -129,7 +131,8 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
     return {
         itemId: id,
         name: comp.name,
-        icon: itemIcons[id] ?? componentIcon,
+        icon: itemAbbreviations[id] ?? componentIcon,
+        abbreviation: itemAbbreviations[id] ?? null,
         tier: 't1' as ResourceTier,
         mass: comp.mass,
         itemType: 'component',
@@ -220,7 +223,8 @@ function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
     return {
         itemId: id,
         name: recipe.name,
-        icon: itemIcons[id] ?? moduleIcon,
+        icon: itemAbbreviations[id] ?? moduleIcon,
+        abbreviation: itemAbbreviations[id] ?? null,
         tier: 't1' as ResourceTier,
         mass: 0,
         itemType: 'module',
@@ -286,7 +290,8 @@ function resolveEntity(
     return {
         itemId: id,
         name: recipe.name,
-        icon: itemIcons[id] ?? componentIcon,
+        icon: itemAbbreviations[id] ?? componentIcon,
+        abbreviation: itemAbbreviations[id] ?? null,
         tier: 't1' as ResourceTier,
         mass: 0,
         itemType: 'entity',

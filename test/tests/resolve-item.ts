@@ -117,3 +117,25 @@ suite('resolveItem', function () {
         assert.equal(result.itemType, 'resource')
     })
 })
+
+suite('ResolvedItem.abbreviation', function () {
+    test('component exposes abbreviation', function () {
+        const resolved = resolveItem(UInt16.from(ITEM_HULL_PLATES))
+        assert.equal(resolved.abbreviation, 'HP')
+    })
+
+    test('module exposes abbreviation', function () {
+        const resolved = resolveItem(UInt16.from(ITEM_ENGINE_T1))
+        assert.equal(resolved.abbreviation, 'EN')
+    })
+
+    test('entity exposes abbreviation', function () {
+        const resolved = resolveItem(UInt16.from(ITEM_SHIP_T1_PACKED))
+        assert.equal(resolved.abbreviation, 'SH')
+    })
+
+    test('resource abbreviation is null', function () {
+        const resolved = resolveItem(UInt16.from(26))
+        assert.isNull(resolved.abbreviation)
+    })
+})

@@ -16,6 +16,14 @@ export const tierColors: Record<ResourceTier, string> = {
     t5: '#fbbf24',
 }
 
+export const tierLabels: Record<ResourceTier, string> = {
+    t1: 'Common',
+    t2: 'Uncommon',
+    t3: 'Rare',
+    t4: 'Epic',
+    t5: 'Legendary',
+}
+
 export const categoryIcons: Record<ResourceCategory, string> = {
     metal: '⬡',
     precious: '◈',
@@ -24,10 +32,20 @@ export const categoryIcons: Record<ResourceCategory, string> = {
     organic: '❋',
 }
 
+export type CategoryIconShape = 'hex' | 'diamond' | 'star' | 'circle' | 'square'
+
+export const categoryIconShapes: Record<ResourceCategory, CategoryIconShape> = {
+    metal: 'hex',
+    precious: 'diamond',
+    gas: 'circle',
+    mineral: 'square',
+    organic: 'star',
+}
+
 export const componentIcon = '▣'
 export const moduleIcon = '⬢'
 
-export const itemIcons: Record<number, string> = {
+export const itemAbbreviations: Record<number, string> = {
     10001: 'HP',
     10002: 'CL',
     10003: 'TC',
