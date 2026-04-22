@@ -52,16 +52,29 @@ function cellInner(props: ItemCellProps): string {
     const color = categoryColors[props.resolved.category]
     const iconCy = size * 0.4
     content = categoryIconPath({ shape, cx, cy: iconCy, size: size * 0.32, color, strokeWidth: 1.5 })
+  } else if (props.resolved.icon) {
+    content = text({
+      x: cx,
+      y: size * 0.4,
+      value: props.resolved.icon,
+      size: Math.round(size * 0.44),
+      weight: 400,
+      anchor: 'middle',
+      dominantBaseline: 'central',
+      color: tokens.colors.text.primary,
+    })
   }
 
   const qty = props.quantity ?? 0
   let quantityText = ''
   if (qty > 1) {
+    const qtyFontSize = Math.max(9, Math.round(size * 0.22))
+    const qtyPad = Math.max(3, Math.round(size * 0.12))
     quantityText = text({
-      x: size - Math.round(size * 0.12),
-      y: height - Math.round(size * 0.12),
+      x: size - qtyPad,
+      y: height - qtyPad,
       value: String(qty),
-      size: Math.round(size * 0.22),
+      size: qtyFontSize,
       weight: 700,
       anchor: 'end',
       color: tokens.colors.text.primary,

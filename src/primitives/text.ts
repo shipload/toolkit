@@ -11,6 +11,7 @@ export interface TextProps {
   color?: string
   anchor?: 'start' | 'middle' | 'end'
   letterSpacing?: number
+  dominantBaseline?: 'auto' | 'middle' | 'central' | 'hanging' | 'text-top' | 'text-bottom'
 }
 
 export function text(props: TextProps): string {
@@ -25,6 +26,7 @@ export function text(props: TextProps): string {
       fill: props.color ?? tokens.colors.text.primary,
       'text-anchor': props.anchor,
       'letter-spacing': props.letterSpacing,
+      'dominant-baseline': props.dominantBaseline,
     },
     escapeValue(props.value),
   )

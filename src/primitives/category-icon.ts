@@ -13,6 +13,7 @@ export interface CategoryIconPathOpts {
 export interface CategoryIconSvgOpts {
   size?: number
   color?: string
+  strokeWidth?: number
 }
 
 function hexPoints(cx: number, cy: number, r: number): string {
@@ -72,7 +73,7 @@ export function categoryIconSvg(shape: CategoryIconShape, opts: CategoryIconSvgO
   const cx = size / 2
   const cy = size / 2
   const iconSize = size * 0.85
-  const inner = categoryIconPath({ shape, cx, cy, size: iconSize, color })
+  const inner = categoryIconPath({ shape, cx, cy, size: iconSize, color, strokeWidth: opts.strokeWidth })
   return el(
     'svg',
     {
