@@ -100,7 +100,7 @@ function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
     }
     return {
         itemId: id,
-        name: String(item.name),
+        name: item.displayName,
         icon: categoryIcons[cat] ?? '⬡',
         abbreviation: null,
         category: cat,

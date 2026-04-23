@@ -1,36 +1,18 @@
 import type {ResolvedItem} from './resolve-item'
-import type {ResourceCategory} from '../types'
+import type {ResourceCategory, ResourceTier} from '../types'
+import {CATEGORY_LABELS, TIER_ADJECTIVES, tierNumber} from '../types'
 import {formatMass as defaultFormatMass} from '../format'
 
-const TIER_ADJECTIVES: Record<number, string> = {
-    1: 'Crude',
-    2: 'Dense',
-    3: 'Pure',
-    4: 'Prime',
-    5: 'Pristine',
-    6: 'Radiant',
-    7: 'Exotic',
-    8: 'Mythic',
-    9: 'Cosmic',
-    10: 'Ascendant',
+export interface DisplayNameInput {
+    itemType: 'resource' | 'component' | 'module' | 'entity' | string
+    tier: ResourceTier | string
+    category?: ResourceCategory
+    name: string
 }
 
-const CATEGORY_LABELS: Record<ResourceCategory, string> = {
-    ore: 'Ore',
-    crystal: 'Crystal',
-    gas: 'Gas',
-    regolith: 'Regolith',
-    biomass: 'Biomass',
-}
-
-function tierNumber(tier: string): number {
-    return Number(String(tier).replace(/^t/i, ''))
-}
-
-export function displayName(resolved: ResolvedItem): string {
+export function displayName(resolved: DisplayNameInput): string {
     if (resolved.itemType === 'resource') {
-        const tierNum = tierNumber(resolved.tier)
-        const adj = TIER_ADJECTIVES[tierNum] ?? 'Unknown'
+        const adj = TIER_ADJECTIVES[tierNumber(resolved.tier)] ?? 'Unknown'
         const cat = resolved.category ? CATEGORY_LABELS[resolved.category] : 'Resource'
         return `${adj} ${cat}`
     }

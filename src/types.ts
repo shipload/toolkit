@@ -116,6 +116,31 @@ export interface Distance {
 export type ResourceCategory = 'ore' | 'crystal' | 'gas' | 'regolith' | 'biomass'
 export type ResourceTier = 't1' | 't2' | 't3' | 't4' | 't5'
 
+export const TIER_ADJECTIVES: Record<number, string> = {
+    1: 'Crude',
+    2: 'Dense',
+    3: 'Pure',
+    4: 'Prime',
+    5: 'Pristine',
+    6: 'Radiant',
+    7: 'Exotic',
+    8: 'Mythic',
+    9: 'Cosmic',
+    10: 'Ascendant',
+}
+
+export const CATEGORY_LABELS: Record<ResourceCategory, string> = {
+    ore: 'Ore',
+    crystal: 'Crystal',
+    gas: 'Gas',
+    regolith: 'Regolith',
+    biomass: 'Biomass',
+}
+
+export function tierNumber(tier: string): number {
+    return Number(String(tier).replace(/^t/i, ''))
+}
+
 @Struct.type('item')
 export class Item extends Struct {
     @Struct.field(UInt16)
@@ -132,4 +157,11 @@ export class Item extends Struct {
     tier!: ResourceTier
     @Struct.field('string')
     color!: string
+
+    get displayName(): string {
+        if (this.name && this.name.length > 0) return this.name
+        const adj = TIER_ADJECTIVES[tierNumber(this.tier)] ?? 'Unknown'
+        const cat = CATEGORY_LABELS[this.category] ?? 'Resource'
+        return `${adj} ${cat}`
+    }
 }
