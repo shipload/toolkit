@@ -3,7 +3,7 @@ import { tierColors as sdkTierColors } from '@shipload/sdk'
 import { tokens } from '../src/tokens/index.ts'
 
 test('colors include all resource categories', () => {
-  for (const cat of ['metal', 'gas', 'mineral', 'organic', 'precious']) {
+  for (const cat of ['ore', 'crystal', 'gas', 'regolith', 'biomass']) {
     expect(tokens.colors.category).toHaveProperty(cat)
     expect(tokens.colors.category[cat as keyof typeof tokens.colors.category]).toMatch(/^#[0-9a-f]{6}$/i)
   }

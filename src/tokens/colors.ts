@@ -19,11 +19,11 @@ export const colors = {
     cyan: '#6cb9ff',
   },
   category: {
-    metal: '#b5b9c2',
-    gas: '#6cb9ff',
-    mineral: '#b38aff',
-    organic: '#58d08c',
-    precious: '#f4c96b',
+    ore: '#C26D3F',
+    crystal: '#4ADBFF',
+    gas: '#B8E4A0',
+    regolith: '#C4A57B',
+    biomass: '#5A8B3E',
   },
   tier: tierColors,
   accent: {
