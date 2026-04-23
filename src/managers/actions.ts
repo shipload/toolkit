@@ -176,15 +176,13 @@ export class ActionsManager extends BaseManager {
         entityType: EntityTypeName,
         entityId: UInt64Type,
         packedItemId: number,
-        stats: bigint,
-        entityName: string
+        stats: bigint
     ): Action {
         return this.server.action('deploy', {
             entity_type: entityType,
             id: UInt64.from(entityId),
             packed_item_id: UInt16.from(packedItemId),
             stats: UInt64.from(stats),
-            entity_name: entityName,
         })
     }
 
