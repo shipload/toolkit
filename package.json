@@ -1,6 +1,6 @@
 {
   "name": "@shipload/item-renderer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Deterministic SVG rendering for Shipload items",
   "type": "module",
   "main": "./src/index.ts",
@@ -34,7 +34,7 @@
     "fonts:copy": "bun run scripts/copy-fonts.ts"
   },
   "dependencies": {
-    "@shipload/sdk": "^2.0.0-rc13",
+    "@shipload/sdk": "2.0.0-rc15",
     "@wharfkit/antelope": "^1.0.0"
   },
   "devDependencies": {
