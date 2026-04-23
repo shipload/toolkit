@@ -3,13 +3,21 @@ import {
     type CargoStack,
     ENTITY_CAPACITY_EXCEEDED,
     Item,
+    ITEM_HULL_PLATES,
+    ITEM_THRUSTER_CORE,
     projectEntity,
+    RECIPE_INPUTS_EXCESS,
+    RECIPE_INPUTS_INSUFFICIENT,
+    RECIPE_INPUTS_INVALID,
+    RECIPE_INPUTS_MIXED,
+    RECIPE_NOT_FOUND,
+    SHIP_CARGO_NOT_LOADED,
     ServerContract,
     TaskType,
     validateSchedule,
 } from '$lib'
 import {UInt16, UInt32} from '@wharfkit/antelope'
-import {registerItem} from 'src/market/items'
+import {registerMockItem} from '../item-mock'
 import {makeShipFixture, makeTask} from '../helpers'
 
 function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoStack | undefined {
@@ -157,6 +165,168 @@ suite('projectEntity (stack-aware)', function () {
             })
             assert.doesNotThrow(() => validateSchedule(ship))
         })
+
+        suite('craft input validation', function () {
+            // Hull Plates recipe: [{category: 'ore', quantity: 15}] → output qty 1
+            const HULL_PLATES_QTY = 15
+
+            test('accepts valid craft inputs (Hull Plates from 15 ore)', function () {
+                const ship = makeShipFixture({
+                    capacity: 10_000_000,
+                    cargo: [{item_id: 101, quantity: HULL_PLATES_QTY, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: HULL_PLATES_QTY, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.doesNotThrow(() => validateSchedule(ship))
+            })
+
+            test('throws RECIPE_NOT_FOUND when output has no recipe', function () {
+                const ship = makeShipFixture({
+                    cargo: [{item_id: 101, quantity: 10, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: 10, stats: 0},
+                                {item_id: 999, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_NOT_FOUND)
+            })
+
+            test('throws RECIPE_INPUTS_INSUFFICIENT when quantity below required', function () {
+                const ship = makeShipFixture({
+                    cargo: [{item_id: 101, quantity: 10, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: 10, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INSUFFICIENT)
+            })
+
+            test('throws RECIPE_INPUTS_EXCESS when quantity above required', function () {
+                const ship = makeShipFixture({
+                    cargo: [{item_id: 101, quantity: 20, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: 20, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_EXCESS)
+            })
+
+            test('throws RECIPE_INPUTS_INVALID when input category does not match', function () {
+                // Crystal (201) offered to Hull Plates recipe which needs ore
+                const ship = makeShipFixture({
+                    cargo: [{item_id: 201, quantity: HULL_PLATES_QTY, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 201, quantity: HULL_PLATES_QTY, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
+            })
+
+            test('throws RECIPE_INPUTS_MIXED when category slot has multiple item_ids', function () {
+                // Two different ore items (T1 id=101 and T2 id=102) for a single category slot
+                const ship = makeShipFixture({
+                    cargo: [
+                        {item_id: 101, quantity: 8, stats: 0},
+                        {item_id: 102, quantity: 7, stats: 0},
+                    ],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: 8, stats: 0},
+                                {item_id: 102, quantity: 7, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_MIXED)
+            })
+
+            test('throws SHIP_CARGO_NOT_LOADED when input not in projected cargo', function () {
+                // Cargo empty but craft task declares inputs
+                const ship = makeShipFixture({capacity: 10_000_000})
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: 101, quantity: HULL_PLATES_QTY, stats: 0},
+                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), SHIP_CARGO_NOT_LOADED)
+            })
+
+            test('validates itemId-typed recipe slots (Engine from Thruster Cores)', function () {
+                // Engine recipe: [{itemId: ITEM_THRUSTER_CORE, quantity: 6}]
+                // Use wrong item (Power Cell instead of Thruster Core) → INVALID
+                const ITEM_POWER_CELL = 10004
+                const ITEM_ENGINE_T1_LOCAL = 10100
+                const ship = makeShipFixture({
+                    capacity: 10_000_000,
+                    cargo: [{item_id: ITEM_POWER_CELL, quantity: 6, stats: 0}],
+                })
+                ship.schedule = ServerContract.Types.schedule.from({
+                    started: '2024-06-04T23:41:09.000',
+                    tasks: [
+                        makeTask(TaskType.CRAFT, {
+                            cargo: [
+                                {item_id: ITEM_POWER_CELL, quantity: 6, stats: 0},
+                                {item_id: ITEM_ENGINE_T1_LOCAL, quantity: 1, stats: 0},
+                            ],
+                        }),
+                    ],
+                })
+                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
+                // Silence unused-var warning — ITEM_THRUSTER_CORE imported for clarity above
+                assert.notEqual(ITEM_THRUSTER_CORE, ITEM_POWER_CELL)
+            })
+        })
     })
 
     suite('cross-validation against contract (synthetic — fixture deferred)', function () {
@@ -169,7 +339,7 @@ suite('projectEntity (stack-aware)', function () {
             const INPUT_QTY = 15
             const OUTPUT_QTY = 1
 
-            registerItem(
+            registerMockItem(
                 Item.from({
                     id: UInt16.from(COMPONENT_ID),
                     name: 'Matter Conduit',

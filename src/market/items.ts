@@ -82,7 +82,11 @@ export function getItems(): Item[] {
     return Array.from(itemsById.values())
 }
 
-export function registerItem(item: Item): void {
+/**
+ * @internal Test-only: registers an item into the in-memory map. Tests should
+ * use `test/item-mock.ts`'s `registerMockItem()` instead of calling this directly.
+ */
+export function __registerItemInternal(item: Item): void {
     const id = item.id.toNumber()
     itemsById.set(id, item)
     synthesizedCache.delete(id)

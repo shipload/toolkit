@@ -11,7 +11,8 @@ import {
     ServerContract,
     TaskType,
 } from '$lib'
-import {getItem, registerItem} from 'src/items'
+import {getItem} from 'src/items'
+import {registerMockItem} from './item-mock'
 
 function ensureTestItem(itemId: number, mass?: number): void {
     try {
@@ -20,7 +21,7 @@ function ensureTestItem(itemId: number, mass?: number): void {
     } catch {
         /* fall through */
     }
-    registerItem(
+    registerMockItem(
         Item.from({
             id: UInt16.from(itemId),
             name: `TestItem-${itemId}`,

@@ -8,7 +8,22 @@ import {
     EntityCapabilities,
     EntityState,
 } from '../types/capabilities'
-import {ENTITY_CAPACITY_EXCEEDED} from '../errors'
+import {
+    ENTITY_CAPACITY_EXCEEDED,
+    RECIPE_INPUTS_EXCESS,
+    RECIPE_INPUTS_INSUFFICIENT,
+    RECIPE_INPUTS_INVALID,
+    RECIPE_INPUTS_MIXED,
+    RECIPE_NOT_FOUND,
+    SHIP_CARGO_NOT_LOADED,
+} from '../errors'
+import {
+    getComponentById,
+    getEntityRecipeByItemId,
+    getModuleRecipeByItemId,
+    RecipeInput,
+} from '../data/recipes'
+import {getItem} from '../market/items'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
     calcStacksMass,
@@ -281,11 +296,98 @@ export function projectEntity(entity: Projectable, options?: ProjectionOptions):
     return projected
 }
 
+function getRecipeForOutput(outputItemId: number): RecipeInput[] | undefined {
+    const component = getComponentById(outputItemId)
+    if (component) return component.recipe
+    const moduleRecipe = getModuleRecipeByItemId(outputItemId)
+    if (moduleRecipe) return moduleRecipe.recipe
+    const entityRecipe = getEntityRecipeByItemId(outputItemId)
+    if (entityRecipe) return entityRecipe.recipe
+    return undefined
+}
+
+function validateCraftTask(
+    task: ServerContract.Types.task,
+    projected: ProjectedEntity
+): void {
+    if (task.cargo.length === 0) return
+
+    const output = task.cargo[task.cargo.length - 1]
+    const inputs = task.cargo.slice(0, -1)
+    const craftQuantity = output.quantity.toNumber()
+
+    const recipe = getRecipeForOutput(output.item_id.toNumber())
+    if (!recipe) throw new Error(RECIPE_NOT_FOUND)
+
+    const groupedInputs: ServerContract.Types.cargo_item[][] = recipe.map(() => [])
+    for (const input of inputs) {
+        let matched = false
+        for (let ri = 0; ri < recipe.length; ri++) {
+            const req = recipe[ri]
+            if (req.itemId && req.itemId > 0) {
+                if (input.item_id.toNumber() === req.itemId) {
+                    groupedInputs[ri].push(input)
+                    matched = true
+                    break
+                }
+            } else if (req.category) {
+                const item = getItem(input.item_id)
+                if (item.category === req.category) {
+                    groupedInputs[ri].push(input)
+                    matched = true
+                    break
+                }
+            }
+        }
+        if (!matched) throw new Error(RECIPE_INPUTS_INVALID)
+    }
+
+    for (let ri = 0; ri < recipe.length; ri++) {
+        const stacks = groupedInputs[ri]
+        let provided = 0
+        for (const stack of stacks) {
+            provided += stack.quantity.toNumber()
+        }
+        const required = recipe[ri].quantity * craftQuantity
+        if (provided < required) throw new Error(RECIPE_INPUTS_INSUFFICIENT)
+        if (provided !== required) throw new Error(RECIPE_INPUTS_EXCESS)
+
+        if (!recipe[ri].itemId && stacks.length > 1) {
+            const firstItemId = stacks[0].item_id.toNumber()
+            for (let si = 1; si < stacks.length; si++) {
+                if (stacks[si].item_id.toNumber() !== firstItemId) {
+                    throw new Error(RECIPE_INPUTS_MIXED)
+                }
+            }
+        }
+    }
+
+    for (const input of inputs) {
+        let found = false
+        for (const pc of projected.cargo) {
+            if (
+                pc.item_id.toNumber() === input.item_id.toNumber() &&
+                pc.stats.toString() === input.stats.toString()
+            ) {
+                if (pc.quantity.toNumber() < input.quantity.toNumber()) {
+                    throw new Error(RECIPE_INPUTS_INSUFFICIENT)
+                }
+                found = true
+                break
+            }
+        }
+        if (!found) throw new Error(SHIP_CARGO_NOT_LOADED)
+    }
+}
+
 export function validateSchedule(entity: Projectable): void {
     if (!entity.schedule || entity.schedule.tasks.length === 0) return
 
     const projected = createProjectedEntity(entity)
     for (const task of entity.schedule.tasks) {
+        if (task.type.toNumber() === TaskType.CRAFT) {
+            validateCraftTask(task, projected)
+        }
         applyTask(projected, task)
         if (projected.capacity && projected.cargoMass.gt(projected.capacity)) {
             throw new Error(ENTITY_CAPACITY_EXCEEDED)

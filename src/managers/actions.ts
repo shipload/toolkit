@@ -51,11 +51,19 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    resolve(entityId: UInt64Type, entityType: EntityTypeName = EntityType.SHIP): Action {
-        return this.server.action('resolve', {
+    resolve(
+        entityId: UInt64Type,
+        entityType: EntityTypeName = EntityType.SHIP,
+        count?: UInt64Type
+    ): Action {
+        const params: ServerContract.ActionParams.resolve = {
             entity_type: entityType,
             id: UInt64.from(entityId),
-        })
+        }
+        if (count !== undefined) {
+            params.count = UInt64.from(count)
+        }
+        return this.server.action('resolve', params)
     }
 
     cancel(
@@ -70,10 +78,10 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    recharge(shipId: UInt64Type): Action {
+    recharge(entityId: UInt64Type, entityType: EntityTypeName = EntityType.SHIP): Action {
         return this.server.action('recharge', {
-            entity_type: EntityType.SHIP,
-            id: UInt64.from(shipId),
+            entity_type: entityType,
+            id: UInt64.from(entityId),
         })
     }
 
@@ -130,13 +138,17 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    warp(shipId: UInt64Type, destination: CoordinatesType): Action {
+    warp(
+        entityId: UInt64Type,
+        destination: CoordinatesType,
+        entityType: EntityTypeName = EntityType.SHIP
+    ): Action {
         const x = Int64.from(destination.x)
         const y = Int64.from(destination.y)
 
         return this.server.action('warp', {
-            entity_type: EntityType.SHIP,
-            id: UInt64.from(shipId),
+            entity_type: entityType,
+            id: UInt64.from(entityId),
             x,
             y,
         })
