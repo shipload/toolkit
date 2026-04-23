@@ -22,8 +22,8 @@ suite('tier utilities', function () {
     })
 
     test('itemTier returns 0 for raw resources', function () {
-        assert.equal(itemTier(26), 0)
-        assert.equal(itemTier(1000), 0)
+        assert.equal(itemTier(101), 0)
+        assert.equal(itemTier(402), 0)
     })
 
     test('itemOffset returns offset within tier', function () {
@@ -40,7 +40,7 @@ suite('tier utilities', function () {
         assert.equal(itemCategory(10200), 'entity')
         assert.equal(itemCategory(20001), 'component')
         assert.equal(itemCategory(20200), 'entity')
-        assert.equal(itemCategory(26), 'resource')
+        assert.equal(itemCategory(101), 'resource')
     })
 
     test('isRelatedItem matches same offset across tiers', function () {
@@ -51,7 +51,7 @@ suite('tier utilities', function () {
     })
 
     test('isCraftedItem checks >= 10000', function () {
-        assert.isFalse(isCraftedItem(26))
+        assert.isFalse(isCraftedItem(101))
         assert.isTrue(isCraftedItem(10001))
         assert.isTrue(isCraftedItem(20001))
     })

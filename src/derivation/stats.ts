@@ -8,7 +8,7 @@ export interface StatDefinition {
     inverted?: boolean
 }
 
-const METAL_STATS: StatDefinition[] = [
+const ORE_STATS: StatDefinition[] = [
     {
         key: 'strength',
         label: 'Strength',
@@ -30,24 +30,24 @@ const METAL_STATS: StatDefinition[] = [
     },
 ]
 
-const PRECIOUS_STATS: StatDefinition[] = [
+const CRYSTAL_STATS: StatDefinition[] = [
     {
         key: 'conductivity',
         label: 'Conductivity',
         abbreviation: 'CON',
-        purpose: 'Efficiency of energy/signal transfer',
+        purpose: 'Efficiency of energy/signal transfer through crystalline lattice',
     },
     {
-        key: 'ductility',
-        label: 'Ductility',
-        abbreviation: 'DUC',
-        purpose: 'Ability to be worked into fine, precise shapes',
+        key: 'resonance',
+        label: 'Resonance',
+        abbreviation: 'RES',
+        purpose: 'Frequency tuning and piezoelectric response — storage and amplification',
     },
     {
         key: 'reflectivity',
         label: 'Reflectivity',
         abbreviation: 'REF',
-        purpose: 'Surface quality for heat management and precision optics',
+        purpose: 'Optical refraction and reflection — lenses, mirrors, focus',
     },
 ]
 
@@ -72,54 +72,54 @@ const GAS_STATS: StatDefinition[] = [
     },
 ]
 
-const MINERAL_STATS: StatDefinition[] = [
+const REGOLITH_STATS: StatDefinition[] = [
     {
-        key: 'resonance',
-        label: 'Resonance',
-        abbreviation: 'RES',
-        purpose: 'Energy field interaction — storage, focusing, projection',
+        key: 'composition',
+        label: 'Composition',
+        abbreviation: 'COM',
+        purpose: 'Mineral/metal mix — drives sensor, chip, and optic crafting quality',
     },
     {
         key: 'hardness',
         label: 'Hardness',
         abbreviation: 'HRD',
-        purpose: 'Resistance to wear — cutting surfaces, penetration',
+        purpose: 'Particle hardness — cutting surfaces, abrasives, wear resistance',
     },
     {
-        key: 'clarity',
-        label: 'Clarity',
-        abbreviation: 'CLR',
-        purpose: 'Crystalline perfection — precision optics',
+        key: 'fineness',
+        label: 'Fineness',
+        abbreviation: 'FIN',
+        purpose: 'Grain size — fine powder for smooth composites and sintering',
     },
 ]
 
-const ORGANIC_STATS: StatDefinition[] = [
+const BIOMASS_STATS: StatDefinition[] = [
     {
         key: 'plasticity',
         label: 'Plasticity',
         abbreviation: 'PLA',
-        purpose: 'Ease of reshaping — speeds processing',
+        purpose: 'Flexibility and deformation under load',
     },
     {
         key: 'insulation',
         label: 'Insulation',
         abbreviation: 'INS',
-        purpose: 'Energy containment — reduces energy loss',
+        purpose: 'Thermal and electrical blocking capacity',
     },
     {
-        key: 'purity',
-        label: 'Purity',
-        abbreviation: 'PUR',
-        purpose: 'Biological cleanliness — better composites and lubricants',
+        key: 'saturation',
+        label: 'Saturation',
+        abbreviation: 'SAT',
+        purpose: 'Concentration of useful organic compounds per unit',
     },
 ]
 
 const STAT_MAP: Record<ResourceCategory, StatDefinition[]> = {
-    metal: METAL_STATS,
-    precious: PRECIOUS_STATS,
+    ore: ORE_STATS,
+    crystal: CRYSTAL_STATS,
     gas: GAS_STATS,
-    mineral: MINERAL_STATS,
-    organic: ORGANIC_STATS,
+    regolith: REGOLITH_STATS,
+    biomass: BIOMASS_STATS,
 }
 
 export function getStatDefinitions(category: ResourceCategory): StatDefinition[] {

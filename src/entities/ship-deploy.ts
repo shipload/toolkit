@@ -15,11 +15,11 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
 } {
     const density = stats.density ?? 500
     const strength = stats.strength ?? 500
-    const ductility = stats.ductility ?? 500
-    const purity = stats.purity ?? 500
+    const fineness = stats.fineness ?? 500
+    const saturation = stats.saturation ?? 500
 
     const hullmass = 25000 + 75 * density
-    const statSum = strength + ductility + purity
+    const statSum = strength + fineness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(1000000 * Math.pow(10, exponent))
 
@@ -44,11 +44,11 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     recharge: number
 } {
     const res = stats.resonance ?? 500
-    const clr = stats.clarity ?? 500
+    const ref = stats.reflectivity ?? 500
 
     return {
         capacity: 300 + Math.floor(res / 6),
-        recharge: 1 + Math.floor((clr * 3) / 1000),
+        recharge: 1 + Math.floor((ref * 3) / 1000),
     }
 }
 
@@ -76,11 +76,11 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
     thrust: number
     quantity: number
 } {
-    const duc = stats.ductility ?? 500
+    const fin = stats.fineness ?? 500
     const pla = stats.plasticity ?? 500
 
     return {
-        mass: Math.max(200, 2000 - Math.floor(duc * 2)),
+        mass: Math.max(200, 2000 - Math.floor(fin * 2)),
         thrust: 1 + Math.floor(pla / 500),
         quantity: 1,
     }
@@ -91,11 +91,11 @@ export function computeManufacturingCapabilities(stats: Record<string, number>):
     drain: number
 } {
     const rea = stats.reactivity ?? 500
-    const clr = stats.clarity ?? 500
+    const com = stats.composition ?? 500
 
     return {
         speed: 100 + Math.floor((rea * 4) / 5),
-        drain: Math.max(5, 30 - Math.floor(clr / 33)),
+        drain: Math.max(5, 30 - Math.floor(com / 33)),
     }
 }
 
@@ -106,12 +106,12 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
 } {
     const res = stats.resonance ?? 500
     const con = stats.conductivity ?? 500
-    const clr = stats.clarity ?? 500
+    const ref = stats.reflectivity ?? 500
 
     return {
         capacity: Math.max(1, 1 + Math.floor(res / 400)),
         efficiency: 2000 + con * 6,
-        drain: Math.max(3, 15 - Math.floor(clr / 80)),
+        drain: Math.max(3, 15 - Math.floor(ref / 80)),
     }
 }
 
@@ -122,10 +122,10 @@ export function computeStorageCapabilities(
     capacityBonus: number
 } {
     const strength = stats.strength ?? 500
-    const ductility = stats.ductility ?? 500
-    const purity = stats.purity ?? 500
+    const fineness = stats.fineness ?? 500
+    const saturation = stats.saturation ?? 500
 
-    const statSum = strength + ductility + purity
+    const statSum = strength + fineness + saturation
     const capacityBonus = Math.floor(
         (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
     )
@@ -139,11 +139,11 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
 } {
     const density = stats.density ?? 500
     const strength = stats.strength ?? 500
-    const ductility = stats.ductility ?? 500
-    const purity = stats.purity ?? 500
+    const fineness = stats.fineness ?? 500
+    const saturation = stats.saturation ?? 500
 
     const hullmass = 25000 + 75 * density
-    const statSum = strength + ductility + purity
+    const statSum = strength + fineness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(20000000 * Math.pow(10, exponent))
 

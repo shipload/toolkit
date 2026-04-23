@@ -11,42 +11,39 @@ export interface CategoryInfo {
 
 const categories: CategoryInfo[] = [
     {
-        id: 'metal',
-        name: 'Metals',
-        label: 'Metal',
-        description: 'Structural, strong, heavy — hulls, frames, load-bearing components',
-        color: categoryColors.metal,
+        id: 'ore',
+        name: 'Ore',
+        label: 'Ore',
+        description: 'Structural metal-bearing rock — hulls, frames, load-bearing components',
+        color: categoryColors.ore,
     },
     {
-        id: 'precious',
-        name: 'Precious Metals',
-        label: 'Precious Metal',
-        description:
-            'Conductive, corrosion-resistant — electronics, energy systems, precision components',
-        color: categoryColors.precious,
+        id: 'crystal',
+        name: 'Crystal',
+        label: 'Crystal',
+        description: 'Crystalline lattice — conductors, energy storage, resonant systems',
+        color: categoryColors.crystal,
     },
     {
         id: 'gas',
-        name: 'Gases',
+        name: 'Gas',
         label: 'Gas',
-        description:
-            'Energy, fuel, volatile/reactive — propulsion, thermal processing, chemical reactions',
+        description: 'Atmospheric volatile — propulsion, thermal processing, chemical reactions',
         color: categoryColors.gas,
     },
     {
-        id: 'mineral',
-        name: 'Minerals',
-        label: 'Mineral',
-        description:
-            'Crystalline, hard, precise — sensors, optics, energy storage, cutting surfaces',
-        color: categoryColors.mineral,
+        id: 'regolith',
+        name: 'Regolith',
+        label: 'Regolith',
+        description: 'Surface mineral dust — sensors, optics, computation, cutting surfaces',
+        color: categoryColors.regolith,
     },
     {
-        id: 'organic',
-        name: 'Organics',
-        label: 'Organic',
-        description: 'Adaptive, biological, polymer — insulation, composites, bio-processes',
-        color: categoryColors.organic,
+        id: 'biomass',
+        name: 'Biomass',
+        label: 'Biomass',
+        description: 'Organic polymer — insulation, composites, bio-processes',
+        color: categoryColors.biomass,
     },
 ]
 

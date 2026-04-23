@@ -35,7 +35,7 @@ function synthesizeItem(id: number, source: RecipeSource): Item {
         name: source.name,
         description: source.description,
         mass: source.mass,
-        category: 'metal',
+        category: 'ore',
         tier: 't1',
         color: source.color,
     })

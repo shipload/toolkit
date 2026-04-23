@@ -135,11 +135,11 @@ function decodeStackStats(itemId: number, stats: UInt64): Record<string, number>
 }
 
 export const categoryItemMass: Record<string, number> = {
-    metal: 30000,
-    precious: 40000,
+    ore: 30000,
+    crystal: 40000,
     gas: 15000,
-    mineral: 22000,
-    organic: 15000,
+    regolith: 22000,
+    biomass: 15000,
 }
 
 export function computeInputMass(

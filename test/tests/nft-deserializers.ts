@@ -15,8 +15,8 @@ import {
 suite('NFT deserializers', function () {
     test('deserializeResource: basic round-trip fields', function () {
         const data = {quantity: 10, stats: '12345', origin_x: '100', origin_y: '-50'}
-        const result = deserializeResource(data, 26) // iron
-        assert.equal(result.item_id, 26)
+        const result = deserializeResource(data, 101) // ore t1
+        assert.equal(result.item_id, 101)
         assert.equal(result.quantity, 10)
         assert.equal(result.stats, '12345')
         assert.isUndefined(result.modules)
@@ -95,7 +95,7 @@ suite('NFT deserializers', function () {
     test('deserializeAsset dispatches by item type', function () {
         const resource = deserializeAsset(
             {quantity: 5, stats: '1', origin_x: '0', origin_y: '0'},
-            26
+            101
         )
         assert.isUndefined(resource.modules)
 

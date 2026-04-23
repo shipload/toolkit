@@ -388,9 +388,9 @@ suite('travel', function () {
 
         test('calculates both unload and load times when both specified', () => {
             const ship = createMockShip({loaderQuantity: 2})
-            const cargos = [createMockCargo(1, 100), createMockCargo(26, 50)]
-            const loadMap = new Map([[1, 20]])
-            const unloadMap = new Map([[26, 50]])
+            const cargos = [createMockCargo(301, 100), createMockCargo(101, 50)]
+            const loadMap = new Map([[301, 20]])
+            const unloadMap = new Map([[101, 50]])
             const breakdown = calculateLoadTimeBreakdown(ship, cargos, loadMap, unloadMap)
 
             assert.isAbove(breakdown.unloadTime, 0, 'Should have unload time')

@@ -76,12 +76,12 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
 } {
     const density = stats['density'] ?? 500
     const strength = stats['strength'] ?? 500
-    const ductility = stats['ductility'] ?? 500
-    const purity = stats['purity'] ?? 500
+    const fineness = stats['fineness'] ?? 500
+    const saturation = stats['saturation'] ?? 500
 
     const hullmass = 25000 + 75 * density
 
-    const statSum = strength + ductility + purity
+    const statSum = strength + fineness + saturation
     const exponent = statSum / 2997
     const capacity = Math.floor(1000000 * Math.pow(10, exponent))
 
@@ -94,12 +94,12 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
 } {
     const strength = stats['strength'] ?? 0
     const density = stats['density'] ?? 0
-    const ductility = stats['ductility'] ?? 0
-    const purity = stats['purity'] ?? 0
+    const fineness = stats['fineness'] ?? 0
+    const saturation = stats['saturation'] ?? 0
 
     const hullmass = 20000 + 50 * density
 
-    const statSum = strength + ductility + purity
+    const statSum = strength + fineness + saturation
     const exponent = statSum / 2500
     const capacity = Math.floor(1500000 * Math.pow(10, exponent))
 

@@ -329,3 +329,8 @@ export {
     ITEM_TYPE_ENTITY,
     itemTypeCode,
 } from './data/tiers'
+
+export {formatMass, formatMassDelta} from './format'
+
+export {displayName, describeItem} from './resolution/display-name'
+export type {DescribeOptions} from './resolution/display-name'

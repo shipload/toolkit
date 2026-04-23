@@ -24,21 +24,21 @@ interface ResourceEntry {
 }
 
 const RESOURCE_CATALOG: ResourceEntry[] = [
-    {id: 26, tier: 't1'},
-    {id: 13, tier: 't2'},
-    {id: 24, tier: 't3'},
-    {id: 29, tier: 't1'},
-    {id: 47, tier: 't2'},
-    {id: 79, tier: 't3'},
-    {id: 1, tier: 't1'},
-    {id: 2, tier: 't2'},
-    {id: 18, tier: 't3'},
-    {id: 14, tier: 't1'},
-    {id: 1000, tier: 't2'},
-    {id: 1001, tier: 't3'},
-    {id: 6, tier: 't1'},
-    {id: 1003, tier: 't2'},
-    {id: 1002, tier: 't3'},
+    {id: 101, tier: 't1'},
+    {id: 102, tier: 't2'},
+    {id: 103, tier: 't3'},
+    {id: 201, tier: 't1'},
+    {id: 202, tier: 't2'},
+    {id: 203, tier: 't3'},
+    {id: 301, tier: 't1'},
+    {id: 302, tier: 't2'},
+    {id: 303, tier: 't3'},
+    {id: 401, tier: 't1'},
+    {id: 402, tier: 't2'},
+    {id: 403, tier: 't3'},
+    {id: 501, tier: 't1'},
+    {id: 502, tier: 't2'},
+    {id: 503, tier: 't3'},
 ]
 
 export function getDepthThreshold(tier: ResourceTier): number {
@@ -91,14 +91,14 @@ export function getResourceWeight(itemId: number, stratum: number): number {
     }
 }
 
-const ASTEROID_RESOURCES = [26, 13, 24, 29, 47]
-const NEBULA_RESOURCES = [47, 79, 1, 2, 18]
-const GAS_GIANT_RESOURCES = [1, 2, 18, 14, 6]
-const ROCKY_RESOURCES = [26, 13, 24, 14, 1000, 1001, 1002]
-const TERRESTRIAL_RESOURCES = [29, 47, 14, 1000, 6, 1003, 1002]
-const ICY_RESOURCES = [26, 1, 2, 14, 1001, 6, 1003]
-const OCEAN_RESOURCES = [29, 79, 1, 18, 6, 1003, 1002]
-const INDUSTRIAL_RESOURCES = [26, 13, 24, 29, 79, 1000, 1001]
+const ASTEROID_RESOURCES = [101, 102, 103, 201, 202]
+const NEBULA_RESOURCES = [202, 203, 301, 302, 303]
+const GAS_GIANT_RESOURCES = [301, 302, 303, 401, 501]
+const ROCKY_RESOURCES = [101, 102, 103, 401, 402, 403, 503]
+const TERRESTRIAL_RESOURCES = [201, 202, 401, 402, 501, 502, 503]
+const ICY_RESOURCES = [101, 301, 302, 401, 403, 501, 502]
+const OCEAN_RESOURCES = [201, 203, 301, 303, 501, 502, 503]
+const INDUSTRIAL_RESOURCES = [101, 102, 103, 201, 203, 402, 403]
 
 export function getLocationCandidates(locationType: number, subtype: number): number[] {
     if (locationType === 2) return ASTEROID_RESOURCES

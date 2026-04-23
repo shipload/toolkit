@@ -138,8 +138,8 @@ describe('describeModule', () => {
 describe('describeModuleForItem', () => {
     test('Non-module ResolvedItem returns null', () => {
         const r = {
-            itemId: 26,
-            name: 'Iron',
+            itemId: 101,
+            name: 'Crude Ore',
             icon: '',
             tier: 't1',
             mass: 100,

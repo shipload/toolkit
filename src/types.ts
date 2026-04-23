@@ -113,7 +113,7 @@ export interface Distance {
     distance: UInt16
 }
 
-export type ResourceCategory = 'metal' | 'precious' | 'gas' | 'mineral' | 'organic'
+export type ResourceCategory = 'ore' | 'crystal' | 'gas' | 'regolith' | 'biomass'
 export type ResourceTier = 't1' | 't2' | 't3' | 't4' | 't5'
 
 @Struct.type('item')

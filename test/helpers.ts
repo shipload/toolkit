@@ -26,7 +26,7 @@ function ensureTestItem(itemId: number, mass?: number): void {
             name: `TestItem-${itemId}`,
             description: 'Synthetic item registered for tests.',
             mass: UInt32.from(mass ?? 10),
-            category: 'metal',
+            category: 'ore',
             tier: 't1',
             color: '#FF00FF',
         })

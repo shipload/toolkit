@@ -22,11 +22,11 @@ suite('tokens', function () {
 
     suite('categoryIconShapes', function () {
         test('maps each resource category to a shape name', function () {
-            assert.equal(categoryIconShapes.metal, 'hex')
-            assert.equal(categoryIconShapes.precious, 'diamond')
+            assert.equal(categoryIconShapes.ore, 'hex')
+            assert.equal(categoryIconShapes.crystal, 'diamond')
             assert.equal(categoryIconShapes.gas, 'circle')
-            assert.equal(categoryIconShapes.mineral, 'square')
-            assert.equal(categoryIconShapes.organic, 'star')
+            assert.equal(categoryIconShapes.regolith, 'square')
+            assert.equal(categoryIconShapes.biomass, 'star')
         })
 
         test('CategoryIconShape type accepts the five known values', function () {

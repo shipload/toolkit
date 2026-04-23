@@ -82,10 +82,10 @@ suite('Crafting', function () {
     })
 
     suite('Component Stats', function () {
-        test('hull plates from metal stacks', function () {
+        test('hull plates from ore stacks', function () {
             const stats = computeComponentStats(ITEM_HULL_PLATES, [
                 {
-                    category: 'metal',
+                    category: 'ore',
                     stacks: [
                         {quantity: 30, stats: {strength: 450, tolerance: 200, density: 300}},
                         {quantity: 10, stats: {strength: 720, tolerance: 400, density: 150}},
@@ -99,52 +99,52 @@ suite('Crafting', function () {
             assert.equal(den!.value, 262)
         })
 
-        test('focusing array from precious stacks blends weighted average', function () {
+        test('focusing array from crystal stacks blends weighted average', function () {
             const stats = computeComponentStats(ITEM_FOCUSING_ARRAY, [
                 {
-                    category: 'precious',
+                    category: 'crystal',
                     stacks: [
                         {
                             quantity: 10,
-                            stats: {conductivity: 200, ductility: 200, reflectivity: 200},
+                            stats: {conductivity: 200, resonance: 200, reflectivity: 200},
                         },
                         {
                             quantity: 15,
-                            stats: {conductivity: 800, ductility: 800, reflectivity: 800},
+                            stats: {conductivity: 800, resonance: 800, reflectivity: 800},
                         },
                     ],
                 },
             ])
             assert.equal(stats.length, 2)
             const cond = stats.find((s) => s.key === 'conductivity')
-            const duc = stats.find((s) => s.key === 'ductility')
+            const res = stats.find((s) => s.key === 'resonance')
             assert.equal(cond!.value, 560)
-            assert.equal(duc!.value, 560)
+            assert.equal(res!.value, 560)
         })
 
-        test('cargo lining from precious + organic', function () {
+        test('cargo lining from regolith + biomass', function () {
             const stats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
-                    category: 'precious',
+                    category: 'regolith',
                     stacks: [
                         {
                             quantity: 10,
-                            stats: {conductivity: 500, ductility: 700, reflectivity: 300},
+                            stats: {composition: 500, hardness: 200, fineness: 700},
                         },
                     ],
                 },
                 {
-                    category: 'organic',
+                    category: 'biomass',
                     stacks: [
-                        {quantity: 20, stats: {plasticity: 400, insulation: 200, purity: 800}},
+                        {quantity: 20, stats: {plasticity: 400, insulation: 200, saturation: 800}},
                     ],
                 },
             ])
             assert.equal(stats.length, 2)
-            const duc = stats.find((s) => s.key === 'ductility')
-            const pur = stats.find((s) => s.key === 'purity')
-            assert.equal(duc!.value, 700)
-            assert.equal(pur!.value, 800)
+            const fin = stats.find((s) => s.key === 'fineness')
+            const sat = stats.find((s) => s.key === 'saturation')
+            assert.equal(fin!.value, 700)
+            assert.equal(sat!.value, 800)
         })
     })
 
@@ -155,7 +155,7 @@ suite('Crafting', function () {
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 400, density: 200}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {ductility: 600, purity: 700}}],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {fineness: 600, saturation: 700}}],
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
@@ -176,17 +176,16 @@ suite('Crafting', function () {
             const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
             assert.equal(stats['density'], 300)
-            assert.equal(stats['ductility'], 600)
-            assert.equal(stats['purity'], 700)
+            assert.equal(stats['fineness'], 600)
+            assert.equal(stats['saturation'], 700)
         })
 
         test('decoded hauler stats use input stat key names', function () {
-            const seed = encodeStats([500, 500, 500, 500])
+            const seed = encodeStats([500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'resonance')
+            assert.property(decoded, 'reflectivity')
             assert.property(decoded, 'conductivity')
-            assert.property(decoded, 'clarity')
-            assert.property(decoded, 'ductility')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')
@@ -229,7 +228,7 @@ suite('Crafting', function () {
             const seedB = 0xfedcba9876543210n
             const slotInputs: RecipeSlotInput[] = [
                 {
-                    itemId: 1003,
+                    itemId: 502,
                     category: 'gas',
                     stacks: [
                         {quantity: 20, stats: seedA},
@@ -282,56 +281,56 @@ suite('Crafting', function () {
             assert.equal(decoded['thermal'], thm)
         })
 
-        test('multi-input multi-category component (Cargo Lining from precious + organic)', function () {
-            const preciousSeed = 0x1111222233334444n
-            const organicSeed = 0xaaaabbbbccccddddn
+        test('multi-input multi-category component (Cargo Lining from regolith + biomass)', function () {
+            const regolithSeed = 0x1111222233334444n
+            const biomassSeed = 0xaaaabbbbccccddddn
             const slotInputs: RecipeSlotInput[] = [
                 {
                     itemId: 200,
-                    category: 'precious',
-                    stacks: [{quantity: 6, stats: preciousSeed}],
+                    category: 'regolith',
+                    stacks: [{quantity: 10, stats: regolithSeed}],
                 },
                 {
                     itemId: 500,
-                    category: 'organic',
-                    stacks: [{quantity: 14, stats: organicSeed}],
+                    category: 'biomass',
+                    stacks: [{quantity: 20, stats: biomassSeed}],
                 },
             ]
             const outputStats = computeCraftedOutputStats(ITEM_CARGO_LINING, slotInputs)
 
-            const rawP = {
-                stat1: decodeStat(preciousSeed, 0),
-                stat2: decodeStat(preciousSeed, 1),
-                stat3: decodeStat(preciousSeed, 2),
+            const rawR = {
+                stat1: decodeStat(regolithSeed, 0),
+                stat2: decodeStat(regolithSeed, 1),
+                stat3: decodeStat(regolithSeed, 2),
             }
-            const rawO = {
-                stat1: decodeStat(organicSeed, 0),
-                stat2: decodeStat(organicSeed, 1),
-                stat3: decodeStat(organicSeed, 2),
+            const rawB = {
+                stat1: decodeStat(biomassSeed, 0),
+                stat2: decodeStat(biomassSeed, 1),
+                stat3: decodeStat(biomassSeed, 2),
             }
             const expectedStats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
-                    category: 'precious',
+                    category: 'regolith',
                     stacks: [
                         {
-                            quantity: 6,
+                            quantity: 10,
                             stats: {
-                                conductivity: rawP.stat1,
-                                ductility: rawP.stat2,
-                                reflectivity: rawP.stat3,
+                                composition: rawR.stat1,
+                                hardness: rawR.stat2,
+                                fineness: rawR.stat3,
                             },
                         },
                     ],
                 },
                 {
-                    category: 'organic',
+                    category: 'biomass',
                     stacks: [
                         {
-                            quantity: 14,
+                            quantity: 20,
                             stats: {
-                                plasticity: rawO.stat1,
-                                insulation: rawO.stat2,
-                                purity: rawO.stat3,
+                                plasticity: rawB.stat1,
+                                insulation: rawB.stat2,
+                                saturation: rawB.stat3,
                             },
                         },
                     ],
@@ -341,12 +340,12 @@ suite('Crafting', function () {
                 ITEM_CARGO_LINING,
                 BigInt(outputStats.toString())
             )
-            const duc = expectedStats.find((s) => s.key === 'ductility')!.value
-            const pur = expectedStats.find((s) => s.key === 'purity')!.value
-            assert.equal(decoded['ductility'], duc)
-            assert.equal(decoded['purity'], pur)
-            assert.equal(decoded['ductility'], rawP.stat2)
-            assert.equal(decoded['purity'], rawO.stat3)
+            const fin = expectedStats.find((s) => s.key === 'fineness')!.value
+            const sat = expectedStats.find((s) => s.key === 'saturation')!.value
+            assert.equal(decoded['fineness'], fin)
+            assert.equal(decoded['saturation'], sat)
+            assert.equal(decoded['fineness'], rawR.stat3)
+            assert.equal(decoded['saturation'], rawB.stat3)
         })
 
         test('entity recipe (Container packed from hull_plates + cargo_lining)', function () {
@@ -376,7 +375,7 @@ suite('Crafting', function () {
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 700, density: 400}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {ductility: 600, purity: 800}}],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {fineness: 600, saturation: 800}}],
             })
             const decoded = decodeCraftedItemStats(
                 ITEM_CONTAINER_T1_PACKED,
@@ -387,8 +386,8 @@ suite('Crafting', function () {
             }
             assert.equal(decoded['strength'], 566)
             assert.equal(decoded['density'], 333)
-            assert.equal(decoded['ductility'], 600)
-            assert.equal(decoded['purity'], 800)
+            assert.equal(decoded['fineness'], 600)
+            assert.equal(decoded['saturation'], 800)
         })
 
         test('throws for unknown output item id', function () {
@@ -401,7 +400,7 @@ suite('Crafting', function () {
                     computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, [
                         {
                             itemId: 200,
-                            category: 'precious',
+                            category: 'crystal',
                             stacks: [{quantity: 1, stats: 0n}],
                         },
                     ]),
@@ -415,8 +414,8 @@ suite('Crafting', function () {
             const caps = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             assert.equal(caps.hullmass, 25000 + 75 * 500)
             assert.equal(caps.capacity, Math.floor(1000000 * Math.pow(10, 1500 / 2997)))
@@ -427,8 +426,8 @@ suite('Crafting', function () {
             const caps = computeContainerCapabilities({
                 strength: 1,
                 density: 1,
-                ductility: 1,
-                purity: 1,
+                fineness: 1,
+                saturation: 1,
             })
             assert.equal(caps.hullmass, 25075)
             assert.isAtLeast(caps.hullmass, 25000)
@@ -441,8 +440,8 @@ suite('Crafting', function () {
             const caps = computeContainerCapabilities({
                 strength: 999,
                 density: 999,
-                ductility: 999,
-                purity: 999,
+                fineness: 999,
+                saturation: 999,
             })
             assert.equal(caps.hullmass, 25000 + 75 * 999)
             assert.isAtLeast(caps.hullmass, 99000)
@@ -455,14 +454,14 @@ suite('Crafting', function () {
             const min = computeContainerCapabilities({
                 density: 1,
                 strength: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             const max = computeContainerCapabilities({
                 density: 999,
                 strength: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             assert.isAtLeast(min.hullmass, 25000)
             assert.isAtMost(max.hullmass, 100000)
@@ -471,14 +470,14 @@ suite('Crafting', function () {
         test('capacity range is 1M-10M', function () {
             const min = computeContainerCapabilities({
                 strength: 1,
-                ductility: 1,
-                purity: 1,
+                fineness: 1,
+                saturation: 1,
                 density: 500,
             })
             const max = computeContainerCapabilities({
                 strength: 999,
-                ductility: 999,
-                purity: 999,
+                fineness: 999,
+                saturation: 999,
                 density: 500,
             })
             assert.isAtLeast(min.capacity, 1000000)
@@ -489,14 +488,14 @@ suite('Crafting', function () {
             const low = computeContainerCapabilities({
                 density: 100,
                 strength: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             const high = computeContainerCapabilities({
                 density: 900,
                 strength: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             assert.isBelow(low.hullmass, high.hullmass)
         })
@@ -507,14 +506,14 @@ suite('Crafting', function () {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             assert.isBelow(t2.hullmass, t1.hullmass)
         })
@@ -523,20 +522,20 @@ suite('Crafting', function () {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
-                ductility: 500,
-                purity: 500,
+                fineness: 500,
+                saturation: 500,
             })
             assert.isAbove(t2.capacity, t1.capacity)
         })
 
         test('T2 container formulas match contract', function () {
-            const stats = {strength: 400, density: 300, ductility: 600, purity: 200}
+            const stats = {strength: 400, density: 300, fineness: 600, saturation: 200}
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 20000 + 50 * 300)
             const statSum = 400 + 600 + 200
@@ -573,7 +572,7 @@ suite('Crafting', function () {
         test('component returns positive mass', function () {
             const mass = computeInputMass(ITEM_HULL_PLATES, 'component')
             assert.isAbove(mass, 0)
-            assert.equal(mass, 15 * categoryItemMass['metal'])
+            assert.equal(mass, 15 * categoryItemMass['ore'])
         })
 
         test('module returns positive mass', function () {

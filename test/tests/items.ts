@@ -5,9 +5,9 @@ import {ITEM_CARGO_LINING, ITEM_CONTAINER_T1_PACKED, ITEM_ENGINE_T1} from '../..
 suite('items', function () {
     suite('getItem', function () {
         test('returns item for valid id', function () {
-            const item = getItem(1)
+            const item = getItem(101)
             assert.isDefined(item)
-            assert.equal(Number(item.id), 1)
+            assert.equal(Number(item.id), 101)
         })
 
         test('throws error for invalid item id', function () {
@@ -51,7 +51,7 @@ suite('items', function () {
         test('contains valid item ids', function () {
             assert.isArray(itemIds)
             assert.isTrue(itemIds.length > 0)
-            assert.isTrue(itemIds.some((id) => Number(id) === 1))
+            assert.isTrue(itemIds.some((id) => Number(id) === 101))
         })
     })
 })

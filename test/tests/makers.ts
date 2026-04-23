@@ -63,8 +63,8 @@ suite('makeShip factory', function () {
             ],
         })
 
-        // Storage stat keys are [strength, ductility, purity, density].
-        // computeStorageCapabilities reads strength+ductility+purity (ignores density).
+        // Storage stat keys are [strength, density, fineness, saturation].
+        // computeStorageCapabilities reads strength+fineness+saturation (ignores density).
         // stats1 sum = 300, stats2 sum = 1500, stats3 sum = 2100, stats4 sum = 2997
         // bonus_i = floor(base * (10 + floor(sum*10/2997)) / 100)
         // bonus1 = floor(1_000_000 * 11 / 100) = 110_000  (floor(3000/2997)=1)

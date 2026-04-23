@@ -117,14 +117,14 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
         resolvedStats = Object.entries(decoded).map(([key, value]) => {
-            const allDefs = getStatDefinitions('metal')
-                .concat(getStatDefinitions('precious'))
+            const allDefs = getStatDefinitions('ore')
+                .concat(getStatDefinitions('crystal'))
                 .concat(getStatDefinitions('gas'))
-                .concat(getStatDefinitions('mineral'))
-                .concat(getStatDefinitions('organic'))
+                .concat(getStatDefinitions('regolith'))
+                .concat(getStatDefinitions('biomass'))
             const def = allDefs.find((d) => d.key === key)
             const statDef = comp.stats.find((s) => s.key === key)
-            const cat = (statDef?.source ?? 'metal') as ResourceCategory
+            const cat = (statDef?.source ?? 'ore') as ResourceCategory
             return {
                 key,
                 label: def?.label ?? key,
@@ -219,9 +219,9 @@ function computeCapabilityGroup(
         }
         case MODULE_STORAGE: {
             const str = stats.strength ?? 500
-            const duc = stats.ductility ?? 500
-            const pur = stats.purity ?? 500
-            const statSum = str + duc + pur
+            const fin = stats.fineness ?? 500
+            const sat = stats.saturation ?? 500
+            const statSum = str + fin + sat
             const pct = 10 + Math.floor((statSum * 10) / 2997)
             return {capability: 'Storage', attributes: [{label: 'Capacity Bonus', value: pct}]}
         }

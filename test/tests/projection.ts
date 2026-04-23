@@ -161,7 +161,7 @@ suite('projectEntity (stack-aware)', function () {
 
     suite('cross-validation against contract (synthetic — fixture deferred)', function () {
         test('gather + craft produces expected output stack matching contract semantics', function () {
-            const RESOURCE_ID = 26
+            const RESOURCE_ID = 101
             const COMPONENT_ID = 10005
             const COMPONENT_MASS = 50000
             const RESOURCE_SEED = 1234
@@ -175,7 +175,7 @@ suite('projectEntity (stack-aware)', function () {
                     name: 'Matter Conduit',
                     description: 'Heavy-duty metal shaft used in gathering equipment.',
                     mass: UInt32.from(COMPONENT_MASS),
-                    category: 'metal',
+                    category: 'ore',
                     tier: 't1',
                     color: '#7B8D9E',
                 })

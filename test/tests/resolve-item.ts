@@ -17,7 +17,7 @@ import {
 
 suite('resolveItem', function () {
     test('resolves a resource by item ID without seed', function () {
-        const result = resolveItem(UInt16.from(26))
+        const result = resolveItem(UInt16.from(101))
         assert.equal(result.itemType, 'resource')
         assert.isDefined(result.name)
         assert.isDefined(result.tier)
@@ -27,7 +27,7 @@ suite('resolveItem', function () {
     })
 
     test('resolves a resource with seed and returns stats', function () {
-        const result = resolveItem(UInt16.from(26), UInt64.from(12345))
+        const result = resolveItem(UInt16.from(101), UInt64.from(12345))
         assert.equal(result.itemType, 'resource')
         assert.isDefined(result.stats)
         assert.isArray(result.stats)
@@ -115,15 +115,15 @@ suite('resolveItem', function () {
     })
 
     test('accepts plain numbers for itemId and seed', function () {
-        const result = resolveItem(26, 12345)
+        const result = resolveItem(101, 12345)
         assert.equal(result.itemType, 'resource')
     })
 
     test('resolveItem(ITEM_HAULER_T1) returns Hauler capability group', function () {
-        const seed = encodeStats([500, 500, 500, 500])
+        const seed = encodeStats([500, 500, 500])
         const resolved = resolveItem(UInt16.from(ITEM_HAULER_T1), UInt64.from(seed))
         assert.equal(resolved.itemType, 'module')
-        assert.equal(resolved.name, 'Hauler Module T1')
+        assert.equal(resolved.name, 'Hauler')
         assert.isArray(resolved.attributes)
         assert.lengthOf(resolved.attributes!, 1)
 
@@ -154,7 +154,7 @@ suite('ResolvedItem.abbreviation', function () {
     })
 
     test('resource abbreviation is null', function () {
-        const resolved = resolveItem(UInt16.from(26))
+        const resolved = resolveItem(UInt16.from(101))
         assert.isNull(resolved.abbreviation)
     })
 })

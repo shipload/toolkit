@@ -1,11 +1,11 @@
 import type {ResourceCategory, ResourceTier} from '../types'
 
 export const categoryColors: Record<ResourceCategory, string> = {
-    metal: '#5B9BD5',
-    precious: '#D4A843',
-    gas: '#7EC8E3',
-    mineral: '#B8A9C9',
-    organic: '#6B8E5A',
+    ore: '#C26D3F',
+    crystal: '#4ADBFF',
+    gas: '#B8E4A0',
+    regolith: '#C4A57B',
+    biomass: '#5A8B3E',
 }
 
 export const tierColors: Record<ResourceTier, string> = {
@@ -25,21 +25,21 @@ export const tierLabels: Record<ResourceTier, string> = {
 }
 
 export const categoryIcons: Record<ResourceCategory, string> = {
-    metal: '⬡',
-    precious: '◈',
+    ore: '⬡',
+    crystal: '◈',
     gas: '◎',
-    mineral: '◇',
-    organic: '❋',
+    regolith: '■',
+    biomass: '❋',
 }
 
 export type CategoryIconShape = 'hex' | 'diamond' | 'star' | 'circle' | 'square'
 
 export const categoryIconShapes: Record<ResourceCategory, CategoryIconShape> = {
-    metal: 'hex',
-    precious: 'diamond',
+    ore: 'hex',
+    crystal: 'diamond',
     gas: 'circle',
-    mineral: 'square',
-    organic: 'star',
+    regolith: 'square',
+    biomass: 'star',
 }
 
 export const componentIcon = '▣'
