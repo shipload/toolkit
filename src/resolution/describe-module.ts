@@ -73,8 +73,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         ],
         highlightKeys: ['quantity', 'thrust', 'mass'],
     },
-    manufacturing: {
-        id: 'module.manufacturing.description',
+    crafter: {
+        id: 'module.crafter.description',
         template: 'manufactures items at {speed} speed while draining {drain} energy per second',
         params: [
             ['speed', 'Speed'],

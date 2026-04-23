@@ -86,7 +86,7 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
     }
 }
 
-export function computeManufacturingCapabilities(stats: Record<string, number>): {
+export function computeCrafterCapabilities(stats: Record<string, number>): {
     speed: number
     drain: number
 } {
@@ -247,7 +247,7 @@ export function computeShipCapabilities(
         let totalSpeed = 0
         let totalDrain = 0
         for (const m of crafterModules) {
-            const caps = computeManufacturingCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
+            const caps = computeCrafterCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalSpeed += caps.speed
             totalDrain += caps.drain
         }

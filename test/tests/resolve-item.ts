@@ -9,7 +9,7 @@ import {
     ITEM_HAULER_T1,
     ITEM_HULL_PLATES,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     ITEM_SHIP_T1_PACKED,
     ITEM_THRUSTER_CORE,
     resolveItem,
@@ -84,7 +84,7 @@ suite('resolveItem', function () {
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
             [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth', 'Speed']],
             [ITEM_LOADER_T1, 'Loader', ['Mass', 'Thrust', 'Quantity']],
-            [ITEM_MANUFACTURING_T1, 'Manufacturing', ['Speed', 'Drain']],
+            [ITEM_CRAFTER_T1, 'Crafter', ['Speed', 'Drain']],
         ]
         for (const [itemId, capName, attrNames] of expectations) {
             const result = resolveItem(UInt16.from(itemId), UInt64.from(12345))

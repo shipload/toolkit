@@ -22,7 +22,7 @@ import {
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
-    computeManufacturingCapabilities,
+    computeCrafterCapabilities,
     computeShipHullCapabilities,
 } from '../entities/ship-deploy'
 import {computeContainerCapabilities} from '../entities/container'
@@ -197,9 +197,9 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_CRAFTER: {
-            const caps = computeManufacturingCapabilities(stats)
+            const caps = computeCrafterCapabilities(stats)
             return {
-                capability: 'Manufacturing',
+                capability: 'Crafter',
                 attributes: [
                     {label: 'Speed', value: caps.speed},
                     {label: 'Drain', value: caps.drain},

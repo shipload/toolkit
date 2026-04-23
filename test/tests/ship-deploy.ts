@@ -6,7 +6,7 @@ import {
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
-    computeManufacturingCapabilities,
+    computeCrafterCapabilities,
     computeShipCapabilities,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
@@ -245,33 +245,33 @@ suite('ship deploy formulas', function () {
         assert.isAbove(low.mass, high.mass)
     })
 
-    test('manufacturing formula exact values at min', function () {
-        const r = computeManufacturingCapabilities({reactivity: 1, composition: 1})
+    test('crafter formula exact values at min', function () {
+        const r = computeCrafterCapabilities({reactivity: 1, composition: 1})
         assert.equal(r.speed, 100)
         assert.equal(r.drain, 30)
     })
 
-    test('manufacturing formula exact values at mid', function () {
-        const r = computeManufacturingCapabilities({reactivity: 500, composition: 500})
+    test('crafter formula exact values at mid', function () {
+        const r = computeCrafterCapabilities({reactivity: 500, composition: 500})
         assert.equal(r.speed, 500)
         assert.equal(r.drain, 15)
     })
 
-    test('manufacturing formula exact values at max', function () {
-        const r = computeManufacturingCapabilities({reactivity: 999, composition: 999})
+    test('crafter formula exact values at max', function () {
+        const r = computeCrafterCapabilities({reactivity: 999, composition: 999})
         assert.equal(r.speed, 899)
         assert.equal(r.drain, 5)
     })
 
-    test('higher REA = higher manufacturing speed', function () {
-        const low = computeManufacturingCapabilities({reactivity: 100, composition: 500})
-        const high = computeManufacturingCapabilities({reactivity: 900, composition: 500})
+    test('higher REA = higher crafter speed', function () {
+        const low = computeCrafterCapabilities({reactivity: 100, composition: 500})
+        const high = computeCrafterCapabilities({reactivity: 900, composition: 500})
         assert.isBelow(low.speed, high.speed)
     })
 
-    test('higher COM = lower manufacturing drain', function () {
-        const low = computeManufacturingCapabilities({reactivity: 500, composition: 100})
-        const high = computeManufacturingCapabilities({reactivity: 500, composition: 900})
+    test('higher COM = lower crafter drain', function () {
+        const low = computeCrafterCapabilities({reactivity: 500, composition: 100})
+        const high = computeCrafterCapabilities({reactivity: 500, composition: 900})
         assert.isAbove(low.drain, high.drain)
     })
 

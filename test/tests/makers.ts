@@ -7,7 +7,7 @@ import {
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     makeContainer,
     makeShip,
@@ -180,7 +180,7 @@ suite('makeWarehouse factory', function () {
                     coordinates: {x: 0, y: 0},
                     hullmass: 500000,
                     capacity: 10_000_000,
-                    modules: [{itemId: ITEM_MANUFACTURING_T1, stats: crafterSeed}],
+                    modules: [{itemId: ITEM_CRAFTER_T1, stats: crafterSeed}],
                 }),
             /No compatible slot.*Warehouse/
         )

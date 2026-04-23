@@ -4,7 +4,7 @@ import {
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     MODULE_ANY,
     MODULE_CRAFTER,
@@ -22,7 +22,7 @@ export {
     ITEM_GENERATOR_T1,
     ITEM_GATHERER_T1,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     ITEM_HAULER_T1,
 }
@@ -202,7 +202,7 @@ export const components: ComponentDefinition[] = [
     {
         id: ITEM_TOOL_BIT,
         name: 'Tool Bit',
-        description: 'Dense regolith cutting head for manufacturing operations.',
+        description: 'Dense regolith cutting head for crafting operations.',
         color: '#C4A57B',
         mass: 30000,
         stats: [
@@ -210,12 +210,12 @@ export const components: ComponentDefinition[] = [
             {key: 'composition', source: 'regolith'},
         ],
         recipe: [{category: 'regolith' as ResourceCategory, quantity: 20}],
-        usedIn: [{type: 'module', name: 'Manufacturing'}],
+        usedIn: [{type: 'module', name: 'Crafter'}],
     },
     {
         id: ITEM_REACTION_CHAMBER,
         name: 'Reaction Chamber',
-        description: 'Gas-pressurized vessel for controlled manufacturing reactions.',
+        description: 'Gas-pressurized vessel for controlled crafting reactions.',
         color: '#B8E4A0',
         mass: 50000,
         stats: [
@@ -223,7 +223,7 @@ export const components: ComponentDefinition[] = [
             {key: 'thermal', source: 'gas'},
         ],
         recipe: [{category: 'gas' as ResourceCategory, quantity: 32}],
-        usedIn: [{type: 'module', name: 'Manufacturing'}],
+        usedIn: [{type: 'module', name: 'Crafter'}],
     },
     {
         id: ITEM_FOCUSING_ARRAY,
@@ -449,12 +449,12 @@ export const moduleRecipes: ModuleRecipe[] = [
         ],
     },
     {
-        id: 'manufacturing-t1',
-        name: 'Manufacturing',
+        id: 'crafter-t1',
+        name: 'Crafter',
         description:
             'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
         color: '#B8E4A0',
-        itemId: ITEM_MANUFACTURING_T1,
+        itemId: ITEM_CRAFTER_T1,
         moduleType: MODULE_CRAFTER,
         recipe: [
             {itemId: ITEM_TOOL_BIT, quantity: 3},

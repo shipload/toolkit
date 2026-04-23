@@ -4,7 +4,7 @@ import {
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     MODULE_CRAFTER,
     MODULE_ENGINE,
@@ -79,8 +79,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Gatherer'
         case ITEM_LOADER_T1:
             return 'Loader'
-        case ITEM_MANUFACTURING_T1:
-            return 'Manufacturing'
+        case ITEM_CRAFTER_T1:
+            return 'Crafter'
         case ITEM_STORAGE_T1:
             return 'Storage'
         default:

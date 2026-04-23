@@ -80,15 +80,15 @@ describe('describeModule', () => {
         expect(desc?.highlightKeys).toEqual(['quantity', 'thrust', 'mass'])
     })
 
-    test('Manufacturing produces the expected description', () => {
+    test('Crafter produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Manufacturing',
+            capability: 'Crafter',
             attributes: [
                 {label: 'Speed', value: 580},
                 {label: 'Drain', value: 15},
             ],
         })
-        expect(desc?.id).toBe('module.manufacturing.description')
+        expect(desc?.id).toBe('module.crafter.description')
         expect(desc?.template).toBe(
             'manufactures items at {speed} speed while draining {drain} energy per second'
         )

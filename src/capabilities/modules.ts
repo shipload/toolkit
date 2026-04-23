@@ -2,7 +2,7 @@ export const ITEM_ENGINE_T1 = 10100
 export const ITEM_GENERATOR_T1 = 10101
 export const ITEM_GATHERER_T1 = 10102
 export const ITEM_LOADER_T1 = 10103
-export const ITEM_MANUFACTURING_T1 = 10104
+export const ITEM_CRAFTER_T1 = 10104
 export const ITEM_STORAGE_T1 = 10105
 export const ITEM_HAULER_T1 = 10106
 
@@ -41,7 +41,7 @@ export function getModuleCapabilityType(itemId: number): number {
             return MODULE_GATHERER
         case ITEM_LOADER_T1:
             return MODULE_LOADER
-        case ITEM_MANUFACTURING_T1:
+        case ITEM_CRAFTER_T1:
             return MODULE_CRAFTER
         case ITEM_STORAGE_T1:
             return MODULE_STORAGE

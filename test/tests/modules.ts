@@ -7,7 +7,7 @@ import {
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
-    ITEM_MANUFACTURING_T1,
+    ITEM_CRAFTER_T1,
     MODULE_ANY,
     MODULE_CRAFTER,
     MODULE_ENGINE,
@@ -58,13 +58,13 @@ suite('modules', function () {
     test('getModuleCapabilityType returns correct type for new modules', function () {
         assert.equal(getModuleCapabilityType(ITEM_GATHERER_T1), MODULE_GATHERER)
         assert.equal(getModuleCapabilityType(ITEM_LOADER_T1), MODULE_LOADER)
-        assert.equal(getModuleCapabilityType(ITEM_MANUFACTURING_T1), MODULE_CRAFTER)
+        assert.equal(getModuleCapabilityType(ITEM_CRAFTER_T1), MODULE_CRAFTER)
     })
 
     test('isModuleItem identifies new modules', function () {
         assert.isTrue(isModuleItem(ITEM_GATHERER_T1))
         assert.isTrue(isModuleItem(ITEM_LOADER_T1))
-        assert.isTrue(isModuleItem(ITEM_MANUFACTURING_T1))
+        assert.isTrue(isModuleItem(ITEM_CRAFTER_T1))
     })
 
     test('MODULE_ANY accepts MODULE_HAULER', function () {

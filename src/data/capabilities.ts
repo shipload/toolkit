@@ -19,7 +19,7 @@ export const capabilityNames: string[] = [
     'Loader',
     'Gathering',
     'Warp',
-    'Manufacturing',
+    'Crafter',
     'Launch',
     'Hauler',
 ]
@@ -38,13 +38,13 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Gathering', attribute: 'depth', description: 'Maximum gather depth'},
     {capability: 'Gathering', attribute: 'speed', description: 'Gathering speed/penetration'},
     {capability: 'Warp', attribute: 'range', description: 'Maximum warp distance'},
-    {capability: 'Manufacturing', attribute: 'speed', description: 'Crafting time per item'},
+    {capability: 'Crafter', attribute: 'speed', description: 'Crafting time per item'},
     {
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'drain',
         description: 'Energy consumed per second while crafting',
     },
-    {capability: 'Manufacturing', attribute: 'quality', description: 'Modifier on output quality'},
+    {capability: 'Crafter', attribute: 'quality', description: 'Modifier on output quality'},
     {capability: 'Launch', attribute: 'range', description: 'Maximum launch distance'},
     {capability: 'Launch', attribute: 'capacity', description: 'Maximum mass per launch'},
     {capability: 'Launch', attribute: 'drain', description: 'Energy consumed per launch'},
@@ -140,9 +140,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Conductivity',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'drain',
-        rationale: 'Efficient energy transfer reduces manufacturing energy cost',
+        rationale: 'Efficient energy transfer reduces crafting energy cost',
     },
     {
         stat: 'Conductivity',
@@ -152,9 +152,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Ductility',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'quality',
-        rationale: 'Precise shaping enables tighter manufacturing tolerances',
+        rationale: 'Precise shaping enables tighter crafting tolerances',
     },
     {
         stat: 'Ductility',
@@ -212,7 +212,7 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Reactivity',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'speed',
         rationale: 'Reactive gases accelerate chemical/thermal processing',
     },
@@ -230,7 +230,7 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Thermal',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'quality',
         rationale: 'Precise thermal control during fabrication',
     },
@@ -272,7 +272,7 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Hardness',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'speed',
         rationale: 'Hard tooling surfaces cut and shape materials faster',
     },
@@ -290,19 +290,19 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Clarity',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'quality',
         rationale: 'Precision optics for calibration during fabrication',
     },
     {
         stat: 'Clarity',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'drain',
         rationale: 'Precision computing optimizes energy routing in factory',
     },
     {
         stat: 'Plasticity',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'speed',
         rationale: 'Easily reshaped materials speed up processing',
     },
@@ -332,9 +332,9 @@ export const statMappings: StatMapping[] = [
     },
     {
         stat: 'Insulation',
-        capability: 'Manufacturing',
+        capability: 'Crafter',
         attribute: 'drain',
-        rationale: 'Better insulation reduces energy loss during manufacturing',
+        rationale: 'Better insulation reduces energy loss during crafting',
     },
     {
         stat: 'Insulation',
