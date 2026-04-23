@@ -1,5 +1,5 @@
 import type { ResolvedItem } from '@shipload/sdk'
-import { getStatDefinitions, categoryColors } from '@shipload/sdk'
+import { getStatDefinitions, categoryColors, displayName } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -11,11 +11,11 @@ import { tokens } from '../tokens/index.ts'
 import { shortCode, formatMass, tierBorder } from './_shared.ts'
 
 const CATEGORY_LABELS: Record<string, string> = {
-  metal: 'Metals',
+  ore: 'Ore',
+  crystal: 'Crystal',
   gas: 'Gas',
-  mineral: 'Minerals',
-  organic: 'Organic',
-  precious: 'Precious',
+  regolith: 'Regolith',
+  biomass: 'Biomass',
 }
 
 function categoryColor(category?: string): string {
@@ -89,13 +89,13 @@ export function renderResource(
   const name = text({
     x: pad + 34,
     y: pad + 22,
-    value: resolved.name,
+    value: displayName(resolved),
     size: tokens.typography.sizes.title,
     weight: 700,
     family: tokens.typography.display,
   })
 
-  const catLabel = CATEGORY_LABELS[(resolved.category ?? 'metal') as string] ?? 'Item'
+  const catLabel = resolved.category ? (CATEGORY_LABELS[resolved.category] ?? 'Item') : 'Item'
   const catText = text({
     x: pad,
     y: pad + headerH + 4,
