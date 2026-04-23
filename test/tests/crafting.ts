@@ -546,24 +546,24 @@ suite('Crafting', function () {
 
     suite('calc_craft_duration', function () {
         test('basic duration calculation', function () {
-            const duration = calc_craft_duration(500, 450000, 1)
+            const duration = calc_craft_duration(500, 450000)
             assert.equal(duration.toNumber(), 900)
         })
 
-        test('batch quantity multiplies input mass', function () {
-            const single = calc_craft_duration(500, 450000, 1)
-            const batch = calc_craft_duration(500, 450000, 8)
+        test('scales linearly with total input mass', function () {
+            const single = calc_craft_duration(500, 450000)
+            const batch = calc_craft_duration(500, 450000 * 8)
             assert.equal(batch.toNumber(), single.toNumber() * 8)
         })
 
         test('higher speed reduces duration', function () {
-            const slow = calc_craft_duration(200, 450000, 1)
-            const fast = calc_craft_duration(800, 450000, 1)
+            const slow = calc_craft_duration(200, 450000)
+            const fast = calc_craft_duration(800, 450000)
             assert.isAbove(slow.toNumber(), fast.toNumber())
         })
 
         test('minimum duration is 1', function () {
-            const duration = calc_craft_duration(999, 1, 1)
+            const duration = calc_craft_duration(999, 1)
             assert.isAtLeast(duration.toNumber(), 1)
         })
     })
