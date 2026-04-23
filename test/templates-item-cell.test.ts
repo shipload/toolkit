@@ -30,7 +30,7 @@ test('entity cell renders abbreviation', () => {
 })
 
 test('resource cell renders category icon (no abbreviation)', () => {
-  const resolved = resolveItem(26)
+  const resolved = resolveItem(101)
   const svg = renderItemCell({ resolved, size: 48 })
   expect(svg).not.toMatch(/>[A-Z]{2,3}</)
   expect(svg).toMatch(/<(polygon|circle|rect)\b/)
@@ -74,7 +74,7 @@ test('abbreviation cell uses proportional font size for different sizes', () => 
 })
 
 test('resource icon renders in stroke-only mode', () => {
-  const resolved = resolveItem(26)
+  const resolved = resolveItem(101)
   const svg = renderItemCell({ resolved, size: 48 })
   expect(svg).toContain('fill="none"')
   expect(svg).toContain('stroke-width="1.5"')
@@ -82,7 +82,7 @@ test('resource icon renders in stroke-only mode', () => {
 
 test('matches golden SVG snapshot per itemType', () => {
   const cases: [number, string][] = [
-    [26, 'item-cell-resource'],
+    [101, 'item-cell-resource'],
     [ITEM_HULL_PLATES, 'item-cell-component'],
     [ITEM_ENGINE_T1, 'item-cell-module'],
     [ITEM_SHIP_T1_PACKED, 'item-cell-entity'],

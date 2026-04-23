@@ -1,7 +1,7 @@
 import { ServerContract } from '@shipload/sdk'
 
-export const ITEM_IRON = 26
-export const ITEM_HELIUM = 2
+export const ITEM_ORE_T1 = 101
+export const ITEM_GAS_T2 = 302
 export const ITEM_ENGINE_T1 = 10100
 export const ITEM_GENERATOR_T1 = 10101
 export const ITEM_GATHERER_T1 = 10102
@@ -14,9 +14,9 @@ export const ITEM_SHIP_T1_PACKED = 10201
 export const MODULE_ENGINE = 1
 export const MODULE_GENERATOR = 2
 
-export function cargoIron(stats = '0x123456789ABCDEF', quantity = 1) {
+export function cargoOreT1(stats = '0x123456789ABCDEF', quantity = 1) {
   return ServerContract.Types.cargo_item.from({
-    item_id: ITEM_IRON,
+    item_id: ITEM_ORE_T1,
     quantity,
     stats,
     modules: [],
@@ -52,11 +52,11 @@ export function cargoShipT1Packed(opts?: {
 export const ITEM_HULL_PLATES = 10001
 
 export const FIXTURES = {
-  iron: cargoIron('0x123456789ABCDEF'),
-  ironStackOf50: cargoIron('0x123456789ABCDEF', 50),
-  ironZeroStats: cargoIron('0'),
-  helium: ServerContract.Types.cargo_item.from({
-    item_id: ITEM_HELIUM,
+  oreT1: cargoOreT1('0x123456789ABCDEF'),
+  oreT1StackOf50: cargoOreT1('0x123456789ABCDEF', 50),
+  oreT1ZeroStats: cargoOreT1('0'),
+  gasT2: ServerContract.Types.cargo_item.from({
+    item_id: ITEM_GAS_T2,
     quantity: 1,
     stats: '0xDEADBEEF1234',
     modules: [],

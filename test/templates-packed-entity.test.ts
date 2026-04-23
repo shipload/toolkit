@@ -3,11 +3,11 @@ import { resolveItem } from '@shipload/sdk'
 import { renderPackedEntity } from '../src/templates/packed-entity.ts'
 import { FIXTURES } from './fixtures/cargo-items.ts'
 
-test('renders Ship T1 with hull attributes and two modules', () => {
+test('renders Ship with hull attributes and two modules', () => {
   const item = FIXTURES.shipT1TwoModules
   const resolved = resolveItem(item.item_id, item.stats, item.modules)
   const svg = renderPackedEntity(item, resolved)
-  expect(svg).toContain('Ship T1 (Packed)')
+  expect(svg).toContain('Ship (Packed)')
   expect(svg).toContain('HULL')
   expect(svg).toContain('Mass')
   expect(svg).toContain('Capacity')

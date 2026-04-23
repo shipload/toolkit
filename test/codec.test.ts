@@ -37,7 +37,7 @@ test('decodePayload throws InvalidPayloadError on malformed input', () => {
 })
 
 test('payload sizes are within expected ranges', () => {
-  expect(encodePayload(FIXTURES.iron).length).toBeLessThan(30)
+  expect(encodePayload(FIXTURES.oreT1).length).toBeLessThan(30)
   expect(encodePayload(FIXTURES.shipT1NoModules).length).toBeLessThan(30)
   expect(encodePayload(FIXTURES.shipT1TwoModules).length).toBeLessThan(110)
 })

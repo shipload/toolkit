@@ -4,7 +4,7 @@ import { renderByType } from '../src/templates/index.ts'
 import { FIXTURES } from './fixtures/cargo-items.ts'
 
 test('renderByType forwards mode=ranges to resource template', () => {
-  const item = FIXTURES.iron
+  const item = FIXTURES.oreT1
   const resolved = resolveItem(item.item_id)
   const svg = renderByType(item, resolved, { mode: 'ranges' })
   // No 3-digit stat values
@@ -27,7 +27,7 @@ test('renderByType forwards mode=ranges to module template', () => {
 })
 
 test('renderByType default mode is values (no opts)', () => {
-  const item = FIXTURES.iron
+  const item = FIXTURES.oreT1
   const resolved = resolveItem(item.item_id, item.stats)
   const svg = renderByType(item, resolved)
   // At least one numeric stat value

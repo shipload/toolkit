@@ -25,7 +25,7 @@ async function renderPng(svg: string): Promise<Buffer> {
 }
 
 const CASES = [
-  { name: 'resource-iron', fixture: FIXTURES.iron },
+  { name: 'resource-ore-t1', fixture: FIXTURES.oreT1 },
   { name: 'packed-entity-ship-t1-two-modules', fixture: FIXTURES.shipT1TwoModules },
   { name: 'packed-entity-ship-t1-only-engine', fixture: FIXTURES.shipT1OnlyEngine },
   { name: 'component-hull-plates', fixture: FIXTURES.hullPlates },
