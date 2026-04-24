@@ -1,0 +1,10 @@
+[default]
+; Private key that signs transactions. Treat this file as a secret —
+; it has full spending authority for the account below.
+private_key = PVT_K1_REPLACE_ME
+
+; Antelope account this CLI acts as.
+actor = myaccount
+
+; Permission to sign with. Defaults to "active" if omitted.
+permission = active
