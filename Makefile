@@ -1,3 +1,9 @@
+-include Makefile.local
+
+SIGNING_IDENTITY ?=
+NOTARY_PROFILE   ?= shiploadcli
+ENTITLEMENTS     := scripts/entitlements.plist
+
 API_URL := https://jungle4.greymass.com
 PLATFORM_ACCOUNT := platform.gm
 SERVER_ACCOUNT := shipload.gm
@@ -18,7 +24,10 @@ test:
 install:
 	bun install
 
-.PHONY: codegen check format test install
+clean:
+	rm -rf $(DIST)
+
+.PHONY: codegen check format test install clean
 
 # User-facing binary targets. Output: dist/shiploadcli-<target>[.exe]
 # Bun's --compile target identifiers use `bun-darwin-*`; we map mac→darwin internally.
@@ -44,6 +53,39 @@ binaries:
 	@ls -lh $(DIST)
 
 .PHONY: binary binaries
+
+# Sign + notarize one mac binary. Usage: make sign-one TARGET=mac-arm64
+sign-one:
+	@if [ -z "$(TARGET)" ]; then echo "usage: make sign-one TARGET=mac-arm64 (or mac-x64)"; exit 1; fi
+	@case "$(TARGET)" in mac-x64|mac-arm64) ;; *) echo "error: sign-one TARGET must be mac-x64 or mac-arm64 (got: $(TARGET))"; exit 1 ;; esac
+	@SIGNING_IDENTITY="$(SIGNING_IDENTITY)" \
+	NOTARY_PROFILE="$(NOTARY_PROFILE)" \
+	ENTITLEMENTS="$(ENTITLEMENTS)" \
+	./scripts/sign-macos.sh $(DIST)/shiploadcli-$(TARGET)
+
+# Sign + notarize both mac binaries (serial).
+sign-mac:
+	@$(MAKE) --no-print-directory sign-one TARGET=mac-x64
+	@$(MAKE) --no-print-directory sign-one TARGET=mac-arm64
+
+.PHONY: sign-one sign-mac
+
+# Dry-run release: preflight (skip tag check), build, sign, notarize.
+# No git mutations, no GitHub upload. Leaves dist/ populated.
+release-dry:
+	@SIGNING_IDENTITY="$(SIGNING_IDENTITY)" \
+	NOTARY_PROFILE="$(NOTARY_PROFILE)" \
+	./scripts/preflight.sh --skip-tag
+	@$(MAKE) --no-print-directory check
+	@$(MAKE) --no-print-directory clean
+	@$(MAKE) --no-print-directory binaries
+	@$(MAKE) --no-print-directory sign-mac
+	@ls -lh $(DIST)
+	@echo ""
+	@echo "✓ release-dry complete — artifacts in $(DIST)/"
+	@echo "  No git mutations, no release published."
+
+.PHONY: release-dry
 
 release:
 	@./scripts/release.sh

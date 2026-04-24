@@ -6,15 +6,17 @@ Commander-based CLI (`shiploadcli`) for interacting with the Shipload game contr
 
 ### Using a pre-built binary
 
-1. Download the binary for your platform from the [latest release](https://github.com/<org>/<repo>/releases/latest):
-   - `shiploadcli-mac-arm64` — macOS Apple Silicon
-   - `shiploadcli-mac-x64` — macOS Intel
-   - `shiploadcli-linux-x64` / `shiploadcli-linux-arm64` — Linux
-   - `shiploadcli-windows-x64.exe` — Windows
-2. Make it executable (macOS/Linux): `chmod +x shiploadcli-*`
-3. Initialize a config: `./shiploadcli-* init`
-4. Edit the config at the printed path — fill in `private_key` and `actor`.
-5. Run: `./shiploadcli-* whoami`
+Download the binary for your platform from the [latest release](https://github.com/shipload/cli/releases/latest):
+
+- **macOS (Apple Silicon / Intel)** — `shiploadcli-mac-arm64.zip` / `shiploadcli-mac-x64.zip`. Unzip, then run the extracted binary. macOS builds are signed with a Developer ID and notarized — no `xattr` or Gatekeeper workarounds needed.
+- **Linux (x64 / arm64)** — `shiploadcli-linux-x64` / `shiploadcli-linux-arm64`. `chmod +x` and run.
+- **Windows (x64)** — `shiploadcli-windows-x64.exe`. Run directly.
+
+Then:
+
+1. Initialize a config: `./shiploadcli-* init`
+2. Edit the config at the printed path — fill in `private_key` and `actor`.
+3. Run: `./shiploadcli-* whoami`
 
 ### From source
 
@@ -167,5 +169,6 @@ make format         # biome auto-fix
 make test           # bun test
 make codegen        # regenerate contracts/ bindings from Jungle 4
 make binaries       # build binaries for all five target OS/arch pairs
-make release        # bump version, tag, push — triggers GitHub Actions release
+make release-dry    # build + sign + notarize locally; no git mutations, no publish
+make release        # full local release: preflight → build → sign → notarize → commit → tag → push → publish
 ```
