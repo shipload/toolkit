@@ -1,4 +1,5 @@
 import type {ClientMessage, ServerMessage} from './types'
+import {debug} from './debug'
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting'
 
@@ -17,6 +18,7 @@ export class WebSocketConnection {
     private reconnectTimeout: ReturnType<typeof setTimeout> | null = null
     private _state: ConnectionState = 'disconnected'
     private shouldReconnect = true
+    private sendQueue: string[] = []
 
     private static readonly MIN_RECONNECT_DELAY = 1000
     private static readonly MAX_RECONNECT_DELAY = 30000
@@ -46,15 +48,22 @@ export class WebSocketConnection {
 
         this.shouldReconnect = true
         this.setState('connecting')
-        console.log('[WS] Connecting to', this.url)
+        debug('Connecting to', this.url)
 
         try {
             this.ws = new WebSocket(this.url)
 
             this.ws.onopen = () => {
-                console.log('[WS] Connected')
+                debug('Connected')
                 this.reconnectAttempts = 0
                 this.setState('connected')
+                while (
+                    this.sendQueue.length > 0 &&
+                    this.ws &&
+                    this.ws.readyState === WebSocket.OPEN
+                ) {
+                    this.ws.send(this.sendQueue.shift()!)
+                }
             }
 
             this.ws.onmessage = (event) => {
@@ -62,16 +71,14 @@ export class WebSocketConnection {
                     const message = JSON.parse(event.data) as ServerMessage
                     this.onMessage(message)
                 } catch (e) {
+                    // eslint-disable-next-line no-console
                     console.error('[WS] Failed to parse message:', e)
                 }
             }
 
-            this.ws.onerror = (error) => {
-                console.error('[WS] Error:', error)
-            }
-
             this.ws.onclose = () => {
                 this.ws = null
+                this.sendQueue.length = 0
 
                 if (this.shouldReconnect) {
                     this.setState('reconnecting')
@@ -81,6 +88,7 @@ export class WebSocketConnection {
                 }
             }
         } catch (e) {
+            // eslint-disable-next-line no-console
             console.error('[WS] Failed to create connection:', e)
             this.ws = null
             if (this.shouldReconnect) {
@@ -101,7 +109,7 @@ export class WebSocketConnection {
             WebSocketConnection.MAX_RECONNECT_DELAY
         )
 
-        console.log(`[WS] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`)
+        debug(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`)
 
         this.reconnectTimeout = setTimeout(() => {
             this.reconnectTimeout = null
@@ -123,6 +131,7 @@ export class WebSocketConnection {
             this.ws = null
         }
 
+        this.sendQueue.length = 0
         this.setState('disconnected')
     }
 
@@ -131,11 +140,12 @@ export class WebSocketConnection {
     }
 
     send(message: ClientMessage) {
+        const data = JSON.stringify(message)
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message))
-        } else {
-            console.warn('[WS] Cannot send message, not connected')
+            this.ws.send(data)
+            return
         }
+        this.sendQueue.push(data)
     }
 
     get isConnected(): boolean {

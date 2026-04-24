@@ -4,6 +4,8 @@ import {mapEntity} from '../../src/subscriptions/mappers'
 import {SubscriptionsManager} from '../../src/subscriptions/manager'
 import {FakeWebSocketServer} from '../helpers/fake-ws'
 
+const noop = (): void => undefined
+
 suite('subscriptions/mappers', function () {
     test('mapEntity returns Ship for type=ship', function () {
         const ei = ServerContract.Types.entity_info.from({
@@ -75,9 +77,8 @@ suite('SubscriptionsManager', function () {
     })
 
     test('subscribeEntity sends subscribe_entity frame', async function () {
-        // Allow fake's onopen (setTimeout 0) to fire before sending.
         await new Promise((r) => setTimeout(r, 1))
-        const handle = mgr.subscribeEntity('ship', '1', () => {})
+        const handle = mgr.subscribeEntity('ship', '1', noop)
         const msg = await fake.nextMessage()
         assert.equal(msg.type, 'subscribe_entity')
         assert.equal(msg.entity_type, 'ship')
@@ -125,7 +126,7 @@ suite('SubscriptionsManager', function () {
 
     test('handle.unsubscribe sends unsubscribe_entity frame', async function () {
         await new Promise((r) => setTimeout(r, 1))
-        const handle = mgr.subscribeEntity('ship', '1', () => {})
+        const handle = mgr.subscribeEntity('ship', '1', noop)
         await fake.nextMessage()
         handle.unsubscribe()
         const msg = await fake.nextMessage()

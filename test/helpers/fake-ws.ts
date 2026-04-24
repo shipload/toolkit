@@ -26,6 +26,7 @@ export class FakeWebSocketServer {
     }
 
     private createFakeCtor() {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const fake = this
         return class FakeWebSocket {
             static readonly CONNECTING = 0
