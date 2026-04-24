@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import pkg from "../package.json" with { type: "json" };
 import * as addmodule from "./commands/action/addmodule";
 import * as blend from "./commands/action/blend";
 import * as cancel from "./commands/action/cancel";
@@ -40,7 +41,7 @@ import * as tools from "./commands/tools";
 
 const PACKAGE = {
 	name: "shiploadcli",
-	version: "0.1.0",
+	version: pkg.version,
 	description: "Shipload game CLI — query state and submit actions",
 };
 
