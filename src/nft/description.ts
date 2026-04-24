@@ -1,10 +1,10 @@
 import {
     getModuleCapabilityType,
+    ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
-    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     MODULE_CRAFTER,
     MODULE_ENGINE,

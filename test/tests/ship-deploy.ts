@@ -1,12 +1,12 @@
 import {assert} from 'chai'
 import {
     computeContainerCapabilities,
+    computeCrafterCapabilities,
     computeEngineCapabilities,
     computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
-    computeCrafterCapabilities,
     computeShipCapabilities,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
@@ -346,19 +346,31 @@ suite('ship deploy formulas', function () {
 
     test('higher RES = higher hauler capacity', function () {
         const low = computeHaulerCapabilities({resonance: 0, conductivity: 500, reflectivity: 500})
-        const high = computeHaulerCapabilities({resonance: 999, conductivity: 500, reflectivity: 500})
+        const high = computeHaulerCapabilities({
+            resonance: 999,
+            conductivity: 500,
+            reflectivity: 500,
+        })
         assert.isBelow(low.capacity, high.capacity)
     })
 
     test('higher CON = higher hauler efficiency', function () {
         const low = computeHaulerCapabilities({resonance: 500, conductivity: 0, reflectivity: 500})
-        const high = computeHaulerCapabilities({resonance: 500, conductivity: 999, reflectivity: 500})
+        const high = computeHaulerCapabilities({
+            resonance: 500,
+            conductivity: 999,
+            reflectivity: 500,
+        })
         assert.isBelow(low.efficiency, high.efficiency)
     })
 
     test('higher REF = lower hauler drain', function () {
         const low = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 0})
-        const high = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 999})
+        const high = computeHaulerCapabilities({
+            resonance: 500,
+            conductivity: 500,
+            reflectivity: 999,
+        })
         assert.isBelow(high.drain, low.drain)
     })
 

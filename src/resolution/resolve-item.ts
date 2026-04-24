@@ -17,12 +17,12 @@ import {
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
+    computeCrafterCapabilities,
     computeEngineCapabilities,
     computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
-    computeCrafterCapabilities,
     computeShipHullCapabilities,
 } from '../entities/ship-deploy'
 import {computeContainerCapabilities} from '../entities/container'

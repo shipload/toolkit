@@ -2,12 +2,12 @@ import {assert} from 'chai'
 import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     encodeStats,
+    ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
-    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     makeContainer,
     makeShip,

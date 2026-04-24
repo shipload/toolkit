@@ -1,10 +1,10 @@
 import {
+    ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
-    ITEM_CRAFTER_T1,
     ITEM_STORAGE_T1,
     MODULE_ANY,
     MODULE_CRAFTER,
@@ -147,7 +147,8 @@ export const components: ComponentDefinition[] = [
     {
         id: ITEM_POWER_CELL,
         name: 'Power Cell',
-        description: 'Crystalline energy storage matrix. Resonant lattices retain and release charge.',
+        description:
+            'Crystalline energy storage matrix. Resonant lattices retain and release charge.',
         color: '#4ADBFF',
         mass: 30000,
         stats: [
@@ -258,7 +259,8 @@ export const components: ComponentDefinition[] = [
     {
         id: ITEM_CARGO_LINING_T2,
         name: 'Cargo Lining',
-        description: 'Advanced composite lining reinforced with tier 2 regolith and biomass polymer.',
+        description:
+            'Advanced composite lining reinforced with tier 2 regolith and biomass polymer.',
         color: '#C4A57B',
         mass: 45000,
         stats: [
@@ -398,7 +400,11 @@ export const moduleRecipes: ModuleRecipe[] = [
         recipe: [{itemId: ITEM_POWER_CELL, quantity: 5}],
         stats: [
             {key: 'resonance', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'resonance'},
-            {key: 'reflectivity', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'reflectivity'},
+            {
+                key: 'reflectivity',
+                sourceComponentId: ITEM_POWER_CELL,
+                sourceStatKey: 'reflectivity',
+            },
         ],
     },
     {
@@ -501,7 +507,11 @@ export const moduleRecipes: ModuleRecipe[] = [
         ],
         stats: [
             {key: 'resonance', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'resonance'},
-            {key: 'reflectivity', sourceComponentId: ITEM_POWER_CELL, sourceStatKey: 'reflectivity'},
+            {
+                key: 'reflectivity',
+                sourceComponentId: ITEM_POWER_CELL,
+                sourceStatKey: 'reflectivity',
+            },
             {
                 key: 'conductivity',
                 sourceComponentId: ITEM_FOCUSING_ARRAY,

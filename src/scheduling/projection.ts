@@ -306,10 +306,7 @@ function getRecipeForOutput(outputItemId: number): RecipeInput[] | undefined {
     return undefined
 }
 
-function validateCraftTask(
-    task: ServerContract.Types.task,
-    projected: ProjectedEntity
-): void {
+function validateCraftTask(task: ServerContract.Types.task, projected: ProjectedEntity): void {
     if (task.cargo.length === 0) return
 
     const output = task.cargo[task.cargo.length - 1]
