@@ -50,18 +50,9 @@ type MovementEntity = {
 export class Ship extends ServerContract.Types.entity_info {
     private _sched?: ScheduleAccessor
     private _inv?: InventoryAccessor
-    private _modules: ServerContract.Types.module_entry[] = []
 
     get name(): string {
         return this.entity_name
-    }
-
-    get modules(): ServerContract.Types.module_entry[] {
-        return this._modules
-    }
-
-    setModules(modules: ServerContract.Types.module_entry[]): void {
-        this._modules = modules
     }
 
     get inv(): InventoryAccessor {

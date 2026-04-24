@@ -9,6 +9,7 @@ import {
     ITEM_LOADER_T1,
     makeShip,
     ServerContract,
+    Ship,
 } from '$lib'
 
 const seed = encodeStats([500, 500, 500, 500])
@@ -279,5 +280,29 @@ suite('Ship', function () {
             const ship = makeStationaryShip()
             assert.isFalse(ship.hasEnergyFor(UInt64.from(100000000)))
         })
+    })
+
+    test('Ship constructed from entity_info hydrates modules from Struct field', function () {
+        const ei = ServerContract.Types.entity_info.from({
+            type: 'ship',
+            id: 10,
+            owner: 'alice',
+            entity_name: 'Test',
+            coordinates: {x: 0, y: 0, z: 800},
+            cargomass: 0,
+            cargo: [],
+            modules: [
+                {type: 1, installed: {item_id: 10100, stats: '0'}},
+                {type: 2, installed: undefined},
+            ],
+            is_idle: true,
+            current_task_elapsed: 0,
+            current_task_remaining: 0,
+            pending_tasks: [],
+        })
+        const ship = new Ship(ei)
+        assert.lengthOf(ship.modules, 2)
+        assert.isDefined(ship.modules[0].installed)
+        assert.isUndefined(ship.modules[1].installed)
     })
 })

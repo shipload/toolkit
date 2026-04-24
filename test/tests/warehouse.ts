@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
-import {encodeStats, ITEM_LOADER_T1, makeWarehouse, ServerContract} from '$lib'
+import {encodeStats, ITEM_LOADER_T1, makeWarehouse, ServerContract, Warehouse} from '$lib'
 
 const loaderSeed = encodeStats([500, 500, 500, 500])
 
@@ -228,5 +228,25 @@ suite('Warehouse', function () {
             const now = new Date()
             assert.equal(warehouse.sched.currentTaskIndex(now), -1)
         })
+    })
+
+    test('Warehouse constructed from entity_info hydrates modules from Struct field', function () {
+        const ei = ServerContract.Types.entity_info.from({
+            type: 'warehouse',
+            id: 20,
+            owner: 'alice',
+            entity_name: 'Test WH',
+            coordinates: {x: 0, y: 0, z: 800},
+            cargomass: 0,
+            cargo: [],
+            modules: [{type: 4, installed: {item_id: 10200, stats: '0'}}],
+            is_idle: true,
+            current_task_elapsed: 0,
+            current_task_remaining: 0,
+            pending_tasks: [],
+        })
+        const wh = new Warehouse(ei)
+        assert.lengthOf(wh.modules, 1)
+        assert.isDefined(wh.modules[0].installed)
     })
 })

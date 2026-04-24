@@ -119,10 +119,10 @@ export function makeShip(state: ShipStateInput): Ship {
         if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
     }
 
+    info.modules = moduleEntries
+
     const entityInfo = ServerContract.Types.entity_info.from(info)
-    const ship = new Ship(entityInfo)
-    ship.setModules(moduleEntries)
-    return ship
+    return new Ship(entityInfo)
 }
 
 export function makeWarehouse(state: WarehouseStateInput): Warehouse {
@@ -160,10 +160,10 @@ export function makeWarehouse(state: WarehouseStateInput): Warehouse {
         moduleEntries = assignModulesToSlots(ITEM_WAREHOUSE_T1_PACKED, [], 'Warehouse T1')
     }
 
+    info.modules = moduleEntries
+
     const entityInfo = ServerContract.Types.entity_info.from(info)
-    const warehouse = new Warehouse(entityInfo)
-    warehouse.setModules(moduleEntries)
-    return warehouse
+    return new Warehouse(entityInfo)
 }
 
 export function makeContainer(state: ContainerStateInput): Container {
@@ -177,6 +177,7 @@ export function makeContainer(state: ContainerStateInput): Container {
         capacity: UInt32.from(state.capacity),
         cargomass: UInt32.from(state.cargomass || 0),
         cargo: state.cargo || [],
+        modules: [],
         is_idle: !state.schedule,
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),

@@ -9,12 +9,14 @@ import {PlayersManager} from './managers/players'
 import {LocationsManager} from './managers/locations'
 import {EpochsManager} from './managers/epochs'
 import {ActionsManager} from './managers/actions'
+import {SubscriptionsManager} from './subscriptions/manager'
 import {GameState} from './entities/gamestate'
 
 interface ShiploadOptions {
     platformContractName?: string
     serverContractName?: string
     client?: APIClient
+    subscriptionsUrl?: string
 }
 
 interface ShiploadConstructorOptions extends ShiploadOptions {
@@ -38,6 +40,10 @@ export class Shipload {
             : new ServerContract.Contract({client: apiClient})
 
         this._context = new GameContext(apiClient, server, platform)
+
+        if (constructorOptions?.subscriptionsUrl) {
+            this._context.setSubscriptionsUrl(constructorOptions.subscriptionsUrl)
+        }
     }
 
     static async load(
@@ -99,6 +105,10 @@ export class Shipload {
 
     get actions(): ActionsManager {
         return this._context.actions
+    }
+
+    get subscriptions(): SubscriptionsManager {
+        return this._context.subscriptions
     }
 
     async getGame(reload = false): Promise<PlatformContract.Types.game_row> {

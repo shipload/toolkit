@@ -334,3 +334,5 @@ export {formatMass, formatMassDelta} from './format'
 
 export {displayName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
+
+export * from './subscriptions'

@@ -24,8 +24,9 @@ import {
     computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeShipHullCapabilities,
+    computeWarehouseHullCapabilities,
 } from '../entities/ship-deploy'
-import {computeContainerCapabilities} from '../entities/container'
+import {computeContainerCapabilities, computeContainerT2Capabilities} from '../entities/container'
 import {
     categoryColors,
     categoryIcons,
@@ -264,26 +265,32 @@ function resolveEntity(
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
         attributes = []
 
-        const isShip = recipe.id === 'ship-t1'
-        if (isShip) {
-            const hullCaps = computeShipHullCapabilities(decoded)
-            attributes.push({
-                capability: 'Hull',
-                attributes: [
-                    {label: 'Mass', value: hullCaps.hullmass},
-                    {label: 'Capacity', value: hullCaps.capacity},
-                ],
-            })
-        } else {
-            const containerCaps = computeContainerCapabilities(decoded)
-            attributes.push({
-                capability: 'Hull',
-                attributes: [
-                    {label: 'Mass', value: containerCaps.hullmass},
-                    {label: 'Capacity', value: containerCaps.capacity},
-                ],
-            })
+        let hullCaps: {hullmass: number; capacity: number}
+        switch (recipe.id) {
+            case 'ship-t1':
+                hullCaps = computeShipHullCapabilities(decoded)
+                break
+            case 'warehouse-t1':
+                hullCaps = computeWarehouseHullCapabilities(decoded)
+                break
+            case 'container':
+                hullCaps = computeContainerCapabilities(decoded)
+                break
+            case 'container-t2':
+                hullCaps = computeContainerT2Capabilities(decoded)
+                break
+            default:
+                throw new Error(
+                    `resolveItem: no capacity formula wired for entity recipe "${recipe.id}"`
+                )
         }
+        attributes.push({
+            capability: 'Hull',
+            attributes: [
+                {label: 'Mass', value: hullCaps.hullmass},
+                {label: 'Capacity', value: hullCaps.capacity},
+            ],
+        })
     }
 
     if (recipe.moduleSlots) {

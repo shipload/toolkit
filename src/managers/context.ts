@@ -8,6 +8,7 @@ import {PlayersManager} from './players'
 import {LocationsManager} from './locations'
 import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
+import {SubscriptionsManager} from '../subscriptions/manager'
 
 export class GameContext {
     private _entities?: EntitiesManager
@@ -15,6 +16,8 @@ export class GameContext {
     private _locations?: LocationsManager
     private _epochs?: EpochsManager
     private _actions?: ActionsManager
+    private _subscriptions?: SubscriptionsManager
+    private _subscriptionsUrl?: string
 
     private _gameCache?: PlatformContract.Types.game_row
     private _stateCache?: GameState
@@ -58,6 +61,22 @@ export class GameContext {
             this._actions = new ActionsManager(this)
         }
         return this._actions
+    }
+
+    setSubscriptionsUrl(url: string) {
+        this._subscriptionsUrl = url
+    }
+
+    get subscriptions(): SubscriptionsManager {
+        if (!this._subscriptions) {
+            if (!this._subscriptionsUrl) {
+                throw new Error(
+                    'subscriptions requires a subscriptionsUrl passed to Shipload constructor'
+                )
+            }
+            this._subscriptions = new SubscriptionsManager({url: this._subscriptionsUrl})
+        }
+        return this._subscriptions
     }
 
     async getGame(reload = false): Promise<PlatformContract.Types.game_row> {
