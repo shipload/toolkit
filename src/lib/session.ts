@@ -1,3 +1,4 @@
+import { type Projectable, schedule } from "@shipload/sdk";
 import { PrivateKey, type PublicKey } from "@wharfkit/antelope";
 import {
 	Action,
@@ -11,7 +12,13 @@ import { Types } from "../contracts/server";
 import { chain, client } from "./client";
 import { loadConfig } from "./config";
 import { printError } from "./errors";
-import { formatCancelResults, formatResolveResults, formatTaskResults } from "./format";
+import {
+	formatCancelResults,
+	formatDuration,
+	formatEntityRef,
+	formatResolveResults,
+} from "./format";
+import { getEntitySnapshot } from "./snapshot";
 
 let cachedSession: Session | null = null;
 let cachedActor: string | null = null;
@@ -79,10 +86,45 @@ function getActionName(action: Action | AnyAction): string {
 	return String(action.name);
 }
 
-function formatActionResult(actionName: string, returnData: unknown): string | null {
+async function formatTaskAddition(
+	entityType: string,
+	entityId: bigint,
+	addedCount: number,
+	snapshots: Map<string, unknown>,
+): Promise<string> {
+	const taskWord = addedCount === 1 ? "task" : "tasks";
+	try {
+		const snap = await getEntitySnapshot(entityType, entityId);
+		snapshots.set(formatEntityRef({ entityType, entityId }), snap);
+		const projectable = snap as unknown as Projectable;
+		const totalTasks = projectable.schedule?.tasks?.length ?? 0;
+		const totalWord = totalTasks === 1 ? "task" : "tasks";
+		const remaining = schedule.scheduleRemaining(projectable, new Date());
+		const tail = remaining > 0 ? ` · ends in ${formatDuration(remaining)}` : "";
+		return `${entityType} ${entityId}: queued ${addedCount} ${taskWord} (${totalTasks} ${totalWord} in queue${tail})`;
+	} catch {
+		return `${entityType} ${entityId}: queued ${addedCount} ${taskWord}`;
+	}
+}
+
+async function formatActionResult(
+	actionName: string,
+	returnData: unknown,
+	snapshots: Map<string, unknown>,
+): Promise<string | null> {
 	if (TASK_RESULT_ACTIONS.includes(actionName)) {
 		const results = Types.task_results.from(returnData);
-		return formatTaskResults(results);
+		const lines = await Promise.all(
+			results.entities.map((e) =>
+				formatTaskAddition(
+					e.entity_type.toString(),
+					BigInt(e.entity_id.toString()),
+					Number(e.task_count),
+					snapshots,
+				),
+			),
+		);
+		return lines.length > 0 ? lines.join("\n") : null;
 	}
 	if (RESOLVE_ACTIONS.includes(actionName)) {
 		const results = Types.resolve_results.from(returnData);
@@ -93,6 +135,11 @@ function formatActionResult(actionName: string, returnData: unknown): string | n
 		return formatCancelResults(results);
 	}
 	return null;
+}
+
+export interface TransactResult {
+	txid: string;
+	snapshots: Map<string, unknown>;
 }
 
 export interface SessionLike {
@@ -111,13 +158,17 @@ export async function runTransact(
 	sessionLike: SessionLike,
 	args: TransactArgs,
 	options?: TransactOptions & { description?: string },
-): Promise<string> {
+): Promise<TransactResult> {
+	const snapshots = new Map<string, unknown>();
 	try {
-		const result = await sessionLike.transact(args, options);
+		const result = await sessionLike.transact(args, { awaitIrreversible: true, ...options });
 		const txid = result.response?.transaction_id;
 
 		if (options?.description) {
 			console.log(options.description);
+			if (options.description.includes("\n")) {
+				console.log();
+			}
 		}
 
 		const actions = getActions(args);
@@ -129,7 +180,7 @@ export async function runTransact(
 			const returnData = trace?.return_value_data;
 
 			if (returnData) {
-				const formatted = formatActionResult(actionName, returnData);
+				const formatted = await formatActionResult(actionName, returnData, snapshots);
 				if (formatted) {
 					console.log(formatted);
 				}
@@ -138,18 +189,17 @@ export async function runTransact(
 
 		console.log();
 		console.log(`https://jungle4.unicove.com/en/jungle4/transaction/${txid}`);
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-		return String(txid);
+		return { txid: String(txid), snapshots };
 	} catch (err) {
 		process.exitCode = printError(err);
-		return "";
+		return { txid: "", snapshots };
 	}
 }
 
 export async function transact(
 	args: TransactArgs,
 	options?: TransactOptions & { description?: string },
-): Promise<string> {
+): Promise<TransactResult> {
 	return runTransact(getSession(), args, options);
 }
 

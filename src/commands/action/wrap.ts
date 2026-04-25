@@ -6,7 +6,7 @@ import { printError } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface WrapOpts {
 	owner: string;
@@ -42,6 +42,7 @@ export function register(program: Command): void {
 		.argument("<quantity>", "quantity to wrap", parseUint64)
 		.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				owner: string,
@@ -49,7 +50,7 @@ export function register(program: Command): void {
 				entityId: bigint,
 				cargoId: bigint,
 				quantity: bigint,
-				options: { autoResolve?: boolean; wait?: boolean },
+				options: { autoResolve?: boolean; wait?: boolean; track?: boolean },
 			) => {
 				try {
 					await checkResolveEntity(entityType, entityId, Boolean(options.autoResolve));
@@ -66,13 +67,11 @@ export function register(program: Command): void {
 					cargoId,
 					quantity,
 				});
-				await transact(
+				const result = await transact(
 					{ action },
 					{ description: `Wrapping ${quantity} cargo for ${owner}` },
 				);
-				if (options.wait) {
-					await awaitAndPrint(entityType, entityId);
-				}
+				await maybeAwaitAndPrint(entityType, entityId, options, result);
 			},
 		);
 }

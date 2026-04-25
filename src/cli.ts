@@ -13,6 +13,7 @@ import * as join from "./commands/action/join";
 import * as recharge from "./commands/action/recharge";
 import * as resolve from "./commands/action/resolve";
 import * as rmmodule from "./commands/action/rmmodule";
+import * as track from "./commands/action/track";
 import * as transfer from "./commands/action/transfer";
 import * as travel from "./commands/action/travel";
 import * as wait from "./commands/action/wait";
@@ -99,6 +100,7 @@ export function build(): Command {
 	resolve.register(program);
 	cancel.register(program);
 	wait.register(program);
+	track.register(program);
 
 	tools.register(program);
 

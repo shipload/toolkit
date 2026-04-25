@@ -3,7 +3,6 @@ import type { EntityTypeName } from "./args";
 import { getShipload } from "./client";
 import { transact } from "./session";
 import { completedTaskCount, getEntitySnapshot } from "./snapshot";
-import { ValidationError } from "./validate";
 
 export async function ensureNoPendingResolve(
 	entityType: EntityTypeName | string,
@@ -12,12 +11,7 @@ export async function ensureNoPendingResolve(
 	autoResolve: boolean,
 ): Promise<void> {
 	if (completedCount === 0) return;
-	if (!autoResolve) {
-		throw new ValidationError(
-			`${entityType} ${entityId} has ${completedCount} completed task(s) needing resolve.`,
-			`--auto-resolve (or run: shiploadcli resolve ${entityType} ${entityId})`,
-		);
-	}
+	if (!autoResolve) return;
 	const shipload = await getShipload();
 	const action = shipload.actions.resolve(
 		BigInt(entityId.toString()),

@@ -23,7 +23,7 @@ import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 import { buildAction as buildRechargeAction } from "./recharge";
 
 export interface CraftOpts {
@@ -77,6 +77,7 @@ export function register(program: Command): void {
 		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.option("--recharge", "recharge to full energy before crafting")
 		.action(
@@ -90,11 +91,12 @@ export function register(program: Command): void {
 					autoResolve?: boolean;
 					estimate?: boolean;
 					wait?: boolean;
+					track?: boolean;
 					force?: boolean;
 					recharge?: boolean;
 				},
 			) => {
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				try {
 					if (!options.estimate) {
 						await checkResolveEntity(
@@ -132,21 +134,21 @@ export function register(program: Command): void {
 						quantity,
 						inputs: resolved,
 					});
-					if (options.recharge) {
-						const rechargeAction = await buildRechargeAction({ entityType, entityId });
-						await transact(
-							{ actions: [rechargeAction, action] },
-							{ description: `Recharge + craft recipe ${recipeId} x${quantity}` },
-						);
-					} else {
-						await transact(
-							{ action },
-							{ description: `Crafting recipe ${recipeId} x${quantity}` },
-						);
-					}
-					if (options.wait) {
-						await awaitAndPrint(entityType, entityId);
-					}
+					const result = options.recharge
+						? await transact(
+								{
+									actions: [
+										await buildRechargeAction({ entityType, entityId }),
+										action,
+									],
+								},
+								{ description: `Recharge + craft recipe ${recipeId} x${quantity}` },
+							)
+						: await transact(
+								{ action },
+								{ description: `Crafting recipe ${recipeId} x${quantity}` },
+							);
+					await maybeAwaitAndPrint(entityType, entityId, options, result);
 				} catch (err) {
 					if (err instanceof ValidationError) {
 						process.exit(printError(err));

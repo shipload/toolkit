@@ -67,7 +67,7 @@ export function register(program: Command): void {
 					wait?: boolean;
 				},
 			) => {
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"]);
 				if (options.estimate) {
 					console.log(
 						renderEstimate({

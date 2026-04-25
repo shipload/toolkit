@@ -85,8 +85,8 @@ export function checkOriginEqualsTarget(
 	if (ox !== tx || oy !== ty) return null;
 	return {
 		code: "origin_equals_target",
-		severity: "warning",
-		message: `origin (${ox},${oy}) equals target — no travel needed`,
+		severity: "error",
+		message: `ship is already at (${ox}, ${oy}) — no travel needed`,
 	};
 }
 

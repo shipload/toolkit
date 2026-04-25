@@ -8,7 +8,7 @@ import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface RechargeOpts {
 	entityType: EntityTypeName;
@@ -30,13 +30,19 @@ export function register(program: Command): void {
 		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 		.option("--estimate", "print duration/energy estimate without submitting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				entityType: EntityTypeName,
 				entityId: bigint,
-				options: { autoResolve?: boolean; estimate?: boolean; wait?: boolean },
+				options: {
+					autoResolve?: boolean;
+					estimate?: boolean;
+					wait?: boolean;
+					track?: boolean;
+				},
 			) => {
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				if (options.estimate) {
 					try {
 						const est = await estimateRecharge({ entityType, entityId });
@@ -58,10 +64,11 @@ export function register(program: Command): void {
 					throw err;
 				}
 				const action = await buildAction({ entityType, entityId });
-				await transact({ action }, { description: `Recharging ${entityType} ${entityId}` });
-				if (options.wait) {
-					await awaitAndPrint(entityType, entityId);
-				}
+				const result = await transact(
+					{ action },
+					{ description: `Recharging ${entityType} ${entityId}` },
+				);
+				await maybeAwaitAndPrint(entityType, entityId, options, result);
 			},
 		);
 }

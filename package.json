@@ -17,7 +17,7 @@
 		"@wharfkit/antelope": "^1.2.0",
 		"@wharfkit/common": "^1.5.0",
 		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "^1.6.1",
+		"@wharfkit/session": "1.8.0-rc1",
 		"@wharfkit/wallet-plugin-privatekey": "^1.1.0",
 		"cli-table3": "^0.6.5",
 		"commander": "^14.0.2",
@@ -34,12 +34,12 @@
 		"@wharfkit/antelope": "^1.2.0",
 		"@wharfkit/common": "^1.5.0",
 		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "^1.6.1"
+		"@wharfkit/session": "1.8.0-rc1"
 	},
 	"overrides": {
 		"@wharfkit/antelope": "^1.2.0",
 		"@wharfkit/common": "^1.5.0",
 		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "^1.6.1"
+		"@wharfkit/session": "1.8.0-rc1"
 	}
 }

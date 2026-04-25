@@ -10,8 +10,11 @@ import {
 	getModuleCapabilityType,
 	getStatDefinitions,
 	LocationType,
+	type Projectable,
+	projectEntity,
 	type ResourceCategory,
 	resolveItem,
+	schedule,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import type { Types } from "../contracts/server";
@@ -377,11 +380,55 @@ export function formatEntity(entity: Types.entity_info): string {
 	const entityType = String(entity.type);
 	const entityId = BigInt(entity.id.toString());
 	const scheduleTasks = entity.schedule?.tasks.length ?? 0;
+
+	const whenDone = formatWhenDone(entity);
+	if (whenDone) lines.push(whenDone);
+
 	if (entity.is_idle && scheduleTasks > 0) {
 		lines.push(formatResolveHint(entityType, entityId, scheduleTasks));
 	}
 
 	return lines.join("\n");
+}
+
+function formatWhenDone(entity: Types.entity_info): string | null {
+	if (!entity.schedule || entity.schedule.tasks.length === 0) return null;
+	const projection = projectEntity(entity as unknown as Projectable);
+
+	const currentX = Number(entity.coordinates.x.toString());
+	const currentY = Number(entity.coordinates.y.toString());
+	const projX = Number(projection.location.x.toString());
+	const projY = Number(projection.location.y.toString());
+	const positionChanged = projX !== currentX || projY !== currentY;
+
+	const currentEnergy = Number(entity.energy ?? 0);
+	const projEnergy = Number(projection.energy.toString());
+	const energyChanged = projEnergy !== currentEnergy;
+
+	const currentCargoMass = Number(entity.cargomass ?? 0);
+	const projCargoMass = Number(projection.cargoMass.toString());
+	const cargoChanged = projCargoMass !== currentCargoMass;
+
+	if (!positionChanged && !energyChanged && !cargoChanged) return null;
+
+	const remaining = schedule.scheduleRemaining(entity as unknown as Projectable, new Date());
+	const header = remaining > 0 ? `When done (${formatDuration(remaining)}):` : "When done:";
+
+	const out = [`\n  ${header}`];
+	if (positionChanged) out.push(`    Position:  (${projX}, ${projY})`);
+	if (energyChanged && entity.generator) {
+		out.push(`    Energy:    ${projEnergy}/${entity.generator.capacity}`);
+	} else if (energyChanged) {
+		out.push(`    Energy:    ${projEnergy}`);
+	}
+	if (cargoChanged && entity.capacity != null) {
+		out.push(
+			`    Cargo:     ${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
+		);
+	} else if (cargoChanged) {
+		out.push(`    Cargo:     ${formatMass(projCargoMass)}`);
+	}
+	return out.join("\n");
 }
 
 export function formatLocation(
@@ -522,16 +569,6 @@ export function formatNearby(nearby: Types.nearby_info, opts: NearbyOpts = {}): 
 
 function formatTime(t: { toMilliseconds(): number }): string {
 	return new Date(t.toMilliseconds()).toLocaleTimeString();
-}
-
-export function formatTaskResults(results: Types.task_results): string {
-	if (results.entities.length === 0) return "No tasks scheduled";
-	return results.entities
-		.map((e) => {
-			const started = formatTime(e.schedule_started);
-			return `${e.entity_type} ${e.entity_id}: ${e.task_count} task(s) scheduled (started ${started})`;
-		})
-		.join("\n");
 }
 
 export function formatResolveResults(results: Types.resolve_results): string {

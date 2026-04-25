@@ -7,7 +7,7 @@ import { printError } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface WarpOpts {
 	entityType: EntityTypeName;
@@ -39,13 +39,14 @@ export function register(program: Command): void {
 		.argument("<y>", "destination y", parseInt64)
 		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				entityType: EntityTypeName,
 				entityId: bigint,
 				x: bigint,
 				y: bigint,
-				options: { autoResolve?: boolean; wait?: boolean },
+				options: { autoResolve?: boolean; wait?: boolean; track?: boolean },
 			) => {
 				try {
 					await checkResolveEntity(entityType, entityId, Boolean(options.autoResolve));
@@ -56,15 +57,13 @@ export function register(program: Command): void {
 					throw err;
 				}
 				const action = await buildAction({ entityType, entityId, x, y });
-				await transact(
+				const result = await transact(
 					{ action },
 					{
 						description: `Warping ${entityType} ${entityId} to (${x}, ${y})`,
 					},
 				);
-				if (options.wait) {
-					await awaitAndPrint(entityType, entityId);
-				}
+				await maybeAwaitAndPrint(entityType, entityId, options, result);
 			},
 		);
 }

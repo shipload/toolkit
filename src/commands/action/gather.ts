@@ -13,7 +13,7 @@ import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { checkCapacity, checkDepth, ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 import { buildAction as buildRechargeAction } from "./recharge";
 
 export interface GatherOpts {
@@ -163,6 +163,7 @@ export function register(program: Command): void {
 		.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.option(
 			"--recharge",
@@ -180,6 +181,7 @@ export function register(program: Command): void {
 					autoResolve?: boolean;
 					estimate?: boolean;
 					wait?: boolean;
+					track?: boolean;
 					force?: boolean;
 					recharge?: boolean;
 				},
@@ -190,7 +192,7 @@ export function register(program: Command): void {
 					stratum,
 					quantity,
 				};
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				let est: EstimateResult;
 				try {
 					est = await estimateGather({
@@ -228,25 +230,28 @@ export function register(program: Command): void {
 				}
 				const action = buildAction(gatherOpts);
 				try {
-					if (options.recharge) {
-						const rechargeAction = await buildRechargeAction({
-							entityType: srcType,
-							entityId: srcId,
-						});
-						await transact(
-							{ actions: [rechargeAction, action] },
-							{
-								description: `Recharge + gather ${quantity} from stratum ${stratum}`,
-							},
-						);
-					} else {
-						await transact(
-							{ action },
-							{
-								description: `Gathering ${quantity} from stratum ${stratum}`,
-							},
-						);
-					}
+					const result = options.recharge
+						? await transact(
+								{
+									actions: [
+										await buildRechargeAction({
+											entityType: srcType,
+											entityId: srcId,
+										}),
+										action,
+									],
+								},
+								{
+									description: `Recharge + gather ${quantity} from stratum ${stratum}`,
+								},
+							)
+						: await transact(
+								{ action },
+								{
+									description: `Gathering ${quantity} from stratum ${stratum}`,
+								},
+							);
+					await maybeAwaitAndPrint(srcType, srcId, options, result);
 				} catch (err) {
 					const enriched = await enrichGatherError(err, {
 						sourceType: srcType,
@@ -255,9 +260,6 @@ export function register(program: Command): void {
 					});
 					console.error(enriched);
 					process.exit(1);
-				}
-				if (options.wait) {
-					await awaitAndPrint(srcType, srcId);
 				}
 			},
 		);

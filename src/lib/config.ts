@@ -16,6 +16,8 @@ export interface PlayerConfig {
 	permission: string;
 	/** Absolute path of the config file this was loaded from. */
 	source: string;
+	/** Whether to auto-resolve completed tasks after waiting. Defaults to false. */
+	autoResolve: boolean;
 }
 
 export interface LoadConfigOptions {
@@ -45,6 +47,16 @@ interface ParsedSection {
 	privateKey?: string;
 	actor?: string;
 	permission?: string;
+	autoResolve?: boolean;
+}
+
+function parseBool(v: unknown): boolean | undefined {
+	if (v === undefined || v === null) return undefined;
+	if (typeof v === "boolean") return v;
+	const s = String(v).trim().toLowerCase();
+	if (s === "true" || s === "yes" || s === "1") return true;
+	if (s === "false" || s === "no" || s === "0") return false;
+	return undefined;
 }
 
 function parseIniFile(path: string): ParsedSection {
@@ -55,6 +67,7 @@ function parseIniFile(path: string): ParsedSection {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
 		permission: section.permission as string | undefined,
+		autoResolve: parseBool(section.auto_resolve),
 	};
 }
 
@@ -117,6 +130,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		privateKey: fileData.privateKey,
 		actor: fileData.actor,
 		permission: fileData.permission ?? "active",
+		autoResolve: fileData.autoResolve ?? false,
 		source,
 	};
 }

@@ -50,9 +50,13 @@ const HINTS: ChainHint[] = [
 	},
 ];
 
-export function assertNotBoth(opts: Record<string, unknown>, a: string, b: string): void {
-	if (opts[a] && opts[b]) {
-		process.exit(printError(new ValidationError(`--${a} and --${b} are mutually exclusive`)));
+export function assertNotBoth(opts: Record<string, unknown>, ...pairs: [string, string][]): void {
+	for (const [a, b] of pairs) {
+		if (opts[a] && opts[b]) {
+			process.exit(
+				printError(new ValidationError(`--${a} and --${b} are mutually exclusive`)),
+			);
+		}
 	}
 }
 

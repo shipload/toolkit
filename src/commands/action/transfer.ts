@@ -6,7 +6,7 @@ import { printError } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface TransferOpts {
 	sourceType: EntityTypeName;
@@ -48,6 +48,7 @@ export function register(program: Command): void {
 		.argument("<quantity>", "quantity", parseUint64)
 		.option("--auto-resolve", "resolve completed tasks on source and destination before acting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				srcType: EntityTypeName,
@@ -57,7 +58,7 @@ export function register(program: Command): void {
 				itemId: bigint,
 				stats: bigint,
 				quantity: bigint,
-				options: { autoResolve?: boolean; wait?: boolean },
+				options: { autoResolve?: boolean; wait?: boolean; track?: boolean },
 			) => {
 				try {
 					await checkResolveEntity(srcType, srcId, Boolean(options.autoResolve));
@@ -79,15 +80,13 @@ export function register(program: Command): void {
 					stats,
 					quantity,
 				});
-				await transact(
+				const result = await transact(
 					{ action },
 					{
 						description: `Transferred ${quantity} of item ${itemId} from ${srcType}:${srcId} to ${destType}:${destId}`,
 					},
 				);
-				if (options.wait) {
-					await awaitAndPrint(srcType, srcId);
-				}
+				await maybeAwaitAndPrint(srcType, srcId, options, result);
 			},
 		);
 }

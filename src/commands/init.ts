@@ -13,6 +13,9 @@ actor = myaccount
 
 ; Permission to sign with. Defaults to "active" if omitted.
 permission = active
+
+; Automatically resolve completed tasks after wait/track finishes. Defaults to false.
+; auto_resolve = false
 `;
 
 export interface InitOptions {

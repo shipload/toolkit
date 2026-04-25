@@ -5,10 +5,10 @@ import { getShipload } from "../../lib/client";
 import { assertNotBoth, printError } from "../../lib/errors";
 import { type EstimateResult, estimateTravel } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
-import { renderEstimate } from "../../lib/render-estimate";
+import { renderEstimate, renderTravelSummary } from "../../lib/render-estimate";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface TravelOpts {
 	shipId: bigint;
@@ -40,6 +40,7 @@ export function register(program: Command): void {
 		)
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.action(
 			async (
@@ -51,6 +52,7 @@ export function register(program: Command): void {
 					recharge?: boolean;
 					estimate?: boolean;
 					wait?: boolean;
+					track?: boolean;
 					force?: boolean;
 				},
 			) => {
@@ -63,7 +65,7 @@ export function register(program: Command): void {
 						),
 					);
 				}
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				let est: EstimateResult;
 				try {
 					est = await estimateTravel({
@@ -78,8 +80,11 @@ export function register(program: Command): void {
 					}
 					throw err;
 				}
+				const summary = est.travel ? renderTravelSummary(est.travel, id) : null;
 				if (options.estimate) {
-					console.log(renderEstimate(est));
+					const body = summary ?? renderEstimate(est);
+					const issues = est.feasibility.issues;
+					console.log(issues.length > 0 ? `${renderIssues(issues)}\n${body}` : body);
 					return;
 				}
 				if (!est.feasibility.ok) {
@@ -92,10 +97,12 @@ export function register(program: Command): void {
 					y,
 					recharge: Boolean(options.recharge),
 				});
-				await transact({ action }, { description: `Ship ${id} → (${x}, ${y})` });
-				if (options.wait) {
-					await awaitAndPrint("ship", id);
-				}
+				const result = await transact(
+					{ action },
+					{ description: summary ?? `Ship ${id} → (${x}, ${y})` },
+				);
+				if (!result.txid) return;
+				await maybeAwaitAndPrint("ship", id, options, result);
 			},
 		);
 }

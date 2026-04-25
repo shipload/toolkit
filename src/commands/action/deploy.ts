@@ -9,7 +9,7 @@ import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface DeployOpts {
 	entityType: EntityTypeName;
@@ -42,12 +42,13 @@ export function register(program: Command): void {
 		)
 		.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				entityType: EntityTypeName,
 				entityId: bigint,
 				packedItemId: number,
-				options: { stats?: string; autoResolve?: boolean; wait?: boolean },
+				options: { stats?: string; autoResolve?: boolean; wait?: boolean; track?: boolean },
 			) => {
 				try {
 					await checkResolveEntity(entityType, entityId, Boolean(options.autoResolve));
@@ -68,13 +69,11 @@ export function register(program: Command): void {
 						packedItemId,
 						stats: resolved.stats,
 					});
-					await transact(
+					const result = await transact(
 						{ action },
 						{ description: `Deploying from ${entityType}:${entityId}` },
 					);
-					if (options.wait) {
-						await awaitAndPrint(entityType, entityId);
-					}
+					await maybeAwaitAndPrint(entityType, entityId, options, result);
 				} catch (err) {
 					if (err instanceof ValidationError) {
 						process.exit(printError(err));

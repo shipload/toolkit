@@ -9,7 +9,7 @@
         "@wharfkit/antelope": "^1.2.0",
         "@wharfkit/common": "^1.5.0",
         "@wharfkit/contract": "^1.2.1",
-        "@wharfkit/session": "^1.6.1",
+        "@wharfkit/session": "1.8.0-rc1",
         "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
         "cli-table3": "^0.6.5",
         "commander": "^14.0.2",
@@ -28,7 +28,7 @@
     "@wharfkit/antelope": "^1.2.0",
     "@wharfkit/common": "^1.5.0",
     "@wharfkit/contract": "^1.2.1",
-    "@wharfkit/session": "^1.6.1",
+    "@wharfkit/session": "1.8.0-rc1",
   },
   "packages": {
     "@biomejs/biome": ["@biomejs/biome@2.4.12", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.4.12", "@biomejs/cli-darwin-x64": "2.4.12", "@biomejs/cli-linux-arm64": "2.4.12", "@biomejs/cli-linux-arm64-musl": "2.4.12", "@biomejs/cli-linux-x64": "2.4.12", "@biomejs/cli-linux-x64-musl": "2.4.12", "@biomejs/cli-win32-arm64": "2.4.12", "@biomejs/cli-win32-x64": "2.4.12" }, "bin": { "biome": "bin/biome" } }, "sha512-Rro7adQl3NLq/zJCIL98eElXKI8eEiBtoeu5TbXF/U3qbjuSc7Jb5rjUbeHHcquDWeSf3HnGP7XI5qGrlRk/pA=="],
@@ -69,7 +69,7 @@
 
     "@wharfkit/contract": ["@wharfkit/contract@1.2.1", "", { "dependencies": { "@wharfkit/abicache": "^1.2.0", "@wharfkit/antelope": "^1.0.4", "@wharfkit/signing-request": "^3.1.0", "tslib": "^2.1.0" } }, "sha512-3UhCtDYCyapfM2nRTrslcbvko864d4MOpxRAz7TR/ZUbRAgZsxhYLFLEv1v23/SU+vsFzAHNBmvzkLEG0OLaHQ=="],
 
-    "@wharfkit/session": ["@wharfkit/session@1.6.1", "", { "dependencies": { "@wharfkit/abicache": "^1.2.1", "@wharfkit/antelope": "^1.0.11", "@wharfkit/common": "^1.2.0", "@wharfkit/signing-request": "^3.1.0", "pako": "^2.0.4", "tslib": "^2.1.0" } }, "sha512-k6ntDGOe8bvD/Ps0erTPTFMdYVFrw5cRvPcEwxytlmRRcNV/M8xWcpCYWdmGDxa8QYqynf/hAkbVh1PSwRGl5A=="],
+    "@wharfkit/session": ["@wharfkit/session@1.8.0-rc1", "", { "dependencies": { "@wharfkit/abicache": "^1.2.1", "@wharfkit/antelope": "^1.2.0", "@wharfkit/common": "^1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/signing-request": "^3.4.0", "pako": "^2.0.4", "tslib": "^2.1.0" } }, "sha512-XGiEjifTnQC54RmYi4HC9XyUn7HqNtZ29l8Rh6/H+eZL+o5dnUDNCSvsFfh3IsEHlLHR19zcxIu4W56w4Ae5wA=="],
 
     "@wharfkit/signing-request": ["@wharfkit/signing-request@3.4.0", "", { "dependencies": { "@wharfkit/antelope": "^1.1.1", "tslib": "^2.0.3" } }, "sha512-WstXfmR9i5pKaYXDUwNFNCgBIvN6u5IRGWSfj5O3XzthbtJUmRoJNtjGMaNnUqZ1MMx5YY4/JpY3b2e6LbpXLw=="],
 

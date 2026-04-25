@@ -27,6 +27,8 @@ import {
 	calc_ship_rechargetime,
 	distanceBetweenPoints,
 	getItem,
+	type Projectable,
+	projectEntity,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { Types as ServerTypes } from "../contracts/server";
@@ -45,12 +47,26 @@ import {
 } from "./feasibility";
 import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
 
+export interface TravelSummary {
+	origin: { x: number; y: number };
+	originIsProjected: boolean;
+	destination: { x: number; y: number };
+	distance: number;
+	flightDuration_s: number;
+	rechargeDuration_s: number;
+	startEnergy: number;
+	startEnergyIsProjected: boolean;
+	endEnergy: number;
+	energyCost: number;
+}
+
 export interface EstimateResult {
 	duration_s: number;
 	energy_cost: number;
 	cargo_delta: Record<number, number>;
 	feasibility: { ok: boolean; issues: FeasibilityIssue[] };
 	with_recharge?: boolean;
+	travel?: TravelSummary;
 }
 
 /**
@@ -268,20 +284,14 @@ export async function estimateTravel(params: {
 		};
 	}
 
-	const originX = Number(snap.coordinates.x.toString());
-	const originY = Number(snap.coordinates.y.toString());
+	const projection = projectEntity(snap as unknown as Projectable);
+	const currentX = Number(snap.coordinates.x.toString());
+	const currentY = Number(snap.coordinates.y.toString());
+	const originX = Number(projection.location.x.toString());
+	const originY = Number(projection.location.y.toString());
+	const originIsProjected = originX !== currentX || originY !== currentY;
 	const targetX = typeof target.x === "bigint" ? Number(target.x) : target.x;
 	const targetY = typeof target.y === "bigint" ? Number(target.y) : target.y;
-
-	if (originX === targetX && originY === targetY) {
-		return {
-			duration_s: 0,
-			energy_cost: 0,
-			cargo_delta: {},
-			feasibility: { ok: true, issues: [] },
-			with_recharge: false,
-		};
-	}
 
 	const distance = distanceBetweenPoints(originX, originY, targetX, targetY);
 
@@ -294,9 +304,16 @@ export async function estimateTravel(params: {
 		rechargeSeconds = Number(calc_ship_rechargetime(ship));
 	}
 
+	const generatorCapacity = Number(ship.generator.capacity);
+	const snapshotEnergy = Number(ship.energy ?? 0);
+	const projectedAfterPending = Number(projection.energy.toString());
+	const startEnergy = recharge ? generatorCapacity : projectedAfterPending;
+	const startEnergyIsProjected = projectedAfterPending !== snapshotEnergy;
+	const endEnergy = Math.max(0, startEnergy - energyUsage);
+
 	const issues = populateTravelFeasibility({
-		generatorCapacity: Number(ship.generator.capacity),
-		currentEnergy: Number(ship.energy ?? 0),
+		generatorCapacity,
+		currentEnergy: projectedAfterPending,
 		energyCost: energyUsage,
 		flightSeconds,
 		originX,
@@ -313,6 +330,18 @@ export async function estimateTravel(params: {
 		cargo_delta: {},
 		feasibility: { ok: issues.length === 0, issues },
 		with_recharge: recharge,
+		travel: {
+			origin: { x: originX, y: originY },
+			originIsProjected,
+			destination: { x: targetX, y: targetY },
+			distance: Number(distance),
+			flightDuration_s: flightSeconds,
+			rechargeDuration_s: rechargeSeconds,
+			startEnergy,
+			startEnergyIsProjected,
+			endEnergy,
+			energyCost: energyUsage,
+		},
 	};
 }
 

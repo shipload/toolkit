@@ -8,7 +8,7 @@ import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { ValidationError } from "../../lib/validate";
-import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
+import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface GroupTravelOpts {
 	entities: EntityRef[];
@@ -44,6 +44,7 @@ export function register(program: Command): void {
 		.option("--auto-resolve", "resolve completed tasks on each entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
 		.addOption(WAIT_OPTION)
+		.addOption(TRACK_OPTION)
 		.action(
 			async (
 				entities: EntityRef[],
@@ -54,9 +55,10 @@ export function register(program: Command): void {
 					autoResolve?: boolean;
 					estimate?: boolean;
 					wait?: boolean;
+					track?: boolean;
 				},
 			) => {
-				assertNotBoth(options, "estimate", "wait");
+				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				if (options.estimate) {
 					try {
 						const est = await estimateGroupTravel({
@@ -93,11 +95,16 @@ export function register(program: Command): void {
 					y,
 					recharge: Boolean(options.recharge),
 				});
-				await transact({ action }, { description: `Group travel to (${x}, ${y})` });
-				if (options.wait) {
-					const primary = entities[0];
-					await awaitAndPrint(primary.entityType, primary.entityId);
-				}
+				const result = await transact(
+					{ action },
+					{ description: `Group travel to (${x}, ${y})` },
+				);
+				await maybeAwaitAndPrint(
+					entities[0].entityType,
+					entities[0].entityId,
+					options,
+					result,
+				);
 			},
 		);
 }
