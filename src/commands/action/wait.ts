@@ -1,11 +1,8 @@
 import type { Command } from "commander";
-import type { Types } from "../../contracts/server";
 import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { printError } from "../../lib/errors";
-import { formatEntity } from "../../lib/format";
-import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint } from "../../lib/wait";
 
 export function register(program: Command): void {
 	program
@@ -19,15 +16,13 @@ export function register(program: Command): void {
 		.action(
 			async (entityType: EntityTypeName, entityId: bigint, opts: { timeout?: number }) => {
 				try {
-					await waitForEntityIdle({ entityType, entityId, timeoutMs: opts.timeout });
+					await awaitAndPrint(entityType, entityId, { timeoutMs: opts.timeout });
 				} catch (err) {
 					if (err instanceof ValidationError) {
 						process.exit(printError(err));
 					}
 					throw err;
 				}
-				const snap = await getEntitySnapshot(entityType, entityId);
-				console.log(formatEntity(snap as unknown as Types.entity_info));
 			},
 		);
 }

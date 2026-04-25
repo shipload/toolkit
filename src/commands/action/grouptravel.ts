@@ -1,17 +1,14 @@
 import { type Action, Name } from "@wharfkit/antelope";
 import type { Command } from "commander";
-import type { Types } from "../../contracts/server";
 import { type EntityRef, parseEntityRefList, parseInt64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
 import { estimateGroupTravel } from "../../lib/estimate";
-import { formatEntity } from "../../lib/format";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
-import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
 
 export interface GroupTravelOpts {
 	entities: EntityRef[];
@@ -46,10 +43,7 @@ export function register(program: Command): void {
 		)
 		.option("--auto-resolve", "resolve completed tasks on each entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
-		.option(
-			"--wait",
-			"block until the primary entity's scheduled task completes, then print post-state",
-		)
+		.addOption(WAIT_OPTION)
 		.action(
 			async (
 				entities: EntityRef[],
@@ -108,12 +102,7 @@ export function register(program: Command): void {
 				await transact({ action }, { description: `Group travel to (${x}, ${y})` });
 				if (options.wait) {
 					const primary = entities[0];
-					await waitForEntityIdle({
-						entityType: primary.entityType,
-						entityId: primary.entityId,
-					});
-					const snap = await getEntitySnapshot(primary.entityType, primary.entityId);
-					console.log(formatEntity(snap as unknown as Types.entity_info));
+					await awaitAndPrint(primary.entityType, primary.entityId);
 				}
 			},
 		);

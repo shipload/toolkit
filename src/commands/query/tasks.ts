@@ -39,10 +39,21 @@ export function render(view: TasksView): string {
 
 	const table = new Table({
 		chars: {
-			top: "", "top-mid": "", "top-left": "", "top-right": "",
-			bottom: "", "bottom-mid": "", "bottom-left": "", "bottom-right": "",
-			left: "  ", "left-mid": "", mid: "", "mid-mid": "",
-			right: "", "right-mid": "", middle: "  ",
+			top: "",
+			"top-mid": "",
+			"top-left": "",
+			"top-right": "",
+			bottom: "",
+			"bottom-mid": "",
+			"bottom-left": "",
+			"bottom-right": "",
+			left: "  ",
+			"left-mid": "",
+			mid: "",
+			"mid-mid": "",
+			right: "",
+			"right-mid": "",
+			middle: "  ",
 		},
 		style: { head: [], border: [] },
 		head: ["#", "dest", "type", "status", "duration", "ends"],
@@ -57,7 +68,14 @@ export function render(view: TasksView): string {
 		cursor = end.getTime();
 		const status = view.now >= end ? "done" : view.now >= start ? "active" : "pending";
 		const endsLabel = reltime(end, view.now);
-		table.push([String(i), fmtCoords(t.coordinates), formatTaskType(t.type), status, formatDuration(t.duration), endsLabel]);
+		table.push([
+			String(i),
+			fmtCoords(t.coordinates),
+			formatTaskType(t.type),
+			status,
+			formatDuration(t.duration),
+			endsLabel,
+		]);
 	}
 
 	return [header, "", table.toString()].join("\n");

@@ -18,13 +18,12 @@ import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
 import { estimateCraft } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
-import { formatEntity } from "../../lib/format";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
 import { buildAction as buildRechargeAction } from "./recharge";
 
 export interface CraftOpts {
@@ -77,7 +76,7 @@ export function register(program: Command): void {
 		)
 		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
-		.option("--wait", "block until scheduled task completes, then print post-state")
+		.addOption(WAIT_OPTION)
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.option("--recharge", "recharge to full energy before crafting")
 		.action(
@@ -152,9 +151,7 @@ export function register(program: Command): void {
 						);
 					}
 					if (options.wait) {
-						await waitForEntityIdle({ entityType, entityId });
-						const postSnap = await getEntitySnapshot(entityType, entityId);
-						console.log(formatEntity(postSnap as unknown as ServerTypes.entity_info));
+						await awaitAndPrint(entityType, entityId);
 					}
 				} catch (err) {
 					if (err instanceof ValidationError) {

@@ -1,6 +1,14 @@
+import { Option } from "commander";
+import type { Types } from "../contracts/server";
 import type { EntityTypeName } from "./args";
+import { formatEntity } from "./format";
 import { ensureNoPendingResolve } from "./resolve-prompt";
 import { getEntitySnapshot } from "./snapshot";
+
+export const WAIT_OPTION = new Option(
+	"--wait",
+	"block until scheduled task completes, then print post-state",
+);
 
 export function nextInterval(s: { remaining_s: number; attempt: number }): number {
 	if (s.remaining_s <= 2) return 1000;
@@ -48,6 +56,16 @@ function countCompletedTasks(snap: EntitySnapshotLike): number {
 	if (!snap.is_idle) return 0;
 	const tasks = snap.schedule?.tasks;
 	return Array.isArray(tasks) ? tasks.length : 0;
+}
+
+export async function awaitAndPrint(
+	entityType: EntityTypeName | string,
+	entityId: bigint | number,
+	opts?: Omit<WaitOpts, "entityType" | "entityId">,
+): Promise<void> {
+	await waitForEntityIdle({ entityType, entityId, ...opts });
+	const snap = await getEntitySnapshot(entityType, entityId);
+	console.log(formatEntity(snap as unknown as Types.entity_info));
 }
 
 export async function waitForEntityIdle(opts: WaitOpts): Promise<void> {

@@ -5,12 +5,11 @@ import { type EntityTypeName, parseEntityType, parseUint32, parseUint64 } from "
 import { type ParsedCargoInput, resolveCargoInputs } from "../../lib/cargo-resolve";
 import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
-import { formatEntity } from "../../lib/format";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
 
 export interface DeployOpts {
 	entityType: EntityTypeName;
@@ -42,7 +41,7 @@ export function register(program: Command): void {
 			"cargo stack stats (packed uint; omit to auto-match the single cargo stack for this item)",
 		)
 		.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
-		.option("--wait", "block until scheduled task completes, then print post-state")
+		.addOption(WAIT_OPTION)
 		.action(
 			async (
 				entityType: EntityTypeName,
@@ -74,9 +73,7 @@ export function register(program: Command): void {
 						{ description: `Deploying from ${entityType}:${entityId}` },
 					);
 					if (options.wait) {
-						await waitForEntityIdle({ entityType, entityId });
-						const postSnap = await getEntitySnapshot(entityType, entityId);
-						console.log(formatEntity(postSnap as unknown as ServerTypes.entity_info));
+						await awaitAndPrint(entityType, entityId);
 					}
 				} catch (err) {
 					if (err instanceof ValidationError) {

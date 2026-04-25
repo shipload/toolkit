@@ -1,15 +1,12 @@
 import { type Action, Name } from "@wharfkit/antelope";
 import type { Command } from "commander";
-import type { Types } from "../../contracts/server";
 import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
-import { formatEntity } from "../../lib/format";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
-import { getEntitySnapshot } from "../../lib/snapshot";
 import { ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
 
 export interface TransferOpts {
 	sourceType: EntityTypeName;
@@ -50,7 +47,7 @@ export function register(program: Command): void {
 		.argument("<stats>", "cargo stack discriminator (often 0)", parseUint64)
 		.argument("<quantity>", "quantity", parseUint64)
 		.option("--auto-resolve", "resolve completed tasks on source and destination before acting")
-		.option("--wait", "block until scheduled task completes, then print post-state")
+		.addOption(WAIT_OPTION)
 		.action(
 			async (
 				srcType: EntityTypeName,
@@ -89,9 +86,7 @@ export function register(program: Command): void {
 					},
 				);
 				if (options.wait) {
-					await waitForEntityIdle({ entityType: srcType, entityId: srcId });
-					const snap = await getEntitySnapshot(srcType, srcId);
-					console.log(formatEntity(snap as unknown as Types.entity_info));
+					await awaitAndPrint(srcType, srcId);
 				}
 			},
 		);

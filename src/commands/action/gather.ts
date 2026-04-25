@@ -1,20 +1,19 @@
 import { getItem } from "@shipload/sdk";
 import { type Action, Checksum256, Name, UInt64 } from "@wharfkit/antelope";
 import type { Command } from "commander";
-import type { Types } from "../../contracts/server";
 import { type EntityTypeName, parseEntityType, parseUint32, parseUint64 } from "../../lib/args";
 import { getGameSeed, server } from "../../lib/client";
 import { printError } from "../../lib/errors";
 import { estimateGather } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
-import { formatEntity, formatItem } from "../../lib/format";
+import { formatItem } from "../../lib/format";
 import { resolveReach, shallowestPerItem } from "../../lib/reach";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
 import { checkCapacity, checkDepth, ValidationError } from "../../lib/validate";
-import { waitForEntityIdle } from "../../lib/wait";
+import { awaitAndPrint, WAIT_OPTION } from "../../lib/wait";
 import { buildAction as buildRechargeAction } from "./recharge";
 
 export interface GatherOpts {
@@ -163,7 +162,7 @@ export function register(program: Command): void {
 		.argument("<quantity>", "quantity to gather", parseUint32)
 		.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
-		.option("--wait", "block until scheduled task completes, then print post-state")
+		.addOption(WAIT_OPTION)
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.option(
 			"--recharge",
@@ -270,9 +269,7 @@ export function register(program: Command): void {
 					process.exit(1);
 				}
 				if (options.wait) {
-					await waitForEntityIdle({ entityType: srcType, entityId: srcId });
-					const snap = await getEntitySnapshot(srcType, srcId);
-					console.log(formatEntity(snap as unknown as Types.entity_info));
+					await awaitAndPrint(srcType, srcId);
 				}
 			},
 		);
