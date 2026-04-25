@@ -76,6 +76,19 @@ export function formatCoords(coords: Types.coordinates): string {
 	return `(${coords.x}, ${coords.y})`;
 }
 
+export function reltime(d: Date, now: Date): string {
+	const diffMs = d.getTime() - now.getTime();
+	const abs = Math.abs(diffMs);
+	const secs = Math.floor(abs / 1000);
+	const mins = Math.floor(secs / 60);
+	const hours = Math.floor(mins / 60);
+	let label: string;
+	if (hours >= 1) label = `${hours}h ${mins % 60}m`;
+	else if (mins >= 1) label = `${mins}m ${secs % 60}s`;
+	else label = `${secs}s`;
+	return diffMs >= 0 ? `${label} left` : `${label} ago`;
+}
+
 export function formatDuration(seconds: number): string {
 	if (seconds < 60) return `${seconds}s`;
 	const m = Math.floor(seconds / 60);

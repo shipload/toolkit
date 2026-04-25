@@ -61,7 +61,7 @@ Unsure what to do next? Run `bun run shiploadcli next`.
 
 ## Commands
 
-Three groups, browsable via `bun run shiploadcli --help`:
+Four groups, browsable via `bun run shiploadcli --help`:
 
 ### Query (read-only)
 
@@ -112,6 +112,10 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `tools scan <radius>` — scan strata in a radius around the origin; leaderboard of god-rolls. Supports `--threshold`, `--top`, `--workers`, `--center`, `--entity`, `--all`, `--json`, and seed overrides.
 - `tools find <resource-id>` — locate the nearest reachable strata producing a given resource. Supports `--entity`, `--radius`, `--max-results`, `--json`, and seed overrides.
 - `tools verify-tiers` — verify world-gen produces reserves matching `RESERVE_TIERS` ranges. Supports `--radius`.
+
+### Utilities
+
+- `update` — download and install the latest release from GitHub. Fetches release metadata, downloads the platform binary, verifies SHA256, and atomically replaces the running binary. Supports `--check` to report the available version without installing. Only works on compiled binaries; errors if run via `bun run`.
 
 ## Conventions
 
