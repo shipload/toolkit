@@ -3,7 +3,7 @@ import { type Action, Checksum256, Name, UInt64 } from "@wharfkit/antelope";
 import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseUint32, parseUint64 } from "../../lib/args";
 import { getGameSeed, server } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { assertNotBoth, printError } from "../../lib/errors";
 import { type EstimateResult, estimateGather } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
 import { formatItem } from "../../lib/format";
@@ -190,13 +190,7 @@ export function register(program: Command): void {
 					stratum,
 					quantity,
 				};
-				if (options.estimate && options.wait) {
-					process.exit(
-						printError(
-							new ValidationError("--estimate and --wait are mutually exclusive"),
-						),
-					);
-				}
+				assertNotBoth(options, "estimate", "wait");
 				let est: EstimateResult;
 				try {
 					est = await estimateGather({

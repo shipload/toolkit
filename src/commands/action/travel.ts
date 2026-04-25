@@ -2,7 +2,7 @@ import type { Action } from "@wharfkit/antelope";
 import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseInt64, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { assertNotBoth, printError } from "../../lib/errors";
 import { type EstimateResult, estimateTravel } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
 import { renderEstimate } from "../../lib/render-estimate";
@@ -63,19 +63,12 @@ export function register(program: Command): void {
 						),
 					);
 				}
-				const shipId = id;
-				if (options.estimate && options.wait) {
-					process.exit(
-						printError(
-							new ValidationError("--estimate and --wait are mutually exclusive"),
-						),
-					);
-				}
+				assertNotBoth(options, "estimate", "wait");
 				let est: EstimateResult;
 				try {
 					est = await estimateTravel({
 						entityType: "ship",
-						entityId: shipId,
+						entityId: id,
 						target: { x, y },
 						recharge: Boolean(options.recharge),
 					});
@@ -94,14 +87,14 @@ export function register(program: Command): void {
 					if (!options.force) process.exit(1);
 				}
 				const action = await buildAction({
-					shipId,
+					shipId: id,
 					x,
 					y,
 					recharge: Boolean(options.recharge),
 				});
-				await transact({ action }, { description: `Ship ${shipId} → (${x}, ${y})` });
+				await transact({ action }, { description: `Ship ${id} → (${x}, ${y})` });
 				if (options.wait) {
-					await awaitAndPrint("ship", shipId);
+					await awaitAndPrint("ship", id);
 				}
 			},
 		);

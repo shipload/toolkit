@@ -50,6 +50,12 @@ const HINTS: ChainHint[] = [
 	},
 ];
 
+export function assertNotBoth(opts: Record<string, unknown>, a: string, b: string): void {
+	if (opts[a] && opts[b]) {
+		process.exit(printError(new ValidationError(`--${a} and --${b} are mutually exclusive`)));
+	}
+}
+
 export function printError(err: unknown): ExitCode {
 	if (err instanceof ValidationError) {
 		console.error(`Error: ${err.message}`);

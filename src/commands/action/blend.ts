@@ -8,7 +8,7 @@ import {
 	resolveCargoInputs,
 } from "../../lib/cargo-resolve";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { assertNotBoth, printError } from "../../lib/errors";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
@@ -67,13 +67,7 @@ export function register(program: Command): void {
 					wait?: boolean;
 				},
 			) => {
-				if (options.estimate && options.wait) {
-					process.exit(
-						printError(
-							new ValidationError("--estimate and --wait are mutually exclusive"),
-						),
-					);
-				}
+				assertNotBoth(options, "estimate", "wait");
 				if (options.estimate) {
 					console.log(
 						renderEstimate({

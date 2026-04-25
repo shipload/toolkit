@@ -2,7 +2,7 @@ import { type Action, Name } from "@wharfkit/antelope";
 import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { assertNotBoth, printError } from "../../lib/errors";
 import { estimateRecharge } from "../../lib/estimate";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
@@ -36,13 +36,7 @@ export function register(program: Command): void {
 				entityId: bigint,
 				options: { autoResolve?: boolean; estimate?: boolean; wait?: boolean },
 			) => {
-				if (options.estimate && options.wait) {
-					process.exit(
-						printError(
-							new ValidationError("--estimate and --wait are mutually exclusive"),
-						),
-					);
-				}
+				assertNotBoth(options, "estimate", "wait");
 				if (options.estimate) {
 					try {
 						const est = await estimateRecharge({ entityType, entityId });
