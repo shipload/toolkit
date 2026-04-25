@@ -1,3 +1,4 @@
+import Table from "cli-table3";
 import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { server } from "../../lib/client";
@@ -22,33 +23,31 @@ interface TasksView {
 	now: Date;
 }
 
-function iso(d: Date): string {
-	return d.toISOString().replace(".000", "");
-}
-
 function fmtCoords(c: { x: number; y: number; z: number | null } | null | undefined): string {
 	if (!c) return "—";
 	return `(${c.x}, ${c.y})`;
 }
 
 export function render(view: TasksView): string {
-	const timeStr = view.now.toISOString().replace(/.*T/, "").replace(".000Z", "").replace("Z", "") + " UTC";
+	const timeStr =
+		view.now.toISOString().replace(/.*T/, "").replace(".000Z", "").replace("Z", "") + " UTC";
 	const header = `${view.type} ${view.id}  ·  ${timeStr}`;
-	const lines: string[] = [header, ""];
 
 	if (!view.schedule || view.schedule.tasks.length === 0) {
-		lines.push("  No scheduled tasks.");
-		return lines.join("\n");
+		return [header, "", "  No scheduled tasks."].join("\n");
 	}
 
-	const COL_DEST = 10;
-	const COL_TYPE = 10;
-	const COL_STATUS = 9;
-	const COL_DUR = 10;
-
-	lines.push(
-		`  ${"#".padEnd(3)}${"dest".padEnd(COL_DEST)}${"type".padEnd(COL_TYPE)}${"status".padEnd(COL_STATUS)}${"duration".padEnd(COL_DUR)}ends`,
-	);
+	const table = new Table({
+		chars: {
+			top: "", "top-mid": "", "top-left": "", "top-right": "",
+			bottom: "", "bottom-mid": "", "bottom-left": "", "bottom-right": "",
+			left: "  ", "left-mid": "", mid: "", "mid-mid": "",
+			right: "", "right-mid": "", middle: "  ",
+		},
+		style: { head: [], border: [] },
+		head: ["#", "dest", "type", "status", "duration", "ends"],
+		colAligns: ["left", "left", "left", "left", "left", "left"],
+	});
 
 	let cursor = view.schedule.started.getTime();
 	for (let i = 0; i < view.schedule.tasks.length; i++) {
@@ -57,20 +56,11 @@ export function render(view: TasksView): string {
 		const end = new Date(cursor + t.duration * 1000);
 		cursor = end.getTime();
 		const status = view.now >= end ? "done" : view.now >= start ? "active" : "pending";
-		const timeLabel =
-			status === "done" ? reltime(end, view.now) : reltime(end, view.now);
-		const dest = fmtCoords(t.coordinates);
-		const row =
-			`  ${String(i).padEnd(3)}` +
-			`${dest.padEnd(COL_DEST)}` +
-			`${formatTaskType(t.type).padEnd(COL_TYPE)}` +
-			`${status.padEnd(COL_STATUS)}` +
-			`${formatDuration(t.duration).padEnd(COL_DUR)}` +
-			timeLabel;
-		lines.push(row);
+		const endsLabel = reltime(end, view.now);
+		table.push([String(i), fmtCoords(t.coordinates), formatTaskType(t.type), status, formatDuration(t.duration), endsLabel]);
 	}
 
-	return lines.join("\n");
+	return [header, "", table.toString()].join("\n");
 }
 
 function viewToJson(view: TasksView): Record<string, unknown> {
