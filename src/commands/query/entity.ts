@@ -20,8 +20,8 @@ export function register(program: Command): void {
 	program
 		.command("entity")
 		.description("Show full state for a single entity")
-		.argument("<entity-type>", "entity type (ship/warehouse/container)", parseEntityType)
-		.argument("<id>", "entity id", parseUint64)
+		.argument("<entity-type>", "entity type (ship/container/warehouse)", parseEntityType)
+		.argument("<id>", "numeric entity id", parseUint64)
 		.option("--json", "emit JSON instead of formatted text")
 		.action(async (entityType: EntityTypeName, id: bigint, opts: { json?: boolean }) => {
 			await runEntity(entityType, id, opts);
@@ -34,7 +34,7 @@ export function register(program: Command): void {
 	] as [string, EntityTypeName][]) {
 		program
 			.command(name)
-			.description(`Show full state for a ${type}. Shorthand for \`entity ${type} <id>\`.`)
+			.description(`Show full state for a ${type} (shorthand for \`entity ${type} <id>\`)`)
 			.argument("<id>", `${type} id`, parseUint64)
 			.option("--json", "emit JSON instead of formatted text")
 			.action(async (id: bigint, opts: { json?: boolean }) => {

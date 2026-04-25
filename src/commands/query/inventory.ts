@@ -10,7 +10,10 @@ export interface InventoryData {
 }
 
 export function render(entityType: string, id: bigint, cargo: any[]): string {
-	return [`Inventory for ${entityType} ${id}:`, `  ${formatCargo(cargo)}`].join("\n");
+	const header = `Inventory for ${entityType} ${id}:`;
+	if (cargo.length === 0) return `${header}\n  (empty)`;
+	const lines = formatCargo(cargo).split("\n").map((l) => `  ${l}`);
+	return [header, ...lines].join("\n");
 }
 
 export function register(program: Command): void {

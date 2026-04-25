@@ -50,6 +50,16 @@ export function formatCoords(coords: Types.coordinates): string {
 	return `(${coords.x}, ${coords.y})`;
 }
 
+export function formatDuration(seconds: number): string {
+	if (seconds < 60) return `${seconds}s`;
+	const m = Math.floor(seconds / 60);
+	const s = seconds % 60;
+	if (m < 60) return s === 0 ? `${m}m` : `${m}m ${s}s`;
+	const h = Math.floor(m / 60);
+	const rem = m % 60;
+	return rem === 0 ? `${h}h` : `${h}h ${rem}m`;
+}
+
 export function formatItem(itemId: number): string {
 	try {
 		return `${displayName(resolveItem(itemId))} (id:${itemId})`;
@@ -163,18 +173,25 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 	return `${ref.entityType}:${ref.entityId}`;
 }
 
+function formatCargoItem(c: Types.cargo_item): string {
+	const itemId = Number(c.item_id);
+	const name = displayName(resolveItem(itemId));
+	const qty = Number(c.quantity);
+
+	let massStr = "";
+	try {
+		massStr = `    ${formatMass(getItem(itemId).mass * qty)}`;
+	} catch {}
+
+	const statsStr = formatStats(c.stats, itemId);
+	const statsDisplay = statsStr ? `    ${statsStr}` : "";
+
+	return `${qty} × ${name}${statsDisplay}${massStr}`;
+}
+
 export function formatCargo(cargo: Types.cargo_item[]): string {
-	if (cargo.length === 0) return "empty";
-	return cargo
-		.map((c) => {
-			const itemId = Number(c.item_id);
-			const base = `${c.quantity} ${formatItem(itemId)}`;
-			const stats = formatStats(c.stats, itemId);
-			const decoded = stats ? ` [${stats}]` : "";
-			const statsUint = BigInt(c.stats.toString());
-			return `${base}${decoded} stats=${statsUint}`;
-		})
-		.join(" + ");
+	if (cargo.length === 0) return "";
+	return cargo.map(formatCargoItem).join("\n");
 }
 
 export function formatPlayer(player: Types.player_info): string {
@@ -216,7 +233,7 @@ export function formatEntity(entity: Types.entity_info): string {
 		const t = entity.current_task;
 		let taskLine = `  Task:      ${formatTaskType(Number(t.type))}`;
 		if (t.coordinates) taskLine += ` to ${formatCoords(t.coordinates)}`;
-		taskLine += `  ·  ${entity.current_task_remaining}s remaining`;
+		taskLine += `  ·  ${formatDuration(Number(entity.current_task_remaining))} remaining`;
 		lines.push(taskLine);
 	}
 
@@ -233,8 +250,10 @@ export function formatEntity(entity: Types.entity_info): string {
 	if (entity.capacity != null) {
 		const usedStr = formatMass(Number(entity.cargomass ?? 0));
 		const capStr = formatMass(Number(entity.capacity));
-		const cargoStr = (entity.cargo?.length ?? 0) === 0 ? "empty" : formatCargo(entity.cargo);
-		lines.push(`  Cargo:     ${cargoStr}  ·  ${usedStr} / ${capStr}`);
+		lines.push(`  Cargo:     ${usedStr} / ${capStr}`);
+		for (const c of entity.cargo ?? []) {
+			lines.push(`             ${formatCargoItem(c)}`);
+		}
 	}
 
 	const isShip = String(entity.type) === "ship";
