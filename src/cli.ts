@@ -37,6 +37,7 @@ import * as stratum from "./commands/query/stratum";
 import * as tasks from "./commands/query/tasks";
 import * as whoami from "./commands/query/whoami";
 import * as tools from "./commands/tools";
+import * as update from "./commands/update";
 
 const PACKAGE = {
 	name: "shiploadcli",
@@ -61,6 +62,7 @@ export function build(): Command {
 	);
 
 	init.register(program);
+	update.register(program);
 	whoami.register(program);
 	status.register(program);
 	epoch.register(program);
