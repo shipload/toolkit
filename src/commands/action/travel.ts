@@ -3,7 +3,7 @@ import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseInt64, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
-import { estimateTravel } from "../../lib/estimate";
+import { type EstimateResult, estimateTravel } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
 import { renderEstimate } from "../../lib/render-estimate";
 import { transact } from "../../lib/session";
@@ -71,31 +71,26 @@ export function register(program: Command): void {
 						),
 					);
 				}
-				if (options.estimate) {
-					try {
-						const est = await estimateTravel({
-							entityType: "ship",
-							entityId: shipId,
-							target: { x, y },
-							recharge: Boolean(options.recharge),
-						});
-						console.log(renderEstimate(est));
-					} catch (err) {
-						if (err instanceof ValidationError) {
-							process.exit(printError(err));
-						}
-						throw err;
+				let est: EstimateResult;
+				try {
+					est = await estimateTravel({
+						entityType: "ship",
+						entityId: shipId,
+						target: { x, y },
+						recharge: Boolean(options.recharge),
+					});
+				} catch (err) {
+					if (err instanceof ValidationError) {
+						process.exit(printError(err));
 					}
+					throw err;
+				}
+				if (options.estimate) {
+					console.log(renderEstimate(est));
 					return;
 				}
-				const feasibilityEstimate = await estimateTravel({
-					entityType: "ship",
-					entityId: shipId,
-					target: { x, y },
-					recharge: Boolean(options.recharge),
-				});
-				if (!feasibilityEstimate.feasibility.ok) {
-					console.error(renderIssues(feasibilityEstimate.feasibility.issues));
+				if (!est.feasibility.ok) {
+					console.error(renderIssues(est.feasibility.issues));
 					if (!options.force) process.exit(1);
 				}
 				const action = await buildAction({

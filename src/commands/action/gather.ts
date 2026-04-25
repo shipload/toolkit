@@ -4,7 +4,7 @@ import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseUint32, parseUint64 } from "../../lib/args";
 import { getGameSeed, server } from "../../lib/client";
 import { printError } from "../../lib/errors";
-import { estimateGather } from "../../lib/estimate";
+import { type EstimateResult, estimateGather } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
 import { formatItem } from "../../lib/format";
 import { resolveReach, shallowestPerItem } from "../../lib/reach";
@@ -197,22 +197,23 @@ export function register(program: Command): void {
 						),
 					);
 				}
-				if (options.estimate) {
-					try {
-						const est = await estimateGather({
-							entityType: srcType,
-							entityId: srcId,
-							stratum,
-							quantity,
-							recharge: Boolean(options.recharge),
-						});
-						console.log(renderEstimate(est));
-					} catch (err) {
-						if (err instanceof ValidationError) {
-							process.exit(printError(err));
-						}
-						throw err;
+				let est: EstimateResult;
+				try {
+					est = await estimateGather({
+						entityType: srcType,
+						entityId: srcId,
+						stratum,
+						quantity,
+						recharge: Boolean(options.recharge),
+					});
+				} catch (err) {
+					if (err instanceof ValidationError) {
+						process.exit(printError(err));
 					}
+					throw err;
+				}
+				if (options.estimate) {
+					console.log(renderEstimate(est));
 					return;
 				}
 				try {
@@ -227,15 +228,8 @@ export function register(program: Command): void {
 					}
 					throw err;
 				}
-				const feasibilityEstimate = await estimateGather({
-					entityType: srcType,
-					entityId: srcId,
-					stratum,
-					quantity,
-					recharge: Boolean(options.recharge),
-				});
-				if (!feasibilityEstimate.feasibility.ok) {
-					console.error(renderIssues(feasibilityEstimate.feasibility.issues));
+				if (!est.feasibility.ok) {
+					console.error(renderIssues(est.feasibility.issues));
 					if (!options.force) process.exit(1);
 				}
 				const action = buildAction(gatherOpts);
