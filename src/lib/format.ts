@@ -4,8 +4,10 @@ import {
 	deriveLocationStatic,
 	deriveStratum,
 	displayName,
+	formatMass,
 	getItem,
 	getLocationType,
+	getModuleCapabilityType,
 	getStatDefinitions,
 	LocationType,
 	type ResourceCategory,
@@ -40,39 +42,8 @@ export function formatTaskType(type: number): string {
 	return TASK_TYPES[type] ?? `Unknown(${type})`;
 }
 
-export interface LiveEnergyArgs {
-	storedEnergy: number;
-	capacity: number;
-	recharge: number;
-	drainPerSec?: number;
-	activeTaskStartedAt?: Date;
-	now?: Date;
-}
-
-export function formatLiveEnergy(args: LiveEnergyArgs): string {
-	if (!args.activeTaskStartedAt) {
-		return `${args.storedEnergy}/${args.capacity} (recharge: ${args.recharge}/s)`;
-	}
-	const elapsedMs = (args.now ?? new Date()).getTime() - args.activeTaskStartedAt.getTime();
-	const elapsed = Math.max(0, elapsedMs / 1000);
-	const drain = (args.drainPerSec ?? 0) * elapsed;
-	const regen = args.recharge * elapsed;
-	const projected = Math.min(args.capacity, Math.max(0, args.storedEnergy + regen - drain));
-	return `${args.storedEnergy} → ${Math.round(projected)}/${args.capacity} (live, recharge: ${args.recharge}/s)`;
-}
-
-const TASK_TYPE_RECHARGE = 2;
-
-function deriveDrainPerSec(task: Types.task): number {
-	const type = Number(task.type);
-	const duration = Number(task.duration);
-	if (duration <= 0) return 0;
-	if (type === TASK_TYPE_RECHARGE) return 0;
-	const costRaw = task.energy_cost;
-	if (!costRaw) return 0;
-	const cost = Number(costRaw);
-	if (cost <= 0) return 0;
-	return cost / duration;
+export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {
+	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
 }
 
 export function formatCoords(coords: Types.coordinates): string {
@@ -217,90 +188,100 @@ export function formatPlayer(player: Types.player_info): string {
 	return lines.join("\n");
 }
 
+function resolvedModuleNames(modules: Types.entity_info["modules"]): Map<number, string> {
+	const map = new Map<number, string>();
+	for (const m of modules ?? []) {
+		if (!m.installed) continue;
+		const itemId = Number(m.installed.item_id);
+		try {
+			const capType = getModuleCapabilityType(itemId);
+			map.set(capType, displayName(resolveItem(itemId)));
+		} catch {}
+	}
+	return map;
+}
+
 export function formatEntity(entity: Types.entity_info): string {
 	const trimmedName = entity.entity_name?.trim() ?? "";
-	const nameStr = trimmedName ? ` "${trimmedName}"` : "";
-	const lines = [
-		`${entity.type} ${entity.id}${nameStr} owned by ${entity.owner}`,
-		`Location: ${formatCoords(entity.coordinates)} | Status: ${entity.is_idle ? "Idle" : "Busy"}`,
-	];
+	const title = trimmedName
+		? `${trimmedName} (${entity.type} ${entity.id})`
+		: `${entity.type} ${entity.id}`;
+
+	const lines = [`${title} — ${entity.owner}`];
+
+	const statusStr = entity.is_idle ? "idle" : "busy";
+	lines.push(`  Status:    ${statusStr}  ·  ${formatCoords(entity.coordinates)}`);
 
 	if (!entity.is_idle && entity.current_task) {
 		const t = entity.current_task;
-		let status = `  ${formatTaskType(Number(t.type))}`;
-		if (t.coordinates) status += ` to ${formatCoords(t.coordinates)}`;
-		status += ` | ${entity.current_task_remaining}s remaining`;
-		lines.push(status);
+		let taskLine = `  Task:      ${formatTaskType(Number(t.type))}`;
+		if (t.coordinates) taskLine += ` to ${formatCoords(t.coordinates)}`;
+		taskLine += `  ·  ${entity.current_task_remaining}s remaining`;
+		lines.push(taskLine);
 	}
 
 	if (entity.generator) {
-		const storedEnergy = Number(entity.energy ?? 0);
-		const capacity = Number(entity.generator.capacity);
-		const recharge = Number(entity.generator.recharge);
-		let activeTaskStartedAt: Date | undefined;
-		let drainPerSec: number | undefined;
-		if (!entity.is_idle && entity.current_task) {
-			const elapsedSec = Number(entity.current_task_elapsed ?? 0);
-			activeTaskStartedAt = new Date(Date.now() - elapsedSec * 1000);
-			drainPerSec = deriveDrainPerSec(entity.current_task);
+		lines.push(
+			`  Energy:    ${formatEnergy(Number(entity.energy ?? 0), Number(entity.generator.capacity), Number(entity.generator.recharge))}`,
+		);
+	}
+
+	if (entity.hullmass) {
+		lines.push(`  Hull:      ${formatMass(Number(entity.hullmass))}`);
+	}
+
+	if (entity.capacity != null) {
+		const usedStr = formatMass(Number(entity.cargomass ?? 0));
+		const capStr = formatMass(Number(entity.capacity));
+		const cargoStr = (entity.cargo?.length ?? 0) === 0 ? "empty" : formatCargo(entity.cargo);
+		lines.push(`  Cargo:     ${cargoStr}  ·  ${usedStr} / ${capStr}`);
+	}
+
+	const isShip = String(entity.type) === "ship";
+
+	if (entity.engines || entity.generator || entity.gatherer || entity.hauler || entity.crafter || entity.warp || entity.loaders) {
+		lines.push("");
+		const modNames = resolvedModuleNames(entity.modules);
+
+		if (entity.engines) {
+			const label = modNames.get(1) ?? "Engine";
+			lines.push(`  ${label.padEnd(11)}thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`);
 		}
-		lines.push(
-			`Energy: ${formatLiveEnergy({
-				storedEnergy,
-				capacity,
-				recharge,
-				drainPerSec,
-				activeTaskStartedAt,
-			})}`,
-		);
+		if (entity.generator) {
+			const label = modNames.get(2) ?? "Generator";
+			lines.push(`  ${label.padEnd(11)}capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`);
+		}
+		if (entity.gatherer) {
+			const label = modNames.get(3) ?? "Gatherer";
+			lines.push(`  ${label.padEnd(11)}depth ${entity.gatherer.depth} · yield ${entity.gatherer.yield} · ${entity.gatherer.drain} energy/gather · speed ${entity.gatherer.speed}`);
+		} else if (isShip) {
+			lines.push(`  ${"Gatherer".padEnd(11)}— not installed`);
+		}
+		if (entity.hauler) {
+			const label = modNames.get(9) ?? "Hauler";
+			lines.push(`  ${label.padEnd(11)}capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`);
+		} else if (isShip) {
+			lines.push(`  ${"Hauler".padEnd(11)}— not installed`);
+		}
+		if (entity.crafter) {
+			const label = modNames.get(6) ?? "Crafter";
+			lines.push(`  ${label.padEnd(11)}speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`);
+		} else if (isShip) {
+			lines.push(`  ${"Crafter".padEnd(11)}— not installed`);
+		}
+		if (entity.warp) {
+			const label = modNames.get(5) ?? "Warp";
+			lines.push(`  ${label.padEnd(11)}range ${entity.warp.range}`);
+		} else if (isShip) {
+			lines.push(`  ${"Warp".padEnd(11)}— not installed`);
+		}
+		if (entity.loaders) {
+			const label = modNames.get(4) ?? "Loader";
+			lines.push(`  ${label.padEnd(11)}${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`);
+		}
 	}
 
-	if (entity.engines) {
-		lines.push(
-			`Cargo: ${formatCargo(entity.cargo)} | Mass: ${entity.cargomass}/${entity.capacity ?? 0}`,
-		);
-		lines.push(`Engines: thrust ${entity.engines.thrust}, drain ${entity.engines.drain}`);
-	} else if (entity.capacity) {
-		lines.push(
-			`Cargo: ${formatCargo(entity.cargo)} | Mass: ${entity.cargomass}/${entity.capacity}`,
-		);
-	}
-
-	if (entity.loaders) {
-		lines.push(
-			`Loaders: ${entity.loaders.quantity}x (mass: ${entity.loaders.mass}, thrust: ${entity.loaders.thrust})`,
-		);
-	}
-
-	const notInstalled = "— (not installed)";
-	const entityType = String(entity.type);
-	const entityId = BigInt(entity.id.toString());
-	const addable = entityType === "ship";
-	const installHint = (slotName: string) =>
-		addable ? ` ${formatInstallHint(entityType, entityId, "<slot-index>", slotName)}` : "";
-
-	lines.push(
-		entity.gatherer
-			? `Gatherer: depth ${entity.gatherer.depth}, yield ${entity.gatherer.yield}, drain ${entity.gatherer.drain}, speed ${entity.gatherer.speed}`
-			: `Gatherer: ${notInstalled}${installHint("Gatherer")}`,
-	);
-	lines.push(
-		entity.hauler
-			? `Hauler:   capacity ${entity.hauler.capacity}, efficiency ${entity.hauler.efficiency}, drain ${entity.hauler.drain}`
-			: `Hauler:   ${notInstalled}${installHint("Hauler")}`,
-	);
-	lines.push(
-		entity.warp
-			? `Warp:     range ${entity.warp.range}`
-			: `Warp:     ${notInstalled}${installHint("Warp")}`,
-	);
-	lines.push(
-		entity.crafter
-			? `Crafter:  speed ${entity.crafter.speed}, drain ${entity.crafter.drain}`
-			: `Crafter:  ${notInstalled}${installHint("Crafter")}`,
-	);
-
-	if (entity.pending_tasks.length > 0) {
+	if ((entity.pending_tasks?.length ?? 0) > 0) {
 		const pending = entity.pending_tasks
 			.map((t) => {
 				const type = formatTaskType(Number(t.type));
@@ -308,9 +289,11 @@ export function formatEntity(entity: Types.entity_info): string {
 				return type;
 			})
 			.join(", ");
-		lines.push(`Pending: ${pending}`);
+		lines.push(`\n  Pending:   ${pending}`);
 	}
 
+	const entityType = String(entity.type);
+	const entityId = BigInt(entity.id.toString());
 	const scheduleTasks = entity.schedule?.tasks.length ?? 0;
 	if (entity.is_idle && scheduleTasks > 0) {
 		lines.push(formatResolveHint(entityType, entityId, scheduleTasks));
