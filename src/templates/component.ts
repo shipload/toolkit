@@ -1,5 +1,5 @@
-import type { ResolvedItem } from '@shipload/sdk'
-import { getComponentById, getStatDefinitions, categoryColors } from '@shipload/sdk'
+import type { ResolvedItem, ResourceCategory } from '@shipload/sdk'
+import { formatTier, getRecipe, getStatDefinitions, categoryColors } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -42,16 +42,20 @@ export function renderComponent(
       inverted: s.inverted,
     }))
   } else {
-    const comp = getComponentById(resolved.itemId)
-    rows = (comp?.stats ?? []).flatMap(stat => {
-      const defs = getStatDefinitions(stat.source)
-      const def = defs.find(d => d.key === stat.key)
+    const recipe = getRecipe(resolved.itemId)
+    rows = (recipe?.statSlots ?? []).flatMap(slot => {
+      const src = slot.sources[0]
+      if (!src) return []
+      const input = recipe!.inputs[src.inputIndex]
+      if (!input || !('category' in input)) return []
+      const category = input.category as ResourceCategory
+      const def = getStatDefinitions(category)[src.statIndex]
       if (!def) return []
       return [{
         label: def.label,
         abbreviation: def.abbreviation,
         value: null,
-        color: categoryColors[stat.source],
+        color: categoryColors[category],
         inverted: def.inverted,
       }]
     })
@@ -83,7 +87,6 @@ export function renderComponent(
     family: tokens.typography.display,
   })
 
-  const tierNum = resolved.tier.replace(/^t/i, '')
   const subtitleText = text({
     x: pad,
     y: pad + headerH + 4,
@@ -94,7 +97,7 @@ export function renderComponent(
   const subtitleValue = text({
     x: w - pad,
     y: pad + headerH + 4,
-    value: `COMPONENT · T${tierNum}`,
+    value: `COMPONENT · ${formatTier(resolved.tier)}`,
     size: tokens.typography.sizes.body,
     weight: 600,
     anchor: 'end',

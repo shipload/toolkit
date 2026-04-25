@@ -4,8 +4,8 @@ export function formatMass(n: number): string {
   return n.toLocaleString('en-US')
 }
 
-export function tierBorder(tier: string): string {
-  const key = tier.toLowerCase() as keyof typeof tokens.colors.tier
+export function tierBorder(tier: number): string {
+  const key = `t${tier}` as keyof typeof tokens.colors.tier
   return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
 }
 

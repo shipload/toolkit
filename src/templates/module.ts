@@ -1,5 +1,5 @@
 import type { ResolvedItem } from '@shipload/sdk'
-import { describeModuleForItem, renderDescription } from '@shipload/sdk'
+import { describeModuleForItem, formatTier, renderDescription } from '@shipload/sdk'
 import type { CargoItem } from '../payload/codec.ts'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
@@ -86,7 +86,6 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem, opts?: Ren
     family: tokens.typography.display,
   })
 
-  const tierNum = resolved.tier.replace(/^t/i, '')
   const subtitleLabel = text({
     x: pad,
     y: pad + headerH + 4,
@@ -97,7 +96,7 @@ export function renderModule(item: CargoItem, resolved: ResolvedItem, opts?: Ren
   const subtitleValue = text({
     x: w - pad,
     y: pad + headerH + 4,
-    value: `MODULE · T${tierNum}`,
+    value: `MODULE · ${formatTier(resolved.tier)}`,
     size: tokens.typography.sizes.body,
     weight: 600,
     anchor: 'end',

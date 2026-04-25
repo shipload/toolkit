@@ -1,4 +1,4 @@
-import type { ResourceTier, TextSpan } from '@shipload/sdk'
+import type { TextSpan } from '@shipload/sdk'
 import { panel } from '../primitives/panel.ts'
 import { iconHex } from '../primitives/icon-hex.ts'
 import { text } from '../primitives/text.ts'
@@ -16,7 +16,7 @@ export interface ShipPanelSlot {
 
 export interface ShipPanelProps {
   name: string
-  tier: ResourceTier
+  tier: number
   quantity?: number
   attributes: { capability: string; attributes: { label: string; value: number }[] }[]
   slots: ShipPanelSlot[]
@@ -26,8 +26,8 @@ function formatNumber(n: number): string {
   return n.toLocaleString('en-US')
 }
 
-function tierBorder(tier: string): string {
-  const key = tier.toLowerCase() as keyof typeof tokens.colors.tier
+function tierBorder(tier: number): string {
+  const key = `t${tier}` as keyof typeof tokens.colors.tier
   return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
 }
 

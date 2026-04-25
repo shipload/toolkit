@@ -4,7 +4,7 @@ import { renderShipPanel } from '../src/templates/ship-panel.ts'
 test('renderShipPanel with empty slots renders empty module rows', () => {
   const svg = renderShipPanel({
     name: 'Ship T1 (Packed)',
-    tier: 't1',
+    tier: 1,
     attributes: [{
       capability: 'Hull',
       attributes: [
@@ -28,7 +28,7 @@ test('renderShipPanel with empty slots renders empty module rows', () => {
 test('renderShipPanel with installed slots + string descriptions', () => {
   const svg = renderShipPanel({
     name: 'Ship T1 (Packed)',
-    tier: 't1',
+    tier: 1,
     attributes: [{
       capability: 'Hull',
       attributes: [{ label: 'Mass', value: 100 }],
@@ -47,7 +47,7 @@ test('renderShipPanel with installed slots + string descriptions', () => {
 test('renderShipPanel with TextSpan[] descriptions preserves highlights', () => {
   const svg = renderShipPanel({
     name: 'Ship T1 (Packed)',
-    tier: 't1',
+    tier: 1,
     attributes: [{
       capability: 'Hull',
       attributes: [{ label: 'Mass', value: 100 }],
@@ -71,7 +71,7 @@ test('renderShipPanel with TextSpan[] descriptions preserves highlights', () => 
 test('renderShipPanel mixed slots (installed + empty)', () => {
   const svg = renderShipPanel({
     name: 'Ship T1 (Packed)',
-    tier: 't1',
+    tier: 1,
     attributes: [{
       capability: 'Hull',
       attributes: [{ label: 'Mass', value: 100 }],
