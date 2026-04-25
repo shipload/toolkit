@@ -2,7 +2,7 @@ import { formatMass, formatTier, getItem } from "@shipload/sdk";
 import type { Command } from "commander";
 import { parseUint32 } from "../../lib/args";
 import { server } from "../../lib/client";
-import { formatCategory, formatItem, formatOutput } from "../../lib/format";
+import { formatCategory, formatOutput } from "../../lib/format";
 
 // Wire shape returned by the server's getrecipe / getrecipes readonly actions.
 // Distinct from the SDK's RecipeInput discriminated union (camelCase, item-or-category).

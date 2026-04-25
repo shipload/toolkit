@@ -65,7 +65,10 @@ export function formatLiveEnergy({
 		return `${storedEnergy}/${capacity} (recharge: ${recharge}/s)`;
 	}
 	const elapsed = (now.getTime() - activeTaskStartedAt.getTime()) / 1000;
-	const projected = Math.max(0, Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed)));
+	const projected = Math.max(
+		0,
+		Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed)),
+	);
 	return `${storedEnergy} → ${projected}/${capacity} (live, recharge: ${recharge}/s)`;
 }
 
@@ -259,8 +262,11 @@ export function formatEntity(entity: Types.entity_info): string {
 	}
 
 	if (entity.generator) {
-		const elapsedMs = entity.is_idle ? undefined : (Number(entity.current_task_elapsed ?? 0)) * 1000;
-		const activeTaskStartedAt = elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
+		const elapsedMs = entity.is_idle
+			? undefined
+			: Number(entity.current_task_elapsed ?? 0) * 1000;
+		const activeTaskStartedAt =
+			elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
 		lines.push(
 			`  Energy: ${formatLiveEnergy({ storedEnergy: Number(entity.energy ?? 0), capacity: Number(entity.generator.capacity), recharge: Number(entity.generator.recharge), activeTaskStartedAt })}`,
 		);
