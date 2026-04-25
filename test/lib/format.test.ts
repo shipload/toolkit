@@ -83,22 +83,23 @@ describe("formatEntity modules", () => {
 			...base,
 			gatherer: { depth: 100, yield: 700, drain: 25, speed: 500 },
 		});
-		expect(out).toContain("Gatherer: depth 100, yield 700, drain 25, speed 500");
+		expect(out).toMatch(
+			/Gatherer:\s+depth 100 · yield 700 · speed 500 · 25 energy\/s/,
+		);
 	});
 
 	test("renders zero-valued slot to distinguish from absent", () => {
 		const out = formatEntity({ ...base, warp: { range: 0 } });
-		expect(out).toContain("Warp:");
-		expect(out).toContain("range 0");
-		expect(out).not.toContain("Warp:     — (not installed)");
+		expect(out).toMatch(/Warp:\s+range 0/);
+		expect(out).not.toMatch(/Warp:\s+— \(not installed\)/);
 	});
 
 	test("renders absent slots as — (not installed)", () => {
 		const out = formatEntity({ ...base });
-		expect(out).toContain("Gatherer: — (not installed)");
-		expect(out).toContain("Hauler:   — (not installed)");
-		expect(out).toContain("Warp:     — (not installed)");
-		expect(out).toContain("Crafter:  — (not installed)");
+		expect(out).toMatch(/Gatherer:\s+— \(not installed\)/);
+		expect(out).toMatch(/Hauler:\s+— \(not installed\)/);
+		expect(out).toMatch(/Warp:\s+— \(not installed\)/);
+		expect(out).toMatch(/Crafter:\s+— \(not installed\)/);
 	});
 });
 
@@ -276,7 +277,7 @@ describe("formatEntity live energy", () => {
 			energy: 200,
 			generator: { capacity: 350, recharge: 10 },
 		});
-		expect(out).toContain("Energy: 200/350 (recharge: 10/s)");
+		expect(out).toMatch(/Energy:\s+200\/350 \(recharge: 10\/s\)/);
 		expect(out).not.toContain("→");
 	});
 
@@ -296,7 +297,7 @@ describe("formatEntity live energy", () => {
 			current_task_elapsed: 0,
 			current_task_remaining: 60,
 		});
-		expect(out).toContain("Energy: 200 → ");
+		expect(out).toMatch(/Energy:\s+200 → /);
 		expect(out).toContain("/350 (live, recharge: 10/s)");
 	});
 });

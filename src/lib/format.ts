@@ -17,8 +17,39 @@ import {
 	schedule,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
+import Table from "cli-table3";
 import type { Types } from "../contracts/server";
 import { shallowestPerItem } from "./reach";
+
+export function kvTable(rows: [string, string][], opts: { indent?: string } = {}): string {
+	const indent = opts.indent ?? "  ";
+	const table = new Table({
+		chars: {
+			top: "",
+			"top-mid": "",
+			"top-left": "",
+			"top-right": "",
+			bottom: "",
+			"bottom-mid": "",
+			"bottom-left": "",
+			"bottom-right": "",
+			left: indent,
+			"left-mid": "",
+			mid: "",
+			"mid-mid": "",
+			right: "",
+			"right-mid": "",
+			middle: "  ",
+		},
+		style: { head: [], border: [], "padding-left": 0, "padding-right": 0 },
+	});
+	for (const row of rows) table.push(row);
+	return table
+		.toString()
+		.split("\n")
+		.map((line) => line.trimEnd())
+		.join("\n");
+}
 
 const LOCATION_TYPE_NAMES: Record<LocationType, string> = {
 	[LocationType.EMPTY]: "Empty",
@@ -264,17 +295,19 @@ function resolvedModuleNames(modules: Types.entity_info["modules"]): Map<number,
 export function formatEntity(entity: Types.entity_info): string {
 	const trimmedName = entity.entity_name?.trim() ?? "";
 	const namePart = trimmedName ? ` "${trimmedName}"` : "";
-	const lines = [`${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`];
+	const header = `${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`;
+	const sections: string[] = [];
 
+	const statRows: [string, string][] = [];
 	const statusStr = entity.is_idle ? "idle" : "busy";
-	lines.push(`  Status:    ${statusStr}  ·  ${formatCoords(entity.coordinates)}`);
+	statRows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
 
 	if (!entity.is_idle && entity.current_task) {
 		const t = entity.current_task;
-		let taskLine = `  Task:      ${formatTaskType(Number(t.type))}`;
-		if (t.coordinates) taskLine += ` to ${formatCoords(t.coordinates)}`;
-		taskLine += `  ·  ${formatDuration(Number(entity.current_task_remaining))} remaining`;
-		lines.push(taskLine);
+		let taskValue = formatTaskType(Number(t.type));
+		if (t.coordinates) taskValue += ` to ${formatCoords(t.coordinates)}`;
+		taskValue += `  ·  ${formatDuration(Number(entity.current_task_remaining))} remaining`;
+		statRows.push(["Task:", taskValue]);
 	}
 
 	if (entity.generator) {
@@ -283,88 +316,35 @@ export function formatEntity(entity: Types.entity_info): string {
 			: Number(entity.current_task_elapsed ?? 0) * 1000;
 		const activeTaskStartedAt =
 			elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
-		lines.push(
-			`  Energy: ${formatLiveEnergy({ storedEnergy: Number(entity.energy ?? 0), capacity: Number(entity.generator.capacity), recharge: Number(entity.generator.recharge), activeTaskStartedAt })}`,
-		);
+		statRows.push([
+			"Energy:",
+			formatLiveEnergy({
+				storedEnergy: Number(entity.energy ?? 0),
+				capacity: Number(entity.generator.capacity),
+				recharge: Number(entity.generator.recharge),
+				activeTaskStartedAt,
+			}),
+		]);
 	}
 
 	if (entity.hullmass) {
-		lines.push(`  Hull:      ${formatMass(Number(entity.hullmass))}`);
+		statRows.push(["Hull:", formatMass(Number(entity.hullmass))]);
 	}
 
 	if (entity.capacity != null) {
 		const usedStr = formatMass(Number(entity.cargomass ?? 0));
 		const capStr = formatMass(Number(entity.capacity));
-		lines.push(`  Cargo:     ${usedStr} / ${capStr}`);
+		statRows.push(["Cargo:", `${usedStr} / ${capStr}`]);
 		for (const c of entity.cargo ?? []) {
-			lines.push(`             ${formatCargoItem(c)}`);
+			statRows.push(["", formatCargoItem(c)]);
 		}
 	}
+
+	sections.push([header, kvTable(statRows)].join("\n"));
 
 	const isShip = String(entity.type) === "ship";
-
-	if (
-		isShip ||
-		entity.engines ||
-		entity.generator ||
-		entity.gatherer ||
-		entity.hauler ||
-		entity.crafter ||
-		entity.warp ||
-		entity.loaders
-	) {
-		lines.push("");
-		const modNames = resolvedModuleNames(entity.modules);
-
-		if (entity.engines) {
-			const label = modNames.get(1) ?? "Engine";
-			lines.push(
-				`  ${label.padEnd(11)}thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`,
-			);
-		}
-		if (entity.generator) {
-			const label = modNames.get(2) ?? "Generator";
-			lines.push(
-				`  ${label.padEnd(11)}capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`,
-			);
-		}
-		if (entity.gatherer) {
-			const label = modNames.get(3) ?? "Gatherer";
-			lines.push(
-				`  ${label}: depth ${entity.gatherer.depth}, yield ${entity.gatherer.yield}, drain ${entity.gatherer.drain}, speed ${entity.gatherer.speed}`,
-			);
-		} else if (isShip) {
-			lines.push(`  Gatherer: — (not installed)`);
-		}
-		if (entity.hauler) {
-			const label = modNames.get(9) ?? "Hauler";
-			lines.push(
-				`  ${label.padEnd(11)}capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`,
-			);
-		} else if (isShip) {
-			lines.push(`  Hauler:   — (not installed)`);
-		}
-		if (entity.crafter) {
-			const label = modNames.get(6) ?? "Crafter";
-			lines.push(
-				`  ${label.padEnd(11)}speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`,
-			);
-		} else if (isShip) {
-			lines.push(`  Crafter:  — (not installed)`);
-		}
-		if (entity.warp) {
-			const label = modNames.get(5) ?? "Warp";
-			lines.push(`  ${label}: range ${entity.warp.range}`);
-		} else if (isShip) {
-			lines.push(`  Warp:     — (not installed)`);
-		}
-		if (entity.loaders) {
-			const label = modNames.get(4) ?? "Loader";
-			lines.push(
-				`  ${label.padEnd(11)}${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`,
-			);
-		}
-	}
+	const moduleRows = buildModuleRows(entity, isShip);
+	if (moduleRows.length > 0) sections.push(kvTable(moduleRows));
 
 	if ((entity.pending_tasks?.length ?? 0) > 0) {
 		const pending = entity.pending_tasks
@@ -374,21 +354,75 @@ export function formatEntity(entity: Types.entity_info): string {
 				return type;
 			})
 			.join(", ");
-		lines.push(`\n  Pending:   ${pending}`);
+		sections.push(kvTable([["Pending:", pending]]));
 	}
+
+	const whenDone = formatWhenDone(entity);
+	if (whenDone) sections.push(whenDone);
 
 	const entityType = String(entity.type);
 	const entityId = BigInt(entity.id.toString());
 	const scheduleTasks = entity.schedule?.tasks.length ?? 0;
-
-	const whenDone = formatWhenDone(entity);
-	if (whenDone) lines.push(whenDone);
-
 	if (entity.is_idle && scheduleTasks > 0) {
-		lines.push(formatResolveHint(entityType, entityId, scheduleTasks));
+		sections.push(formatResolveHint(entityType, entityId, scheduleTasks));
 	}
 
-	return lines.join("\n");
+	return sections.join("\n\n");
+}
+
+function buildModuleRows(entity: Types.entity_info, isShip: boolean): [string, string][] {
+	const modNames = resolvedModuleNames(entity.modules);
+	const rows: [string, string][] = [];
+	const notInstalled = "— (not installed)";
+
+	if (entity.engines) {
+		rows.push([
+			`${modNames.get(1) ?? "Engine"}:`,
+			`thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`,
+		]);
+	}
+	if (entity.generator) {
+		rows.push([
+			`${modNames.get(2) ?? "Generator"}:`,
+			`capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`,
+		]);
+	}
+	if (entity.gatherer) {
+		rows.push([
+			`${modNames.get(3) ?? "Gatherer"}:`,
+			`depth ${entity.gatherer.depth} · yield ${entity.gatherer.yield} · speed ${entity.gatherer.speed} · ${entity.gatherer.drain} energy/s`,
+		]);
+	} else if (isShip) {
+		rows.push(["Gatherer:", notInstalled]);
+	}
+	if (entity.hauler) {
+		rows.push([
+			`${modNames.get(9) ?? "Hauler"}:`,
+			`capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`,
+		]);
+	} else if (isShip) {
+		rows.push(["Hauler:", notInstalled]);
+	}
+	if (entity.crafter) {
+		rows.push([
+			`${modNames.get(6) ?? "Crafter"}:`,
+			`speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`,
+		]);
+	} else if (isShip) {
+		rows.push(["Crafter:", notInstalled]);
+	}
+	if (entity.warp) {
+		rows.push([`${modNames.get(5) ?? "Warp"}:`, `range ${entity.warp.range}`]);
+	} else if (isShip) {
+		rows.push(["Warp:", notInstalled]);
+	}
+	if (entity.loaders) {
+		rows.push([
+			`${modNames.get(4) ?? "Loader"}:`,
+			`${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`,
+		]);
+	}
+	return rows;
 }
 
 function formatWhenDone(entity: Types.entity_info): string | null {
@@ -414,21 +448,22 @@ function formatWhenDone(entity: Types.entity_info): string | null {
 	const remaining = schedule.scheduleRemaining(entity as unknown as Projectable, new Date());
 	const header = remaining > 0 ? `When done (${formatDuration(remaining)}):` : "When done:";
 
-	const out = [`\n  ${header}`];
-	if (positionChanged) out.push(`    Position:  (${projX}, ${projY})`);
+	const rows: [string, string][] = [];
+	if (positionChanged) rows.push(["Position:", `(${projX}, ${projY})`]);
 	if (energyChanged && entity.generator) {
-		out.push(`    Energy:    ${projEnergy}/${entity.generator.capacity}`);
+		rows.push(["Energy:", `${projEnergy}/${entity.generator.capacity}`]);
 	} else if (energyChanged) {
-		out.push(`    Energy:    ${projEnergy}`);
+		rows.push(["Energy:", String(projEnergy)]);
 	}
 	if (cargoChanged && entity.capacity != null) {
-		out.push(
-			`    Cargo:     ${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
-		);
+		rows.push([
+			"Cargo:",
+			`${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
+		]);
 	} else if (cargoChanged) {
-		out.push(`    Cargo:     ${formatMass(projCargoMass)}`);
+		rows.push(["Cargo:", formatMass(projCargoMass)]);
 	}
-	return out.join("\n");
+	return [`  ${header}`, kvTable(rows, { indent: "    " })].join("\n");
 }
 
 export function formatLocation(
