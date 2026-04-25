@@ -164,9 +164,9 @@ describe("formatCategory", () => {
 });
 
 describe("formatTier", () => {
-	test("returns Tn for 0-based tier index", () => {
-		expect(formatTier(0)).toBe("T1");
-		expect(formatTier(9)).toBe("T10");
+	test("returns Tn for 1-based tier", () => {
+		expect(formatTier(1)).toBe("T1");
+		expect(formatTier(10)).toBe("T10");
 	});
 });
 

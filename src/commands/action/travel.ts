@@ -1,7 +1,7 @@
 import type { Action } from "@wharfkit/antelope";
 import type { Command } from "commander";
 import type { Types } from "../../contracts/server";
-import { parseInt64, parseUint64 } from "../../lib/args";
+import { type EntityTypeName, parseEntityType, parseInt64, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
 import { printError } from "../../lib/errors";
 import { estimateTravel } from "../../lib/estimate";
@@ -28,12 +28,13 @@ export async function buildAction(opts: TravelOpts): Promise<Action> {
 export function register(program: Command): void {
 	program
 		.command("travel")
-		.description("Travel a ship to coordinates")
+		.description("Travel an entity to coordinates")
 		.addHelpText(
 			"before",
-			"Requires: idle source ship; sufficient energy for flight; destination within map bounds.\n",
+			"Requires: idle source entity; sufficient energy for flight; destination within map bounds.\n",
 		)
-		.argument("<ship-id>", "ship id", parseUint64)
+		.argument("<entity-type>", "entity type (currently only ship)", parseEntityType)
+		.argument("<id>", "entity id", parseUint64)
 		.argument("<x>", "destination x", parseInt64)
 		.argument("<y>", "destination y", parseInt64)
 		.option(
@@ -45,7 +46,8 @@ export function register(program: Command): void {
 		.option("--force", "submit despite failed feasibility checks (advanced)")
 		.action(
 			async (
-				shipId: bigint,
+				entityType: EntityTypeName,
+				id: bigint,
 				x: bigint,
 				y: bigint,
 				options: {
@@ -55,6 +57,16 @@ export function register(program: Command): void {
 					force?: boolean;
 				},
 			) => {
+				if (entityType !== "ship") {
+					process.exit(
+						printError(
+							new ValidationError(
+								`travel currently supports only ships (got "${entityType}")`,
+							),
+						),
+					);
+				}
+				const shipId = id;
 				if (options.estimate && options.wait) {
 					process.exit(
 						printError(

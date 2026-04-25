@@ -125,8 +125,8 @@ export function categoryLabelFromName(cat: ResourceCategory): string {
 	return CATEGORY_LABEL[cat];
 }
 
-export function formatTier(tierIndex: number): string {
-	return `T${tierIndex + 1}`;
+export function formatTier(tier: number): string {
+	return `T${tier}`;
 }
 
 export function formatInstallHint(

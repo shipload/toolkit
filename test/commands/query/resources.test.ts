@@ -4,8 +4,8 @@ import { render } from "../../../src/commands/query/resources";
 test("resources renders rows with id, category, tier, mass", () => {
 	const input = {
 		resources: [
-			{ id: 101, mass: 30000, category: 0, tier: 0 },
-			{ id: 103, mass: 40000, category: 0, tier: 2 },
+			{ id: 101, mass: 52000, category: 0, tier: 1 },
+			{ id: 103, mass: 64000, category: 0, tier: 3 },
 		],
 	};
 	const out = render(input as any, false);
@@ -14,7 +14,7 @@ test("resources renders rows with id, category, tier, mass", () => {
 	expect(out).toContain("103");
 	expect(out).toContain("Ore");
 	expect(out).toContain("T3");
-	expect(out).toContain("30000");
+	expect(out).toContain("52000");
 });
 
 test("resources --raw emits JSON", () => {

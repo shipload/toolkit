@@ -166,11 +166,16 @@ async function resolveSeeds(options: {
 	return { gameSeed, epochSeed };
 }
 
-interface FirstShipResult {
+interface DefaultReachEntityResult {
 	entityRef: EntityRef;
 }
 
-async function findCallerFirstShip(): Promise<FirstShipResult | null> {
+/**
+ * Picks a default entity to scope reach calculations against when the user
+ * doesn't pass --entity. Reach is only meaningful for entities that move,
+ * which today means ships — so this returns the caller's first ship.
+ */
+async function findDefaultReachEntity(): Promise<DefaultReachEntityResult | null> {
 	const result = (await server.readonly("getentities", {
 		owner: getAccountName(),
 	})) as unknown;
@@ -242,7 +247,7 @@ export function registerSubcommand(tools: Command): void {
 				if (opts.entity) {
 					entityRef = opts.entity;
 				} else {
-					const fallback = await findCallerFirstShip();
+					const fallback = await findDefaultReachEntity();
 					if (!fallback) {
 						console.error(
 							`Error: ${getAccountName()} has no ships; pass --entity <type>:<id> explicitly.`,

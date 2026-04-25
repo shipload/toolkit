@@ -1,12 +1,13 @@
 import { Checksum256 } from "@wharfkit/antelope";
 import type { Command } from "commander";
-import { parseUint64 } from "../../lib/args";
+import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { getGameSeed, server } from "../../lib/client";
 import { formatNearby, formatOutput } from "../../lib/format";
 import { resolveReach } from "../../lib/reach";
 
 export interface NearbyOpts {
-	shipId: bigint;
+	entityType: EntityTypeName;
+	entityId: bigint;
 	recharge?: boolean;
 }
 
@@ -16,8 +17,8 @@ export function buildQuery(opts: NearbyOpts): {
 	recharge: boolean;
 } {
 	return {
-		entity_type: "ship",
-		entity_id: opts.shipId,
+		entity_type: opts.entityType,
+		entity_id: opts.entityId,
 		recharge: opts.recharge !== false,
 	};
 }
@@ -25,19 +26,21 @@ export function buildQuery(opts: NearbyOpts): {
 export function register(program: Command): void {
 	program
 		.command("nearby")
-		.description("Show nearby systems reachable from a ship")
-		.argument("<ship-id>", "ship id", parseUint64)
+		.description("Show nearby systems reachable from an entity")
+		.argument("<entity-type>", "entity type (ship/warehouse/container)", parseEntityType)
+		.argument("<id>", "entity id", parseUint64)
 		.option("--no-recharge", "disable recharge projection")
 		.option("--all", "expand each cell to list every resource (bypasses depth filter)")
 		.option("--json", "emit JSON instead of formatted text")
 		.action(
 			async (
-				shipId: bigint,
+				entityType: EntityTypeName,
+				id: bigint,
 				options: { recharge: boolean; all?: boolean; json?: boolean },
 			) => {
 				const nearbyRaw = await server.readonly("getnearby", {
-					entity_type: "ship",
-					entity_id: shipId,
+					entity_type: entityType,
+					entity_id: id,
 					recharge: options.recharge !== false,
 				});
 				// biome-ignore lint/suspicious/noExplicitAny: getnearby readonly return shape
@@ -49,7 +52,7 @@ export function register(program: Command): void {
 
 				let reach: { depth: number } | undefined;
 				try {
-					const r = await resolveReach({ entityType: "ship", entityId: shipId });
+					const r = await resolveReach({ entityType, entityId: id });
 					reach = { depth: r.gatherer.depth };
 				} catch {
 					reach = undefined;
