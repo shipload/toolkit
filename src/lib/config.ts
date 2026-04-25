@@ -110,19 +110,19 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 				`  - ${cwdPath}`,
 				`  - ${userPath}`,
 				"",
-				"Run `player init` to create one at the user config directory.",
+				"Run `shiploadcli init` to create one at the user config directory.",
 			].join("\n"),
 		);
 	}
 
 	if (!fileData.privateKey) {
 		throw new ConfigError(
-			`Missing 'private_key' in ${source}. Run \`player init --force\` to regenerate, or edit the file directly.`,
+			`Missing 'private_key' in ${source}. Run \`shiploadcli init --force\` to regenerate, or edit the file directly.`,
 		);
 	}
 	if (!fileData.actor) {
 		throw new ConfigError(
-			`Missing 'actor' in ${source}. Run \`player init --force\` to regenerate, or edit the file directly.`,
+			`Missing 'actor' in ${source}. Run \`shiploadcli init --force\` to regenerate, or edit the file directly.`,
 		);
 	}
 

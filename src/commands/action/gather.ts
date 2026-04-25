@@ -136,7 +136,7 @@ async function enrichGatherError(err: unknown, ctx: GatherContext): Promise<stri
 	}
 
 	if (msg.includes("insufficient energy") || raw.includes("insufficient energy")) {
-		return `✗ Cannot gather: insufficient energy on ${ctx.sourceType}:${ctx.sourceId}. Run "player entity ${ctx.sourceType} ${ctx.sourceId}" to inspect.`;
+		return `✗ Cannot gather: insufficient energy on ${ctx.sourceType}:${ctx.sourceId}. Run "shiploadcli entity ${ctx.sourceType} ${ctx.sourceId}" to inspect.`;
 	}
 
 	if (msg.includes("cargo exceeds capacity") || raw.includes("cargo exceeds capacity")) {

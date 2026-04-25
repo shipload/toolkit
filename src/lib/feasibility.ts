@@ -35,7 +35,7 @@ export function checkEnergyAvailable(
 ): FeasibilityIssue | null {
 	if (current >= required) return null;
 	const suffix = entity
-		? ` — run \`player recharge ${entity.entityType} ${entity.entityId}\` first, or pass --recharge to compose the recharge into this transaction`
+		? ` — run \`shiploadcli recharge ${entity.entityType} ${entity.entityId}\` first, or pass --recharge to compose the recharge into this transaction`
 		: " — recharge first";
 	return {
 		code: "insufficient_energy",

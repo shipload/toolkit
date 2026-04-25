@@ -38,7 +38,7 @@ export interface ChainHint {
 const HINTS: ChainHint[] = [
 	{
 		matches: (m) => m.includes("cannot cancel market task"),
-		hint: "Gather/craft tasks cannot be canceled once scheduled. Wait for completion (player wait <type> <id>) or let the schedule drain.",
+		hint: "Gather/craft tasks cannot be canceled once scheduled. Wait for completion (shiploadcli wait <type> <id>) or let the schedule drain.",
 	},
 	{
 		matches: (m) => m.includes("cargo capacity would be exceeded"),
@@ -46,7 +46,7 @@ const HINTS: ChainHint[] = [
 	},
 	{
 		matches: (m) => m.includes("no resources at this stratum"),
-		hint: "Either the stratum is empty, or it is below your gatherer's depth. Check: player stratum <x> <y> <index>.",
+		hint: "Either the stratum is empty, or it is below your gatherer's depth. Check: shiploadcli stratum <x> <y> <index>.",
 	},
 ];
 

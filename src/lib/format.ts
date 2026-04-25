@@ -158,7 +158,7 @@ export function formatInstallHint(
 	slotIndex: number | string,
 	slotName: string,
 ): string {
-	return `(empty ${slotName} slot — install with: player addmodule ${entityType} ${entityId} ${slotIndex} <module-item-id>)`;
+	return `(empty ${slotName} slot — install with: shiploadcli addmodule ${entityType} ${entityId} ${slotIndex} <module-item-id>)`;
 }
 
 export function formatResolveHint(
@@ -166,7 +166,7 @@ export function formatResolveHint(
 	entityId: number | bigint,
 	completedCount: number,
 ): string {
-	return `${completedCount} completed task(s) need resolve — run: player resolve ${entityType} ${entityId}`;
+	return `${completedCount} completed task(s) need resolve — run: shiploadcli resolve ${entityType} ${entityId}`;
 }
 
 const TYPE_LABEL: Record<number, string> = {
@@ -466,7 +466,9 @@ export function formatLocation(
 					for (const l of top) {
 						lines.push(`  [${l.index}] ${formatItem(l.itemId)} — reserve ${l.reserve}`);
 					}
-					lines.push(`(run "player stratum ${coord.x} ${coord.y} <index>" for detail)`);
+					lines.push(
+						`(run "shiploadcli stratum ${coord.x} ${coord.y} <index>" for detail)`,
+					);
 				}
 			} else {
 				const reachable = all.filter((l) => l.index <= reach.depth);

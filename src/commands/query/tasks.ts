@@ -2,7 +2,13 @@ import Table from "cli-table3";
 import type { Command } from "commander";
 import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
 import { server } from "../../lib/client";
-import { formatDuration, formatOutput, formatTaskType, reltime } from "../../lib/format";
+import {
+	formatDuration,
+	formatOutput,
+	formatResolveHint,
+	formatTaskType,
+	reltime,
+} from "../../lib/format";
 
 const CANCEL_NAMES = ["never", "before-start", "always"];
 
@@ -61,12 +67,14 @@ export function render(view: TasksView): string {
 	});
 
 	let cursor = view.schedule.started.getTime();
+	let doneCount = 0;
 	for (let i = 0; i < view.schedule.tasks.length; i++) {
 		const t = view.schedule.tasks[i];
 		const start = new Date(cursor);
 		const end = new Date(cursor + t.duration * 1000);
 		cursor = end.getTime();
 		const status = view.now >= end ? "done" : view.now >= start ? "active" : "pending";
+		if (status === "done") doneCount++;
 		const endsLabel = reltime(end, view.now);
 		table.push([
 			String(i),
@@ -78,7 +86,11 @@ export function render(view: TasksView): string {
 		]);
 	}
 
-	return [header, "", table.toString()].join("\n");
+	const out = [header, "", table.toString()];
+	if (doneCount > 0) {
+		out.push("", formatResolveHint(view.type, view.id, doneCount));
+	}
+	return out.join("\n");
 }
 
 function viewToJson(view: TasksView): Record<string, unknown> {
