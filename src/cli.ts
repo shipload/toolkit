@@ -28,7 +28,6 @@ import * as items from "./commands/query/items";
 import * as location from "./commands/query/location";
 import * as modules from "./commands/query/modules";
 import * as nearby from "./commands/query/nearby";
-import * as next from "./commands/query/next";
 import * as nftinfo from "./commands/query/nftinfo";
 import * as player from "./commands/query/player";
 import * as recipe from "./commands/query/recipe";
@@ -55,7 +54,6 @@ export function build(): Command {
 			"Shipload CLI — query state and submit actions.",
 			"",
 			'First time?  Run: shiploadcli foundcompany "<name>" && shiploadcli join && shiploadcli claimstarter',
-			"Unsure?      Run: shiploadcli next",
 			"",
 			"Commands are grouped as: Query (read-only), Action (transacting), Tools (diagnostics).",
 			"",
@@ -64,7 +62,6 @@ export function build(): Command {
 
 	init.register(program);
 	whoami.register(program);
-	next.register(program);
 	status.register(program);
 	epoch.register(program);
 	player.register(program);
