@@ -12,7 +12,9 @@ export interface InventoryData {
 export function render(entityType: string, id: bigint, cargo: any[]): string {
 	const header = `Inventory for ${entityType} ${id}:`;
 	if (cargo.length === 0) return `${header}\n  (empty)`;
-	const lines = formatCargo(cargo).split("\n").map((l) => `  ${l}`);
+	const lines = formatCargo(cargo)
+		.split("\n")
+		.map((l) => `  ${l}`);
 	return [header, ...lines].join("\n");
 }
 

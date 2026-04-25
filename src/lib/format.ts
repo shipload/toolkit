@@ -46,6 +46,29 @@ export function formatEnergy(storedEnergy: number, capacity: number, recharge: n
 	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
 }
 
+export function formatLiveEnergy({
+	storedEnergy,
+	capacity,
+	recharge,
+	drainPerSec = 0,
+	activeTaskStartedAt,
+	now = new Date(),
+}: {
+	storedEnergy: number;
+	capacity: number;
+	recharge: number;
+	drainPerSec?: number;
+	activeTaskStartedAt?: Date;
+	now?: Date;
+}): string {
+	if (!activeTaskStartedAt) {
+		return `${storedEnergy}/${capacity} (recharge: ${recharge}/s)`;
+	}
+	const elapsed = (now.getTime() - activeTaskStartedAt.getTime()) / 1000;
+	const projected = Math.max(0, Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed)));
+	return `${storedEnergy} → ${projected}/${capacity} (live, recharge: ${recharge}/s)`;
+}
+
 export function formatCoords(coords: Types.coordinates): string {
 	return `(${coords.x}, ${coords.y})`;
 }
@@ -185,8 +208,9 @@ function formatCargoItem(c: Types.cargo_item): string {
 
 	const statsStr = formatStats(c.stats, itemId);
 	const statsDisplay = statsStr ? `    ${statsStr}` : "";
+	const statsRaw = `    stats=${c.stats}`;
 
-	return `${qty} × ${name}${statsDisplay}${massStr}`;
+	return `${qty} × ${name}${statsDisplay}${massStr}${statsRaw}`;
 }
 
 export function formatCargo(cargo: Types.cargo_item[]): string {
@@ -220,11 +244,8 @@ function resolvedModuleNames(modules: Types.entity_info["modules"]): Map<number,
 
 export function formatEntity(entity: Types.entity_info): string {
 	const trimmedName = entity.entity_name?.trim() ?? "";
-	const title = trimmedName
-		? `${trimmedName} (${entity.type} ${entity.id})`
-		: `${entity.type} ${entity.id}`;
-
-	const lines = [`${title} — ${entity.owner}`];
+	const namePart = trimmedName ? ` "${trimmedName}"` : "";
+	const lines = [`${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`];
 
 	const statusStr = entity.is_idle ? "idle" : "busy";
 	lines.push(`  Status:    ${statusStr}  ·  ${formatCoords(entity.coordinates)}`);
@@ -238,8 +259,10 @@ export function formatEntity(entity: Types.entity_info): string {
 	}
 
 	if (entity.generator) {
+		const elapsedMs = entity.is_idle ? undefined : (Number(entity.current_task_elapsed ?? 0)) * 1000;
+		const activeTaskStartedAt = elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
 		lines.push(
-			`  Energy:    ${formatEnergy(Number(entity.energy ?? 0), Number(entity.generator.capacity), Number(entity.generator.recharge))}`,
+			`  Energy: ${formatLiveEnergy({ storedEnergy: Number(entity.energy ?? 0), capacity: Number(entity.generator.capacity), recharge: Number(entity.generator.recharge), activeTaskStartedAt })}`,
 		);
 	}
 
@@ -258,45 +281,66 @@ export function formatEntity(entity: Types.entity_info): string {
 
 	const isShip = String(entity.type) === "ship";
 
-	if (entity.engines || entity.generator || entity.gatherer || entity.hauler || entity.crafter || entity.warp || entity.loaders) {
+	if (
+		isShip ||
+		entity.engines ||
+		entity.generator ||
+		entity.gatherer ||
+		entity.hauler ||
+		entity.crafter ||
+		entity.warp ||
+		entity.loaders
+	) {
 		lines.push("");
 		const modNames = resolvedModuleNames(entity.modules);
 
 		if (entity.engines) {
 			const label = modNames.get(1) ?? "Engine";
-			lines.push(`  ${label.padEnd(11)}thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`);
+			lines.push(
+				`  ${label.padEnd(11)}thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`,
+			);
 		}
 		if (entity.generator) {
 			const label = modNames.get(2) ?? "Generator";
-			lines.push(`  ${label.padEnd(11)}capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`);
+			lines.push(
+				`  ${label.padEnd(11)}capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`,
+			);
 		}
 		if (entity.gatherer) {
 			const label = modNames.get(3) ?? "Gatherer";
-			lines.push(`  ${label.padEnd(11)}depth ${entity.gatherer.depth} · yield ${entity.gatherer.yield} · ${entity.gatherer.drain} energy/gather · speed ${entity.gatherer.speed}`);
+			lines.push(
+				`  ${label}: depth ${entity.gatherer.depth}, yield ${entity.gatherer.yield}, drain ${entity.gatherer.drain}, speed ${entity.gatherer.speed}`,
+			);
 		} else if (isShip) {
-			lines.push(`  ${"Gatherer".padEnd(11)}— not installed`);
+			lines.push(`  Gatherer: — (not installed)`);
 		}
 		if (entity.hauler) {
 			const label = modNames.get(9) ?? "Hauler";
-			lines.push(`  ${label.padEnd(11)}capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`);
+			lines.push(
+				`  ${label.padEnd(11)}capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`,
+			);
 		} else if (isShip) {
-			lines.push(`  ${"Hauler".padEnd(11)}— not installed`);
+			lines.push(`  Hauler:   — (not installed)`);
 		}
 		if (entity.crafter) {
 			const label = modNames.get(6) ?? "Crafter";
-			lines.push(`  ${label.padEnd(11)}speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`);
+			lines.push(
+				`  ${label.padEnd(11)}speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`,
+			);
 		} else if (isShip) {
-			lines.push(`  ${"Crafter".padEnd(11)}— not installed`);
+			lines.push(`  Crafter:  — (not installed)`);
 		}
 		if (entity.warp) {
 			const label = modNames.get(5) ?? "Warp";
-			lines.push(`  ${label.padEnd(11)}range ${entity.warp.range}`);
+			lines.push(`  ${label}: range ${entity.warp.range}`);
 		} else if (isShip) {
-			lines.push(`  ${"Warp".padEnd(11)}— not installed`);
+			lines.push(`  Warp:     — (not installed)`);
 		}
 		if (entity.loaders) {
 			const label = modNames.get(4) ?? "Loader";
-			lines.push(`  ${label.padEnd(11)}${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`);
+			lines.push(
+				`  ${label.padEnd(11)}${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`,
+			);
 		}
 	}
 

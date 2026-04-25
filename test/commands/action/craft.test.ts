@@ -11,3 +11,14 @@ test("craft builds action with inputs", async () => {
 	});
 	expect(action.name.toString()).toBe("craft");
 });
+
+test("craft buildAction accepts recipe id in UInt16 range", async () => {
+	const action = await buildAction({
+		entityType: "ship",
+		entityId: 1n,
+		recipeId: 65535,
+		quantity: 1,
+		inputs: [],
+	});
+	expect(action.name.toString()).toBe("craft");
+});

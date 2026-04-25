@@ -6,6 +6,7 @@ import {
 	parseEntityRefList,
 	parseEntityType,
 	parseInt64,
+	parseUint16,
 	parseUint32,
 	parseUint64,
 } from "../../src/lib/args";
@@ -123,5 +124,23 @@ describe("parseUint64", () => {
 	});
 	test("rejects decimal", () => {
 		expect(() => parseUint64("1.5")).toThrow(InvalidArgumentError);
+	});
+});
+
+describe("parseUint16", () => {
+	test("accepts 0", () => {
+		expect(parseUint16("0")).toBe(0);
+	});
+	test("accepts 65535", () => {
+		expect(parseUint16("65535")).toBe(65535);
+	});
+	test("rejects 65536", () => {
+		expect(() => parseUint16("65536")).toThrow(InvalidArgumentError);
+	});
+	test("rejects negative", () => {
+		expect(() => parseUint16("-1")).toThrow(InvalidArgumentError);
+	});
+	test("rejects non-integer", () => {
+		expect(() => parseUint16("1.5")).toThrow(InvalidArgumentError);
 	});
 });

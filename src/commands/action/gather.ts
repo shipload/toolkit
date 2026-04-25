@@ -80,7 +80,7 @@ async function preflightGather(opts: GatherOpts): Promise<void> {
 			: await getEntitySnapshot(opts.destination.entityType, opts.destination.entityId);
 
 	const item = getItem(itemId);
-	const itemMass = Number(item.mass.toString());
+	const itemMass = item.mass;
 	const capacity = Number((dest.capacity ?? 0).toString());
 	const currentMass = Number(dest.cargomass.toString());
 	checkCapacity(capacity, currentMass, itemMass, opts.quantity);

@@ -5,6 +5,7 @@ import {
 	type EntityTypeName,
 	parseCargoInput,
 	parseEntityType,
+	parseUint16,
 	parseUint32,
 	parseUint64,
 } from "../../lib/args";
@@ -59,15 +60,15 @@ export function register(program: Command): void {
 		.description("Craft items from a recipe")
 		.addHelpText(
 			"before",
-			"Requires: idle crafter entity; all declared inputs in cargo; crafter module installed.\n",
+			"Requires: entity is idle; all inputs are in cargo; Crafter module in an entity slot.\n",
 		)
-		.argument("<entity-type>", "entity type", parseEntityType)
+		.argument("<entity-type>", "entity type (ship)", parseEntityType)
 		.argument("<entity-id>", "entity id", parseUint64)
-		.argument("<recipe-id>", "recipe id", parseUint32)
-		.argument("<quantity>", "quantity", parseUint32)
+		.argument("<recipe-id>", "output item id from the recipe command", parseUint16)
+		.argument("<quantity>", "number of times to run the recipe", parseUint32)
 		.option(
 			"--input <val>",
-			"cargo input item:qty (omit stats to auto-match when unambiguous; or item:qty:<packed-uint>, repeatable)",
+			"cargo input as item-id:quantity or item-id:quantity:stats — repeat for each input slot (auto-matches if only one stack available)",
 			(val: string, acc: ParsedCargoInput[] = []) => {
 				acc.push(parseCargoInput(val));
 				return acc;
@@ -78,10 +79,7 @@ export function register(program: Command): void {
 		.option("--estimate", "print duration/energy/cargo estimate without submitting")
 		.option("--wait", "block until scheduled task completes, then print post-state")
 		.option("--force", "submit despite failed feasibility checks (advanced)")
-		.option(
-			"--recharge",
-			"prepend a recharge action to the same signed transaction (recharges to full)",
-		)
+		.option("--recharge", "recharge to full energy before crafting")
 		.action(
 			async (
 				entityType: EntityTypeName,

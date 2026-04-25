@@ -5,7 +5,7 @@
     "": {
       "name": "@shipload/player",
       "dependencies": {
-        "@shipload/sdk": "next",
+        "@shipload/sdk": "2.0.0-rc21",
         "@wharfkit/antelope": "^1.2.0",
         "@wharfkit/common": "^1.5.0",
         "@wharfkit/contract": "^1.2.1",
@@ -48,7 +48,7 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.4.12", "", { "os": "win32", "cpu": "x64" }, "sha512-yMckRzTyZ83hkk8iDFWswqSdU8tvZxspJKnYNh7JZr/zhZNOlzH13k4ecboU6MurKExCe2HUkH75pGI/O2JwGA=="],
 
-    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc19", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-hm4nKADtN/j4Y0R2VK1rO6WgYyt+6rmnKPo7GaCdH4mclHP3I7Xo6i5DlR/hynkhMv8mhhMrt2YafGMV5twDJg=="],
+    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc21", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-61o0JHZe86HlE0SIWf7x1K5DL18yzwj8KMtUIJQhIGBVvGhhbGPh3kONWfwhf/hLBzV+slrVtjcB2MIgah5Ifg=="],
 
     "@types/bun": ["@types/bun@1.3.12", "", { "dependencies": { "bun-types": "1.3.12" } }, "sha512-DBv81elK+/VSwXHDlnH3Qduw+KxkTIWi7TXkAeh24zpi5l0B2kUg9Ga3tb4nJaPcOFswflgi/yAvMVBPrxMB+A=="],
 

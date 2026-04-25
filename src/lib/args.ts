@@ -75,6 +75,14 @@ export function parseInt64(s: string): bigint {
 	return BigInt(s);
 }
 
+export function parseUint16(s: string): number {
+	const n = Number(s);
+	if (!Number.isInteger(n) || n < 0 || n > 0xffff) {
+		throw new InvalidArgumentError(`must be a non-negative 16-bit integer (got "${s}")`);
+	}
+	return n;
+}
+
 export function parseUint32(s: string): number {
 	const n = Number(s);
 	if (!Number.isInteger(n) || n < 0 || n > 0xffffffff) {

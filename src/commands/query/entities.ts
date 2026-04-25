@@ -72,7 +72,9 @@ async function runEntities(
 	const result = (await server.readonly(action, params as unknown as any)) as any;
 	const rows: any[] = Array.isArray(result) ? result : (result?.entities ?? result);
 	if (options.full) {
-		console.log(formatOutput(rows, { json: Boolean(options.json) }, (r) => renderFull(target, r)));
+		console.log(
+			formatOutput(rows, { json: Boolean(options.json) }, (r) => renderFull(target, r)),
+		);
 	} else {
 		console.log(
 			formatOutput(rows, { json: Boolean(options.json) }, (r) => renderSummaries(target, r)),

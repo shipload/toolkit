@@ -364,7 +364,7 @@ export async function estimateGather(params: {
 		};
 	}
 
-	const itemMass = Number(getItem(itemId).mass.toString());
+	const itemMass = getItem(itemId).mass;
 
 	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
 	const rawGatherer = snap.gatherer as any;
@@ -539,7 +539,7 @@ export async function estimateCraft(params: {
 	let totalInputMass = 0;
 	for (const i of inputs) {
 		const item = getItem(i.itemId);
-		totalInputMass += Number(item.mass.toString()) * i.quantity;
+		totalInputMass += item.mass * i.quantity;
 	}
 
 	const speed = Number(crafter.speed?.toString() ?? "0");
@@ -581,7 +581,7 @@ export async function estimateCraft(params: {
 
 	let outputItemMass = 0;
 	if (outputItemId > 0) {
-		outputItemMass = Number(getItem(outputItemId).mass.toString());
+		outputItemMass = getItem(outputItemId).mass;
 	}
 	const cargoDelta = outputItemMass * quantity - totalInputMass;
 

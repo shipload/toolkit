@@ -1,11 +1,15 @@
+import { formatMass, formatTier, getItem } from "@shipload/sdk";
 import type { Command } from "commander";
 import { parseUint32 } from "../../lib/args";
 import { server } from "../../lib/client";
 import { formatCategory, formatItem, formatOutput } from "../../lib/format";
 
-interface RecipeInput {
+// Wire shape returned by the server's getrecipe / getrecipes readonly actions.
+// Distinct from the SDK's RecipeInput discriminated union (camelCase, item-or-category).
+interface WireRecipeInput {
 	item_id: number;
 	category: number;
+	tier: number;
 	quantity: number;
 }
 
@@ -16,30 +20,48 @@ interface StatSlot {
 interface Recipe {
 	output_item_id: number;
 	output_mass: number;
-	inputs: RecipeInput[];
+	inputs: WireRecipeInput[];
 	stat_slots: StatSlot[];
 	blend_weights: number[];
 	output_item?: { id: number; mass: number };
 	input_items?: { id: number; mass: number }[];
 }
 
-function formatInput(i: RecipeInput): string {
-	if (i.item_id > 0) return `${i.quantity}× ${formatItem(i.item_id)}`;
-	return `${i.quantity}× ${formatCategory(i.category)}`;
+function formatInput(i: WireRecipeInput): string {
+	const itemId = Number(i.item_id);
+	const tier = Number(i.tier);
+	const tierSuffix = Number.isFinite(tier) && tier > 0 ? ` ${formatTier(tier)}` : "";
+	if (itemId > 0) {
+		const item = getItem(itemId);
+		return `${i.quantity}× ${item.name} ${formatTier(item.tier)}`;
+	}
+	return `${i.quantity}× ${formatCategory(Number(i.category))}${tierSuffix}`;
+}
+
+function itemName(itemId: number): string {
+	try {
+		const item = getItem(itemId);
+		return `${item.name} ${formatTier(item.tier)}`;
+	} catch {
+		return `Item ${itemId}`;
+	}
 }
 
 export function renderList(recipes: Recipe[]): string {
 	const lines = [`Recipes (${recipes.length}):`];
 	for (const r of recipes) {
 		const inputs = r.inputs.map(formatInput).join(" + ");
-		const output = formatItem(r.output_item_id);
+		const output = itemName(r.output_item_id);
 		lines.push(`  [${r.output_item_id}] ${output} ← ${inputs}`);
 	}
 	return lines.join("\n");
 }
 
 export function renderDetail(r: Recipe): string {
-	const lines = [`Output:   ${formatItem(r.output_item_id)} (mass ${r.output_mass})`, `Inputs:`];
+	const lines = [
+		`Output:   ${itemName(r.output_item_id)} (${formatMass(r.output_mass)})`,
+		`Inputs:`,
+	];
 	for (let i = 0; i < r.inputs.length; i++) {
 		lines.push(`  [${i}] ${formatInput(r.inputs[i])}`);
 	}
@@ -77,6 +99,10 @@ export function register(program: Command): void {
 	program
 		.command("recipe")
 		.description("List all recipes, or show one by output item id")
+		.addHelpText(
+			"before",
+			"The bracketed number [ID] in the list is the recipe id — pass it as <recipe-id> in the craft command.\n",
+		)
 		.argument("[id]", "output item id (omit to list all)", parseUint32)
 		.option("--json", "emit JSON instead of formatted text")
 		.action(async (id: number | undefined, opts: { json?: boolean }) => {
