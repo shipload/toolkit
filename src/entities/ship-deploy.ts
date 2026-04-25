@@ -15,11 +15,11 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
 } {
     const density = stats.density ?? 500
     const strength = stats.strength ?? 500
-    const fineness = stats.fineness ?? 500
+    const hardness = stats.hardness ?? 500
     const saturation = stats.saturation ?? 500
 
     const hullmass = 25000 + 75 * density
-    const statSum = strength + fineness + saturation
+    const statSum = strength + hardness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(1000000 * Math.pow(10, exponent))
 
@@ -76,11 +76,11 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
     thrust: number
     quantity: number
 } {
-    const fin = stats.fineness ?? 500
+    const hrd = stats.hardness ?? 500
     const pla = stats.plasticity ?? 500
 
     return {
-        mass: Math.max(200, 2000 - Math.floor(fin * 2)),
+        mass: Math.max(200, 2000 - Math.floor(hrd * 2)),
         thrust: 1 + Math.floor(pla / 500),
         quantity: 1,
     }
@@ -122,10 +122,10 @@ export function computeStorageCapabilities(
     capacityBonus: number
 } {
     const strength = stats.strength ?? 500
-    const fineness = stats.fineness ?? 500
+    const hardness = stats.hardness ?? 500
     const saturation = stats.saturation ?? 500
 
-    const statSum = strength + fineness + saturation
+    const statSum = strength + hardness + saturation
     const capacityBonus = Math.floor(
         (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
     )
@@ -139,11 +139,11 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
 } {
     const density = stats.density ?? 500
     const strength = stats.strength ?? 500
-    const fineness = stats.fineness ?? 500
+    const hardness = stats.hardness ?? 500
     const saturation = stats.saturation ?? 500
 
     const hullmass = 25000 + 75 * density
-    const statSum = strength + fineness + saturation
+    const statSum = strength + hardness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(20000000 * Math.pow(10, exponent))
 

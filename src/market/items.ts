@@ -1,93 +1,41 @@
 import {UInt16, UInt16Type} from '@wharfkit/antelope'
+import items from '../data/items.json'
+import {itemMetadata} from '../data/metadata'
 import {Item} from '../types'
-import itemsData from '../data/items.json'
-import {computeInputMass} from '../derivation/crafting'
-import {getComponentById, getEntityRecipeByItemId, getModuleRecipeByItemId} from '../data/recipes'
 
-const itemsById: Map<number, Item> = new Map()
-const synthesizedCache: Map<number, Item> = new Map()
+const itemsById = new Map<number, Item>()
 
-for (const g of itemsData) {
-    const item = Item.from({
-        id: g.id,
-        name: g.name,
-        description: g.description,
-        mass: g.mass,
-        category: g.category,
-        tier: g.tier,
-        color: g.color,
-    })
-    itemsById.set(item.id.toNumber(), item)
-}
-
-export const itemIds = Array.from(itemsById.values(), (i) => i.id)
-
-interface RecipeSource {
-    name: string
-    description: string
-    mass: number
-    color: string
-}
-
-function synthesizeItem(id: number, source: RecipeSource): Item {
-    return Item.from({
-        id,
-        name: source.name,
-        description: source.description,
-        mass: source.mass,
-        category: 'ore',
-        tier: 't1',
-        color: source.color,
+for (const raw of items as any[]) {
+    const meta = itemMetadata[raw.id]
+    if (!meta) {
+        throw new Error(`Missing metadata for item ${raw.id}. Add an entry to metadata.ts.`)
+    }
+    itemsById.set(raw.id, {
+        id: raw.id,
+        name: meta.name,
+        description: meta.description,
+        color: meta.color,
+        mass: raw.mass,
+        type: raw.type,
+        tier: raw.tier,
+        category: raw.category,
+        moduleType: raw.type === 'module' ? raw.subtype : undefined,
     })
 }
 
-function synthesizeFromRecipes(id: number): Item | undefined {
-    const component = getComponentById(id)
-    if (component) return synthesizeItem(id, component)
-
-    const entityRecipe = getEntityRecipeByItemId(id)
-    if (entityRecipe) {
-        return synthesizeItem(id, {
-            ...entityRecipe,
-            mass: computeInputMass(entityRecipe.id, 'entity'),
-        })
-    }
-
-    const moduleRecipe = getModuleRecipeByItemId(id)
-    if (moduleRecipe) {
-        return synthesizeItem(id, {
-            ...moduleRecipe,
-            mass: computeInputMass(moduleRecipe.id, 'module'),
-        })
-    }
-
-    return undefined
-}
+export const itemIds = Array.from(itemsById.keys())
 
 export function getItem(itemId: UInt16Type): Item {
     const id = UInt16.from(itemId).toNumber()
-    const existing = itemsById.get(id) ?? synthesizedCache.get(id)
-    if (existing) return existing
-
-    const synthesized = synthesizeFromRecipes(id)
-    if (synthesized) {
-        synthesizedCache.set(id, synthesized)
-        return synthesized
-    }
-
-    throw new Error(`Item with id ${id} not found`)
+    const item = itemsById.get(id)
+    if (!item) throw new Error(`Unknown item id: ${id}`)
+    return item
 }
 
 export function getItems(): Item[] {
     return Array.from(itemsById.values())
 }
 
-/**
- * @internal Test-only: registers an item into the in-memory map. Tests should
- * use `test/item-mock.ts`'s `registerMockItem()` instead of calling this directly.
- */
 export function __registerItemInternal(item: Item): void {
-    const id = item.id.toNumber()
-    itemsById.set(id, item)
-    synthesizedCache.delete(id)
+    itemsById.set(item.id, item)
 }

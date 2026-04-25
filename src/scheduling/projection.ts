@@ -13,16 +13,10 @@ import {
     RECIPE_INPUTS_EXCESS,
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
-    RECIPE_INPUTS_MIXED,
     RECIPE_NOT_FOUND,
     SHIP_CARGO_NOT_LOADED,
 } from '../errors'
-import {
-    getComponentById,
-    getEntityRecipeByItemId,
-    getModuleRecipeByItemId,
-    RecipeInput,
-} from '../data/recipes'
+import {getRecipe, RecipeInput} from '../data/recipes-runtime'
 import {getItem} from '../market/items'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
@@ -296,14 +290,9 @@ export function projectEntity(entity: Projectable, options?: ProjectionOptions):
     return projected
 }
 
-function getRecipeForOutput(outputItemId: number): RecipeInput[] | undefined {
-    const component = getComponentById(outputItemId)
-    if (component) return component.recipe
-    const moduleRecipe = getModuleRecipeByItemId(outputItemId)
-    if (moduleRecipe) return moduleRecipe.recipe
-    const entityRecipe = getEntityRecipeByItemId(outputItemId)
-    if (entityRecipe) return entityRecipe.recipe
-    return undefined
+function getRecipeInputsForOutput(outputItemId: number): RecipeInput[] | undefined {
+    const recipe = getRecipe(outputItemId)
+    return recipe?.inputs
 }
 
 function validateCraftTask(task: ServerContract.Types.task, projected: ProjectedEntity): void {
@@ -313,7 +302,7 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
     const inputs = task.cargo.slice(0, -1)
     const craftQuantity = output.quantity.toNumber()
 
-    const recipe = getRecipeForOutput(output.item_id.toNumber())
+    const recipe = getRecipeInputsForOutput(output.item_id.toNumber())
     if (!recipe) throw new Error(RECIPE_NOT_FOUND)
 
     const groupedInputs: ServerContract.Types.cargo_item[][] = recipe.map(() => [])
@@ -321,15 +310,15 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
         let matched = false
         for (let ri = 0; ri < recipe.length; ri++) {
             const req = recipe[ri]
-            if (req.itemId && req.itemId > 0) {
+            if ('itemId' in req) {
                 if (input.item_id.toNumber() === req.itemId) {
                     groupedInputs[ri].push(input)
                     matched = true
                     break
                 }
-            } else if (req.category) {
+            } else {
                 const item = getItem(input.item_id)
-                if (item.category === req.category) {
+                if (item.category === req.category && item.tier === req.tier) {
                     groupedInputs[ri].push(input)
                     matched = true
                     break
@@ -348,15 +337,6 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
         const required = recipe[ri].quantity * craftQuantity
         if (provided < required) throw new Error(RECIPE_INPUTS_INSUFFICIENT)
         if (provided !== required) throw new Error(RECIPE_INPUTS_EXCESS)
-
-        if (!recipe[ri].itemId && stacks.length > 1) {
-            const firstItemId = stacks[0].item_id.toNumber()
-            for (let si = 1; si < stacks.length; si++) {
-                if (stacks[si].item_id.toNumber() !== firstItemId) {
-                    throw new Error(RECIPE_INPUTS_MIXED)
-                }
-            }
-        }
     }
 
     for (const input of inputs) {

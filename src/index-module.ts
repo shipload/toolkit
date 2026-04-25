@@ -1,6 +1,8 @@
 export * from './contracts'
 export * from './errors'
 export * from './types'
+export * from './data/item-ids'
+export * from './data/recipes-runtime'
 
 import {ServerContract} from './contracts'
 
@@ -183,51 +185,6 @@ export {
 export type {CapabilityAttribute, StatMapping} from './data/capabilities'
 
 export {
-    components,
-    entityRecipes,
-    moduleRecipes,
-    getComponentById,
-    getEntityRecipe,
-    getEntityRecipeByItemId,
-    getModuleRecipe,
-    getModuleRecipeByItemId,
-    getAllCraftableItems,
-    getComponentsForCategory,
-    getComponentsForStat,
-    ITEM_HULL_PLATES,
-    ITEM_CARGO_LINING,
-    ITEM_CONTAINER_T1_PACKED,
-    ITEM_THRUSTER_CORE,
-    ITEM_POWER_CELL,
-    ITEM_ENGINE_T1,
-    ITEM_GENERATOR_T1,
-    ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_MATTER_CONDUIT,
-    ITEM_SURVEY_PROBE,
-    ITEM_CARGO_ARM,
-    ITEM_TOOL_BIT,
-    ITEM_REACTION_CHAMBER,
-    ITEM_GATHERER_T1,
-    ITEM_LOADER_T1,
-    ITEM_CRAFTER_T1,
-    ITEM_STORAGE_T1,
-    ITEM_HULL_PLATES_T2,
-    ITEM_CARGO_LINING_T2,
-    ITEM_CONTAINER_T2_PACKED,
-    ITEM_FOCUSING_ARRAY,
-} from './data/recipes'
-export type {
-    ComponentDefinition,
-    ComponentStat,
-    RecipeInput,
-    EntityRecipe,
-    ModuleRecipe,
-    ModuleSlot,
-    CraftableItem,
-} from './data/recipes'
-
-export {
     encodeStats,
     encodeGatheredCargoStats,
     decodeStat,
@@ -239,7 +196,6 @@ export {
     computeEntityStats,
     blendCargoStacks,
     blendCrossGroup,
-    categoryItemMass,
     computeInputMass,
     computeCraftedOutputStats,
 } from './derivation/crafting'
@@ -321,7 +277,6 @@ export {
     computeCrafterDrain,
 } from './nft/description'
 
-export {getEntitySlotLayout} from './data/recipes'
 export {
     ITEM_TYPE_RESOURCE,
     ITEM_TYPE_COMPONENT,

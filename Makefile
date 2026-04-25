@@ -13,6 +13,20 @@ build: lib
 lib: ${SRC_FILES} package.json tsconfig.json node_modules rollup.config.js
 	@${BIN}/rollup -c && touch lib
 
+CATALOG_SRC ?= ../game/build/catalog
+
+.PHONY: sync-catalog
+sync-catalog:
+	@if [ ! -d "$(CATALOG_SRC)" ]; then \
+		echo "Error: $(CATALOG_SRC) not found. Run 'make' in game/ first."; \
+		exit 1; \
+	fi
+	cp $(CATALOG_SRC)/items.json    src/data/items.json
+	cp $(CATALOG_SRC)/recipes.json  src/data/recipes.json
+	cp $(CATALOG_SRC)/entities.json src/data/entities.json
+	cp $(CATALOG_SRC)/item-ids.ts   src/data/item-ids.ts
+	@echo "Catalog synced from $(CATALOG_SRC)"
+
 .PHONY: dev
 dev: node_modules
 	@onchange -k -i 'src/**/*.ts' 'config/*' -- ${BIN}/rollup -c && touch lib

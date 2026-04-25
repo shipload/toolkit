@@ -1,17 +1,252 @@
 [
-    {"id": 101, "name": "", "description": "", "mass": 52000, "category": "ore", "tier": "t1", "color": "#C26D3F"},
-    {"id": 102, "name": "", "description": "", "mass": 58000, "category": "ore", "tier": "t2", "color": "#C26D3F"},
-    {"id": 103, "name": "", "description": "", "mass": 64000, "category": "ore", "tier": "t3", "color": "#C26D3F"},
-    {"id": 201, "name": "", "description": "", "mass": 35000, "category": "crystal", "tier": "t1", "color": "#4ADBFF"},
-    {"id": 202, "name": "", "description": "", "mass": 35000, "category": "crystal", "tier": "t2", "color": "#4ADBFF"},
-    {"id": 203, "name": "", "description": "", "mass": 35000, "category": "crystal", "tier": "t3", "color": "#4ADBFF"},
-    {"id": 301, "name": "", "description": "", "mass": 15000, "category": "gas", "tier": "t1", "color": "#B8E4A0"},
-    {"id": 302, "name": "", "description": "", "mass": 13500, "category": "gas", "tier": "t2", "color": "#B8E4A0"},
-    {"id": 303, "name": "", "description": "", "mass": 12000, "category": "gas", "tier": "t3", "color": "#B8E4A0"},
-    {"id": 401, "name": "", "description": "", "mass": 22000, "category": "regolith", "tier": "t1", "color": "#C4A57B"},
-    {"id": 402, "name": "", "description": "", "mass": 25000, "category": "regolith", "tier": "t2", "color": "#C4A57B"},
-    {"id": 403, "name": "", "description": "", "mass": 28000, "category": "regolith", "tier": "t3", "color": "#C4A57B"},
-    {"id": 501, "name": "", "description": "", "mass": 42000, "category": "biomass", "tier": "t1", "color": "#5A8B3E"},
-    {"id": 502, "name": "", "description": "", "mass": 37000, "category": "biomass", "tier": "t2", "color": "#5A8B3E"},
-    {"id": 503, "name": "", "description": "", "mass": 33000, "category": "biomass", "tier": "t3", "color": "#5A8B3E"}
+  {
+    "id": 101,
+    "mass": 52000,
+    "type": "resource",
+    "tier": 1,
+    "category": "ore"
+  },
+  {
+    "id": 102,
+    "mass": 58000,
+    "type": "resource",
+    "tier": 2,
+    "category": "ore"
+  },
+  {
+    "id": 103,
+    "mass": 64000,
+    "type": "resource",
+    "tier": 3,
+    "category": "ore"
+  },
+  {
+    "id": 201,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 1,
+    "category": "crystal"
+  },
+  {
+    "id": 202,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 2,
+    "category": "crystal"
+  },
+  {
+    "id": 203,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 3,
+    "category": "crystal"
+  },
+  {
+    "id": 301,
+    "mass": 15000,
+    "type": "resource",
+    "tier": 1,
+    "category": "gas"
+  },
+  {
+    "id": 302,
+    "mass": 13500,
+    "type": "resource",
+    "tier": 2,
+    "category": "gas"
+  },
+  {
+    "id": 303,
+    "mass": 12000,
+    "type": "resource",
+    "tier": 3,
+    "category": "gas"
+  },
+  {
+    "id": 401,
+    "mass": 22000,
+    "type": "resource",
+    "tier": 1,
+    "category": "regolith"
+  },
+  {
+    "id": 402,
+    "mass": 25000,
+    "type": "resource",
+    "tier": 2,
+    "category": "regolith"
+  },
+  {
+    "id": 403,
+    "mass": 28000,
+    "type": "resource",
+    "tier": 3,
+    "category": "regolith"
+  },
+  {
+    "id": 501,
+    "mass": 42000,
+    "type": "resource",
+    "tier": 1,
+    "category": "biomass"
+  },
+  {
+    "id": 502,
+    "mass": 37000,
+    "type": "resource",
+    "tier": 2,
+    "category": "biomass"
+  },
+  {
+    "id": 503,
+    "mass": 33000,
+    "type": "resource",
+    "tier": 3,
+    "category": "biomass"
+  },
+  {
+    "id": 10001,
+    "mass": 50000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10002,
+    "mass": 30000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10003,
+    "mass": 50000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10004,
+    "mass": 30000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10005,
+    "mass": 50000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10006,
+    "mass": 30000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10007,
+    "mass": 30000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10008,
+    "mass": 30000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10009,
+    "mass": 50000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10010,
+    "mass": 40000,
+    "type": "component",
+    "tier": 1
+  },
+  {
+    "id": 10100,
+    "mass": 150000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "engine"
+  },
+  {
+    "id": 10101,
+    "mass": 75000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "generator"
+  },
+  {
+    "id": 10102,
+    "mass": 145000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "gatherer"
+  },
+  {
+    "id": 10103,
+    "mass": 90000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "loader"
+  },
+  {
+    "id": 10104,
+    "mass": 120000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "crafter"
+  },
+  {
+    "id": 10105,
+    "mass": 100000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "storage"
+  },
+  {
+    "id": 10106,
+    "mass": 120000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "hauler"
+  },
+  {
+    "id": 10200,
+    "mass": 80000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 10201,
+    "mass": 100000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 10202,
+    "mass": 1300000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 20001,
+    "mass": 50000,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20002,
+    "mass": 30000,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20200,
+    "mass": 80000,
+    "type": "entity",
+    "tier": 2
+  }
 ]

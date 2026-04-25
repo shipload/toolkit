@@ -1,0 +1,878 @@
+[
+  {
+    "outputItemId": 10001,
+    "outputMass": 50000,
+    "inputs": [
+      {
+        "category": "ore",
+        "tier": 1,
+        "quantity": 15
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10002,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "category": "regolith",
+        "tier": 1,
+        "quantity": 10
+      },
+      {
+        "category": "biomass",
+        "tier": 1,
+        "quantity": 20
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10003,
+    "outputMass": 50000,
+    "inputs": [
+      {
+        "category": "gas",
+        "tier": 1,
+        "quantity": 32
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10004,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "category": "regolith",
+        "tier": 1,
+        "quantity": 20
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10005,
+    "outputMass": 50000,
+    "inputs": [
+      {
+        "category": "ore",
+        "tier": 1,
+        "quantity": 15
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10006,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "category": "crystal",
+        "tier": 1,
+        "quantity": 10
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10007,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "category": "biomass",
+        "tier": 1,
+        "quantity": 32
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10008,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "category": "regolith",
+        "tier": 1,
+        "quantity": 20
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10009,
+    "outputMass": 50000,
+    "inputs": [
+      {
+        "category": "gas",
+        "tier": 1,
+        "quantity": 32
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10010,
+    "outputMass": 40000,
+    "inputs": [
+      {
+        "category": "crystal",
+        "tier": 1,
+        "quantity": 25
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10100,
+    "outputMass": 150000,
+    "inputs": [
+      {
+        "itemId": 10003,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10101,
+    "outputMass": 75000,
+    "inputs": [
+      {
+        "itemId": 10004,
+        "quantity": 5
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10102,
+    "outputMass": 145000,
+    "inputs": [
+      {
+        "itemId": 10005,
+        "quantity": 4
+      },
+      {
+        "itemId": 10006,
+        "quantity": 3
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10103,
+    "outputMass": 90000,
+    "inputs": [
+      {
+        "itemId": 10002,
+        "quantity": 3
+      },
+      {
+        "itemId": 10007,
+        "quantity": 3
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10104,
+    "outputMass": 120000,
+    "inputs": [
+      {
+        "itemId": 10008,
+        "quantity": 3
+      },
+      {
+        "itemId": 10009,
+        "quantity": 3
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10105,
+    "outputMass": 100000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 8
+      },
+      {
+        "itemId": 10002,
+        "quantity": 4
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10106,
+    "outputMass": 120000,
+    "inputs": [
+      {
+        "itemId": 10004,
+        "quantity": 3
+      },
+      {
+        "itemId": 10010,
+        "quantity": 3
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10200,
+    "outputMass": 80000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 6
+      },
+      {
+        "itemId": 10002,
+        "quantity": 2
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10201,
+    "outputMass": 100000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 8
+      },
+      {
+        "itemId": 10002,
+        "quantity": 4
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10202,
+    "outputMass": 1300000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 20
+      },
+      {
+        "itemId": 10002,
+        "quantity": 10
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20001,
+    "outputMass": 50000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 2
+      },
+      {
+        "category": "ore",
+        "tier": 2,
+        "quantity": 15
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": [
+      1,
+      1
+    ]
+  },
+  {
+    "outputItemId": 20002,
+    "outputMass": 30000,
+    "inputs": [
+      {
+        "itemId": 10002,
+        "quantity": 2
+      },
+      {
+        "category": "regolith",
+        "tier": 2,
+        "quantity": 10
+      },
+      {
+        "category": "biomass",
+        "tier": 2,
+        "quantity": 20
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "outputItemId": 20200,
+    "outputMass": 80000,
+    "inputs": [
+      {
+        "itemId": 20001,
+        "quantity": 6
+      },
+      {
+        "itemId": 20002,
+        "quantity": 2
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  }
+]

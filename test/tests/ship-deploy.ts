@@ -19,7 +19,7 @@ suite('ship deploy formulas', function () {
         const result = computeShipHullCapabilities({
             strength: 500,
             density: 500,
-            fineness: 500,
+            hardness: 500,
             saturation: 500,
         })
         assert.isAbove(result.hullmass, 0)
@@ -42,13 +42,13 @@ suite('ship deploy formulas', function () {
         const light = computeShipHullCapabilities({
             strength: 500,
             density: 100,
-            fineness: 500,
+            hardness: 500,
             saturation: 500,
         })
         const heavy = computeShipHullCapabilities({
             strength: 500,
             density: 900,
-            fineness: 500,
+            hardness: 500,
             saturation: 500,
         })
         assert.isBelow(light.hullmass, heavy.hullmass)
@@ -104,7 +104,7 @@ suite('ship deploy formulas', function () {
     })
 
     test('hull formula exact values at min', function () {
-        const r = computeShipHullCapabilities({strength: 1, density: 1, fineness: 1, saturation: 1})
+        const r = computeShipHullCapabilities({strength: 1, density: 1, hardness: 1, saturation: 1})
         assert.equal(r.hullmass, 25075)
         assert.equal(r.capacity, 1002307)
     })
@@ -113,7 +113,7 @@ suite('ship deploy formulas', function () {
         const r = computeShipHullCapabilities({
             strength: 500,
             density: 500,
-            fineness: 500,
+            hardness: 500,
             saturation: 500,
         })
         assert.equal(r.hullmass, 62500)
@@ -124,7 +124,7 @@ suite('ship deploy formulas', function () {
         const r = computeShipHullCapabilities({
             strength: 999,
             density: 999,
-            fineness: 999,
+            hardness: 999,
             saturation: 999,
         })
         assert.equal(r.hullmass, 99925)
@@ -219,29 +219,29 @@ suite('ship deploy formulas', function () {
     })
 
     test('loader formula exact values at min', function () {
-        const r = computeLoaderCapabilities({fineness: 1, plasticity: 1})
+        const r = computeLoaderCapabilities({hardness: 1, plasticity: 1})
         assert.equal(r.mass, 1998)
         assert.equal(r.thrust, 1)
         assert.equal(r.quantity, 1)
     })
 
     test('loader formula exact values at mid', function () {
-        const r = computeLoaderCapabilities({fineness: 500, plasticity: 500})
+        const r = computeLoaderCapabilities({hardness: 500, plasticity: 500})
         assert.equal(r.mass, 1000)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
     test('loader formula exact values at max', function () {
-        const r = computeLoaderCapabilities({fineness: 999, plasticity: 999})
+        const r = computeLoaderCapabilities({hardness: 999, plasticity: 999})
         assert.equal(r.mass, 200)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
     test('higher FIN = lower loader mass', function () {
-        const low = computeLoaderCapabilities({fineness: 100, plasticity: 500})
-        const high = computeLoaderCapabilities({fineness: 900, plasticity: 500})
+        const low = computeLoaderCapabilities({hardness: 100, plasticity: 500})
+        const high = computeLoaderCapabilities({hardness: 900, plasticity: 500})
         assert.isAbove(low.mass, high.mass)
     })
 
@@ -279,7 +279,7 @@ suite('ship deploy formulas', function () {
         const r = computeWarehouseHullCapabilities({
             density: 0,
             strength: 0,
-            fineness: 0,
+            hardness: 0,
             saturation: 0,
         })
         assert.equal(r.hullmass, 25000)
@@ -290,7 +290,7 @@ suite('ship deploy formulas', function () {
         const r = computeWarehouseHullCapabilities({
             density: 500,
             strength: 500,
-            fineness: 500,
+            hardness: 500,
             saturation: 500,
         })
         assert.equal(r.hullmass, 62500)
@@ -298,7 +298,7 @@ suite('ship deploy formulas', function () {
     })
 
     test('warehouse capacity is ~20x container capacity', function () {
-        const stats = {density: 500, strength: 500, fineness: 500, saturation: 500}
+        const stats = {density: 500, strength: 500, hardness: 500, saturation: 500}
         const wh = computeWarehouseHullCapabilities(stats)
         const ct = computeContainerCapabilities(stats)
         const ratio = wh.capacity / ct.capacity
@@ -307,7 +307,7 @@ suite('ship deploy formulas', function () {
     })
 
     test('warehouse hullmass matches container/ship formula', function () {
-        const stats = {density: 500, strength: 500, fineness: 500, saturation: 500}
+        const stats = {density: 500, strength: 500, hardness: 500, saturation: 500}
         const wh = computeWarehouseHullCapabilities(stats)
         const ship = computeShipHullCapabilities(stats)
         assert.equal(wh.hullmass, ship.hullmass)
@@ -317,7 +317,7 @@ suite('ship deploy formulas', function () {
         const r = computeWarehouseHullCapabilities({
             density: 999,
             strength: 999,
-            fineness: 999,
+            hardness: 999,
             saturation: 999,
         })
         assert.isAbove(r.capacity, 190000000)

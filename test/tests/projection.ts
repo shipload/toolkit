@@ -2,21 +2,18 @@ import {assert} from 'chai'
 import {
     type CargoStack,
     ENTITY_CAPACITY_EXCEEDED,
-    Item,
     ITEM_HULL_PLATES,
     ITEM_THRUSTER_CORE,
     projectEntity,
     RECIPE_INPUTS_EXCESS,
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
-    RECIPE_INPUTS_MIXED,
     RECIPE_NOT_FOUND,
     ServerContract,
     SHIP_CARGO_NOT_LOADED,
     TaskType,
     validateSchedule,
 } from '$lib'
-import {UInt16, UInt32} from '@wharfkit/antelope'
 import {registerMockItem} from '../item-mock'
 import {makeShipFixture, makeTask} from '../helpers'
 
@@ -262,29 +259,6 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
             })
 
-            test('throws RECIPE_INPUTS_MIXED when category slot has multiple item_ids', function () {
-                // Two different ore items (T1 id=101 and T2 id=102) for a single category slot
-                const ship = makeShipFixture({
-                    cargo: [
-                        {item_id: 101, quantity: 8, stats: 0},
-                        {item_id: 102, quantity: 7, stats: 0},
-                    ],
-                })
-                ship.schedule = ServerContract.Types.schedule.from({
-                    started: '2024-06-04T23:41:09.000',
-                    tasks: [
-                        makeTask(TaskType.CRAFT, {
-                            cargo: [
-                                {item_id: 101, quantity: 8, stats: 0},
-                                {item_id: 102, quantity: 7, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
-                            ],
-                        }),
-                    ],
-                })
-                assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_MIXED)
-            })
-
             test('throws SHIP_CARGO_NOT_LOADED when input not in projected cargo', function () {
                 // Cargo empty but craft task declares inputs
                 const ship = makeShipFixture({capacity: 10_000_000})
@@ -339,17 +313,15 @@ suite('projectEntity (stack-aware)', function () {
             const INPUT_QTY = 15
             const OUTPUT_QTY = 1
 
-            registerMockItem(
-                Item.from({
-                    id: UInt16.from(COMPONENT_ID),
-                    name: 'Matter Conduit',
-                    description: 'Heavy-duty metal shaft used in gathering equipment.',
-                    mass: UInt32.from(COMPONENT_MASS),
-                    category: 'ore',
-                    tier: 't1',
-                    color: '#7B8D9E',
-                })
-            )
+            registerMockItem({
+                id: COMPONENT_ID,
+                name: 'Matter Conduit',
+                description: 'Heavy-duty metal shaft used in gathering equipment.',
+                mass: COMPONENT_MASS,
+                type: 'component',
+                tier: 1,
+                color: '#7B8D9E',
+            })
 
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({

@@ -1,4 +1,4 @@
-import {ResourceTier} from '../types'
+import {getItem} from '../market/items'
 
 export const DEPTH_THRESHOLD_T1 = 0
 export const DEPTH_THRESHOLD_T2 = 2000
@@ -18,47 +18,23 @@ export const PLANET_SUBTYPE_ICY = 3
 export const PLANET_SUBTYPE_OCEAN = 4
 export const PLANET_SUBTYPE_INDUSTRIAL = 5
 
-interface ResourceEntry {
-    id: number
-    tier: ResourceTier
-}
-
-const RESOURCE_CATALOG: ResourceEntry[] = [
-    {id: 101, tier: 't1'},
-    {id: 102, tier: 't2'},
-    {id: 103, tier: 't3'},
-    {id: 201, tier: 't1'},
-    {id: 202, tier: 't2'},
-    {id: 203, tier: 't3'},
-    {id: 301, tier: 't1'},
-    {id: 302, tier: 't2'},
-    {id: 303, tier: 't3'},
-    {id: 401, tier: 't1'},
-    {id: 402, tier: 't2'},
-    {id: 403, tier: 't3'},
-    {id: 501, tier: 't1'},
-    {id: 502, tier: 't2'},
-    {id: 503, tier: 't3'},
-]
-
-export function getDepthThreshold(tier: ResourceTier): number {
+export function getDepthThreshold(tier: number): number {
     switch (tier) {
-        case 't1':
+        case 1:
             return DEPTH_THRESHOLD_T1
-        case 't2':
+        case 2:
             return DEPTH_THRESHOLD_T2
-        case 't3':
+        case 3:
             return DEPTH_THRESHOLD_T3
-        case 't4':
+        case 4:
             return DEPTH_THRESHOLD_T4
-        case 't5':
+        default:
             return DEPTH_THRESHOLD_T5
     }
 }
 
-export function getResourceTier(itemId: number): ResourceTier {
-    const entry = RESOURCE_CATALOG.find((r) => r.id === itemId)
-    return entry ? entry.tier : 't5'
+export function getResourceTier(itemId: number): number {
+    return getItem(itemId).tier
 }
 
 export function getResourceWeight(itemId: number, stratum: number): number {
@@ -69,24 +45,24 @@ export function getResourceWeight(itemId: number, stratum: number): number {
     const depthAbove = stratum - threshold
 
     switch (tier) {
-        case 't1':
+        case 1:
             if (stratum < 2000) return 100
             if (stratum < 10000) return 80
             if (stratum < 30000) return 50
             return 30
-        case 't2':
+        case 2:
             if (depthAbove < 3000) return 40
             if (depthAbove < 8000) return 60
             return 50
-        case 't3':
+        case 3:
             if (depthAbove < 5000) return 20
             if (depthAbove < 15000) return 35
             return 40
-        case 't4':
+        case 4:
             if (depthAbove < 10000) return 10
             if (depthAbove < 25000) return 20
             return 30
-        case 't5':
+        default:
             return 10
     }
 }

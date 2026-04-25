@@ -120,7 +120,8 @@ suite('resolveItem', function () {
     })
 
     test('resolveItem(ITEM_HAULER_T1) returns Hauler capability group', function () {
-        const seed = encodeStats([500, 500, 500])
+        // Hauler decodes 4 stats per recipe — provide values for all four.
+        const seed = encodeStats([500, 500, 500, 500])
         const resolved = resolveItem(UInt16.from(ITEM_HAULER_T1), UInt64.from(seed))
         assert.equal(resolved.itemType, 'module')
         assert.equal(resolved.name, 'Hauler')

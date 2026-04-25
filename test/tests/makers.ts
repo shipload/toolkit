@@ -17,8 +17,11 @@ import {
 
 suite('makeShip factory', function () {
     test('stacks two hauler modules by capacity-weighted efficiency', function () {
+        // Hauler decoded keys: composition, conductivity, fineness, resonance.
+        // Capacity uses resonance, efficiency uses conductivity, drain uses
+        // reflectivity — which the recipe doesn't carry, so it defaults to 500.
         const seedA = encodeStats([500, 500, 500, 500]) // cap=2, eff=5000, drain=9
-        const seedB = encodeStats([999, 999, 999, 999]) // cap=3, eff=7994, drain=3
+        const seedB = encodeStats([999, 999, 999, 999]) // cap=3, eff=7994, drain=9
         const ship = makeShip({
             id: UInt64.from(1),
             owner: 'test',
@@ -35,7 +38,7 @@ suite('makeShip factory', function () {
 
         assert.exists(ship.hauler)
         assert.equal(Number(ship.hauler!.capacity.value.toString()), 5) // 2 + 3
-        assert.equal(Number(ship.hauler!.drain.value.toString()), 12) // 9 + 3
+        assert.equal(Number(ship.hauler!.drain.value.toString()), 18) // 9 + 9
         // capacity-weighted efficiency: (5000*2 + 7994*3) / 5 = 33982/5 = 6796.4 → floor 6796
         assert.equal(Number(ship.hauler!.efficiency.value.toString()), 6796)
     })
@@ -63,14 +66,11 @@ suite('makeShip factory', function () {
             ],
         })
 
-        // Storage stat keys are [strength, density, fineness, saturation].
-        // computeStorageCapabilities reads strength+fineness+saturation (ignores density).
-        // stats1 sum = 300, stats2 sum = 1500, stats3 sum = 2100, stats4 sum = 2997
-        // bonus_i = floor(base * (10 + floor(sum*10/2997)) / 100)
-        // bonus1 = floor(1_000_000 * 11 / 100) = 110_000  (floor(3000/2997)=1)
-        // bonus2 = floor(1_000_000 * 15 / 100) = 150_000  (floor(15000/2997)=5)
-        // bonus3 = floor(1_000_000 * 17 / 100) = 170_000  (floor(21000/2997)=7)
-        // bonus4 = floor(1_000_000 * 20 / 100) = 200_000  (floor(29970/2997)=10)
+        // uses strength + hardness + saturation (all encoded at indices 0, 2, 3).
+        // stats1: strength=100, hardness=100, saturation=100 → sum  300 → pct 11 → 110_000
+        // stats2: strength=500, hardness=500, saturation=500 → sum 1500 → pct 15 → 150_000
+        // stats3: strength=700, hardness=700, saturation=700 → sum 2100 → pct 17 → 170_000
+        // stats4: strength=999, hardness=999, saturation=999 → sum 2997 → pct 20 → 200_000
         // total = 1_000_000 + 110_000 + 150_000 + 170_000 + 200_000 = 1_630_000
         assert.equal(Number(ship.capacity!.value.toString()), 1_630_000)
     })

@@ -1,8 +1,9 @@
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
-import type {ResourceCategory, ResourceTier} from '../types'
+import type {ResourceCategory} from '../types'
 import {getItem} from '../market/items'
-import {getComponentById, getEntityRecipeByItemId, getModuleRecipeByItemId} from '../data/recipes'
+import {getEntityLayout} from '../data/recipes-runtime'
+import {entityMetadata, itemMetadata} from '../data/metadata'
 import {
     getModuleCapabilityType,
     isModuleItem,
@@ -35,6 +36,12 @@ import {
     moduleIcon,
 } from '../data/colors'
 import {ServerContract} from '../contracts'
+import {
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+} from '../data/item-ids'
 
 export interface ResolvedItemStat {
     key: string
@@ -42,7 +49,7 @@ export interface ResolvedItemStat {
     abbreviation: string
     value: number
     color: string
-    category: ResourceCategory
+    category?: ResourceCategory
     inverted?: boolean
 }
 
@@ -65,7 +72,7 @@ export interface ResolvedItem {
     icon: string
     abbreviation: string | null
     category?: ResourceCategory
-    tier: ResourceTier
+    tier: number
     mass: number
     itemType: ResolvedItemType
     stats?: ResolvedItemStat[]
@@ -85,7 +92,7 @@ function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
     const item = getItem(id)
     const cat = item.category
     let resolvedStats: ResolvedItemStat[] | undefined
-    if (stats !== undefined) {
+    if (stats !== undefined && cat) {
         const bigStats = toBigStats(stats)
         const defs = getStatDefinitions(cat)
         const values = [decodeStat(bigStats, 0), decodeStat(bigStats, 1), decodeStat(bigStats, 2)]
@@ -101,19 +108,19 @@ function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
     }
     return {
         itemId: id,
-        name: item.displayName,
-        icon: categoryIcons[cat] ?? '⬡',
+        name: item.name,
+        icon: cat ? categoryIcons[cat] : '⬡',
         abbreviation: null,
         category: cat,
         tier: item.tier,
-        mass: Number(item.mass.value.toString()),
+        mass: item.mass,
         itemType: 'resource',
         stats: resolvedStats,
     }
 }
 
 function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
-    const comp = getComponentById(id)!
+    const item = getItem(id)
     let resolvedStats: ResolvedItemStat[] | undefined
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
@@ -124,26 +131,23 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
                 .concat(getStatDefinitions('regolith'))
                 .concat(getStatDefinitions('biomass'))
             const def = allDefs.find((d) => d.key === key)
-            const statDef = comp.stats.find((s) => s.key === key)
-            const cat = (statDef?.source ?? 'ore') as ResourceCategory
             return {
                 key,
                 label: def?.label ?? key,
                 abbreviation: def?.abbreviation ?? key.slice(0, 3).toUpperCase(),
                 value,
-                color: categoryColors[cat],
-                category: cat,
+                color: '#9BADB8',
                 inverted: def?.inverted,
             }
         })
     }
     return {
         itemId: id,
-        name: comp.name,
+        name: item.name,
         icon: itemAbbreviations[id] ?? componentIcon,
         abbreviation: itemAbbreviations[id] ?? null,
-        tier: 't1' as ResourceTier,
-        mass: comp.mass,
+        tier: item.tier,
+        mass: item.mass,
         itemType: 'component',
         stats: resolvedStats,
     }
@@ -220,9 +224,9 @@ function computeCapabilityGroup(
         }
         case MODULE_STORAGE: {
             const str = stats.strength ?? 500
-            const fin = stats.fineness ?? 500
+            const hrd = stats.hardness ?? 500
             const sat = stats.saturation ?? 500
-            const statSum = str + fin + sat
+            const statSum = str + hrd + sat
             const pct = 10 + Math.floor((statSum * 10) / 2997)
             return {capability: 'Storage', attributes: [{label: 'Capacity Bonus', value: pct}]}
         }
@@ -232,7 +236,7 @@ function computeCapabilityGroup(
 }
 
 function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
-    const recipe = getModuleRecipeByItemId(id)!
+    const item = getItem(id)
     let attributes: ResolvedAttributeGroup[] | undefined
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
@@ -242,13 +246,34 @@ function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
     }
     return {
         itemId: id,
-        name: recipe.name,
+        name: item.name,
         icon: itemAbbreviations[id] ?? moduleIcon,
         abbreviation: itemAbbreviations[id] ?? null,
-        tier: 't1' as ResourceTier,
-        mass: 0,
+        tier: item.tier,
+        mass: item.mass,
         itemType: 'module',
         attributes,
+    }
+}
+
+function hullCapsForEntity(
+    itemId: number,
+    decoded: Record<string, number>
+): {
+    hullmass: number
+    capacity: number
+} {
+    switch (itemId) {
+        case ITEM_SHIP_T1_PACKED:
+            return computeShipHullCapabilities(decoded)
+        case ITEM_WAREHOUSE_T1_PACKED:
+            return computeWarehouseHullCapabilities(decoded)
+        case ITEM_CONTAINER_T1_PACKED:
+            return computeContainerCapabilities(decoded)
+        case ITEM_CONTAINER_T2_PACKED:
+            return computeContainerT2Capabilities(decoded)
+        default:
+            throw new Error(`resolveItem: no capacity formula wired for entity item ${itemId}`)
     }
 }
 
@@ -257,44 +282,28 @@ function resolveEntity(
     stats?: UInt64Type,
     modules?: ServerContract.Types.module_entry[]
 ): ResolvedItem {
-    const recipe = getEntityRecipeByItemId(id)!
+    const item = getItem(id)
+    const layout = getEntityLayout(id)
     let attributes: ResolvedAttributeGroup[] | undefined
     let moduleSlots: ResolvedModuleSlot[] | undefined
 
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
-        attributes = []
-
-        let hullCaps: {hullmass: number; capacity: number}
-        switch (recipe.id) {
-            case 'ship-t1':
-                hullCaps = computeShipHullCapabilities(decoded)
-                break
-            case 'warehouse-t1':
-                hullCaps = computeWarehouseHullCapabilities(decoded)
-                break
-            case 'container':
-                hullCaps = computeContainerCapabilities(decoded)
-                break
-            case 'container-t2':
-                hullCaps = computeContainerT2Capabilities(decoded)
-                break
-            default:
-                throw new Error(
-                    `resolveItem: no capacity formula wired for entity recipe "${recipe.id}"`
-                )
-        }
-        attributes.push({
-            capability: 'Hull',
-            attributes: [
-                {label: 'Mass', value: hullCaps.hullmass},
-                {label: 'Capacity', value: hullCaps.capacity},
-            ],
-        })
+        const hullCaps = hullCapsForEntity(id, decoded)
+        attributes = [
+            {
+                capability: 'Hull',
+                attributes: [
+                    {label: 'Mass', value: hullCaps.hullmass},
+                    {label: 'Capacity', value: hullCaps.capacity},
+                ],
+            },
+        ]
     }
 
-    if (recipe.moduleSlots) {
-        moduleSlots = recipe.moduleSlots.map((slot, i) => {
+    if (layout && layout.slots.length > 0) {
+        const slotLabels = entityMetadata[id]?.moduleSlotLabels ?? []
+        moduleSlots = layout.slots.map((slot, i) => {
             const mod = modules?.[i]
             if (mod?.installed) {
                 const modItemId = Number(mod.installed.item_id.value.toString())
@@ -302,24 +311,32 @@ function resolveEntity(
                 const decodedStats = decodeCraftedItemStats(modItemId, modStats)
                 const modType = getModuleCapabilityType(modItemId)
                 const group = computeCapabilityGroup(modType, decodedStats)
-                const modRecipe = getModuleRecipeByItemId(modItemId)
+                let modName = 'Module'
+                try {
+                    modName = getItem(modItemId).name
+                } catch {
+                    modName = itemMetadata[modItemId]?.name ?? 'Module'
+                }
                 return {
-                    name: modRecipe?.name ?? 'Module',
+                    name: modName,
                     installed: true,
                     attributes: group?.attributes,
                 }
             }
-            return {installed: false}
+            return {
+                name: slotLabels[i] ?? slot.type,
+                installed: false,
+            }
         })
     }
 
     return {
         itemId: id,
-        name: recipe.name,
+        name: item.name,
         icon: itemAbbreviations[id] ?? componentIcon,
         abbreviation: itemAbbreviations[id] ?? null,
-        tier: 't1' as ResourceTier,
-        mass: 0,
+        tier: item.tier,
+        mass: item.mass,
         itemType: 'entity',
         attributes,
         moduleSlots,
@@ -332,12 +349,10 @@ export function resolveItem(
     modules?: ServerContract.Types.module_entry[]
 ): ResolvedItem {
     const id = toNum(itemId)
+    const item = getItem(id)
 
-    if (isModuleItem(id)) return resolveModule(id, stats)
-
-    if (getComponentById(id)) return resolveComponent(id, stats)
-
-    if (getEntityRecipeByItemId(id)) return resolveEntity(id, stats, modules)
-
+    if (item.type === 'module' || isModuleItem(id)) return resolveModule(id, stats)
+    if (item.type === 'component') return resolveComponent(id, stats)
+    if (item.type === 'entity') return resolveEntity(id, stats, modules)
     return resolveResource(id, stats)
 }

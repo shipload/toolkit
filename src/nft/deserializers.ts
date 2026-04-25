@@ -1,4 +1,5 @@
-import {getEntitySlotLayout} from '../data/recipes'
+import {getEntityLayout} from '../data/recipes-runtime'
+import {moduleSlotTypeToCode} from '../capabilities/modules'
 import {
     ITEM_TYPE_COMPONENT,
     ITEM_TYPE_ENTITY,
@@ -53,10 +54,11 @@ export function deserializeEntity(data: Record<string, any>, itemId: number): NF
     const base = readCommonBase(data)
     const moduleItems: number[] = (data.module_items ?? []).map((v: any) => Number(v))
     const moduleStats: string[] = (data.module_stats ?? []).map((v: any) => String(v))
-    const layout = getEntitySlotLayout(itemId)
+    const layout = getEntityLayout(itemId)
+    const slots = layout?.slots ?? []
 
-    const modules: NFTModuleSlot[] = layout.map((slot, i) => ({
-        type: slot.type,
+    const modules: NFTModuleSlot[] = slots.map((slot, i) => ({
+        type: moduleSlotTypeToCode(slot.type),
         installed:
             moduleItems[i] && moduleItems[i] !== 0
                 ? {item_id: moduleItems[i], stats: moduleStats[i]}

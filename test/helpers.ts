@@ -3,7 +3,6 @@ import {AnyInt, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     Coordinates,
     encodeStats,
-    Item,
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
@@ -21,17 +20,16 @@ function ensureTestItem(itemId: number, mass?: number): void {
     } catch {
         /* fall through */
     }
-    registerMockItem(
-        Item.from({
-            id: UInt16.from(itemId),
-            name: `TestItem-${itemId}`,
-            description: 'Synthetic item registered for tests.',
-            mass: UInt32.from(mass ?? 10),
-            category: 'ore',
-            tier: 't1',
-            color: '#FF00FF',
-        })
-    )
+    registerMockItem({
+        id: itemId,
+        name: `TestItem-${itemId}`,
+        description: 'Synthetic item registered for tests.',
+        mass: mass ?? 10,
+        type: 'resource',
+        tier: 1,
+        category: 'ore',
+        color: '#FF00FF',
+    })
 }
 
 export function assertEq(actual: AnyInt, expected: AnyInt, msg?: string) {

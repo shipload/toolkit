@@ -174,7 +174,8 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     }
 
     for (const cargo of cargos) {
-        mass.add(getItem(cargo.item_id).mass.multiplying(cargo.quantity))
+        const cargoMass = getItem(cargo.item_id).mass * Number(UInt32.from(cargo.quantity))
+        mass.add(UInt64.from(cargoMass))
     }
 
     return mass
@@ -195,8 +196,8 @@ export function calculateTransferTime(
         const qty = quantities?.get(Number(cargo.item_id)) ?? 0
         if (qty > 0) {
             const good_mass = getItem(cargo.item_id).mass
-            const cargo_mass = good_mass.multiplying(qty)
-            mass = UInt64.from(mass).adding(cargo_mass)
+            const cargo_mass = good_mass * qty
+            mass = UInt64.from(mass).adding(UInt64.from(cargo_mass))
         }
     }
 
@@ -249,12 +250,12 @@ export function calculateLoadTimeBreakdown(
             const good = getItem(cargo.item_id)
 
             if (loadQty > 0) {
-                const cargo_mass = good.mass.multiplying(loadQty)
-                mass_load = UInt64.from(mass_load).adding(cargo_mass)
+                const cargo_mass = good.mass * loadQty
+                mass_load = UInt64.from(mass_load).adding(UInt64.from(cargo_mass))
             }
             if (unloadQty > 0) {
-                const cargo_mass = good.mass.multiplying(unloadQty)
-                mass_unload = UInt64.from(mass_unload).adding(cargo_mass)
+                const cargo_mass = good.mass * unloadQty
+                mass_unload = UInt64.from(mass_unload).adding(UInt64.from(cargo_mass))
             }
         }
     }

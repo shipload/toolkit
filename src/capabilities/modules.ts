@@ -1,10 +1,12 @@
-export const ITEM_ENGINE_T1 = 10100
-export const ITEM_GENERATOR_T1 = 10101
-export const ITEM_GATHERER_T1 = 10102
-export const ITEM_LOADER_T1 = 10103
-export const ITEM_CRAFTER_T1 = 10104
-export const ITEM_STORAGE_T1 = 10105
-export const ITEM_HAULER_T1 = 10106
+import {
+    ITEM_CRAFTER_T1,
+    ITEM_ENGINE_T1,
+    ITEM_GATHERER_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_HAULER_T1,
+    ITEM_LOADER_T1,
+    ITEM_STORAGE_T1,
+} from '../data/item-ids'
 
 export const MODULE_ANY = 0
 export const MODULE_ENGINE = 1
@@ -54,4 +56,31 @@ export function getModuleCapabilityType(itemId: number): number {
 
 export function isModuleItem(itemId: number): boolean {
     return getModuleCapabilityType(itemId) !== 0xff
+}
+
+export function moduleSlotTypeToCode(slotType: string): number {
+    switch (slotType) {
+        case 'any':
+            return MODULE_ANY
+        case 'engine':
+            return MODULE_ENGINE
+        case 'generator':
+            return MODULE_GENERATOR
+        case 'gatherer':
+            return MODULE_GATHERER
+        case 'loader':
+            return MODULE_LOADER
+        case 'warp':
+            return MODULE_WARP
+        case 'crafter':
+            return MODULE_CRAFTER
+        case 'launcher':
+            return MODULE_LAUNCHER
+        case 'storage':
+            return MODULE_STORAGE
+        case 'hauler':
+            return MODULE_HAULER
+        default:
+            return MODULE_ANY
+    }
 }

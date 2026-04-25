@@ -3,13 +3,16 @@ import {ServerContract} from '../contracts'
 import {PackedModuleInput, Ship, ShipStateInput} from './ship'
 import {computeWarehouseCapabilities, Warehouse, WarehouseStateInput} from './warehouse'
 import {Container, ContainerStateInput} from './container'
+import {ITEM_SHIP_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
+import {getEntityLayout} from '../data/recipes-runtime'
+import {itemMetadata} from '../data/metadata'
+import {getItem} from '../market/items'
 import {
-    getEntitySlotLayout,
-    getModuleRecipeByItemId,
-    ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-} from '../data/recipes'
-import {getModuleCapabilityType, MODULE_STORAGE, moduleAccepts} from '../capabilities/modules'
+    getModuleCapabilityType,
+    MODULE_STORAGE,
+    moduleAccepts,
+    moduleSlotTypeToCode,
+} from '../capabilities/modules'
 import {computeShipCapabilities, computeStorageCapabilities} from './ship-deploy'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 
@@ -18,9 +21,10 @@ function assignModulesToSlots(
     modules: PackedModuleInput[],
     entityLabel: string
 ): ServerContract.Types.module_entry[] {
-    const slots = getEntitySlotLayout(packedEntityItemId)
+    const layout = getEntityLayout(packedEntityItemId)
+    const slots = layout?.slots ?? []
     const result: Array<{type: number; installed?: ServerContract.Types.packed_module}> = slots.map(
-        (s) => ({type: s.type, installed: undefined})
+        (s) => ({type: moduleSlotTypeToCode(s.type), installed: undefined})
     )
 
     for (const mod of modules) {
@@ -28,8 +32,12 @@ function assignModulesToSlots(
         const modType = getModuleCapabilityType(itemId)
         const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType))
         if (slotIdx === -1) {
-            const recipe = getModuleRecipeByItemId(itemId)
-            const modName = recipe?.name ?? `item ${itemId}`
+            let modName: string
+            try {
+                modName = getItem(itemId).name
+            } catch {
+                modName = itemMetadata[itemId]?.name ?? `item ${itemId}`
+            }
             throw new Error(
                 `No compatible slot for module ${modName} (type ${modType}) on ${entityLabel}`
             )

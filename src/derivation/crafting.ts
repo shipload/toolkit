@@ -1,13 +1,7 @@
 import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {
-    entityRecipes,
-    getComponentById,
-    getEntityRecipe,
-    getEntityRecipeByItemId,
-    getModuleRecipe,
-    moduleRecipes,
-} from '../data/recipes'
+import {findItemByCategoryAndTier, getRecipe, Recipe} from '../data/recipes-runtime'
+import {getItem} from '../market/items'
 import {getStatDefinitions} from './stats'
 import {deriveResourceStats} from './stratum'
 
@@ -41,26 +35,45 @@ export function decodeStats(stats: bigint, count: number): number[] {
     return result
 }
 
-function mapStatsToKeys(stats: bigint, statDefs: {key: string}[]): Record<string, number> {
-    const values = decodeStats(stats, statDefs.length)
-    const result: Record<string, number> = {}
-    for (let i = 0; i < statDefs.length; i++) {
-        result[statDefs[i].key] = values[i]
+function getItemStatKeys(itemId: number): string[] {
+    const item = getItem(itemId)
+    if (item.type === 'resource') {
+        if (!item.category) return []
+        return getStatDefinitions(item.category).map((d) => d.key)
     }
-    return result
+    const recipe = getRecipe(itemId)
+    if (!recipe) return []
+    return recipe.statSlots.map((slot) => keyForStatSlot(recipe, slot))
+}
+
+function keyForStatSlot(
+    recipe: Recipe,
+    slot: {sources: {inputIndex: number; statIndex: number}[]}
+): string {
+    const src = slot.sources[0]
+    if (!src) return ''
+    return keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
+}
+
+function keyForRecipeInputStat(recipe: Recipe, inputIndex: number, statIndex: number): string {
+    const input = recipe.inputs[inputIndex]
+    if (!input) return ''
+    if ('category' in input) {
+        const defs = getStatDefinitions(input.category)
+        return defs[statIndex]?.key ?? ''
+    }
+    // itemId-typed input — its stats follow that item's own statSlots layout.
+    const innerKeys = getItemStatKeys(input.itemId)
+    return innerKeys[statIndex] ?? ''
 }
 
 export function decodeCraftedItemStats(itemId: number, stats: bigint): Record<string, number> {
-    const comp = getComponentById(itemId)
-    if (comp) return mapStatsToKeys(stats, comp.stats)
-
-    const entityRecipe = entityRecipes.find((r) => r.packedItemId === itemId)
-    if (entityRecipe) return mapStatsToKeys(stats, entityRecipe.stats)
-
-    const moduleRecipe = moduleRecipes.find((r) => r.itemId === itemId)
-    if (moduleRecipe) return mapStatsToKeys(stats, moduleRecipe.stats)
-
-    return {}
+    const keys = getItemStatKeys(itemId)
+    const result: Record<string, number> = {}
+    for (let i = 0; i < keys.length; i++) {
+        if (keys[i]) result[keys[i]] = decodeStat(stats, i)
+    }
+    return result
 }
 
 export function blendStacks(stacks: StackInput[], statKey: string): number {
@@ -73,20 +86,6 @@ export function blendStacks(stacks: StackInput[], statKey: string): number {
     }
     if (totalQty === 0) return 0
     return Math.floor(weightedSum / totalQty)
-}
-
-export function computeComponentStats(
-    componentId: number,
-    categoryStacks: CategoryStacks[]
-): {key: string; value: number}[] {
-    const comp = getComponentById(componentId)
-    if (!comp) return []
-
-    return comp.stats.map((statDef) => {
-        const matching = categoryStacks.find((cs) => cs.category === statDef.source)
-        const value = matching ? blendStacks(matching.stacks, statDef.key) : 0
-        return {key: statDef.key, value: Math.max(1, Math.min(999, value))}
-    })
 }
 
 export function blendComponentStacks(
@@ -107,11 +106,35 @@ export function blendComponentStacks(
     return result
 }
 
+export function computeComponentStats(
+    componentId: number,
+    categoryStacks: CategoryStacks[]
+): {key: string; value: number}[] {
+    const recipe = getRecipe(componentId)
+    if (!recipe) return []
+
+    return recipe.statSlots.map((slot) => {
+        const src = slot.sources[0]
+        const key = keyForStatSlot(recipe, slot)
+        const input = src ? recipe.inputs[src.inputIndex] : undefined
+        if (!input || !('category' in input)) {
+            return {key, value: Math.max(1, Math.min(999, 0))}
+        }
+        const matching = categoryStacks.find((cs) => cs.category === input.category)
+        const value = matching ? blendStacks(matching.stacks, key) : 0
+        return {key, value: Math.max(1, Math.min(999, value))}
+    })
+}
+
 export function computeEntityStats(
-    entityRecipeId: string,
+    entityItemIdOrLegacyId: number | string,
     componentStacks: Record<number, {quantity: number; stats: Record<string, number>}[]>
 ): {key: string; value: number}[] {
-    const recipe = getEntityRecipe(entityRecipeId) ?? getModuleRecipe(entityRecipeId)
+    const itemId =
+        typeof entityItemIdOrLegacyId === 'number'
+            ? entityItemIdOrLegacyId
+            : legacyEntityIdToItemId(entityItemIdOrLegacyId)
+    const recipe = getRecipe(itemId)
     if (!recipe) return []
 
     const blendedByComponent: Record<number, Record<string, number>> = {}
@@ -119,11 +142,33 @@ export function computeEntityStats(
         blendedByComponent[Number(compId)] = blendComponentStacks(stacks)
     }
 
-    return recipe.stats.map((stat) => {
-        const blended = blendedByComponent[stat.sourceComponentId] ?? {}
-        const value = blended[stat.sourceStatKey] ?? 0
-        return {key: stat.key, value: Math.max(1, Math.min(999, value))}
+    return recipe.statSlots.map((slot) => {
+        const src = slot.sources[0]
+        const key = keyForStatSlot(recipe, slot)
+        if (!src) return {key, value: 1}
+        const input = recipe.inputs[src.inputIndex]
+        if (!input || 'category' in input) {
+            return {key, value: 1}
+        }
+        const blended = blendedByComponent[input.itemId] ?? {}
+        const value = blended[key] ?? 0
+        return {key, value: Math.max(1, Math.min(999, value))}
     })
+}
+
+function legacyEntityIdToItemId(id: string): number {
+    switch (id) {
+        case 'container':
+            return 10200
+        case 'ship-t1':
+            return 10201
+        case 'warehouse-t1':
+            return 10202
+        case 'container-t2':
+            return 20200
+        default:
+            return 0
+    }
 }
 
 function decodeStackStats(itemId: number, stats: UInt64): Record<string, number> {
@@ -134,43 +179,20 @@ function decodeStackStats(itemId: number, stats: UInt64): Record<string, number>
     return {stat1: decodeStat(s, 0), stat2: decodeStat(s, 1), stat3: decodeStat(s, 2)}
 }
 
-export const categoryItemMass: Record<string, number> = {
-    ore: 52000,
-    crystal: 35000,
-    gas: 15000,
-    regolith: 22000,
-    biomass: 42000,
-}
+export function computeInputMass(itemId: number): number {
+    const recipe = getRecipe(itemId)
+    if (!recipe) throw new Error(`computeInputMass: no recipe found for itemId=${itemId}`)
 
-export function computeInputMass(
-    itemId: string | number,
-    itemType: 'component' | 'module' | 'entity'
-): number {
-    if (itemType === 'component') {
-        const comp = getComponentById(itemId as number)
-        if (!comp) return 0
-        return comp.recipe.reduce((sum, input) => {
-            const mass = input.category ? categoryItemMass[input.category] ?? 0 : 0
-            return sum + mass * input.quantity
-        }, 0)
+    let total = 0
+    for (const input of recipe.inputs) {
+        if ('itemId' in input) {
+            total += getItem(input.itemId).mass * input.quantity
+        } else {
+            const item = findItemByCategoryAndTier(input.category, input.tier)
+            total += item.mass * input.quantity
+        }
     }
-    if (itemType === 'module') {
-        const mod = getModuleRecipe(itemId as string)
-        if (!mod) return 0
-        return mod.recipe.reduce((sum, input) => {
-            const comp = input.itemId ? getComponentById(input.itemId) : undefined
-            return sum + (comp?.mass ?? 0) * input.quantity
-        }, 0)
-    }
-    if (itemType === 'entity') {
-        const ent = getEntityRecipe(itemId as string)
-        if (!ent) return 0
-        return ent.recipe.reduce((sum, input) => {
-            const comp = input.itemId ? getComponentById(input.itemId) : undefined
-            return sum + (comp?.mass ?? 0) * input.quantity
-        }, 0)
-    }
-    return 0
+    return total
 }
 
 export function blendCrossGroup(sources: {value: number; weight: number}[]): number {
@@ -220,39 +242,41 @@ export function computeCraftedOutputStats(
     outputItemId: number,
     slotInputs: RecipeSlotInput[]
 ): UInt64 {
-    const component = getComponentById(outputItemId)
-    if (component) {
-        const categoryStacks: CategoryStacks[] = []
-        for (const slot of slotInputs) {
-            if (!slot.category) continue
-            const slotIsComponent = getComponentById(slot.itemId) !== undefined
-            const stacks: StackInput[] = slot.stacks.map((s) => ({
-                quantity: s.quantity,
-                stats: slotIsComponent
-                    ? decodeCraftedItemStats(slot.itemId, s.stats)
-                    : decodeRawStackToCategoryStats(s.stats, slot.category!),
-            }))
-            categoryStacks.push({category: slot.category, stacks})
-        }
-        const stats = computeComponentStats(outputItemId, categoryStacks)
-        const ordered = component.stats.map((statDef) => {
-            const found = stats.find((s) => s.key === statDef.key)
-            return found ? found.value : 0
-        })
-        return UInt64.from(encodeStats(ordered))
+    const recipe = getRecipe(outputItemId)
+    if (!recipe) {
+        throw new Error(
+            `computeCraftedOutputStats: no recipe found for outputItemId=${outputItemId}`
+        )
     }
 
-    const entityRecipe = getEntityRecipeByItemId(outputItemId)
-    if (entityRecipe) {
-        const componentStacks: Record<number, {quantity: number; stats: Record<string, number>}[]> =
-            {}
+    const outputItem = getItem(outputItemId)
+
+    if (outputItem.type === 'entity') {
         for (const slot of slotInputs) {
             if (slot.category !== undefined) {
                 throw new Error(
-                    `entity recipe ${entityRecipe.id} expects component inputs but slot itemId=${slot.itemId} has category=${slot.category}`
+                    `entity recipe ${outputItemId} expects component inputs but slot itemId=${slot.itemId} has category=${slot.category}`
                 )
             }
-            const list = (componentStacks[slot.itemId] ??= [])
+        }
+    }
+
+    // Decode each slot's stacks into key→value maps using the slot item's
+    // own stat layout, so blending works regardless of recipe shape.
+    const decodedByItem: Record<number, {quantity: number; stats: Record<string, number>}[]> = {}
+    const decodedByCategory: Partial<Record<ResourceCategory, StackInput[]>> = {}
+
+    for (const slot of slotInputs) {
+        if (slot.category !== undefined) {
+            const list = (decodedByCategory[slot.category] ??= [])
+            for (const s of slot.stacks) {
+                list.push({
+                    quantity: s.quantity,
+                    stats: decodeRawStackToCategoryStats(s.stats, slot.category),
+                })
+            }
+        } else {
+            const list = (decodedByItem[slot.itemId] ??= [])
             for (const s of slot.stacks) {
                 list.push({
                     quantity: s.quantity,
@@ -260,15 +284,52 @@ export function computeCraftedOutputStats(
                 })
             }
         }
-        const stats = computeEntityStats(entityRecipe.id, componentStacks)
-        const ordered = entityRecipe.stats.map((statDef) => {
-            const found = stats.find((s) => s.key === statDef.key)
-            return found ? found.value : 0
-        })
-        return UInt64.from(encodeStats(ordered))
     }
 
-    throw new Error(`computeCraftedOutputStats: no recipe found for outputItemId=${outputItemId}`)
+    // Pre-blend itemId inputs once per item id.
+    const blendedByItem: Record<number, Record<string, number>> = {}
+    for (const [id, stacks] of Object.entries(decodedByItem)) {
+        blendedByItem[Number(id)] = blendComponentStacks(stacks)
+    }
+
+    const out: number[] = []
+    for (const slot of recipe.statSlots) {
+        if (slot.sources.length === 0) {
+            out.push(0)
+            continue
+        }
+        if (slot.sources.length === 1 || recipe.blendWeights.length === 0) {
+            const src = slot.sources[0]
+            const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
+            const input = recipe.inputs[src.inputIndex]
+            let value = 0
+            if (input && 'category' in input) {
+                value = blendStacks(decodedByCategory[input.category] ?? [], key)
+            } else if (input) {
+                value = blendedByItem[input.itemId]?.[key] ?? 0
+            }
+            out.push(Math.max(1, Math.min(999, value)))
+        } else {
+            let weightedSum = 0
+            let totalWeight = 0
+            for (const src of slot.sources) {
+                const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
+                const input = recipe.inputs[src.inputIndex]
+                const weight = recipe.blendWeights[src.inputIndex] ?? 1
+                let value = 0
+                if (input && 'category' in input) {
+                    value = blendStacks(decodedByCategory[input.category] ?? [], key)
+                } else if (input) {
+                    value = blendedByItem[input.itemId]?.[key] ?? 0
+                }
+                weightedSum += value * weight
+                totalWeight += weight
+            }
+            const blended = totalWeight > 0 ? Math.floor(weightedSum / totalWeight) : 0
+            out.push(Math.max(1, Math.min(999, blended)))
+        }
+    }
+    return UInt64.from(encodeStats(out))
 }
 
 /**

@@ -18,11 +18,11 @@ export class EntityInventory extends ServerContract.Types.cargo_item {
     }
 
     get name(): string {
-        return this.item.displayName
+        return this.item.name
     }
 
     get unitMass(): UInt32 {
-        return this.item.mass
+        return UInt32.from(this.item.mass)
     }
 
     get totalMass(): UInt64 {

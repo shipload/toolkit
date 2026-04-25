@@ -29,7 +29,7 @@ export function calcCargoItemMass(item: MassInput): UInt64 {
     for (const mod of item.modules) {
         if (mod.installed) {
             const modDef = getItem(mod.installed.item_id)
-            mass = mass.adding(modDef.mass)
+            mass = mass.adding(UInt64.from(modDef.mass))
         }
     }
 

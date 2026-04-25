@@ -1,0 +1,50 @@
+[
+  {
+    "entityItemId": 10200,
+    "slots": []
+  },
+  {
+    "entityItemId": 10201,
+    "slots": [
+      {
+        "type": "any"
+      },
+      {
+        "type": "any"
+      },
+      {
+        "type": "any"
+      },
+      {
+        "type": "any"
+      },
+      {
+        "type": "any"
+      }
+    ]
+  },
+  {
+    "entityItemId": 10202,
+    "slots": [
+      {
+        "type": "loader"
+      },
+      {
+        "type": "storage"
+      },
+      {
+        "type": "storage"
+      },
+      {
+        "type": "storage"
+      },
+      {
+        "type": "storage"
+      }
+    ]
+  },
+  {
+    "entityItemId": 20200,
+    "slots": []
+  }
+]

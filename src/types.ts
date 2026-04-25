@@ -1,13 +1,4 @@
-import {
-    Int64Type,
-    Name,
-    Struct,
-    UInt16,
-    UInt16Type,
-    UInt32,
-    UInt32Type,
-    UInt64,
-} from '@wharfkit/antelope'
+import {Int64Type, Name, UInt16, UInt16Type, UInt32, UInt32Type, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 
 export const PRECISION = 10000
@@ -110,8 +101,20 @@ export interface Distance {
     distance: UInt16
 }
 
+export type ItemType = 'resource' | 'component' | 'module' | 'entity'
 export type ResourceCategory = 'ore' | 'crystal' | 'gas' | 'regolith' | 'biomass'
 export type ResourceTier = 't1' | 't2' | 't3' | 't4' | 't5'
+export type ModuleType =
+    | 'any'
+    | 'engine'
+    | 'generator'
+    | 'gatherer'
+    | 'loader'
+    | 'warp'
+    | 'crafter'
+    | 'launcher'
+    | 'storage'
+    | 'hauler'
 
 export const TIER_ADJECTIVES: Record<number, string> = {
     1: 'Crude',
@@ -138,27 +141,18 @@ export function tierNumber(tier: string): number {
     return Number(String(tier).replace(/^t/i, ''))
 }
 
-@Struct.type('item')
-export class Item extends Struct {
-    @Struct.field(UInt16)
-    id!: UInt16
-    @Struct.field('string')
-    name!: string
-    @Struct.field('string')
-    description!: string
-    @Struct.field(UInt32)
-    mass!: UInt32
-    @Struct.field('string')
-    category!: ResourceCategory
-    @Struct.field('string')
-    tier!: ResourceTier
-    @Struct.field('string')
-    color!: string
+export interface Item {
+    id: number
+    name: string
+    description: string
+    color: string
+    mass: number
+    type: ItemType
+    tier: number
+    category?: ResourceCategory
+    moduleType?: ModuleType
+}
 
-    get displayName(): string {
-        if (this.name && this.name.length > 0) return this.name
-        const adj = TIER_ADJECTIVES[tierNumber(this.tier)] ?? 'Unknown'
-        const cat = CATEGORY_LABELS[this.category] ?? 'Resource'
-        return `${adj} ${cat}`
-    }
+export function formatTier(tier: number): string {
+    return 'T' + tier
 }

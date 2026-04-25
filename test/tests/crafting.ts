@@ -7,7 +7,6 @@ import {
     blendStacks,
     calc_craft_duration,
     calc_craft_energy,
-    categoryItemMass,
     computeComponentStats,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
@@ -20,11 +19,15 @@ import {
     deriveResourceStats,
     encodeGatheredCargoStats,
     encodeStats,
+    findItemByCategoryAndTier,
     ITEM_CARGO_LINING,
+    ITEM_CARGO_LINING_T2,
     ITEM_CONTAINER_T1_PACKED,
+    ITEM_ENGINE_T1,
     ITEM_FOCUSING_ARRAY,
     ITEM_HAULER_T1,
     ITEM_HULL_PLATES,
+    ITEM_HULL_PLATES_T2,
     ITEM_THRUSTER_CORE,
     type RecipeSlotInput,
 } from '$lib'
@@ -123,6 +126,7 @@ suite('Crafting', function () {
         })
 
         test('cargo lining from regolith + biomass', function () {
+            // Recipe 10002 statSlots: [regolith stat 1 (hardness), biomass stat 2 (saturation)].
             const stats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
                     category: 'regolith',
@@ -141,21 +145,21 @@ suite('Crafting', function () {
                 },
             ])
             assert.equal(stats.length, 2)
-            const fin = stats.find((s) => s.key === 'fineness')
+            const hard = stats.find((s) => s.key === 'hardness')
             const sat = stats.find((s) => s.key === 'saturation')
-            assert.equal(fin!.value, 700)
+            assert.equal(hard!.value, 200)
             assert.equal(sat!.value, 800)
         })
     })
 
     suite('Entity Stats', function () {
         test('container from component stacks', function () {
-            const stats = computeEntityStats('container', {
+            const stats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
                 [ITEM_HULL_PLATES]: [
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 400, density: 200}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {fineness: 600, saturation: 700}}],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {hardness: 600, saturation: 700}}],
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
@@ -172,20 +176,26 @@ suite('Crafting', function () {
         })
 
         test('decode container packed seed', function () {
+            // Container T1 statSlots derive from Hull Plates (strength, density)
+            // and Cargo Lining (hardness, saturation), so decode keys are those four.
             const seed = encodeStats([500, 300, 600, 700])
             const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
             assert.equal(stats['density'], 300)
-            assert.equal(stats['fineness'], 600)
+            assert.equal(stats['hardness'], 600)
             assert.equal(stats['saturation'], 700)
         })
 
         test('decoded hauler stats use input stat key names', function () {
-            const seed = encodeStats([500, 500, 500])
+            // Hauler 10106 inputs are Power Cell (regolith composition/fineness) and
+            // Focusing Array (crystal conductivity/resonance), so decoded keys come
+            // from those raw-resource stats — not from capability output names.
+            const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
-            assert.property(decoded, 'resonance')
-            assert.property(decoded, 'reflectivity')
+            assert.property(decoded, 'composition')
             assert.property(decoded, 'conductivity')
+            assert.property(decoded, 'fineness')
+            assert.property(decoded, 'resonance')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')
@@ -340,15 +350,17 @@ suite('Crafting', function () {
                 ITEM_CARGO_LINING,
                 BigInt(outputStats.toString())
             )
-            const fin = expectedStats.find((s) => s.key === 'fineness')!.value
+            const hard = expectedStats.find((s) => s.key === 'hardness')!.value
             const sat = expectedStats.find((s) => s.key === 'saturation')!.value
-            assert.equal(decoded['fineness'], fin)
+            assert.equal(decoded['hardness'], hard)
             assert.equal(decoded['saturation'], sat)
-            assert.equal(decoded['fineness'], rawR.stat3)
+            assert.equal(decoded['hardness'], rawR.stat2)
             assert.equal(decoded['saturation'], rawB.stat3)
         })
 
         test('entity recipe (Container packed from hull_plates + cargo_lining)', function () {
+            // Hull Plates packs (strength, density); Cargo Lining packs
+            // (hardness, saturation) per the new contract recipes.
             const hullSeedA = encodeStats([500, 300])
             const hullSeedB = encodeStats([700, 400])
             const liningSeed = encodeStats([600, 800])
@@ -370,12 +382,12 @@ suite('Crafting', function () {
             ]
             const outputStats = computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, slotInputs)
 
-            const expectedStats = computeEntityStats('container', {
+            const expectedStats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
                 [ITEM_HULL_PLATES]: [
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 700, density: 400}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {fineness: 600, saturation: 800}}],
+                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {hardness: 600, saturation: 800}}],
             })
             const decoded = decodeCraftedItemStats(
                 ITEM_CONTAINER_T1_PACKED,
@@ -386,7 +398,7 @@ suite('Crafting', function () {
             }
             assert.equal(decoded['strength'], 566)
             assert.equal(decoded['density'], 333)
-            assert.equal(decoded['fineness'], 600)
+            assert.equal(decoded['hardness'], 600)
             assert.equal(decoded['saturation'], 800)
         })
 
@@ -409,12 +421,66 @@ suite('Crafting', function () {
         })
     })
 
+    suite('T2 Multi-Source Blending', function () {
+        test('Hull Plates T2 blends component + raw ore stats', function () {
+            const hullPlatesEncoded = encodeStats([400, 300])
+            const oreT2Seed = encodeStats([600, 0, 200])
+
+            const slotInputs: RecipeSlotInput[] = [
+                {
+                    itemId: ITEM_HULL_PLATES,
+                    category: undefined,
+                    stacks: [{quantity: 2, stats: hullPlatesEncoded}],
+                },
+                {
+                    itemId: 102,
+                    category: 'ore',
+                    stacks: [{quantity: 15, stats: oreT2Seed}],
+                },
+            ]
+            const output = computeCraftedOutputStats(ITEM_HULL_PLATES_T2, slotInputs)
+            const decoded = decodeCraftedItemStats(ITEM_HULL_PLATES_T2, BigInt(output.toString()))
+
+            assert.equal(decoded['strength'], 500)
+            assert.equal(decoded['density'], 250)
+        })
+
+        test('Cargo Lining T2 blends component + regolith + biomass stats', function () {
+            const clEncoded = encodeStats([600, 700])
+            const regolithSeed = encodeStats([0, 400, 0])
+            const biomassSeed = encodeStats([0, 0, 800])
+
+            const slotInputs: RecipeSlotInput[] = [
+                {
+                    itemId: ITEM_CARGO_LINING,
+                    category: undefined,
+                    stacks: [{quantity: 2, stats: clEncoded}],
+                },
+                {
+                    itemId: 402,
+                    category: 'regolith',
+                    stacks: [{quantity: 10, stats: regolithSeed}],
+                },
+                {
+                    itemId: 502,
+                    category: 'biomass',
+                    stacks: [{quantity: 20, stats: biomassSeed}],
+                },
+            ]
+            const output = computeCraftedOutputStats(ITEM_CARGO_LINING_T2, slotInputs)
+            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING_T2, BigInt(output.toString()))
+
+            assert.equal(decoded['hardness'], 500)
+            assert.equal(decoded['saturation'], 750)
+        })
+    })
+
     suite('Container Capabilities', function () {
         test('all stats at 500 produces expected mid-range values', function () {
             const caps = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             assert.equal(caps.hullmass, 25000 + 75 * 500)
@@ -426,7 +492,7 @@ suite('Crafting', function () {
             const caps = computeContainerCapabilities({
                 strength: 1,
                 density: 1,
-                fineness: 1,
+                hardness: 1,
                 saturation: 1,
             })
             assert.equal(caps.hullmass, 25075)
@@ -440,7 +506,7 @@ suite('Crafting', function () {
             const caps = computeContainerCapabilities({
                 strength: 999,
                 density: 999,
-                fineness: 999,
+                hardness: 999,
                 saturation: 999,
             })
             assert.equal(caps.hullmass, 25000 + 75 * 999)
@@ -454,13 +520,13 @@ suite('Crafting', function () {
             const min = computeContainerCapabilities({
                 density: 1,
                 strength: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             const max = computeContainerCapabilities({
                 density: 999,
                 strength: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             assert.isAtLeast(min.hullmass, 25000)
@@ -470,13 +536,13 @@ suite('Crafting', function () {
         test('capacity range is 1M-10M', function () {
             const min = computeContainerCapabilities({
                 strength: 1,
-                fineness: 1,
+                hardness: 1,
                 saturation: 1,
                 density: 500,
             })
             const max = computeContainerCapabilities({
                 strength: 999,
-                fineness: 999,
+                hardness: 999,
                 saturation: 999,
                 density: 500,
             })
@@ -488,13 +554,13 @@ suite('Crafting', function () {
             const low = computeContainerCapabilities({
                 density: 100,
                 strength: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             const high = computeContainerCapabilities({
                 density: 900,
                 strength: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             assert.isBelow(low.hullmass, high.hullmass)
@@ -506,13 +572,13 @@ suite('Crafting', function () {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             assert.isBelow(t2.hullmass, t1.hullmass)
@@ -522,20 +588,20 @@ suite('Crafting', function () {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
-                fineness: 500,
+                hardness: 500,
                 saturation: 500,
             })
             assert.isAbove(t2.capacity, t1.capacity)
         })
 
         test('T2 container formulas match contract', function () {
-            const stats = {strength: 400, density: 300, fineness: 600, saturation: 200}
+            const stats = {strength: 400, density: 300, hardness: 600, saturation: 200}
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 20000 + 50 * 300)
             const statSum = 400 + 600 + 200
@@ -570,29 +636,24 @@ suite('Crafting', function () {
 
     suite('computeInputMass', function () {
         test('component returns positive mass', function () {
-            const mass = computeInputMass(ITEM_HULL_PLATES, 'component')
+            const mass = computeInputMass(ITEM_HULL_PLATES)
             assert.isAbove(mass, 0)
-            assert.equal(mass, 15 * categoryItemMass['ore'])
+            const oreT1 = findItemByCategoryAndTier('ore', 1)
+            assert.equal(mass, 15 * oreT1.mass)
         })
 
         test('module returns positive mass', function () {
-            const mass = computeInputMass('engine-t1', 'module')
+            const mass = computeInputMass(ITEM_ENGINE_T1)
             assert.isAbove(mass, 0)
         })
 
         test('entity returns positive mass', function () {
-            const mass = computeInputMass('container', 'entity')
+            const mass = computeInputMass(ITEM_CONTAINER_T1_PACKED)
             assert.isAbove(mass, 0)
         })
 
-        test('unknown component returns 0', function () {
-            const mass = computeInputMass(99999, 'component')
-            assert.equal(mass, 0)
-        })
-
-        test('unknown module returns 0', function () {
-            const mass = computeInputMass('nonexistent', 'module')
-            assert.equal(mass, 0)
+        test('throws for unknown item', function () {
+            assert.throws(() => computeInputMass(99999), /no recipe found/)
         })
     })
 

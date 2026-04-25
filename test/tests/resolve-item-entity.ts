@@ -44,8 +44,12 @@ suite('resolveItem - entity capacity dispatch', function () {
     })
 
     test('container-t2 uses computeContainerT2Capabilities', function () {
+        // Container T2 packs (strength, density, hardness, saturation) — fineness
+        // is absent and defaults to 0 in computeContainerT2Capabilities, so the
+        // expected value is computed from the same set of decoded stats.
         const resolved = resolveItem(ITEM_CONTAINER_T2_PACKED, defaultPackedStats)
-        const expected = computeContainerT2Capabilities(defaultStatInputs).capacity
+        const decodedInputs = {strength: 500, density: 500, hardness: 500, saturation: 500}
+        const expected = computeContainerT2Capabilities(decodedInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 })

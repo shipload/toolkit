@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {getItem, getItems, itemIds} from 'src/items'
-import {ITEM_CARGO_LINING, ITEM_CONTAINER_T1_PACKED, ITEM_ENGINE_T1} from '../../src/data/recipes'
+import {ITEM_CARGO_LINING, ITEM_CONTAINER_T1_PACKED, ITEM_ENGINE_T1} from '$lib'
 
 suite('items', function () {
     suite('getItem', function () {
@@ -13,29 +13,28 @@ suite('items', function () {
         test('throws error for invalid item id', function () {
             assert.throws(() => {
                 getItem(60000)
-            }, 'Item with id 60000 not found')
+            }, /Unknown item id/)
         })
 
-        test('falls back to component definition for component id', function () {
+        test('returns the component item for component id', function () {
             const item = getItem(ITEM_CARGO_LINING)
             assert.equal(item.name, 'Cargo Lining')
             assert.equal(Number(item.id), ITEM_CARGO_LINING)
-            assert.isTrue(item.mass.toNumber() > 0)
+            assert.isTrue(item.mass > 0)
         })
 
-        test('falls back to entity recipe for packed-entity id', function () {
+        test('returns the entity item for packed-entity id', function () {
             const item = getItem(ITEM_CONTAINER_T1_PACKED)
             assert.equal(item.name, 'Container')
             assert.equal(Number(item.id), ITEM_CONTAINER_T1_PACKED)
-            // Entity mass should be positive (sum of component masses)
-            assert.isTrue(item.mass.toNumber() > 0)
+            assert.isTrue(item.mass > 0)
         })
 
-        test('falls back to module recipe for module id', function () {
+        test('returns the module item for module id', function () {
             const item = getItem(ITEM_ENGINE_T1)
             assert.equal(item.name, 'Engine')
             assert.equal(Number(item.id), ITEM_ENGINE_T1)
-            assert.isTrue(item.mass.toNumber() > 0)
+            assert.isTrue(item.mass > 0)
         })
     })
 

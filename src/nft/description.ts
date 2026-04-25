@@ -1,11 +1,5 @@
 import {
     getModuleCapabilityType,
-    ITEM_CRAFTER_T1,
-    ITEM_ENGINE_T1,
-    ITEM_GATHERER_T1,
-    ITEM_GENERATOR_T1,
-    ITEM_LOADER_T1,
-    ITEM_STORAGE_T1,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
@@ -16,9 +10,15 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_CRAFTER_T1,
+    ITEM_ENGINE_T1,
+    ITEM_GATHERER_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
     ITEM_SHIP_T1_PACKED,
+    ITEM_STORAGE_T1,
     ITEM_WAREHOUSE_T1_PACKED,
-} from '../data/recipes'
+} from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
 
 function idiv(a: number, b: number): number {
