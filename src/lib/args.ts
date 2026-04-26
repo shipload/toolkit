@@ -3,13 +3,13 @@ import type { ParsedCargoInput } from "./cargo-resolve";
 
 export type EntityTypeName = "ship" | "container" | "warehouse";
 
-const ENTITY_TYPES: readonly EntityTypeName[] = ["ship", "container", "warehouse"];
+export const ALL_ENTITY_TYPES: readonly EntityTypeName[] = ["ship", "container", "warehouse"];
 
 export function parseEntityType(s: string): EntityTypeName {
-	if ((ENTITY_TYPES as readonly string[]).includes(s)) {
+	if ((ALL_ENTITY_TYPES as readonly string[]).includes(s)) {
 		return s as EntityTypeName;
 	}
-	throw new InvalidArgumentError(`entity type must be one of: ${ENTITY_TYPES.join(", ")}`);
+	throw new InvalidArgumentError(`entity type must be one of: ${ALL_ENTITY_TYPES.join(", ")}`);
 }
 
 export interface EntityRef {
@@ -44,6 +44,11 @@ export function parseEntityRefList(s: string): EntityRef[] {
 }
 
 export type CargoInput = ParsedCargoInput;
+
+export function appendCargoInput(val: string, acc: ParsedCargoInput[] = []): ParsedCargoInput[] {
+	acc.push(parseCargoInput(val));
+	return acc;
+}
 
 export function parseCargoInput(s: string): ParsedCargoInput {
 	const parts = s.split(":");

@@ -1,7 +1,8 @@
 import Table from "cli-table3";
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import { ALL_ENTITY_TYPES } from "../../lib/args";
 import { server } from "../../lib/client";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import {
 	formatDuration,
 	formatOutput,
@@ -108,37 +109,42 @@ function viewToJson(view: TasksView): Record<string, unknown> {
 	};
 }
 
-export function register(program: Command): void {
-	program
-		.command("tasks")
-		.description("Show scheduled and pending tasks for an entity")
-		.argument("<entity-type>", "entity type (ship/container/warehouse)", parseEntityType)
-		.argument("<id>", "numeric entity ID", parseUint64)
-		.option("--json", "emit JSON instead of formatted text")
-		.action(async (entityType: EntityTypeName, entityId: bigint, opts: { json?: boolean }) => {
-			const info = (await server.readonly("getentity", {
-				entity_type: entityType,
-				entity_id: entityId,
-			})) as unknown as {
-				schedule?: { started: { toMilliseconds(): number }; tasks: Task[] };
-				pending_tasks?: Task[];
-			};
-			const view: TasksView = {
-				type: entityType,
-				id: entityId,
-				schedule: info.schedule
-					? {
-							started: new Date(info.schedule.started.toMilliseconds()),
-							tasks: info.schedule.tasks ?? [],
-						}
-					: null,
-				pending: info.pending_tasks ?? [],
-				now: new Date(),
-			};
-			if (opts.json) {
-				console.log(formatOutput(viewToJson(view), { json: true }, () => ""));
-			} else {
-				console.log(render(view));
-			}
-		});
+export async function runTasks(ctx: EntityContext, opts: { json?: boolean }): Promise<void> {
+	const info = (await server.readonly("getentity", {
+		entity_type: ctx.entityType,
+		entity_id: ctx.entityId,
+	})) as unknown as {
+		schedule?: { started: { toMilliseconds(): number }; tasks: Task[] };
+		pending_tasks?: Task[];
+	};
+	const view: TasksView = {
+		type: ctx.entityType,
+		id: ctx.entityId,
+		schedule: info.schedule
+			? {
+					started: new Date(info.schedule.started.toMilliseconds()),
+					tasks: info.schedule.tasks ?? [],
+				}
+			: null,
+		pending: info.pending_tasks ?? [],
+		now: new Date(),
+	};
+	if (opts.json) {
+		console.log(formatOutput(viewToJson(view), { json: true }, () => ""));
+	} else {
+		console.log(render(view));
+	}
 }
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "tasks",
+	description: "Show scheduled and pending tasks for the entity",
+	appliesTo: ALL_ENTITY_TYPES,
+	build: (ctx) =>
+		new Command("tasks")
+			.description("Show scheduled and pending tasks for the entity")
+			.option("--json", "emit JSON instead of formatted text")
+			.action(async (opts: { json?: boolean }) => {
+				await runTasks(ctx, opts);
+			}),
+};

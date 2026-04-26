@@ -1,12 +1,11 @@
 import { type Action, Name } from "@wharfkit/antelope";
-
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseInt64, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import { type EntityTypeName, parseInt64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { withValidation } from "../../lib/errors";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
-import { ValidationError } from "../../lib/validate";
 import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface WarpOpts {
@@ -25,45 +24,53 @@ export async function buildAction(opts: WarpOpts): Promise<Action> {
 	);
 }
 
-export function register(program: Command): void {
-	program
-		.command("warp")
-		.description("Warp an entity to coordinates")
-		.addHelpText(
-			"before",
-			"Requires: warp module installed; full energy; ship idle and cargo-empty.\n",
-		)
-		.argument("<entity-type>", "entity type (ship/container/warehouse)", parseEntityType)
-		.argument("<id>", "entity id", parseUint64)
-		.argument("<x>", "destination x", parseInt64)
-		.argument("<y>", "destination y", parseInt64)
-		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
-		.addOption(WAIT_OPTION)
-		.addOption(TRACK_OPTION)
-		.action(
-			async (
-				entityType: EntityTypeName,
-				entityId: bigint,
-				x: bigint,
-				y: bigint,
-				options: { autoResolve?: boolean; wait?: boolean; track?: boolean },
-			) => {
-				try {
-					await checkResolveEntity(entityType, entityId, Boolean(options.autoResolve));
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
-				const action = await buildAction({ entityType, entityId, x, y });
-				const result = await transact(
-					{ action },
-					{
-						description: `Warping ${entityType} ${entityId} to (${x}, ${y})`,
-					},
-				);
-				await maybeAwaitAndPrint(entityType, entityId, options, result);
-			},
-		);
+interface WarpCliOptions {
+	autoResolve?: boolean;
+	wait?: boolean;
+	track?: boolean;
 }
+
+export async function runWarp(
+	ctx: EntityContext,
+	x: bigint,
+	y: bigint,
+	options: WarpCliOptions,
+): Promise<void> {
+	await withValidation(() =>
+		checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve)),
+	);
+	const action = await buildAction({
+		entityType: ctx.entityType,
+		entityId: ctx.entityId,
+		x,
+		y,
+	});
+	const result = await transact(
+		{ action },
+		{
+			description: `Warping ${ctx.entityType} ${ctx.entityId} to (${x}, ${y})`,
+		},
+	);
+	await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result);
+}
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "warp",
+	description: "Warp the ship to coordinates",
+	appliesTo: ["ship"],
+	build: (ctx) =>
+		new Command("warp")
+			.description("Warp the ship to coordinates")
+			.addHelpText(
+				"before",
+				"Requires: warp module installed; full energy; ship idle and cargo-empty.\n",
+			)
+			.argument("<x>", "destination x", parseInt64)
+			.argument("<y>", "destination y", parseInt64)
+			.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
+			.addOption(WAIT_OPTION)
+			.addOption(TRACK_OPTION)
+			.action(async (x: bigint, y: bigint, opts: WarpCliOptions) => {
+				await runWarp(ctx, x, y, opts);
+			}),
+};

@@ -189,7 +189,7 @@ export function formatInstallHint(
 	slotIndex: number | string,
 	slotName: string,
 ): string {
-	return `(empty ${slotName} slot — install with: shiploadcli addmodule ${entityType} ${entityId} ${slotIndex} <module-item-id>)`;
+	return `(empty ${slotName} slot — install with: shiploadcli ${entityType} ${entityId} addmodule ${slotIndex} <module-item-id>)`;
 }
 
 export function formatResolveHint(
@@ -197,7 +197,7 @@ export function formatResolveHint(
 	entityId: number | bigint,
 	completedCount: number,
 ): string {
-	return `${completedCount} completed task(s) need resolve — run: shiploadcli resolve ${entityType} ${entityId}`;
+	return `${completedCount} completed task(s) need resolve — run: shiploadcli ${entityType} ${entityId} resolve`;
 }
 
 const TYPE_LABEL: Record<number, string> = {

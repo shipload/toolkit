@@ -1,34 +1,31 @@
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
-import { printError } from "../../lib/errors";
-import { ValidationError } from "../../lib/validate";
+import { Command } from "commander";
+import { ALL_ENTITY_TYPES } from "../../lib/args";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
+import { withValidation } from "../../lib/errors";
 import { AUTO_RESOLVE_OPTION, awaitAndPrint, TIMEOUT_OPTION } from "../../lib/wait";
 
-export function register(program: Command): void {
-	program
-		.command("wait")
-		.description("Block until the entity's active task ends, then print post-state")
-		.argument("<entity-type>", "entity type", parseEntityType)
-		.argument("<entity-id>", "entity id", parseUint64)
-		.addOption(TIMEOUT_OPTION)
-		.addOption(AUTO_RESOLVE_OPTION)
-		.action(
-			async (
-				entityType: EntityTypeName,
-				entityId: bigint,
-				opts: { timeout?: number; autoResolve?: boolean },
-			) => {
-				try {
-					await awaitAndPrint(entityType, entityId, {
-						timeoutMs: opts.timeout,
-						autoResolve: opts.autoResolve,
-					});
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
-			},
-		);
+export async function runWait(
+	ctx: EntityContext,
+	opts: { timeout?: number; autoResolve?: boolean },
+): Promise<void> {
+	await withValidation(() =>
+		awaitAndPrint(ctx.entityType, ctx.entityId, {
+			timeoutMs: opts.timeout,
+			autoResolve: opts.autoResolve,
+		}),
+	);
 }
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "wait",
+	description: "Block until the entity's active task ends, then print post-state",
+	appliesTo: ALL_ENTITY_TYPES,
+	build: (ctx) =>
+		new Command("wait")
+			.description("Block until the entity's active task ends, then print post-state")
+			.addOption(TIMEOUT_OPTION)
+			.addOption(AUTO_RESOLVE_OPTION)
+			.action(async (opts: { timeout?: number; autoResolve?: boolean }) => {
+				await runWait(ctx, opts);
+			}),
+};

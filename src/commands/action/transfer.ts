@@ -1,11 +1,16 @@
 import { type Action, Name } from "@wharfkit/antelope";
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import {
+	ALL_ENTITY_TYPES,
+	type EntityTypeName,
+	parseEntityType,
+	parseUint64,
+} from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
+import { withValidation } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
-import { ValidationError } from "../../lib/validate";
 import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface TransferOpts {
@@ -31,62 +36,77 @@ export async function buildAction(opts: TransferOpts): Promise<Action> {
 	);
 }
 
-export function register(program: Command): void {
-	program
-		.command("transfer")
-		.description("Transfer cargo between entities of the same owner")
-		.addHelpText(
-			"before",
-			"Requires: source and destination entities owned by caller; source has the cargo; destination has capacity.\n",
-		)
-		.argument("<src-type>", "source entity type", parseEntityType)
-		.argument("<src-id>", "source entity id", parseUint64)
-		.argument("<dest-type>", "destination entity type", parseEntityType)
-		.argument("<dest-id>", "destination entity id", parseUint64)
-		.argument("<item-id>", "item id", parseUint64)
-		.argument("<stats>", "cargo stack discriminator (often 0)", parseUint64)
-		.argument("<quantity>", "quantity", parseUint64)
-		.option("--auto-resolve", "resolve completed tasks on source and destination before acting")
-		.addOption(WAIT_OPTION)
-		.addOption(TRACK_OPTION)
-		.action(
-			async (
-				srcType: EntityTypeName,
-				srcId: bigint,
-				destType: EntityTypeName,
-				destId: bigint,
-				itemId: bigint,
-				stats: bigint,
-				quantity: bigint,
-				options: { autoResolve?: boolean; wait?: boolean; track?: boolean },
-			) => {
-				try {
-					await checkResolveEntity(srcType, srcId, Boolean(options.autoResolve));
-					if (destType !== srcType || destId !== srcId) {
-						await checkResolveEntity(destType, destId, Boolean(options.autoResolve));
-					}
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
-				const action = await buildAction({
-					sourceType: srcType,
-					sourceId: srcId,
-					destType,
-					destId,
-					itemId,
-					stats,
-					quantity,
-				});
-				const result = await transact(
-					{ action },
-					{
-						description: `Transferred ${quantity} of item ${itemId} from ${srcType}:${srcId} to ${destType}:${destId}`,
-					},
-				);
-				await maybeAwaitAndPrint(srcType, srcId, options, result);
-			},
-		);
+interface TransferCliOptions {
+	autoResolve?: boolean;
+	wait?: boolean;
+	track?: boolean;
 }
+
+export async function runTransfer(
+	ctx: EntityContext,
+	destType: EntityTypeName,
+	destId: bigint,
+	itemId: bigint,
+	stats: bigint,
+	quantity: bigint,
+	options: TransferCliOptions,
+): Promise<void> {
+	await withValidation(async () => {
+		await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve));
+		if (destType !== ctx.entityType || destId !== ctx.entityId) {
+			await checkResolveEntity(destType, destId, Boolean(options.autoResolve));
+		}
+	});
+	const action = await buildAction({
+		sourceType: ctx.entityType,
+		sourceId: ctx.entityId,
+		destType,
+		destId,
+		itemId,
+		stats,
+		quantity,
+	});
+	const result = await transact(
+		{ action },
+		{
+			description: `Transferred ${quantity} of item ${itemId} from ${ctx.entityType}:${ctx.entityId} to ${destType}:${destId}`,
+		},
+	);
+	await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result);
+}
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "transfer",
+	description: "Transfer cargo to another entity (same owner)",
+	appliesTo: ALL_ENTITY_TYPES,
+	build: (ctx) =>
+		new Command("transfer")
+			.description("Transfer cargo to another entity (same owner)")
+			.addHelpText(
+				"before",
+				"Requires: source and destination entities owned by caller; source has the cargo; destination has capacity.\n",
+			)
+			.argument("<dest-type>", "destination entity type", parseEntityType)
+			.argument("<dest-id>", "destination entity id", parseUint64)
+			.argument("<item-id>", "item id", parseUint64)
+			.argument("<stats>", "cargo stack discriminator (often 0)", parseUint64)
+			.argument("<quantity>", "quantity", parseUint64)
+			.option(
+				"--auto-resolve",
+				"resolve completed tasks on source and destination before acting",
+			)
+			.addOption(WAIT_OPTION)
+			.addOption(TRACK_OPTION)
+			.action(
+				async (
+					destType: EntityTypeName,
+					destId: bigint,
+					itemId: bigint,
+					stats: bigint,
+					quantity: bigint,
+					opts: TransferCliOptions,
+				) => {
+					await runTransfer(ctx, destType, destId, itemId, stats, quantity, opts);
+				},
+			),
+};

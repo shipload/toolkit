@@ -1,7 +1,8 @@
 import { type Action, Name } from "@wharfkit/antelope";
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import { ALL_ENTITY_TYPES, type EntityTypeName, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { transact } from "../../lib/session";
 
 export interface ResolveOpts {
@@ -15,18 +16,31 @@ export async function buildAction(opts: ResolveOpts): Promise<Action> {
 	return shipload.actions.resolve(opts.entityId, Name.from(opts.entityType), opts.count);
 }
 
-export function register(program: Command): void {
-	program
-		.command("resolve")
-		.description("Resolve completed tasks for an entity")
-		.addHelpText("before", "Requires: entity with completed tasks.\n")
-		.argument("<entity-type>", "entity type (ship/container/warehouse)", parseEntityType)
-		.argument("<id>", "entity id", parseUint64)
-		.option("--count <n>", "number of tasks to resolve (default: all completed)", parseUint64)
-		.action(
-			async (entityType: EntityTypeName, entityId: bigint, options: { count?: bigint }) => {
-				const action = await buildAction({ entityType, entityId, count: options.count });
-				await transact({ action }, { description: `Resolving ${entityType} ${entityId}` });
-			},
-		);
+export async function runResolve(
+	ctx: EntityContext,
+	opts: { count?: bigint },
+): Promise<void> {
+	const action = await buildAction({
+		entityType: ctx.entityType,
+		entityId: ctx.entityId,
+		count: opts.count,
+	});
+	await transact(
+		{ action },
+		{ description: `Resolving ${ctx.entityType} ${ctx.entityId}` },
+	);
 }
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "resolve",
+	description: "Resolve completed tasks for the entity",
+	appliesTo: ALL_ENTITY_TYPES,
+	build: (ctx) =>
+		new Command("resolve")
+			.description("Resolve completed tasks for the entity")
+			.addHelpText("before", "Requires: entity with completed tasks.\n")
+			.option("--count <n>", "number of tasks to resolve (default: all completed)", parseUint64)
+			.action(async (opts: { count?: bigint }) => {
+				await runResolve(ctx, opts);
+			}),
+};

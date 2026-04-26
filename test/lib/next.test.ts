@@ -27,7 +27,7 @@ describe("nextAction", () => {
 			player: { company: "Test", in_game: true },
 			entities: [{ type: "ship", id: 1, status: "active", completedTasks: 0 }],
 		};
-		expect(nextAction(state).command).toBe("shiploadcli wait ship 1");
+		expect(nextAction(state).command).toBe("shiploadcli ship 1 wait");
 	});
 
 	test("completed tasks → resolve hint", () => {
@@ -35,7 +35,7 @@ describe("nextAction", () => {
 			player: { company: "Test", in_game: true },
 			entities: [{ type: "ship", id: 1, status: "idle", completedTasks: 2 }],
 		};
-		expect(nextAction(state).command).toContain("shiploadcli resolve ship 1");
+		expect(nextAction(state).command).toContain("shiploadcli ship 1 resolve");
 	});
 
 	test("starter ship missing after join → flag a bug", () => {

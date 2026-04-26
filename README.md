@@ -72,8 +72,8 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `player [account]` — player record; defaults to self.
 - `entity <entity-type> <id>` — full state for a single ship/warehouse/container.
 - `entities [owner]` — list entities for an owner; defaults to self.
-- `inventory <entity-type> <id>` — cargo inventory for an entity.
-- `tasks <entity-type> <id>` — scheduled + pending tasks for an entity.
+- `<entity-type> <id> inventory` — cargo inventory for an entity.
+- `<entity-type> <id> tasks` — scheduled + pending tasks for an entity.
 - `items` — available item definitions.
 - `recipe [id]` — list all recipes, or show one by output item id.
 - `resources` — resource definitions.
@@ -82,7 +82,7 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `config` — server game config.
 - `stratum <x> <y> [index]` — list non-empty strata at a location, or detail one with `index`. Supports `--entity <ref>` to scope to a gatherer's depth.
 - `location <x> <y>` — location metadata for given coordinates.
-- `nearby <ship-id>` — systems reachable from a ship.
+- `ship <id> nearby` — systems reachable from a ship.
 - `epoch` — current epoch seed and timing.
 - `next` (alias `hint`) — suggest the next action based on current state.
 
@@ -91,21 +91,21 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `foundcompany <name>` — create a new company on the platform.
 - `join` — join the Shipload game.
 - `claimstarter [x] [y]` — claim a pre-kitted T1 starter ship at `(x, y)` (defaults to `0 0`). Testnet/debug builds only; fails on mainnet where the action is not in the ABI.
-- `travel <ship-id> <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
+- `ship <id> travel <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
 - `grouptravel <entities> <x> <y>` — fly multiple entities together (e.g., `ship:1,container:2`).
-- `warp <entity-type> <id> <x> <y>` — instant-transit via the warp module.
-- `gather <src-type> <src-id> <dest-type> <dest-id> <stratum> <quantity>` — extract resources from a stratum into a destination entity.
-- `transfer <src-type> <src-id> <dest-type> <dest-id> <item-id> <stats> <quantity>` — move cargo between entities of the same owner.
-- `recharge <entity-type> <id>` — recharge energy on an entity with a generator.
-- `craft <entity-type> <entity-id> <recipe-id> <quantity>` — produce items from a recipe. Pass inputs with repeatable `--input item:qty:stats`.
-- `blend <entity-type> <entity-id>` — merge multiple stacks of the same item into one with blended stats. Pass inputs with repeatable `--input item:qty:stats`.
-- `deploy <entity-type> <entity-id> <packed-item-id> <name>` — deploy an entity from a packed cargo NFT.
-- `wrap <owner> <entity-type> <entity-id> <cargo-id> <quantity>` — wrap cargo into an NFT for the specified owner.
-- `addmodule <entity-type> <entity-id> <module-index> <module-cargo-id>` — attach a module cargo to an entity slot.
-- `rmmodule <entity-type> <entity-id> <module-index>` — remove a module from a slot.
-- `resolve <entity-type> <id>` — process completed tasks on an entity.
-- `cancel <entity-type> <id> <count>` — cancel pending tasks on an entity (count required).
-- `wait <entity-type> <entity-id>` — block until the entity's active task ends, auto-resolve, and print post-state. Supports `--timeout <s>`.
+- `<entity-type> <id> warp <x> <y>` — instant-transit via the warp module.
+- `<src-type> <src-id> gather <dest-type> <dest-id> <stratum> <quantity>` — extract resources from a stratum into a destination entity.
+- `<src-type> <src-id> transfer <dest-type> <dest-id> <item-id> <stats> <quantity>` — move cargo between entities of the same owner.
+- `<entity-type> <id> recharge` — recharge energy on an entity with a generator.
+- `<entity-type> <id> craft <recipe-id> <quantity>` — produce items from a recipe. Pass inputs with repeatable `--input item:qty:stats`.
+- `<entity-type> <id> blend` — merge multiple stacks of the same item into one with blended stats. Pass inputs with repeatable `--input item:qty:stats`.
+- `<entity-type> <id> deploy <packed-item-id> <name>` — deploy an entity from a packed cargo NFT.
+- `<entity-type> <id> wrap <owner> <cargo-id> <quantity>` — wrap cargo into an NFT for the specified owner.
+- `<entity-type> <id> addmodule <module-index> <module-cargo-id>` — attach a module cargo to an entity slot.
+- `<entity-type> <id> rmmodule <module-index>` — remove a module from a slot.
+- `<entity-type> <id> resolve` — process completed tasks on an entity.
+- `<entity-type> <id> cancel <count>` — cancel pending tasks on an entity (count required).
+- `<entity-type> <id> wait` — block until the entity's active task ends, auto-resolve, and print post-state. Supports `--timeout <s>`.
 
 ### Tools (diagnostics)
 
@@ -140,9 +140,9 @@ Exit codes:
 
 Tasks move through four states: **scheduled → active → completed → resolved**.
 
-- `bun run shiploadcli tasks <entity-type> <id>` shows the current schedule and pending queue.
+- `bun run shiploadcli <entity-type> <id> tasks` shows the current schedule and pending queue.
 - Some tasks are uncancelable ("market tasks": `gather`, `craft`). Once scheduled they must run to completion — wait or let the schedule drain.
-- `bun run shiploadcli resolve <entity-type> <id>` processes completed tasks. Passing `--auto-resolve` on the next action does this automatically before submission.
+- `bun run shiploadcli <entity-type> <id> resolve` processes completed tasks. Passing `--auto-resolve` on the next action does this automatically before submission.
 
 ## Craft vs blend
 
@@ -152,11 +152,11 @@ Tasks move through four states: **scheduled → active → completed → resolve
 ## Recommended agent pattern
 
 ```bash
-bun run shiploadcli next                              # figure out what to do
-bun run shiploadcli <query commands>                  # gather context
-bun run shiploadcli <action> --estimate               # preview cost
-bun run shiploadcli <action> --wait --auto-resolve    # submit, wait, verify
-bun run shiploadcli entity <type> <id>                # confirm post-state
+bun run shiploadcli next                                       # figure out what to do
+bun run shiploadcli <query commands>                           # gather context
+bun run shiploadcli <type> <id> <action> --estimate            # preview cost
+bun run shiploadcli <type> <id> <action> --wait --auto-resolve # submit, wait, verify
+bun run shiploadcli <type> <id>                                # confirm post-state
 ```
 
 ## Troubleshooting

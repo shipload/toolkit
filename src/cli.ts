@@ -39,6 +39,12 @@ import * as tasks from "./commands/query/tasks";
 import * as whoami from "./commands/query/whoami";
 import * as tools from "./commands/tools";
 import * as update from "./commands/update";
+import { parseEntityType } from "./lib/args";
+import {
+	buildEntityParent,
+	buildGenericEntityParent,
+	registerEntitySubcommand,
+} from "./lib/entity-scope";
 
 const PACKAGE = {
 	name: "shiploadcli",
@@ -68,10 +74,13 @@ export function build(): Command {
 	status.register(program);
 	epoch.register(program);
 	player.register(program);
-	entity.register(program);
+	buildGenericEntityParent(program, parseEntityType, entity.defaultShow);
+	buildEntityParent(program, "ship", entity.defaultShow);
+	buildEntityParent(program, "container", entity.defaultShow);
+	buildEntityParent(program, "warehouse", entity.defaultShow);
 	entities.register(program);
 	location.register(program);
-	nearby.register(program);
+	registerEntitySubcommand(nearby.SUBCOMMAND);
 	items.register(program);
 	recipe.register(program);
 	config.register(program);
@@ -79,28 +88,28 @@ export function build(): Command {
 	modules.register(program);
 	nftinfo.register(program);
 	stratum.register(program);
-	inventory.register(program);
-	tasks.register(program);
+	registerEntitySubcommand(inventory.SUBCOMMAND);
+	registerEntitySubcommand(tasks.SUBCOMMAND);
 
 	foundcompany.register(program);
 	join.register(program);
 	claimstarter.register(program);
-	travel.register(program);
+	registerEntitySubcommand(travel.SUBCOMMAND);
 	grouptravel.register(program);
-	warp.register(program);
-	gather.register(program);
-	transfer.register(program);
-	recharge.register(program);
-	craft.register(program);
-	blend.register(program);
-	deploy.register(program);
-	wrap.register(program);
-	addmodule.register(program);
-	rmmodule.register(program);
-	resolve.register(program);
-	cancel.register(program);
-	wait.register(program);
-	track.register(program);
+	registerEntitySubcommand(warp.SUBCOMMAND);
+	registerEntitySubcommand(gather.SUBCOMMAND);
+	registerEntitySubcommand(transfer.SUBCOMMAND);
+	registerEntitySubcommand(recharge.SUBCOMMAND);
+	registerEntitySubcommand(craft.SUBCOMMAND);
+	registerEntitySubcommand(blend.SUBCOMMAND);
+	registerEntitySubcommand(deploy.SUBCOMMAND);
+	registerEntitySubcommand(wrap.SUBCOMMAND);
+	registerEntitySubcommand(addmodule.SUBCOMMAND);
+	registerEntitySubcommand(rmmodule.SUBCOMMAND);
+	registerEntitySubcommand(resolve.SUBCOMMAND);
+	registerEntitySubcommand(cancel.SUBCOMMAND);
+	registerEntitySubcommand(wait.SUBCOMMAND);
+	registerEntitySubcommand(track.SUBCOMMAND);
 
 	tools.register(program);
 

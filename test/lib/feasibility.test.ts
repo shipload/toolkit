@@ -133,7 +133,7 @@ describe("checkEnergyAvailable — copy-paste suggestion", () => {
 			entityType: "ship",
 			entityId: 1n,
 		});
-		expect(issue?.message).toContain("`player recharge ship 1`");
+		expect(issue?.message).toContain("`shiploadcli ship 1 recharge`");
 		expect(issue?.message).toContain("--recharge");
 	});
 });

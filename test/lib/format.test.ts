@@ -174,7 +174,7 @@ describe("formatTier", () => {
 describe("formatInstallHint", () => {
 	test("emits install command referencing entity and slot", () => {
 		const hint = formatInstallHint("ship", 1n, 2, "Crafter");
-		expect(hint).toContain("addmodule ship 1 2");
+		expect(hint).toContain("ship 1 addmodule 2");
 		expect(hint).toContain("Crafter");
 	});
 });
@@ -182,7 +182,7 @@ describe("formatInstallHint", () => {
 describe("formatResolveHint", () => {
 	test("emits resolve command + count", () => {
 		const h = formatResolveHint("ship", 1n, 3);
-		expect(h).toContain("player resolve ship 1");
+		expect(h).toContain("shiploadcli ship 1 resolve");
 		expect(h).toContain("3 completed");
 	});
 });

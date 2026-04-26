@@ -1,44 +1,42 @@
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
-import { printError } from "../../lib/errors";
+import { Command } from "commander";
+import { ALL_ENTITY_TYPES } from "../../lib/args";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
+import { withValidation } from "../../lib/errors";
 import { getEntitySnapshot } from "../../lib/snapshot";
-import { ValidationError } from "../../lib/validate";
 import { AUTO_RESOLVE_OPTION, awaitAndPrint, TIMEOUT_OPTION } from "../../lib/wait";
 
-export function register(program: Command): void {
-	program
-		.command("track")
-		.description(
-			"Block until the entity's active task ends, showing a live progress display, then print post-state",
-		)
-		.argument("<entity-type>", "entity type", parseEntityType)
-		.argument("<entity-id>", "entity id", parseUint64)
-		.addOption(TIMEOUT_OPTION)
-		.addOption(AUTO_RESOLVE_OPTION)
-		.action(
-			async (
-				entityType: EntityTypeName,
-				entityId: bigint,
-				opts: { timeout?: number; autoResolve?: boolean },
-			) => {
-				try {
-					const snap = await getEntitySnapshot(entityType, entityId);
-					if (snap.is_idle) {
-						console.log(`${entityType} ${entityId} is idle — nothing to track`);
-						return;
-					}
-					await awaitAndPrint(entityType, entityId, {
-						timeoutMs: opts.timeout,
-						autoResolve: opts.autoResolve,
-						progress: true,
-						initialSnapshot: snap,
-					});
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
-			},
-		);
+export async function runTrack(
+	ctx: EntityContext,
+	opts: { timeout?: number; autoResolve?: boolean },
+): Promise<void> {
+	await withValidation(async () => {
+		const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId);
+		if (snap.is_idle) {
+			console.log(`${ctx.entityType} ${ctx.entityId} is idle — nothing to track`);
+			return;
+		}
+		await awaitAndPrint(ctx.entityType, ctx.entityId, {
+			timeoutMs: opts.timeout,
+			autoResolve: opts.autoResolve,
+			progress: true,
+			initialSnapshot: snap,
+		});
+	});
 }
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "track",
+	description:
+		"Block until the entity's active task ends, showing a live progress display, then print post-state",
+	appliesTo: ALL_ENTITY_TYPES,
+	build: (ctx) =>
+		new Command("track")
+			.description(
+				"Block until the entity's active task ends, showing a live progress display, then print post-state",
+			)
+			.addOption(TIMEOUT_OPTION)
+			.addOption(AUTO_RESOLVE_OPTION)
+			.action(async (opts: { timeout?: number; autoResolve?: boolean }) => {
+				await runTrack(ctx, opts);
+			}),
+};

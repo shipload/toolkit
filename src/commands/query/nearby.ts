@@ -1,7 +1,8 @@
 import { Checksum256 } from "@wharfkit/antelope";
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import type { EntityTypeName } from "../../lib/args";
 import { getGameSeed, server } from "../../lib/client";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { formatNearby, formatOutput } from "../../lib/format";
 import { resolveReach } from "../../lib/reach";
 
@@ -23,51 +24,51 @@ export function buildQuery(opts: NearbyOpts): {
 	};
 }
 
-export function register(program: Command): void {
-	program
-		.command("nearby")
-		.description("Show nearby systems reachable from an entity")
-		.argument("<entity-type>", "entity type (ship/warehouse/container)", parseEntityType)
-		.argument("<id>", "entity id", parseUint64)
-		.option("--no-recharge", "disable recharge projection")
-		.option("--all", "expand each cell to list every resource (bypasses depth filter)")
-		.option("--json", "emit JSON instead of formatted text")
-		.action(
-			async (
-				entityType: EntityTypeName,
-				id: bigint,
-				options: { recharge: boolean; all?: boolean; json?: boolean },
-			) => {
-				const nearbyRaw = await server.readonly("getnearby", {
-					entity_type: entityType,
-					entity_id: id,
-					recharge: options.recharge !== false,
-				});
-				// biome-ignore lint/suspicious/noExplicitAny: getnearby readonly return shape
-				const nearby = nearbyRaw as any;
-				const gameSeed = await getGameSeed();
-				// biome-ignore lint/suspicious/noExplicitAny: state row shape
-				const state = (await server.table("state").get()) as any;
-				const epochSeed = state?.seed ? Checksum256.from(state.seed) : undefined;
+export async function runNearby(
+	ctx: EntityContext,
+	options: { recharge: boolean; all?: boolean; json?: boolean },
+): Promise<void> {
+	const [nearbyRaw, gameSeed, stateRaw, reach] = await Promise.all([
+		server.readonly("getnearby", {
+			entity_type: ctx.entityType,
+			entity_id: ctx.entityId,
+			recharge: options.recharge !== false,
+		}),
+		getGameSeed(),
+		server.table("state").get(),
+		resolveReach({ entityType: ctx.entityType, entityId: ctx.entityId })
+			.then((r) => ({ depth: r.gatherer.depth }))
+			.catch(() => undefined),
+	]);
+	// biome-ignore lint/suspicious/noExplicitAny: getnearby readonly return shape
+	const nearby = nearbyRaw as any;
+	// biome-ignore lint/suspicious/noExplicitAny: state row shape
+	const state = stateRaw as any;
+	const epochSeed = state?.seed ? Checksum256.from(state.seed) : undefined;
 
-				let reach: { depth: number } | undefined;
-				try {
-					const r = await resolveReach({ entityType, entityId: id });
-					reach = { depth: r.gatherer.depth };
-				} catch {
-					reach = undefined;
-				}
-
-				console.log(
-					formatOutput(nearby, { json: Boolean(options.json) }, (d) =>
-						formatNearby(d, {
-							gameSeed,
-							epochSeed,
-							reach,
-							showAll: Boolean(options.all),
-						}),
-					),
-				);
-			},
-		);
+	console.log(
+		formatOutput(nearby, { json: Boolean(options.json) }, (d) =>
+			formatNearby(d, {
+				gameSeed,
+				epochSeed,
+				reach,
+				showAll: Boolean(options.all),
+			}),
+		),
+	);
 }
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "nearby",
+	description: "Show nearby systems reachable from an entity",
+	appliesTo: ["ship"],
+	build: (ctx) =>
+		new Command("nearby")
+			.description("Show nearby systems reachable from an entity")
+			.option("--no-recharge", "disable recharge projection")
+			.option("--all", "expand each cell to list every resource (bypasses depth filter)")
+			.option("--json", "emit JSON instead of formatted text")
+			.action(async (opts: { recharge: boolean; all?: boolean; json?: boolean }) => {
+				await runNearby(ctx, opts);
+			}),
+};

@@ -40,7 +40,7 @@ const RULES: Rule[] = [
 		if (busy) {
 			return {
 				reason: `${busy.type} ${busy.id} has an active task.`,
-				command: `shiploadcli wait ${busy.type} ${busy.id}`,
+				command: `shiploadcli ${busy.type} ${busy.id} wait`,
 			};
 		}
 		return null;
@@ -50,7 +50,7 @@ const RULES: Rule[] = [
 		if (stuck) {
 			return {
 				reason: `${stuck.type} ${stuck.id} has completed tasks to resolve.`,
-				command: `shiploadcli resolve ${stuck.type} ${stuck.id}`,
+				command: `shiploadcli ${stuck.type} ${stuck.id} resolve`,
 			};
 		}
 		return null;

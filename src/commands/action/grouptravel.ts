@@ -2,12 +2,11 @@ import { type Action, Name } from "@wharfkit/antelope";
 import type { Command } from "commander";
 import { type EntityRef, parseEntityRefList, parseInt64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { assertNotBoth, printError } from "../../lib/errors";
+import { assertNotBoth, withValidation } from "../../lib/errors";
 import { estimateGroupTravel } from "../../lib/estimate";
 import { renderEstimate } from "../../lib/render-estimate";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
-import { ValidationError } from "../../lib/validate";
 import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface GroupTravelOpts {
@@ -60,22 +59,17 @@ export function register(program: Command): void {
 			) => {
 				assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 				if (options.estimate) {
-					try {
-						const est = await estimateGroupTravel({
+					const est = await withValidation(() =>
+						estimateGroupTravel({
 							entities,
 							target: { x, y },
 							recharge: Boolean(options.recharge),
-						});
-						console.log(renderEstimate(est));
-					} catch (err) {
-						if (err instanceof ValidationError) {
-							process.exit(printError(err));
-						}
-						throw err;
-					}
+						}),
+					);
+					console.log(renderEstimate(est));
 					return;
 				}
-				try {
+				await withValidation(async () => {
 					for (const e of entities) {
 						await checkResolveEntity(
 							e.entityType,
@@ -83,12 +77,7 @@ export function register(program: Command): void {
 							Boolean(options.autoResolve),
 						);
 					}
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
+				});
 				const action = await buildAction({
 					entities,
 					x,

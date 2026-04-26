@@ -1,8 +1,9 @@
 import { type Action, Name } from "@wharfkit/antelope";
-import type { Command } from "commander";
-import { type EntityTypeName, parseEntityType, parseUint32, parseUint64 } from "../../lib/args";
+import { Command } from "commander";
+import { type EntityTypeName, parseUint32, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { printError } from "../../lib/errors";
+import { withValidation } from "../../lib/errors";
+import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
@@ -42,48 +43,52 @@ export async function buildAction(opts: AddModuleOpts): Promise<Action> {
 	);
 }
 
-export function register(program: Command): void {
-	program
-		.command("addmodule")
-		.description("Attach a module cargo to an entity")
-		.addHelpText("before", "Requires: entity idle; module cargo present in cargo.\n")
-		.argument("<entity-type>", "entity type", parseEntityType)
-		.argument("<entity-id>", "entity id", parseUint64)
-		.argument("<module-index>", "module slot index", parseUint32)
-		.argument("<module-cargo-id>", "module cargo id", parseUint64)
-		.option("--target <id>", "target cargo id (for modules on cargo NFTs)", "0")
-		.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
-		.action(
-			async (
-				entityType: EntityTypeName,
-				entityId: bigint,
-				moduleIndex: number,
-				moduleCargoId: bigint,
-				options: { target: string; autoResolve?: boolean },
-			) => {
-				const addOpts: AddModuleOpts = {
-					entityType,
-					entityId,
-					moduleIndex,
-					moduleCargoId,
-					targetCargoId: parseUint64(options.target),
-				};
-				try {
-					await checkResolveEntity(entityType, entityId, Boolean(options.autoResolve));
-					await preflightAddModule(addOpts);
-				} catch (err) {
-					if (err instanceof ValidationError) {
-						process.exit(printError(err));
-					}
-					throw err;
-				}
-				const action = await buildAction(addOpts);
-				await transact(
-					{ action },
-					{
-						description: `Adding module ${moduleCargoId} to ${entityType}:${entityId} slot ${moduleIndex}`,
-					},
-				);
-			},
-		);
+interface AddModuleCliOptions {
+	target?: bigint;
+	autoResolve?: boolean;
 }
+
+export async function runAddModule(
+	ctx: EntityContext,
+	moduleIndex: number,
+	moduleCargoId: bigint,
+	options: AddModuleCliOptions,
+): Promise<void> {
+	const addOpts: AddModuleOpts = {
+		entityType: ctx.entityType,
+		entityId: ctx.entityId,
+		moduleIndex,
+		moduleCargoId,
+		targetCargoId: options.target ?? 0n,
+	};
+	await withValidation(async () => {
+		await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve));
+		await preflightAddModule(addOpts);
+	});
+	const action = await buildAction(addOpts);
+	await transact(
+		{ action },
+		{
+			description: `Adding module ${moduleCargoId} to ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
+		},
+	);
+}
+
+export const SUBCOMMAND: EntitySubcommand = {
+	name: "addmodule",
+	description: "Attach a module cargo to the ship",
+	appliesTo: ["ship"],
+	build: (ctx) =>
+		new Command("addmodule")
+			.description("Attach a module cargo to the ship")
+			.addHelpText("before", "Requires: ship idle; module cargo present in cargo.\n")
+			.argument("<module-index>", "module slot index", parseUint32)
+			.argument("<module-cargo-id>", "module cargo id", parseUint64)
+			.option("--target <id>", "target cargo id (for modules on cargo NFTs; default 0)", parseUint64)
+			.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
+			.action(
+				async (moduleIndex: number, moduleCargoId: bigint, opts: AddModuleCliOptions) => {
+					await runAddModule(ctx, moduleIndex, moduleCargoId, opts);
+				},
+			),
+};
