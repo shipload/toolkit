@@ -1,5 +1,7 @@
 export {deriveStratum, deriveResourceStats} from './stratum'
 export type {StratumInfo, ResourceStats} from './stratum'
+export {deriveStrata} from './strata'
+export type {DerivedStratum} from './strata'
 export {deriveLocationSize} from './location-size'
 export {
     getEligibleResources,

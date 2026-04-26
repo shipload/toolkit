@@ -378,9 +378,7 @@ suite('projectFromCurrentState', function () {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 100, stats: 0}]})
         ship.schedule = ServerContract.Types.schedule.from({
             started: '2024-06-04T23:41:09.000',
-            tasks: [
-                makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 30, stats: 0}]}),
-            ],
+            tasks: [makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 30, stats: 0}]})],
         })
         ship.is_idle = false
         ship.current_task = makeTask(TaskType.UNLOAD, {

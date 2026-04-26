@@ -61,6 +61,7 @@ export {
 
 export {
     deriveStratum,
+    deriveStrata,
     deriveResourceStats,
     deriveLocationSize,
     getEligibleResources,
@@ -83,7 +84,7 @@ export {
     PLANET_SUBTYPE_INDUSTRIAL,
 } from './derivation'
 
-export type {StratumInfo, ResourceStats} from './derivation'
+export type {StratumInfo, ResourceStats, DerivedStratum} from './derivation'
 
 export {RESERVE_TIERS, TIER_ROLL_MAX, rollTier, rollWithinTier} from './derivation'
 export type {ReserveTier, TierRange} from './derivation'
