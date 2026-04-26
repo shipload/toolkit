@@ -1,4 +1,4 @@
-import { chmodSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, readdirSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import type { Command } from "commander";
 import pkg from "../../package.json" with { type: "json" };
@@ -32,6 +32,34 @@ interface GithubRelease {
 	tag_name: string;
 	html_url: string;
 	assets: GithubAsset[];
+}
+
+const SIDECAR_PREFIX = ".shiploadcli-old-";
+
+function installBinary(tmp: string, self: string, selfDir: string, selfName: string): void {
+	try {
+		renameSync(tmp, self);
+	} catch (err) {
+		if ((err as NodeJS.ErrnoException).code !== "EPERM") throw err;
+		const sidecar = join(selfDir, `${SIDECAR_PREFIX}${selfName}-${Date.now()}`);
+		renameSync(self, sidecar);
+		renameSync(tmp, self);
+	}
+}
+
+function cleanupSidecars(selfDir: string): void {
+	let entries: string[];
+	try {
+		entries = readdirSync(selfDir);
+	} catch {
+		return;
+	}
+	for (const entry of entries) {
+		if (!entry.startsWith(SIDECAR_PREFIX)) continue;
+		try {
+			unlinkSync(join(selfDir, entry));
+		} catch {}
+	}
 }
 
 export function register(program: Command): void {
@@ -116,6 +144,7 @@ export function register(program: Command): void {
 
 			const self = process.execPath;
 			const selfDir = dirname(self);
+			const selfName = basename(self);
 			let binary: Uint8Array;
 
 			try {
@@ -139,7 +168,8 @@ export function register(program: Command): void {
 				const tmp = join(selfDir, `.shiploadcli-update-${Date.now()}`);
 				writeFileSync(tmp, binary);
 				chmodSync(tmp, 0o755);
-				renameSync(tmp, self);
+				installBinary(tmp, self, selfDir, selfName);
+				cleanupSidecars(selfDir);
 			} catch (err) {
 				fail(`Install failed: ${(err as Error).message}`);
 				return;
