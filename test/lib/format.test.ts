@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { encodeStats } from "@shipload/sdk";
-import { Checksum256 } from "@wharfkit/antelope";
+import { encodeStats, TaskType } from "@shipload/sdk";
+import { Checksum256, UInt64 } from "@wharfkit/antelope";
 import {
 	formatCargo,
 	formatCategory,
@@ -98,6 +98,26 @@ describe("formatEntity modules", () => {
 		expect(out).toMatch(/Hauler:\s+— \(not installed\)/);
 		expect(out).toMatch(/Warp:\s+— \(not installed\)/);
 		expect(out).toMatch(/Crafter:\s+— \(not installed\)/);
+	});
+
+	test("skips completed tasks lingering in schedule (avoids double-apply crash)", () => {
+		const stats = UInt64.from(0);
+		const completedCraft = {
+			type: { toNumber: () => TaskType.CRAFT },
+			duration: { toNumber: () => 60 },
+			cargo: [
+				{ item_id: 101, quantity: 5, stats, modules: [] },
+				{ item_id: 102, quantity: 1, stats, modules: [] },
+			],
+		};
+		const out = formatEntity({
+			...base,
+			schedule: {
+				started: { toDate: () => new Date() },
+				tasks: [completedCraft],
+			},
+		});
+		expect(out).not.toMatch(/When done/);
 	});
 });
 

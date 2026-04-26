@@ -13,7 +13,7 @@
 		"test": "bun test"
 	},
 	"dependencies": {
-		"@shipload/sdk": "2.0.0-rc21",
+		"@shipload/sdk": "2.0.0-rc22",
 		"@wharfkit/antelope": "^1.2.0",
 		"@wharfkit/common": "^1.5.0",
 		"@wharfkit/contract": "^1.2.1",

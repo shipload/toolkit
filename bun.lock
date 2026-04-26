@@ -5,7 +5,7 @@
     "": {
       "name": "@shipload/player",
       "dependencies": {
-        "@shipload/sdk": "2.0.0-rc21",
+        "@shipload/sdk": "2.0.0-rc22",
         "@wharfkit/antelope": "^1.2.0",
         "@wharfkit/common": "^1.5.0",
         "@wharfkit/contract": "^1.2.1",
@@ -51,7 +51,7 @@
 
     "@colors/colors": ["@colors/colors@1.5.0", "", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
 
-    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc21", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-61o0JHZe86HlE0SIWf7x1K5DL18yzwj8KMtUIJQhIGBVvGhhbGPh3kONWfwhf/hLBzV+slrVtjcB2MIgah5Ifg=="],
+    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc22", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-N5zSILSI2PP+1bSzdHgjsruCDdQne3VQNSr0Zu4SJJaEfFZTGIa8Lr44Vzd7NvlJiMCbiVfJ4ryo/Xrpsx98hw=="],
 
     "@types/bun": ["@types/bun@1.3.12", "", { "dependencies": { "bun-types": "1.3.12" } }, "sha512-DBv81elK+/VSwXHDlnH3Qduw+KxkTIWi7TXkAeh24zpi5l0B2kUg9Ga3tb4nJaPcOFswflgi/yAvMVBPrxMB+A=="],
 

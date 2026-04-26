@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import { TaskType } from "@shipload/sdk";
 import {
 	computeCraftCargoDelta,
 	computeFlightDurationSeconds,
 	computeGatherCargoDelta,
 	type EstimateResult,
+	estimateTravel,
 	populateCraftFeasibility,
 	populateGatherFeasibility,
 	populateTravelFeasibility,
@@ -312,5 +314,56 @@ describe("populateCraftFeasibility — willRechargeFirst", () => {
 			willRechargeFirst: true,
 		});
 		expect(issues.find((i) => i.code === "insufficient_energy")).toBeUndefined();
+	});
+});
+
+describe("estimateTravel projection", () => {
+	test("does not crash when snapshot.schedule contains completed CRAFT lingering for resolve", async () => {
+		// Mirrors the ship 3 repro: cargo already projected forward through completed CRAFT,
+		// schedule still has the task. Without the fix, projectEntity re-applies the CRAFT
+		// against post-craft cargo and throws INSUFFICIENT_ITEM_QUANTITY.
+		const stats = {
+			toString: () => "0",
+			equals: (o: { toString(): string }) => o.toString() === "0",
+		};
+		const snap = {
+			type: "ship",
+			id: 1n,
+			owner: "agent.gm",
+			entity_name: "Test Ship",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0,
+			cargo: [],
+			capacity: 1000n,
+			energy: 100,
+			hullmass: 1000n,
+			engines: { thrust: 1000, drain: 1 },
+			generator: { capacity: 100, recharge: 1 },
+			is_idle: true,
+			current_task_elapsed: 0,
+			current_task_remaining: 0,
+			pending_tasks: [],
+			schedule: {
+				started: { toMilliseconds: () => Date.now() - 600_000 },
+				tasks: [
+					{
+						type: { toNumber: () => TaskType.CRAFT },
+						duration: { toNumber: () => 60 },
+						cargo: [
+							{ item_id: 101, quantity: 5, stats, modules: [] },
+							{ item_id: 102, quantity: 1, stats, modules: [] },
+						],
+					},
+				],
+			},
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+		const est = await estimateTravel({
+			entityType: "ship",
+			entityId: 1n,
+			target: { x: 100, y: 100 },
+			snapshot: snap,
+		});
+		expect(est.travel?.origin).toEqual({ x: 0, y: 0 });
 	});
 });

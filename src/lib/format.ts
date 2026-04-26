@@ -10,8 +10,9 @@ import {
 	getModuleCapabilityType,
 	getStatDefinitions,
 	LocationType,
-	type Projectable,
-	projectEntity,
+	type ProjectableSnapshot,
+	type ProjectedEntity,
+	projectFromCurrentState,
 	type ResourceCategory,
 	resolveItem,
 	schedule,
@@ -465,7 +466,12 @@ function buildModuleRows(entity: Types.entity_info, isShip: boolean): [string, s
 
 function formatWhenDone(entity: Types.entity_info): string | null {
 	if (!entity.schedule || entity.schedule.tasks.length === 0) return null;
-	const projection = projectEntity(entity as unknown as Projectable);
+	let projection: ProjectedEntity;
+	try {
+		projection = projectFromCurrentState(entity as unknown as ProjectableSnapshot);
+	} catch {
+		return null;
+	}
 
 	const currentX = Number(entity.coordinates.x.toString());
 	const currentY = Number(entity.coordinates.y.toString());
@@ -483,7 +489,10 @@ function formatWhenDone(entity: Types.entity_info): string | null {
 
 	if (!positionChanged && !energyChanged && !cargoChanged) return null;
 
-	const remaining = schedule.scheduleRemaining(entity as unknown as Projectable, new Date());
+	const remaining = schedule.scheduleRemaining(
+		entity as unknown as ProjectableSnapshot,
+		new Date(),
+	);
 	const header = remaining > 0 ? `When done (${formatDuration(remaining)}):` : "When done:";
 
 	const rows: [string, string][] = [];

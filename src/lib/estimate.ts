@@ -27,8 +27,8 @@ import {
 	calc_ship_rechargetime,
 	distanceBetweenPoints,
 	getItem,
-	type Projectable,
-	projectEntity,
+	type ProjectableSnapshot,
+	projectFromCurrentState,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { Types as ServerTypes } from "../contracts/server";
@@ -284,7 +284,7 @@ export async function estimateTravel(params: {
 		};
 	}
 
-	const projection = projectEntity(snap as unknown as Projectable);
+	const projection = projectFromCurrentState(snap as unknown as ProjectableSnapshot);
 	const currentX = Number(snap.coordinates.x.toString());
 	const currentY = Number(snap.coordinates.y.toString());
 	const originX = Number(projection.location.x.toString());
