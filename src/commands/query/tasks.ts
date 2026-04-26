@@ -11,8 +11,6 @@ import {
 	reltime,
 } from "../../lib/format";
 
-const CANCEL_NAMES = ["never", "before-start", "always"];
-
 interface Task {
 	type: number;
 	duration: number;
@@ -36,8 +34,7 @@ function fmtCoords(c: { x: number; y: number; z: number | null } | null | undefi
 }
 
 export function render(view: TasksView): string {
-	const timeStr =
-		view.now.toISOString().replace(/.*T/, "").replace(".000Z", "").replace("Z", "") + " UTC";
+	const timeStr = `${view.now.toISOString().replace(/.*T/, "").replace(".000Z", "").replace("Z", "")} UTC`;
 	const header = `${view.type} ${view.id}  ·  ${timeStr}`;
 
 	if (!view.schedule || view.schedule.tasks.length === 0) {

@@ -23,7 +23,7 @@ export function makeProgressRenderer(): { tick: (t: ProgressTick) => void; done:
 	};
 
 	const done = (): void => {
-		process.stderr.write("\r" + " ".repeat(BAR_WIDTH + 22) + "\r");
+		process.stderr.write(`\r${" ".repeat(BAR_WIDTH + 22)}\r`);
 	};
 
 	return { tick, done };
