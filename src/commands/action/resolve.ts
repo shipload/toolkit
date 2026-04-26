@@ -16,19 +16,13 @@ export async function buildAction(opts: ResolveOpts): Promise<Action> {
 	return shipload.actions.resolve(opts.entityId, Name.from(opts.entityType), opts.count);
 }
 
-export async function runResolve(
-	ctx: EntityContext,
-	opts: { count?: bigint },
-): Promise<void> {
+export async function runResolve(ctx: EntityContext, opts: { count?: bigint }): Promise<void> {
 	const action = await buildAction({
 		entityType: ctx.entityType,
 		entityId: ctx.entityId,
 		count: opts.count,
 	});
-	await transact(
-		{ action },
-		{ description: `Resolving ${ctx.entityType} ${ctx.entityId}` },
-	);
+	await transact({ action }, { description: `Resolving ${ctx.entityType} ${ctx.entityId}` });
 }
 
 export const SUBCOMMAND: EntitySubcommand = {
@@ -39,7 +33,11 @@ export const SUBCOMMAND: EntitySubcommand = {
 		new Command("resolve")
 			.description("Resolve completed tasks for the entity")
 			.addHelpText("before", "Requires: entity with completed tasks.\n")
-			.option("--count <n>", "number of tasks to resolve (default: all completed)", parseUint64)
+			.option(
+				"--count <n>",
+				"number of tasks to resolve (default: all completed)",
+				parseUint64,
+			)
 			.action(async (opts: { count?: bigint }) => {
 				await runResolve(ctx, opts);
 			}),

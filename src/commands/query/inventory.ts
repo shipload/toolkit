@@ -19,10 +19,7 @@ export function render(entityType: string, id: bigint, cargo: any[]): string {
 	return [header, ...lines].join("\n");
 }
 
-export async function runInventory(
-	ctx: EntityContext,
-	opts: { json?: boolean },
-): Promise<void> {
+export async function runInventory(ctx: EntityContext, opts: { json?: boolean }): Promise<void> {
 	const info = (await server.readonly("getentity", {
 		entity_type: ctx.entityType,
 		entity_id: ctx.entityId,
@@ -33,7 +30,9 @@ export async function runInventory(
 		cargo: info.cargo ?? [],
 	};
 	console.log(
-		formatOutput(data, { json: Boolean(opts.json) }, (d) => render(d.entityType, d.id, d.cargo)),
+		formatOutput(data, { json: Boolean(opts.json) }, (d) =>
+			render(d.entityType, d.id, d.cargo),
+		),
 	);
 }
 

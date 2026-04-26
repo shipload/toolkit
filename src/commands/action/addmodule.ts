@@ -2,8 +2,8 @@ import { type Action, Name } from "@wharfkit/antelope";
 import { Command } from "commander";
 import { type EntityTypeName, parseUint32, parseUint64 } from "../../lib/args";
 import { getShipload } from "../../lib/client";
-import { withValidation } from "../../lib/errors";
 import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
+import { withValidation } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
@@ -84,7 +84,11 @@ export const SUBCOMMAND: EntitySubcommand = {
 			.addHelpText("before", "Requires: ship idle; module cargo present in cargo.\n")
 			.argument("<module-index>", "module slot index", parseUint32)
 			.argument("<module-cargo-id>", "module cargo id", parseUint64)
-			.option("--target <id>", "target cargo id (for modules on cargo NFTs; default 0)", parseUint64)
+			.option(
+				"--target <id>",
+				"target cargo id (for modules on cargo NFTs; default 0)",
+				parseUint64,
+			)
 			.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 			.action(
 				async (moduleIndex: number, moduleCargoId: bigint, opts: AddModuleCliOptions) => {

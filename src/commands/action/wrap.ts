@@ -75,12 +75,7 @@ export const SUBCOMMAND: EntitySubcommand = {
 			.addOption(WAIT_OPTION)
 			.addOption(TRACK_OPTION)
 			.action(
-				async (
-					owner: string,
-					cargoId: bigint,
-					quantity: bigint,
-					opts: WrapCliOptions,
-				) => {
+				async (owner: string, cargoId: bigint, quantity: bigint, opts: WrapCliOptions) => {
 					await runWrap(ctx, owner, cargoId, quantity, opts);
 				},
 			),

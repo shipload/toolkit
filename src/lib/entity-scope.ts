@@ -59,10 +59,7 @@ export async function dispatchEntityScope(
 		const suggestion = available
 			? `available actions for ${type}: ${available}`
 			: `no actions are registered for ${type}`;
-		throw new ValidationError(
-			`unknown action '${name}' for ${type} ${id}`,
-			suggestion,
-		);
+		throw new ValidationError(`unknown action '${name}' for ${type} ${id}`, suggestion);
 	}
 	if (!sub.appliesTo.includes(type)) {
 		throw new ValidationError(

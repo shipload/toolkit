@@ -8,8 +8,8 @@ import {
 	resolveCargoInputs,
 } from "../../lib/cargo-resolve";
 import { getShipload } from "../../lib/client";
-import { assertNotBoth, withValidation } from "../../lib/errors";
 import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
+import { assertNotBoth, withValidation } from "../../lib/errors";
 import { estimateCraft } from "../../lib/estimate";
 import { renderIssues } from "../../lib/feasibility";
 import { renderEstimate } from "../../lib/render-estimate";
@@ -65,11 +65,7 @@ export async function runCraft(
 	assertNotBoth(options, ["estimate", "wait"], ["estimate", "track"]);
 	await withValidation(async () => {
 		if (!options.estimate) {
-			await checkResolveEntity(
-				ctx.entityType,
-				ctx.entityId,
-				Boolean(options.autoResolve),
-			);
+			await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve));
 		}
 		const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId);
 		const resolved = resolveCargoInputs(

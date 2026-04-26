@@ -1,6 +1,6 @@
 import { type Action, Name } from "@wharfkit/antelope";
 import { Command } from "commander";
-import { type EntityTypeName } from "../../lib/args";
+import type { EntityTypeName } from "../../lib/args";
 import { getShipload } from "../../lib/client";
 import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { assertNotBoth, withValidation } from "../../lib/errors";

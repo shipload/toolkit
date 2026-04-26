@@ -83,9 +83,7 @@ describe("formatEntity modules", () => {
 			...base,
 			gatherer: { depth: 100, yield: 700, drain: 25, speed: 500 },
 		});
-		expect(out).toMatch(
-			/Gatherer:\s+depth 100 · yield 700 · speed 500 · 25 energy\/s/,
-		);
+		expect(out).toMatch(/Gatherer:\s+depth 100 · yield 700 · speed 500 · 25 energy\/s/);
 	});
 
 	test("renders zero-valued slot to distinguish from absent", () => {
