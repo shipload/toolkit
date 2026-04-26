@@ -1,4 +1,4 @@
-import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, TimePoint, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, PRECISION, TaskType} from '../types'
 import {
@@ -290,6 +290,38 @@ export function projectEntity(entity: Projectable, options?: ProjectionOptions):
     return projected
 }
 
+export interface ProjectableSnapshot extends Projectable {
+    current_task?: ServerContract.Types.task
+    pending_tasks?: ServerContract.Types.task[]
+}
+
+function buildRemainingProjectable(snapshot: ProjectableSnapshot): Projectable | null {
+    if (!snapshot.schedule) return null
+    const remainingTasks: ServerContract.Types.task[] = []
+    if (snapshot.current_task) remainingTasks.push(snapshot.current_task)
+    if (snapshot.pending_tasks?.length) remainingTasks.push(...snapshot.pending_tasks)
+    if (remainingTasks.length === 0) return null
+
+    const completedCount = snapshot.schedule.tasks.length - remainingTasks.length
+    let startedMs = snapshot.schedule.started.toMilliseconds()
+    for (let i = 0; i < completedCount; i++) {
+        startedMs += snapshot.schedule.tasks[i].duration.toNumber() * 1000
+    }
+
+    return {
+        ...snapshot,
+        schedule: ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: remainingTasks,
+        }),
+    }
+}
+
+export function projectFromCurrentState(snapshot: ProjectableSnapshot): ProjectedEntity {
+    const projectable = buildRemainingProjectable(snapshot)
+    return projectable ? projectEntity(projectable) : createProjectedEntity(snapshot)
+}
+
 function getRecipeInputsForOutput(outputItemId: number): RecipeInput[] | undefined {
     const recipe = getRecipe(outputItemId)
     return recipe?.inputs
@@ -420,4 +452,12 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
     }
 
     return projected
+}
+
+export function projectFromCurrentStateAt(
+    snapshot: ProjectableSnapshot,
+    now: Date
+): ProjectedEntity {
+    const projectable = buildRemainingProjectable(snapshot)
+    return projectable ? projectEntityAt(projectable, now) : createProjectedEntity(snapshot)
 }

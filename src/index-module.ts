@@ -143,9 +143,16 @@ export {
     createProjectedEntity,
     projectEntity,
     projectEntityAt,
+    projectFromCurrentState,
+    projectFromCurrentStateAt,
     validateSchedule,
 } from './scheduling/projection'
-export type {Projectable, ProjectedEntity, ProjectionOptions} from './scheduling/projection'
+export type {
+    Projectable,
+    ProjectableSnapshot,
+    ProjectedEntity,
+    ProjectionOptions,
+} from './scheduling/projection'
 
 export * from './types/capabilities'
 export * from './types/entity'

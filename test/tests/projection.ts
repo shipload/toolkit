@@ -1,10 +1,13 @@
 import {assert} from 'chai'
+import {TimePoint} from '@wharfkit/antelope'
 import {
     type CargoStack,
     ENTITY_CAPACITY_EXCEEDED,
     ITEM_HULL_PLATES,
     ITEM_THRUSTER_CORE,
     projectEntity,
+    projectFromCurrentState,
+    projectFromCurrentStateAt,
     RECIPE_INPUTS_EXCESS,
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
@@ -348,5 +351,101 @@ suite('projectEntity (stack-aware)', function () {
                 'cargoMass should match component mass × quantity'
             )
         })
+    })
+})
+
+suite('projectFromCurrentState', function () {
+    test('skips completed tasks lingering in schedule.tasks (regression)', function () {
+        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
+        ship.schedule = ServerContract.Types.schedule.from({
+            started: '2024-06-04T23:41:09.000',
+            tasks: [
+                makeTask(TaskType.CRAFT, {
+                    cargo: [
+                        {item_id: 5, quantity: 10, stats: 0},
+                        {item_id: 99, quantity: 1, stats: 0},
+                    ],
+                }),
+            ],
+        })
+        ship.is_idle = true
+        const projected = projectFromCurrentState(ship)
+        assert.equal(projected.cargo.length, 1, 'cargo unchanged when no remaining work')
+        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
+    })
+
+    test('projects current_task + pending_tasks against current cargo', function () {
+        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 100, stats: 0}]})
+        ship.schedule = ServerContract.Types.schedule.from({
+            started: '2024-06-04T23:41:09.000',
+            tasks: [
+                makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 30, stats: 0}]}),
+            ],
+        })
+        ship.is_idle = false
+        ship.current_task = makeTask(TaskType.UNLOAD, {
+            cargo: [{item_id: 5, quantity: 30, stats: 0}],
+        })
+        ship.pending_tasks = [
+            makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 20, stats: 0}]}),
+        ]
+        const projected = projectFromCurrentState(ship)
+        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 50)
+    })
+
+    test('returns current state when no schedule', function () {
+        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 0}]})
+        const projected = projectFromCurrentState(ship)
+        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 10)
+    })
+})
+
+suite('projectFromCurrentStateAt', function () {
+    test('skips completed tasks lingering in schedule.tasks (regression)', function () {
+        // Idle snapshot with a completed CRAFT task lingering in schedule.tasks.
+        // Without the snapshot-aware variant, projectEntityAt would re-apply the CRAFT
+        // and throw INSUFFICIENT_ITEM_QUANTITY.
+        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
+        ship.schedule = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(Date.now() - 120_000),
+            tasks: [
+                makeTask(TaskType.CRAFT, {
+                    cargo: [
+                        {item_id: 5, quantity: 10, stats: 0},
+                        {item_id: 99, quantity: 1, stats: 0},
+                    ],
+                }),
+            ],
+        })
+        ship.is_idle = true
+        const projected = projectFromCurrentStateAt(ship, new Date())
+        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
+    })
+
+    test('applies in-progress current_task partially', function () {
+        // Snapshot mid-flight: ship at origin, current_task is a TRAVEL to (100, 0).
+        // At the halfway point, projection.location should interpolate to ~(50, 0).
+        const ship = makeShipFixture({})
+        const taskDuration = 100
+        const elapsed = 50
+        ship.schedule = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(Date.now() - elapsed * 1000),
+            tasks: [
+                makeTask(TaskType.TRAVEL, {
+                    coordinates: {x: 100, y: 0},
+                    duration: taskDuration,
+                }),
+            ],
+        })
+        ship.is_idle = false
+        ship.current_task = makeTask(TaskType.TRAVEL, {
+            coordinates: {x: 100, y: 0},
+            duration: taskDuration,
+        })
+        const projected = projectFromCurrentStateAt(ship, new Date())
+        // Halfway through a 0→100 travel, interpolated x should be near 50.
+        const x = projected.location.x.toNumber()
+        assert.isAtLeast(x, 40)
+        assert.isAtMost(x, 60)
     })
 })

@@ -8,8 +8,8 @@ import {
 } from '../travel/travel'
 import {
     ProjectedEntity,
-    projectEntity as sharedProjectEntity,
-    projectEntityAt as sharedProjectEntityAt,
+    projectFromCurrentState as sharedProjectFromCurrentState,
+    projectFromCurrentStateAt as sharedProjectFromCurrentStateAt,
 } from '../scheduling/projection'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
@@ -128,11 +128,11 @@ export class Ship extends ServerContract.Types.entity_info {
     }
 
     project(): ProjectedEntity {
-        return sharedProjectEntity(this)
+        return sharedProjectFromCurrentState(this)
     }
 
     projectAt(now: Date): ProjectedEntity {
-        return sharedProjectEntityAt(this, now)
+        return sharedProjectFromCurrentStateAt(this, now)
     }
 
     get location(): Location {
