@@ -91,7 +91,7 @@ describe("loadConfig", () => {
 			const message = (err as Error).message;
 			expect(message).toContain(join(tmpDir, "config.ini"));
 			expect(message).toContain(join(userDir, "config.ini"));
-			expect(message).toContain("player init");
+			expect(message).toContain("shiploadcli init");
 		}
 	});
 

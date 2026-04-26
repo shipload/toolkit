@@ -76,8 +76,48 @@ export function formatTaskType(type: number): string {
 	return TASK_TYPES[type] ?? `Unknown(${type})`;
 }
 
+function itemDisplayName(itemId: number): string | null {
+	try {
+		return displayName(resolveItem(itemId));
+	} catch {
+		return null;
+	}
+}
+
+export function formatTaskShort(t: Types.task): string {
+	const label = formatTaskType(Number(t.type));
+	const parts: string[] = [label];
+	if (t.coordinates) parts.push(`to ${formatCoords(t.coordinates)}`);
+	if (t.entitytarget) {
+		parts.push(`→ ${String(t.entitytarget.entity_type)} ${String(t.entitytarget.entity_id)}`);
+	}
+	const cargo = t.cargo ?? [];
+	if (cargo.length === 1) {
+		const c = cargo[0];
+		parts.push(
+			`× ${Number(c.quantity)} ${itemDisplayName(Number(c.item_id)) ?? `Item ${Number(c.item_id)}`}`,
+		);
+	} else if (cargo.length > 1) {
+		parts.push(`× ${cargo.length} item types`);
+	}
+	return parts.join(" ");
+}
+
 export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {
 	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
+}
+
+export function projectEnergy(
+	storedEnergy: number,
+	capacity: number,
+	recharge: number,
+	drainPerSec: number,
+	elapsed_s: number,
+): number {
+	return Math.max(
+		0,
+		Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed_s)),
+	);
 }
 
 export function formatLiveEnergy({
@@ -98,12 +138,17 @@ export function formatLiveEnergy({
 	if (!activeTaskStartedAt) {
 		return `${storedEnergy}/${capacity} (recharge: ${recharge}/s)`;
 	}
-	const elapsed = (now.getTime() - activeTaskStartedAt.getTime()) / 1000;
-	const projected = Math.max(
-		0,
-		Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed)),
-	);
+	const elapsed_s = (now.getTime() - activeTaskStartedAt.getTime()) / 1000;
+	const projected = projectEnergy(storedEnergy, capacity, recharge, drainPerSec, elapsed_s);
 	return `${storedEnergy} → ${projected}/${capacity} (live, recharge: ${recharge}/s)`;
+}
+
+export function formatTimeUTC(d: Date): string {
+	return `${d.toISOString().slice(11, 19)} UTC`;
+}
+
+export function formatCargoUsage(used: number, capacity?: number): string {
+	return capacity != null ? `${formatMass(used)} / ${formatMass(capacity)}` : formatMass(used);
 }
 
 export function formatCoords(coords: Types.coordinates): string {
@@ -134,11 +179,8 @@ export function formatDuration(seconds: number): string {
 }
 
 export function formatItem(itemId: number): string {
-	try {
-		return `${displayName(resolveItem(itemId))} (id:${itemId})`;
-	} catch {
-		return `Item ${itemId}`;
-	}
+	const name = itemDisplayName(itemId);
+	return name ? `${name} (id:${itemId})` : `Item ${itemId}`;
 }
 
 function resourceCategoryFor(itemId: number): ResourceCategory | null {
@@ -303,11 +345,11 @@ export function formatEntity(entity: Types.entity_info): string {
 	statRows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
 
 	if (!entity.is_idle && entity.current_task) {
-		const t = entity.current_task;
-		let taskValue = formatTaskType(Number(t.type));
-		if (t.coordinates) taskValue += ` to ${formatCoords(t.coordinates)}`;
-		taskValue += `  ·  ${formatDuration(Number(entity.current_task_remaining))} remaining`;
-		statRows.push(["Task:", taskValue]);
+		const remaining = formatDuration(Number(entity.current_task_remaining));
+		statRows.push([
+			"Task:",
+			`${formatTaskShort(entity.current_task)}  ·  ${remaining} remaining`,
+		]);
 	}
 
 	if (entity.generator) {
@@ -332,9 +374,10 @@ export function formatEntity(entity: Types.entity_info): string {
 	}
 
 	if (entity.capacity != null) {
-		const usedStr = formatMass(Number(entity.cargomass ?? 0));
-		const capStr = formatMass(Number(entity.capacity));
-		statRows.push(["Cargo:", `${usedStr} / ${capStr}`]);
+		statRows.push([
+			"Cargo:",
+			formatCargoUsage(Number(entity.cargomass ?? 0), Number(entity.capacity)),
+		]);
 		for (const c of entity.cargo ?? []) {
 			statRows.push(["", formatCargoItem(c)]);
 		}
@@ -347,14 +390,9 @@ export function formatEntity(entity: Types.entity_info): string {
 	if (moduleRows.length > 0) sections.push(kvTable(moduleRows));
 
 	if ((entity.pending_tasks?.length ?? 0) > 0) {
-		const pending = entity.pending_tasks
-			.map((t) => {
-				const type = formatTaskType(Number(t.type));
-				if (t.coordinates) return `${type} to ${formatCoords(t.coordinates)}`;
-				return type;
-			})
-			.join(", ");
-		sections.push(kvTable([["Pending:", pending]]));
+		sections.push(
+			kvTable([["Pending:", entity.pending_tasks.map(formatTaskShort).join(", ")]]),
+		);
 	}
 
 	const whenDone = formatWhenDone(entity);

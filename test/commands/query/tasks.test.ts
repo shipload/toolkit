@@ -20,7 +20,9 @@ test("tasks renders schedule with per-task timing", () => {
 	expect(out).toContain("ship 1");
 	expect(out).toContain("Travel");
 	expect(out).toContain("Gather");
-	expect(out).toContain("2026-04-21");
+	expect(out).toContain("3m 42s");
+	expect(out).toContain("32m 48s");
+	expect(out).toMatch(/ago|left/);
 });
 
 test("tasks renders idle when no schedule", () => {
@@ -32,5 +34,5 @@ test("tasks renders idle when no schedule", () => {
 		now: new Date(),
 	} as any);
 	expect(out).toContain("ship 1");
-	expect(out.toLowerCase()).toContain("no tasks");
+	expect(out.toLowerCase()).toContain("no scheduled tasks");
 });

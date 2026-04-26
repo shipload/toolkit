@@ -40,7 +40,6 @@ describe("waitForEntityIdle", () => {
 			entityId: 1n,
 			fetchSnapshot: async () => snapshots[Math.min(calls++, snapshots.length - 1)],
 			sleep: async () => {},
-			now: () => Date.now(),
 			resolveFn: async (...args) => {
 				resolveCalls.push(args);
 			},
@@ -59,9 +58,9 @@ describe("waitForEntityIdle", () => {
 		await waitForEntityIdle({
 			entityType: "ship",
 			entityId: 7n,
+			autoResolve: true,
 			fetchSnapshot: async () => snapshots[Math.min(calls++, snapshots.length - 1)],
 			sleep: async () => {},
-			now: () => Date.now(),
 			resolveFn: async (entityType, entityId, completed, auto) => {
 				resolveCalls.push([entityType, entityId, completed, auto]);
 			},
@@ -74,17 +73,13 @@ describe("waitForEntityIdle", () => {
 	});
 
 	test("honors timeoutMs", async () => {
-		let t = 0;
 		const busy = makeSnapshot({ is_idle: false, remaining: 1000 });
 		const promise = waitForEntityIdle({
 			entityType: "ship",
 			entityId: 1n,
 			timeoutMs: 50,
 			fetchSnapshot: async () => busy,
-			sleep: async () => {
-				t += 100;
-			},
-			now: () => t,
+			sleep: async () => {},
 			resolveFn: async () => {},
 		});
 		await expect(promise).rejects.toThrow(/Timed out/);

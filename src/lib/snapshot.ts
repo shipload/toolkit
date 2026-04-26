@@ -1,3 +1,4 @@
+import type { Types } from "../contracts/server";
 import type { EntityTypeName } from "./args";
 import { server } from "./client";
 
@@ -18,8 +19,19 @@ export interface EntitySnapshot {
 	capacity?: number | bigint | { toString(): string };
 	energy?: number | bigint | { toString(): string };
 	gatherer?: { depth: number | bigint | { toString(): string } };
+	generator?: {
+		capacity: number | bigint | { toString(): string };
+		recharge: number | bigint | { toString(): string };
+	};
 	is_idle: boolean;
-	schedule?: { tasks: unknown[] };
+	current_task?: Types.task;
+	current_task_elapsed?: number | bigint | { toString(): string };
+	current_task_remaining?: number | bigint | { toString(): string };
+	pending_tasks?: Types.task[];
+	schedule?: {
+		started?: { toMilliseconds(): number } | string | Date;
+		tasks: unknown[];
+	};
 }
 
 export async function getEntitySnapshot(

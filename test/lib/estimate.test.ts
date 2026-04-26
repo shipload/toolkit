@@ -106,7 +106,7 @@ describe("renderEstimate", () => {
 			cargo_delta: {},
 			feasibility: { ok: true, issues: [] },
 		});
-		expect(out).toContain("2h0m");
+		expect(out).toContain("duration 2h");
 	});
 });
 

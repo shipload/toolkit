@@ -8,6 +8,7 @@ import {
 	formatOutput,
 	formatResolveHint,
 	formatTaskType,
+	formatTimeUTC,
 	reltime,
 } from "../../lib/format";
 
@@ -34,8 +35,7 @@ function fmtCoords(c: { x: number; y: number; z: number | null } | null | undefi
 }
 
 export function render(view: TasksView): string {
-	const timeStr = `${view.now.toISOString().replace(/.*T/, "").replace(".000Z", "").replace("Z", "")} UTC`;
-	const header = `${view.type} ${view.id}  ·  ${timeStr}`;
+	const header = `${view.type} ${view.id}  ·  ${formatTimeUTC(view.now)}`;
 
 	if (!view.schedule || view.schedule.tasks.length === 0) {
 		return [header, "", "  No scheduled tasks."].join("\n");
