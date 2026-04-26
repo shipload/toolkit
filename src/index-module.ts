@@ -42,7 +42,7 @@ export {
     EpochsManager,
     ActionsManager,
 } from './managers'
-export type {EntityType} from './managers'
+export type {EntityType, LocationStratum} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
 export {getItem, getItems, itemIds} from './market/items'
