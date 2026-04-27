@@ -61,8 +61,13 @@ release:
 	bun changeset version
 	git add .
 	git commit -m "chore: version packages"
-	bun changeset publish
-	git push --follow-tags
+	git push
+	@echo ""
+	@echo "✓ Versions bumped, committed, and pushed."
+	@echo ""
+	@echo "Now publish manually (npm browser auth requires interactive terminal):"
+	@echo "    bun changeset publish"
+	@echo "    git push --follow-tags"
 
 release/cli:
 	$(MAKE) -C packages/cli release

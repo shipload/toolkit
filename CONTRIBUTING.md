@@ -21,14 +21,16 @@ Multiple changesets accumulate between releases. `make release` preflight refuse
 
 ## Releasing
 
-All releases run locally — no CI publishing. `make release` is one-shot:
+All releases run locally — no CI publishing. The flow is two steps:
 
 ```bash
 git checkout master && git pull
-make release
+make release                  # preflight + check + test + build + version + commit + push
+bun changeset publish         # interactive: npm publishes (browser auth) + creates tags
+git push --follow-tags        # push the tags
 ```
 
-What this runs in order:
+`make release` runs:
 
 1. Preflight script — clean tree, on `master`, in sync with origin, ≥1 pending changeset, npm authenticated.
 2. `make check` — biome + each package's type-check.
@@ -36,12 +38,11 @@ What this runs in order:
 4. `make build` — SDK rollup; others as configured.
 5. `bun changeset version` — bumps versions, rewrites internal deps, regenerates CHANGELOGs.
 6. `git commit "chore: version packages"`.
-7. `bun changeset publish` — npm publishes only changed public packages, creates git tags.
-8. `git push --follow-tags` — single push at the end.
+7. `git push`.
 
-If anything before step 7 fails, no mutation has escaped your machine. If step 7 fails partway, `npm publish` is idempotent on retry. If step 8 fails, retry the push.
+The publish step is separate because npm's CLI browser-auth flow requires an interactive terminal and can't be reliably automated. After `make release` finishes you run `bun changeset publish` manually (browser auth window opens once), then push the resulting tags.
 
-For CLI binary releases (after `make release` if `@shipload/cli` version bumped):
+For CLI binary releases (after publish if `@shipload/cli` version bumped):
 
 ```bash
 make release/cli       # builds, signs, notarizes, uploads to GitHub Release

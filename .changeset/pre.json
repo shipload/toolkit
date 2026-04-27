@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@shipload/cli": "1.0.0-beta1",
+    "@shipload/image-renderer": "1.0.0-beta1",
+    "@shipload/item-renderer": "1.0.0-beta1",
+    "@shipload/sdk": "1.0.0-beta1"
+  },
+  "changesets": []
+}
