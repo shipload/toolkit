@@ -6,8 +6,8 @@
       "name": "item-image-worker",
       "dependencies": {
         "@resvg/resvg-wasm": "^2.6.0",
-        "@shipload/item-renderer": "^0.2.1",
-        "@shipload/sdk": "2.0.0-rc15",
+        "@shipload/item-renderer": "^0.2.3",
+        "@shipload/sdk": "2.0.0-rc25",
         "@wharfkit/antelope": "^1.0.0",
       },
       "devDependencies": {
@@ -190,9 +190,9 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.60.2", "", { "os": "win32", "cpu": "x64" }, "sha512-Nd/SgG27WoA9e+/TdK74KnHz852TLa94ovOYySo/yMPuTmpckK/jIF2jSwS3g7ELSKXK13/cVdmg1Z/DaCWKxA=="],
 
-    "@shipload/item-renderer": ["@shipload/item-renderer@0.2.1", "", { "dependencies": { "@shipload/sdk": "2.0.0-rc15", "@wharfkit/antelope": "^1.0.0" } }, "sha512-R944u0tdmJ+dERFANatLpYXK/136C6lJqaJadMDVhQ6Fu3toFQ4PDZ0KqzbbV9/CvlJ9f3842Z71sYYjmWCQrQ=="],
+    "@shipload/item-renderer": ["@shipload/item-renderer@0.2.3", "", { "dependencies": { "@shipload/sdk": "^2.0.0-rc25", "@wharfkit/antelope": "^1.0.0" } }, "sha512-luyOcEETwkaAVLnaHJNZaDRhcLBT/Hg2z8yl4AAGh4FwOqrGOW0FUy56h0WcXvW8SFxFB3G/mfuCuRypG60GmQ=="],
 
-    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc15", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-V1GXjrXLYadbPqFx5s7qfYFhYUC9JoQCfitEf5XmNTP9r2x3ZwiQP4fVf4y1eycZVgMi2zz3z22xzLheE9yUdA=="],
+    "@shipload/sdk": ["@shipload/sdk@2.0.0-rc25", "", { "dependencies": { "@wharfkit/antelope": "1.2.0", "@wharfkit/contract": "^1.2.1", "@wharfkit/session": "^1.3.1", "tslib": "^2.1.0" } }, "sha512-Kjr8YH/hiGWaRm9gTtgus/H/YHJfLBfn9KtbU82iTRARS+ZIMZIYeMmvshTlOcOvGL9nIynbfM4mVz4jDQCq4g=="],
 
     "@types/estree": ["@types/estree@1.0.8", "", {}, "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w=="],
 

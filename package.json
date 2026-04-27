@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.0",
-    "@shipload/item-renderer": "^0.2.1",
-    "@shipload/sdk": "2.0.0-rc15",
+    "@shipload/item-renderer": "^0.2.3",
+    "@shipload/sdk": "2.0.0-rc25",
     "@wharfkit/antelope": "^1.0.0"
   },
   "devDependencies": {
