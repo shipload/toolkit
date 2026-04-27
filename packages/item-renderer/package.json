@@ -1,6 +1,6 @@
 {
     "name": "@shipload/item-renderer",
-    "version": "1.0.0-next.0",
+    "version": "1.0.0-next.1",
     "description": "Deterministic SVG rendering for Shipload items",
     "homepage": "https://github.com/shipload/toolkit/tree/master/packages/item-renderer",
     "repository": {

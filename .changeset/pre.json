@@ -8,6 +8,7 @@
     "@shipload/sdk": "1.0.0-beta1"
   },
   "changesets": [
+    "dark-pillows-attend",
     "ninety-swans-jog"
   ]
 }
