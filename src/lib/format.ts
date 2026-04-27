@@ -15,6 +15,7 @@ import {
 	projectFromCurrentState,
 	type ResourceCategory,
 	resolveItem,
+	resolveItemCategory,
 	schedule,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
@@ -184,48 +185,6 @@ export function formatItem(itemId: number): string {
 	return name ? `${name} (id:${itemId})` : `Item ${itemId}`;
 }
 
-function resourceCategoryFor(itemId: number): ResourceCategory | null {
-	try {
-		return (getItem(itemId).category ?? null) as ResourceCategory | null;
-	} catch {
-		return null;
-	}
-}
-
-export function resolveItemCategory(itemId: number): ResourceCategory | null {
-	return resourceCategoryFor(itemId);
-}
-
-const CATEGORY_BY_INT: Record<number, ResourceCategory> = {
-	0: "ore",
-	1: "gas",
-	2: "regolith",
-	3: "biomass",
-	4: "crystal",
-};
-
-const CATEGORY_LABEL: Record<ResourceCategory, string> = {
-	ore: "Ore",
-	crystal: "Crystal",
-	gas: "Gas",
-	regolith: "Regolith",
-	biomass: "Biomass",
-};
-
-export function formatCategory(categoryInt: number): string {
-	const cat = CATEGORY_BY_INT[categoryInt];
-	if (!cat) return `category ${categoryInt}`;
-	return CATEGORY_LABEL[cat];
-}
-
-export function categoryLabelFromName(cat: ResourceCategory): string {
-	return CATEGORY_LABEL[cat];
-}
-
-export function formatTier(tier: number): string {
-	return `T${tier}`;
-}
-
 export function formatInstallHint(
 	entityType: string,
 	entityId: number | bigint,
@@ -243,17 +202,6 @@ export function formatResolveHint(
 	return `${completedCount} completed task(s) need resolve — run: shiploadcli ${entityType} ${entityId} resolve`;
 }
 
-const TYPE_LABEL: Record<number, string> = {
-	0: "Resource",
-	1: "Component",
-	2: "Module",
-	3: "Entity",
-};
-
-export function typeLabel(itemType: number): string {
-	return TYPE_LABEL[itemType] ?? `type ${itemType}`;
-}
-
 export function formatStats(
 	packed: bigint | number | string | { toString(): string },
 	itemIdOrCategory?: number | ResourceCategory,
@@ -263,11 +211,11 @@ export function formatStats(
 	const values = decodeStats(s, 6);
 	while (values.length > 3 && values[values.length - 1] === 0) values.pop();
 
-	let category: ResourceCategory | null = null;
+	let category: ResourceCategory | undefined;
 	if (typeof itemIdOrCategory === "string") {
 		category = itemIdOrCategory as ResourceCategory;
 	} else if (typeof itemIdOrCategory === "number") {
-		category = resourceCategoryFor(itemIdOrCategory);
+		category = resolveItemCategory(itemIdOrCategory);
 	}
 	if (category) {
 		const defs = getStatDefinitions(category);
@@ -299,11 +247,12 @@ function formatCargoItem(c: Types.cargo_item): string {
 		massStr = `    ${formatMass(getItem(itemId).mass * qty)}`;
 	} catch {}
 
-	const statsStr = formatStats(c.stats, itemId);
+	const stackId = BigInt(c.stats.toString());
+	const statsStr = formatStats(stackId, itemId);
 	const statsDisplay = statsStr ? `    ${statsStr}` : "";
-	const statsRaw = `    stats=${c.stats}`;
+	const stackRaw = `    stack=${stackId}`;
 
-	return `${qty} × ${name}${statsDisplay}${massStr}${statsRaw}`;
+	return `${qty} × ${name}${statsDisplay}${massStr}${stackRaw}`;
 }
 
 export function formatCargo(cargo: Types.cargo_item[]): string {

@@ -1,7 +1,7 @@
 import { type Action, Name } from "@wharfkit/antelope";
 import { Command } from "commander";
 import { Types as ServerTypes } from "../../contracts/server";
-import { appendCargoInput, type EntityTypeName } from "../../lib/args";
+import { type EntityTypeName, parseCargoInput } from "../../lib/args";
 import {
 	type ParsedCargoInput,
 	type ResolvedCargoInput,
@@ -27,21 +27,23 @@ export async function buildAction(opts: BlendOpts): Promise<Action> {
 		ServerTypes.cargo_item.from({
 			item_id: i.itemId,
 			quantity: i.quantity,
-			stats: i.stats,
+			stats: i.stackId,
 			modules: [],
 		}),
 	);
 	return shipload.actions.blend(Name.from(opts.entityType), opts.entityId, cargoInputs);
 }
 
+type BlendCliOptions = {
+	autoResolve?: boolean;
+	estimate?: boolean;
+	wait?: boolean;
+};
+
 export async function runBlend(
 	ctx: EntityContext,
-	opts: {
-		input: ParsedCargoInput[];
-		autoResolve?: boolean;
-		estimate?: boolean;
-		wait?: boolean;
-	},
+	inputs: ParsedCargoInput[],
+	opts: BlendCliOptions,
 ): Promise<void> {
 	assertNotBoth(opts, ["estimate", "wait"]);
 	if (opts.estimate) {
@@ -59,7 +61,7 @@ export async function runBlend(
 		await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(opts.autoResolve));
 		const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId);
 		const resolved = resolveCargoInputs(
-			opts.input,
+			inputs,
 			snap.cargo as unknown as ServerTypes.cargo_item[],
 		);
 		const action = await buildAction({
@@ -88,23 +90,24 @@ export const SUBCOMMAND: EntitySubcommand = {
 				"before",
 				"Requires: multiple stacks of the same item in cargo; entity idle.\n",
 			)
-			.option(
-				"--input <val>",
-				"cargo input item:qty:stats (repeatable; explicit stats almost always required for blend)",
-				appendCargoInput,
-				[] as ParsedCargoInput[],
+			.addHelpText(
+				"after",
+				`
+Example:
+  # Blend two Gas stacks (11 + 21 = 32 units total)
+  shiploadcli ship 1 blend 301:1000:11 301:2000:21
+
+Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`,
+			)
+			.argument(
+				"<input...>",
+				"<item-id>:<stack-id>:<qty> — total units to pull from a specific cargo stack. Repeat once per stack.",
+				parseCargoInput,
 			)
 			.option("--auto-resolve", "resolve completed tasks on the target entity before acting")
 			.option("--estimate", "print duration/energy/cargo estimate without submitting")
 			.option("--wait", "no-op for blend (instantaneous); accepted for consistency")
-			.action(
-				async (opts: {
-					input: ParsedCargoInput[];
-					autoResolve?: boolean;
-					estimate?: boolean;
-					wait?: boolean;
-				}) => {
-					await runBlend(ctx, opts);
-				},
-			),
+			.action(async (inputs: ParsedCargoInput[], opts: BlendCliOptions) => {
+				await runBlend(ctx, inputs, opts);
+			}),
 };

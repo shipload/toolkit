@@ -60,6 +60,16 @@ export interface TravelSummary {
 	energyCost: number;
 }
 
+export interface CraftSummary {
+	outputItemId: number;
+	outputQty: number;
+	slots: {
+		itemId: number;
+		requiredQty: number;
+		contributions: { stackId: bigint; qty: number }[];
+	}[];
+}
+
 export interface EstimateResult {
 	duration_s: number;
 	energy_cost: number;
@@ -67,6 +77,7 @@ export interface EstimateResult {
 	feasibility: { ok: boolean; issues: FeasibilityIssue[] };
 	with_recharge?: boolean;
 	travel?: TravelSummary;
+	craft?: CraftSummary;
 }
 
 /**
@@ -560,6 +571,10 @@ export async function estimateCraft(params: {
 	})) as unknown as {
 		recipes: {
 			output_item_id: number | bigint | { toString(): string };
+			inputs: {
+				item_id: number | bigint | { toString(): string };
+				quantity: number | bigint | { toString(): string };
+			}[];
 		}[];
 	};
 	const recipe = recipeResponse?.recipes?.[0];
@@ -624,11 +639,26 @@ export async function estimateCraft(params: {
 		entity: { entityType: String(entityType), entityId },
 	});
 
+	const craftSlots =
+		recipe?.inputs.map((slot) => {
+			const itemId = Number(slot.item_id.toString());
+			const requiredQty = Number(slot.quantity.toString()) * quantity;
+			const contributions = inputs
+				.filter((i) => i.itemId === itemId)
+				.map((i) => ({ stackId: i.stackId, qty: i.quantity }));
+			return { itemId, requiredQty, contributions };
+		}) ?? [];
+
 	return {
 		duration_s: duration + rechargeSeconds,
 		energy_cost: energy,
 		cargo_delta: computeCraftCargoDelta(inputs, outputItemId, quantity),
 		feasibility: { ok: craftIssues.length === 0, issues: craftIssues },
 		with_recharge: recharge,
+		craft: {
+			outputItemId,
+			outputQty: quantity,
+			slots: craftSlots,
+		},
 	};
 }

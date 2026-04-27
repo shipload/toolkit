@@ -59,29 +59,37 @@ describe("parseEntityRefList", () => {
 });
 
 describe("parseCargoInput", () => {
-	test("parses full form with explicit stats", () => {
-		expect(parseCargoInput("5:100:0")).toEqual({
-			itemId: 5,
-			quantity: 100,
-			stats: 0n,
-		});
-	});
-	test("parses full form with non-zero stats", () => {
-		expect(parseCargoInput("201:12:251479207179")).toEqual({
+	test("parses item-id:stack-id:qty", () => {
+		expect(parseCargoInput("201:251479207179:12")).toEqual({
 			itemId: 201,
+			stackId: 251479207179n,
 			quantity: 12,
-			stats: 251479207179n,
 		});
 	});
-	test("parses short form with null stats (auto-match sentinel)", () => {
-		expect(parseCargoInput("5:100")).toEqual({
+	test("accepts stack-id 0", () => {
+		expect(parseCargoInput("5:0:100")).toEqual({
 			itemId: 5,
+			stackId: 0n,
 			quantity: 100,
-			stats: null,
 		});
+	});
+	test("rejects two-field form (was old --input shorthand)", () => {
+		expect(() => parseCargoInput("5:100")).toThrow(/<item-id>:<stack-id>:<qty>/);
 	});
 	test("rejects single-component input", () => {
-		expect(() => parseCargoInput("5")).toThrow(InvalidArgumentError);
+		expect(() => parseCargoInput("5")).toThrow(/<item-id>:<stack-id>:<qty>/);
+	});
+	test("rejects four-component input", () => {
+		expect(() => parseCargoInput("5:0:100:99")).toThrow(/<item-id>:<stack-id>:<qty>/);
+	});
+	test("rejects negative qty", () => {
+		expect(() => parseCargoInput("201:0:-5")).toThrow(/positive integer/);
+	});
+	test("rejects qty zero", () => {
+		expect(() => parseCargoInput("201:0:0")).toThrow(/positive integer/);
+	});
+	test("rejects negative item-id", () => {
+		expect(() => parseCargoInput("-1:0:5")).toThrow(/non-negative/);
 	});
 });
 

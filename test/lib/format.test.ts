@@ -3,7 +3,6 @@ import { encodeStats, TaskType } from "@shipload/sdk";
 import { Checksum256, UInt64 } from "@wharfkit/antelope";
 import {
 	formatCargo,
-	formatCategory,
 	formatEntity,
 	formatInstallHint,
 	formatLiveEnergy,
@@ -12,8 +11,6 @@ import {
 	formatReserve,
 	formatResolveHint,
 	formatStats,
-	formatTier,
-	typeLabel,
 } from "../../src/lib/format";
 
 describe("formatStats", () => {
@@ -168,27 +165,6 @@ describe("formatOutput", () => {
 	});
 });
 
-describe("formatCategory", () => {
-	test("returns SDK label for known enum int", () => {
-		// contract enum: ORE=0, GAS=1, REGOLITH=2, BIOMASS=3, CRYSTAL=4
-		expect(formatCategory(0)).toBe("Ore");
-		expect(formatCategory(4)).toBe("Crystal");
-		expect(formatCategory(1)).toBe("Gas");
-		expect(formatCategory(2)).toBe("Regolith");
-		expect(formatCategory(3)).toBe("Biomass");
-	});
-	test("falls back to 'category N' for unknown value", () => {
-		expect(formatCategory(99)).toBe("category 99");
-	});
-});
-
-describe("formatTier", () => {
-	test("returns Tn for 1-based tier", () => {
-		expect(formatTier(1)).toBe("T1");
-		expect(formatTier(10)).toBe("T10");
-	});
-});
-
 describe("formatInstallHint", () => {
 	test("emits install command referencing entity and slot", () => {
 		const hint = formatInstallHint("ship", 1n, 2, "Crafter");
@@ -320,16 +296,6 @@ describe("formatEntity live energy", () => {
 	});
 });
 
-describe("typeLabel", () => {
-	test("decodes the item-type enum (0=Resource 1=Component 2=Module 3=Entity)", () => {
-		expect(typeLabel(0)).toBe("Resource");
-		expect(typeLabel(1)).toBe("Component");
-		expect(typeLabel(2)).toBe("Module");
-		expect(typeLabel(3)).toBe("Entity");
-		expect(typeLabel(99)).toBe("type 99");
-	});
-});
-
 describe("formatReserve", () => {
 	test("returns single value when reserve equals reserve_max", () => {
 		expect(formatReserve(820, 820)).toBe("820");
@@ -381,15 +347,15 @@ describe("formatEntity — empty name", () => {
 	});
 });
 
-describe("formatCargo stats suffix", () => {
-	test("appends stats=<uint> to each stack line", () => {
+describe("formatCargo stack suffix", () => {
+	test("appends stack=<uint> to each stack line", () => {
 		const cargo = [{ item_id: 201, quantity: 45, stats: 251479207179n, modules: [] } as any];
 		const out = formatCargo(cargo);
-		expect(out).toContain("stats=251479207179");
+		expect(out).toContain("stack=251479207179");
 	});
-	test("stats=0 still rendered so the discriminator is always visible", () => {
+	test("stack=0 still rendered so the discriminator is always visible", () => {
 		const cargo = [{ item_id: 10200, quantity: 1, stats: 0n, modules: [] } as any];
 		const out = formatCargo(cargo);
-		expect(out).toContain("stats=0");
+		expect(out).toContain("stack=0");
 	});
 });

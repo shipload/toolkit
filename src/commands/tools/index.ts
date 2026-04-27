@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import * as find from "./find";
 import * as scan from "./scan";
+import * as tuiSelftest from "./tui-selftest";
 import * as verifyTiers from "./verify-tiers";
 
 export function register(program: Command): void {
@@ -8,4 +9,5 @@ export function register(program: Command): void {
 	scan.registerSubcommand(tools);
 	find.registerSubcommand(tools);
 	verifyTiers.registerSubcommand(tools);
+	tuiSelftest.registerSubcommand(tools);
 }

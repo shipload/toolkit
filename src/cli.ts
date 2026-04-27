@@ -33,6 +33,7 @@ import * as nftinfo from "./commands/query/nftinfo";
 import * as player from "./commands/query/player";
 import * as recipe from "./commands/query/recipe";
 import * as resources from "./commands/query/resources";
+import * as shipLocation from "./commands/query/ship-location";
 import * as status from "./commands/query/status";
 import * as stratum from "./commands/query/stratum";
 import * as tasks from "./commands/query/tasks";
@@ -81,6 +82,7 @@ export function build(): Command {
 	entities.register(program);
 	location.register(program);
 	registerEntitySubcommand(nearby.SUBCOMMAND);
+	registerEntitySubcommand(shipLocation.SUBCOMMAND);
 	items.register(program);
 	recipe.register(program);
 	config.register(program);
@@ -89,6 +91,7 @@ export function build(): Command {
 	nftinfo.register(program);
 	stratum.register(program);
 	registerEntitySubcommand(inventory.SUBCOMMAND);
+	registerEntitySubcommand(inventory.SUBCOMMAND_CARGO_ALIAS);
 	registerEntitySubcommand(tasks.SUBCOMMAND);
 
 	foundcompany.register(program);

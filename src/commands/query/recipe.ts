@@ -1,8 +1,8 @@
-import { formatMass, formatTier, getItem } from "@shipload/sdk";
+import { categoryLabelFromIndex, formatMass, formatTier, getItem } from "@shipload/sdk";
 import type { Command } from "commander";
 import { parseUint32 } from "../../lib/args";
 import { server } from "../../lib/client";
-import { formatCategory, formatOutput } from "../../lib/format";
+import { formatOutput } from "../../lib/format";
 
 // Wire shape returned by the server's getrecipe / getrecipes readonly actions.
 // Distinct from the SDK's RecipeInput discriminated union (camelCase, item-or-category).
@@ -35,7 +35,7 @@ function formatInput(i: WireRecipeInput): string {
 		const item = getItem(itemId);
 		return `${i.quantity}× ${item.name} ${formatTier(item.tier)}`;
 	}
-	return `${i.quantity}× ${formatCategory(Number(i.category))}${tierSuffix}`;
+	return `${i.quantity}× ${categoryLabelFromIndex(Number(i.category))}${tierSuffix}`;
 }
 
 function itemName(itemId: number): string {

@@ -7,6 +7,11 @@ import { makeProgressRenderer } from "./progress";
 import { ensureNoPendingResolve } from "./resolve-prompt";
 import type { TransactResult } from "./session";
 import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
+import {
+	DEFAULT_FETCH_INTERVAL_MS,
+	DEFAULT_RENDER_INTERVAL_MS,
+	streamEntitySnapshot,
+} from "./snapshot-stream";
 
 export const WAIT_OPTION = new Option(
 	"--wait",
@@ -70,13 +75,6 @@ export interface WaitOpts {
 	watch?: boolean;
 }
 
-function toNumber(v: unknown): number {
-	if (v === undefined || v === null) return 0;
-	if (typeof v === "number") return v;
-	if (typeof v === "bigint") return Number(v);
-	return Number(String(v));
-}
-
 function loadAutoResolveDefault(): boolean {
 	try {
 		return loadConfig().autoResolve;
@@ -100,9 +98,6 @@ export async function maybeAwaitAndPrint(
 		initialSnapshot,
 	});
 }
-
-const DEFAULT_RENDER_INTERVAL_MS = 1_000;
-const DEFAULT_FETCH_INTERVAL_MS = 5_000;
 
 export async function awaitAndPrint(
 	entityType: EntityTypeName | string,
@@ -128,14 +123,11 @@ export async function awaitAndPrint(
 }
 
 export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot> {
-	const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
-	const fetchSnapshot: FetchSnapshotFn = opts.fetchSnapshot ?? getEntitySnapshot;
-	const resolveFn: ResolveFn = opts.resolveFn ?? ensureNoPendingResolve;
 	const renderInterval = opts.renderIntervalMs ?? DEFAULT_RENDER_INTERVAL_MS;
 	const fetchInterval = opts.fetchIntervalMs ?? DEFAULT_FETCH_INTERVAL_MS;
+	const fetchSnapshot: FetchSnapshotFn = opts.fetchSnapshot ?? getEntitySnapshot;
+	const resolveFn: ResolveFn = opts.resolveFn ?? ensureNoPendingResolve;
 	const watch = !!opts.watch;
-
-	let modelNow = 0;
 	const deadline = opts.timeoutMs ?? null;
 
 	const maybeAutoResolve = async (s: EntitySnapshot): Promise<EntitySnapshot> => {
@@ -147,70 +139,31 @@ export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot>
 		return s;
 	};
 
-	let snap = opts.initialSnapshot ?? (await fetchSnapshot(opts.entityType, opts.entityId));
-	let snapAtModel = modelNow;
-	let lastFetchAtModel = modelNow;
+	let modelNow = 0;
+	let lastSnap: EntitySnapshot | undefined;
 
-	if (snap.is_idle) {
-		if (!watch) return await maybeAutoResolve(snap);
-		snap = await maybeAutoResolve(snap);
-	}
-
-	let elapsedAtFetch = snap.is_idle ? 0 : toNumber(snap.current_task_elapsed);
-	let remainingAtFetch = snap.is_idle ? 0 : toNumber(snap.current_task_remaining);
-	let totalAtFetch = elapsedAtFetch + remainingAtFetch;
-	let attempt = 0;
-
-	while (true) {
-		const dt = (modelNow - snapAtModel) / 1000;
-		const elapsed_s = elapsedAtFetch + dt;
-		const remaining_s = Math.max(0, remainingAtFetch - dt);
-		const total_s = totalAtFetch > 0 ? totalAtFetch : elapsed_s + remaining_s;
-		const sinceLastFetch_s = (modelNow - lastFetchAtModel) / 1000;
-
-		opts.onTick?.({
-			snap,
-			elapsed_s,
-			remaining_s,
-			total_s,
-			attempt,
-			sinceLastFetch_s,
-			fetchInterval_s: fetchInterval / 1000,
-		});
-		attempt++;
+	for await (const tick of streamEntitySnapshot({
+		entityType: opts.entityType,
+		entityId: opts.entityId,
+		initialSnapshot: opts.initialSnapshot,
+		fetchSnapshot: opts.fetchSnapshot,
+		sleep: opts.sleep,
+		renderIntervalMs: renderInterval,
+		fetchIntervalMs: fetchInterval,
+	})) {
+		opts.onTick?.(tick);
+		lastSnap = tick.snap;
 
 		if (deadline !== null && modelNow >= deadline) {
 			throw new Error(`Timed out waiting for ${opts.entityType} ${opts.entityId}`);
 		}
-
-		const needRefetch =
-			(!snap.is_idle && remaining_s <= 0) || sinceLastFetch_s * 1000 >= fetchInterval;
-
-		await sleep(renderInterval);
 		modelNow += renderInterval;
 
-		if (!needRefetch) continue;
-
-		try {
-			snap = await fetchSnapshot(opts.entityType, opts.entityId);
-		} catch {
-			lastFetchAtModel = modelNow;
-			continue;
+		if (tick.snap.is_idle) {
+			const resolved = await maybeAutoResolve(tick.snap);
+			if (!watch) return resolved;
+			lastSnap = resolved;
 		}
-		snapAtModel = modelNow;
-		lastFetchAtModel = modelNow;
-
-		if (snap.is_idle) {
-			if (!watch) return await maybeAutoResolve(snap);
-			snap = await maybeAutoResolve(snap);
-			elapsedAtFetch = 0;
-			remainingAtFetch = 0;
-			totalAtFetch = 0;
-			continue;
-		}
-
-		elapsedAtFetch = toNumber(snap.current_task_elapsed);
-		remainingAtFetch = toNumber(snap.current_task_remaining);
-		totalAtFetch = elapsedAtFetch + remainingAtFetch;
 	}
+	return lastSnap as EntitySnapshot;
 }

@@ -1,7 +1,27 @@
 import { expect, test } from "bun:test";
-import { renderDetail, renderList } from "../../../src/commands/query/stratum";
+import { type LocationStratum, LocationType } from "@shipload/sdk";
+import { renderDetail } from "../../../src/commands/query/stratum";
+import { renderStrataTable } from "../../../src/lib/strata-render";
 
-test("stratum detail renders item, reserve, richness", () => {
+function stratum(
+	index: number,
+	itemId: number,
+	reserve: number,
+	richness: number,
+	reserveMax = reserve,
+): LocationStratum {
+	return {
+		index,
+		itemId,
+		reserve,
+		reserveMax,
+		richness,
+		seed: 0n,
+		stats: { stat1: 0, stat2: 0, stat3: 0 } as any,
+	};
+}
+
+test("renderDetail still renders item, reserve, richness from raw stratum row", () => {
 	const out = renderDetail(
 		{ item_id: 101, reserve: 1000, seed: "abc", richness: 50 } as any,
 		null,
@@ -11,78 +31,89 @@ test("stratum detail renders item, reserve, richness", () => {
 	expect(out).toContain("101");
 });
 
-test("stratum list renders header and per-row non-empty strata", () => {
-	const out = renderList({
-		x: 10n,
-		y: 20n,
+test("renderStrataTable renders header and per-row non-empty strata", () => {
+	const out = renderStrataTable({
+		coords: { x: 10n, y: 20n },
+		locationType: LocationType.ASTEROID,
 		locationTypeLabel: "Asteroid",
 		size: 64,
-		rows: [
-			{ index: 3, itemId: 101, reserve: 12000, richness: 64, stats: 0n },
-			{ index: 17, itemId: 201, reserve: 8400, richness: 72, stats: 0n },
-		],
+		strata: [stratum(3, 101, 12000, 64), stratum(17, 201, 8400, 72)],
 	});
 	expect(out).toContain("(10, 20)");
 	expect(out).toContain("Asteroid");
 	expect(out).toContain("64 strata");
-	expect(out).toContain("[  3]");
 	expect(out).toContain("12000");
+	expect(out).toContain("8400");
 });
 
-test("stratum list is empty when no non-empty strata", () => {
-	const out = renderList({
-		x: 0n,
-		y: 0n,
+test("renderStrataTable empty when no non-empty strata", () => {
+	const out = renderStrataTable({
+		coords: { x: 0n, y: 0n },
+		locationType: LocationType.EMPTY,
 		locationTypeLabel: "Empty",
 		size: 0,
-		rows: [],
+		strata: [],
 	});
 	expect(out.toLowerCase()).toContain("no non-empty strata");
 });
 
-const reachRows = [
-	{ index: 42, itemId: 101, reserve: 15, richness: 400, stats: 0n },
-	{ index: 624, itemId: 501, reserve: 16, richness: 410, stats: 0n },
-	{ index: 705, itemId: 501, reserve: 45, richness: 541, stats: 0n },
+const reachRows: LocationStratum[] = [
+	stratum(42, 101, 15, 400),
+	stratum(624, 501, 16, 410),
+	stratum(705, 501, 45, 541),
 ];
 
-test("renderList with reach hides out-of-depth rows by default", () => {
-	const out = renderList(
-		{ x: 0n, y: 0n, locationTypeLabel: "Planet", size: 3618, rows: reachRows },
-		{ depth: 100, showAll: false },
-	);
-	expect(out).toContain("[ 42]");
-	expect(out).not.toContain("[624]");
-	expect(out).not.toContain("[705]");
-	expect(out).toContain("1 reachable of 3 · gatherer depth 100");
-});
-
-test("renderList with reach + showAll marks unreachable rows with OOD and includes legend", () => {
-	const out = renderList(
-		{ x: 0n, y: 0n, locationTypeLabel: "Planet", size: 3618, rows: reachRows },
-		{ depth: 100, showAll: true },
-	);
-	expect(out).toContain("[ 42]");
-	expect(out).toContain("[624]");
-	expect(out).toContain("[705]");
-	expect(out).toMatch(/\[624\].* OOD/);
-	expect(out).toMatch(/\[705\].* OOD/);
-	expect(out).not.toMatch(/\[ 42\].* OOD/);
-	expect(out).toContain("1 reachable of 3 · gatherer depth 100");
-	expect(out).toContain("OOD = out of depth");
-});
-
-test("renderList without reach parameter is unchanged", () => {
-	const out = renderList({
-		x: 0n,
-		y: 0n,
+test("renderStrataTable with reach hides out-of-depth rows by default", () => {
+	const out = renderStrataTable({
+		coords: { x: 0n, y: 0n },
+		locationType: LocationType.PLANET,
 		locationTypeLabel: "Planet",
 		size: 3618,
-		rows: reachRows,
+		strata: reachRows,
+		reach: { depth: 100 },
 	});
-	expect(out).toContain("[ 42]");
-	expect(out).toContain("[624]");
-	expect(out).toContain("[705]");
+	const lines = out.split("\n");
+	expect(lines.some((l) => /^\s*42\s/.test(l))).toBe(true);
+	expect(lines.some((l) => /^\s*624\s/.test(l))).toBe(false);
+	expect(lines.some((l) => /^\s*705\s/.test(l))).toBe(false);
+	expect(out).toContain("1 reachable of 3 · gatherer depth 100");
+});
+
+test("renderStrataTable with reach + showAll marks unreachable rows with OOD", () => {
+	const out = renderStrataTable({
+		coords: { x: 0n, y: 0n },
+		locationType: LocationType.PLANET,
+		locationTypeLabel: "Planet",
+		size: 3618,
+		strata: reachRows,
+		reach: { depth: 100 },
+		showAll: true,
+	});
+	const lines = out.split("\n");
+	const row42 = lines.find((l) => /^\s*42\s/.test(l));
+	const row624 = lines.find((l) => /^\s*624\s/.test(l));
+	const row705 = lines.find((l) => /^\s*705\s/.test(l));
+	expect(row42).toBeDefined();
+	expect(row624).toBeDefined();
+	expect(row705).toBeDefined();
+	expect(row42).not.toContain("OOD");
+	expect(row624).toContain("OOD");
+	expect(row705).toContain("OOD");
+	expect(out).toContain("1 reachable of 3 · gatherer depth 100");
+});
+
+test("renderStrataTable without reach parameter shows all rows and no reach summary", () => {
+	const out = renderStrataTable({
+		coords: { x: 0n, y: 0n },
+		locationType: LocationType.PLANET,
+		locationTypeLabel: "Planet",
+		size: 3618,
+		strata: reachRows,
+	});
+	const lines = out.split("\n");
+	expect(lines.some((l) => /^\s*42\s/.test(l))).toBe(true);
+	expect(lines.some((l) => /^\s*624\s/.test(l))).toBe(true);
+	expect(lines.some((l) => /^\s*705\s/.test(l))).toBe(true);
 	expect(out).not.toContain("OOD");
 	expect(out).not.toContain("reachable");
 });

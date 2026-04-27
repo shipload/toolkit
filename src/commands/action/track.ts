@@ -2,25 +2,23 @@ import { Command } from "commander";
 import { ALL_ENTITY_TYPES } from "../../lib/args";
 import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
 import { withValidation } from "../../lib/errors";
-import { getEntitySnapshot } from "../../lib/snapshot";
-import { AUTO_RESOLVE_OPTION, awaitAndPrint, TIMEOUT_OPTION } from "../../lib/wait";
+import { AUTO_RESOLVE_OPTION, TIMEOUT_OPTION } from "../../lib/wait";
+import { runTrackView } from "../../tui";
 
 const DESCRIPTION =
-	"Live, in-place UI for the entity. Shows location, energy, cargo, and schedule. Refreshes every second; resyncs with the chain every 5s. Stays open across idle/busy transitions — exit with Ctrl-C or --timeout.";
+	"Live full-screen TUI for the entity. Shows location, energy, cargo, and schedule. Press 'r' to resolve completed tasks. Exit with 'q' or Ctrl-C.";
 
 export async function runTrack(
 	ctx: EntityContext,
 	opts: { timeout?: number; autoResolve?: boolean },
 ): Promise<void> {
+	if (opts.autoResolve) {
+		console.error(
+			"Note: --auto-resolve is ignored in the track TUI. Use 'r' to resolve manually, or `shiploadcli <entity> <id> wait --auto-resolve`.",
+		);
+	}
 	await withValidation(async () => {
-		const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId);
-		await awaitAndPrint(ctx.entityType, ctx.entityId, {
-			timeoutMs: opts.timeout,
-			autoResolve: opts.autoResolve,
-			progress: true,
-			watch: true,
-			initialSnapshot: snap,
-		});
+		await runTrackView(ctx, { timeoutMs: opts.timeout });
 	});
 }
 

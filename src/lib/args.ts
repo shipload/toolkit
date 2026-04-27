@@ -43,34 +43,30 @@ export function parseEntityRefList(s: string): EntityRef[] {
 	});
 }
 
-export type CargoInput = ParsedCargoInput;
-
-export function appendCargoInput(val: string, acc: ParsedCargoInput[] = []): ParsedCargoInput[] {
-	acc.push(parseCargoInput(val));
-	return acc;
-}
-
 export function parseCargoInput(s: string): ParsedCargoInput {
 	const parts = s.split(":");
-	if (parts.length < 2 || parts.length > 3) {
+	if (parts.length !== 3) {
 		throw new InvalidArgumentError(
-			`cargo input must be "item:qty" or "item:qty:stats" (got "${s}")`,
+			`cargo input must be "<item-id>:<stack-id>:<qty>" (got "${s}")`,
 		);
 	}
 	const itemId = Number(parts[0]);
-	const quantity = Number(parts[1]);
-	const stats = parts[2] === undefined ? null : BigInt(parts[2]);
+	const stackIdStr = parts[1];
+	const quantity = Number(parts[2]);
 	if (!Number.isInteger(itemId) || itemId < 0) {
 		throw new InvalidArgumentError(
-			`cargo item must be non-negative integer (got "${parts[0]}")`,
+			`cargo item-id must be a non-negative integer (got "${parts[0]}")`,
+		);
+	}
+	if (!/^\d+$/.test(stackIdStr)) {
+		throw new InvalidArgumentError(
+			`cargo stack-id must be a non-negative integer (got "${parts[1]}")`,
 		);
 	}
 	if (!Number.isInteger(quantity) || quantity <= 0) {
-		throw new InvalidArgumentError(
-			`cargo quantity must be positive integer (got "${parts[1]}")`,
-		);
+		throw new InvalidArgumentError(`cargo qty must be a positive integer (got "${parts[2]}")`);
 	}
-	return { itemId, quantity, stats };
+	return { itemId, stackId: BigInt(stackIdStr), quantity };
 }
 
 export function parseInt64(s: string): bigint {

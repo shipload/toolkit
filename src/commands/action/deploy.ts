@@ -1,7 +1,7 @@
 import { type Action, Name } from "@wharfkit/antelope";
 import { Command } from "commander";
 import type { Types as ServerTypes } from "../../contracts/server";
-import { type EntityTypeName, parseUint32 } from "../../lib/args";
+import { type EntityTypeName, parseCargoInput } from "../../lib/args";
 import { type ParsedCargoInput, resolveCargoInputs } from "../../lib/cargo-resolve";
 import { getShipload } from "../../lib/client";
 import type { EntityContext, EntitySubcommand } from "../../lib/entity-scope";
@@ -9,13 +9,14 @@ import { withValidation } from "../../lib/errors";
 import { checkResolveEntity } from "../../lib/resolve-prompt";
 import { transact } from "../../lib/session";
 import { getEntitySnapshot } from "../../lib/snapshot";
+import { ValidationError } from "../../lib/validate";
 import { maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION } from "../../lib/wait";
 
 export interface DeployOpts {
 	entityType: EntityTypeName;
 	entityId: bigint;
 	packedItemId: number;
-	stats: bigint;
+	stackId: bigint;
 }
 
 export async function buildAction(opts: DeployOpts): Promise<Action> {
@@ -24,12 +25,11 @@ export async function buildAction(opts: DeployOpts): Promise<Action> {
 		Name.from(opts.entityType),
 		opts.entityId,
 		opts.packedItemId,
-		opts.stats,
+		opts.stackId,
 	);
 }
 
 interface DeployCliOptions {
-	stats?: string;
 	autoResolve?: boolean;
 	wait?: boolean;
 	track?: boolean;
@@ -37,27 +37,26 @@ interface DeployCliOptions {
 
 export async function runDeploy(
 	ctx: EntityContext,
-	packedItemId: number,
+	input: ParsedCargoInput,
 	options: DeployCliOptions,
 ): Promise<void> {
 	await withValidation(async () => {
+		if (input.quantity !== 1) {
+			throw new ValidationError(
+				`deploy expects qty=1 in <input> (packed entities are unique); got ${input.quantity}`,
+			);
+		}
 		await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve));
 		const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId);
-		const parsedInput: ParsedCargoInput = {
-			itemId: packedItemId,
-			quantity: 1,
-			stats: options.stats === undefined ? null : BigInt(options.stats),
-		};
 		const [resolved] = resolveCargoInputs(
-			[parsedInput],
+			[input],
 			snap.cargo as unknown as ServerTypes.cargo_item[],
-			"stats",
 		);
 		const action = await buildAction({
 			entityType: ctx.entityType,
 			entityId: ctx.entityId,
-			packedItemId,
-			stats: resolved.stats,
+			packedItemId: input.itemId,
+			stackId: resolved.stackId,
 		});
 		const result = await transact(
 			{ action },
@@ -75,15 +74,24 @@ export const SUBCOMMAND: EntitySubcommand = {
 		new Command("deploy")
 			.description("Deploy an entity from a packed cargo NFT")
 			.addHelpText("before", "Requires: packed-entity NFT in cargo; deploy location valid.\n")
-			.argument("<packed-item-id>", "packed item id", parseUint32)
-			.option(
-				"--stats <n>",
-				"cargo stack stats (packed uint; omit to auto-match the single cargo stack for this item)",
+			.addHelpText(
+				"after",
+				`
+Example:
+  # Deploy a packed entity (qty is always 1)
+  shiploadcli ship 1 deploy 27:888888888:1
+
+Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`,
+			)
+			.argument(
+				"<input>",
+				"<packed-item-id>:<stack-id>:1 — packed entity to deploy from cargo.",
+				parseCargoInput,
 			)
 			.option("--auto-resolve", "resolve completed tasks on the source entity before acting")
 			.addOption(WAIT_OPTION)
 			.addOption(TRACK_OPTION)
-			.action(async (packedItemId: number, opts: DeployCliOptions) => {
-				await runDeploy(ctx, packedItemId, opts);
+			.action(async (input: ParsedCargoInput, opts: DeployCliOptions) => {
+				await runDeploy(ctx, input, opts);
 			}),
 };

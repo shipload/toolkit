@@ -97,15 +97,16 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `<src-type> <src-id> gather <dest-type> <dest-id> <stratum> <quantity>` — extract resources from a stratum into a destination entity.
 - `<src-type> <src-id> transfer <dest-type> <dest-id> <item-id> <stats> <quantity>` — move cargo between entities of the same owner.
 - `<entity-type> <id> recharge` — recharge energy on an entity with a generator.
-- `<entity-type> <id> craft <recipe-id> <quantity>` — produce items from a recipe. Pass inputs with repeatable `--input item:qty:stats`.
-- `<entity-type> <id> blend` — merge multiple stacks of the same item into one with blended stats. Pass inputs with repeatable `--input item:qty:stats`.
-- `<entity-type> <id> deploy <packed-item-id> <name>` — deploy an entity from a packed cargo NFT.
+- `<entity-type> <id> craft <recipe-id> <quantity> <input>...` — produce items from a recipe. Each input is `<item-id>:<stack-id>:<qty>`; total qty per slot must equal `recipe.qty × quantity`. Multiple inputs with the same item-id draw from multiple stacks.
+- `<entity-type> <id> blend <input>...` — merge multiple stacks of the same item into one with blended stats. Each input is `<item-id>:<stack-id>:<qty>`.
+- `<entity-type> <id> deploy <input>` — deploy an entity from a packed cargo NFT. Input is `<packed-item-id>:<stack-id>:1`.
 - `<entity-type> <id> wrap <owner> <cargo-id> <quantity>` — wrap cargo into an NFT for the specified owner.
 - `<entity-type> <id> addmodule <module-index> <module-cargo-id>` — attach a module cargo to an entity slot.
 - `<entity-type> <id> rmmodule <module-index>` — remove a module from a slot.
 - `<entity-type> <id> resolve` — process completed tasks on an entity.
 - `<entity-type> <id> cancel <count>` — cancel pending tasks on an entity (count required).
 - `<entity-type> <id> wait` — block until the entity's active task ends, auto-resolve, and print post-state. Supports `--timeout <s>`.
+- `<entity-type> <id> track` — open an interactive full-screen TUI for the entity. Updates every second, refetches every 5s. Press `r` to resolve completed tasks, `?` for help, `` ` `` to toggle the console overlay, `q` or Ctrl-C to exit. Requires a TTY; for non-interactive watching pipe `wait --track` (inline progress) or sample `status` instead.
 
 ### Tools (diagnostics)
 
@@ -141,7 +142,7 @@ Exit codes:
 Tasks move through four states: **scheduled → active → completed → resolved**.
 
 - `bun run shiploadcli <entity-type> <id> tasks` shows the current schedule and pending queue.
-- Some tasks are uncancelable ("market tasks": `gather`, `craft`). Once scheduled they must run to completion — wait or let the schedule drain.
+- Some tasks are uncancelable: `gather` (commits a reserve at submission). Once scheduled they must run to completion — wait or let the schedule drain.
 - `bun run shiploadcli <entity-type> <id> resolve` processes completed tasks. Passing `--auto-resolve` on the next action does this automatically before submission.
 
 ## Craft vs blend
@@ -161,7 +162,7 @@ bun run shiploadcli <type> <id>                                # confirm post-st
 
 ## Troubleshooting
 
-- **`cannot cancel market task - use counter-action instead`** — `gather` and `craft` tasks are uncancelable once scheduled. Wait for them to complete or let the queue drain.
+- **`Cannot cancel: task is non-cancelable.`** — `gather` tasks are uncancelable once scheduled (the gathered reserve is committed at submission). Wait for completion or let the queue drain.
 - **`cargo capacity would be exceeded`** — reduce `quantity`. Pre-flight validation catches most of these before they reach the chain; if the chain returns it, your `--estimate` numbers were off (rare).
 - **`no resources at this stratum`** — either the stratum is empty or it's below your gatherer's depth. Check `bun run shiploadcli stratum <x> <y> <index>` for the stratum and `bun run shiploadcli entity ship <id>` for the ship's gatherer depth.
 

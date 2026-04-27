@@ -1,6 +1,7 @@
+import { categoryLabelFromIndex, formatTier } from "@shipload/sdk";
 import type { Command } from "commander";
 import { server } from "../../lib/client";
-import { formatCategory, formatItem, formatOutput, formatTier } from "../../lib/format";
+import { formatItem, formatOutput } from "../../lib/format";
 
 interface Resource {
 	id: number;
@@ -13,7 +14,7 @@ export function renderPretty(input: { resources: Resource[] }): string {
 	const rows = input.resources ?? [];
 	const lines = [`Resources (${rows.length}):`];
 	for (const r of rows) {
-		const label = `${formatCategory(r.category)} · ${formatTier(r.tier)}`;
+		const label = `${categoryLabelFromIndex(r.category)} · ${formatTier(r.tier)}`;
 		lines.push(`  ${formatItem(r.id).padEnd(28)}  ${label.padEnd(18)}  mass ${r.mass}`);
 	}
 	return lines.join("\n");

@@ -36,15 +36,39 @@ export function renderTravelSummary(t: TravelSummary, shipId: bigint | number): 
 }
 
 export function renderEstimate(e: EstimateResult): string {
-	const parts: string[] = [];
-	parts.push(`duration ${formatDuration(e.duration_s)}`);
-	if (e.energy_cost !== 0) parts.push(`energy ${signed(-e.energy_cost)}`);
+	const prefix = e.with_recharge ? "Estimate (with recharge):" : "Estimate:";
+	const headerParts: string[] = [`duration ${formatDuration(e.duration_s)}`];
+	if (e.energy_cost !== 0) headerParts.push(`energy ${signed(-e.energy_cost)}`);
+
+	if (e.craft) {
+		const lines: string[] = [`${prefix} ${headerParts.join(", ")}`, "Inputs:"];
+		for (const slot of e.craft.slots) {
+			const total = slot.contributions.reduce((s, c) => s + c.qty, 0);
+			const itemName = formatItem(slot.itemId);
+			if (slot.contributions.length === 1) {
+				const c = slot.contributions[0];
+				lines.push(`  ${itemName} ×${total}  (from stack ${c.stackId})`);
+			} else if (slot.contributions.length === 0) {
+				lines.push(`  ${itemName} ×${slot.requiredQty}  (no inputs supplied)`);
+			} else {
+				const breakdown = slot.contributions
+					.map((c) => `${c.qty} from stack ${c.stackId}`)
+					.join(" + ");
+				lines.push(`  ${itemName} ×${total}  (= ${breakdown})`);
+			}
+		}
+		lines.push(`Output:`, `  ${formatItem(e.craft.outputItemId)} ×${e.craft.outputQty}`);
+		const body = lines.join("\n");
+		return e.feasibility.issues.length === 0
+			? body
+			: `${renderIssues(e.feasibility.issues)}\n${body}`;
+	}
+
 	for (const [itemIdStr, qty] of Object.entries(e.cargo_delta)) {
 		const id = Number(itemIdStr);
-		parts.push(`cargo ${signed(qty)} ${formatItem(id)}`);
+		headerParts.push(`cargo ${signed(qty)} ${formatItem(id)}`);
 	}
-	const prefix = e.with_recharge ? "Estimate (with recharge):" : "Estimate:";
-	const summary = `${prefix} ${parts.join(", ")}`;
+	const summary = `${prefix} ${headerParts.join(", ")}`;
 	if (e.feasibility.issues.length === 0) return summary;
 	return `${renderIssues(e.feasibility.issues)}\n${summary}`;
 }
