@@ -17,7 +17,7 @@ import {
     SHIP_CARGO_NOT_LOADED,
 } from '../errors'
 import {getRecipe, RecipeInput} from '../data/recipes-runtime'
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
     calcStacksMass,

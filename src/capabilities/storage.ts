@@ -1,7 +1,7 @@
 import {UInt16, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {StorageCapability} from '../types/capabilities'
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 import {INSUFFICIENT_ITEM_QUANTITY} from '../errors'
 
 export interface HasCargo {

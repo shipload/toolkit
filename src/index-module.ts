@@ -45,7 +45,21 @@ export {
 export type {EntityType, LocationStratum} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
-export {getItem, getItems, itemIds} from './market/items'
+export {
+    getItem,
+    getItems,
+    itemIds,
+    getResources,
+    getComponents,
+    getModules,
+    getEntityItems,
+    resolveItemCategory,
+    typeLabel,
+    categoryLabel,
+    categoryFromIndex,
+    categoryLabelFromIndex,
+    tierLabel,
+} from './data/catalog'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
 export {

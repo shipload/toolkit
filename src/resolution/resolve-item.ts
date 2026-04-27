@@ -1,7 +1,7 @@
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {entityMetadata, itemMetadata} from '../data/metadata'
 import {

@@ -32,7 +32,7 @@ import {
     ShipLike,
     TaskType,
 } from '../types'
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 import {hasSystem} from '../utils/system'
 
 export function calc_orbital_altitude(mass: number): number {

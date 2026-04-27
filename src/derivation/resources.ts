@@ -1,4 +1,4 @@
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 
 export const DEPTH_THRESHOLD_T1 = 0
 export const DEPTH_THRESHOLD_T2 = 2000

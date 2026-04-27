@@ -1,4 +1,4 @@
-import type {ResourceCategory, ResourceTier} from '../types'
+import type {ResourceCategory} from '../types'
 
 export const categoryColors: Record<ResourceCategory, string> = {
     ore: '#C26D3F',
@@ -8,20 +8,33 @@ export const categoryColors: Record<ResourceCategory, string> = {
     biomass: '#5A8B3E',
 }
 
-export const tierColors: Record<ResourceTier, string> = {
-    t1: '#8b8b8b',
-    t2: '#4ade80',
-    t3: '#818cf8',
-    t4: '#c084fc',
-    t5: '#fbbf24',
+export const tierColors: Record<number, string> = {
+    1: '#8b8b8b',
+    2: '#4ade80',
+    3: '#818cf8',
+    4: '#c084fc',
+    5: '#fbbf24',
+    6: '#f97316',
+    7: '#ef4444',
+    8: '#ec4899',
+    9: '#06b6d4',
+    10: '#ffffff',
 }
 
-export const tierLabels: Record<ResourceTier, string> = {
-    t1: 'Common',
-    t2: 'Uncommon',
-    t3: 'Rare',
-    t4: 'Epic',
-    t5: 'Legendary',
+// Rarity-tier names (badge labels). Kept disjoint from TIER_ADJECTIVES in
+// types.ts (resource descriptors like "Pristine Ore") so the two vocabularies
+// never collide at any tier.
+export const tierLabels: Record<number, string> = {
+    1: 'Common',
+    2: 'Uncommon',
+    3: 'Rare',
+    4: 'Epic',
+    5: 'Legendary',
+    6: 'Mythic',
+    7: 'Divine',
+    8: 'Celestial',
+    9: 'Eternal',
+    10: 'Transcendent',
 }
 
 export const categoryIcons: Record<ResourceCategory, string> = {

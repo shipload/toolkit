@@ -103,7 +103,6 @@ export interface Distance {
 
 export type ItemType = 'resource' | 'component' | 'module' | 'entity'
 export type ResourceCategory = 'ore' | 'crystal' | 'gas' | 'regolith' | 'biomass'
-export type ResourceTier = 't1' | 't2' | 't3' | 't4' | 't5'
 export type ModuleType =
     | 'any'
     | 'engine'
@@ -135,10 +134,6 @@ export const CATEGORY_LABELS: Record<ResourceCategory, string> = {
     gas: 'Gas',
     regolith: 'Regolith',
     biomass: 'Biomass',
-}
-
-export function tierNumber(tier: string): number {
-    return Number(String(tier).replace(/^t/i, ''))
 }
 
 export interface Item {

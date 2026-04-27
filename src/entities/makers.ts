@@ -6,7 +6,7 @@ import {Container, ContainerStateInput} from './container'
 import {ITEM_SHIP_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {itemMetadata} from '../data/metadata'
-import {getItem} from '../market/items'
+import {getItem} from '../data/catalog'
 import {
     getModuleCapabilityType,
     MODULE_STORAGE,

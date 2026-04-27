@@ -12,11 +12,11 @@ import {
 suite('tokens', function () {
     suite('tierLabels', function () {
         test('covers all tiers with expected names', function () {
-            assert.equal(tierLabels.t1, 'Common')
-            assert.equal(tierLabels.t2, 'Uncommon')
-            assert.equal(tierLabels.t3, 'Rare')
-            assert.equal(tierLabels.t4, 'Epic')
-            assert.equal(tierLabels.t5, 'Legendary')
+            assert.equal(tierLabels[1], 'Common')
+            assert.equal(tierLabels[2], 'Uncommon')
+            assert.equal(tierLabels[3], 'Rare')
+            assert.equal(tierLabels[4], 'Epic')
+            assert.equal(tierLabels[5], 'Legendary')
         })
     })
 

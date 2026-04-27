@@ -2,7 +2,7 @@ import items from './items.json'
 import recipes from './recipes.json'
 import entities from './entities.json'
 
-import {getItem} from '../market/items'
+import {getItem} from './catalog'
 import {Item, ModuleType, ResourceCategory} from '../types'
 
 export interface RecipeInputItemId {
