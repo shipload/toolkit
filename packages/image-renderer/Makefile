@@ -12,19 +12,13 @@ deploy: node_modules
 test: node_modules
 	bun run test
 
-.PHONY: typecheck
-typecheck: node_modules
-	./node_modules/.bin/tsc --noEmit
-
 .PHONY: check
-check: typecheck test
+check: node_modules
+	./node_modules/.bin/tsc --noEmit
 
 .PHONY: clean
 clean:
-	rm -rf node_modules bun.lock .wrangler
+	rm -rf node_modules .wrangler
 
-node_modules: package.json
-	bun install
-	bun link @shipload/item-renderer
-	bun link @shipload/sdk
-	@touch $@
+node_modules:
+	@cd ../.. && bun install

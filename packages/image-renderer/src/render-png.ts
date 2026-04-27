@@ -1,5 +1,5 @@
 import {Resvg, initWasm} from '@resvg/resvg-wasm'
-import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm'
+import resvgWasm from './assets/resvg.wasm'
 import {embedFontsInSvg, type FontKey} from '@shipload/item-renderer/fonts'
 import orbitron700 from './assets/orbitron-700.woff2'
 import inter400 from './assets/inter-400.woff2'

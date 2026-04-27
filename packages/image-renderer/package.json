@@ -1,5 +1,5 @@
 {
-    "name": "item-image-worker",
+    "name": "@shipload/image-renderer",
     "version": "0.1.0",
     "description": "Cloudflare Worker rendering Shipload item images",
     "type": "module",
@@ -8,20 +8,20 @@
         "dev": "wrangler dev",
         "deploy": "wrangler deploy",
         "fonts:sync": "bun run scripts/sync-fonts.ts",
+        "wasm:sync": "bun run scripts/sync-wasm.ts",
         "test": "vitest run",
         "check": "tsc --noEmit",
         "build": "echo '@shipload/image-renderer is a Cloudflare Worker — deploy via wrangler deploy'"
     },
     "dependencies": {
         "@resvg/resvg-wasm": "^2.6.0",
-        "@shipload/item-renderer": "^0.2.3",
-        "@shipload/sdk": "2.0.0-rc25",
-        "@wharfkit/antelope": "^1.0.0"
+        "@shipload/item-renderer": "workspace:^",
+        "@shipload/sdk": "workspace:^",
+        "@wharfkit/antelope": "1.2.0"
     },
     "devDependencies": {
         "@cloudflare/vitest-pool-workers": "^0.5.0",
         "@cloudflare/workers-types": "^4.20240512.0",
-        "typescript": "^5.4.0",
         "vitest": "^2.0.0",
         "wrangler": "^3.70.0"
     }
