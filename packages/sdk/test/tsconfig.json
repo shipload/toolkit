@@ -1,0 +1,37 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "isolatedModules": false,
+        "resolveJsonModule": true,
+        "module": "commonjs",
+        "target": "es2020",
+        "types": ["mocha", "node"],
+        "baseUrl": "..",
+        "paths": {
+            "$lib": ["src"],
+            "$test": ["test"],
+            "$test/*": ["test/*"],
+            "src/ship": ["src/entities/ship"],
+            "src/cargo": ["src/entities/cargo"],
+            "src/location": ["src/entities/location"],
+            "src/player": ["src/entities/player"],
+            "src/warehouse": ["src/entities/warehouse"],
+            "src/container": ["src/entities/container"],
+            "src/gamestate": ["src/entities/gamestate"],
+            "src/cargo-utils": ["src/entities/cargo-utils"],
+            "src/items": ["src/data/catalog"],
+            "src/travel": ["src/travel/travel"],
+            "src/deal": ["src/trading/deal"],
+            "src/trade": ["src/trading/trade"],
+            "src/collect": ["src/trading/collect"],
+            "src/epoch": ["src/scheduling/epoch"],
+            "src/schedule": ["src/scheduling/schedule"],
+            "src/projection": ["src/scheduling/projection"],
+            "src/hash": ["src/utils/hash"],
+            "src/system": ["src/utils/system"],
+            "src/types": ["src/types"],
+            "src/contracts": ["src/contracts"]
+        }
+    },
+    "include": ["*.ts", "**/*.ts"]
+}

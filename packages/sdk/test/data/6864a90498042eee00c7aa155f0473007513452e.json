@@ -1,0 +1,70 @@
+{
+    "request": {
+        "path": "https://jungle4.greymass.com/v1/chain/send_read_only_transaction",
+        "params": {
+            "method": "POST",
+            "body": "{\"transaction\":{\"signatures\":[],\"compression\":1,\"packed_context_free_data\":\"789c63000000010001\",\"packed_trx\":\"789c636040068c0c2acc272f44c41e06b21d5a2e6dc86460614ecbcf67000059880734\"}}",
+            "headers": {}
+        }
+    },
+    "status": 200,
+    "json": {
+        "transaction_id": "10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805",
+        "processed": {
+            "id": "10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805",
+            "block_num": 260881728,
+            "block_time": "2026-04-16T00:33:27.500",
+            "producer_block_id": null,
+            "receipt": {
+                "status": "executed",
+                "cpu_usage_us": 0,
+                "net_usage_words": 0
+            },
+            "elapsed": 170,
+            "net_usage": 72,
+            "scheduled": false,
+            "action_traces": [
+                {
+                    "action_ordinal": 1,
+                    "creator_action_ordinal": 0,
+                    "closest_unnotified_ancestor_action_ordinal": 0,
+                    "receipt": {
+                        "receiver": "shipload.gm",
+                        "act_digest": "00a6d204bcc72fc519c4094c3f1ad1c2be29ce996df37bf72521cb41e1d74ca5",
+                        "global_sequence": 0,
+                        "recv_sequence": 0,
+                        "auth_sequence": [],
+                        "code_sequence": 127,
+                        "abi_sequence": 88
+                    },
+                    "receiver": "shipload.gm",
+                    "act": {
+                        "account": "shipload.gm",
+                        "name": "hash512",
+                        "authorization": [],
+                        "data": {
+                            "value": "foo"
+                        },
+                        "hex_data": "03666f6f"
+                    },
+                    "context_free": false,
+                    "elapsed": 131,
+                    "console": "",
+                    "trx_id": "10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805",
+                    "block_num": 260881728,
+                    "block_time": "2026-04-16T00:33:27.500",
+                    "producer_block_id": null,
+                    "account_ram_deltas": [],
+                    "except": null,
+                    "error_code": null,
+                    "return_value_hex_data": "f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916",
+                    "return_value_data": "f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916"
+                }
+            ],
+            "account_ram_delta": null,
+            "except": null,
+            "error_code": null
+        }
+    },
+    "text": "{\"transaction_id\":\"10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805\",\"processed\":{\"id\":\"10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805\",\"block_num\":260881728,\"block_time\":\"2026-04-16T00:33:27.500\",\"producer_block_id\":null,\"receipt\":{\"status\":\"executed\",\"cpu_usage_us\":0,\"net_usage_words\":0},\"elapsed\":170,\"net_usage\":72,\"scheduled\":false,\"action_traces\":[{\"action_ordinal\":1,\"creator_action_ordinal\":0,\"closest_unnotified_ancestor_action_ordinal\":0,\"receipt\":{\"receiver\":\"shipload.gm\",\"act_digest\":\"00a6d204bcc72fc519c4094c3f1ad1c2be29ce996df37bf72521cb41e1d74ca5\",\"global_sequence\":0,\"recv_sequence\":0,\"auth_sequence\":[],\"code_sequence\":127,\"abi_sequence\":88},\"receiver\":\"shipload.gm\",\"act\":{\"account\":\"shipload.gm\",\"name\":\"hash512\",\"authorization\":[],\"data\":{\"value\":\"foo\"},\"hex_data\":\"03666f6f\"},\"context_free\":false,\"elapsed\":131,\"console\":\"\",\"trx_id\":\"10b188fe25ca9973dd397c4e0ee0f6a3747446996646e695946b9764877d5805\",\"block_num\":260881728,\"block_time\":\"2026-04-16T00:33:27.500\",\"producer_block_id\":null,\"account_ram_deltas\":[],\"except\":null,\"error_code\":null,\"return_value_hex_data\":\"f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916\",\"return_value_data\":\"f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916\"}],\"account_ram_delta\":null,\"except\":null,\"error_code\":null}}"
+}

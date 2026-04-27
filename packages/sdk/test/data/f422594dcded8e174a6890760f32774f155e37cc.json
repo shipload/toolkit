@@ -1,0 +1,19 @@
+{
+    "request": {
+        "path": "https://jungle4.greymass.com/v1/chain/get_table_rows",
+        "params": {
+            "method": "POST",
+            "body": "{\"table\":\"games\",\"code\":\"platform.gm\",\"scope\":\"platform.gm\",\"limit\":1,\"lower_bound\":\"shipload.gm\",\"upper_bound\":\"shipload.gm\",\"key_type\":\"name\",\"json\":false}",
+            "headers": {}
+        }
+    },
+    "status": 200,
+    "json": {
+        "rows": [
+            "002403c9d0585dc3dde83e2f49130b38989fccf03ad008d6dea390211cc622f72dc12d780cfd49bb805101007018e06900b9556912536869706c6f61642028546573746e657429001568747470733a2f2f746573742e746573742e636f6d05302e302e3001"
+        ],
+        "more": false,
+        "next_key": ""
+    },
+    "text": "{\"rows\":[\"002403c9d0585dc3dde83e2f49130b38989fccf03ad008d6dea390211cc622f72dc12d780cfd49bb805101007018e06900b9556912536869706c6f61642028546573746e657429001568747470733a2f2f746573742e746573742e636f6d05302e302e3001\"],\"more\":false,\"next_key\":\"\"}"
+}

@@ -1,0 +1,112 @@
+import {getItem} from '../data/catalog'
+
+export const DEPTH_THRESHOLD_T1 = 0
+export const DEPTH_THRESHOLD_T2 = 2000
+export const DEPTH_THRESHOLD_T3 = 10000
+export const DEPTH_THRESHOLD_T4 = 30000
+export const DEPTH_THRESHOLD_T5 = 55000
+
+export const LOCATION_MIN_DEPTH = 500
+export const LOCATION_MAX_DEPTH = 65535
+
+export const YIELD_THRESHOLD = Math.floor(0.001 * 0xffffffff)
+
+export const PLANET_SUBTYPE_GAS_GIANT = 0
+export const PLANET_SUBTYPE_ROCKY = 1
+export const PLANET_SUBTYPE_TERRESTRIAL = 2
+export const PLANET_SUBTYPE_ICY = 3
+export const PLANET_SUBTYPE_OCEAN = 4
+export const PLANET_SUBTYPE_INDUSTRIAL = 5
+
+export function getDepthThreshold(tier: number): number {
+    switch (tier) {
+        case 1:
+            return DEPTH_THRESHOLD_T1
+        case 2:
+            return DEPTH_THRESHOLD_T2
+        case 3:
+            return DEPTH_THRESHOLD_T3
+        case 4:
+            return DEPTH_THRESHOLD_T4
+        default:
+            return DEPTH_THRESHOLD_T5
+    }
+}
+
+export function getResourceTier(itemId: number): number {
+    return getItem(itemId).tier
+}
+
+export function getResourceWeight(itemId: number, stratum: number): number {
+    const tier = getResourceTier(itemId)
+    const threshold = getDepthThreshold(tier)
+    if (stratum < threshold) return 0
+
+    const depthAbove = stratum - threshold
+
+    switch (tier) {
+        case 1:
+            if (stratum < 2000) return 100
+            if (stratum < 10000) return 80
+            if (stratum < 30000) return 50
+            return 30
+        case 2:
+            if (depthAbove < 3000) return 40
+            if (depthAbove < 8000) return 60
+            return 50
+        case 3:
+            if (depthAbove < 5000) return 20
+            if (depthAbove < 15000) return 35
+            return 40
+        case 4:
+            if (depthAbove < 10000) return 10
+            if (depthAbove < 25000) return 20
+            return 30
+        default:
+            return 10
+    }
+}
+
+const ASTEROID_RESOURCES = [101, 102, 103, 201, 202]
+const NEBULA_RESOURCES = [202, 203, 301, 302, 303]
+const GAS_GIANT_RESOURCES = [301, 302, 303, 401, 501]
+const ROCKY_RESOURCES = [101, 102, 103, 401, 402, 403, 503]
+const TERRESTRIAL_RESOURCES = [201, 202, 401, 402, 501, 502, 503]
+const ICY_RESOURCES = [101, 301, 302, 401, 403, 501, 502]
+const OCEAN_RESOURCES = [201, 203, 301, 303, 501, 502, 503]
+const INDUSTRIAL_RESOURCES = [101, 102, 103, 201, 203, 402, 403]
+
+export function getLocationCandidates(locationType: number, subtype: number): number[] {
+    if (locationType === 2) return ASTEROID_RESOURCES
+    if (locationType === 3) return NEBULA_RESOURCES
+    if (locationType === 1) {
+        switch (subtype) {
+            case PLANET_SUBTYPE_GAS_GIANT:
+                return GAS_GIANT_RESOURCES
+            case PLANET_SUBTYPE_ROCKY:
+                return ROCKY_RESOURCES
+            case PLANET_SUBTYPE_TERRESTRIAL:
+                return TERRESTRIAL_RESOURCES
+            case PLANET_SUBTYPE_ICY:
+                return ICY_RESOURCES
+            case PLANET_SUBTYPE_OCEAN:
+                return OCEAN_RESOURCES
+            case PLANET_SUBTYPE_INDUSTRIAL:
+                return INDUSTRIAL_RESOURCES
+        }
+    }
+    return []
+}
+
+export function getEligibleResources(
+    locationType: number,
+    subtype: number,
+    stratum: number
+): number[] {
+    const candidates = getLocationCandidates(locationType, subtype)
+    return candidates.filter((itemId) => {
+        const tier = getResourceTier(itemId)
+        const threshold = getDepthThreshold(tier)
+        return stratum >= threshold
+    })
+}
