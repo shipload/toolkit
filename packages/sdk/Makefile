@@ -57,11 +57,11 @@ ci-test: node_modules
 
 .PHONY: check
 check: node_modules
-	@${BIN}/eslint src test --ext .ts --max-warnings 0 --format unix && echo "Ok"
+	@${BIN}/tsc --noEmit
 
 .PHONY: format
 format: node_modules
-	@${BIN}/eslint src test --ext .ts --fix
+	@cd ../.. && bun biome check packages/sdk --write
 
 .PHONY: docs
 docs: build/docs
@@ -86,7 +86,7 @@ build/browser.html: $(SRC_FILES) $(TEST_FILES) test/rollup.config.js node_module
 	@${BIN}/rollup -c test/rollup.config.js
 
 node_modules:
-	yarn install --non-interactive --frozen-lockfile --ignore-scripts
+	@cd ../.. && bun install
 
 .PHONY: clean
 clean:

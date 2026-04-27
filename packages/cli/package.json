@@ -1,46 +1,46 @@
 {
-	"name": "@shipload/cli",
-	"version": "0.2.3",
-	"private": true,
-	"type": "module",
-	"bin": {
-		"shiploadcli": "src/index.ts"
-	},
-	"scripts": {
-		"shiploadcli": "bun src/index.ts",
-		"check": "tsc --noEmit && biome check .",
-		"format": "biome check . --write",
-		"test": "bun test"
-	},
-	"dependencies": {
-		"@opentui/core": "^0.1.103",
-		"@shipload/sdk": "2.0.0-rc25",
-		"@wharfkit/antelope": "^1.2.0",
-		"@wharfkit/common": "^1.5.0",
-		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "1.8.0-rc1",
-		"@wharfkit/wallet-plugin-privatekey": "^1.1.0",
-		"cli-table3": "^0.6.5",
-		"commander": "^14.0.2",
-		"ini": "^6.0.0"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.3.7",
-		"@types/bun": "latest",
-		"@types/ini": "^4.1.1",
-		"@wharfkit/cli": "^1.0.0",
-		"typescript": "^5.0.0"
-	},
-	"resolutions": {
-		"@wharfkit/antelope": "^1.2.0",
-		"@wharfkit/common": "^1.5.0",
-		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "1.8.0-rc1"
-	},
-	"overrides": {
-		"@wharfkit/antelope": "^1.2.0",
-		"@wharfkit/common": "^1.5.0",
-		"@wharfkit/contract": "^1.2.1",
-		"@wharfkit/session": "1.8.0-rc1"
-	}
+    "name": "@shipload/cli",
+    "version": "0.2.3",
+    "private": true,
+    "type": "module",
+    "bin": {
+        "shiploadcli": "src/index.ts"
+    },
+    "scripts": {
+        "shiploadcli": "bun src/index.ts",
+        "check": "tsc --noEmit",
+        "build": "echo '@shipload/cli build is a no-op (binaries via make release/cli)'",
+        "test": "bun test"
+    },
+    "dependencies": {
+        "@opentui/core": "^0.1.103",
+        "@shipload/sdk": "2.0.0-rc25",
+        "@wharfkit/antelope": "^1.2.0",
+        "@wharfkit/common": "^1.5.0",
+        "@wharfkit/contract": "^1.2.1",
+        "@wharfkit/session": "1.8.0-rc1",
+        "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
+        "cli-table3": "^0.6.5",
+        "commander": "^14.0.2",
+        "ini": "^6.0.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.7",
+        "@types/bun": "latest",
+        "@types/ini": "^4.1.1",
+        "@wharfkit/cli": "^1.0.0",
+        "typescript": "^5.0.0"
+    },
+    "resolutions": {
+        "@wharfkit/antelope": "^1.2.0",
+        "@wharfkit/common": "^1.5.0",
+        "@wharfkit/contract": "^1.2.1",
+        "@wharfkit/session": "1.8.0-rc1"
+    },
+    "overrides": {
+        "@wharfkit/antelope": "^1.2.0",
+        "@wharfkit/common": "^1.5.0",
+        "@wharfkit/contract": "^1.2.1",
+        "@wharfkit/session": "1.8.0-rc1"
+    }
 }

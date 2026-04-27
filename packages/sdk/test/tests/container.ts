@@ -47,9 +47,9 @@ function makeContainerWithSchedule() {
     })
 }
 
-suite('Container', function () {
-    suite('fromState', function () {
-        test('creates container with basic properties', function () {
+suite('Container', () => {
+    suite('fromState', () => {
+        test('creates container with basic properties', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.id.equals(1))
             assert.isTrue(container.owner.equals('teamgreymass'))
@@ -57,38 +57,38 @@ suite('Container', function () {
             assert.isTrue(container.type.equals('container'))
         })
 
-        test('creates container with cargo mass', function () {
+        test('creates container with cargo mass', () => {
             const container = makeContainerWithCargo()
             assert.isTrue(container.cargomass.equals(100000))
         })
     })
 
-    suite('sched.hasSchedule', function () {
-        test('returns false when container has no schedule', function () {
+    suite('sched.hasSchedule', () => {
+        test('returns false when container has no schedule', () => {
             const container = makeStationaryContainer()
             assert.isFalse(container.sched.hasSchedule)
         })
 
-        test('returns true when container has schedule with tasks', function () {
+        test('returns true when container has schedule with tasks', () => {
             const container = makeContainerWithSchedule()
             assert.isTrue(container.sched.hasSchedule)
         })
     })
 
-    suite('isIdle', function () {
-        test('returns true when container has no schedule', function () {
+    suite('isIdle', () => {
+        test('returns true when container has no schedule', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.isIdle)
         })
 
-        test('returns false when container has schedule', function () {
+        test('returns false when container has schedule', () => {
             const container = makeContainerWithSchedule()
             assert.isFalse(container.isIdle)
         })
     })
 
-    suite('location', function () {
-        test('returns Location object', function () {
+    suite('location', () => {
+        test('returns Location object', () => {
             const container = makeStationaryContainer()
             const loc = container.location
             assert.equal(loc.coordinates.x.toNumber(), 5)
@@ -96,13 +96,13 @@ suite('Container', function () {
         })
     })
 
-    suite('orbitalAltitude', function () {
-        test('returns z coordinate', function () {
+    suite('orbitalAltitude', () => {
+        test('returns z coordinate', () => {
             const container = makeStationaryContainer()
             assert.equal(container.orbitalAltitude, 1000)
         })
 
-        test('returns 0 when z is undefined', function () {
+        test('returns 0 when z is undefined', () => {
             const container = makeContainer({
                 id: UInt64.from(1),
                 owner: 'teamgreymass',
@@ -115,56 +115,56 @@ suite('Container', function () {
         })
     })
 
-    suite('totalMass', function () {
-        test('returns hullmass when no cargo', function () {
+    suite('totalMass', () => {
+        test('returns hullmass when no cargo', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.totalMass.equals(50000))
         })
 
-        test('includes cargo mass', function () {
+        test('includes cargo mass', () => {
             const container = makeContainerWithCargo()
             assert.isTrue(container.totalMass.equals(150000))
         })
     })
 
-    suite('maxCapacity', function () {
-        test('returns capacity', function () {
+    suite('maxCapacity', () => {
+        test('returns capacity', () => {
             const container = makeStationaryContainer()
             assert.equal(container.maxCapacity.toNumber(), 500000)
         })
     })
 
-    suite('availableCapacity', function () {
-        test('returns full capacity when empty', function () {
+    suite('availableCapacity', () => {
+        test('returns full capacity when empty', () => {
             const container = makeStationaryContainer()
             assert.equal(container.availableCapacity.toNumber(), 500000)
         })
 
-        test('returns reduced capacity when cargo loaded', function () {
+        test('returns reduced capacity when cargo loaded', () => {
             const container = makeContainerWithCargo()
             assert.equal(container.availableCapacity.toNumber(), 400000)
         })
     })
 
-    suite('hasSpace', function () {
-        test('returns true when space available', function () {
+    suite('hasSpace', () => {
+        test('returns true when space available', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.hasSpace(UInt64.from(100000)))
         })
 
-        test('returns false when no space', function () {
+        test('returns false when no space', () => {
             const container = makeStationaryContainer()
             assert.isFalse(container.hasSpace(UInt64.from(1000000)))
         })
     })
 
-    suite('isFull', function () {
-        test('returns false when not full', function () {
+    suite('isFull', () => {
+        test('returns false when not full', () => {
             const container = makeStationaryContainer()
             assert.isFalse(container.isFull)
         })
 
-        test('returns true when at capacity', function () {
+        test('returns true when at capacity', () => {
             const container = makeContainer({
                 id: UInt64.from(1),
                 owner: 'teamgreymass',
@@ -178,56 +178,56 @@ suite('Container', function () {
         })
     })
 
-    suite('coordinates', function () {
-        test('returns raw coordinates from entity', function () {
+    suite('coordinates', () => {
+        test('returns raw coordinates from entity', () => {
             const container = makeStationaryContainer()
             assert.equal(container.coordinates.x.toNumber(), 5)
             assert.equal(container.coordinates.y.toNumber(), 10)
         })
     })
 
-    suite('schedule methods', function () {
-        test('sched.duration returns total task duration', function () {
+    suite('schedule methods', () => {
+        test('sched.duration returns total task duration', () => {
             const container = makeContainerWithSchedule()
             assert.equal(container.sched.duration(), 100)
         })
 
-        test('sched.duration returns 0 when no schedule', function () {
+        test('sched.duration returns 0 when no schedule', () => {
             const container = makeStationaryContainer()
             assert.equal(container.sched.duration(), 0)
         })
 
-        test('sched.elapsed calculates elapsed time', function () {
+        test('sched.elapsed calculates elapsed time', () => {
             const container = makeContainerWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(container.sched.elapsed(now), 50)
         })
 
-        test('sched.remaining calculates remaining time', function () {
+        test('sched.remaining calculates remaining time', () => {
             const container = makeContainerWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(container.sched.remaining(now), 50)
         })
 
-        test('sched.complete returns false when not complete', function () {
+        test('sched.complete returns false when not complete', () => {
             const container = makeContainerWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.isFalse(container.sched.complete(now))
         })
 
-        test('sched.complete returns true when complete', function () {
+        test('sched.complete returns true when complete', () => {
             const container = makeContainerWithSchedule()
             const now = new Date('2024-06-04T23:45:00.000Z')
             assert.isTrue(container.sched.complete(now))
         })
 
-        test('sched.currentTaskIndex returns correct task', function () {
+        test('sched.currentTaskIndex returns correct task', () => {
             const container = makeContainerWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(container.sched.currentTaskIndex(now), 0)
         })
 
-        test('sched.currentTaskIndex returns -1 when no schedule', function () {
+        test('sched.currentTaskIndex returns -1 when no schedule', () => {
             const container = makeStationaryContainer()
             const now = new Date()
             assert.equal(container.sched.currentTaskIndex(now), -1)

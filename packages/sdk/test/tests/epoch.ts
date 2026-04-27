@@ -34,9 +34,9 @@ function createMockGame(
     })
 }
 
-suite('epoch', function () {
-    suite('getCurrentEpoch', function () {
-        test('returns epoch 1 at game start', function () {
+suite('epoch', () => {
+    suite('getCurrentEpoch', () => {
+        test('returns epoch 1 at game start', () => {
             const now = Math.floor(Date.now() / 1000) * 1000
             const game = createMockGame(now, 3600)
 
@@ -44,7 +44,7 @@ suite('epoch', function () {
             assert.equal(epoch.toNumber(), 1)
         })
 
-        test('returns epoch 2 after one epoch time', function () {
+        test('returns epoch 2 after one epoch time', () => {
             const nowSec = Math.floor(Date.now() / 1000)
             const epochtime = 3600
             const startSec = nowSec - epochtime
@@ -54,7 +54,7 @@ suite('epoch', function () {
             assert.equal(epoch.toNumber(), 2)
         })
 
-        test('returns correct epoch after multiple epochs', function () {
+        test('returns correct epoch after multiple epochs', () => {
             const nowSec = Math.floor(Date.now() / 1000)
             const epochtime = 3600
             const startSec = nowSec - epochtime * 5
@@ -65,8 +65,8 @@ suite('epoch', function () {
         })
     })
 
-    suite('getEpochInfo', function () {
-        test('returns correct start and end dates for epoch 1', function () {
+    suite('getEpochInfo', () => {
+        test('returns correct start and end dates for epoch 1', () => {
             const startTimestamp = Math.floor(Date.now() / 1000) * 1000
             const epochtime = 3600
             const game = createMockGame(startTimestamp, epochtime)
@@ -78,7 +78,7 @@ suite('epoch', function () {
             assert.equal(info.end.getTime(), startTimestamp + epochtime * 1000)
         })
 
-        test('returns correct start and end dates for epoch 2', function () {
+        test('returns correct start and end dates for epoch 2', () => {
             const startTimestamp = Math.floor(Date.now() / 1000) * 1000
             const epochtime = 3600
             const game = createMockGame(startTimestamp, epochtime)
@@ -90,7 +90,7 @@ suite('epoch', function () {
             assert.equal(info.end.getTime(), startTimestamp + epochtime * 1000 * 2)
         })
 
-        test('calculates correct duration', function () {
+        test('calculates correct duration', () => {
             const startTimestamp = Math.floor(Date.now() / 1000) * 1000
             const epochtime = 7200
             const game = createMockGame(startTimestamp, epochtime)
@@ -102,7 +102,7 @@ suite('epoch', function () {
         })
     })
 
-    suite('EpochsManager', function () {
+    suite('EpochsManager', () => {
         let shipload: Shipload
 
         setup(async () => {
@@ -113,12 +113,12 @@ suite('epoch', function () {
             })
         })
 
-        test('getCurrentHeight returns a positive epoch', async function () {
+        test('getCurrentHeight returns a positive epoch', async () => {
             const height = await shipload.epochs.getCurrentHeight()
             assert.isTrue(height.gt(UInt64.from(0)))
         })
 
-        test('getCurrent returns EpochInfo', async function () {
+        test('getCurrent returns EpochInfo', async () => {
             const info = await shipload.epochs.getCurrent()
             assert.isDefined(info.epoch)
             assert.isDefined(info.start)
@@ -127,25 +127,25 @@ suite('epoch', function () {
             assert.instanceOf(info.end, Date)
         })
 
-        test('getByHeight returns EpochInfo for given height', async function () {
+        test('getByHeight returns EpochInfo for given height', async () => {
             const info = await shipload.epochs.getByHeight(1)
             assert.equal(info.epoch.toNumber(), 1)
             assert.instanceOf(info.start, Date)
             assert.instanceOf(info.end, Date)
         })
 
-        test('getTimeRemaining returns non-negative number', async function () {
+        test('getTimeRemaining returns non-negative number', async () => {
             const remaining = await shipload.epochs.getTimeRemaining()
             assert.isAtLeast(remaining, 0)
         })
 
-        test('getProgress returns number between 0 and 1', async function () {
+        test('getProgress returns number between 0 and 1', async () => {
             const progress = await shipload.epochs.getProgress()
             assert.isAtLeast(progress, 0)
             assert.isAtMost(progress, 1)
         })
 
-        test('fitsInCurrentEpoch returns boolean', async function () {
+        test('fitsInCurrentEpoch returns boolean', async () => {
             const fitsShort = await shipload.epochs.fitsInCurrentEpoch(1000)
             const fitsLong = await shipload.epochs.fitsInCurrentEpoch(1000 * 60 * 60 * 24 * 365)
             assert.isBoolean(fitsShort)

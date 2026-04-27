@@ -1,4 +1,4 @@
 #!/usr/bin/env bun
-import { run } from "./cli";
+import {run} from './cli'
 
-run();
+run()

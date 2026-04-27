@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 // Empty stub for elliptic. @wharfkit/antelope imports elliptic for ECDSA/EdDSA
 // crypto (key signing, signature verification), but this worker only uses
@@ -8,4 +8,4 @@
 // If something here ever throws because an elliptic symbol IS accessed at
 // import-time (not runtime), swap this back to the copy-shim at ./elliptic.cjs.
 
-module.exports = {};
+module.exports = {}

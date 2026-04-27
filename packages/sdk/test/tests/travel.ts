@@ -90,7 +90,7 @@ function createMockCargo(goodId: number, quantity: number) {
     })
 }
 
-suite('travel', function () {
+suite('travel', () => {
     let shipload: Shipload
 
     setup(async () => {

@@ -9,7 +9,7 @@ const client = makeClient('https://jungle4.greymass.com')
 const platformContractName = 'platform.gm'
 const serverContractName = 'shipload.gm'
 
-suite('ActionsManager', function () {
+suite('ActionsManager', () => {
     let shipload: Shipload
 
     setup(async () => {
@@ -20,62 +20,62 @@ suite('ActionsManager', function () {
         })
     })
 
-    suite('travel', function () {
-        test('creates travel action with number coordinates', function () {
+    suite('travel', () => {
+        test('creates travel action with number coordinates', () => {
             const action = shipload.actions.travel(1, {x: 5, y: 10})
             assert.equal(action.name.toString(), 'travel')
             assert.isDefined(action.data)
         })
 
-        test('creates travel action with Int64 coordinates', function () {
+        test('creates travel action with Int64 coordinates', () => {
             const action = shipload.actions.travel(1, {x: Int64.from(5), y: Int64.from(10)})
             assert.equal(action.name.toString(), 'travel')
             assert.isDefined(action.data)
         })
 
-        test('creates travel action with recharge false', function () {
+        test('creates travel action with recharge false', () => {
             const action = shipload.actions.travel(1, {x: 5, y: 10}, false)
             assert.equal(action.name.toString(), 'travel')
         })
     })
 
-    suite('resolve', function () {
-        test('creates resolve action', function () {
+    suite('resolve', () => {
+        test('creates resolve action', () => {
             const action = shipload.actions.resolve(1)
             assert.equal(action.name.toString(), 'resolve')
             assert.isDefined(action.data)
         })
 
-        test('creates resolve action with UInt64', function () {
+        test('creates resolve action with UInt64', () => {
             const action = shipload.actions.resolve(UInt64.from(123))
             assert.equal(action.name.toString(), 'resolve')
         })
     })
 
-    suite('join', function () {
-        test('creates join action', function () {
+    suite('join', () => {
+        test('creates join action', () => {
             const action = shipload.actions.join('newplayer')
             assert.equal(action.name.toString(), 'join')
             assert.isDefined(action.data)
         })
     })
 
-    suite('warp', function () {
-        test('creates warp action with number coordinates', function () {
+    suite('warp', () => {
+        test('creates warp action with number coordinates', () => {
             const action = shipload.actions.warp(1, {x: 5, y: 10})
             assert.equal(action.name.toString(), 'warp')
             assert.isDefined(action.data)
         })
 
-        test('creates warp action with Int64 coordinates', function () {
+        test('creates warp action with Int64 coordinates', () => {
             const action = shipload.actions.warp(1, {x: Int64.from(5), y: Int64.from(10)})
             assert.equal(action.name.toString(), 'warp')
             assert.isDefined(action.data)
         })
     })
 
-    suite('wrap', function () {
-        test('creates wrap action', function () {
+    suite('wrap', () => {
+        test('creates wrap action', () => {
             const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, 7, 5)
             assert.equal(action.name.toString(), 'wrap')
             assert.isDefined(action.data)

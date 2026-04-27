@@ -6,8 +6,8 @@ const client = makeClient('https://jungle4.greymass.com')
 const platform = new PlatformContract.Contract({client})
 const server = new ServerContract.Contract({client})
 
-suite('hash', function () {
-    test('sha256', async function () {
+suite('hash', () => {
+    test('sha256', async () => {
         const value = 'foo'
         const game = await platform.table('games').get('shipload.gm')
         if (!game) {
@@ -18,7 +18,7 @@ suite('hash', function () {
         })
         assert.equal(String(result), String(hash(game.config.seed, value)))
     })
-    test('sha512', async function () {
+    test('sha512', async () => {
         const value = 'foo'
         const game = await platform.table('games').get('shipload.gm')
         if (!game) {

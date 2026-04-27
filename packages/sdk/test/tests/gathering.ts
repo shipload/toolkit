@@ -22,13 +22,13 @@ import {makeShip} from '../../src/entities/makers'
 
 const seed = encodeStats([500, 500, 500, 500])
 
-suite('gathering', function () {
-    suite('TaskType', function () {
-        test('GATHER equals 5', function () {
+suite('gathering', () => {
+    suite('TaskType', () => {
+        test('GATHER equals 5', () => {
             assert.equal(TaskType.GATHER, 5)
         })
 
-        test('all task types have correct values', function () {
+        test('all task types have correct values', () => {
             assert.equal(TaskType.IDLE, 0)
             assert.equal(TaskType.TRAVEL, 1)
             assert.equal(TaskType.RECHARGE, 2)
@@ -38,30 +38,30 @@ suite('gathering', function () {
         })
     })
 
-    suite('LocationType', function () {
-        test('EMPTY equals 0', function () {
+    suite('LocationType', () => {
+        test('EMPTY equals 0', () => {
             assert.equal(LocationType.EMPTY, 0)
         })
 
-        test('PLANET equals 1', function () {
+        test('PLANET equals 1', () => {
             assert.equal(LocationType.PLANET, 1)
         })
 
-        test('ASTEROID equals 2', function () {
+        test('ASTEROID equals 2', () => {
             assert.equal(LocationType.ASTEROID, 2)
         })
 
-        test('NEBULA equals 3', function () {
+        test('NEBULA equals 3', () => {
             assert.equal(LocationType.NEBULA, 3)
         })
     })
 
-    suite('getLocationType', function () {
+    suite('getLocationType', () => {
         const gameSeed = Checksum256.from(
             '0000000000000000000000000000000000000000000000000000000000000000'
         )
 
-        test('returns LocationType for coordinates', function () {
+        test('returns LocationType for coordinates', () => {
             const result = getLocationType(gameSeed, {x: 0, y: 0})
             assert.isNumber(result)
             assert.oneOf(result, [
@@ -72,14 +72,14 @@ suite('gathering', function () {
             ])
         })
 
-        test('is deterministic for same seed and coordinates', function () {
+        test('is deterministic for same seed and coordinates', () => {
             const coords = {x: 5, y: 10}
             const result1 = getLocationType(gameSeed, coords)
             const result2 = getLocationType(gameSeed, coords)
             assert.equal(result1, result2)
         })
 
-        test('different coordinates can produce different types', function () {
+        test('different coordinates can produce different types', () => {
             const results = new Set<LocationType>()
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
@@ -92,26 +92,26 @@ suite('gathering', function () {
         })
     })
 
-    suite('isGatherableLocation', function () {
-        test('ASTEROID is gatherable', function () {
+    suite('isGatherableLocation', () => {
+        test('ASTEROID is gatherable', () => {
             assert.isTrue(isGatherableLocation(LocationType.ASTEROID))
         })
 
-        test('NEBULA is gatherable', function () {
+        test('NEBULA is gatherable', () => {
             assert.isTrue(isGatherableLocation(LocationType.NEBULA))
         })
 
-        test('PLANET is gatherable', function () {
+        test('PLANET is gatherable', () => {
             assert.isTrue(isGatherableLocation(LocationType.PLANET))
         })
 
-        test('EMPTY is not gatherable', function () {
+        test('EMPTY is not gatherable', () => {
             assert.isFalse(isGatherableLocation(LocationType.EMPTY))
         })
     })
 
-    suite('hasGatherer type guard', function () {
-        test('returns true for entity with gatherer', function () {
+    suite('hasGatherer type guard', () => {
+        test('returns true for entity with gatherer', () => {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('ship'),
@@ -126,7 +126,7 @@ suite('gathering', function () {
             assert.isTrue(hasGatherer(entity as any))
         })
 
-        test('returns false for entity without gatherer', function () {
+        test('returns false for entity without gatherer', () => {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('warehouse'),
@@ -137,7 +137,7 @@ suite('gathering', function () {
             assert.isFalse(hasGatherer(entity as any))
         })
 
-        test('returns false for entity with undefined gatherer', function () {
+        test('returns false for entity with undefined gatherer', () => {
             const entity = {
                 id: UInt64.from(1),
                 type: Name.from('ship'),
@@ -150,8 +150,8 @@ suite('gathering', function () {
         })
     })
 
-    suite('capsHasGatherer', function () {
-        test('returns true when gatherer is present', function () {
+    suite('capsHasGatherer', () => {
+        test('returns true when gatherer is present', () => {
             const caps = {
                 gatherer: {
                     yield: UInt16.from(700),
@@ -161,20 +161,20 @@ suite('gathering', function () {
             assert.isTrue(capsHasGatherer(caps as any))
         })
 
-        test('returns false when gatherer is undefined', function () {
+        test('returns false when gatherer is undefined', () => {
             const caps = {
                 gatherer: undefined,
             }
             assert.isFalse(capsHasGatherer(caps as any))
         })
 
-        test('returns false when gatherer is missing', function () {
+        test('returns false when gatherer is missing', () => {
             const caps = {}
             assert.isFalse(capsHasGatherer(caps as any))
         })
     })
 
-    suite('calc_gather_duration', function () {
+    suite('calc_gather_duration', () => {
         const gatherer = ServerContract.Types.gatherer_stats.from({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
@@ -182,31 +182,31 @@ suite('gathering', function () {
             speed: UInt16.from(500),
         })
 
-        test('duration increases with quantity', function () {
+        test('duration increases with quantity', () => {
             const one = calc_gather_duration(gatherer, 15000, 1, 600, 500)
             const five = calc_gather_duration(gatherer, 15000, 5, 600, 500)
             assert.isAbove(five.toNumber(), one.toNumber())
         })
 
-        test('heavier mass increases duration', function () {
+        test('heavier mass increases duration', () => {
             const light = calc_gather_duration(gatherer, 15000, 1, 600, 500)
             const heavy = calc_gather_duration(gatherer, 40000, 1, 600, 500)
             assert.isAbove(heavy.toNumber(), light.toNumber())
         })
 
-        test('deeper stratum increases duration', function () {
+        test('deeper stratum increases duration', () => {
             const shallow = calc_gather_duration(gatherer, 15000, 1, 100, 500)
             const deep = calc_gather_duration(gatherer, 15000, 1, 900, 500)
             assert.isAbove(deep.toNumber(), shallow.toNumber())
         })
 
-        test('higher richness reduces duration', function () {
+        test('higher richness reduces duration', () => {
             const lowRichness = calc_gather_duration(gatherer, 15000, 1, 600, 250)
             const highRichness = calc_gather_duration(gatherer, 15000, 1, 600, 750)
             assert.isBelow(highRichness.toNumber(), lowRichness.toNumber())
         })
 
-        test('returns 0 for zero yield', function () {
+        test('returns 0 for zero yield', () => {
             const zeroYield = ServerContract.Types.gatherer_stats.from({
                 yield: UInt16.from(0),
                 drain: UInt16.from(25),
@@ -217,17 +217,17 @@ suite('gathering', function () {
             assert.equal(duration.toNumber(), 0)
         })
 
-        test('median hydrogen at stratum 600', function () {
+        test('median hydrogen at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
             assert.equal(duration.toNumber(), 275)
         })
 
-        test('median copper at stratum 600', function () {
+        test('median copper at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
             assert.equal(duration.toNumber(), 300)
         })
 
-        test('exact formula calculation', function () {
+        test('exact formula calculation', () => {
             const itemMass = 15000
             const quantity = 3
             const stratum = 600
@@ -246,7 +246,7 @@ suite('gathering', function () {
         })
     })
 
-    suite('calc_gather_energy', function () {
+    suite('calc_gather_energy', () => {
         const gatherer = ServerContract.Types.gatherer_stats.from({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
@@ -254,23 +254,23 @@ suite('gathering', function () {
             speed: UInt16.from(500),
         })
 
-        test('returns UInt16', function () {
+        test('returns UInt16', () => {
             const energy = calc_gather_energy(gatherer, 100)
             assert.ok(energy.toNumber !== undefined)
         })
 
-        test('returns 0 for zero duration', function () {
+        test('returns 0 for zero duration', () => {
             const energy = calc_gather_energy(gatherer, 0)
             assert.equal(energy.toNumber(), 0)
         })
 
-        test('energy increases with duration', function () {
+        test('energy increases with duration', () => {
             const short = calc_gather_energy(gatherer, 100)
             const long = calc_gather_energy(gatherer, 1000)
             assert.isAbove(long.toNumber(), short.toNumber())
         })
 
-        test('energy scales with drain rate', function () {
+        test('energy scales with drain rate', () => {
             const lowDrain = ServerContract.Types.gatherer_stats.from({
                 yield: UInt16.from(700),
                 drain: UInt16.from(10),
@@ -288,7 +288,7 @@ suite('gathering', function () {
             assert.isAbove(highEnergy.toNumber(), lowEnergy.toNumber())
         })
 
-        test('calculation matches expected formula', function () {
+        test('calculation matches expected formula', () => {
             const duration = 1000
             const expected = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
             const energy = calc_gather_energy(gatherer, duration)
@@ -296,8 +296,8 @@ suite('gathering', function () {
         })
     })
 
-    suite('projection with TASK_GATHER', function () {
-        test('applies energy cost on complete gather task', function () {
+    suite('projection with TASK_GATHER', () => {
+        test('applies energy cost on complete gather task', () => {
             const ship = makeShip({
                 id: UInt64.from(1),
                 owner: 'test',
@@ -333,7 +333,7 @@ suite('gathering', function () {
             assert.equal(Number(projected.energy), 300)
         })
 
-        test('adds cargo mass on complete gather task', function () {
+        test('adds cargo mass on complete gather task', () => {
             const ship = makeShip({
                 id: UInt64.from(1),
                 owner: 'test',
@@ -373,7 +373,7 @@ suite('gathering', function () {
             )
         })
 
-        test('skips cargo add when gather targets another entity', function () {
+        test('skips cargo add when gather targets another entity', () => {
             const ship = makeShip({
                 id: UInt64.from(1),
                 owner: 'test',

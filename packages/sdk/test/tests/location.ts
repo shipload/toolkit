@@ -10,16 +10,16 @@ const testSeed = Checksum256.from(
 
 const origin = Coordinates.from({x: 0, y: 0})
 
-suite('Location', function () {
-    suite('constructor and from', function () {
-        test('creates Location from coordinates', function () {
+suite('Location', () => {
+    suite('constructor and from', () => {
+        test('creates Location from coordinates', () => {
             const coords = Coordinates.from({x: 5, y: 10})
             const location = new Location(coords)
             assert.equal(location.coordinates.x.toNumber(), 5)
             assert.equal(location.coordinates.y.toNumber(), 10)
         })
 
-        test('static from creates Location', function () {
+        test('static from creates Location', () => {
             const coords = Coordinates.from({x: 5, y: 10})
             const location = Location.from(coords)
             assert.equal(location.coordinates.x.toNumber(), 5)
@@ -27,21 +27,21 @@ suite('Location', function () {
         })
     })
 
-    suite('hasSystemAt', function () {
-        test('returns boolean for system check', function () {
+    suite('hasSystemAt', () => {
+        test('returns boolean for system check', () => {
             const location = Location.from(origin)
             const result = location.hasSystemAt(testSeed)
             assert.isBoolean(result)
         })
 
-        test('caches result for same seed', function () {
+        test('caches result for same seed', () => {
             const location = Location.from(origin)
             const result1 = location.hasSystemAt(testSeed)
             const result2 = location.hasSystemAt(testSeed)
             assert.equal(result1, result2)
         })
 
-        test('recalculates for different seed', function () {
+        test('recalculates for different seed', () => {
             const location = Location.from(origin)
             const seed1 = Checksum256.from(
                 'a3b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
@@ -54,8 +54,8 @@ suite('Location', function () {
         })
     })
 
-    suite('getLocationTypeAt', function () {
-        test('returns a LocationType value', function () {
+    suite('getLocationTypeAt', () => {
+        test('returns a LocationType value', () => {
             const location = Location.from(origin)
             const result = location.getLocationTypeAt(testSeed)
             assert.include(
@@ -69,7 +69,7 @@ suite('Location', function () {
             )
         })
 
-        test('consistent with hasSystemAt for EMPTY', function () {
+        test('consistent with hasSystemAt for EMPTY', () => {
             const location = Location.from(origin)
             const locationType = location.getLocationTypeAt(testSeed)
             const hasSystem = location.hasSystemAt(testSeed)
@@ -77,8 +77,8 @@ suite('Location', function () {
         })
     })
 
-    suite('isGatherableAt', function () {
-        test('returns true for asteroid locations', function () {
+    suite('isGatherableAt', () => {
+        test('returns true for asteroid locations', () => {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
@@ -91,7 +91,7 @@ suite('Location', function () {
             }
         })
 
-        test('returns true for nebula locations', function () {
+        test('returns true for nebula locations', () => {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
@@ -104,7 +104,7 @@ suite('Location', function () {
             }
         })
 
-        test('returns true for planet locations', function () {
+        test('returns true for planet locations', () => {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
@@ -117,7 +117,7 @@ suite('Location', function () {
             }
         })
 
-        test('returns false for empty locations', function () {
+        test('returns false for empty locations', () => {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
                     const location = Location.from(Coordinates.from({x, y}))
@@ -131,43 +131,43 @@ suite('Location', function () {
         })
     })
 
-    suite('findNearby', function () {
-        test('returns array of distances', function () {
+    suite('findNearby', () => {
+        test('returns array of distances', () => {
             const location = Location.from(origin)
             const nearby = location.findNearby(testSeed, 20)
             assert.isArray(nearby)
         })
     })
 
-    suite('equals', function () {
-        test('returns true for same coordinates', function () {
+    suite('equals', () => {
+        test('returns true for same coordinates', () => {
             const location1 = Location.from(Coordinates.from({x: 5, y: 10}))
             const location2 = Location.from(Coordinates.from({x: 5, y: 10}))
             assert.isTrue(location1.equals(location2))
         })
 
-        test('returns false for different coordinates', function () {
+        test('returns false for different coordinates', () => {
             const location1 = Location.from(Coordinates.from({x: 5, y: 10}))
             const location2 = Location.from(Coordinates.from({x: 5, y: 11}))
             assert.isFalse(location1.equals(location2))
         })
 
-        test('compares with raw coordinates object', function () {
+        test('compares with raw coordinates object', () => {
             const location = Location.from(Coordinates.from({x: 5, y: 10}))
             const coords = Coordinates.from({x: 5, y: 10})
             assert.isTrue(location.equals(coords))
         })
     })
 
-    suite('epoch', function () {
-        test('epoch returns undefined initially', function () {
+    suite('epoch', () => {
+        test('epoch returns undefined initially', () => {
             const location = Location.from(origin)
             assert.isUndefined(location.epoch)
         })
     })
 
-    suite('clearCache', function () {
-        test('clears cached data', function () {
+    suite('clearCache', () => {
+        test('clears cached data', () => {
             const location = Location.from(origin)
             location.hasSystemAt(testSeed)
             location.clearCache()
@@ -176,14 +176,14 @@ suite('Location', function () {
     })
 })
 
-suite('toLocation helper', function () {
-    test('returns Location unchanged', function () {
+suite('toLocation helper', () => {
+    test('returns Location unchanged', () => {
         const location = Location.from(Coordinates.from({x: 5, y: 10}))
         const result = toLocation(location)
         assert.strictEqual(result, location)
     })
 
-    test('converts coordinates to Location', function () {
+    test('converts coordinates to Location', () => {
         const coords = Coordinates.from({x: 5, y: 10})
         const result = toLocation(coords)
         assert.instanceOf(result, Location)
@@ -192,19 +192,19 @@ suite('toLocation helper', function () {
     })
 })
 
-suite('coordsToLocationId', function () {
-    test('returns UInt64', function () {
+suite('coordsToLocationId', () => {
+    test('returns UInt64', () => {
         const id = coordsToLocationId({x: 0, y: 0})
         assert.instanceOf(id, UInt64)
     })
 
-    test('same coordinates produce same ID', function () {
+    test('same coordinates produce same ID', () => {
         const id1 = coordsToLocationId({x: 5, y: 10})
         const id2 = coordsToLocationId({x: 5, y: 10})
         assert.isTrue(id1.equals(id2))
     })
 
-    test('different coordinates produce different IDs', function () {
+    test('different coordinates produce different IDs', () => {
         const id1 = coordsToLocationId({x: 0, y: 0})
         const id2 = coordsToLocationId({x: 1, y: 0})
         const id3 = coordsToLocationId({x: 0, y: 1})
@@ -213,7 +213,7 @@ suite('coordsToLocationId', function () {
         assert.isFalse(id2.equals(id3))
     })
 
-    test('handles negative coordinates', function () {
+    test('handles negative coordinates', () => {
         const id1 = coordsToLocationId({x: -5, y: -5})
         const id2 = coordsToLocationId({x: -5, y: -5})
         const id3 = coordsToLocationId({x: 5, y: 5})
@@ -221,18 +221,18 @@ suite('coordsToLocationId', function () {
         assert.isFalse(id1.equals(id3))
     })
 
-    test('origin (0,0) produces ID 0', function () {
+    test('origin (0,0) produces ID 0', () => {
         const id = coordsToLocationId({x: 0, y: 0})
         assert.equal(id.toNumber(), 0)
     })
 
-    test('x in high bits, y in low bits', function () {
+    test('x in high bits, y in low bits', () => {
         const id = coordsToLocationId({x: 1, y: 0})
         const expected = BigInt(1) << BigInt(32)
         assert.equal(id.toString(), expected.toString())
     })
 
-    test('Coordinates.toLocationId() matches coordsToLocationId()', function () {
+    test('Coordinates.toLocationId() matches coordsToLocationId()', () => {
         const coords = Coordinates.from({x: 7, y: 13})
         const id1 = coords.toLocationId()
         const id2 = coordsToLocationId(coords)

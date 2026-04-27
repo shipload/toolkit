@@ -11,8 +11,8 @@ import {
     rollWithinTier,
 } from '$lib'
 
-suite('tier utilities', function () {
-    test('itemTier returns tier from item ID', function () {
+suite('tier utilities', () => {
+    test('itemTier returns tier from item ID', () => {
         assert.equal(itemTier(10001), 1)
         assert.equal(itemTier(10100), 1)
         assert.equal(itemTier(10200), 1)
@@ -21,12 +21,12 @@ suite('tier utilities', function () {
         assert.equal(itemTier(30001), 3)
     })
 
-    test('itemTier returns 0 for raw resources', function () {
+    test('itemTier returns 0 for raw resources', () => {
         assert.equal(itemTier(101), 0)
         assert.equal(itemTier(402), 0)
     })
 
-    test('itemOffset returns offset within tier', function () {
+    test('itemOffset returns offset within tier', () => {
         assert.equal(itemOffset(10001), 1)
         assert.equal(itemOffset(10100), 100)
         assert.equal(itemOffset(10200), 200)
@@ -34,7 +34,7 @@ suite('tier utilities', function () {
         assert.equal(itemOffset(20200), 200)
     })
 
-    test('itemCategory classifies crafted items', function () {
+    test('itemCategory classifies crafted items', () => {
         assert.equal(itemCategory(10001), 'component')
         assert.equal(itemCategory(10100), 'module')
         assert.equal(itemCategory(10200), 'entity')
@@ -43,22 +43,22 @@ suite('tier utilities', function () {
         assert.equal(itemCategory(101), 'resource')
     })
 
-    test('isRelatedItem matches same offset across tiers', function () {
+    test('isRelatedItem matches same offset across tiers', () => {
         assert.isTrue(isRelatedItem(10001, 20001))
         assert.isTrue(isRelatedItem(10200, 20200))
         assert.isFalse(isRelatedItem(10001, 10002))
         assert.isFalse(isRelatedItem(10001, 10100))
     })
 
-    test('isCraftedItem checks >= 10000', function () {
+    test('isCraftedItem checks >= 10000', () => {
         assert.isFalse(isCraftedItem(101))
         assert.isTrue(isCraftedItem(10001))
         assert.isTrue(isCraftedItem(20001))
     })
 })
 
-suite('reserve tiers', function () {
-    test('tier constants match spec', function () {
+suite('reserve tiers', () => {
+    test('tier constants match spec', () => {
         assert.deepEqual(RESERVE_TIERS.small, {min: 15, max: 60})
         assert.deepEqual(RESERVE_TIERS.medium, {min: 100, max: 200})
         assert.deepEqual(RESERVE_TIERS.large, {min: 400, max: 700})
@@ -66,7 +66,7 @@ suite('reserve tiers', function () {
         assert.deepEqual(RESERVE_TIERS.motherlode, {min: 4000, max: 10000})
     })
 
-    test('rollTier at shallow distributes ~80/19.2/0.8/0.005/0.0004', function () {
+    test('rollTier at shallow distributes ~80/19.2/0.8/0.005/0.0004', () => {
         const counts: Record<ReserveTier, number> = {
             small: 0,
             medium: 0,
@@ -84,7 +84,7 @@ suite('reserve tiers', function () {
         assert.isAtMost(counts.small, 850_000)
     })
 
-    test('rollTier at deep yields more large/massive than at shallow', function () {
+    test('rollTier at deep yields more large/massive than at shallow', () => {
         let shallowLargePlus = 0
         let deepLargePlus = 0
         for (let r = 0; r < 65536; r++) {
@@ -97,7 +97,7 @@ suite('reserve tiers', function () {
         assert.isAbove(deepLargePlus, shallowLargePlus * 4)
     })
 
-    test('rollWithinTier is skewed low', function () {
+    test('rollWithinTier is skewed low', () => {
         const range = RESERVE_TIERS.large
         let belowMidpoint = 0
         const N = 10_000
@@ -113,7 +113,7 @@ suite('reserve tiers', function () {
         assert.isAbove(belowMidpoint / N, 0.6)
     })
 
-    test('rollWithinTier deterministic', function () {
+    test('rollWithinTier deterministic', () => {
         const range = RESERVE_TIERS.medium
         assert.equal(rollWithinTier(0, range), range.min)
         assert.equal(rollWithinTier(65535, range), range.max)

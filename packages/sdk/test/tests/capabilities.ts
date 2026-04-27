@@ -14,52 +14,52 @@ import {
     statMappings,
 } from '$lib'
 
-suite('Capabilities', function () {
-    test('capabilityNames has 10 entries', function () {
+suite('Capabilities', () => {
+    test('capabilityNames has 10 entries', () => {
         assert.equal(capabilityNames.length, 10)
     })
 
-    test('getCapabilityAttributes returns all attributes', function () {
+    test('getCapabilityAttributes returns all attributes', () => {
         const all = getCapabilityAttributes()
         assert.equal(all.length, capabilityAttributes.length)
         assert.equal(all.length, 22)
     })
 
-    test('getCapabilityAttributes filters by capability', function () {
+    test('getCapabilityAttributes filters by capability', () => {
         const gathering = getCapabilityAttributes('Gathering')
         assert.equal(gathering.length, 4)
         assert.isTrue(gathering.every((a) => a.capability === 'Gathering'))
     })
 
-    test('getStatMappings returns all mappings', function () {
+    test('getStatMappings returns all mappings', () => {
         const all = getStatMappings()
         assert.equal(all.length, statMappings.length)
     })
 
-    test('getStatMappingsForStat filters correctly', function () {
+    test('getStatMappingsForStat filters correctly', () => {
         const strength = getStatMappingsForStat('Strength')
         assert.equal(strength.length, 3)
         assert.isTrue(strength.every((m) => m.stat === 'Strength'))
     })
 
-    test('getStatMappingsForCapability filters correctly', function () {
+    test('getStatMappingsForCapability filters correctly', () => {
         const manufacturing = getStatMappingsForCapability('Crafter')
         assert.isTrue(manufacturing.length > 0)
         assert.isTrue(manufacturing.every((m) => m.capability === 'Crafter'))
     })
 
-    test('isInvertedAttribute returns true for drain and mass', function () {
+    test('isInvertedAttribute returns true for drain and mass', () => {
         assert.isTrue(isInvertedAttribute('drain'))
         assert.isTrue(isInvertedAttribute('mass'))
     })
 
-    test('isInvertedAttribute returns false for non-inverted attributes', function () {
+    test('isInvertedAttribute returns false for non-inverted attributes', () => {
         assert.isFalse(isInvertedAttribute('thrust'))
         assert.isFalse(isInvertedAttribute('capacity'))
         assert.isFalse(isInvertedAttribute('yield'))
     })
 
-    test('capsHasHauler returns true when hauler is present', function () {
+    test('capsHasHauler returns true when hauler is present', () => {
         const caps: EntityCapabilities = {
             hauler: ServerContract.Types.hauler_stats.from({
                 capacity: 2,
@@ -70,7 +70,7 @@ suite('Capabilities', function () {
         assert.isTrue(capsHasHauler(caps))
     })
 
-    test('capsHasHauler returns false when hauler is absent', function () {
+    test('capsHasHauler returns false when hauler is absent', () => {
         const caps: EntityCapabilities = {}
         assert.isFalse(capsHasHauler(caps))
     })

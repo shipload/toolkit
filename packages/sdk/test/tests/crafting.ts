@@ -32,22 +32,22 @@ import {
     type RecipeSlotInput,
 } from '$lib'
 
-suite('Crafting', function () {
-    suite('Seed Encoding', function () {
-        test('encodes and decodes single stat', function () {
+suite('Crafting', () => {
+    suite('Seed Encoding', () => {
+        test('encodes and decodes single stat', () => {
             const encoded = encodeStats([450])
             const decoded = decodeStats(encoded, 1)
             assert.equal(decoded[0], 450)
         })
 
-        test('encodes and decodes multiple stats', function () {
+        test('encodes and decodes multiple stats', () => {
             const values = [450, 300, 720, 150]
             const encoded = encodeStats(values)
             const decoded = decodeStats(encoded, 4)
             assert.deepEqual(decoded, values)
         })
 
-        test('clamps to 10-bit range', function () {
+        test('clamps to 10-bit range', () => {
             const encoded = encodeStats([999, 1, 512])
             const decoded = decodeStats(encoded, 3)
             assert.equal(decoded[0], 999)
@@ -55,14 +55,14 @@ suite('Crafting', function () {
             assert.equal(decoded[2], 512)
         })
 
-        test('handles zero seed', function () {
+        test('handles zero seed', () => {
             const decoded = decodeStats(0n, 2)
             assert.deepEqual(decoded, [0, 0])
         })
     })
 
-    suite('Blending', function () {
-        test('weighted average of single stat', function () {
+    suite('Blending', () => {
+        test('weighted average of single stat', () => {
             const result = blendStacks(
                 [
                     {quantity: 30, stats: {strength: 450}},
@@ -73,19 +73,19 @@ suite('Crafting', function () {
             assert.equal(result, 517)
         })
 
-        test('single stack returns its value', function () {
+        test('single stack returns its value', () => {
             const result = blendStacks([{quantity: 40, stats: {strength: 600}}], 'strength')
             assert.equal(result, 600)
         })
 
-        test('returns 0 for empty stacks', function () {
+        test('returns 0 for empty stacks', () => {
             const result = blendStacks([], 'strength')
             assert.equal(result, 0)
         })
     })
 
-    suite('Component Stats', function () {
-        test('hull plates from ore stacks', function () {
+    suite('Component Stats', () => {
+        test('hull plates from ore stacks', () => {
             const stats = computeComponentStats(ITEM_HULL_PLATES, [
                 {
                     category: 'ore',
@@ -102,7 +102,7 @@ suite('Crafting', function () {
             assert.equal(den!.value, 262)
         })
 
-        test('focusing array from crystal stacks blends weighted average', function () {
+        test('focusing array from crystal stacks blends weighted average', () => {
             const stats = computeComponentStats(ITEM_FOCUSING_ARRAY, [
                 {
                     category: 'crystal',
@@ -125,7 +125,7 @@ suite('Crafting', function () {
             assert.equal(res!.value, 560)
         })
 
-        test('cargo lining from regolith + biomass', function () {
+        test('cargo lining from regolith + biomass', () => {
             // Recipe 10002 statSlots: [regolith stat 1 (hardness), biomass stat 2 (saturation)].
             const stats = computeComponentStats(ITEM_CARGO_LINING, [
                 {
@@ -152,8 +152,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('Entity Stats', function () {
-        test('container from component stacks', function () {
+    suite('Entity Stats', () => {
+        test('container from component stacks', () => {
             const stats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
                 [ITEM_HULL_PLATES]: [
                     {quantity: 4, stats: {strength: 500, density: 300}},
@@ -167,15 +167,15 @@ suite('Crafting', function () {
         })
     })
 
-    suite('Decode Crafted Item', function () {
-        test('decode hull plates seed', function () {
+    suite('Decode Crafted Item', () => {
+        test('decode hull plates seed', () => {
             const seed = encodeStats([450, 300])
             const stats = decodeCraftedItemStats(ITEM_HULL_PLATES, seed)
             assert.equal(stats['strength'], 450)
             assert.equal(stats['density'], 300)
         })
 
-        test('decode container packed seed', function () {
+        test('decode container packed seed', () => {
             // Container T1 statSlots derive from Hull Plates (strength, density)
             // and Cargo Lining (hardness, saturation), so decode keys are those four.
             const seed = encodeStats([500, 300, 600, 700])
@@ -186,7 +186,7 @@ suite('Crafting', function () {
             assert.equal(stats['saturation'], 700)
         })
 
-        test('decoded hauler stats use input stat key names', function () {
+        test('decoded hauler stats use input stat key names', () => {
             // Hauler 10106 inputs are Power Cell (regolith composition/fineness) and
             // Focusing Array (crystal conductivity/resonance), so decoded keys come
             // from those raw-resource stats — not from capability output names.
@@ -202,8 +202,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('encodeGatheredCargoStats', function () {
-        test('round-trips derived stats via bit decode', function () {
+    suite('encodeGatheredCargoStats', () => {
+        test('round-trips derived stats via bit decode', () => {
             const depositSeed = 0x0badf00dcafebaben
             const encoded = encodeGatheredCargoStats(depositSeed)
             const raw = deriveResourceStats(depositSeed)
@@ -213,7 +213,7 @@ suite('Crafting', function () {
             assert.equal(decodeStat(seed, 2), raw.stat3)
         })
 
-        test('returns a UInt64 instance', function () {
+        test('returns a UInt64 instance', () => {
             const encoded = encodeGatheredCargoStats(0x123456789abcdef0n)
             assert.isFunction(encoded.toString)
             const second = encodeGatheredCargoStats(0x123456789abcdef0n)
@@ -221,8 +221,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('blendCargoStacks', function () {
-        test('decodes raw-item stats via bit decode, not hash', function () {
+    suite('blendCargoStacks', () => {
+        test('decodes raw-item stats via bit decode, not hash', () => {
             const packed = UInt64.from(encodeStats([278, 142, 162]))
             const result = blendCargoStacks(6, [{quantity: 1, stats: packed}])
             const decoded = decodeStats(BigInt(result.toString()), 3)
@@ -232,8 +232,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('computeCraftedOutputStats', function () {
-        test('single-input single-category component (Thruster Core from gas)', function () {
+    suite('computeCraftedOutputStats', () => {
+        test('single-input single-category component (Thruster Core from gas)', () => {
             const seedA = 0x123456789abcdef0n
             const seedB = 0xfedcba9876543210n
             const slotInputs: RecipeSlotInput[] = [
@@ -291,7 +291,7 @@ suite('Crafting', function () {
             assert.equal(decoded['thermal'], thm)
         })
 
-        test('multi-input multi-category component (Cargo Lining from regolith + biomass)', function () {
+        test('multi-input multi-category component (Cargo Lining from regolith + biomass)', () => {
             const regolithSeed = 0x1111222233334444n
             const biomassSeed = 0xaaaabbbbccccddddn
             const slotInputs: RecipeSlotInput[] = [
@@ -358,7 +358,7 @@ suite('Crafting', function () {
             assert.equal(decoded['saturation'], rawB.stat3)
         })
 
-        test('entity recipe (Container packed from hull_plates + cargo_lining)', function () {
+        test('entity recipe (Container packed from hull_plates + cargo_lining)', () => {
             // Hull Plates packs (strength, density); Cargo Lining packs
             // (hardness, saturation) per the new contract recipes.
             const hullSeedA = encodeStats([500, 300])
@@ -402,11 +402,11 @@ suite('Crafting', function () {
             assert.equal(decoded['saturation'], 800)
         })
 
-        test('throws for unknown output item id', function () {
+        test('throws for unknown output item id', () => {
             assert.throws(() => computeCraftedOutputStats(99999, []), /no recipe found/)
         })
 
-        test('throws when entity recipe receives a category-only slot', function () {
+        test('throws when entity recipe receives a category-only slot', () => {
             assert.throws(
                 () =>
                     computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, [
@@ -421,8 +421,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('T2 Multi-Source Blending', function () {
-        test('Hull Plates T2 blends component + raw ore stats', function () {
+    suite('T2 Multi-Source Blending', () => {
+        test('Hull Plates T2 blends component + raw ore stats', () => {
             const hullPlatesEncoded = encodeStats([400, 300])
             const oreT2Seed = encodeStats([600, 0, 200])
 
@@ -445,7 +445,7 @@ suite('Crafting', function () {
             assert.equal(decoded['density'], 250)
         })
 
-        test('Cargo Lining T2 blends component + regolith + biomass stats', function () {
+        test('Cargo Lining T2 blends component + regolith + biomass stats', () => {
             const clEncoded = encodeStats([600, 700])
             const regolithSeed = encodeStats([0, 400, 0])
             const biomassSeed = encodeStats([0, 0, 800])
@@ -475,8 +475,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('Container Capabilities', function () {
-        test('all stats at 500 produces expected mid-range values', function () {
+    suite('Container Capabilities', () => {
+        test('all stats at 500 produces expected mid-range values', () => {
             const caps = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
@@ -484,11 +484,11 @@ suite('Crafting', function () {
                 saturation: 500,
             })
             assert.equal(caps.hullmass, 25000 + 75 * 500)
-            assert.equal(caps.capacity, Math.floor(1000000 * Math.pow(10, 1500 / 2997)))
+            assert.equal(caps.capacity, Math.floor(1000000 * 10 ** (1500 / 2997)))
             assert.approximately(caps.capacity, 3162000, 50000)
         })
 
-        test('minimum stats produce floor values', function () {
+        test('minimum stats produce floor values', () => {
             const caps = computeContainerCapabilities({
                 strength: 1,
                 density: 1,
@@ -502,7 +502,7 @@ suite('Crafting', function () {
             assert.isAtMost(caps.capacity, 1100000)
         })
 
-        test('maximum stats produce ceiling values', function () {
+        test('maximum stats produce ceiling values', () => {
             const caps = computeContainerCapabilities({
                 strength: 999,
                 density: 999,
@@ -516,7 +516,7 @@ suite('Crafting', function () {
             assert.isAtMost(caps.capacity, 10100000)
         })
 
-        test('hullmass range is 25k-100k', function () {
+        test('hullmass range is 25k-100k', () => {
             const min = computeContainerCapabilities({
                 density: 1,
                 strength: 500,
@@ -533,7 +533,7 @@ suite('Crafting', function () {
             assert.isAtMost(max.hullmass, 100000)
         })
 
-        test('capacity range is 1M-10M', function () {
+        test('capacity range is 1M-10M', () => {
             const min = computeContainerCapabilities({
                 strength: 1,
                 hardness: 1,
@@ -550,7 +550,7 @@ suite('Crafting', function () {
             assert.isAtMost(max.capacity, 10100000)
         })
 
-        test('density is inverted - lower density means lighter hull', function () {
+        test('density is inverted - lower density means lighter hull', () => {
             const low = computeContainerCapabilities({
                 density: 100,
                 strength: 500,
@@ -567,8 +567,8 @@ suite('Crafting', function () {
         })
     })
 
-    suite('T2 Container Capabilities', function () {
-        test('T2 container has lighter hullmass than T1 at same density', function () {
+    suite('T2 Container Capabilities', () => {
+        test('T2 container has lighter hullmass than T1 at same density', () => {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
@@ -584,7 +584,7 @@ suite('Crafting', function () {
             assert.isBelow(t2.hullmass, t1.hullmass)
         })
 
-        test('T2 container has greater capacity than T1 at same stats', function () {
+        test('T2 container has greater capacity than T1 at same stats', () => {
             const t1 = computeContainerCapabilities({
                 strength: 500,
                 density: 500,
@@ -600,65 +600,65 @@ suite('Crafting', function () {
             assert.isAbove(t2.capacity, t1.capacity)
         })
 
-        test('T2 container formulas match contract', function () {
+        test('T2 container formulas match contract', () => {
             const stats = {strength: 400, density: 300, hardness: 600, saturation: 200}
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 20000 + 50 * 300)
             const statSum = 400 + 600 + 200
-            const expected = Math.floor(1500000 * Math.pow(10, statSum / 2500))
+            const expected = Math.floor(1500000 * 10 ** (statSum / 2500))
             assert.equal(caps.capacity, expected)
         })
     })
 
-    suite('calc_craft_duration', function () {
-        test('basic duration calculation', function () {
+    suite('calc_craft_duration', () => {
+        test('basic duration calculation', () => {
             const duration = calc_craft_duration(500, 450000)
             assert.equal(duration.toNumber(), 900)
         })
 
-        test('scales linearly with total input mass', function () {
+        test('scales linearly with total input mass', () => {
             const single = calc_craft_duration(500, 450000)
             const batch = calc_craft_duration(500, 450000 * 8)
             assert.equal(batch.toNumber(), single.toNumber() * 8)
         })
 
-        test('higher speed reduces duration', function () {
+        test('higher speed reduces duration', () => {
             const slow = calc_craft_duration(200, 450000)
             const fast = calc_craft_duration(800, 450000)
             assert.isAbove(slow.toNumber(), fast.toNumber())
         })
 
-        test('minimum duration is 1', function () {
+        test('minimum duration is 1', () => {
             const duration = calc_craft_duration(999, 1)
             assert.isAtLeast(duration.toNumber(), 1)
         })
     })
 
-    suite('computeInputMass', function () {
-        test('component returns positive mass', function () {
+    suite('computeInputMass', () => {
+        test('component returns positive mass', () => {
             const mass = computeInputMass(ITEM_HULL_PLATES)
             assert.isAbove(mass, 0)
             const oreT1 = findItemByCategoryAndTier('ore', 1)
             assert.equal(mass, 15 * oreT1.mass)
         })
 
-        test('module returns positive mass', function () {
+        test('module returns positive mass', () => {
             const mass = computeInputMass(ITEM_ENGINE_T1)
             assert.isAbove(mass, 0)
         })
 
-        test('entity returns positive mass', function () {
+        test('entity returns positive mass', () => {
             const mass = computeInputMass(ITEM_CONTAINER_T1_PACKED)
             assert.isAbove(mass, 0)
         })
 
-        test('throws for unknown item', function () {
+        test('throws for unknown item', () => {
             assert.throws(() => computeInputMass(99999), /no recipe found/)
         })
     })
 
-    suite('T2 cross-group blending', function () {
-        test('blendCrossGroup averages stats from two groups with equal weights', function () {
+    suite('T2 cross-group blending', () => {
+        test('blendCrossGroup averages stats from two groups with equal weights', () => {
             const result = blendCrossGroup([
                 {value: 400, weight: 1},
                 {value: 600, weight: 1},
@@ -666,7 +666,7 @@ suite('Crafting', function () {
             assert.equal(result, 500)
         })
 
-        test('blendCrossGroup respects unequal weights', function () {
+        test('blendCrossGroup respects unequal weights', () => {
             const result = blendCrossGroup([
                 {value: 400, weight: 3},
                 {value: 800, weight: 1},
@@ -674,37 +674,37 @@ suite('Crafting', function () {
             assert.equal(result, 500)
         })
 
-        test('blendCrossGroup clamps to 1-999', function () {
+        test('blendCrossGroup clamps to 1-999', () => {
             assert.equal(blendCrossGroup([{value: 0, weight: 1}]), 1)
             assert.equal(blendCrossGroup([{value: 1500, weight: 1}]), 999)
         })
     })
 
-    suite('calc_craft_energy', function () {
-        test('basic energy calculation', function () {
+    suite('calc_craft_energy', () => {
+        test('basic energy calculation', () => {
             // Hull Plates: 450K input_mass × drain 17 / 150K = 51
             const energy = calc_craft_energy(17, 450000)
             assert.equal(energy.toNumber(), 51)
         })
 
-        test('higher drain costs more energy', function () {
+        test('higher drain costs more energy', () => {
             const low = calc_craft_energy(5, 450000)
             const high = calc_craft_energy(30, 450000)
             assert.isAbove(high.toNumber(), low.toNumber())
         })
 
-        test('zero input costs zero energy', function () {
+        test('zero input costs zero energy', () => {
             const energy = calc_craft_energy(17, 0)
             assert.equal(energy.toNumber(), 0)
         })
 
-        test('scales linearly with batched input mass', function () {
+        test('scales linearly with batched input mass', () => {
             const single = calc_craft_energy(17, 450000)
             const batch = calc_craft_energy(17, 1350000)
             assert.equal(batch.toNumber(), single.toNumber() * 3)
         })
 
-        test('energy clamps to uint16 max on oversized input', function () {
+        test('energy clamps to uint16 max on oversized input', () => {
             const energy = calc_craft_energy(30, 450_000_000)
             assert.equal(energy.toNumber(), 65535)
         })

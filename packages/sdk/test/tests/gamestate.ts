@@ -45,9 +45,9 @@ function createMockGame(startTimestamp: number, epochtime: number) {
     })
 }
 
-suite('GameState', function () {
-    suite('from', function () {
-        test('creates GameState from state_row without game', function () {
+suite('GameState', () => {
+    suite('from', () => {
+        test('creates GameState from state_row without game', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
@@ -55,7 +55,7 @@ suite('GameState', function () {
             assert.equal(gameState.epoch.toNumber(), 5)
         })
 
-        test('creates GameState from state_row with game', function () {
+        test('creates GameState from state_row with game', () => {
             const stateRow = createMockStateRow()
             const game = createMockGame(Date.now(), 3600)
             const gameState = GameState.from(stateRow, game)
@@ -65,8 +65,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('setGame', function () {
-        test('sets game configuration', function () {
+    suite('setGame', () => {
+        test('sets game configuration', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
             const game = createMockGame(Date.now(), 3600)
@@ -77,8 +77,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('currentEpoch', function () {
-        test('returns epoch from state', function () {
+    suite('currentEpoch', () => {
+        test('returns epoch from state', () => {
             const stateRow = createMockStateRow({epoch: 42})
             const gameState = GameState.from(stateRow)
 
@@ -86,8 +86,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('epochSeed', function () {
-        test('returns seed from state', function () {
+    suite('epochSeed', () => {
+        test('returns seed from state', () => {
             const seed = '1234'.repeat(16)
             const stateRow = createMockStateRow({seed})
             const gameState = GameState.from(stateRow)
@@ -96,15 +96,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('gameSeed', function () {
-        test('returns undefined when no game set', function () {
+    suite('gameSeed', () => {
+        test('returns undefined when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
             assert.isUndefined(gameState.gameSeed)
         })
 
-        test('returns game config seed when game set', function () {
+        test('returns game config seed when game set', () => {
             const stateRow = createMockStateRow()
             const game = createMockGame(Date.now(), 3600)
             const gameState = GameState.from(stateRow, game)
@@ -114,15 +114,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('isEnabled', function () {
-        test('returns true when enabled', function () {
+    suite('isEnabled', () => {
+        test('returns true when enabled', () => {
             const stateRow = createMockStateRow({enabled: true})
             const gameState = GameState.from(stateRow)
 
             assert.isTrue(gameState.isEnabled)
         })
 
-        test('returns false when disabled', function () {
+        test('returns false when disabled', () => {
             const stateRow = createMockStateRow({enabled: false})
             const gameState = GameState.from(stateRow)
 
@@ -130,8 +130,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('shipCount', function () {
-        test('returns number of ships', function () {
+    suite('shipCount', () => {
+        test('returns number of ships', () => {
             const stateRow = createMockStateRow({ships: 42})
             const gameState = GameState.from(stateRow)
 
@@ -139,8 +139,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('currentSalt', function () {
-        test('returns salt value', function () {
+    suite('currentSalt', () => {
+        test('returns salt value', () => {
             const stateRow = createMockStateRow({salt: 99999})
             const gameState = GameState.from(stateRow)
 
@@ -148,8 +148,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('nextEpochCommit', function () {
-        test('returns commit hash', function () {
+    suite('nextEpochCommit', () => {
+        test('returns commit hash', () => {
             const commit = 'abcd'.repeat(16)
             const stateRow = createMockStateRow({commit})
             const gameState = GameState.from(stateRow)
@@ -158,15 +158,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('calculatedCurrentEpoch', function () {
-        test('returns undefined when no game set', function () {
+    suite('calculatedCurrentEpoch', () => {
+        test('returns undefined when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
             assert.isUndefined(gameState.calculatedCurrentEpoch)
         })
 
-        test('calculates current epoch from game config', function () {
+        test('calculates current epoch from game config', () => {
             const stateRow = createMockStateRow()
             const nowSec = Math.floor(Date.now() / 1000)
             const game = createMockGame((nowSec - 7200) * 1000, 3600)
@@ -178,15 +178,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('currentEpochInfo', function () {
-        test('returns undefined when no game set', function () {
+    suite('currentEpochInfo', () => {
+        test('returns undefined when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
             assert.isUndefined(gameState.currentEpochInfo)
         })
 
-        test('returns epoch info when game set', function () {
+        test('returns epoch info when game set', () => {
             const stateRow = createMockStateRow({epoch: 1})
             const now = Math.floor(Date.now() / 1000) * 1000
             const game = createMockGame(now, 3600)
@@ -200,15 +200,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('getEpochInfo', function () {
-        test('returns undefined when no game set', function () {
+    suite('getEpochInfo', () => {
+        test('returns undefined when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
             assert.isUndefined(gameState.getEpochInfo(UInt64.from(5)))
         })
 
-        test('returns epoch info for given epoch', function () {
+        test('returns epoch info for given epoch', () => {
             const stateRow = createMockStateRow()
             const now = Math.floor(Date.now() / 1000) * 1000
             const game = createMockGame(now, 3600)
@@ -220,15 +220,15 @@ suite('GameState', function () {
         })
     })
 
-    suite('hasSystemAt', function () {
-        test('returns false when no game set', function () {
+    suite('hasSystemAt', () => {
+        test('returns false when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
             assert.isFalse(gameState.hasSystemAt(0, 0))
         })
 
-        test('returns true for valid system coordinates', function () {
+        test('returns true for valid system coordinates', () => {
             const stateRow = createMockStateRow()
             const game = createMockGame(Date.now(), 3600)
             const gameState = GameState.from(stateRow, game)
@@ -238,8 +238,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('hasSystemAtCoords', function () {
-        test('returns false when no game set', function () {
+    suite('hasSystemAtCoords', () => {
+        test('returns false when no game set', () => {
             const stateRow = createMockStateRow()
             const gameState = GameState.from(stateRow)
 
@@ -247,7 +247,7 @@ suite('GameState', function () {
             assert.isFalse(gameState.hasSystemAtCoords(coords))
         })
 
-        test('returns boolean for valid coordinates', function () {
+        test('returns boolean for valid coordinates', () => {
             const stateRow = createMockStateRow()
             const game = createMockGame(Date.now(), 3600)
             const gameState = GameState.from(stateRow, game)
@@ -258,8 +258,8 @@ suite('GameState', function () {
         })
     })
 
-    suite('summary', function () {
-        test('returns summary object', function () {
+    suite('summary', () => {
+        test('returns summary object', () => {
             const stateRow = createMockStateRow({
                 enabled: true,
                 epoch: 10,
@@ -276,14 +276,14 @@ suite('GameState', function () {
             assert.isBoolean(summary.hasCommit)
         })
 
-        test('hasSeed is false for zero seed', function () {
+        test('hasSeed is false for zero seed', () => {
             const stateRow = createMockStateRow({seed: '0'.repeat(64)})
             const gameState = GameState.from(stateRow)
 
             assert.isFalse(gameState.summary.hasSeed)
         })
 
-        test('hasCommit is false for zero commit', function () {
+        test('hasCommit is false for zero commit', () => {
             const stateRow = createMockStateRow({commit: '0'.repeat(64)})
             const gameState = GameState.from(stateRow)
 

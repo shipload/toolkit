@@ -2,8 +2,8 @@ import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
 import {deriveResourceStats, deriveStratum, RESERVE_TIERS, ReserveTier} from '$lib'
 
-suite('deriveResourceStats', function () {
-    test('stat range [1, 999] is bounded', function () {
+suite('deriveResourceStats', () => {
+    test('stat range [1, 999] is bounded', () => {
         // 10K seeds × 3 stats = 30K samples. At weibull k=0.24 the per-sample rate
         // of stat=1 is ~0.003, so min=1 is reliably hit; max in this window typically
         // reaches ~800. The ≤999 upper bound is a structural invariant of the weibull
@@ -22,7 +22,7 @@ suite('deriveResourceStats', function () {
         assert.isAtLeast(max, 700, 'maximum over 10K rolls should reach at least 700')
     })
 
-    test('stats ≥ 900 rate stays under 1 in 5k', function () {
+    test('stats ≥ 900 rate stays under 1 in 5k', () => {
         // Reachability of ≥900 is covered by the pinned god-roll fixtures below;
         // this test only bounds the tail rate. At true rate ~1e-4 (weibull k=0.24,
         // max-of-3), expected count in 100K is ~10. Asserting observed rate < 2e-4
@@ -40,7 +40,7 @@ suite('deriveResourceStats', function () {
         )
     })
 
-    test('pinned god-roll fixtures at k=0.24', function () {
+    test('pinned god-roll fixtures at k=0.24', () => {
         // Seeds found by brute-force search for ≥900 under the current formula
         // (scale 0.24, u32 extraction, val≤999 cap). Any change to the weibull
         // constants or byte-ordering will break these and requires a re-derive.
@@ -71,7 +71,7 @@ suite('deriveResourceStats', function () {
         }
     })
 
-    test('is deterministic', function () {
+    test('is deterministic', () => {
         const seed = 12345678901234567890n
         const a = deriveResourceStats(seed)
         const b = deriveResourceStats(seed)
@@ -79,12 +79,12 @@ suite('deriveResourceStats', function () {
     })
 })
 
-suite('deriveStratum reserve tiers', function () {
+suite('deriveStratum reserve tiers', () => {
     const epochSeed = Checksum256.from(
         '0202020202020202020202020202020202020202020202020202020202020202'
     )
 
-    test('reserve fits a tier range when nonzero (asteroid)', function () {
+    test('reserve fits a tier range when nonzero (asteroid)', () => {
         // Pinned coords (epoch 0x02…, stratum=1) known to produce nonzero reserves.
         // Replaces a brute-force grid scan. Any change to the reserve generator or
         // RESERVE_TIERS ranges will break these and requires a re-derive.
@@ -110,7 +110,7 @@ suite('deriveStratum reserve tiers', function () {
         }
     })
 
-    test('yield rate near 0.1%', function () {
+    test('yield rate near 0.1%', () => {
         // 30K samples at true rate ~0.001 gives 99% CI roughly [0.00066, 0.0015].
         // The [0.0005, 0.002] bounds comfortably contain that CI.
         let yielded = 0
@@ -126,7 +126,7 @@ suite('deriveStratum reserve tiers', function () {
         assert.isBelow(rate, 0.002, `yield rate ${rate} too high`)
     })
 
-    test('deeper strata bias toward larger tiers', function () {
+    test('deeper strata bias toward larger tiers', () => {
         // 25K samples per stratum at yield rate ~0.001 gives ~25 yields each, enough
         // signal to observe the depth-bias effect (shallow is dominated by 'small';
         // deep shifts weight to 'medium' and above).

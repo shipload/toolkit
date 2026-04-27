@@ -32,12 +32,12 @@ export function computeBaseHullmass(stats: bigint): number {
 
 export function computeBaseCapacityShip(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
-    return Math.floor(1_000_000 * Math.pow(10, s / 2997))
+    return Math.floor(1_000_000 * 10 ** (s / 2997))
 }
 
 export function computeBaseCapacityWarehouse(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
-    return Math.floor(20_000_000 * Math.pow(10, s / 2997))
+    return Math.floor(20_000_000 * 10 ** (s / 2997))
 }
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)

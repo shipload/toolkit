@@ -12,8 +12,8 @@ import {
     ITEM_WAREHOUSE_T1_PACKED,
 } from '$lib'
 
-suite('NFT deserializers', function () {
-    test('deserializeResource: basic round-trip fields', function () {
+suite('NFT deserializers', () => {
+    test('deserializeResource: basic round-trip fields', () => {
         const data = {quantity: 10, stats: '12345', origin_x: '100', origin_y: '-50'}
         const result = deserializeResource(data, 101) // ore t1
         assert.equal(result.item_id, 101)
@@ -22,7 +22,7 @@ suite('NFT deserializers', function () {
         assert.isUndefined(result.modules)
     })
 
-    test('deserializeComponent: basic round-trip fields', function () {
+    test('deserializeComponent: basic round-trip fields', () => {
         const data = {
             quantity: 3,
             stats: '9999',
@@ -37,7 +37,7 @@ suite('NFT deserializers', function () {
         assert.equal(result.stats, '9999')
     })
 
-    test('deserializeModule: basic round-trip fields', function () {
+    test('deserializeModule: basic round-trip fields', () => {
         const data = {
             quantity: 1,
             stats: '42',
@@ -53,7 +53,7 @@ suite('NFT deserializers', function () {
         assert.equal(result.stats, '42')
     })
 
-    test('deserializeEntity ship T1: reconstitutes 5-slot module array with only slot 0 filled', function () {
+    test('deserializeEntity ship T1: reconstitutes 5-slot module array with only slot 0 filled', () => {
         const data = {
             quantity: 1,
             stats: '2864434397',
@@ -75,7 +75,7 @@ suite('NFT deserializers', function () {
         assert.isUndefined(result.modules![4].installed)
     })
 
-    test('deserializeEntity warehouse T1: preserves slot types', function () {
+    test('deserializeEntity warehouse T1: preserves slot types', () => {
         const data = {
             quantity: 1,
             stats: '100',
@@ -92,7 +92,7 @@ suite('NFT deserializers', function () {
         }
     })
 
-    test('deserializeAsset dispatches by item type', function () {
+    test('deserializeAsset dispatches by item type', () => {
         const resource = deserializeAsset(
             {quantity: 5, stats: '1', origin_x: '0', origin_y: '0'},
             101

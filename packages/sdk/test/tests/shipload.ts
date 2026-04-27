@@ -20,7 +20,7 @@ const serverContractName = 'shipload.gm'
 
 const server = new ServerContract.Contract({client})
 
-suite('Shipload', function () {
+suite('Shipload', () => {
     let shipload: Shipload
 
     setup(async () => {
@@ -31,42 +31,42 @@ suite('Shipload', function () {
         })
     })
 
-    suite('getters', function () {
-        test('client returns APIClient', function () {
+    suite('getters', () => {
+        test('client returns APIClient', () => {
             assert.instanceOf(shipload.client, APIClient)
         })
 
-        test('server returns Contract', function () {
+        test('server returns Contract', () => {
             assert.instanceOf(shipload.server, Contract)
         })
 
-        test('platform returns Contract', function () {
+        test('platform returns Contract', () => {
             assert.instanceOf(shipload.platform, Contract)
         })
 
-        test('entities returns EntitiesManager', function () {
+        test('entities returns EntitiesManager', () => {
             assert.instanceOf(shipload.entities, EntitiesManager)
         })
 
-        test('players returns PlayersManager', function () {
+        test('players returns PlayersManager', () => {
             assert.instanceOf(shipload.players, PlayersManager)
         })
 
-        test('locations returns LocationsManager', function () {
+        test('locations returns LocationsManager', () => {
             assert.instanceOf(shipload.locations, LocationsManager)
         })
 
-        test('epochs returns EpochsManager', function () {
+        test('epochs returns EpochsManager', () => {
             assert.instanceOf(shipload.epochs, EpochsManager)
         })
 
-        test('actions returns ActionsManager', function () {
+        test('actions returns ActionsManager', () => {
             assert.instanceOf(shipload.actions, ActionsManager)
         })
     })
 
-    suite('getState', function () {
-        test('should return GameState with correct values', async function () {
+    suite('getState', () => {
+        test('should return GameState with correct values', async () => {
             const state = await shipload.getState()
             const expectedState = await server.table('state').get()
 
@@ -81,15 +81,15 @@ suite('Shipload', function () {
         })
     })
 
-    suite('hasSystem', function () {
-        test('should return true if planet exists', async function () {
+    suite('hasSystem', () => {
+        test('should return true if planet exists', async () => {
             const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const hasSystem = await shipload.locations.hasSystem(location)
 
             assert.isTrue(hasSystem)
         })
 
-        test('should return false if planet does not exist', async function () {
+        test('should return false if planet does not exist', async () => {
             const location: ServerContract.ActionParams.Type.coordinates = {x: 100, y: 100}
             const hasSystem = await shipload.locations.hasSystem(location)
 
@@ -97,8 +97,8 @@ suite('Shipload', function () {
         })
     })
 
-    suite('getShip', function () {
-        test('success', async function () {
+    suite('getShip', () => {
+        test('success', async () => {
             const sdkShip = await shipload.entities.getShip(1)
             assert.instanceOf(sdkShip, Ship)
             assert.isTrue(sdkShip.id.equals(1))
@@ -107,15 +107,15 @@ suite('Shipload', function () {
         })
     })
 
-    suite('getShips', function () {
-        test('success', async function () {
+    suite('getShips', () => {
+        test('success', async () => {
             const ships = await shipload.entities.getShips('wharfkittest')
             assert.isArray(ships)
         })
     })
 
-    suite('findNearbyPlanets', function () {
-        test('should return nearby planets', async function () {
+    suite('findNearbyPlanets', () => {
+        test('should return nearby planets', async () => {
             const origin: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const maxDistance = 2 * PRECISION
             const nearbyPlanets = await shipload.locations.findNearbyPlanets(origin, maxDistance)

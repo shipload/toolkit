@@ -18,15 +18,15 @@ const testEpochSeed = Checksum256.from(
 const SYSTEM_COORDS = {x: -10, y: -4}
 const EMPTY_COORDS = {x: 0, y: 0}
 
-suite('deriveStrata', function () {
-    test('returns empty array for an empty (non-system) coord', function () {
+suite('deriveStrata', () => {
+    test('returns empty array for an empty (non-system) coord', () => {
         const loc = deriveLocationStatic(testGameSeed, EMPTY_COORDS)
         assert.equal(Number(loc.type), LocationType.EMPTY, 'fixture sanity')
         const result = deriveStrata(EMPTY_COORDS, testGameSeed, testEpochSeed)
         assert.deepEqual(result, [])
     })
 
-    test('returns only non-empty strata at a known system coord', function () {
+    test('returns only non-empty strata at a known system coord', () => {
         const result = deriveStrata(SYSTEM_COORDS, testGameSeed, testEpochSeed)
         assert.isAbove(result.length, 0, 'expected at least one non-empty stratum')
         for (const s of result) {
@@ -35,7 +35,7 @@ suite('deriveStrata', function () {
         }
     })
 
-    test('matches per-stratum derivation for first non-empty entry', function () {
+    test('matches per-stratum derivation for first non-empty entry', () => {
         const loc = deriveLocationStatic(testGameSeed, SYSTEM_COORDS)
         const size = deriveLocationSize(loc)
         const strata = deriveStrata(SYSTEM_COORDS, testGameSeed, testEpochSeed)
@@ -55,7 +55,7 @@ suite('deriveStrata', function () {
         assert.equal(first.seed, expected.seed)
     })
 
-    test('entries are in ascending stratum-index order', function () {
+    test('entries are in ascending stratum-index order', () => {
         const result = deriveStrata(SYSTEM_COORDS, testGameSeed, testEpochSeed)
         for (let i = 1; i < result.length; i++) {
             assert.isAbove(

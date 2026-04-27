@@ -15,8 +15,8 @@ import {
     ServerContract,
 } from '$lib'
 
-suite('makeShip factory', function () {
-    test('stacks two hauler modules by capacity-weighted efficiency', function () {
+suite('makeShip factory', () => {
+    test('stacks two hauler modules by capacity-weighted efficiency', () => {
         // Hauler decoded keys: composition, conductivity, fineness, resonance.
         // Capacity uses resonance, efficiency uses conductivity, drain uses
         // reflectivity — which the recipe doesn't carry, so it defaults to 500.
@@ -43,7 +43,7 @@ suite('makeShip factory', function () {
         assert.equal(Number(ship.hauler!.efficiency.value.toString()), 6796)
     })
 
-    test('four storage modules stack capacity bonuses additively', function () {
+    test('four storage modules stack capacity bonuses additively', () => {
         const baseCapacity = 1_000_000
         const stats1 = encodeStats([100, 100, 100, 100])
         const stats2 = encodeStats([500, 500, 500, 500])
@@ -75,7 +75,7 @@ suite('makeShip factory', function () {
         assert.equal(Number(ship.capacity!.value.toString()), 1_630_000)
     })
 
-    test('rejects module with no compatible slot on the entity', function () {
+    test('rejects module with no compatible slot on the entity', () => {
         const engineSeed = encodeStats([500, 500, 500, 500])
         assert.throws(
             () =>
@@ -100,7 +100,7 @@ suite('makeShip factory', function () {
         )
     })
 
-    test('empty modules array produces ship with no derived capabilities', function () {
+    test('empty modules array produces ship with no derived capabilities', () => {
         const ship = makeShip({
             id: UInt64.from(1),
             owner: 'test',
@@ -121,7 +121,7 @@ suite('makeShip factory', function () {
         assert.lengthOf(ship.modules, 5) // Ship T1 has 5 slots, all empty
     })
 
-    test('exposes full capability kit when modules cover engines, generator, loader, and gatherer', function () {
+    test('exposes full capability kit when modules cover engines, generator, loader, and gatherer', () => {
         const seed = encodeStats([500, 500, 500, 500])
         const ship = makeShip({
             id: UInt64.from(1),
@@ -145,8 +145,8 @@ suite('makeShip factory', function () {
     })
 })
 
-suite('makeWarehouse factory', function () {
-    test('builds warehouse with loader + 4 storage modules', function () {
+suite('makeWarehouse factory', () => {
+    test('builds warehouse with loader + 4 storage modules', () => {
         const loaderSeed = encodeStats([500, 500, 500, 500])
         const storageSeed = encodeStats([500, 500, 500, 500])
         const wh = makeWarehouse({
@@ -169,7 +169,7 @@ suite('makeWarehouse factory', function () {
         assert.lengthOf(wh.modules, 5)
     })
 
-    test('rejects crafter module — warehouse has no crafter slot', function () {
+    test('rejects crafter module — warehouse has no crafter slot', () => {
         const crafterSeed = encodeStats([500, 500, 500, 500])
         assert.throws(
             () =>
@@ -187,8 +187,8 @@ suite('makeWarehouse factory', function () {
     })
 })
 
-suite('makeContainer factory', function () {
-    test('cargo input is threaded through (previously hardcoded to empty)', function () {
+suite('makeContainer factory', () => {
+    test('cargo input is threaded through (previously hardcoded to empty)', () => {
         const container = makeContainer({
             id: UInt64.from(1),
             owner: 'test',

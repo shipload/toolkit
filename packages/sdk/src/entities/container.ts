@@ -83,7 +83,7 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
 
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2997
-    const capacity = Math.floor(1000000 * Math.pow(10, exponent))
+    const capacity = Math.floor(1000000 * 10 ** exponent)
 
     return {hullmass, capacity}
 }
@@ -101,7 +101,7 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
 
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2500
-    const capacity = Math.floor(1500000 * Math.pow(10, exponent))
+    const capacity = Math.floor(1500000 * 10 ** exponent)
 
     return {hullmass, capacity}
 }

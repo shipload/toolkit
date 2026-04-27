@@ -8,7 +8,7 @@ export function deriveLocationSize(loc: ServerContract.Types.location_static): n
     const raw = (loc.seed0.toNumber() << 8) | loc.seed1.toNumber()
     const normalized = raw / 65535
 
-    const curved = Math.pow(normalized, 3.0)
+    const curved = normalized ** 3.0
 
     const range = LOCATION_MAX_DEPTH - LOCATION_MIN_DEPTH
     return Math.floor(LOCATION_MIN_DEPTH + curved * range)

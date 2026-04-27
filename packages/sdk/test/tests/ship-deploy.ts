@@ -14,8 +14,8 @@ import {
     ITEM_HAULER_T1,
 } from '$lib'
 
-suite('ship deploy formulas', function () {
-    test('hull capabilities from stats', function () {
+suite('ship deploy formulas', () => {
+    test('hull capabilities from stats', () => {
         const result = computeShipHullCapabilities({
             strength: 500,
             density: 500,
@@ -26,19 +26,19 @@ suite('ship deploy formulas', function () {
         assert.isAbove(result.capacity, 0)
     })
 
-    test('engine capabilities from stats', function () {
+    test('engine capabilities from stats', () => {
         const result = computeEngineCapabilities({volatility: 500, thermal: 500})
         assert.isAbove(result.thrust, 0)
         assert.isAbove(result.drain, 0)
     })
 
-    test('generator capabilities from stats', function () {
+    test('generator capabilities from stats', () => {
         const result = computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
         assert.isAbove(result.capacity, 0)
         assert.isAbove(result.recharge, 0)
     })
 
-    test('lower density = lower hullmass', function () {
+    test('lower density = lower hullmass', () => {
         const light = computeShipHullCapabilities({
             strength: 500,
             density: 100,
@@ -54,62 +54,62 @@ suite('ship deploy formulas', function () {
         assert.isBelow(light.hullmass, heavy.hullmass)
     })
 
-    test('higher volatility = more thrust', function () {
+    test('higher volatility = more thrust', () => {
         const low = computeEngineCapabilities({volatility: 100, thermal: 500})
         const high = computeEngineCapabilities({volatility: 900, thermal: 500})
         assert.isBelow(low.thrust, high.thrust)
     })
 
-    test('higher thermal = lower drain', function () {
+    test('higher thermal = lower drain', () => {
         const low = computeEngineCapabilities({volatility: 500, thermal: 100})
         const high = computeEngineCapabilities({volatility: 500, thermal: 900})
         assert.isAbove(high.drain, 0)
         assert.isBelow(high.drain, low.drain)
     })
 
-    test('engine formula exact values at min', function () {
+    test('engine formula exact values at min', () => {
         const r = computeEngineCapabilities({volatility: 1, thermal: 1})
         assert.equal(r.thrust, 400)
         assert.equal(r.drain, 50)
     })
 
-    test('engine formula exact values at mid', function () {
+    test('engine formula exact values at mid', () => {
         const r = computeEngineCapabilities({volatility: 500, thermal: 500})
         assert.equal(r.thrust, 775)
         assert.equal(r.drain, 43)
     })
 
-    test('engine formula exact values at max', function () {
+    test('engine formula exact values at max', () => {
         const r = computeEngineCapabilities({volatility: 999, thermal: 999})
         assert.equal(r.thrust, 1149)
         assert.equal(r.drain, 36)
     })
 
-    test('generator formula exact values at min', function () {
+    test('generator formula exact values at min', () => {
         const r = computeGeneratorCapabilities({resonance: 1, reflectivity: 1})
         assert.equal(r.capacity, 300)
         assert.equal(r.recharge, 1)
     })
 
-    test('generator formula exact values at mid', function () {
+    test('generator formula exact values at mid', () => {
         const r = computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
         assert.equal(r.capacity, 383)
         assert.equal(r.recharge, 2)
     })
 
-    test('generator formula exact values at max', function () {
+    test('generator formula exact values at max', () => {
         const r = computeGeneratorCapabilities({resonance: 999, reflectivity: 999})
         assert.equal(r.capacity, 466)
         assert.equal(r.recharge, 3)
     })
 
-    test('hull formula exact values at min', function () {
+    test('hull formula exact values at min', () => {
         const r = computeShipHullCapabilities({strength: 1, density: 1, hardness: 1, saturation: 1})
         assert.equal(r.hullmass, 25075)
         assert.equal(r.capacity, 1002307)
     })
 
-    test('hull formula exact values at mid', function () {
+    test('hull formula exact values at mid', () => {
         const r = computeShipHullCapabilities({
             strength: 500,
             density: 500,
@@ -120,7 +120,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.capacity, 3165924)
     })
 
-    test('hull formula exact values at max', function () {
+    test('hull formula exact values at max', () => {
         const r = computeShipHullCapabilities({
             strength: 999,
             density: 999,
@@ -131,7 +131,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.capacity, 10000000)
     })
 
-    test('gatherer formula exact values at min', function () {
+    test('gatherer formula exact values at min', () => {
         const r = computeGathererCapabilities({
             strength: 1,
             tolerance: 1,
@@ -144,7 +144,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.speed, 100)
     })
 
-    test('gatherer formula exact values at mid', function () {
+    test('gatherer formula exact values at mid', () => {
         const r = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
@@ -157,7 +157,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.speed, 500)
     })
 
-    test('gatherer formula exact values at max', function () {
+    test('gatherer formula exact values at max', () => {
         const r = computeGathererCapabilities({
             strength: 999,
             tolerance: 999,
@@ -170,7 +170,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.speed, 899)
     })
 
-    test('higher STR = higher gatherer yield', function () {
+    test('higher STR = higher gatherer yield', () => {
         const low = computeGathererCapabilities({
             strength: 100,
             tolerance: 500,
@@ -186,7 +186,7 @@ suite('ship deploy formulas', function () {
         assert.isBelow(low.yield, high.yield)
     })
 
-    test('higher CON = lower gatherer drain', function () {
+    test('higher CON = lower gatherer drain', () => {
         const low = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
@@ -202,7 +202,7 @@ suite('ship deploy formulas', function () {
         assert.isAbove(low.drain, high.drain)
     })
 
-    test('higher REF = higher speed', function () {
+    test('higher REF = higher speed', () => {
         const low = computeGathererCapabilities({
             strength: 500,
             tolerance: 500,
@@ -218,64 +218,64 @@ suite('ship deploy formulas', function () {
         assert.isBelow(low.speed, high.speed)
     })
 
-    test('loader formula exact values at min', function () {
+    test('loader formula exact values at min', () => {
         const r = computeLoaderCapabilities({hardness: 1, plasticity: 1})
         assert.equal(r.mass, 1998)
         assert.equal(r.thrust, 1)
         assert.equal(r.quantity, 1)
     })
 
-    test('loader formula exact values at mid', function () {
+    test('loader formula exact values at mid', () => {
         const r = computeLoaderCapabilities({hardness: 500, plasticity: 500})
         assert.equal(r.mass, 1000)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
-    test('loader formula exact values at max', function () {
+    test('loader formula exact values at max', () => {
         const r = computeLoaderCapabilities({hardness: 999, plasticity: 999})
         assert.equal(r.mass, 200)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
-    test('higher FIN = lower loader mass', function () {
+    test('higher FIN = lower loader mass', () => {
         const low = computeLoaderCapabilities({hardness: 100, plasticity: 500})
         const high = computeLoaderCapabilities({hardness: 900, plasticity: 500})
         assert.isAbove(low.mass, high.mass)
     })
 
-    test('crafter formula exact values at min', function () {
+    test('crafter formula exact values at min', () => {
         const r = computeCrafterCapabilities({reactivity: 1, composition: 1})
         assert.equal(r.speed, 100)
         assert.equal(r.drain, 30)
     })
 
-    test('crafter formula exact values at mid', function () {
+    test('crafter formula exact values at mid', () => {
         const r = computeCrafterCapabilities({reactivity: 500, composition: 500})
         assert.equal(r.speed, 500)
         assert.equal(r.drain, 15)
     })
 
-    test('crafter formula exact values at max', function () {
+    test('crafter formula exact values at max', () => {
         const r = computeCrafterCapabilities({reactivity: 999, composition: 999})
         assert.equal(r.speed, 899)
         assert.equal(r.drain, 5)
     })
 
-    test('higher REA = higher crafter speed', function () {
+    test('higher REA = higher crafter speed', () => {
         const low = computeCrafterCapabilities({reactivity: 100, composition: 500})
         const high = computeCrafterCapabilities({reactivity: 900, composition: 500})
         assert.isBelow(low.speed, high.speed)
     })
 
-    test('higher COM = lower crafter drain', function () {
+    test('higher COM = lower crafter drain', () => {
         const low = computeCrafterCapabilities({reactivity: 500, composition: 100})
         const high = computeCrafterCapabilities({reactivity: 500, composition: 900})
         assert.isAbove(low.drain, high.drain)
     })
 
-    test('warehouse hull capabilities with zero stats', function () {
+    test('warehouse hull capabilities with zero stats', () => {
         const r = computeWarehouseHullCapabilities({
             density: 0,
             strength: 0,
@@ -286,7 +286,7 @@ suite('ship deploy formulas', function () {
         assert.equal(r.capacity, 20000000)
     })
 
-    test('warehouse hull capabilities at mid stats', function () {
+    test('warehouse hull capabilities at mid stats', () => {
         const r = computeWarehouseHullCapabilities({
             density: 500,
             strength: 500,
@@ -297,7 +297,7 @@ suite('ship deploy formulas', function () {
         assert.isAbove(r.capacity, 20000000)
     })
 
-    test('warehouse capacity is ~20x container capacity', function () {
+    test('warehouse capacity is ~20x container capacity', () => {
         const stats = {density: 500, strength: 500, hardness: 500, saturation: 500}
         const wh = computeWarehouseHullCapabilities(stats)
         const ct = computeContainerCapabilities(stats)
@@ -306,14 +306,14 @@ suite('ship deploy formulas', function () {
         assert.isBelow(ratio, 21)
     })
 
-    test('warehouse hullmass matches container/ship formula', function () {
+    test('warehouse hullmass matches container/ship formula', () => {
         const stats = {density: 500, strength: 500, hardness: 500, saturation: 500}
         const wh = computeWarehouseHullCapabilities(stats)
         const ship = computeShipHullCapabilities(stats)
         assert.equal(wh.hullmass, ship.hullmass)
     })
 
-    test('warehouse max capacity with max stats', function () {
+    test('warehouse max capacity with max stats', () => {
         const r = computeWarehouseHullCapabilities({
             density: 999,
             strength: 999,
@@ -323,28 +323,28 @@ suite('ship deploy formulas', function () {
         assert.isAbove(r.capacity, 190000000)
     })
 
-    test('hauler formula exact values at min', function () {
+    test('hauler formula exact values at min', () => {
         const r = computeHaulerCapabilities({resonance: 1, conductivity: 1, reflectivity: 1})
         assert.equal(r.capacity, 1)
         assert.equal(r.efficiency, 2006)
         assert.equal(r.drain, 15)
     })
 
-    test('hauler formula exact values at mid', function () {
+    test('hauler formula exact values at mid', () => {
         const r = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 500})
         assert.equal(r.capacity, 2)
         assert.equal(r.efficiency, 5000)
         assert.equal(r.drain, 9)
     })
 
-    test('hauler formula exact values at max', function () {
+    test('hauler formula exact values at max', () => {
         const r = computeHaulerCapabilities({resonance: 999, conductivity: 999, reflectivity: 999})
         assert.equal(r.capacity, 3)
         assert.equal(r.efficiency, 7994)
         assert.equal(r.drain, 3)
     })
 
-    test('higher RES = higher hauler capacity', function () {
+    test('higher RES = higher hauler capacity', () => {
         const low = computeHaulerCapabilities({resonance: 0, conductivity: 500, reflectivity: 500})
         const high = computeHaulerCapabilities({
             resonance: 999,
@@ -354,7 +354,7 @@ suite('ship deploy formulas', function () {
         assert.isBelow(low.capacity, high.capacity)
     })
 
-    test('higher CON = higher hauler efficiency', function () {
+    test('higher CON = higher hauler efficiency', () => {
         const low = computeHaulerCapabilities({resonance: 500, conductivity: 0, reflectivity: 500})
         const high = computeHaulerCapabilities({
             resonance: 500,
@@ -364,7 +364,7 @@ suite('ship deploy formulas', function () {
         assert.isBelow(low.efficiency, high.efficiency)
     })
 
-    test('higher REF = lower hauler drain', function () {
+    test('higher REF = lower hauler drain', () => {
         const low = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 0})
         const high = computeHaulerCapabilities({
             resonance: 500,
@@ -374,7 +374,7 @@ suite('ship deploy formulas', function () {
         assert.isBelow(high.drain, low.drain)
     })
 
-    test('computeShipCapabilities stacks two hauler modules', function () {
+    test('computeShipCapabilities stacks two hauler modules', () => {
         const seedA = encodeStats([0, 0, 0, 0])
         const seedB = encodeStats([999, 999, 999, 999])
         const modules = [
@@ -388,7 +388,7 @@ suite('ship deploy formulas', function () {
         assert.equal(caps.hauler!.drain, 18)
     })
 
-    test('computeShipCapabilities single hauler module', function () {
+    test('computeShipCapabilities single hauler module', () => {
         const seed = encodeStats([500, 500, 500, 500])
         const caps = computeShipCapabilities([{itemId: ITEM_HAULER_T1, stats: seed}])
         assert.exists(caps.hauler)
@@ -397,7 +397,7 @@ suite('ship deploy formulas', function () {
         assert.equal(caps.hauler!.drain, 9)
     })
 
-    test('computeShipCapabilities with no hauler modules returns no hauler', function () {
+    test('computeShipCapabilities with no hauler modules returns no hauler', () => {
         const caps = computeShipCapabilities([])
         assert.isUndefined(caps.hauler)
     })

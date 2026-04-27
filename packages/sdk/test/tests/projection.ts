@@ -25,9 +25,9 @@ function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoSt
     return cargo.find((s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey)
 }
 
-suite('projectEntity (stack-aware)', function () {
-    suite('initial cargo', function () {
-        test('returns initial cargo when no schedule', function () {
+suite('projectEntity (stack-aware)', () => {
+    suite('initial cargo', () => {
+        test('returns initial cargo when no schedule', () => {
             const ship = makeShipFixture({
                 cargo: [{item_id: 1, quantity: 10, stats: 100}],
             })
@@ -37,15 +37,15 @@ suite('projectEntity (stack-aware)', function () {
             assert.equal(projected.cargo[0].quantity.toNumber(), 10)
         })
 
-        test('returns empty cargo when none', function () {
+        test('returns empty cargo when none', () => {
             const ship = makeShipFixture({})
             const projected = projectEntity(ship)
             assert.deepEqual(projected.cargo, [])
         })
     })
 
-    suite('GATHER tasks', function () {
-        test('adds gathered cargo as a new stack', function () {
+    suite('GATHER tasks', () => {
+        test('adds gathered cargo as a new stack', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -60,7 +60,7 @@ suite('projectEntity (stack-aware)', function () {
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 100)
         })
 
-        test('merges two gathers from same deposit (same seed)', function () {
+        test('merges two gathers from same deposit (same seed)', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -74,7 +74,7 @@ suite('projectEntity (stack-aware)', function () {
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 100)
         })
 
-        test('keeps separate stacks for gathers with different seeds', function () {
+        test('keeps separate stacks for gathers with different seeds', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -88,8 +88,8 @@ suite('projectEntity (stack-aware)', function () {
         })
     })
 
-    suite('CRAFT tasks', function () {
-        test('removes inputs and adds output (last cargo entry)', function () {
+    suite('CRAFT tasks', () => {
+        test('removes inputs and adds output (last cargo entry)', () => {
             const ship = makeShipFixture({
                 cargo: [
                     {item_id: 1, quantity: 5, stats: 100},
@@ -115,8 +115,8 @@ suite('projectEntity (stack-aware)', function () {
         })
     })
 
-    suite('WRAP / UNWRAP', function () {
-        test('WRAP removes cargo (mirrors UNLOAD)', function () {
+    suite('WRAP / UNWRAP', () => {
+        test('WRAP removes cargo (mirrors UNLOAD)', () => {
             const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 200}]})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -126,7 +126,7 @@ suite('projectEntity (stack-aware)', function () {
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 6)
         })
 
-        test('UNWRAP adds cargo (mirrors LOAD)', function () {
+        test('UNWRAP adds cargo (mirrors LOAD)', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -139,8 +139,8 @@ suite('projectEntity (stack-aware)', function () {
         })
     })
 
-    suite('validateSchedule', function () {
-        test('throws ENTITY_CAPACITY_EXCEEDED via validateSchedule', function () {
+    suite('validateSchedule', () => {
+        test('throws ENTITY_CAPACITY_EXCEEDED via validateSchedule', () => {
             const ship = makeShipFixture({capacity: 100})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -153,7 +153,7 @@ suite('projectEntity (stack-aware)', function () {
             assert.throws(() => validateSchedule(ship), ENTITY_CAPACITY_EXCEEDED)
         })
 
-        test('does not throw when schedule stays within capacity', function () {
+        test('does not throw when schedule stays within capacity', () => {
             const ship = makeShipFixture({capacity: 10_000_000})
             ship.schedule = ServerContract.Types.schedule.from({
                 started: '2024-06-04T23:41:09.000',
@@ -166,11 +166,11 @@ suite('projectEntity (stack-aware)', function () {
             assert.doesNotThrow(() => validateSchedule(ship))
         })
 
-        suite('craft input validation', function () {
+        suite('craft input validation', () => {
             // Hull Plates recipe: [{category: 'ore', quantity: 15}] → output qty 1
             const HULL_PLATES_QTY = 15
 
-            test('accepts valid craft inputs (Hull Plates from 15 ore)', function () {
+            test('accepts valid craft inputs (Hull Plates from 15 ore)', () => {
                 const ship = makeShipFixture({
                     capacity: 10_000_000,
                     cargo: [{item_id: 101, quantity: HULL_PLATES_QTY, stats: 0}],
@@ -189,7 +189,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.doesNotThrow(() => validateSchedule(ship))
             })
 
-            test('throws RECIPE_NOT_FOUND when output has no recipe', function () {
+            test('throws RECIPE_NOT_FOUND when output has no recipe', () => {
                 const ship = makeShipFixture({
                     cargo: [{item_id: 101, quantity: 10, stats: 0}],
                 })
@@ -207,7 +207,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), RECIPE_NOT_FOUND)
             })
 
-            test('throws RECIPE_INPUTS_INSUFFICIENT when quantity below required', function () {
+            test('throws RECIPE_INPUTS_INSUFFICIENT when quantity below required', () => {
                 const ship = makeShipFixture({
                     cargo: [{item_id: 101, quantity: 10, stats: 0}],
                 })
@@ -225,7 +225,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INSUFFICIENT)
             })
 
-            test('throws RECIPE_INPUTS_EXCESS when quantity above required', function () {
+            test('throws RECIPE_INPUTS_EXCESS when quantity above required', () => {
                 const ship = makeShipFixture({
                     cargo: [{item_id: 101, quantity: 20, stats: 0}],
                 })
@@ -243,7 +243,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_EXCESS)
             })
 
-            test('throws RECIPE_INPUTS_INVALID when input category does not match', function () {
+            test('throws RECIPE_INPUTS_INVALID when input category does not match', () => {
                 // Crystal (201) offered to Hull Plates recipe which needs ore
                 const ship = makeShipFixture({
                     cargo: [{item_id: 201, quantity: HULL_PLATES_QTY, stats: 0}],
@@ -262,7 +262,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
             })
 
-            test('throws SHIP_CARGO_NOT_LOADED when input not in projected cargo', function () {
+            test('throws SHIP_CARGO_NOT_LOADED when input not in projected cargo', () => {
                 // Cargo empty but craft task declares inputs
                 const ship = makeShipFixture({capacity: 10_000_000})
                 ship.schedule = ServerContract.Types.schedule.from({
@@ -279,7 +279,7 @@ suite('projectEntity (stack-aware)', function () {
                 assert.throws(() => validateSchedule(ship), SHIP_CARGO_NOT_LOADED)
             })
 
-            test('validates itemId-typed recipe slots (Engine from Thruster Cores)', function () {
+            test('validates itemId-typed recipe slots (Engine from Thruster Cores)', () => {
                 // Engine recipe: [{itemId: ITEM_THRUSTER_CORE, quantity: 6}]
                 // Use wrong item (Power Cell instead of Thruster Core) → INVALID
                 const ITEM_POWER_CELL = 10004
@@ -306,8 +306,8 @@ suite('projectEntity (stack-aware)', function () {
         })
     })
 
-    suite('cross-validation against contract (synthetic — fixture deferred)', function () {
-        test('gather + craft produces expected output stack matching contract semantics', function () {
+    suite('cross-validation against contract (synthetic — fixture deferred)', () => {
+        test('gather + craft produces expected output stack matching contract semantics', () => {
             const RESOURCE_ID = 101
             const COMPONENT_ID = 10005
             const COMPONENT_MASS = 50000
@@ -354,8 +354,8 @@ suite('projectEntity (stack-aware)', function () {
     })
 })
 
-suite('projectFromCurrentState', function () {
-    test('skips completed tasks lingering in schedule.tasks (regression)', function () {
+suite('projectFromCurrentState', () => {
+    test('skips completed tasks lingering in schedule.tasks (regression)', () => {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
         ship.schedule = ServerContract.Types.schedule.from({
             started: '2024-06-04T23:41:09.000',
@@ -374,7 +374,7 @@ suite('projectFromCurrentState', function () {
         assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
     })
 
-    test('projects current_task + pending_tasks against current cargo', function () {
+    test('projects current_task + pending_tasks against current cargo', () => {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 100, stats: 0}]})
         ship.schedule = ServerContract.Types.schedule.from({
             started: '2024-06-04T23:41:09.000',
@@ -391,15 +391,15 @@ suite('projectFromCurrentState', function () {
         assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 50)
     })
 
-    test('returns current state when no schedule', function () {
+    test('returns current state when no schedule', () => {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 0}]})
         const projected = projectFromCurrentState(ship)
         assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 10)
     })
 })
 
-suite('projectFromCurrentStateAt', function () {
-    test('skips completed tasks lingering in schedule.tasks (regression)', function () {
+suite('projectFromCurrentStateAt', () => {
+    test('skips completed tasks lingering in schedule.tasks (regression)', () => {
         // Idle snapshot with a completed CRAFT task lingering in schedule.tasks.
         // Without the snapshot-aware variant, projectEntityAt would re-apply the CRAFT
         // and throw INSUFFICIENT_ITEM_QUANTITY.
@@ -420,7 +420,7 @@ suite('projectFromCurrentStateAt', function () {
         assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
     })
 
-    test('applies in-progress current_task partially', function () {
+    test('applies in-progress current_task partially', () => {
         // Snapshot mid-flight: ship at origin, current_task is a TRAVEL to (100, 0).
         // At the halfway point, projection.location should interpolate to ~(50, 0).
         const ship = makeShipFixture({})

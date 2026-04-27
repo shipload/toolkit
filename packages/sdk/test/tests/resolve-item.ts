@@ -15,8 +15,8 @@ import {
     resolveItem,
 } from '$lib'
 
-suite('resolveItem', function () {
-    test('resolves a resource by item ID without seed', function () {
+suite('resolveItem', () => {
+    test('resolves a resource by item ID without seed', () => {
         const result = resolveItem(UInt16.from(101))
         assert.equal(result.itemType, 'resource')
         assert.isDefined(result.name)
@@ -26,7 +26,7 @@ suite('resolveItem', function () {
         assert.isUndefined(result.attributes)
     })
 
-    test('resolves a resource with seed and returns stats', function () {
+    test('resolves a resource with seed and returns stats', () => {
         const result = resolveItem(UInt16.from(101), UInt64.from(12345))
         assert.equal(result.itemType, 'resource')
         assert.isDefined(result.stats)
@@ -43,14 +43,14 @@ suite('resolveItem', function () {
         assert.isUndefined(result.attributes)
     })
 
-    test('resolves a component by item ID', function () {
+    test('resolves a component by item ID', () => {
         const result = resolveItem(UInt16.from(ITEM_HULL_PLATES))
         assert.equal(result.itemType, 'component')
         assert.equal(result.icon, 'HP')
         assert.isUndefined(result.stats)
     })
 
-    test('resolves a component with seed and returns stats', function () {
+    test('resolves a component with seed and returns stats', () => {
         const result = resolveItem(UInt16.from(ITEM_THRUSTER_CORE), UInt64.from(99999))
         assert.equal(result.itemType, 'component')
         assert.isDefined(result.stats)
@@ -58,7 +58,7 @@ suite('resolveItem', function () {
         assert.isUndefined(result.attributes)
     })
 
-    test('resolves a module by item ID', function () {
+    test('resolves a module by item ID', () => {
         const result = resolveItem(UInt16.from(ITEM_ENGINE_T1))
         assert.equal(result.itemType, 'module')
         assert.equal(result.icon, 'EN')
@@ -66,7 +66,7 @@ suite('resolveItem', function () {
         assert.isUndefined(result.attributes)
     })
 
-    test('resolves a module with seed and returns attributes', function () {
+    test('resolves a module with seed and returns attributes', () => {
         const result = resolveItem(UInt16.from(ITEM_ENGINE_T1), UInt64.from(55555))
         assert.equal(result.itemType, 'module')
         assert.isUndefined(result.stats)
@@ -78,7 +78,7 @@ suite('resolveItem', function () {
         assert.include(attrNames, 'Drain')
     })
 
-    test('resolves all module types with correct capability names', function () {
+    test('resolves all module types with correct capability names', () => {
         const expectations: [number, string, string[]][] = [
             [ITEM_ENGINE_T1, 'Engine', ['Thrust', 'Drain']],
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
@@ -97,13 +97,13 @@ suite('resolveItem', function () {
         }
     })
 
-    test('resolves a packed entity by item ID', function () {
+    test('resolves a packed entity by item ID', () => {
         const result = resolveItem(UInt16.from(ITEM_CONTAINER_T1_PACKED))
         assert.equal(result.itemType, 'entity')
         assert.isUndefined(result.stats)
     })
 
-    test('resolves a packed ship with seed and returns hull attributes', function () {
+    test('resolves a packed ship with seed and returns hull attributes', () => {
         const result = resolveItem(UInt16.from(ITEM_SHIP_T1_PACKED), UInt64.from(77777))
         assert.equal(result.itemType, 'entity')
         assert.isDefined(result.attributes)
@@ -114,12 +114,12 @@ suite('resolveItem', function () {
         assert.include(labels, 'Capacity')
     })
 
-    test('accepts plain numbers for itemId and seed', function () {
+    test('accepts plain numbers for itemId and seed', () => {
         const result = resolveItem(101, 12345)
         assert.equal(result.itemType, 'resource')
     })
 
-    test('resolveItem(ITEM_HAULER_T1) returns Hauler capability group', function () {
+    test('resolveItem(ITEM_HAULER_T1) returns Hauler capability group', () => {
         // Hauler decodes 4 stats per recipe — provide values for all four.
         const seed = encodeStats([500, 500, 500, 500])
         const resolved = resolveItem(UInt16.from(ITEM_HAULER_T1), UInt64.from(seed))
@@ -138,23 +138,23 @@ suite('resolveItem', function () {
     })
 })
 
-suite('ResolvedItem.abbreviation', function () {
-    test('component exposes abbreviation', function () {
+suite('ResolvedItem.abbreviation', () => {
+    test('component exposes abbreviation', () => {
         const resolved = resolveItem(UInt16.from(ITEM_HULL_PLATES))
         assert.equal(resolved.abbreviation, 'HP')
     })
 
-    test('module exposes abbreviation', function () {
+    test('module exposes abbreviation', () => {
         const resolved = resolveItem(UInt16.from(ITEM_ENGINE_T1))
         assert.equal(resolved.abbreviation, 'EN')
     })
 
-    test('entity exposes abbreviation', function () {
+    test('entity exposes abbreviation', () => {
         const resolved = resolveItem(UInt16.from(ITEM_SHIP_T1_PACKED))
         assert.equal(resolved.abbreviation, 'SH')
     })
 
-    test('resource abbreviation is null', function () {
+    test('resource abbreviation is null', () => {
         const resolved = resolveItem(UInt16.from(101))
         assert.isNull(resolved.abbreviation)
     })

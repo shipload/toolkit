@@ -105,7 +105,7 @@ export class WebSocketConnection {
 
         const delay = Math.min(
             WebSocketConnection.MIN_RECONNECT_DELAY *
-                Math.pow(WebSocketConnection.RECONNECT_MULTIPLIER, this.reconnectAttempts),
+                WebSocketConnection.RECONNECT_MULTIPLIER ** this.reconnectAttempts,
             WebSocketConnection.MAX_RECONNECT_DELAY
         )
 

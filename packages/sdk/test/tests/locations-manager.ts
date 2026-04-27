@@ -30,14 +30,14 @@ function buildManager(reserveOverrides: {stratum: number; remaining: number}[]):
     return new LocationsManager(stubContext)
 }
 
-suite('LocationsManager.getStrata', function () {
-    test('returns empty array for an empty (non-system) coord', async function () {
+suite('LocationsManager.getStrata', () => {
+    test('returns empty array for an empty (non-system) coord', async () => {
         const mgr = buildManager([])
         const result = await mgr.getStrata(EMPTY_COORDS)
         assert.deepEqual(result, [])
     })
 
-    test('uses derived reserve when no chain override exists', async function () {
+    test('uses derived reserve when no chain override exists', async () => {
         const mgr = buildManager([])
         const result = await mgr.getStrata(SYSTEM_COORDS)
         assert.isAbove(result.length, 0, 'expected at least one stratum')
@@ -50,7 +50,7 @@ suite('LocationsManager.getStrata', function () {
         }
     })
 
-    test('overrides reserve when chain reports a touched stratum', async function () {
+    test('overrides reserve when chain reports a touched stratum', async () => {
         const baseline = await buildManager([]).getStrata(SYSTEM_COORDS)
         assert.isAbove(baseline.length, 0, 'fixture sanity')
         const target = baseline[0]
@@ -68,7 +68,7 @@ suite('LocationsManager.getStrata', function () {
         )
     })
 
-    test('non-overridden strata pass through unchanged', async function () {
+    test('non-overridden strata pass through unchanged', async () => {
         const baseline = await buildManager([]).getStrata(SYSTEM_COORDS)
         assert.isAbove(baseline.length, 1, 'need at least 2 strata for this test')
         const overrideTarget = baseline[0]

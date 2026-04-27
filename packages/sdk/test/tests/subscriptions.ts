@@ -6,8 +6,8 @@ import {FakeWebSocketServer} from '../helpers/fake-ws'
 
 const noop = (): void => undefined
 
-suite('subscriptions/mappers', function () {
-    test('mapEntity returns Ship for type=ship', function () {
+suite('subscriptions/mappers', () => {
+    test('mapEntity returns Ship for type=ship', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'ship',
             id: 1,
@@ -25,7 +25,7 @@ suite('subscriptions/mappers', function () {
         assert.instanceOf(mapEntity(ei), Ship)
     })
 
-    test('mapEntity returns Warehouse for type=warehouse', function () {
+    test('mapEntity returns Warehouse for type=warehouse', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'warehouse',
             id: 2,
@@ -43,7 +43,7 @@ suite('subscriptions/mappers', function () {
         assert.instanceOf(mapEntity(ei), Warehouse)
     })
 
-    test('mapEntity returns Container for type=container', function () {
+    test('mapEntity returns Container for type=container', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'container',
             id: 3,
@@ -62,7 +62,7 @@ suite('subscriptions/mappers', function () {
     })
 })
 
-suite('SubscriptionsManager', function () {
+suite('SubscriptionsManager', () => {
     let fake: FakeWebSocketServer
     let mgr: SubscriptionsManager
 
@@ -76,7 +76,7 @@ suite('SubscriptionsManager', function () {
         fake.close()
     })
 
-    test('subscribeEntity sends subscribe_entity frame', async function () {
+    test('subscribeEntity sends subscribe_entity frame', async () => {
         await new Promise((r) => setTimeout(r, 1))
         const handle = mgr.subscribeEntity('ship', '1', noop)
         const msg = await fake.nextMessage()
@@ -87,7 +87,7 @@ suite('SubscriptionsManager', function () {
         handle.unsubscribe()
     })
 
-    test('subscribeEntity invokes callback on snapshot frame', async function () {
+    test('subscribeEntity invokes callback on snapshot frame', async () => {
         await new Promise((r) => setTimeout(r, 1))
         let received: Ship | Warehouse | Container | null = null
         const handle = mgr.subscribeEntity('ship', '1', (e) => {
@@ -124,7 +124,7 @@ suite('SubscriptionsManager', function () {
         handle.unsubscribe()
     })
 
-    test('handle.unsubscribe sends unsubscribe_entity frame', async function () {
+    test('handle.unsubscribe sends unsubscribe_entity frame', async () => {
         await new Promise((r) => setTimeout(r, 1))
         const handle = mgr.subscribeEntity('ship', '1', noop)
         await fake.nextMessage()

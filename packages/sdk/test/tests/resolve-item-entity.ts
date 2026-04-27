@@ -14,7 +14,7 @@ import {
     resolveItem,
 } from '$lib'
 
-suite('resolveItem - entity capacity dispatch', function () {
+suite('resolveItem - entity capacity dispatch', () => {
     const defaultStatInputs = {strength: 500, density: 500, fineness: 500, saturation: 500}
     const defaultPackedStats = encodeStats([500, 500, 500, 500])
 
@@ -24,26 +24,26 @@ suite('resolveItem - entity capacity dispatch', function () {
             .find((a: any) => a.label === 'Capacity')?.value
     }
 
-    test('ship-t1 uses computeShipHullCapabilities', function () {
+    test('ship-t1 uses computeShipHullCapabilities', () => {
         const resolved = resolveItem(ITEM_SHIP_T1_PACKED, defaultPackedStats)
         const expected = computeShipHullCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 
-    test('warehouse-t1 uses computeWarehouseHullCapabilities (NOT Container)', function () {
+    test('warehouse-t1 uses computeWarehouseHullCapabilities (NOT Container)', () => {
         const resolved = resolveItem(ITEM_WAREHOUSE_T1_PACKED, defaultPackedStats)
         const expected = computeWarehouseHullCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
         assert.isAbove(Number(findCapacityAttr(resolved.attributes)), 50_000_000)
     })
 
-    test('container uses computeContainerCapabilities', function () {
+    test('container uses computeContainerCapabilities', () => {
         const resolved = resolveItem(ITEM_CONTAINER_T1_PACKED, defaultPackedStats)
         const expected = computeContainerCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 
-    test('container-t2 uses computeContainerT2Capabilities', function () {
+    test('container-t2 uses computeContainerT2Capabilities', () => {
         // Container T2 packs (strength, density, hardness, saturation) — fineness
         // is absent and defaults to 0 in computeContainerT2Capabilities, so the
         // expected value is computed from the same set of decoded stats.

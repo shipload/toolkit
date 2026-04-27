@@ -51,33 +51,33 @@ function makeWarehouseWithSchedule() {
     })
 }
 
-suite('Warehouse', function () {
-    suite('sched.hasSchedule', function () {
-        test('returns false when warehouse has no schedule', function () {
+suite('Warehouse', () => {
+    suite('sched.hasSchedule', () => {
+        test('returns false when warehouse has no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isFalse(warehouse.sched.hasSchedule)
         })
 
-        test('returns true when warehouse has schedule with tasks', function () {
+        test('returns true when warehouse has schedule with tasks', () => {
             const warehouse = makeWarehouseWithSchedule()
             assert.isTrue(warehouse.sched.hasSchedule)
         })
     })
 
-    suite('isIdle', function () {
-        test('returns true when warehouse has no schedule', function () {
+    suite('isIdle', () => {
+        test('returns true when warehouse has no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isTrue(warehouse.isIdle)
         })
 
-        test('returns false when warehouse has schedule', function () {
+        test('returns false when warehouse has schedule', () => {
             const warehouse = makeWarehouseWithSchedule()
             assert.isFalse(warehouse.isIdle)
         })
     })
 
-    suite('location', function () {
-        test('returns Location object', function () {
+    suite('location', () => {
+        test('returns Location object', () => {
             const warehouse = makeStationaryWarehouse()
             const loc = warehouse.location
             assert.equal(loc.coordinates.x.toNumber(), 5)
@@ -85,13 +85,13 @@ suite('Warehouse', function () {
         })
     })
 
-    suite('orbitalAltitude', function () {
-        test('returns z coordinate', function () {
+    suite('orbitalAltitude', () => {
+        test('returns z coordinate', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.orbitalAltitude, 1000)
         })
 
-        test('returns 0 when z is undefined', function () {
+        test('returns 0 when z is undefined', () => {
             const warehouse = makeWarehouse({
                 id: UInt64.from(1),
                 owner: 'teamgreymass',
@@ -104,36 +104,36 @@ suite('Warehouse', function () {
         })
     })
 
-    suite('cargo management', function () {
-        test('cargo returns empty array when no cargo', function () {
+    suite('cargo management', () => {
+        test('cargo returns empty array when no cargo', () => {
             const warehouse = makeStationaryWarehouse()
             assert.deepEqual(warehouse.cargo, [])
         })
 
-        test('cargo returns cargo items when provided', function () {
+        test('cargo returns cargo items when provided', () => {
             const cargo1 = createCargoItem(1, 100)
             const cargo2 = createCargoItem(3, 50)
             const warehouse = makeStationaryWarehouse([cargo1, cargo2])
             assert.lengthOf(warehouse.cargo, 2)
         })
 
-        test('totalCargoMass returns 0 when no cargo', function () {
+        test('totalCargoMass returns 0 when no cargo', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.totalCargoMass.toNumber(), 0)
         })
 
-        test('totalCargoMass calculates mass of all cargo', function () {
+        test('totalCargoMass calculates mass of all cargo', () => {
             const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             assert.isTrue(warehouse.totalCargoMass.gt(UInt64.from(0)))
         })
 
-        test('getCargoForItem returns undefined when no cargo', function () {
+        test('getCargoForItem returns undefined when no cargo', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isUndefined(warehouse.getCargoForItem(1))
         })
 
-        test('getCargoForItem returns cargo for good', function () {
+        test('getCargoForItem returns cargo for good', () => {
             const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             const found = warehouse.getCargoForItem(1)
@@ -142,95 +142,95 @@ suite('Warehouse', function () {
         })
     })
 
-    suite('availableCapacity', function () {
-        test('returns full capacity when empty', function () {
+    suite('availableCapacity', () => {
+        test('returns full capacity when empty', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.availableCapacity.toNumber(), 10000000)
         })
 
-        test('returns reduced capacity when cargo loaded', function () {
+        test('returns reduced capacity when cargo loaded', () => {
             const cargo = createCargoItem(1, 100)
             const warehouse = makeStationaryWarehouse([cargo])
             assert.isTrue(warehouse.availableCapacity.lt(UInt64.from(10000000)))
         })
     })
 
-    suite('hasSpace', function () {
-        test('returns true when space available', function () {
+    suite('hasSpace', () => {
+        test('returns true when space available', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isTrue(warehouse.hasSpace(UInt64.from(1000), 10))
         })
 
-        test('returns false when no space', function () {
+        test('returns false when no space', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isFalse(warehouse.hasSpace(UInt64.from(10000000), 10))
         })
     })
 
-    suite('isFull', function () {
-        test('returns false when not full', function () {
+    suite('isFull', () => {
+        test('returns false when not full', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isFalse(warehouse.isFull)
         })
     })
 
-    suite('coordinates', function () {
-        test('returns raw coordinates from entity', function () {
+    suite('coordinates', () => {
+        test('returns raw coordinates from entity', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.coordinates.x.toNumber(), 5)
             assert.equal(warehouse.coordinates.y.toNumber(), 10)
         })
     })
 
-    suite('schedule methods', function () {
-        test('sched.duration returns total task duration', function () {
+    suite('schedule methods', () => {
+        test('sched.duration returns total task duration', () => {
             const warehouse = makeWarehouseWithSchedule()
             assert.equal(warehouse.sched.duration(), 100)
         })
 
-        test('sched.duration returns 0 when no schedule', function () {
+        test('sched.duration returns 0 when no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.sched.duration(), 0)
         })
 
-        test('sched.elapsed calculates elapsed time', function () {
+        test('sched.elapsed calculates elapsed time', () => {
             const warehouse = makeWarehouseWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(warehouse.sched.elapsed(now), 50)
         })
 
-        test('sched.remaining calculates remaining time', function () {
+        test('sched.remaining calculates remaining time', () => {
             const warehouse = makeWarehouseWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(warehouse.sched.remaining(now), 50)
         })
 
-        test('sched.complete returns false when not complete', function () {
+        test('sched.complete returns false when not complete', () => {
             const warehouse = makeWarehouseWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.isFalse(warehouse.sched.complete(now))
         })
 
-        test('sched.complete returns true when complete', function () {
+        test('sched.complete returns true when complete', () => {
             const warehouse = makeWarehouseWithSchedule()
             const now = new Date('2024-06-04T23:45:00.000Z')
             assert.isTrue(warehouse.sched.complete(now))
         })
 
-        test('sched.currentTaskIndex returns correct task', function () {
+        test('sched.currentTaskIndex returns correct task', () => {
             const warehouse = makeWarehouseWithSchedule()
             const now = new Date('2024-06-04T23:41:59.000Z')
             assert.equal(warehouse.sched.currentTaskIndex(now), 0)
         })
 
-        test('sched.currentTaskIndex returns -1 when no schedule', function () {
+        test('sched.currentTaskIndex returns -1 when no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             const now = new Date()
             assert.equal(warehouse.sched.currentTaskIndex(now), -1)
         })
     })
 
-    test('Warehouse constructed from entity_info hydrates modules from Struct field', function () {
+    test('Warehouse constructed from entity_info hydrates modules from Struct field', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'warehouse',
             id: 20,

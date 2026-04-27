@@ -61,8 +61,8 @@ export function distanceBetweenPoints(
     x2: Int64Type,
     y2: Int64Type
 ): UInt64 {
-    const x = Math.pow(x1 - x2, 2)
-    const y = Math.pow(y1 - y2, 2)
+    const x = (x1 - x2) ** 2
+    const y = (y1 - y2) ** 2
     return UInt64.from(Math.sqrt(x + y) * PRECISION)
 }
 
@@ -487,9 +487,9 @@ export function calc_transfer_duration(
     const sourceZ =
         typeof source.location.z === 'number'
             ? source.location.z
-            : source.location.z?.toNumber() ?? 0
+            : (source.location.z?.toNumber() ?? 0)
     const destZ =
-        typeof dest.location.z === 'number' ? dest.location.z : dest.location.z?.toNumber() ?? 0
+        typeof dest.location.z === 'number' ? dest.location.z : (dest.location.z?.toNumber() ?? 0)
     const distance = Math.abs(sourceZ - destZ)
 
     const totalMass = cargoMass + totalLoaderMass

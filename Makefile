@@ -13,7 +13,7 @@ install:
 
 check:
 	bun biome check .
-	bun --filter '*' run check
+	bun --filter='@shipload/*' run check
 
 check/sdk:           ; $(MAKE) -C packages/sdk check
 check/item-renderer: ; $(MAKE) -C packages/item-renderer check
@@ -21,7 +21,7 @@ check/image-renderer:; $(MAKE) -C packages/image-renderer check
 check/cli:           ; $(MAKE) -C packages/cli check
 
 test:
-	bun --filter '*' test
+	bun --filter='@shipload/*' test
 
 test/sdk:            ; $(MAKE) -C packages/sdk test
 test/item-renderer:  ; $(MAKE) -C packages/item-renderer test
@@ -29,7 +29,7 @@ test/image-renderer: ; $(MAKE) -C packages/image-renderer test
 test/cli:            ; $(MAKE) -C packages/cli test
 
 build:
-	bun --filter '*' run build
+	bun --filter='@shipload/*' run build
 
 build/sdk:           ; $(MAKE) -C packages/sdk build
 build/item-renderer: ; $(MAKE) -C packages/item-renderer build
@@ -68,5 +68,5 @@ release/cli:
 	$(MAKE) -C packages/cli release
 
 clean:
-	bun --filter '*' run clean || true
+	bun --filter='@shipload/*' run clean || true
 	rm -rf node_modules

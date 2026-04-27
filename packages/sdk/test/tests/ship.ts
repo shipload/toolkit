@@ -77,9 +77,9 @@ function makeShipWithSchedule() {
     })
 }
 
-suite('Ship', function () {
-    suite('maxDistance', function () {
-        test('calculates max distance from capacity/drain', function () {
+suite('Ship', () => {
+    suite('maxDistance', () => {
+        test('calculates max distance from capacity/drain', () => {
             const ship = makeStationaryShip()
             // seed [500,500,500,500] → gen.capacity=383, eng.drain=43 → floor(383/43)*10000 = 80000
             assert.isTrue(ship.maxDistance.equals(80000))
@@ -87,32 +87,32 @@ suite('Ship', function () {
         })
     })
 
-    suite('sched.hasSchedule', function () {
-        test('returns false when ship has no schedule', function () {
+    suite('sched.hasSchedule', () => {
+        test('returns false when ship has no schedule', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.sched.hasSchedule)
         })
 
-        test('returns true when ship has schedule with tasks', function () {
+        test('returns true when ship has schedule with tasks', () => {
             const ship = makeShipWithSchedule()
             assert.isTrue(ship.sched.hasSchedule)
         })
     })
 
-    suite('isIdle', function () {
-        test('returns true when ship has no schedule', function () {
+    suite('isIdle', () => {
+        test('returns true when ship has no schedule', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.isIdle)
         })
 
-        test('returns false when ship has schedule', function () {
+        test('returns false when ship has schedule', () => {
             const ship = makeShipWithSchedule()
             assert.isFalse(ship.isIdle)
         })
     })
 
-    suite('location', function () {
-        test('returns Location object', function () {
+    suite('location', () => {
+        test('returns Location object', () => {
             const ship = makeStationaryShip()
             const loc = ship.location
             assert.equal(loc.coordinates.x.toNumber(), 5)
@@ -120,18 +120,18 @@ suite('Ship', function () {
         })
     })
 
-    suite('cargo management', function () {
-        test('cargo returns empty array if no cargo', function () {
+    suite('cargo management', () => {
+        test('cargo returns empty array if no cargo', () => {
             const ship = makeStationaryShip()
             assert.deepEqual(ship.cargo, [])
         })
 
-        test('hasSellableCargo returns false if no cargo', function () {
+        test('hasSellableCargo returns false if no cargo', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.hasSellableCargo)
         })
 
-        test('cargo returns items when ship has cargo', function () {
+        test('cargo returns items when ship has cargo', () => {
             const cargo1 = createCargoItem(1, 100)
             const cargo2 = createCargoItem(3, 50)
             const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
@@ -139,23 +139,23 @@ suite('Ship', function () {
             assert.isTrue(ship.hasSellableCargo)
         })
 
-        test('totalCargoMass returns 0 if no cargo', function () {
+        test('totalCargoMass returns 0 if no cargo', () => {
             const ship = makeStationaryShip()
             assert.equal(ship.totalCargoMass.toNumber(), 0)
         })
 
-        test('totalCargoMass calculates mass of all cargo', function () {
+        test('totalCargoMass calculates mass of all cargo', () => {
             const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isTrue(ship.totalCargoMass.gt(UInt64.from(0)))
         })
 
-        test('getCargoForItem returns undefined if no cargo', function () {
+        test('getCargoForItem returns undefined if no cargo', () => {
             const ship = makeStationaryShip()
             assert.isUndefined(ship.getCargoForItem(1))
         })
 
-        test('getCargoForItem returns cargo for good', function () {
+        test('getCargoForItem returns cargo for good', () => {
             const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             const found = ship.getCargoForItem(1)
@@ -163,7 +163,7 @@ suite('Ship', function () {
             assert.isTrue(found!.item_id.equals(1))
         })
 
-        test('sellableCargo returns cargo with quantity > 0', function () {
+        test('sellableCargo returns cargo with quantity > 0', () => {
             const cargo1 = createCargoItem(1, 100)
             const cargo2 = createCargoItem(3, 0)
             const ship = makeStationaryShip({cargo: [cargo1, cargo2]})
@@ -171,27 +171,27 @@ suite('Ship', function () {
             assert.lengthOf(sellable, 1)
         })
 
-        test('hasSellableCargo returns true when cargo exists', function () {
+        test('hasSellableCargo returns true when cargo exists', () => {
             const cargo = createCargoItem(1, 100)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isTrue(ship.hasSellableCargo)
         })
 
-        test('hasSellableCargo returns false with zero quantity cargo', function () {
+        test('hasSellableCargo returns false with zero quantity cargo', () => {
             const cargo = createCargoItem(1, 0)
             const ship = makeStationaryShip({cargo: [cargo]})
             assert.isFalse(ship.hasSellableCargo)
         })
     })
 
-    suite('totalMass', function () {
-        test('returns ship mass without cargo', function () {
+    suite('totalMass', () => {
+        test('returns ship mass without cargo', () => {
             const ship = makeStationaryShip()
             const mass = ship.totalMass
             assert.isTrue(mass.gt(UInt64.from(0)))
         })
 
-        test('includes cargo mass when present', function () {
+        test('includes cargo mass when present', () => {
             const shipWithoutCargo = makeStationaryShip()
             const massWithoutCargo = shipWithoutCargo.totalMass
             const cargo = createCargoItem(1, 100)
@@ -201,88 +201,88 @@ suite('Ship', function () {
         })
     })
 
-    suite('hasSpace', function () {
-        test('returns true when space available', function () {
+    suite('hasSpace', () => {
+        test('returns true when space available', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.hasSpace(UInt64.from(1000), 10))
         })
 
-        test('returns false when no space', function () {
+        test('returns false when no space', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.hasSpace(UInt64.from(1000000000), 10))
         })
     })
 
-    suite('availableCapacity', function () {
-        test('returns available capacity', function () {
+    suite('availableCapacity', () => {
+        test('returns available capacity', () => {
             const ship = makeStationaryShip()
             const space = ship.availableCapacity
             assert.isTrue(space.gt(UInt64.from(0)))
         })
 
-        test('returns 0 when full', function () {
+        test('returns 0 when full', () => {
             // hullmass=500_000 + loader mass 1000*1 = 501_000 → capacity=501_000 is full
             const ship = makeStationaryShip({capacity: 501000})
             assert.isTrue(ship.availableCapacity.equals(UInt64.from(0)))
         })
     })
 
-    suite('coordinates', function () {
-        test('returns raw coordinates from entity', function () {
+    suite('coordinates', () => {
+        test('returns raw coordinates from entity', () => {
             const ship = makeStationaryShip()
             assert.equal(ship.coordinates.x.toNumber(), 5)
             assert.equal(ship.coordinates.y.toNumber(), 10)
         })
     })
 
-    suite('isFull', function () {
-        test('returns false when not full', function () {
+    suite('isFull', () => {
+        test('returns false when not full', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.isFull)
         })
 
-        test('returns true when at max mass', function () {
+        test('returns true when at max mass', () => {
             // hullmass=500_000 + loader mass 1000*1 = 501_000 → capacity=501_000 is full
             const ship = makeStationaryShip({capacity: 501000})
             assert.isTrue(ship.isFull)
         })
     })
 
-    suite('energyPercent', function () {
-        test('calculates energy percentage', function () {
+    suite('energyPercent', () => {
+        test('calculates energy percentage', () => {
             // energy=383 matches gen.capacity=383 for seed [500,500,500,500] → 100%
             const ship = makeStationaryShip({energy: 383})
             assert.equal(ship.energyPercent, 100)
         })
     })
 
-    suite('needsRecharge', function () {
-        test('returns false when fully charged', function () {
+    suite('needsRecharge', () => {
+        test('returns false when fully charged', () => {
             // energy=5000 > gen.capacity=383 → fully charged
             const ship = makeStationaryShip()
             assert.isFalse(ship.needsRecharge)
         })
 
-        test('returns true when not fully charged', function () {
+        test('returns true when not fully charged', () => {
             // energy=100 < gen.capacity=383 → needs recharge
             const ship = makeStationaryShip({energy: 100})
             assert.isTrue(ship.needsRecharge)
         })
     })
 
-    suite('hasEnergyFor', function () {
-        test('returns true when enough energy', function () {
+    suite('hasEnergyFor', () => {
+        test('returns true when enough energy', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.hasEnergyFor(UInt64.from(10000)))
         })
 
-        test('returns false when insufficient energy', function () {
+        test('returns false when insufficient energy', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.hasEnergyFor(UInt64.from(100000000)))
         })
     })
 
-    test('Ship constructed from entity_info hydrates modules from Struct field', function () {
+    test('Ship constructed from entity_info hydrates modules from Struct field', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'ship',
             id: 10,

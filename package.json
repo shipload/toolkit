@@ -1,17 +1,19 @@
 {
-	"name": "@shipload/toolkit",
-	"private": true,
-	"version": "0.0.0",
-	"workspaces": ["packages/*"],
-	"devDependencies": {
-		"@biomejs/biome": "^2.0.0",
-		"@changesets/cli": "^2.27.0",
-		"typescript": "^5.4.0"
-	},
-	"scripts": {
-		"check": "biome check . && bun --filter '*' run check",
-		"test": "bun --filter '*' test",
-		"build": "bun --filter '*' run build",
-		"format": "biome check . --write"
-	}
+    "name": "@shipload/toolkit",
+    "private": true,
+    "version": "0.0.0",
+    "workspaces": [
+        "packages/*"
+    ],
+    "devDependencies": {
+        "@biomejs/biome": "^2.0.0",
+        "@changesets/cli": "^2.27.0",
+        "typescript": "^5.4.0"
+    },
+    "scripts": {
+        "check": "biome check . && bun --filter '*' run check",
+        "test": "bun --filter '*' test",
+        "build": "bun --filter '*' run build",
+        "format": "biome check . --write"
+    }
 }
