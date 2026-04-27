@@ -23,8 +23,28 @@ clean:
 BINARY_TARGETS := linux-x64 linux-arm64 mac-x64 mac-arm64 windows-x64
 DIST := dist
 
+# Cross-platform @opentui/core natives. Bun honors the natives' os/cpu
+# constraints and only installs the one matching the host, so cross-compiling
+# to other targets needs the rest fetched manually. They drop into core's
+# bundle dir under .bun/ where its dynamic import resolves them.
+OPENTUI_NATIVES := darwin-x64 darwin-arm64 linux-x64 linux-arm64 win32-x64
+
+install-natives:
+	@CORE_DIR=$$(ls -d ../../node_modules/.bun/@opentui+core@*/node_modules/@opentui 2>/dev/null | head -1); \
+	if [ -z "$$CORE_DIR" ]; then echo "error: @opentui/core not found — run bun install first"; exit 1; fi; \
+	VERSION=$$(node -p "JSON.parse(require('fs').readFileSync('$$CORE_DIR/core/package.json','utf8')).version"); \
+	for n in $(OPENTUI_NATIVES); do \
+		dest="$$CORE_DIR/core-$$n"; \
+		if [ ! -d "$$dest" ]; then \
+			echo "▸ Fetching @opentui/core-$$n@$$VERSION"; \
+			mkdir -p "$$dest"; \
+			curl -sL "https://registry.npmjs.org/@opentui/core-$$n/-/core-$$n-$$VERSION.tgz" \
+				| tar -xz -C "$$dest" --strip-components=1; \
+		fi; \
+	done
+
 # Build a single binary. Usage: make binary TARGET=mac-arm64
-binary:
+binary: install-natives
 	@if [ -z "$(TARGET)" ]; then echo "usage: make binary TARGET=mac-arm64 (one of: $(BINARY_TARGETS))"; exit 1; fi
 	@mkdir -p $(DIST)
 	@BUN_TARGET=bun-$$(echo $(TARGET) | sed 's/^mac/darwin/'); \
@@ -34,14 +54,14 @@ binary:
 	bun build src/index.ts --compile --target=$$BUN_TARGET --outfile $$OUT
 
 # Build all five binaries.
-binaries:
+binaries: install-natives
 	@mkdir -p $(DIST)
 	@for t in $(BINARY_TARGETS); do \
 		$(MAKE) --no-print-directory binary TARGET=$$t || exit 1; \
 	done
 	@ls -lh $(DIST)
 
-.PHONY: binary binaries
+.PHONY: install-natives binary binaries
 
 # Sign + notarize one mac binary. Usage: make sign-one TARGET=mac-arm64
 sign-one:
