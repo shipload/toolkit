@@ -1,6 +1,6 @@
 {
     "name": "@shipload/item-renderer",
-    "version": "0.2.3",
+    "version": "1.0.0-beta1",
     "description": "Deterministic SVG rendering for Shipload items",
     "type": "module",
     "main": "./src/index.ts",
