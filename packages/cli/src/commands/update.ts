@@ -6,7 +6,7 @@ import {verifyChecksum} from '../lib/update-checksum'
 import {platformAsset} from '../lib/update-platform'
 
 const REPO = 'shipload/toolkit'
-const RELEASES_API = `https://api.github.com/repos/${REPO}/releases?per_page=100`
+const TAGS_API = `https://api.github.com/repos/${REPO}/tags?per_page=100`
 const TAG_PREFIX = 'cli-v'
 const UA = 'shiploadcli'
 
@@ -83,16 +83,24 @@ export function register(program: Command): void {
 
             let release: GithubRelease
             try {
-                const buf = await httpsGet(RELEASES_API, {Accept: 'application/vnd.github+json'})
-                const releases = JSON.parse(new TextDecoder().decode(buf)) as GithubRelease[]
-                const found = releases.find((r) => r.tag_name.startsWith(TAG_PREFIX))
-                if (!found) {
+                const tagsBuf = await httpsGet(TAGS_API, {Accept: 'application/vnd.github+json'})
+                const tags = JSON.parse(new TextDecoder().decode(tagsBuf)) as Array<{name: string}>
+                const cliTags = tags.map((t) => t.name).filter((n) => n.startsWith(TAG_PREFIX))
+                cliTags.sort((a, b) =>
+                    Bun.semver.order(b.slice(TAG_PREFIX.length), a.slice(TAG_PREFIX.length))
+                )
+                const newest = cliTags[0]
+                if (!newest) {
                     fail(
-                        `No ${TAG_PREFIX}* release found in the most recent 100 releases — see https://github.com/${REPO}/releases`
+                        `No ${TAG_PREFIX}* tag found in the most recent 100 tags — see https://github.com/${REPO}/releases`
                     )
                     return
                 }
-                release = found
+                const releaseBuf = await httpsGet(
+                    `https://api.github.com/repos/${REPO}/releases/tags/${newest}`,
+                    {Accept: 'application/vnd.github+json'}
+                )
+                release = JSON.parse(new TextDecoder().decode(releaseBuf)) as GithubRelease
             } catch (err) {
                 fail(`Failed to fetch release info: ${(err as Error).message}`)
                 return
