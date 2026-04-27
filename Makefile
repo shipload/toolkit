@@ -21,7 +21,7 @@ check/image-renderer:; $(MAKE) -C packages/image-renderer check
 check/cli:           ; $(MAKE) -C packages/cli check
 
 test:
-	bun --filter='@shipload/*' test
+	bun --filter='@shipload/*' run test
 
 test/sdk:            ; $(MAKE) -C packages/sdk test
 test/item-renderer:  ; $(MAKE) -C packages/item-renderer test
