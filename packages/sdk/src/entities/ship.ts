@@ -1,20 +1,20 @@
-import {UInt16, UInt16Type, UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {type UInt16, type UInt16Type, UInt32, UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Coordinates, CoordinatesType} from '../types'
+import {Coordinates, type CoordinatesType} from '../types'
 import {
     getDestinationLocation,
     getPositionAt,
     getFlightOrigin as travelGetFlightOrigin,
 } from '../travel/travel'
 import {
-    ProjectedEntity,
+    type ProjectedEntity,
     projectFromCurrentState as sharedProjectFromCurrentState,
     projectFromCurrentStateAt as sharedProjectFromCurrentStateAt,
 } from '../scheduling/projection'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
 import {InventoryAccessor} from './inventory-accessor'
-import {EntityInventory} from './entity-inventory'
+import type {EntityInventory} from './entity-inventory'
 import {
     energyPercent as calcEnergyPercent,
     needsRecharge as calcNeedsRecharge,

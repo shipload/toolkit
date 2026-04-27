@@ -1,6 +1,6 @@
-import {Checksum256, Checksum256Type, Checksum512, UInt8} from '@wharfkit/antelope'
+import {Checksum256, type Checksum256Type, type Checksum512, UInt8} from '@wharfkit/antelope'
 import {hash512} from './hash'
-import {Coordinates, CoordinatesType, LocationType} from '../types'
+import {Coordinates, type CoordinatesType, LocationType} from '../types'
 import {ServerContract} from '../contracts'
 import {deriveLocationSize} from '../derivation/location-size'
 import syllables from '../data/syllables.json'

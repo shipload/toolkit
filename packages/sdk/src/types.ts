@@ -1,4 +1,12 @@
-import {Int64Type, Name, UInt16, UInt16Type, UInt32, UInt32Type, UInt64} from '@wharfkit/antelope'
+import {
+    type Int64Type,
+    Name,
+    type UInt16,
+    type UInt16Type,
+    type UInt32,
+    type UInt32Type,
+    UInt64,
+} from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 
 export const PRECISION = 10000

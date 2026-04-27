@@ -1,4 +1,4 @@
-import {
+import type {
     EnergyCapability,
     GathererCapability,
     LoaderCapability,
@@ -7,7 +7,7 @@ import {
     ScheduleCapability,
     StorageCapability,
 } from '../types/capabilities'
-import {Entity} from '../types/entity'
+import type {Entity} from '../types/entity'
 
 export function canMove(e: Entity): e is Entity & MovementCapability & EnergyCapability {
     return 'engines' in e && 'generator' in e && 'energy' in e

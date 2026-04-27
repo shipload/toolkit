@@ -3,7 +3,7 @@ import recipes from './recipes.json'
 import entities from './entities.json'
 
 import {getItem} from './catalog'
-import {Item, ModuleType, ResourceCategory} from '../types'
+import type {Item, ModuleType, ResourceCategory} from '../types'
 
 export interface RecipeInputItemId {
     itemId: number

@@ -5,8 +5,8 @@ import {
     capsHasLoaders,
     capsHasMovement,
     capsHasStorage,
-    EntityCapabilities,
-    EntityState,
+    type EntityCapabilities,
+    type EntityState,
 } from '../types/capabilities'
 import {
     ENTITY_CAPACITY_EXCEEDED,
@@ -16,19 +16,19 @@ import {
     RECIPE_NOT_FOUND,
     SHIP_CARGO_NOT_LOADED,
 } from '../errors'
-import {getRecipe, RecipeInput} from '../data/recipes-runtime'
+import {getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
     calcStacksMass,
     cargoItemToStack,
-    CargoStack,
+    type CargoStack,
     mergeStacks,
     removeFromStacks,
     stackToCargoItem,
 } from '../capabilities/storage'
 import * as schedule from './schedule'
-import {ScheduleData} from './schedule'
+import type {ScheduleData} from './schedule'
 
 export interface ProjectedEntity {
     location: Coordinates

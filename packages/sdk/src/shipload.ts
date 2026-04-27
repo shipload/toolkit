@@ -1,16 +1,16 @@
 import {APIClient} from '@wharfkit/antelope'
 import {PlatformContract, ServerContract} from './contracts'
-import {ChainDefinition} from '@wharfkit/common'
-import ContractKit, {Contract} from '@wharfkit/contract'
+import type {ChainDefinition} from '@wharfkit/common'
+import ContractKit, {type Contract} from '@wharfkit/contract'
 
 import {GameContext} from './managers/context'
-import {EntitiesManager} from './managers/entities'
-import {PlayersManager} from './managers/players'
-import {LocationsManager} from './managers/locations'
-import {EpochsManager} from './managers/epochs'
-import {ActionsManager} from './managers/actions'
-import {SubscriptionsManager} from './subscriptions/manager'
-import {GameState} from './entities/gamestate'
+import type {EntitiesManager} from './managers/entities'
+import type {PlayersManager} from './managers/players'
+import type {LocationsManager} from './managers/locations'
+import type {EpochsManager} from './managers/epochs'
+import type {ActionsManager} from './managers/actions'
+import type {SubscriptionsManager} from './subscriptions/manager'
+import type {GameState} from './entities/gamestate'
 
 interface ShiploadOptions {
     platformContractName?: string

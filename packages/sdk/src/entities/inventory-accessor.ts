@@ -1,6 +1,6 @@
-import {UInt64, UInt64Type} from '@wharfkit/antelope'
+import {UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {EntityInventory} from './entity-inventory'
-import {HasCargo} from '../capabilities/storage'
+import type {HasCargo} from '../capabilities/storage'
 
 export type {HasCargo}
 

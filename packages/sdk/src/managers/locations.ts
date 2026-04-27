@@ -1,10 +1,10 @@
-import {UInt16Type, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {type UInt16Type, UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {CoordinatesType, coordsToLocationId, Distance} from '../types'
+import {type CoordinatesType, coordsToLocationId, type Distance} from '../types'
 import {hasSystem} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
-import {ServerContract} from '../contracts'
-import {DerivedStratum, deriveStrata} from '../derivation'
+import type {ServerContract} from '../contracts'
+import {type DerivedStratum, deriveStrata} from '../derivation'
 
 export interface LocationStratum extends DerivedStratum {
     reserveMax: number

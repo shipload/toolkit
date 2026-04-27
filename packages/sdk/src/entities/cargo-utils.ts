@@ -1,4 +1,4 @@
-import {UInt32, UInt64, UInt64Type} from '@wharfkit/antelope'
+import {UInt32, UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {EntityInventory} from './entity-inventory'
 import {ServerContract} from '../contracts'
 

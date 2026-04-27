@@ -1,7 +1,7 @@
-import {Name, UInt64} from '@wharfkit/antelope'
-import {ServerContract} from '../contracts'
-import {Coordinates} from '../types'
-import {
+import type {Name, UInt64} from '@wharfkit/antelope'
+import type {ServerContract} from '../contracts'
+import type {Coordinates} from '../types'
+import type {
     EnergyCapability,
     LoaderCapability,
     MassCapability,

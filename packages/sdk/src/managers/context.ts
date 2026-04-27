@@ -1,6 +1,6 @@
-import {APIClient} from '@wharfkit/antelope'
-import {Contract} from '@wharfkit/contract'
-import {PlatformContract} from '../contracts'
+import type {APIClient} from '@wharfkit/antelope'
+import type {Contract} from '@wharfkit/contract'
+import type {PlatformContract} from '../contracts'
 import {GameState} from '../entities/gamestate'
 
 import {EntitiesManager} from './entities'

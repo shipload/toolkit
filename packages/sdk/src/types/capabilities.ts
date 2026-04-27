@@ -1,5 +1,5 @@
-import {Name, UInt16, UInt32} from '@wharfkit/antelope'
-import {ServerContract} from '../contracts'
+import type {Name, UInt16, UInt32} from '@wharfkit/antelope'
+import type {ServerContract} from '../contracts'
 
 export interface MovementCapability {
     engines: ServerContract.Types.movement_stats

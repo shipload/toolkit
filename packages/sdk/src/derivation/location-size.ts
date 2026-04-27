@@ -1,4 +1,4 @@
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {LocationType} from '../types'
 import {LOCATION_MAX_DEPTH, LOCATION_MIN_DEPTH} from './resources'
 

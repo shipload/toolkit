@@ -1,5 +1,5 @@
 import {UInt32, UInt64} from '@wharfkit/antelope'
-import {EnergyCapability, MovementCapability} from '../types/capabilities'
+import type {EnergyCapability, MovementCapability} from '../types/capabilities'
 import {PRECISION} from '../types'
 
 export function maxTravelDistance(entity: MovementCapability): UInt32 {

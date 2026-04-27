@@ -1,4 +1,4 @@
-import {Name, NameType} from '@wharfkit/antelope'
+import {Name, type NameType} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {Player} from '../entities/player'
 

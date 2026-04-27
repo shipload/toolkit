@@ -1,6 +1,6 @@
-import {Bytes, Checksum256, Checksum256Type} from '@wharfkit/antelope'
+import {Bytes, Checksum256, type Checksum256Type} from '@wharfkit/antelope'
 import {hash512} from '../utils/hash'
-import {Coordinates, CoordinatesType} from '../types'
+import {Coordinates, type CoordinatesType} from '../types'
 import {getEligibleResources, getResourceWeight, YIELD_THRESHOLD} from './resources'
 import {RESERVE_TIERS, rollTier, rollWithinTier} from './tiers'
 

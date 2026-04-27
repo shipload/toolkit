@@ -1,9 +1,9 @@
-import {Name, NameType, UInt64Type} from '@wharfkit/antelope'
+import {Name, type NameType, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {Ship} from '../entities/ship'
 import {Warehouse} from '../entities/warehouse'
 import {Container} from '../entities/container'
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 
 export type EntityType = 'ship' | 'warehouse' | 'container' | 'location'
 

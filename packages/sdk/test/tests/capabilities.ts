@@ -5,7 +5,7 @@ import {
     capabilityAttributes,
     capabilityNames,
     capsHasHauler,
-    EntityCapabilities,
+    type EntityCapabilities,
     getCapabilityAttributes,
     getStatMappings,
     getStatMappingsForCapability,

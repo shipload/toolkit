@@ -1,4 +1,4 @@
-import {GameContext} from './context'
+import type {GameContext} from './context'
 
 export abstract class BaseManager {
     constructor(protected readonly context: GameContext) {}

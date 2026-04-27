@@ -35,7 +35,7 @@ import {
     itemAbbreviations,
     moduleIcon,
 } from '../data/colors'
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
