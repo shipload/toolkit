@@ -1,8 +1,13 @@
 # Contributing
 
+## Branch model
+
+- `dev` (default) — integration branch. PRs target `dev`. CI runs on every PR and on pushes to `dev`.
+- `master` — stable / "released" branch. Only advances when a release is cut by merging `dev` → `master`. CI also runs on pushes to `master` as a sanity check.
+
 ## Pull requests
 
-Describe what changed in the PR description — what user-facing behavior is added, removed, or fixed. The maintainer translates this into a changeset (see below) before merging or at release time, so contributors don't need to know semver bump rules.
+Open against `dev`. Describe what changed in the PR description — what user-facing behavior is added, removed, or fixed. The maintainer translates this into a changeset (see below) before merging or at release time, so contributors don't need to know semver bump rules.
 
 If you're a regular contributor and confident about the semver impact, you can author the changeset yourself with `bun changeset` and commit it to the PR. Otherwise leave it; the maintainer will handle it.
 
@@ -21,13 +26,16 @@ Multiple changesets accumulate between releases. `make release` preflight refuse
 
 ## Releasing
 
-All releases run locally — no CI publishing. The flow is two steps:
+All releases run locally — no CI publishing. Releases happen from `master`, which advances by merging `dev`:
 
 ```bash
 git checkout master && git pull
-make release                  # preflight + check + test + build + version + commit + push
-bun changeset publish         # interactive: npm publishes (browser auth) + creates tags
-git push --follow-tags        # push the tags
+git merge --ff-only dev       # fast-forward master to dev's current state
+git push                       # publish the merge
+make release                   # preflight + check + test + build + version + commit + push
+bun changeset publish          # interactive: npm publishes (browser auth) + creates tags
+git push --follow-tags         # push the tags
+git checkout dev && git merge --ff-only master && git push   # bring the version-bump commit back to dev
 ```
 
 `make release` runs:
