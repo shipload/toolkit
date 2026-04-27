@@ -18,6 +18,9 @@ coverage/
 # Wrangler
 .wrangler/
 
+# Makefile
+Makefile.local
+
 # Per-package outputs
 packages/cli/dist/
 packages/sdk/lib/
