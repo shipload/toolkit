@@ -5,8 +5,9 @@ import pkg from '../../package.json' with {type: 'json'}
 import {verifyChecksum} from '../lib/update-checksum'
 import {platformAsset} from '../lib/update-platform'
 
-const REPO = 'shipload/cli'
-const API = `https://api.github.com/repos/${REPO}/releases/latest`
+const REPO = 'shipload/toolkit'
+const RELEASES_API = `https://api.github.com/repos/${REPO}/releases?per_page=100`
+const TAG_PREFIX = 'cli-v'
 const UA = 'shiploadcli'
 
 async function httpsGet(url: string, headers: Record<string, string> = {}): Promise<Uint8Array> {
@@ -82,14 +83,22 @@ export function register(program: Command): void {
 
             let release: GithubRelease
             try {
-                const buf = await httpsGet(API, {Accept: 'application/vnd.github+json'})
-                release = JSON.parse(new TextDecoder().decode(buf)) as GithubRelease
+                const buf = await httpsGet(RELEASES_API, {Accept: 'application/vnd.github+json'})
+                const releases = JSON.parse(new TextDecoder().decode(buf)) as GithubRelease[]
+                const found = releases.find((r) => r.tag_name.startsWith(TAG_PREFIX))
+                if (!found) {
+                    fail(
+                        `No ${TAG_PREFIX}* release found in the most recent 100 releases — see https://github.com/${REPO}/releases`,
+                    )
+                    return
+                }
+                release = found
             } catch (err) {
                 fail(`Failed to fetch release info: ${(err as Error).message}`)
                 return
             }
 
-            const latest = release.tag_name.replace(/^v/, '')
+            const latest = release.tag_name.replace(/^cli-v/, '')
             const current = pkg.version
 
             if (latest === current) {

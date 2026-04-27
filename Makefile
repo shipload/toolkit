@@ -68,9 +68,18 @@ release:
 	@echo "Now publish manually (npm browser auth requires interactive terminal):"
 	@echo "    bun changeset publish"
 	@echo "    git push --follow-tags"
+	@echo ""
+	@echo "Then cut the CLI binary release (uses the version just bumped):"
+	@echo "    make release/cli"
 
 release/cli:
-	$(MAKE) -C packages/cli release
+	@if [ -n "$(VERSION)" ] || [ -n "$(BUMP)" ]; then \
+		$(MAKE) -C packages/cli release; \
+	else \
+		VER=$$(node -p "require('./packages/cli/package.json').version"); \
+		echo "▸ Using current package.json version: $$VER"; \
+		$(MAKE) -C packages/cli release VERSION=$$VER; \
+	fi
 
 clean:
 	bun --filter='@shipload/*' run clean || true

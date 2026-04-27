@@ -6,6 +6,10 @@
 #   make release BUMP=minor         # minor bump
 #   make release BUMP=major         # major bump
 #   make release VERSION=1.2.3      # explicit version
+#
+# If VERSION matches the current package.json version, the bump and version
+# commit are skipped — useful after `bun changeset version` has already bumped
+# the package; this mode just builds, signs, tags, and publishes.
 
 set -euo pipefail
 
@@ -36,7 +40,7 @@ else
 		*) die "BUMP must be major|minor|patch (got: $BUMP)" ;;
 	esac
 fi
-TAG="v$NEW_VERSION"
+TAG="cli-v$NEW_VERSION"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 # --- Preflight ---------------------------------------------------------------
@@ -81,13 +85,19 @@ info "Running make check..."
 make --no-print-directory check
 
 # --- Bump package.json -------------------------------------------------------
-info "Bumping package.json to $NEW_VERSION..."
-node -e "
-const fs = require('fs');
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-pkg.version = '$NEW_VERSION';
-fs.writeFileSync('package.json', JSON.stringify(pkg, null, '\t') + '\n');
-"
+if [ "$NEW_VERSION" = "$CURRENT_VERSION" ]; then
+	SKIP_BUMP=1
+	info "Version already $NEW_VERSION; skipping package.json bump and version commit"
+else
+	SKIP_BUMP=0
+	info "Bumping package.json to $NEW_VERSION..."
+	node -e "
+	const fs = require('fs');
+	const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+	pkg.version = '$NEW_VERSION';
+	fs.writeFileSync('package.json', JSON.stringify(pkg, null, '\t') + '\n');
+	"
+fi
 
 # --- Build -------------------------------------------------------------------
 info "Building all binaries..."
@@ -108,10 +118,14 @@ info "Writing dist/SHA256SUMS..."
 (cd "$DIST" && shasum -a 256 shiploadcli-linux-* shiploadcli-mac-*.zip shiploadcli-windows-* > SHA256SUMS)
 
 # --- Commit + tag ------------------------------------------------------------
-info "Committing and tagging $TAG..."
-git add package.json
-git commit -m "chore: release $TAG"
-COMMIT_MADE=1
+if [ "$SKIP_BUMP" -eq 0 ]; then
+	info "Committing and tagging $TAG..."
+	git add package.json
+	git commit -m "chore: release $TAG"
+	COMMIT_MADE=1
+else
+	info "Tagging $TAG..."
+fi
 git tag -a "$TAG" -m "Release $TAG"
 TAG_MADE=1
 
