@@ -34,7 +34,7 @@ test('hex shape produces a 6-point polygon', () => {
     expect(path).toContain('<polygon')
     const match = path.match(/points="([^"]+)"/)
     expect(match).not.toBeNull()
-    const pointCount = match![1].trim().split(/\s+/).length
+    const pointCount = (match?.[1] ?? '').trim().split(/\s+/).length
     expect(pointCount).toBe(6)
 })
 
@@ -42,7 +42,7 @@ test('star shape produces a 10-vertex polygon', () => {
     const path = categoryIconPath({shape: 'star', cx: 50, cy: 50, size: 40, color: '#fff'})
     const match = path.match(/points="([^"]+)"/)
     expect(match).not.toBeNull()
-    const pointCount = match![1].trim().split(/\s+/).length
+    const pointCount = (match?.[1] ?? '').trim().split(/\s+/).length
     expect(pointCount).toBe(10)
 })
 

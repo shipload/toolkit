@@ -21,6 +21,7 @@ async function renderPng(svg: string): Promise<Buffer> {
     const resvg = new Resvg(svg, {
         font: {
             loadSystemFonts: false,
+            // @ts-expect-error fontBuffers is accepted at runtime but missing from @resvg/resvg-js@2.6.2 types
             fontBuffers: Object.values(fontData).map((b) => Buffer.from(b)),
         },
     })
