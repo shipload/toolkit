@@ -88,7 +88,7 @@ export function register(program: Command): void {
                 const found = releases.find((r) => r.tag_name.startsWith(TAG_PREFIX))
                 if (!found) {
                     fail(
-                        `No ${TAG_PREFIX}* release found in the most recent 100 releases — see https://github.com/${REPO}/releases`,
+                        `No ${TAG_PREFIX}* release found in the most recent 100 releases — see https://github.com/${REPO}/releases`
                     )
                     return
                 }

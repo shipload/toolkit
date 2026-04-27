@@ -14,6 +14,7 @@
             "!**/build",
             "!**/.svelte-kit",
             "!**/coverage",
+            "!**/.changeset",
             "!**/packages/sdk/src/contracts",
             "!**/packages/sdk/src/data/*.json",
             "!**/packages/sdk/src/data/item-ids.ts",
