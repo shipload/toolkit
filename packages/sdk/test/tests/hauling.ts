@@ -1,7 +1,8 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {computeHaulerDrain, computeHaulPenalty} from '$lib'
 
-suite('computeHaulPenalty', () => {
+describe('computeHaulPenalty', () => {
     test('returns total_thrust unchanged when haul_count is 0', () => {
         assert.equal(computeHaulPenalty(1000, 0, 5000), 1000)
     })
@@ -16,7 +17,7 @@ suite('computeHaulPenalty', () => {
     })
 })
 
-suite('computeHaulerDrain', () => {
+describe('computeHaulerDrain', () => {
     test('scales linearly with distance and haul_count', () => {
         assert.equal(computeHaulerDrain(10000, 9, 2), 18)
         assert.equal(computeHaulerDrain(100000, 9, 2), 180)

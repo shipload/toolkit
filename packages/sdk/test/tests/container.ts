@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
 import {makeContainer, ServerContract} from '$lib'
@@ -47,8 +48,8 @@ function makeContainerWithSchedule() {
     })
 }
 
-suite('Container', () => {
-    suite('fromState', () => {
+describe('Container', () => {
+    describe('fromState', () => {
         test('creates container with basic properties', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.id.equals(1))
@@ -63,7 +64,7 @@ suite('Container', () => {
         })
     })
 
-    suite('sched.hasSchedule', () => {
+    describe('sched.hasSchedule', () => {
         test('returns false when container has no schedule', () => {
             const container = makeStationaryContainer()
             assert.isFalse(container.sched.hasSchedule)
@@ -75,7 +76,7 @@ suite('Container', () => {
         })
     })
 
-    suite('isIdle', () => {
+    describe('isIdle', () => {
         test('returns true when container has no schedule', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.isIdle)
@@ -87,7 +88,7 @@ suite('Container', () => {
         })
     })
 
-    suite('location', () => {
+    describe('location', () => {
         test('returns Location object', () => {
             const container = makeStationaryContainer()
             const loc = container.location
@@ -96,7 +97,7 @@ suite('Container', () => {
         })
     })
 
-    suite('orbitalAltitude', () => {
+    describe('orbitalAltitude', () => {
         test('returns z coordinate', () => {
             const container = makeStationaryContainer()
             assert.equal(container.orbitalAltitude, 1000)
@@ -115,7 +116,7 @@ suite('Container', () => {
         })
     })
 
-    suite('totalMass', () => {
+    describe('totalMass', () => {
         test('returns hullmass when no cargo', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.totalMass.equals(50000))
@@ -127,14 +128,14 @@ suite('Container', () => {
         })
     })
 
-    suite('maxCapacity', () => {
+    describe('maxCapacity', () => {
         test('returns capacity', () => {
             const container = makeStationaryContainer()
             assert.equal(container.maxCapacity.toNumber(), 500000)
         })
     })
 
-    suite('availableCapacity', () => {
+    describe('availableCapacity', () => {
         test('returns full capacity when empty', () => {
             const container = makeStationaryContainer()
             assert.equal(container.availableCapacity.toNumber(), 500000)
@@ -146,7 +147,7 @@ suite('Container', () => {
         })
     })
 
-    suite('hasSpace', () => {
+    describe('hasSpace', () => {
         test('returns true when space available', () => {
             const container = makeStationaryContainer()
             assert.isTrue(container.hasSpace(UInt64.from(100000)))
@@ -158,7 +159,7 @@ suite('Container', () => {
         })
     })
 
-    suite('isFull', () => {
+    describe('isFull', () => {
         test('returns false when not full', () => {
             const container = makeStationaryContainer()
             assert.isFalse(container.isFull)
@@ -178,7 +179,7 @@ suite('Container', () => {
         })
     })
 
-    suite('coordinates', () => {
+    describe('coordinates', () => {
         test('returns raw coordinates from entity', () => {
             const container = makeStationaryContainer()
             assert.equal(container.coordinates.x.toNumber(), 5)
@@ -186,7 +187,7 @@ suite('Container', () => {
         })
     })
 
-    suite('schedule methods', () => {
+    describe('schedule methods', () => {
         test('sched.duration returns total task duration', () => {
             const container = makeContainerWithSchedule()
             assert.equal(container.sched.duration(), 100)

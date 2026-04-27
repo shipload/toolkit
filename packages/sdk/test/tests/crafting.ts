@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
 
@@ -32,8 +33,8 @@ import {
     type RecipeSlotInput,
 } from '$lib'
 
-suite('Crafting', () => {
-    suite('Seed Encoding', () => {
+describe('Crafting', () => {
+    describe('Seed Encoding', () => {
         test('encodes and decodes single stat', () => {
             const encoded = encodeStats([450])
             const decoded = decodeStats(encoded, 1)
@@ -61,7 +62,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('Blending', () => {
+    describe('Blending', () => {
         test('weighted average of single stat', () => {
             const result = blendStacks(
                 [
@@ -84,7 +85,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('Component Stats', () => {
+    describe('Component Stats', () => {
         test('hull plates from ore stacks', () => {
             const stats = computeComponentStats(ITEM_HULL_PLATES, [
                 {
@@ -152,7 +153,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('Entity Stats', () => {
+    describe('Entity Stats', () => {
         test('container from component stacks', () => {
             const stats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
                 [ITEM_HULL_PLATES]: [
@@ -167,7 +168,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('Decode Crafted Item', () => {
+    describe('Decode Crafted Item', () => {
         test('decode hull plates seed', () => {
             const seed = encodeStats([450, 300])
             const stats = decodeCraftedItemStats(ITEM_HULL_PLATES, seed)
@@ -202,7 +203,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('encodeGatheredCargoStats', () => {
+    describe('encodeGatheredCargoStats', () => {
         test('round-trips derived stats via bit decode', () => {
             const depositSeed = 0x0badf00dcafebaben
             const encoded = encodeGatheredCargoStats(depositSeed)
@@ -221,7 +222,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('blendCargoStacks', () => {
+    describe('blendCargoStacks', () => {
         test('decodes raw-item stats via bit decode, not hash', () => {
             const packed = UInt64.from(encodeStats([278, 142, 162]))
             const result = blendCargoStacks(6, [{quantity: 1, stats: packed}])
@@ -232,7 +233,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('computeCraftedOutputStats', () => {
+    describe('computeCraftedOutputStats', () => {
         test('single-input single-category component (Thruster Core from gas)', () => {
             const seedA = 0x123456789abcdef0n
             const seedB = 0xfedcba9876543210n
@@ -421,7 +422,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('T2 Multi-Source Blending', () => {
+    describe('T2 Multi-Source Blending', () => {
         test('Hull Plates T2 blends component + raw ore stats', () => {
             const hullPlatesEncoded = encodeStats([400, 300])
             const oreT2Seed = encodeStats([600, 0, 200])
@@ -475,7 +476,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('Container Capabilities', () => {
+    describe('Container Capabilities', () => {
         test('all stats at 500 produces expected mid-range values', () => {
             const caps = computeContainerCapabilities({
                 strength: 500,
@@ -567,7 +568,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('T2 Container Capabilities', () => {
+    describe('T2 Container Capabilities', () => {
         test('T2 container has lighter hullmass than T1 at same density', () => {
             const t1 = computeContainerCapabilities({
                 strength: 500,
@@ -610,7 +611,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('calc_craft_duration', () => {
+    describe('calc_craft_duration', () => {
         test('basic duration calculation', () => {
             const duration = calc_craft_duration(500, 450000)
             assert.equal(duration.toNumber(), 900)
@@ -634,7 +635,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('computeInputMass', () => {
+    describe('computeInputMass', () => {
         test('component returns positive mass', () => {
             const mass = computeInputMass(ITEM_HULL_PLATES)
             assert.isAbove(mass, 0)
@@ -657,7 +658,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('T2 cross-group blending', () => {
+    describe('T2 cross-group blending', () => {
         test('blendCrossGroup averages stats from two groups with equal weights', () => {
             const result = blendCrossGroup([
                 {value: 400, weight: 1},
@@ -680,7 +681,7 @@ suite('Crafting', () => {
         })
     })
 
-    suite('calc_craft_energy', () => {
+    describe('calc_craft_energy', () => {
         test('basic energy calculation', () => {
             // Hull Plates: 450K input_mass × drain 17 / 150K = 51
             const energy = calc_craft_energy(17, 450000)

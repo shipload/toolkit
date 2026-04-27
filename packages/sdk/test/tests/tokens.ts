@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
     type CategoryIconShape,
@@ -9,8 +10,8 @@ import {
     tierLabels,
 } from '../../src'
 
-suite('tokens', () => {
-    suite('tierLabels', () => {
+describe('tokens', () => {
+    describe('tierLabels', () => {
         test('covers all tiers with expected names', () => {
             assert.equal(tierLabels[1], 'Common')
             assert.equal(tierLabels[2], 'Uncommon')
@@ -20,7 +21,7 @@ suite('tokens', () => {
         })
     })
 
-    suite('categoryIconShapes', () => {
+    describe('categoryIconShapes', () => {
         test('maps each resource category to a shape name', () => {
             assert.equal(categoryIconShapes.ore, 'hex')
             assert.equal(categoryIconShapes.crystal, 'diamond')
@@ -35,7 +36,7 @@ suite('tokens', () => {
         })
     })
 
-    suite('itemAbbreviations', () => {
+    describe('itemAbbreviations', () => {
         test('covers known components, modules, and entities', () => {
             assert.equal(itemAbbreviations[ITEM_HULL_PLATES], 'HP')
             assert.equal(itemAbbreviations[ITEM_ENGINE_T1], 'EN')

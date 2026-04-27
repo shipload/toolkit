@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
     computeContainerCapabilities,
@@ -14,7 +15,7 @@ import {
     ITEM_HAULER_T1,
 } from '$lib'
 
-suite('ship deploy formulas', () => {
+describe('ship deploy formulas', () => {
     test('hull capabilities from stats', () => {
         const result = computeShipHullCapabilities({
             strength: 500,

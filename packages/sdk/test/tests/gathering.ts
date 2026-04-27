@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {Checksum256, Name, TimePoint, UInt16, UInt64} from '@wharfkit/antelope'
 import {assert} from 'chai'
 import {
@@ -22,8 +23,8 @@ import {makeShip} from '../../src/entities/makers'
 
 const seed = encodeStats([500, 500, 500, 500])
 
-suite('gathering', () => {
-    suite('TaskType', () => {
+describe('gathering', () => {
+    describe('TaskType', () => {
         test('GATHER equals 5', () => {
             assert.equal(TaskType.GATHER, 5)
         })
@@ -38,7 +39,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('LocationType', () => {
+    describe('LocationType', () => {
         test('EMPTY equals 0', () => {
             assert.equal(LocationType.EMPTY, 0)
         })
@@ -56,7 +57,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('getLocationType', () => {
+    describe('getLocationType', () => {
         const gameSeed = Checksum256.from(
             '0000000000000000000000000000000000000000000000000000000000000000'
         )
@@ -92,7 +93,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('isGatherableLocation', () => {
+    describe('isGatherableLocation', () => {
         test('ASTEROID is gatherable', () => {
             assert.isTrue(isGatherableLocation(LocationType.ASTEROID))
         })
@@ -110,7 +111,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('hasGatherer type guard', () => {
+    describe('hasGatherer type guard', () => {
         test('returns true for entity with gatherer', () => {
             const entity = {
                 id: UInt64.from(1),
@@ -150,7 +151,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('capsHasGatherer', () => {
+    describe('capsHasGatherer', () => {
         test('returns true when gatherer is present', () => {
             const caps = {
                 gatherer: {
@@ -174,7 +175,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('calc_gather_duration', () => {
+    describe('calc_gather_duration', () => {
         const gatherer = ServerContract.Types.gatherer_stats.from({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
@@ -246,7 +247,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('calc_gather_energy', () => {
+    describe('calc_gather_energy', () => {
         const gatherer = ServerContract.Types.gatherer_stats.from({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
@@ -296,7 +297,7 @@ suite('gathering', () => {
         })
     })
 
-    suite('projection with TASK_GATHER', () => {
+    describe('projection with TASK_GATHER', () => {
         test('applies energy cost on complete gather task', () => {
             const ship = makeShip({
                 id: UInt64.from(1),
@@ -320,7 +321,7 @@ suite('gathering', () => {
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
-                            cargo: [{item_id: 1, quantity: 1, stats: 0, modules: []}],
+                            cargo: [{item_id: 101, quantity: 1, stats: 0, modules: []}],
                             energy_cost: 50,
                         }),
                     ],
@@ -356,7 +357,7 @@ suite('gathering', () => {
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
-                            cargo: [{item_id: 1, quantity: 1, stats: 0, modules: []}],
+                            cargo: [{item_id: 101, quantity: 1, stats: 0, modules: []}],
                             energy_cost: 50,
                         }),
                     ],
@@ -396,7 +397,7 @@ suite('gathering', () => {
                             duration: 30,
                             cancelable: 1,
                             coordinates: {x: 0, y: 0},
-                            cargo: [{item_id: 1, quantity: 1, stats: 0, modules: []}],
+                            cargo: [{item_id: 101, quantity: 1, stats: 0, modules: []}],
                             entitytarget: {entity_type: 'ship', entity_id: 2},
                             energy_cost: 50,
                         }),

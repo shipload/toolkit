@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {getItem} from '$lib'
@@ -30,7 +31,7 @@ interface ItemRow {
     subtype?: string
 }
 
-suite('items.json resource masses', () => {
+describe('items.json resource masses', () => {
     const byId = new Map<number, ItemRow>(
         (items as unknown as ItemRow[]).map((item) => [item.id, item])
     )
@@ -46,7 +47,7 @@ suite('items.json resource masses', () => {
     }
 })
 
-suite('getItem strictness', () => {
+describe('getItem strictness', () => {
     test('returns honest fields for a raw resource', () => {
         const ore = getItem(101)
         assert.equal(ore.name, 'Ore')
@@ -82,7 +83,7 @@ suite('getItem strictness', () => {
     })
 })
 
-suite('items.json T4-T10 are not surfaced', () => {
+describe('items.json T4-T10 are not surfaced', () => {
     const allIds = new Set((items as unknown as ItemRow[]).map((item) => item.id))
     const forbiddenIds = [
         104, 105, 106, 107, 108, 109, 110, 204, 205, 206, 207, 208, 209, 210, 304, 305, 306, 307,

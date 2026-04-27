@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {
@@ -14,7 +15,7 @@ import {
     statMappings,
 } from '$lib'
 
-suite('Capabilities', () => {
+describe('Capabilities', () => {
     test('capabilityNames has 10 entries', () => {
         assert.equal(capabilityNames.length, 10)
     })

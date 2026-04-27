@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
@@ -18,8 +19,8 @@ function stack(item_id: number, quantity: number, stats?: number): CargoStack {
     }
 }
 
-suite('CargoStack helpers', () => {
-    suite('stackKey', () => {
+describe('CargoStack helpers', () => {
+    describe('stackKey', () => {
         test('keys by item_id and seed', () => {
             assert.equal(stackKey(stack(5, 10, 42)), '5:42')
         })
@@ -29,7 +30,7 @@ suite('CargoStack helpers', () => {
         })
     })
 
-    suite('mergeStacks', () => {
+    describe('mergeStacks', () => {
         test('appends a new stack with no match', () => {
             const result = mergeStacks([stack(1, 5, 10)], stack(2, 3, 20))
             assert.equal(result.length, 2)
@@ -54,7 +55,7 @@ suite('CargoStack helpers', () => {
         })
     })
 
-    suite('removeFromStacks', () => {
+    describe('removeFromStacks', () => {
         test('decrements quantity from matching stack', () => {
             const result = removeFromStacks([stack(1, 10, 5)], stack(1, 3, 5))
             assert.equal(result.length, 1)
@@ -81,7 +82,7 @@ suite('CargoStack helpers', () => {
         })
     })
 
-    suite('stacksEqual', () => {
+    describe('stacksEqual', () => {
         test('true for identical stacks', () => {
             assert.isTrue(stacksEqual(stack(1, 5, 10), stack(1, 5, 10)))
         })

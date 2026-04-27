@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Int64, UInt32, UInt64} from '@wharfkit/antelope'
 
@@ -77,8 +78,8 @@ function makeShipWithSchedule() {
     })
 }
 
-suite('Ship', () => {
-    suite('maxDistance', () => {
+describe('Ship', () => {
+    describe('maxDistance', () => {
         test('calculates max distance from capacity/drain', () => {
             const ship = makeStationaryShip()
             // seed [500,500,500,500] → gen.capacity=383, eng.drain=43 → floor(383/43)*10000 = 80000
@@ -87,7 +88,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('sched.hasSchedule', () => {
+    describe('sched.hasSchedule', () => {
         test('returns false when ship has no schedule', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.sched.hasSchedule)
@@ -99,7 +100,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('isIdle', () => {
+    describe('isIdle', () => {
         test('returns true when ship has no schedule', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.isIdle)
@@ -111,7 +112,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('location', () => {
+    describe('location', () => {
         test('returns Location object', () => {
             const ship = makeStationaryShip()
             const loc = ship.location
@@ -120,7 +121,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('cargo management', () => {
+    describe('cargo management', () => {
         test('cargo returns empty array if no cargo', () => {
             const ship = makeStationaryShip()
             assert.deepEqual(ship.cargo, [])
@@ -184,7 +185,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('totalMass', () => {
+    describe('totalMass', () => {
         test('returns ship mass without cargo', () => {
             const ship = makeStationaryShip()
             const mass = ship.totalMass
@@ -201,7 +202,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('hasSpace', () => {
+    describe('hasSpace', () => {
         test('returns true when space available', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.hasSpace(UInt64.from(1000), 10))
@@ -213,7 +214,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('availableCapacity', () => {
+    describe('availableCapacity', () => {
         test('returns available capacity', () => {
             const ship = makeStationaryShip()
             const space = ship.availableCapacity
@@ -227,7 +228,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('coordinates', () => {
+    describe('coordinates', () => {
         test('returns raw coordinates from entity', () => {
             const ship = makeStationaryShip()
             assert.equal(ship.coordinates.x.toNumber(), 5)
@@ -235,7 +236,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('isFull', () => {
+    describe('isFull', () => {
         test('returns false when not full', () => {
             const ship = makeStationaryShip()
             assert.isFalse(ship.isFull)
@@ -248,7 +249,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('energyPercent', () => {
+    describe('energyPercent', () => {
         test('calculates energy percentage', () => {
             // energy=383 matches gen.capacity=383 for seed [500,500,500,500] → 100%
             const ship = makeStationaryShip({energy: 383})
@@ -256,7 +257,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('needsRecharge', () => {
+    describe('needsRecharge', () => {
         test('returns false when fully charged', () => {
             // energy=5000 > gen.capacity=383 → fully charged
             const ship = makeStationaryShip()
@@ -270,7 +271,7 @@ suite('Ship', () => {
         })
     })
 
-    suite('hasEnergyFor', () => {
+    describe('hasEnergyFor', () => {
         test('returns true when enough energy', () => {
             const ship = makeStationaryShip()
             assert.isTrue(ship.hasEnergyFor(UInt64.from(10000)))

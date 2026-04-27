@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
 import {
@@ -15,7 +16,7 @@ const testEpochSeed = Checksum256.from(
     'b3c2d1e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2'
 )
 
-suite('getSystemName', () => {
+describe('getSystemName', () => {
     test('should throw an error if system does not exist', () => {
         const locationWithNoPlanet = {x: 0, y: 0}
 
@@ -56,7 +57,7 @@ suite('getSystemName', () => {
     })
 })
 
-suite('deriveLocationStatic', () => {
+describe('deriveLocationStatic', () => {
     test('returns location_static struct', () => {
         const result = deriveLocationStatic(testGameSeed, {x: 0, y: 0})
         assert.ok(result.coords, 'Should have coords')
@@ -122,7 +123,7 @@ suite('deriveLocationStatic', () => {
     })
 })
 
-suite('deriveLocationEpoch', () => {
+describe('deriveLocationEpoch', () => {
     test('returns location_epoch struct', () => {
         const result = deriveLocationEpoch(testEpochSeed, {x: 0, y: 0})
         assert.ok(result.active !== undefined, 'Should have active')
@@ -159,7 +160,7 @@ suite('deriveLocationEpoch', () => {
     })
 })
 
-suite('deriveLocation', () => {
+describe('deriveLocation', () => {
     test('returns location_derived struct', () => {
         const result = deriveLocation(testGameSeed, testEpochSeed, {x: 0, y: 0})
         assert.ok(result.static_props, 'Should have static_props')

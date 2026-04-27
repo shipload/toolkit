@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
 import {LocationsManager} from '$lib'
@@ -30,7 +31,7 @@ function buildManager(reserveOverrides: {stratum: number; remaining: number}[]):
     return new LocationsManager(stubContext)
 }
 
-suite('LocationsManager.getStrata', () => {
+describe('LocationsManager.getStrata', () => {
     test('returns empty array for an empty (non-system) coord', async () => {
         const mgr = buildManager([])
         const result = await mgr.getStrata(EMPTY_COORDS)

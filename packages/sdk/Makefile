@@ -2,10 +2,7 @@ SHELL := /usr/bin/env bash
 PATH  := ./node_modules/.bin:$(PATH)
 
 SRC_FILES := $(shell find src -name '*.ts')
-TEST_FILES := $(shell find test/tests -name '*.ts')
 BIN := ./node_modules/.bin
-MOCHA_OPTS := -u tdd -r ts-node/register -r tsconfig-paths/register --extension ts
-NYC_OPTS := --temp-dir build/nyc_output --report-dir build/coverage
 
 .PHONY: build
 build: lib
@@ -33,27 +30,11 @@ dev: node_modules
 
 .PHONY: test
 test: node_modules
-	@TS_NODE_PROJECT='./test/tsconfig.json' MOCK_DIR='./test/data' \
-		${BIN}/mocha ${MOCHA_OPTS} ${TEST_FILES} --no-timeout --grep '$(grep)'
+	@MOCK_DIR='./test/data' bun test ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
 
+.PHONY: test/watch
 test/watch: node_modules
-	@TS_NODE_PROJECT='./test/tsconfig.json' \
-		${BIN}/mocha --watch ${MOCHA_OPTS} ${TEST_FILES} --no-timeout --grep '$(grep)'
-
-build/coverage: ${SRC_FILES} ${TEST_FILES} node_modules
-	@TS_NODE_PROJECT='./test/tsconfig.json' MOCK_DIR='./test/data' \
-		${BIN}/nyc ${NYC_OPTS} --reporter=html \
-		${BIN}/mocha ${MOCHA_OPTS} -R nyan ${TEST_FILES}
-
-.PHONY: coverage
-coverage: build/coverage
-	@open build/coverage/index.html
-
-.PHONY: ci-test
-ci-test: node_modules
-	@TS_NODE_PROJECT='./test/tsconfig.json' MOCK_DIR='./test/data' \
-		${BIN}/nyc ${NYC_OPTS} --reporter=text \
-		${BIN}/mocha ${MOCHA_OPTS} -R list ${TEST_FILES}
+	@MOCK_DIR='./test/data' bun test --watch ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
 
 .PHONY: check
 check: node_modules
@@ -73,24 +54,12 @@ build/docs: $(SRC_FILES) node_modules
 		--includeVersion --hideGenerator --readme none \
 		src/index.ts
 
-build/pages: build/coverage build/docs
-	@mkdir -p build/pages
-	@cp -r build/docs/* build/pages/
-	@cp -r build/coverage build/pages/coverage
-
-.PHONY: deploy-pages
-deploy-pages: | clean lib build/pages node_modules
-	@${BIN}/gh-pages -d build/pages
-
-build/browser.html: $(SRC_FILES) $(TEST_FILES) test/rollup.config.js node_modules
-	@${BIN}/rollup -c test/rollup.config.js
-
 node_modules:
 	@cd ../.. && bun install
 
 .PHONY: clean
 clean:
-	rm -rf lib/ build/ build/browser.html
+	rm -rf lib/ build/
 
 .PHONY: distclean
 distclean: clean
@@ -100,7 +69,7 @@ distclean: clean
 codegen: codegen/platform codegen/server
 
 codegen/platform:
-	npx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/platform.ts platform.gm
+	bunx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/platform.ts platform.gm
 
 codegen/server:
-	npx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/server.ts shipload.gm
+	bunx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/server.ts shipload.gm

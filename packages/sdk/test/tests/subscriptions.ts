@@ -1,3 +1,4 @@
+import {describe, test, beforeEach, afterEach} from 'bun:test'
 import {assert} from 'chai'
 import {Container, ServerContract, Ship, Warehouse} from '$lib'
 import {mapEntity} from '../../src/subscriptions/mappers'
@@ -6,7 +7,7 @@ import {FakeWebSocketServer} from '../helpers/fake-ws'
 
 const noop = (): void => undefined
 
-suite('subscriptions/mappers', () => {
+describe('subscriptions/mappers', () => {
     test('mapEntity returns Ship for type=ship', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -62,16 +63,16 @@ suite('subscriptions/mappers', () => {
     })
 })
 
-suite('SubscriptionsManager', () => {
+describe('SubscriptionsManager', () => {
     let fake: FakeWebSocketServer
     let mgr: SubscriptionsManager
 
-    setup(() => {
+    beforeEach(() => {
         fake = new FakeWebSocketServer()
         mgr = new SubscriptionsManager({url: 'ws://fake/'})
     })
 
-    teardown(() => {
+    afterEach(() => {
         mgr.close()
         fake.close()
     })

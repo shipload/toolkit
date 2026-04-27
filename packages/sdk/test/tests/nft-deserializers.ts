@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {
@@ -12,7 +13,7 @@ import {
     ITEM_WAREHOUSE_T1_PACKED,
 } from '$lib'
 
-suite('NFT deserializers', () => {
+describe('NFT deserializers', () => {
     test('deserializeResource: basic round-trip fields', () => {
         const data = {quantity: 10, stats: '12345', origin_x: '100', origin_y: '-50'}
         const result = deserializeResource(data, 101) // ore t1

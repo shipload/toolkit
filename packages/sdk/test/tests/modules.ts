@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
     getModuleCapabilityType,
@@ -18,7 +19,7 @@ import {
     moduleAccepts,
 } from '$lib'
 
-suite('modules', () => {
+describe('modules', () => {
     test('MODULE_ANY accepts any module type', () => {
         assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_ENGINE))
         assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_GENERATOR))

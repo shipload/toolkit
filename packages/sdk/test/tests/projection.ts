@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {TimePoint} from '@wharfkit/antelope'
 import {
@@ -25,8 +26,8 @@ function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoSt
     return cargo.find((s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey)
 }
 
-suite('projectEntity (stack-aware)', () => {
-    suite('initial cargo', () => {
+describe('projectEntity (stack-aware)', () => {
+    describe('initial cargo', () => {
         test('returns initial cargo when no schedule', () => {
             const ship = makeShipFixture({
                 cargo: [{item_id: 1, quantity: 10, stats: 100}],
@@ -44,7 +45,7 @@ suite('projectEntity (stack-aware)', () => {
         })
     })
 
-    suite('GATHER tasks', () => {
+    describe('GATHER tasks', () => {
         test('adds gathered cargo as a new stack', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({
@@ -88,7 +89,7 @@ suite('projectEntity (stack-aware)', () => {
         })
     })
 
-    suite('CRAFT tasks', () => {
+    describe('CRAFT tasks', () => {
         test('removes inputs and adds output (last cargo entry)', () => {
             const ship = makeShipFixture({
                 cargo: [
@@ -115,7 +116,7 @@ suite('projectEntity (stack-aware)', () => {
         })
     })
 
-    suite('WRAP / UNWRAP', () => {
+    describe('WRAP / UNWRAP', () => {
         test('WRAP removes cargo (mirrors UNLOAD)', () => {
             const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 200}]})
             ship.schedule = ServerContract.Types.schedule.from({
@@ -139,7 +140,7 @@ suite('projectEntity (stack-aware)', () => {
         })
     })
 
-    suite('validateSchedule', () => {
+    describe('validateSchedule', () => {
         test('throws ENTITY_CAPACITY_EXCEEDED via validateSchedule', () => {
             const ship = makeShipFixture({capacity: 100})
             ship.schedule = ServerContract.Types.schedule.from({
@@ -166,7 +167,7 @@ suite('projectEntity (stack-aware)', () => {
             assert.doesNotThrow(() => validateSchedule(ship))
         })
 
-        suite('craft input validation', () => {
+        describe('craft input validation', () => {
             // Hull Plates recipe: [{category: 'ore', quantity: 15}] → output qty 1
             const HULL_PLATES_QTY = 15
 
@@ -306,7 +307,7 @@ suite('projectEntity (stack-aware)', () => {
         })
     })
 
-    suite('cross-validation against contract (synthetic — fixture deferred)', () => {
+    describe('cross-validation against contract (synthetic — fixture deferred)', () => {
         test('gather + craft produces expected output stack matching contract semantics', () => {
             const RESOURCE_ID = 101
             const COMPONENT_ID = 10005
@@ -354,7 +355,7 @@ suite('projectEntity (stack-aware)', () => {
     })
 })
 
-suite('projectFromCurrentState', () => {
+describe('projectFromCurrentState', () => {
     test('skips completed tasks lingering in schedule.tasks (regression)', () => {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
         ship.schedule = ServerContract.Types.schedule.from({
@@ -398,7 +399,7 @@ suite('projectFromCurrentState', () => {
     })
 })
 
-suite('projectFromCurrentStateAt', () => {
+describe('projectFromCurrentStateAt', () => {
     test('skips completed tasks lingering in schedule.tasks (regression)', () => {
         // Idle snapshot with a completed CRAFT task lingering in schedule.tasks.
         // Without the snapshot-aware variant, projectEntityAt would re-apply the CRAFT

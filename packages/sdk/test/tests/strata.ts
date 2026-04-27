@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
 import {
@@ -18,7 +19,7 @@ const testEpochSeed = Checksum256.from(
 const SYSTEM_COORDS = {x: -10, y: -4}
 const EMPTY_COORDS = {x: 0, y: 0}
 
-suite('deriveStrata', () => {
+describe('deriveStrata', () => {
     test('returns empty array for an empty (non-system) coord', () => {
         const loc = deriveLocationStatic(testGameSeed, EMPTY_COORDS)
         assert.equal(Number(loc.type), LocationType.EMPTY, 'fixture sanity')

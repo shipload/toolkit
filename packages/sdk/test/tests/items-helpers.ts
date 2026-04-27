@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {
@@ -13,8 +14,8 @@ import {
     typeLabel,
 } from 'src/items'
 
-suite('item helpers', () => {
-    suite('getResources', () => {
+describe('item helpers', () => {
+    describe('getResources', () => {
         test('returns only type=resource items', () => {
             const r = getResources()
             assert.isAbove(r.length, 0)
@@ -43,7 +44,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('getComponents', () => {
+    describe('getComponents', () => {
         test('returns only type=component items', () => {
             const c = getComponents()
             assert.isAbove(c.length, 0)
@@ -56,7 +57,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('getModules', () => {
+    describe('getModules', () => {
         test('returns only type=module items', () => {
             const m = getModules()
             assert.isAbove(m.length, 0)
@@ -74,7 +75,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('getEntityItems', () => {
+    describe('getEntityItems', () => {
         test('returns only type=entity items', () => {
             const e = getEntityItems()
             assert.isAbove(e.length, 0)
@@ -87,7 +88,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('resolveItemCategory', () => {
+    describe('resolveItemCategory', () => {
         test('returns category for known resource id', () => {
             assert.equal(resolveItemCategory(101), 'ore')
             assert.equal(resolveItemCategory(201), 'crystal')
@@ -104,7 +105,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('typeLabel', () => {
+    describe('typeLabel', () => {
         test('accepts string', () => {
             assert.equal(typeLabel('resource'), 'Resource')
             assert.equal(typeLabel('component'), 'Component')
@@ -124,14 +125,14 @@ suite('item helpers', () => {
         })
     })
 
-    suite('categoryLabel', () => {
+    describe('categoryLabel', () => {
         test('returns display string', () => {
             assert.equal(categoryLabel('ore'), 'Ore')
             assert.equal(categoryLabel('crystal'), 'Crystal')
         })
     })
 
-    suite('categoryFromIndex', () => {
+    describe('categoryFromIndex', () => {
         // Locks in the chain rescat enum order from server::getrescats:
         // [ore=0, gas=1, regolith=2, biomass=3, crystal=4]
         // This deliberately does NOT match the player-facing T-prefix order
@@ -149,7 +150,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('categoryLabelFromIndex', () => {
+    describe('categoryLabelFromIndex', () => {
         test('composes index to category to label', () => {
             assert.equal(categoryLabelFromIndex(0), 'Ore')
             assert.equal(categoryLabelFromIndex(1), 'Gas')
@@ -161,7 +162,7 @@ suite('item helpers', () => {
         })
     })
 
-    suite('tierLabel', () => {
+    describe('tierLabel', () => {
         test('returns rarity label for known tier', () => {
             assert.equal(tierLabel(1), 'Common')
             assert.equal(tierLabel(5), 'Legendary')

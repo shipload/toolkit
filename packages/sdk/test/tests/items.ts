@@ -1,9 +1,10 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {getItem, getItems, itemIds} from 'src/items'
 import {ITEM_CARGO_LINING, ITEM_CONTAINER_T1_PACKED, ITEM_ENGINE_T1} from '$lib'
 
-suite('items', () => {
-    suite('getItem', () => {
+describe('items', () => {
+    describe('getItem', () => {
         test('returns item for valid id', () => {
             const item = getItem(101)
             assert.isDefined(item)
@@ -38,7 +39,7 @@ suite('items', () => {
         })
     })
 
-    suite('getItems', () => {
+    describe('getItems', () => {
         test('returns all items', () => {
             const items = getItems()
             assert.isArray(items)
@@ -46,7 +47,7 @@ suite('items', () => {
         })
     })
 
-    suite('itemIds', () => {
+    describe('itemIds', () => {
         test('contains valid item ids', () => {
             assert.isArray(itemIds)
             assert.isTrue(itemIds.length > 0)

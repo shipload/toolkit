@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256, UInt64} from '@wharfkit/antelope'
 import {Coordinates, coordsToLocationId} from '$lib'
@@ -10,8 +11,8 @@ const testSeed = Checksum256.from(
 
 const origin = Coordinates.from({x: 0, y: 0})
 
-suite('Location', () => {
-    suite('constructor and from', () => {
+describe('Location', () => {
+    describe('constructor and from', () => {
         test('creates Location from coordinates', () => {
             const coords = Coordinates.from({x: 5, y: 10})
             const location = new Location(coords)
@@ -27,7 +28,7 @@ suite('Location', () => {
         })
     })
 
-    suite('hasSystemAt', () => {
+    describe('hasSystemAt', () => {
         test('returns boolean for system check', () => {
             const location = Location.from(origin)
             const result = location.hasSystemAt(testSeed)
@@ -54,7 +55,7 @@ suite('Location', () => {
         })
     })
 
-    suite('getLocationTypeAt', () => {
+    describe('getLocationTypeAt', () => {
         test('returns a LocationType value', () => {
             const location = Location.from(origin)
             const result = location.getLocationTypeAt(testSeed)
@@ -77,7 +78,7 @@ suite('Location', () => {
         })
     })
 
-    suite('isGatherableAt', () => {
+    describe('isGatherableAt', () => {
         test('returns true for asteroid locations', () => {
             for (let x = 0; x < 100; x++) {
                 for (let y = 0; y < 100; y++) {
@@ -131,7 +132,7 @@ suite('Location', () => {
         })
     })
 
-    suite('findNearby', () => {
+    describe('findNearby', () => {
         test('returns array of distances', () => {
             const location = Location.from(origin)
             const nearby = location.findNearby(testSeed, 20)
@@ -139,7 +140,7 @@ suite('Location', () => {
         })
     })
 
-    suite('equals', () => {
+    describe('equals', () => {
         test('returns true for same coordinates', () => {
             const location1 = Location.from(Coordinates.from({x: 5, y: 10}))
             const location2 = Location.from(Coordinates.from({x: 5, y: 10}))
@@ -159,14 +160,14 @@ suite('Location', () => {
         })
     })
 
-    suite('epoch', () => {
+    describe('epoch', () => {
         test('epoch returns undefined initially', () => {
             const location = Location.from(origin)
             assert.isUndefined(location.epoch)
         })
     })
 
-    suite('clearCache', () => {
+    describe('clearCache', () => {
         test('clears cached data', () => {
             const location = Location.from(origin)
             location.hasSystemAt(testSeed)
@@ -176,7 +177,7 @@ suite('Location', () => {
     })
 })
 
-suite('toLocation helper', () => {
+describe('toLocation helper', () => {
     test('returns Location unchanged', () => {
         const location = Location.from(Coordinates.from({x: 5, y: 10}))
         const result = toLocation(location)
@@ -192,7 +193,7 @@ suite('toLocation helper', () => {
     })
 })
 
-suite('coordsToLocationId', () => {
+describe('coordsToLocationId', () => {
     test('returns UInt64', () => {
         const id = coordsToLocationId({x: 0, y: 0})
         assert.instanceOf(id, UInt64)

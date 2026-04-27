@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
 import {encodeStats, ITEM_LOADER_T1, makeWarehouse, ServerContract, Warehouse} from '$lib'
@@ -51,8 +52,8 @@ function makeWarehouseWithSchedule() {
     })
 }
 
-suite('Warehouse', () => {
-    suite('sched.hasSchedule', () => {
+describe('Warehouse', () => {
+    describe('sched.hasSchedule', () => {
         test('returns false when warehouse has no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isFalse(warehouse.sched.hasSchedule)
@@ -64,7 +65,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('isIdle', () => {
+    describe('isIdle', () => {
         test('returns true when warehouse has no schedule', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isTrue(warehouse.isIdle)
@@ -76,7 +77,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('location', () => {
+    describe('location', () => {
         test('returns Location object', () => {
             const warehouse = makeStationaryWarehouse()
             const loc = warehouse.location
@@ -85,7 +86,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('orbitalAltitude', () => {
+    describe('orbitalAltitude', () => {
         test('returns z coordinate', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.orbitalAltitude, 1000)
@@ -104,7 +105,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('cargo management', () => {
+    describe('cargo management', () => {
         test('cargo returns empty array when no cargo', () => {
             const warehouse = makeStationaryWarehouse()
             assert.deepEqual(warehouse.cargo, [])
@@ -142,7 +143,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('availableCapacity', () => {
+    describe('availableCapacity', () => {
         test('returns full capacity when empty', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.availableCapacity.toNumber(), 10000000)
@@ -155,7 +156,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('hasSpace', () => {
+    describe('hasSpace', () => {
         test('returns true when space available', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isTrue(warehouse.hasSpace(UInt64.from(1000), 10))
@@ -167,14 +168,14 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('isFull', () => {
+    describe('isFull', () => {
         test('returns false when not full', () => {
             const warehouse = makeStationaryWarehouse()
             assert.isFalse(warehouse.isFull)
         })
     })
 
-    suite('coordinates', () => {
+    describe('coordinates', () => {
         test('returns raw coordinates from entity', () => {
             const warehouse = makeStationaryWarehouse()
             assert.equal(warehouse.coordinates.x.toNumber(), 5)
@@ -182,7 +183,7 @@ suite('Warehouse', () => {
         })
     })
 
-    suite('schedule methods', () => {
+    describe('schedule methods', () => {
         test('sched.duration returns total task duration', () => {
             const warehouse = makeWarehouseWithSchedule()
             assert.equal(warehouse.sched.duration(), 100)

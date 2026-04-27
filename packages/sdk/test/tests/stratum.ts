@@ -1,8 +1,9 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
 import {deriveResourceStats, deriveStratum, RESERVE_TIERS, ReserveTier} from '$lib'
 
-suite('deriveResourceStats', () => {
+describe('deriveResourceStats', () => {
     test('stat range [1, 999] is bounded', () => {
         // 10K seeds × 3 stats = 30K samples. At weibull k=0.24 the per-sample rate
         // of stat=1 is ~0.003, so min=1 is reliably hit; max in this window typically
@@ -79,7 +80,7 @@ suite('deriveResourceStats', () => {
     })
 })
 
-suite('deriveStratum reserve tiers', () => {
+describe('deriveStratum reserve tiers', () => {
     const epochSeed = Checksum256.from(
         '0202020202020202020202020202020202020202020202020202020202020202'
     )

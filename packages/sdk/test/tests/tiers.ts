@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
     isCraftedItem,
@@ -11,7 +12,7 @@ import {
     rollWithinTier,
 } from '$lib'
 
-suite('tier utilities', () => {
+describe('tier utilities', () => {
     test('itemTier returns tier from item ID', () => {
         assert.equal(itemTier(10001), 1)
         assert.equal(itemTier(10100), 1)
@@ -57,7 +58,7 @@ suite('tier utilities', () => {
     })
 })
 
-suite('reserve tiers', () => {
+describe('reserve tiers', () => {
     test('tier constants match spec', () => {
         assert.deepEqual(RESERVE_TIERS.small, {min: 15, max: 60})
         assert.deepEqual(RESERVE_TIERS.medium, {min: 100, max: 200})

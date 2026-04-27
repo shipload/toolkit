@@ -1,3 +1,4 @@
+import {describe, test, beforeEach} from 'bun:test'
 import {assert} from 'chai'
 import {TimePointSec, UInt32, UInt64} from '@wharfkit/antelope'
 import {makeClient} from '@wharfkit/mock-data'
@@ -34,8 +35,8 @@ function createMockGame(
     })
 }
 
-suite('epoch', () => {
-    suite('getCurrentEpoch', () => {
+describe('epoch', () => {
+    describe('getCurrentEpoch', () => {
         test('returns epoch 1 at game start', () => {
             const now = Math.floor(Date.now() / 1000) * 1000
             const game = createMockGame(now, 3600)
@@ -65,7 +66,7 @@ suite('epoch', () => {
         })
     })
 
-    suite('getEpochInfo', () => {
+    describe('getEpochInfo', () => {
         test('returns correct start and end dates for epoch 1', () => {
             const startTimestamp = Math.floor(Date.now() / 1000) * 1000
             const epochtime = 3600
@@ -102,10 +103,10 @@ suite('epoch', () => {
         })
     })
 
-    suite('EpochsManager', () => {
+    describe('EpochsManager', () => {
         let shipload: Shipload
 
-        setup(async () => {
+        beforeEach(async () => {
             shipload = await Shipload.load(Chains.Jungle4, {
                 client,
                 platformContractName,

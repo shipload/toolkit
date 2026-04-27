@@ -1,3 +1,4 @@
+import {describe, test, beforeEach} from 'bun:test'
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
 import Shipload, {
@@ -20,10 +21,10 @@ const serverContractName = 'shipload.gm'
 
 const server = new ServerContract.Contract({client})
 
-suite('Shipload', () => {
+describe('Shipload', () => {
     let shipload: Shipload
 
-    setup(async () => {
+    beforeEach(async () => {
         shipload = await Shipload.load(Chains.Jungle4, {
             client,
             platformContractName,
@@ -31,7 +32,7 @@ suite('Shipload', () => {
         })
     })
 
-    suite('getters', () => {
+    describe('getters', () => {
         test('client returns APIClient', () => {
             assert.instanceOf(shipload.client, APIClient)
         })
@@ -65,7 +66,7 @@ suite('Shipload', () => {
         })
     })
 
-    suite('getState', () => {
+    describe('getState', () => {
         test('should return GameState with correct values', async () => {
             const state = await shipload.getState()
             const expectedState = await server.table('state').get()
@@ -81,7 +82,7 @@ suite('Shipload', () => {
         })
     })
 
-    suite('hasSystem', () => {
+    describe('hasSystem', () => {
         test('should return true if planet exists', async () => {
             const location: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const hasSystem = await shipload.locations.hasSystem(location)
@@ -97,7 +98,7 @@ suite('Shipload', () => {
         })
     })
 
-    suite('getShip', () => {
+    describe('getShip', () => {
         test('success', async () => {
             const sdkShip = await shipload.entities.getShip(1)
             assert.instanceOf(sdkShip, Ship)
@@ -107,14 +108,14 @@ suite('Shipload', () => {
         })
     })
 
-    suite('getShips', () => {
+    describe('getShips', () => {
         test('success', async () => {
             const ships = await shipload.entities.getShips('wharfkittest')
             assert.isArray(ships)
         })
     })
 
-    suite('findNearbyPlanets', () => {
+    describe('findNearbyPlanets', () => {
         test('should return nearby planets', async () => {
             const origin: ServerContract.ActionParams.Type.coordinates = {x: 0, y: 0}
             const maxDistance = 2 * PRECISION

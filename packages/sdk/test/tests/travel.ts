@@ -1,3 +1,4 @@
+import {describe, test, beforeEach} from 'bun:test'
 import {makeClient} from '@wharfkit/mock-data'
 import Shipload, {
     calc_ship_mass,
@@ -90,10 +91,10 @@ function createMockCargo(goodId: number, quantity: number) {
     })
 }
 
-suite('travel', () => {
+describe('travel', () => {
     let shipload: Shipload
 
-    setup(async () => {
+    beforeEach(async () => {
         shipload = await Shipload.load(Chains.Jungle4, {
             client,
             platformContractName,
@@ -101,7 +102,7 @@ suite('travel', () => {
         })
     })
 
-    suite('distanceBetweenCoordinates', () => {
+    describe('distanceBetweenCoordinates', () => {
         test('0,0 -> 0,1', async () => {
             const distance = distanceBetweenCoordinates(origin, destination)
             assert.equal(Number(distance), 10000)
@@ -112,7 +113,7 @@ suite('travel', () => {
         })
     })
 
-    suite('distanceBetweenPoints', () => {
+    describe('distanceBetweenPoints', () => {
         test('calculates distance between two points', () => {
             const distance = distanceBetweenPoints(0, 0, 3, 4)
             assert.equal(Number(distance), 50000)
@@ -124,7 +125,7 @@ suite('travel', () => {
         })
     })
 
-    suite('lerp', () => {
+    describe('lerp', () => {
         test('returns origin at time 0', () => {
             const result = lerp({x: 0, y: 0}, {x: 10, y: 20}, 0)
             assert.equal(result.x, 0)
@@ -144,7 +145,7 @@ suite('travel', () => {
         })
     })
 
-    suite('rotation', () => {
+    describe('rotation', () => {
         test('calculates rotation angle', () => {
             const angle = rotation({x: 0, y: 0}, {x: 1, y: 0})
             assert.equal(angle, 90)
@@ -156,7 +157,7 @@ suite('travel', () => {
         })
     })
 
-    suite('findNearbyPlanets', () => {
+    describe('findNearbyPlanets', () => {
         test('finds planets within max distance', async () => {
             const game = await shipload.getGame()
             const nearby = findNearbyPlanets(game.config.seed, {x: 0, y: 0}, 20000)
@@ -172,7 +173,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_rechargetime', () => {
+    describe('calc_rechargetime', () => {
         test('calculates time to recharge', () => {
             const time = calc_rechargetime(1000, 500, 10)
             assert.equal(Number(time), 50)
@@ -184,7 +185,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_ship_rechargetime', () => {
+    describe('calc_ship_rechargetime', () => {
         test('calculates from ship stats', () => {
             const mockShip = createMockShip({capacity: 1000, energy: 500, recharge: 10})
             const time = calc_ship_rechargetime(mockShip)
@@ -192,14 +193,14 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_flighttime', () => {
+    describe('calc_flighttime', () => {
         test('calculates flight time from distance and acceleration', () => {
             const time = calc_flighttime(UInt64.from(10000), 100)
             assert.isAbove(Number(time), 0)
         })
     })
 
-    suite('calc_loader_flighttime', () => {
+    describe('calc_loader_flighttime', () => {
         test('calculates loader flight time', () => {
             const mockShip = createMockShip({loaderThrust: 100, loaderMass: 5000, capacity: 500000})
             const time = calc_loader_flighttime(mockShip, UInt64.from(10000))
@@ -207,7 +208,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_loader_acceleration', () => {
+    describe('calc_loader_acceleration', () => {
         test('calculates loader acceleration', () => {
             const mockShip = createMockShip({loaderThrust: 100, loaderMass: 5000})
             const accel = calc_loader_acceleration(mockShip, UInt64.from(10000))
@@ -215,7 +216,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_ship_flighttime', () => {
+    describe('calc_ship_flighttime', () => {
         test('calculates ship flight time', () => {
             const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
             const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(10000))
@@ -223,7 +224,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_ship_acceleration', () => {
+    describe('calc_ship_acceleration', () => {
         test('calculates ship acceleration', () => {
             const mockShip = createMockShip({thrust: 1000})
             const accel = calc_ship_acceleration(mockShip, UInt64.from(100000))
@@ -231,14 +232,14 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_acceleration', () => {
+    describe('calc_acceleration', () => {
         test('calculates acceleration from thrust and mass', () => {
             const accel = calc_acceleration(1000, 100)
             assert.equal(accel, 100000)
         })
     })
 
-    suite('calc_ship_mass', () => {
+    describe('calc_ship_mass', () => {
         test('calculates mass without cargo', () => {
             const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 1, loaderMass: 5000})
             const mass = calc_ship_mass(mockShip, [])
@@ -259,7 +260,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_energyusage', () => {
+    describe('calc_energyusage', () => {
         test('calculates energy usage', () => {
             const energy = calc_energyusage(UInt64.from(10000), 1)
             assert.equal(Number(energy), 1)
@@ -278,8 +279,8 @@ suite('travel', () => {
         })
     })
 
-    suite('travel time calculations', () => {
-        suite('calculateTransferTime', () => {
+    describe('travel time calculations', () => {
+        describe('calculateTransferTime', () => {
             test('returns 0 when no quantities specified', () => {
                 const mockShip = createMockShip()
                 const cargo = createMockCargo(1, 10)
@@ -302,7 +303,7 @@ suite('travel', () => {
             })
         })
 
-        suite('calculateRefuelingTime', () => {
+        describe('calculateRefuelingTime', () => {
             test('returns 0 when fully charged', () => {
                 const mockShip = createMockShip({generatorCapacity: 100, energy: 100})
                 const time = calculateRefuelingTime(mockShip)
@@ -316,7 +317,7 @@ suite('travel', () => {
             })
         })
 
-        suite('calculateFlightTime', () => {
+        describe('calculateFlightTime', () => {
             test('calculates flight time', () => {
                 const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
                 const time = calculateFlightTime(mockShip, [], UInt64.from(10000))
@@ -332,7 +333,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calculateLoadTimeBreakdown', () => {
+    describe('calculateLoadTimeBreakdown', () => {
         test('returns zero times for empty cargo', () => {
             const ship = createMockShip()
             const breakdown = calculateLoadTimeBreakdown(ship, [])
@@ -422,7 +423,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_orbital_altitude', () => {
+    describe('calc_orbital_altitude', () => {
         test('returns MIN_ORBITAL_ALTITUDE for initial ship mass', () => {
             const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS)
             assert.equal(altitude, MIN_ORBITAL_ALTITUDE)
@@ -448,7 +449,7 @@ suite('travel', () => {
         })
     })
 
-    suite('calc_transfer_duration', () => {
+    describe('calc_transfer_duration', () => {
         test('returns 0 when cargo mass is 0', () => {
             const source = {location: {z: 1000}, loaders: {thrust: 100, mass: 5000, quantity: 1}}
             const dest = {location: {z: 1200}, loaders: {thrust: 100, mass: 5000, quantity: 1}}

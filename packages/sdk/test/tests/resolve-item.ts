@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import {
@@ -15,7 +16,7 @@ import {
     resolveItem,
 } from '$lib'
 
-suite('resolveItem', () => {
+describe('resolveItem', () => {
     test('resolves a resource by item ID without seed', () => {
         const result = resolveItem(UInt16.from(101))
         assert.equal(result.itemType, 'resource')
@@ -138,7 +139,7 @@ suite('resolveItem', () => {
     })
 })
 
-suite('ResolvedItem.abbreviation', () => {
+describe('ResolvedItem.abbreviation', () => {
     test('component exposes abbreviation', () => {
         const resolved = resolveItem(UInt16.from(ITEM_HULL_PLATES))
         assert.equal(resolved.abbreviation, 'HP')

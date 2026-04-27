@@ -1,4 +1,4 @@
-import {suite, test} from 'mocha'
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {
@@ -14,7 +14,7 @@ import {
     resolveItem,
 } from '$lib'
 
-suite('resolveItem - entity capacity dispatch', () => {
+describe('resolveItem - entity capacity dispatch', () => {
     const defaultStatInputs = {strength: 500, density: 500, fineness: 500, saturation: 500}
     const defaultPackedStats = encodeStats([500, 500, 500, 500])
 

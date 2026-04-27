@@ -1,3 +1,4 @@
+import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
@@ -15,7 +16,7 @@ import {
     ServerContract,
 } from '$lib'
 
-suite('makeShip factory', () => {
+describe('makeShip factory', () => {
     test('stacks two hauler modules by capacity-weighted efficiency', () => {
         // Hauler decoded keys: composition, conductivity, fineness, resonance.
         // Capacity uses resonance, efficiency uses conductivity, drain uses
@@ -145,7 +146,7 @@ suite('makeShip factory', () => {
     })
 })
 
-suite('makeWarehouse factory', () => {
+describe('makeWarehouse factory', () => {
     test('builds warehouse with loader + 4 storage modules', () => {
         const loaderSeed = encodeStats([500, 500, 500, 500])
         const storageSeed = encodeStats([500, 500, 500, 500])
@@ -187,7 +188,7 @@ suite('makeWarehouse factory', () => {
     })
 })
 
-suite('makeContainer factory', () => {
+describe('makeContainer factory', () => {
     test('cargo input is threaded through (previously hardcoded to empty)', () => {
         const container = makeContainer({
             id: UInt64.from(1),
