@@ -1,5 +1,5 @@
-import {Checksum256, Checksum256Type, UInt16Type, UInt64} from '@wharfkit/antelope'
-import {Coordinates, CoordinatesType, Distance, LocationType} from '../types'
+import {Checksum256, type Checksum256Type, type UInt16Type, type UInt64} from '@wharfkit/antelope'
+import {Coordinates, type CoordinatesType, type Distance, type LocationType} from '../types'
 import {getLocationType, hasSystem, isGatherableLocation} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 

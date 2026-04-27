@@ -1,4 +1,4 @@
-import {Item} from '$lib'
+import type {Item} from '$lib'
 import {__registerItemInternal as rawRegister} from 'src/items'
 
 const mockedIds = new Set<number>()

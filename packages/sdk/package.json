@@ -1,7 +1,7 @@
 {
     "name": "@shipload/sdk",
     "description": "SDKs for Shipload",
-    "version": "2.0.0-rc25",
+    "version": "1.0.0-beta1",
     "homepage": "https://github.com/shipload/sdk",
     "license": "MIT",
     "main": "lib/shipload.js",

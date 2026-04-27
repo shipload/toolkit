@@ -1,6 +1,6 @@
-import {Checksum256, Int64, UInt64} from '@wharfkit/antelope'
-import {PlatformContract, ServerContract} from '../contracts'
-import {EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
+import {Checksum256, Int64, type UInt64} from '@wharfkit/antelope'
+import {type PlatformContract, ServerContract} from '../contracts'
+import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
 import {hasSystem} from '../utils/system'
 
 /**

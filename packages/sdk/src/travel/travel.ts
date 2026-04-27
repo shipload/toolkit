@@ -11,25 +11,25 @@
  */
 
 import {
-    Checksum256,
+    type Checksum256,
     Int64,
-    Int64Type,
+    type Int64Type,
     UInt16,
     UInt32,
-    UInt32Type,
+    type UInt32Type,
     UInt64,
-    UInt64Type,
+    type UInt64Type,
 } from '@wharfkit/antelope'
 
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {
     BASE_ORBITAL_MASS,
-    CargoMassInfo,
-    Distance,
+    type CargoMassInfo,
+    type Distance,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     PRECISION,
-    ShipLike,
+    type ShipLike,
     TaskType,
 } from '../types'
 import {getItem} from '../data/catalog'

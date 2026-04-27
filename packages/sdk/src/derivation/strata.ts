@@ -1,8 +1,8 @@
-import {Checksum256Type} from '@wharfkit/antelope'
-import {CoordinatesType} from '../types'
+import type {Checksum256Type} from '@wharfkit/antelope'
+import type {CoordinatesType} from '../types'
 import {deriveLocationStatic} from '../utils/system'
 import {deriveLocationSize} from './location-size'
-import {deriveResourceStats, deriveStratum, ResourceStats} from './stratum'
+import {deriveResourceStats, deriveStratum, type ResourceStats} from './stratum'
 
 export interface DerivedStratum {
     index: number

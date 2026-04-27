@@ -7,7 +7,7 @@ import {
     itemOffset,
     itemTier,
     RESERVE_TIERS,
-    ReserveTier,
+    type ReserveTier,
     rollTier,
     rollWithinTier,
 } from '$lib'

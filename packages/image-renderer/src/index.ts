@@ -1,6 +1,6 @@
 import {decodePayload, renderItem, resolveItem, socialCardSvg} from '@shipload/item-renderer'
 import {CACHE_TTL_SECONDS, MAX_PAYLOAD_CHARS} from './config.ts'
-import {errorSvgResponse, errorTextResponse} from './errors.ts'
+import {type ErrorCode, errorSvgResponse, errorTextResponse} from './errors.ts'
 import {renderPng} from './render-png.ts'
 
 type Ext = 'png' | 'svg'
@@ -16,18 +16,24 @@ function immutableHeaders(contentType: string): HeadersInit {
     }
 }
 
-function decodeAndResolve(payload: string) {
-    if (payload.length > MAX_PAYLOAD_CHARS) return {status: 400 as const}
+type DecodeError = {status: ErrorCode}
+type DecodeOk = {
+    cargoItem: ReturnType<typeof decodePayload>
+    resolved: ReturnType<typeof resolveItem>
+}
+
+function decodeAndResolve(payload: string): DecodeError | DecodeOk {
+    if (payload.length > MAX_PAYLOAD_CHARS) return {status: 400}
     try {
         const cargoItem = decodePayload(payload)
         try {
             const resolved = resolveItem(cargoItem.item_id, cargoItem.stats, cargoItem.modules)
             return {cargoItem, resolved}
         } catch {
-            return {status: 404 as const}
+            return {status: 404}
         }
     } catch {
-        return {status: 400 as const}
+        return {status: 400}
     }
 }
 

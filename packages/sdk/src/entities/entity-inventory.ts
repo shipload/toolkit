@@ -1,7 +1,7 @@
 import {UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
-import {Item} from '../types'
+import type {Item} from '../types'
 
 export class EntityInventory extends ServerContract.Types.cargo_item {
     private _item?: Item

@@ -1,5 +1,5 @@
 import {UInt16, UInt32} from '@wharfkit/antelope'
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {PRECISION} from '../types'
 
 const GATHER_TIME_SCALE = 100

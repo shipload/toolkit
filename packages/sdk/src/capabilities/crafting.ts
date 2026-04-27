@@ -1,7 +1,7 @@
 import {UInt16, UInt32} from '@wharfkit/antelope'
 import {CRAFT_ENERGY_DIVISOR} from '../types'
 import type {EntityCapabilities} from '../types/capabilities'
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 
 export interface CrafterCapability {
     crafter: ServerContract.Types.crafter_stats

@@ -1,8 +1,14 @@
-import {UInt16, UInt16Type} from '@wharfkit/antelope'
+import {UInt16, type UInt16Type} from '@wharfkit/antelope'
 import items from './items.json'
 import {tierLabels} from './colors'
 import {itemMetadata} from './metadata'
-import {CATEGORY_LABELS, Item, ItemType, ModuleType, ResourceCategory} from '../types'
+import {
+    CATEGORY_LABELS,
+    type Item,
+    type ItemType,
+    type ModuleType,
+    type ResourceCategory,
+} from '../types'
 
 const itemsById = new Map<number, Item>()
 

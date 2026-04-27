@@ -1,6 +1,6 @@
-import {UInt64, UInt64Type} from '@wharfkit/antelope'
+import {UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {CoordinatesType} from '../types'
+import type {CoordinatesType} from '../types'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
 import * as schedule from '../scheduling/schedule'

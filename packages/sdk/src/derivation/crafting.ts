@@ -1,6 +1,6 @@
 import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {findItemByCategoryAndTier, getRecipe, Recipe} from '../data/recipes-runtime'
+import {findItemByCategoryAndTier, getRecipe, type Recipe} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {getStatDefinitions} from './stats'
 import {deriveResourceStats} from './stratum'

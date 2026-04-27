@@ -1,6 +1,6 @@
-import {ServerContract} from '../contracts'
-import {TaskType} from '../types'
-import {ScheduleData} from './schedule'
+import type {ServerContract} from '../contracts'
+import type {TaskType} from '../types'
+import type {ScheduleData} from './schedule'
 import * as schedule from './schedule'
 
 type Task = ServerContract.Types.task

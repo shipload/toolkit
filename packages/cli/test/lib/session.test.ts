@@ -29,7 +29,6 @@ describe("runTransact error path", () => {
 		const errSpy = mock((..._args: unknown[]) => {});
 		const origErr = console.error;
 		console.error = errSpy;
-		const origExit = process.exitCode;
 
 		// @ts-expect-error minimal session shape for test
 		await runTransact(fakeSession, { action: {} }, { description: "test" });
@@ -38,6 +37,6 @@ describe("runTransact error path", () => {
 		expect(process.exitCode).toBe(EXIT.CHAIN_ERROR);
 		const joined = errSpy.mock.calls.map((c) => String(c[0])).join("\n");
 		expect(joined).toContain("boom");
-		process.exitCode = origExit;
+		process.exitCode = 0;
 	});
 });

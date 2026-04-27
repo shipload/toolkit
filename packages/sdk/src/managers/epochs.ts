@@ -1,6 +1,6 @@
-import {UInt64, UInt64Type} from '@wharfkit/antelope'
+import {UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
+import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
 
 export class EpochsManager extends BaseManager {
     async getCurrentHeight(): Promise<UInt64> {

@@ -9,7 +9,7 @@ export * from './data/recipes-runtime'
 export {Types as ServerTypes} from './contracts/server'
 export {Types as PlatformTypes} from './contracts/platform'
 
-import {ServerContract} from './contracts'
+import type {ServerContract} from './contracts'
 
 export {Shipload} from './shipload'
 export {Ship} from './entities/ship'

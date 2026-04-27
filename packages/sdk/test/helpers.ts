@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {AnyInt, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {type AnyInt, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     Coordinates,
     encodeStats,
@@ -8,7 +8,7 @@ import {
     ITEM_LOADER_T1,
     makeShip,
     ServerContract,
-    TaskType,
+    type TaskType,
 } from '$lib'
 import {getItem} from 'src/items'
 import {registerMockItem} from './item-mock'

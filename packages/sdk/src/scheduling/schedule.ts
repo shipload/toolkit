@@ -1,4 +1,4 @@
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {TaskType} from '../types'
 
 type Schedule = ServerContract.Types.schedule

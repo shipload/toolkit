@@ -1,17 +1,17 @@
 import {
-    Action,
+    type Action,
     Int64,
     Name,
-    NameType,
+    type NameType,
     UInt16,
-    UInt16Type,
+    type UInt16Type,
     UInt32,
-    UInt32Type,
+    type UInt32Type,
     UInt64,
-    UInt64Type,
+    type UInt64Type,
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {CoordinatesType, EntityType, EntityTypeName} from '../types'
+import {type CoordinatesType, EntityType, type EntityTypeName} from '../types'
 import {ServerContract} from '../contracts'
 
 export type EntityRefInput = {

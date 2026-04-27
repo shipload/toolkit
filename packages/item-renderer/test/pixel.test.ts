@@ -1,8 +1,9 @@
 import {readFile, writeFile, mkdir} from 'node:fs/promises'
+import {createRequire} from 'node:module'
 import {existsSync} from 'node:fs'
-import {resolve} from 'node:path'
+import {resolve, dirname, join} from 'node:path'
 import {expect, test} from 'bun:test'
-import {Resvg} from '@resvg/resvg-js'
+import {Resvg, initWasm} from '@resvg/resvg-wasm'
 import pixelmatch from 'pixelmatch'
 import {PNG} from 'pngjs'
 import {resolveItem} from '@shipload/sdk'
@@ -17,14 +18,19 @@ const UPDATE = process.env.UPDATE_IMAGE_SNAPSHOTS === '1'
 await mkdir(SNAP_DIR, {recursive: true})
 const fontData = await loadFontData()
 
+const require = createRequire(import.meta.url)
+const resvgRoot = dirname(require.resolve('@resvg/resvg-wasm/package.json'))
+const wasmBytes = await readFile(join(resvgRoot, 'index_bg.wasm'))
+await initWasm(wasmBytes)
+
 async function renderPng(svg: string): Promise<Buffer> {
     const resvg = new Resvg(svg, {
         font: {
             loadSystemFonts: false,
-            fontBuffers: Object.values(fontData).map((b) => Buffer.from(b)),
+            fontBuffers: Object.values(fontData).map((b) => new Uint8Array(b)),
         },
     })
-    return resvg.render().asPng()
+    return Buffer.from(resvg.render().asPng())
 }
 
 const CASES = [

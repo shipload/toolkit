@@ -1,7 +1,7 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
-import {deriveResourceStats, deriveStratum, RESERVE_TIERS, ReserveTier} from '$lib'
+import {deriveResourceStats, deriveStratum, RESERVE_TIERS, type ReserveTier} from '$lib'
 
 describe('deriveResourceStats', () => {
     test('stat range [1, 999] is bounded', () => {

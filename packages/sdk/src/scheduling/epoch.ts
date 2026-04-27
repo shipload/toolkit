@@ -1,5 +1,5 @@
 import {UInt64} from '@wharfkit/antelope'
-import {PlatformContract} from '../contracts'
+import type {PlatformContract} from '../contracts'
 
 export interface EpochInfo {
     epoch: UInt64
