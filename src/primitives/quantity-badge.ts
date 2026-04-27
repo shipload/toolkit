@@ -1,20 +1,20 @@
-import { el } from './svg.ts'
-import { text } from './text.ts'
-import { tokens } from '../tokens/index.ts'
+import { el } from "./svg.ts";
+import { text } from "./text.ts";
+import { tokens } from "../tokens/index.ts";
 
 export interface QuantityBadgeProps {
-  x: number
-  y: number
-  quantity: number
+  x: number;
+  y: number;
+  quantity: number;
 }
 
 export function quantityBadge({ x, y, quantity }: QuantityBadgeProps): string {
-  if (quantity <= 1) return ''
-  const label = `×${quantity}`
-  const w = label.length * 7 + 12
-  const h = tokens.spacing.quantityBadgeHeight
+  if (quantity <= 1) return "";
+  const label = `×${quantity}`;
+  const w = label.length * 7 + 12;
+  const h = tokens.spacing.quantityBadgeHeight;
   return (
-    el('rect', {
+    el("rect", {
       x: x - w,
       y,
       width: w,
@@ -31,7 +31,7 @@ export function quantityBadge({ x, y, quantity }: QuantityBadgeProps): string {
       weight: 700,
       family: tokens.typography.mono,
       color: tokens.colors.surface.background,
-      anchor: 'middle',
+      anchor: "middle",
     })
-  )
+  );
 }

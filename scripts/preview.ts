@@ -1,15 +1,13 @@
-import { resolveItem } from '@shipload/sdk'
-import { renderItem } from '../src/render.ts'
-import { FIXTURES } from '../test/fixtures/cargo-items.ts'
+import { resolveItem } from "@shipload/sdk";
+import { renderItem } from "../src/render.ts";
+import { FIXTURES } from "../test/fixtures/cargo-items.ts";
 
 function page(): string {
-  const sections: string[] = []
+  const sections: string[] = [];
   for (const [name, item] of Object.entries(FIXTURES)) {
-    const resolved = resolveItem(item.item_id, item.stats, item.modules)
-    const svg = renderItem(item, resolved)
-    sections.push(
-      `<section><h3>${name}</h3><div class="wrap">${svg}</div></section>`,
-    )
+    const resolved = resolveItem(item.item_id, item.stats, item.modules);
+    const svg = renderItem(item, resolved);
+    sections.push(`<section><h3>${name}</h3><div class="wrap">${svg}</div></section>`);
   }
   return `
     <!doctype html>
@@ -27,17 +25,17 @@ function page(): string {
       </head>
       <body>
         <h1>Fixtures</h1>
-        <main>${sections.join('')}</main>
+        <main>${sections.join("")}</main>
       </body>
     </html>
-  `
+  `;
 }
 
-const port = Number(process.env.PORT ?? 5173)
+const port = Number(process.env.PORT ?? 5173);
 
 Bun.serve({
   port,
-  fetch: () => new Response(page(), { headers: { 'content-type': 'text/html' } }),
-})
+  fetch: () => new Response(page(), { headers: { "content-type": "text/html" } }),
+});
 
-console.log(`preview running at http://localhost:${port}`)
+console.log(`preview running at http://localhost:${port}`);

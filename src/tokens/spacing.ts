@@ -7,4 +7,4 @@ export const spacing = {
   statBarHeight: 4,
   iconHexSize: 22,
   quantityBadgeHeight: 18,
-} as const
+} as const;
