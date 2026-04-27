@@ -20,11 +20,23 @@ esac
 die() { echo "error: $*" >&2; exit 1; }
 
 # --- Branch -----------------------------------------------------------------
+# Stable: master/main only. Prerelease (.changeset/pre.json present): dev
+# is also allowed. RELEASE_BRANCH=<name> overrides both rules.
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-case "$BRANCH" in
-	master|main) ;;
-	*) die "release must be cut from master/main (current: $BRANCH)" ;;
-esac
+GIT_ROOT="$(git rev-parse --show-toplevel)"
+if [ -n "${RELEASE_BRANCH:-}" ]; then
+	[ "$BRANCH" = "$RELEASE_BRANCH" ] || die "release must be cut from $RELEASE_BRANCH (current: $BRANCH)"
+elif [ -f "$GIT_ROOT/.changeset/pre.json" ]; then
+	case "$BRANCH" in
+		master|main|dev) ;;
+		*) die "release must be cut from master/main/dev during prerelease (current: $BRANCH)" ;;
+	esac
+else
+	case "$BRANCH" in
+		master|main) ;;
+		*) die "release must be cut from master/main (current: $BRANCH)" ;;
+	esac
+fi
 
 # --- Clean tree -------------------------------------------------------------
 if ! git diff-index --quiet HEAD --; then

@@ -5,16 +5,31 @@ set -euo pipefail
 git diff --quiet || { echo "✗ Working tree has unstaged changes."; exit 1; }
 git diff --cached --quiet || { echo "✗ Working tree has staged changes."; exit 1; }
 
-# 2. On master (override with RELEASE_BRANCH=...).
+# 2. On an allowed branch.
+#    - Stable: master/main only.
+#    - Prerelease (.changeset/pre.json present): dev is also allowed.
+#    - RELEASE_BRANCH=<name> overrides both rules.
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-EXPECTED=${RELEASE_BRANCH:-master}
-[ "$BRANCH" = "$EXPECTED" ] || { echo "✗ On '$BRANCH', expected '$EXPECTED'."; exit 1; }
+GIT_ROOT=$(git rev-parse --show-toplevel)
+if [ -n "${RELEASE_BRANCH:-}" ]; then
+	[ "$BRANCH" = "$RELEASE_BRANCH" ] || { echo "✗ On '$BRANCH', expected '$RELEASE_BRANCH'."; exit 1; }
+elif [ -f "$GIT_ROOT/.changeset/pre.json" ]; then
+	case "$BRANCH" in
+		master|main|dev) ;;
+		*) echo "✗ On '$BRANCH', expected 'master', 'main', or 'dev' (prerelease mode active)."; exit 1 ;;
+	esac
+else
+	case "$BRANCH" in
+		master|main) ;;
+		*) echo "✗ On '$BRANCH', expected 'master' or 'main'."; exit 1 ;;
+	esac
+fi
 
 # 3. In sync with origin.
-git fetch --quiet origin "$EXPECTED"
+git fetch --quiet origin "$BRANCH"
 LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse "origin/$EXPECTED")
-[ "$LOCAL" = "$REMOTE" ] || { echo "✗ Branch out of sync with origin/$EXPECTED."; exit 1; }
+REMOTE=$(git rev-parse "origin/$BRANCH")
+[ "$LOCAL" = "$REMOTE" ] || { echo "✗ Branch out of sync with origin/$BRANCH."; exit 1; }
 
 # 4. There are pending changesets to release.
 PENDING=$(find .changeset -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
