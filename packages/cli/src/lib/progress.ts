@@ -1,4 +1,4 @@
-import type { Types } from "../contracts/server";
+import type { ServerTypes } from "@shipload/sdk";
 import {
 	formatCargoUsage,
 	formatCoords,
@@ -112,7 +112,7 @@ function headerLine(snap: EntitySnapshot): string {
 
 function statsLine(t: ProgressTick): string | null {
 	const parts: string[] = [];
-	if (t.snap.coordinates) parts.push(formatCoords(t.snap.coordinates as Types.coordinates));
+	if (t.snap.coordinates) parts.push(formatCoords(t.snap.coordinates as ServerTypes.coordinates));
 	const energyStr = energySummary(t);
 	if (energyStr) parts.push(energyStr);
 	const cargoStr = cargoSummary(t.snap);
@@ -147,7 +147,7 @@ function idleBody(t: ProgressTick): string[] {
 }
 
 function busyBody(t: ProgressTick): string[] {
-	const all = (t.snap.schedule?.tasks ?? []) as Types.task[];
+	const all = (t.snap.schedule?.tasks ?? []) as ServerTypes.task[];
 	const pendingCount = (t.snap.pending_tasks ?? []).length;
 	const activeIdx = Math.max(0, all.length - pendingCount - 1);
 	const done = all.slice(0, activeIdx);
@@ -181,7 +181,7 @@ function busyBody(t: ProgressTick): string[] {
 	return lines;
 }
 
-function taskRow(prefix: string, task: Types.task, suffix: string): string {
+function taskRow(prefix: string, task:ServerTypes.task, suffix: string): string {
 	const desc = formatTaskShort(task);
 	const padded = desc.length >= TASK_DESC_WIDTH ? `${desc} ` : desc.padEnd(TASK_DESC_WIDTH);
 	return `${prefix}${padded}${suffix}`;

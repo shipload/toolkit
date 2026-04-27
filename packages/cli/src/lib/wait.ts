@@ -1,5 +1,5 @@
 import { Option } from "commander";
-import type { Types } from "../contracts/server";
+import type { ServerTypes } from "@shipload/sdk";
 import type { EntityTypeName } from "./args";
 import { loadConfig } from "./config";
 import { formatEntity, formatEntityRef } from "./format";
@@ -119,7 +119,7 @@ export async function awaitAndPrint(
 		renderer?.done();
 	}
 	if (waitOpts.watch) return;
-	console.log(formatEntity(snap as unknown as Types.entity_info));
+	console.log(formatEntity(snap as unknown as ServerTypes.entity_info));
 }
 
 export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot> {

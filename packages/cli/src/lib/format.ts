@@ -20,7 +20,7 @@ import {
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
-import type { Types } from "../contracts/server";
+import type { ServerTypes } from "@shipload/sdk";
 import { shallowestPerItem } from "./reach";
 
 export function kvTable(rows: [string, string][], opts: { indent?: string } = {}): string {
@@ -86,7 +86,7 @@ function itemDisplayName(itemId: number): string | null {
 	}
 }
 
-export function formatTaskShort(t: Types.task): string {
+export function formatTaskShort(t:ServerTypes.task): string {
 	const label = formatTaskType(Number(t.type));
 	const parts: string[] = [label];
 	if (t.coordinates) parts.push(`to ${formatCoords(t.coordinates)}`);
@@ -153,7 +153,7 @@ export function formatCargoUsage(used: number, capacity?: number): string {
 	return capacity != null ? `${formatMass(used)} / ${formatMass(capacity)}` : formatMass(used);
 }
 
-export function formatCoords(coords: Types.coordinates): string {
+export function formatCoords(coords:ServerTypes.coordinates): string {
 	return `(${coords.x}, ${coords.y})`;
 }
 
@@ -237,7 +237,7 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 	return `${ref.entityType}:${ref.entityId}`;
 }
 
-function formatCargoItem(c: Types.cargo_item): string {
+function formatCargoItem(c:ServerTypes.cargo_item): string {
 	const itemId = Number(c.item_id);
 	const name = displayName(resolveItem(itemId));
 	const qty = Number(c.quantity);
@@ -255,12 +255,12 @@ function formatCargoItem(c: Types.cargo_item): string {
 	return `${qty} × ${name}${statsDisplay}${massStr}${stackRaw}`;
 }
 
-export function formatCargo(cargo: Types.cargo_item[]): string {
+export function formatCargo(cargo:ServerTypes.cargo_item[]): string {
 	if (cargo.length === 0) return "";
 	return cargo.map(formatCargoItem).join("\n");
 }
 
-export function formatPlayer(player: Types.player_info): string {
+export function formatPlayer(player:ServerTypes.player_info): string {
 	const lines = [
 		`${player.company_name || "No Company"} (${player.owner})`,
 		`Ships: ${player.ship_count} | Warehouses: ${player.warehouse_count} | Containers: ${player.container_count}`,
@@ -271,7 +271,7 @@ export function formatPlayer(player: Types.player_info): string {
 	return lines.join("\n");
 }
 
-function resolvedModuleNames(modules: Types.entity_info["modules"]): Map<number, string> {
+function resolvedModuleNames(modules:ServerTypes.entity_info["modules"]): Map<number, string> {
 	const map = new Map<number, string>();
 	for (const m of modules ?? []) {
 		if (!m.installed) continue;
@@ -284,7 +284,7 @@ function resolvedModuleNames(modules: Types.entity_info["modules"]): Map<number,
 	return map;
 }
 
-export function formatEntity(entity: Types.entity_info): string {
+export function formatEntity(entity:ServerTypes.entity_info): string {
 	const trimmedName = entity.entity_name?.trim() ?? "";
 	const namePart = trimmedName ? ` "${trimmedName}"` : "";
 	const header = `${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`;
@@ -358,7 +358,7 @@ export function formatEntity(entity: Types.entity_info): string {
 	return sections.join("\n\n");
 }
 
-function buildModuleRows(entity: Types.entity_info, isShip: boolean): [string, string][] {
+function buildModuleRows(entity:ServerTypes.entity_info, isShip: boolean): [string, string][] {
 	const modNames = resolvedModuleNames(entity.modules);
 	const rows: [string, string][] = [];
 	const notInstalled = "— (not installed)";
@@ -413,7 +413,7 @@ function buildModuleRows(entity: Types.entity_info, isShip: boolean): [string, s
 	return rows;
 }
 
-function formatWhenDone(entity: Types.entity_info): string | null {
+function formatWhenDone(entity:ServerTypes.entity_info): string | null {
 	if (!entity.schedule || entity.schedule.tasks.length === 0) return null;
 	let projection: ProjectedEntity;
 	try {
@@ -463,7 +463,7 @@ function formatWhenDone(entity: Types.entity_info): string | null {
 }
 
 export function formatLocation(
-	location: Types.location_info,
+	location:ServerTypes.location_info,
 	gameSeed?: Checksum256Type,
 	epochSeed?: Checksum256Type,
 	reach?: { depth: number; showAll: boolean },
@@ -539,7 +539,7 @@ export interface NearbyOpts {
 	showAll?: boolean;
 }
 
-export function formatNearby(nearby: Types.nearby_info, opts: NearbyOpts = {}): string {
+export function formatNearby(nearby:ServerTypes.nearby_info, opts: NearbyOpts = {}): string {
 	const { gameSeed, epochSeed, reach, showAll } = opts;
 	const lines = [
 		`Current: ${formatCoords(nearby.current.coordinates)} | Energy: ${nearby.current.energy}/${nearby.max_energy}`,
@@ -604,7 +604,7 @@ function formatTime(t: { toMilliseconds(): number }): string {
 	return new Date(t.toMilliseconds()).toLocaleTimeString();
 }
 
-export function formatResolveResults(results: Types.resolve_results): string {
+export function formatResolveResults(results:ServerTypes.resolve_results): string {
 	if (Number(results.resolved_count) === 0) return "No tasks resolved";
 	const lines = [
 		`Resolved ${results.resolved_count} task(s) for ${results.entity_type} ${results.entity_id}`,
@@ -615,7 +615,7 @@ export function formatResolveResults(results: Types.resolve_results): string {
 	return lines.join("\n");
 }
 
-export function formatCancelResults(results: Types.cancel_results): string {
+export function formatCancelResults(results:ServerTypes.cancel_results): string {
 	if (Number(results.cancelled_count) === 0) return "No tasks cancelled";
 	const lines = [
 		`Cancelled ${results.cancelled_count} task(s) for ${results.entity_type} ${results.entity_id}`,

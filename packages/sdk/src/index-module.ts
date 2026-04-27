@@ -4,6 +4,11 @@ export * from './types'
 export * from './data/item-ids'
 export * from './data/recipes-runtime'
 
+// Direct namespace re-exports for flat `Types` access without going through ServerContract.
+// Preserves both value and type sides through rollup-plugin-dts bundling.
+export {Types as ServerTypes} from './contracts/server'
+export {Types as PlatformTypes} from './contracts/platform'
+
 import {ServerContract} from './contracts'
 
 export {Shipload} from './shipload'

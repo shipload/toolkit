@@ -1,4 +1,4 @@
-import type { Types } from "../contracts/server";
+import type { ServerTypes } from "@shipload/sdk";
 import type { EntityTypeName } from "./args";
 import { server } from "./client";
 
@@ -24,10 +24,10 @@ export interface EntitySnapshot {
 		recharge: number | bigint | { toString(): string };
 	};
 	is_idle: boolean;
-	current_task?: Types.task;
+	current_task?:ServerTypes.task;
 	current_task_elapsed?: number | bigint | { toString(): string };
 	current_task_remaining?: number | bigint | { toString(): string };
-	pending_tasks?: Types.task[];
+	pending_tasks?:ServerTypes.task[];
 	schedule?: {
 		started?: { toMilliseconds(): number } | string | Date;
 		tasks: unknown[];

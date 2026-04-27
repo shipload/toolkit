@@ -1,4 +1,4 @@
-import type { Types } from "../contracts/server";
+import type { ServerTypes } from "@shipload/sdk";
 import { formatItem, formatStats } from "./format";
 import { ValidationError } from "./validate";
 
@@ -14,7 +14,7 @@ export interface ResolvedCargoInput {
 	quantity: number;
 }
 
-function stackRow(itemId: number, s: Types.cargo_item): string {
+function stackRow(itemId: number, s:ServerTypes.cargo_item): string {
 	const stackId = BigInt(s.stats.toString());
 	const qty = Number(s.quantity.toString());
 	const decoded = formatStats(stackId, itemId);
@@ -22,7 +22,7 @@ function stackRow(itemId: number, s: Types.cargo_item): string {
 	return `  ${itemId}:${stackId}:<qty ≤ ${qty}>   (${qty}× ${formatItem(itemId)}${decodedSuffix})`;
 }
 
-function noMatchingItemMessage(p: ParsedCargoInput, cargo: Types.cargo_item[]): string {
+function noMatchingItemMessage(p: ParsedCargoInput, cargo:ServerTypes.cargo_item[]): string {
 	const availableIds = Array.from(new Set(cargo.map((c) => Number(c.item_id))));
 	const itemsSuffix = availableIds.length
 		? ` — cargo has items: ${availableIds.join(", ")}`
@@ -30,7 +30,7 @@ function noMatchingItemMessage(p: ParsedCargoInput, cargo: Types.cargo_item[]): 
 	return `no cargo stack matches item ${p.itemId} (${formatItem(p.itemId)})${itemsSuffix}`;
 }
 
-function noMatchingStackMessage(p: ParsedCargoInput, matches: Types.cargo_item[]): string {
+function noMatchingStackMessage(p: ParsedCargoInput, matches:ServerTypes.cargo_item[]): string {
 	const header = `no cargo stack matches item ${p.itemId} (${formatItem(p.itemId)}) with stack ${p.stackId} — available stacks for item ${p.itemId}:`;
 	const rows = matches.map((s) => stackRow(p.itemId, s));
 	return [header, ...rows].join("\n");
@@ -38,7 +38,7 @@ function noMatchingStackMessage(p: ParsedCargoInput, matches: Types.cargo_item[]
 
 export function resolveCargoInputs(
 	parsed: ParsedCargoInput[],
-	cargo: Types.cargo_item[],
+	cargo:ServerTypes.cargo_item[],
 ): ResolvedCargoInput[] {
 	const seen = new Set<string>();
 	for (const p of parsed) {

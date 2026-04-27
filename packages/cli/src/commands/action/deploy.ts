@@ -1,6 +1,6 @@
+import type {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import type {Types as ServerTypes} from '../../contracts/server'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {getShipload} from '../../lib/client'

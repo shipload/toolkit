@@ -4,10 +4,10 @@ import {
     deriveStratum,
     getItem,
     type LocationType,
+    ServerContract,
 } from '@shipload/sdk'
 import {Checksum256} from '@wharfkit/antelope'
 import {type Command, InvalidArgumentError} from 'commander'
-import {Contract as ServerContract} from '../../contracts/server'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
 import {client, getGameSeed, server} from '../../lib/client'
 import {EXIT} from '../../lib/errors'
@@ -158,7 +158,7 @@ async function resolveSeeds(options: {
     if (options.epochSeed) {
         epochSeed = Checksum256.from(options.epochSeed)
     } else {
-        const srv = new ServerContract({client})
+        const srv = new ServerContract.Contract({client})
         const state = await srv.table('state').get()
         if (!state) throw new Error('Server state row not found on chain')
         epochSeed = Checksum256.from(state.seed)

@@ -1,10 +1,10 @@
 import {Box, Text, type VChild} from '@opentui/core'
-import type {Types} from '../../contracts/server'
+import type {ServerTypes} from '@shipload/sdk'
 import {formatTaskShort} from '../../lib/format'
 
 export interface TaskRowSpec {
     prefix: string
-    task: Types.task
+    task: ServerTypes.task
     suffix: string
     fg?: string
 }

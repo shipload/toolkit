@@ -1,8 +1,6 @@
-import { Shipload } from "@shipload/sdk";
+import { PlatformContract, ServerContract, Shipload } from "@shipload/sdk";
 import { APIClient, type Checksum256 } from "@wharfkit/antelope";
 import { ChainDefinition, TokenIdentifier } from "@wharfkit/common";
-import { Contract as PlatformContract } from "../contracts/platform";
-import { Contract as ServerContract } from "../contracts/server";
 
 export const chain = ChainDefinition.from({
 	id: "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d",
@@ -16,8 +14,8 @@ export const chain = ChainDefinition.from({
 
 export const client = new APIClient({ url: chain.url });
 
-export const server = new ServerContract({ client });
-export const platform = new PlatformContract({ client });
+export const server = new ServerContract.Contract({ client });
+export const platform = new PlatformContract.Contract({ client });
 
 let cachedGameSeed: Promise<Checksum256> | null = null;
 

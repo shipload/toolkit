@@ -1,4 +1,4 @@
-import { type Projectable, schedule } from "@shipload/sdk";
+import { type Projectable, schedule, ServerTypes } from "@shipload/sdk";
 import { PrivateKey, type PublicKey } from "@wharfkit/antelope";
 import {
 	Action,
@@ -8,7 +8,6 @@ import {
 	type TransactOptions,
 } from "@wharfkit/session";
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey";
-import { Types } from "../contracts/server";
 import { chain, client } from "./client";
 import { loadConfig } from "./config";
 import { printError } from "./errors";
@@ -113,7 +112,7 @@ async function formatActionResult(
 	snapshots: Map<string, unknown>,
 ): Promise<string | null> {
 	if (TASK_RESULT_ACTIONS.includes(actionName)) {
-		const results = Types.task_results.from(returnData);
+		const results = ServerTypes.task_results.from(returnData);
 		const lines = await Promise.all(
 			results.entities.map((e) =>
 				formatTaskAddition(
@@ -127,11 +126,11 @@ async function formatActionResult(
 		return lines.length > 0 ? lines.join("\n") : null;
 	}
 	if (RESOLVE_ACTIONS.includes(actionName)) {
-		const results = Types.resolve_results.from(returnData);
+		const results = ServerTypes.resolve_results.from(returnData);
 		return formatResolveResults(results);
 	}
 	if (CANCEL_ACTIONS.includes(actionName)) {
-		const results = Types.cancel_results.from(returnData);
+		const results = ServerTypes.cancel_results.from(returnData);
 		return formatCancelResults(results);
 	}
 	return null;

@@ -4,30 +4,19 @@ SIGNING_IDENTITY ?=
 NOTARY_PROFILE   ?= shiploadcli
 ENTITLEMENTS     := scripts/entitlements.plist
 
-API_URL := https://jungle4.greymass.com
-PLATFORM_ACCOUNT := platform.gm
-SERVER_ACCOUNT := shipload.gm
-
-codegen:
-	bunx @wharfkit/cli generate -u $(API_URL) $(PLATFORM_ACCOUNT) -f src/contracts/platform.ts
-	bunx @wharfkit/cli generate -u $(API_URL) $(SERVER_ACCOUNT) -f src/contracts/server.ts
-
 check:
 	bun run check
-
-format:
-	bun run format
 
 test:
 	bun test
 
 install:
-	bun install
+	@cd ../.. && bun install
 
 clean:
 	rm -rf $(DIST)
 
-.PHONY: codegen check format test install clean
+.PHONY: check test install clean
 
 # User-facing binary targets. Output: dist/shiploadcli-<target>[.exe]
 # Bun's --compile target identifiers use `bun-darwin-*`; we map mac→darwin internally.

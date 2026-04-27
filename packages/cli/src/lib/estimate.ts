@@ -29,9 +29,9 @@ import {
 	getItem,
 	type ProjectableSnapshot,
 	projectFromCurrentState,
+	ServerTypes,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
-import { Types as ServerTypes } from "../contracts/server";
 import type { EntityTypeName } from "./args";
 import type { ResolvedCargoInput } from "./cargo-resolve";
 import { server } from "./client";

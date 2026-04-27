@@ -5,10 +5,10 @@ import {
     type LocationType,
     RESERVE_TIERS,
     type ReserveTier,
+    ServerContract,
 } from '@shipload/sdk'
 import {Checksum256} from '@wharfkit/antelope'
 import type {Command} from 'commander'
-import {Contract as ServerContract} from '../../contracts/server'
 import {parseUint32} from '../../lib/args'
 import {client, getGameSeed} from '../../lib/client'
 
@@ -108,7 +108,7 @@ export function render(radius: number, result: AnalysisResult): string {
 }
 
 async function resolveEpochSeed(): Promise<Checksum256> {
-    const server = new ServerContract({client})
+    const server = new ServerContract.Contract({client})
     const state = await server.table('state').get()
     if (!state) throw new Error('Server state row not found on chain')
     return Checksum256.from(state.seed)

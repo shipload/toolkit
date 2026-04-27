@@ -1,5 +1,5 @@
 import {Box, type CliRenderer, type KeyEvent, Text, type VChild} from '@opentui/core'
-import type {Types} from '../../contracts/server'
+import type {ServerTypes} from '@shipload/sdk'
 import {
     formatCargoUsage,
     formatCoords,
@@ -331,7 +331,7 @@ function layout(state: ViewState, ctx: TrackViewCtx, keys: HotkeyRegistry<Hotkey
 function statsRow(t: {snap: EntitySnapshot; elapsed_s: number}): VChild {
     const cells: string[] = []
     if (t.snap.coordinates) {
-        cells.push(`◷ ${formatCoords(t.snap.coordinates as Types.coordinates)}`)
+        cells.push(`◷ ${formatCoords(t.snap.coordinates as ServerTypes.coordinates)}`)
     }
     const energyStr = energySummary(t)
     if (energyStr) cells.push(energyStr)
@@ -360,7 +360,7 @@ function cargoSummary(snap: EntitySnapshot): string | null {
 }
 
 function busyBody(t: SnapshotTick): VChild[] {
-    const all = (t.snap.schedule?.tasks ?? []) as Types.task[]
+    const all = (t.snap.schedule?.tasks ?? []) as ServerTypes.task[]
     const pendingCount = (t.snap.pending_tasks ?? []).length
     const activeIdx = Math.max(0, all.length - pendingCount - 1)
     const done = all.slice(0, activeIdx)
