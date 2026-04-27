@@ -6,8 +6,8 @@ import {verifyChecksum} from '../lib/update-checksum'
 import {platformAsset} from '../lib/update-platform'
 
 const REPO = 'shipload/toolkit'
-const TAGS_API = `https://api.github.com/repos/${REPO}/tags?per_page=100`
 const TAG_PREFIX = 'cli-v'
+const MATCHING_TAGS_API = `https://api.github.com/repos/${REPO}/git/matching-refs/tags/${TAG_PREFIX}`
 const UA = 'shiploadcli'
 
 async function httpsGet(url: string, headers: Record<string, string> = {}): Promise<Uint8Array> {
@@ -83,17 +83,17 @@ export function register(program: Command): void {
 
             let release: GithubRelease
             try {
-                const tagsBuf = await httpsGet(TAGS_API, {Accept: 'application/vnd.github+json'})
-                const tags = JSON.parse(new TextDecoder().decode(tagsBuf)) as Array<{name: string}>
-                const cliTags = tags.map((t) => t.name).filter((n) => n.startsWith(TAG_PREFIX))
+                const refsBuf = await httpsGet(MATCHING_TAGS_API, {
+                    Accept: 'application/vnd.github+json',
+                })
+                const refs = JSON.parse(new TextDecoder().decode(refsBuf)) as Array<{ref: string}>
+                const cliTags = refs.map((r) => r.ref.replace(/^refs\/tags\//, ''))
                 cliTags.sort((a, b) =>
                     Bun.semver.order(b.slice(TAG_PREFIX.length), a.slice(TAG_PREFIX.length))
                 )
                 const newest = cliTags[0]
                 if (!newest) {
-                    fail(
-                        `No ${TAG_PREFIX}* tag found in the most recent 100 tags — see https://github.com/${REPO}/releases`
-                    )
+                    fail(`No ${TAG_PREFIX}* tag found — see https://github.com/${REPO}/releases`)
                     return
                 }
                 const releaseBuf = await httpsGet(
