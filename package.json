@@ -1,6 +1,6 @@
 {
   "name": "@shipload/item-renderer",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Deterministic SVG rendering for Shipload items",
   "type": "module",
   "main": "./src/index.ts",
@@ -24,7 +24,10 @@
       "default": "./test/fixtures/cargo-items.ts"
     }
   },
-  "files": ["src", "!src/**/*.test.ts"],
+  "files": [
+    "src",
+    "!src/**/*.test.ts"
+  ],
   "scripts": {
     "test": "bun test",
     "test:pixel": "bun test test/pixel.test.ts",
@@ -47,5 +50,6 @@
     "pixelmatch": "^6.0.0",
     "pngjs": "^7.0.0",
     "typescript": "^5.4.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
