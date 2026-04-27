@@ -2,6 +2,13 @@
     "name": "@shipload/item-renderer",
     "version": "1.0.0-next.0",
     "description": "Deterministic SVG rendering for Shipload items",
+    "homepage": "https://github.com/shipload/toolkit/tree/master/packages/item-renderer",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shipload/toolkit.git",
+        "directory": "packages/item-renderer"
+    },
+    "license": "MIT",
     "type": "module",
     "main": "./src/index.ts",
     "types": "./src/index.ts",
@@ -26,6 +33,7 @@
     },
     "files": [
         "src",
+        "test/fixtures/cargo-items.ts",
         "!src/**/*.test.ts"
     ],
     "scripts": {

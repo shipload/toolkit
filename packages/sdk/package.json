@@ -2,7 +2,12 @@
     "name": "@shipload/sdk",
     "description": "SDKs for Shipload",
     "version": "1.0.0-next.0",
-    "homepage": "https://github.com/shipload/sdk",
+    "homepage": "https://github.com/shipload/toolkit/tree/master/packages/sdk",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shipload/toolkit.git",
+        "directory": "packages/sdk"
+    },
     "license": "MIT",
     "main": "lib/shipload.js",
     "module": "lib/shipload.m.js",
