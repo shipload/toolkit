@@ -1,13 +1,9 @@
-import type { ResolvedItem, ResourceTier } from '@shipload/sdk'
+import type { ResolvedItem } from '@shipload/sdk'
 import { tierColors, categoryColors, categoryIconShapes } from '@shipload/sdk'
 import { el } from '../primitives/svg.ts'
 import { text } from '../primitives/text.ts'
 import { categoryIconPath } from '../primitives/category-icon.ts'
 import { tokens } from '../tokens/index.ts'
-
-function tierKey(tier: number): ResourceTier {
-  return `t${tier}` as ResourceTier
-}
 
 export interface ItemCellProps {
   resolved: ResolvedItem
@@ -34,7 +30,7 @@ function cellInner(props: ItemCellProps): string {
     rx: r,
     ry: r,
     fill: tokens.colors.surface.panel,
-    stroke: tierColors[tierKey(props.resolved.tier)] ?? tokens.colors.surface.panelBorder,
+    stroke: tierColors[props.resolved.tier] ?? tokens.colors.surface.panelBorder,
     'stroke-width': 1.5,
   })
 

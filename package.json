@@ -34,7 +34,7 @@
     "fonts:copy": "bun run scripts/copy-fonts.ts"
   },
   "dependencies": {
-    "@shipload/sdk": "2.0.0-rc21",
+    "@shipload/sdk": "^2.0.0-rc25",
     "@wharfkit/antelope": "^1.0.0"
   },
   "devDependencies": {

@@ -27,8 +27,7 @@ function formatNumber(n: number): string {
 }
 
 function tierBorder(tier: number): string {
-  const key = `t${tier}` as keyof typeof tokens.colors.tier
-  return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
+  return tokens.colors.tier[tier] ?? tokens.colors.surface.panelBorder
 }
 
 const MODULE_LABEL_PREFIX = (capability: string) => `${capability}: `

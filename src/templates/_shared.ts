@@ -5,8 +5,7 @@ export function formatMass(n: number): string {
 }
 
 export function tierBorder(tier: number): string {
-  const key = `t${tier}` as keyof typeof tokens.colors.tier
-  return tokens.colors.tier[key] ?? tokens.colors.surface.panelBorder
+  return tokens.colors.tier[tier] ?? tokens.colors.surface.panelBorder
 }
 
 export function shortCode(itemId: number): string {
