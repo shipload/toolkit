@@ -142,8 +142,9 @@ export function renderDescription(
     const spans: TextSpan[] = []
     const regex = /\{([A-Za-z_][A-Za-z0-9_]*)\}/g
     let lastIndex = 0
-    let m: RegExpExecArray | null
-    while ((m = regex.exec(tpl)) !== null) {
+    while (true) {
+        const m = regex.exec(tpl)
+        if (m === null) break
         if (m.index > lastIndex) {
             spans.push({text: tpl.slice(lastIndex, m.index)})
         }

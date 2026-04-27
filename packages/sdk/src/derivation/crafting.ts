@@ -268,7 +268,8 @@ export function computeCraftedOutputStats(
 
     for (const slot of slotInputs) {
         if (slot.category !== undefined) {
-            const list = (decodedByCategory[slot.category] ??= [])
+            decodedByCategory[slot.category] ??= []
+            const list = decodedByCategory[slot.category]!
             for (const s of slot.stacks) {
                 list.push({
                     quantity: s.quantity,
@@ -276,7 +277,8 @@ export function computeCraftedOutputStats(
                 })
             }
         } else {
-            const list = (decodedByItem[slot.itemId] ??= [])
+            decodedByItem[slot.itemId] ??= []
+            const list = decodedByItem[slot.itemId]
             for (const s of slot.stacks) {
                 list.push({
                     quantity: s.quantity,

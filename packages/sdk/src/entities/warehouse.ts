@@ -32,7 +32,8 @@ export class Warehouse extends ServerContract.Types.entity_info {
     }
 
     get inv(): InventoryAccessor {
-        return (this._inv ??= new InventoryAccessor(this))
+        this._inv ??= new InventoryAccessor(this)
+        return this._inv
     }
 
     get inventory(): EntityInventory[] {
@@ -40,7 +41,8 @@ export class Warehouse extends ServerContract.Types.entity_info {
     }
 
     get sched(): ScheduleAccessor {
-        return (this._sched ??= new ScheduleAccessor(this))
+        this._sched ??= new ScheduleAccessor(this)
+        return this._sched
     }
 
     get isIdle(): boolean {

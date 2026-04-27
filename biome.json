@@ -45,12 +45,8 @@
         "rules": {
             "recommended": true,
             "style": {
-                "noNonNullAssertion": "off",
-                "useImportType": "off"
-            },
-            "suspicious": {
-                "noExplicitAny": "off",
-                "noAssignInExpressions": "off"
+                "noNonNullAssertion": "warn",
+                "useImportType": "warn"
             },
             "correctness": {
                 "noUnusedVariables": "warn"
