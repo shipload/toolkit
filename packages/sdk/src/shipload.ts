@@ -1,6 +1,6 @@
 import {APIClient} from '@wharfkit/antelope'
 import {PlatformContract, ServerContract} from './contracts'
-import {ChainDefinition} from '@wharfkit/session'
+import {ChainDefinition} from '@wharfkit/common'
 import ContractKit, {Contract} from '@wharfkit/contract'
 
 import {GameContext} from './managers/context'

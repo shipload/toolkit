@@ -27,7 +27,7 @@ import {
 } from 'src/travel'
 import {BASE_ORBITAL_MASS, MAX_ORBITAL_ALTITUDE, MIN_ORBITAL_ALTITUDE} from 'src/types'
 import {assert} from 'chai'
-import {Chains} from '@wharfkit/session'
+import {Chains} from '@wharfkit/common'
 import {UInt64} from '@wharfkit/antelope'
 
 const client = makeClient('https://jungle4.greymass.com')
