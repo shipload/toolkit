@@ -7,5 +7,7 @@
     "@shipload/item-renderer": "1.0.0-beta1",
     "@shipload/sdk": "1.0.0-beta1"
   },
-  "changesets": []
+  "changesets": [
+    "ninety-swans-jog"
+  ]
 }
