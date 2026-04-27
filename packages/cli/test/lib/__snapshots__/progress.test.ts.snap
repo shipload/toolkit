@@ -1,0 +1,44 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`makeProgressRenderer busy tick frame is stable 1`] = `
+"\x1B[?25l
+\x1B[2KStardust  ·  ship 3
+
+\x1B[2K  (102, 45)  ·  ⚡ 8510/10000  ·  cargo 0.31 t / 0.5 t
+
+\x1B[2K  ▶ Travel                          1m
+
+\x1B[2K  [████████░░░░░░░░░░░░░░░░░░░░] 42s remaining
+\x1B[4A
+\x1B[2K
+
+\x1B[2K
+
+\x1B[2K
+
+\x1B[2K
+\x1B[4A"
+`;
+
+exports[`makeProgressRenderer idle-with-pending-resolve frame is stable 1`] = `
+"\x1B[?25l
+\x1B[2KStardust  ·  ship 3
+
+\x1B[2K  (110, 50)  ·  ⚡ 9320/10000  ·  cargo 0.31 t / 0.5 t
+
+\x1B[2K  ◌ idle  ·  3 task(s) awaiting resolve  ·  refresh in 1s
+\x1B[3A
+\x1B[2K
+
+\x1B[2K
+
+\x1B[2K
+\x1B[3A"
+`;
+
+exports[`makeProgressRenderer non-TTY single-line frame is stable 1`] = `
+"
+  [████████░░░░░░░░░░░░░░░░░░░░] 42s remaining    
+                                                                                
+"
+`;
