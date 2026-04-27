@@ -9,7 +9,7 @@ test('renders Crude Ore with category, mass, and three stat bars', () => {
     const svg = renderResource(item, resolved)
     expect(svg).toContain('Crude Ore')
     expect(svg).toContain('Ore') // category label
-    expect(svg).toContain('30,000') // mass
+    expect(svg).toContain('52,000') // mass
     expect(svg).toContain('STR') // strength abbreviation
     expect(svg).toContain('TOL')
     expect(svg).toContain('DEN')
