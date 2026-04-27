@@ -1,0 +1,27 @@
+# Node / Bun
+node_modules/
+bun.lockb
+*.log
+
+# Build outputs
+dist/
+lib/
+build/
+coverage/
+.turbo/
+
+# Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Wrangler
+.wrangler/
+
+# Per-package outputs
+packages/cli/dist/
+packages/sdk/lib/
+packages/sdk/build/
+
+# OS
+Thumbs.db
