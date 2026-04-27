@@ -17,17 +17,13 @@ test-pixel: node_modules
 test-update: node_modules
 	UPDATE_IMAGE_SNAPSHOTS=1 bun test --update-snapshots
 
-.PHONY: typecheck
-typecheck: node_modules
+.PHONY: check
+check: node_modules
 	$(BIN)/tsc --noEmit
-
-.PHONY: lint
-lint: node_modules
-	$(BIN)/biome check src test scripts
 
 .PHONY: format
 format: node_modules
-	$(BIN)/biome format --write src test scripts
+	@cd ../.. && bun biome check packages/item-renderer --write
 
 .PHONY: bundle-check
 bundle-check: node_modules
@@ -37,14 +33,9 @@ bundle-check: node_modules
 fonts: node_modules
 	bun run scripts/copy-fonts.ts
 
-.PHONY: check
-check: typecheck lint test bundle-check
-
 .PHONY: clean
 clean:
-	rm -rf node_modules bun.lock
+	rm -rf node_modules
 
-node_modules: package.json
-	bun install
-	bun link @shipload/sdk
-	@touch $@
+node_modules:
+	@cd ../.. && bun install
