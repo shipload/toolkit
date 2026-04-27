@@ -59,6 +59,7 @@ release:
 	$(MAKE) test
 	$(MAKE) build
 	bun changeset version
+	bun biome format packages/*/package.json --write
 	git add .
 	git commit -m "chore: version packages"
 	git push
