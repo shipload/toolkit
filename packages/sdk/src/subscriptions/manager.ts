@@ -1,4 +1,4 @@
-import {WebSocketConnection} from './connection'
+import {WebSocketConnection, type ConnectionState} from './connection'
 import type {
     BoundingBox,
     BoundsDeltaMessage,
@@ -22,6 +22,9 @@ export type EntityInstance = Ship | Warehouse | Container
 
 export interface SubscriptionsOptions {
     url: string
+    minReconnectDelay?: number
+    pingIntervalMs?: number
+    pongTimeoutMs?: number
 }
 
 export interface BoundsSubscriptionHandle {
@@ -53,6 +56,9 @@ export class SubscriptionsManager {
     private readonly boundsSubs = new Map<
         string,
         {
+            bounds?: BoundingBox
+            owner?: string
+            prioritizeOwner?: string
             onSnapshot?: (entities: EntityInstance[]) => void
             onUpdate?: (entity: EntityInstance) => void
             onBoundsDelta?: (entered: EntityInstance[], exited: number[]) => void
@@ -60,11 +66,16 @@ export class SubscriptionsManager {
         }
     >()
     private subCounter = 0
+    private hasConnected = false
 
     constructor(opts: SubscriptionsOptions) {
         this.conn = new WebSocketConnection({
             url: opts.url,
             onMessage: (m) => this.onMessage(m),
+            onStateChange: (s) => this.onStateChange(s),
+            minReconnectDelay: opts.minReconnectDelay,
+            pingIntervalMs: opts.pingIntervalMs,
+            pongTimeoutMs: opts.pongTimeoutMs,
         })
         this.conn.connect()
     }
@@ -139,6 +150,9 @@ export class SubscriptionsManager {
             current: new Map(),
         }
         this.boundsSubs.set(subId, {
+            bounds,
+            owner: handlers.owner,
+            prioritizeOwner: handlers.prioritizeOwner,
             onSnapshot: handlers.onSnapshot,
             onUpdate: handlers.onUpdate,
             onBoundsDelta: handlers.onBoundsDelta,
@@ -154,8 +168,37 @@ export class SubscriptionsManager {
     }
 
     private updateBounds(subId: string, bounds: BoundingBox) {
+        const entry = this.boundsSubs.get(subId)
+        if (entry) entry.bounds = bounds
         const msg: UpdateBoundsMessage = {type: 'update_bounds', sub_id: subId, bounds}
         this.sendMessage(msg)
+    }
+
+    private onStateChange(state: ConnectionState) {
+        if (state !== 'connected') return
+        if (!this.hasConnected) {
+            this.hasConnected = true
+            return
+        }
+        for (const [subId, entry] of this.entitySubs) {
+            const msg: SubscribeEntityMessage = {
+                type: 'subscribe_entity',
+                sub_id: subId,
+                entity_type: entry.type,
+                entity_id: entry.id,
+            }
+            this.sendMessage(msg)
+        }
+        for (const [subId, entry] of this.boundsSubs) {
+            const msg: SubscribeMessage = {
+                type: 'subscribe',
+                sub_id: subId,
+                bounds: entry.bounds,
+                owner: entry.owner,
+                prioritize_owner: entry.prioritizeOwner,
+            }
+            this.sendMessage(msg)
+        }
     }
 
     private onMessage(msg: ServerMessage) {

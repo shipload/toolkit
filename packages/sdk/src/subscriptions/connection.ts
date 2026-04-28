@@ -7,6 +7,9 @@ export interface WebSocketConnectionOptions {
     url: string
     onMessage: (message: ServerMessage) => void
     onStateChange?: (state: ConnectionState) => void
+    minReconnectDelay?: number
+    pingIntervalMs?: number
+    pongTimeoutMs?: number
 }
 
 export class WebSocketConnection {
@@ -19,15 +22,28 @@ export class WebSocketConnection {
     private _state: ConnectionState = 'disconnected'
     private shouldReconnect = true
     private sendQueue: string[] = []
+    private minReconnectDelay: number
+    private pingIntervalMs: number
+    private pongTimeoutMs: number
+    private pingTimer: ReturnType<typeof setInterval> | null = null
+    private staleTimer: ReturnType<typeof setTimeout> | null = null
 
-    private static readonly MIN_RECONNECT_DELAY = 1000
+    private static readonly DEFAULT_MIN_RECONNECT_DELAY = 1000
     private static readonly MAX_RECONNECT_DELAY = 30000
     private static readonly RECONNECT_MULTIPLIER = 2
+    private static readonly DEFAULT_PING_INTERVAL_MS = 25000
+    private static readonly DEFAULT_PONG_TIMEOUT_MS = 10000
 
     constructor(options: WebSocketConnectionOptions) {
         this.url = options.url
         this.onMessage = options.onMessage
         this.onStateChange = options.onStateChange
+        this.minReconnectDelay =
+            options.minReconnectDelay ?? WebSocketConnection.DEFAULT_MIN_RECONNECT_DELAY
+        this.pingIntervalMs =
+            options.pingIntervalMs ?? WebSocketConnection.DEFAULT_PING_INTERVAL_MS
+        this.pongTimeoutMs =
+            options.pongTimeoutMs ?? WebSocketConnection.DEFAULT_PONG_TIMEOUT_MS
     }
 
     get state(): ConnectionState {
@@ -64,9 +80,11 @@ export class WebSocketConnection {
                 ) {
                     this.ws.send(this.sendQueue.shift()!)
                 }
+                this.startHeartbeat()
             }
 
             this.ws.onmessage = (event) => {
+                this.resetStaleTimer()
                 try {
                     const message = JSON.parse(event.data) as ServerMessage
                     this.onMessage(message)
@@ -77,6 +95,7 @@ export class WebSocketConnection {
             }
 
             this.ws.onclose = () => {
+                this.stopHeartbeat()
                 this.ws = null
                 this.sendQueue.length = 0
 
@@ -104,7 +123,7 @@ export class WebSocketConnection {
         }
 
         const delay = Math.min(
-            WebSocketConnection.MIN_RECONNECT_DELAY *
+            this.minReconnectDelay *
                 WebSocketConnection.RECONNECT_MULTIPLIER ** this.reconnectAttempts,
             WebSocketConnection.MAX_RECONNECT_DELAY
         )
@@ -126,6 +145,8 @@ export class WebSocketConnection {
             this.reconnectTimeout = null
         }
 
+        this.stopHeartbeat()
+
         if (this.ws) {
             this.ws.close()
             this.ws = null
@@ -133,6 +154,38 @@ export class WebSocketConnection {
 
         this.sendQueue.length = 0
         this.setState('disconnected')
+    }
+
+    private startHeartbeat() {
+        this.stopHeartbeat()
+        this.resetStaleTimer()
+        this.pingTimer = setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(JSON.stringify({type: 'ping'}))
+            }
+        }, this.pingIntervalMs)
+    }
+
+    private stopHeartbeat() {
+        if (this.pingTimer) {
+            clearInterval(this.pingTimer)
+            this.pingTimer = null
+        }
+        if (this.staleTimer) {
+            clearTimeout(this.staleTimer)
+            this.staleTimer = null
+        }
+    }
+
+    private resetStaleTimer() {
+        if (this.staleTimer) clearTimeout(this.staleTimer)
+        this.staleTimer = setTimeout(
+            () => {
+                debug('No frames within ping interval + pong timeout — forcing reconnect')
+                if (this.ws) this.ws.close()
+            },
+            this.pingIntervalMs + this.pongTimeoutMs
+        )
     }
 
     close() {

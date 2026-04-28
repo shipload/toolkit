@@ -2,6 +2,7 @@ export class FakeWebSocketServer {
     private readonly messages: string[] = []
     private readonly resolvers: Array<(msg: any) => void> = []
     private incoming: ((data: string) => void) | null = null
+    private currentSocket: any = null
     public readonly url = 'ws://fake/'
     private prevWS: any
 
@@ -19,6 +20,13 @@ export class FakeWebSocketServer {
 
     send(msg: any) {
         if (this.incoming) this.incoming(JSON.stringify(msg))
+    }
+
+    triggerClose() {
+        const sock = this.currentSocket
+        if (!sock || sock.readyState === 3) return
+        sock.readyState = 3
+        sock.onclose?.()
     }
 
     close() {
@@ -42,6 +50,7 @@ export class FakeWebSocketServer {
 
             constructor(public url: string) {
                 fake.incoming = (data) => this.onmessage?.({data})
+                fake.currentSocket = this
                 setTimeout(() => this.onopen?.(), 0)
             }
             send(data: string) {
