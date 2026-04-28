@@ -8,6 +8,7 @@
     "@shipload/sdk": "1.0.0-beta1"
   },
   "changesets": [
+    "busy-coins-refuse",
     "dark-pillows-attend",
     "ninety-swans-jog"
   ]

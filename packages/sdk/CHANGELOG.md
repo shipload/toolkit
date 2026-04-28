@@ -1,5 +1,11 @@
 # @shipload/sdk
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- websocket connection improvements + cli item input fixes
+
 ## 1.0.0-next.1
 
 ### Patch Changes
