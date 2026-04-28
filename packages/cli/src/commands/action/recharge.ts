@@ -6,7 +6,6 @@ import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateRecharge} from '../../lib/estimate'
 import {renderEstimate} from '../../lib/render-estimate'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
@@ -23,7 +22,6 @@ export async function buildAction(opts: RechargeOpts): Promise<Action> {
 export async function runRecharge(
     ctx: EntityContext,
     opts: {
-        autoResolve?: boolean
         estimate?: boolean
         wait?: boolean
         track?: boolean
@@ -40,9 +38,6 @@ export async function runRecharge(
         console.log(renderEstimate(est))
         return
     }
-    await withValidation(() =>
-        checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(opts.autoResolve))
-    )
     const action = await buildAction({entityType: ctx.entityType, entityId: ctx.entityId})
     const result = await transact(
         {action},
@@ -59,18 +54,10 @@ export const SUBCOMMAND: EntitySubcommand = {
         new Command('recharge')
             .description('Recharge energy for the entity')
             .addHelpText('before', 'Requires: entity has a generator; energy below capacity.\n')
-            .option('--auto-resolve', 'resolve completed tasks on the target entity before acting')
             .option('--estimate', 'print duration/energy estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
-            .action(
-                async (opts: {
-                    autoResolve?: boolean
-                    estimate?: boolean
-                    wait?: boolean
-                    track?: boolean
-                }) => {
-                    await runRecharge(ctx, opts)
-                }
-            ),
+            .action(async (opts: {estimate?: boolean; wait?: boolean; track?: boolean}) => {
+                await runRecharge(ctx, opts)
+            }),
 }

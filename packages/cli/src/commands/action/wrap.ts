@@ -3,8 +3,6 @@ import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
@@ -28,7 +26,6 @@ export async function buildAction(opts: WrapOpts): Promise<Action> {
 }
 
 interface WrapCliOptions {
-    autoResolve?: boolean
     wait?: boolean
     track?: boolean
 }
@@ -40,9 +37,6 @@ export async function runWrap(
     quantity: bigint,
     options: WrapCliOptions
 ): Promise<void> {
-    await withValidation(() =>
-        checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
-    )
     const action = await buildAction({
         owner,
         entityType: ctx.entityType,
@@ -71,7 +65,6 @@ export const SUBCOMMAND: EntitySubcommand = {
             .argument('<owner>', 'recipient account name')
             .argument('<cargo-id>', 'source cargo id', parseUint64)
             .argument('<quantity>', 'quantity to wrap', parseUint64)
-            .option('--auto-resolve', 'resolve completed tasks on the source entity before acting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(

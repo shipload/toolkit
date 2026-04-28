@@ -13,7 +13,6 @@ import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateCraft} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
@@ -48,7 +47,6 @@ export async function buildAction(opts: CraftOpts): Promise<Action> {
 }
 
 type CraftCliOptions = {
-    autoResolve?: boolean
     estimate?: boolean
     wait?: boolean
     track?: boolean
@@ -91,9 +89,6 @@ export async function runCraft(
 ): Promise<void> {
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     await withValidation(async () => {
-        if (!options.estimate) {
-            await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
-        }
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
@@ -175,7 +170,6 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 '<item-id>:<stack-id>:<qty> — total units to pull from a specific cargo stack. Repeat once per stack drawn.',
                 accumulateCargoInputs
             )
-            .option('--auto-resolve', 'resolve completed tasks on the target entity before acting')
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)

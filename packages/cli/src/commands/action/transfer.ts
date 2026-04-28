@@ -3,8 +3,6 @@ import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
@@ -32,7 +30,6 @@ export async function buildAction(opts: TransferOpts): Promise<Action> {
 }
 
 interface TransferCliOptions {
-    autoResolve?: boolean
     wait?: boolean
     track?: boolean
 }
@@ -46,12 +43,6 @@ export async function runTransfer(
     quantity: bigint,
     options: TransferCliOptions
 ): Promise<void> {
-    await withValidation(async () => {
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
-        if (destType !== ctx.entityType || destId !== ctx.entityId) {
-            await checkResolveEntity(destType, destId, Boolean(options.autoResolve))
-        }
-    })
     const action = await buildAction({
         sourceType: ctx.entityType,
         sourceId: ctx.entityId,
@@ -86,10 +77,6 @@ export const SUBCOMMAND: EntitySubcommand = {
             .argument('<item-id>', 'item id', parseUint64)
             .argument('<stats>', 'cargo stack discriminator (often 0)', parseUint64)
             .argument('<quantity>', 'quantity', parseUint64)
-            .option(
-                '--auto-resolve',
-                'resolve completed tasks on source and destination before acting'
-            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(

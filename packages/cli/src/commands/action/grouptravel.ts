@@ -5,7 +5,6 @@ import {getShipload} from '../../lib/client'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGroupTravel} from '../../lib/estimate'
 import {renderEstimate} from '../../lib/render-estimate'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
@@ -40,7 +39,6 @@ export function register(program: Command): void {
             '--recharge',
             "chain a recharge task before travel via the contract's recharge:bool parameter"
         )
-        .option('--auto-resolve', 'resolve completed tasks on each entity before acting')
         .option('--estimate', 'print duration/energy/cargo estimate without submitting')
         .addOption(WAIT_OPTION)
         .addOption(TRACK_OPTION)
@@ -51,7 +49,6 @@ export function register(program: Command): void {
                 y: bigint,
                 options: {
                     recharge?: boolean
-                    autoResolve?: boolean
                     estimate?: boolean
                     wait?: boolean
                     track?: boolean
@@ -69,15 +66,6 @@ export function register(program: Command): void {
                     console.log(renderEstimate(est))
                     return
                 }
-                await withValidation(async () => {
-                    for (const e of entities) {
-                        await checkResolveEntity(
-                            e.entityType,
-                            e.entityId,
-                            Boolean(options.autoResolve)
-                        )
-                    }
-                })
                 const action = await buildAction({
                     entities,
                     x,

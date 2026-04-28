@@ -6,7 +6,6 @@ import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
@@ -30,7 +29,6 @@ export async function buildAction(opts: DeployOpts): Promise<Action> {
 }
 
 interface DeployCliOptions {
-    autoResolve?: boolean
     wait?: boolean
     track?: boolean
 }
@@ -46,7 +44,6 @@ export async function runDeploy(
                 `deploy expects qty=1 in <input> (packed entities are unique); got ${input.quantity}`
             )
         }
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const [resolved] = resolveCargoInputs(
             [input],
@@ -88,7 +85,6 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 '<packed-item-id>:<stack-id>:1 — packed entity to deploy from cargo.',
                 parseCargoInput
             )
-            .option('--auto-resolve', 'resolve completed tasks on the source entity before acting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(async (input: ParsedCargoInput, opts: DeployCliOptions) => {

@@ -11,7 +11,6 @@ import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {renderEstimate} from '../../lib/render-estimate'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 
@@ -35,7 +34,6 @@ export async function buildAction(opts: BlendOpts): Promise<Action> {
 }
 
 type BlendCliOptions = {
-    autoResolve?: boolean
     estimate?: boolean
     wait?: boolean
 }
@@ -58,7 +56,6 @@ export async function runBlend(
         return
     }
     await withValidation(async () => {
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(opts.autoResolve))
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
@@ -101,7 +98,6 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 '<item-id>:<stack-id>:<qty> — total units to pull from a specific cargo stack. Repeat once per stack.',
                 accumulateCargoInputs
             )
-            .option('--auto-resolve', 'resolve completed tasks on the target entity before acting')
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .option('--wait', 'no-op for blend (instantaneous); accepted for consistency')
             .action(async (inputs: ParsedCargoInput[], opts: BlendCliOptions) => {

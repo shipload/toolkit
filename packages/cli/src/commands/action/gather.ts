@@ -10,7 +10,6 @@ import {renderIssues} from '../../lib/feasibility'
 import {formatItem} from '../../lib/format'
 import {resolveReach, shallowestPerItem} from '../../lib/reach'
 import {renderEstimate} from '../../lib/render-estimate'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {checkCapacity, checkDepth, ValidationError} from '../../lib/validate'
@@ -147,7 +146,6 @@ async function enrichGatherError(err: unknown, ctx: GatherErrorContext): Promise
 }
 
 type GatherCliOptions = {
-    autoResolve?: boolean
     estimate?: boolean
     wait?: boolean
     track?: boolean
@@ -184,10 +182,6 @@ export async function runGather(
         return
     }
     await withValidation(async () => {
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
-        if (destType !== ctx.entityType || destId !== ctx.entityId) {
-            await checkResolveEntity(destType, destId, Boolean(options.autoResolve))
-        }
         await preflightGather(gatherOpts)
     })
     if (!est.feasibility.ok) {
@@ -244,7 +238,6 @@ export const SUBCOMMAND: EntitySubcommand = {
             .argument('<dest-id>', 'destination entity id', parseUint64)
             .argument('<stratum>', 'stratum index', parseUint32)
             .argument('<quantity>', 'quantity to gather', parseUint32)
-            .option('--auto-resolve', 'resolve completed tasks on the source entity before acting')
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
