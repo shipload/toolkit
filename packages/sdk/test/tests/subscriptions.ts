@@ -250,7 +250,10 @@ describe('SubscriptionsManager heartbeat', () => {
                     break
                 }
             }
-            assert.isTrue(replayed, 'expected subscribe_entity replay after stale-timeout reconnect')
+            assert.isTrue(
+                replayed,
+                'expected subscribe_entity replay after stale-timeout reconnect'
+            )
             handle.unsubscribe()
         } finally {
             mgr.close()

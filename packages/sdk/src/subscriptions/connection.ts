@@ -40,10 +40,8 @@ export class WebSocketConnection {
         this.onStateChange = options.onStateChange
         this.minReconnectDelay =
             options.minReconnectDelay ?? WebSocketConnection.DEFAULT_MIN_RECONNECT_DELAY
-        this.pingIntervalMs =
-            options.pingIntervalMs ?? WebSocketConnection.DEFAULT_PING_INTERVAL_MS
-        this.pongTimeoutMs =
-            options.pongTimeoutMs ?? WebSocketConnection.DEFAULT_PONG_TIMEOUT_MS
+        this.pingIntervalMs = options.pingIntervalMs ?? WebSocketConnection.DEFAULT_PING_INTERVAL_MS
+        this.pongTimeoutMs = options.pongTimeoutMs ?? WebSocketConnection.DEFAULT_PONG_TIMEOUT_MS
     }
 
     get state(): ConnectionState {
@@ -179,13 +177,10 @@ export class WebSocketConnection {
 
     private resetStaleTimer() {
         if (this.staleTimer) clearTimeout(this.staleTimer)
-        this.staleTimer = setTimeout(
-            () => {
-                debug('No frames within ping interval + pong timeout — forcing reconnect')
-                if (this.ws) this.ws.close()
-            },
-            this.pingIntervalMs + this.pongTimeoutMs
-        )
+        this.staleTimer = setTimeout(() => {
+            debug('No frames within ping interval + pong timeout — forcing reconnect')
+            if (this.ws) this.ws.close()
+        }, this.pingIntervalMs + this.pongTimeoutMs)
     }
 
     close() {
