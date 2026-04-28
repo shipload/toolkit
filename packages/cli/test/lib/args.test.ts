@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { InvalidArgumentError } from "commander";
 import {
+	accumulateCargoInputs,
 	parseCargoInput,
 	parseEntityRef,
 	parseEntityRefList,
@@ -90,6 +91,62 @@ describe("parseCargoInput", () => {
 	});
 	test("rejects negative item-id", () => {
 		expect(() => parseCargoInput("-1:0:5")).toThrow(/non-negative/);
+	});
+});
+
+describe("accumulateCargoInputs", () => {
+	test("returns a single-element array on first call", () => {
+		const result = accumulateCargoInputs("201:111:5", undefined);
+		expect(result).toEqual([{ itemId: 201, stackId: 111n, quantity: 5 }]);
+	});
+	test("appends to an existing accumulator", () => {
+		const first = accumulateCargoInputs("201:111:5", undefined);
+		const second = accumulateCargoInputs("301:222:7", first);
+		expect(second).toEqual([
+			{ itemId: 201, stackId: 111n, quantity: 5 },
+			{ itemId: 301, stackId: 222n, quantity: 7 },
+		]);
+	});
+	test("propagates parseCargoInput validation errors", () => {
+		expect(() => accumulateCargoInputs("bogus", undefined)).toThrow(InvalidArgumentError);
+	});
+});
+
+describe("variadic <input...> wiring (commander integration)", () => {
+	test("accumulateCargoInputs produces an array across multiple positionals", () => {
+		const { Command } = require("commander") as typeof import("commander");
+		let captured: unknown = "untouched";
+		const program = new Command();
+		program
+			.name("test")
+			.exitOverride()
+			.argument("<recipe>")
+			.argument("<qty>")
+			.argument("<input...>", "cargo inputs", accumulateCargoInputs)
+			.action((_recipe, _qty, inputs) => {
+				captured = inputs;
+			});
+		program.parse(["10003", "1", "301:111:5", "301:222:7"], { from: "user" });
+		expect(captured).toEqual([
+			{ itemId: 301, stackId: 111n, quantity: 5 },
+			{ itemId: 301, stackId: 222n, quantity: 7 },
+		]);
+	});
+	test("single positional still produces an array", () => {
+		const { Command } = require("commander") as typeof import("commander");
+		let captured: unknown = "untouched";
+		const program = new Command();
+		program
+			.name("test")
+			.exitOverride()
+			.argument("<recipe>")
+			.argument("<qty>")
+			.argument("<input...>", "cargo inputs", accumulateCargoInputs)
+			.action((_recipe, _qty, inputs) => {
+				captured = inputs;
+			});
+		program.parse(["10003", "1", "301:111:5"], { from: "user" });
+		expect(captured).toEqual([{ itemId: 301, stackId: 111n, quantity: 5 }]);
 	});
 });
 

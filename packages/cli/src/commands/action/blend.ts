@@ -1,7 +1,7 @@
 import {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {type EntityTypeName, parseCargoInput} from '../../lib/args'
+import {accumulateCargoInputs, type EntityTypeName} from '../../lib/args'
 import {
     type ParsedCargoInput,
     type ResolvedCargoInput,
@@ -99,7 +99,7 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
             .argument(
                 '<input...>',
                 '<item-id>:<stack-id>:<qty> — total units to pull from a specific cargo stack. Repeat once per stack.',
-                parseCargoInput
+                accumulateCargoInputs
             )
             .option('--auto-resolve', 'resolve completed tasks on the target entity before acting')
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')

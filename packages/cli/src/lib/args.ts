@@ -69,6 +69,14 @@ export function parseCargoInput(s: string): ParsedCargoInput {
 	return { itemId, stackId: BigInt(stackIdStr), quantity };
 }
 
+export function accumulateCargoInputs(
+	value: string,
+	previous: ParsedCargoInput[] | undefined,
+): ParsedCargoInput[] {
+	const next = parseCargoInput(value);
+	return previous ? [...previous, next] : [next];
+}
+
 export function parseInt64(s: string): bigint {
 	if (!/^-?\d+$/.test(s)) {
 		throw new InvalidArgumentError(`must be an integer (got "${s}")`);
