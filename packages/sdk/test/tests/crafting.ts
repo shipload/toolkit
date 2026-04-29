@@ -189,14 +189,15 @@ describe('Crafting', () => {
 
         test('decoded hauler stats use input stat key names', () => {
             // Hauler 10106 inputs are Power Cell (regolith composition/fineness) and
-            // Focusing Array (crystal conductivity/resonance), so decoded keys come
-            // from those raw-resource stats — not from capability output names.
+            // Focusing Array (crystal conductivity/resonance). Post-rebalance the
+            // recipe sources fineness, conductivity, and composition; slot 3 is
+            // empty pending the deferred 4th attribute (see Stat Coverage plan).
             const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'composition')
             assert.property(decoded, 'conductivity')
             assert.property(decoded, 'fineness')
-            assert.property(decoded, 'resonance')
+            assert.notProperty(decoded, 'resonance')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')

@@ -202,14 +202,20 @@ export type {PlanetSubtypeInfo} from './data/locations'
 export {
     capabilityNames,
     capabilityAttributes,
-    statMappings,
     isInvertedAttribute,
     getCapabilityAttributes,
+} from './data/capabilities'
+export type {CapabilityAttribute, StatMapping} from './data/capabilities'
+
+export {
+    deriveStatMappings,
     getStatMappings,
     getStatMappingsForStat,
     getStatMappingsForCapability,
-} from './data/capabilities'
-export type {CapabilityAttribute, StatMapping} from './data/capabilities'
+    traceToRawCategoryStat,
+} from './derivation/capability-mappings'
+export {SLOT_FORMULAS} from './data/capability-formulas'
+export type {SlotConsumer, SlotConsumerKind} from './data/capability-formulas'
 
 export {
     encodeStats,
@@ -302,6 +308,7 @@ export {
     computeLoaderThrust,
     computeCrafterSpeed,
     computeCrafterDrain,
+    computeWarpRange,
 } from './nft/description'
 
 export {

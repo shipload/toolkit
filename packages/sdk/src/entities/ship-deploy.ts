@@ -76,12 +76,15 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
     thrust: number
     quantity: number
 } {
-    const hrd = stats.hardness ?? 500
-    const pla = stats.plasticity ?? 500
+    // Recipe slot 0 = Cargo Arm s1 (insulation), slot 1 = Cargo Arm s0
+    // (plasticity). Contract reads by slot index — see compute_loader_*
+    // in capabilities/modules.cpp.
+    const insulation = stats.insulation ?? 500
+    const plasticity = stats.plasticity ?? 500
 
     return {
-        mass: Math.max(200, 2000 - Math.floor(hrd * 2)),
-        thrust: 1 + Math.floor(pla / 500),
+        mass: Math.max(200, 2000 - Math.floor(insulation * 2)),
+        thrust: 1 + Math.floor(plasticity / 500),
         quantity: 1,
     }
 }
@@ -104,14 +107,17 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     efficiency: number
     drain: number
 } {
-    const res = stats.resonance ?? 500
-    const con = stats.conductivity ?? 500
-    const ref = stats.reflectivity ?? 500
+    // Recipe slot 0 = Power Cell s1 (fineness), slot 1 = Focusing Array s0
+    // (conductivity), slot 2 = Power Cell s0 (composition). Contract reads
+    // by slot index — see compute_hauler_* in capabilities/modules.cpp.
+    const fineness = stats.fineness ?? 500
+    const conductivity = stats.conductivity ?? 500
+    const composition = stats.composition ?? 500
 
     return {
-        capacity: Math.max(1, 1 + Math.floor(res / 400)),
-        efficiency: 2000 + con * 6,
-        drain: Math.max(3, 15 - Math.floor(ref / 80)),
+        capacity: Math.max(1, 1 + Math.floor(fineness / 400)),
+        efficiency: 2000 + conductivity * 6,
+        drain: Math.max(3, 15 - Math.floor(composition / 80)),
     }
 }
 
@@ -122,10 +128,10 @@ export function computeStorageCapabilities(
     capacityBonus: number
 } {
     const strength = stats.strength ?? 500
+    const density = stats.density ?? 500
     const hardness = stats.hardness ?? 500
-    const saturation = stats.saturation ?? 500
 
-    const statSum = strength + hardness + saturation
+    const statSum = strength + density + hardness
     const capacityBonus = Math.floor(
         (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
     )

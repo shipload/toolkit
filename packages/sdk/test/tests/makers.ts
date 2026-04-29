@@ -18,11 +18,11 @@ import {
 
 describe('makeShip factory', () => {
     test('stacks two hauler modules by capacity-weighted efficiency', () => {
-        // Hauler decoded keys: composition, conductivity, fineness, resonance.
-        // Capacity uses resonance, efficiency uses conductivity, drain uses
-        // reflectivity — which the recipe doesn't carry, so it defaults to 500.
+        // Hauler decoded keys post-rebalance: fineness (slot 0), conductivity
+        // (slot 1), composition (slot 2). Capacity uses fineness, efficiency
+        // uses conductivity, drain uses composition.
         const seedA = encodeStats([500, 500, 500, 500]) // cap=2, eff=5000, drain=9
-        const seedB = encodeStats([999, 999, 999, 999]) // cap=3, eff=7994, drain=9
+        const seedB = encodeStats([999, 999, 999, 999]) // cap=3, eff=7994, drain=3
         const ship = makeShip({
             id: UInt64.from(1),
             owner: 'test',
@@ -39,7 +39,7 @@ describe('makeShip factory', () => {
 
         assert.exists(ship.hauler)
         assert.equal(Number(ship.hauler!.capacity.value.toString()), 5) // 2 + 3
-        assert.equal(Number(ship.hauler!.drain.value.toString()), 18) // 9 + 9
+        assert.equal(Number(ship.hauler!.drain.value.toString()), 12) // 9 + 3
         // capacity-weighted efficiency: (5000*2 + 7994*3) / 5 = 33982/5 = 6796.4 → floor 6796
         assert.equal(Number(ship.hauler!.efficiency.value.toString()), 6796)
     })

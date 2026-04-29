@@ -393,12 +393,7 @@
         ]
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
+        "sources": []
       },
       {
         "sources": [
@@ -436,8 +431,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 0
+            "inputIndex": 1,
+            "statIndex": 1
           }
         ]
       },
@@ -552,7 +547,7 @@
         "sources": [
           {
             "inputIndex": 0,
-            "statIndex": 0
+            "statIndex": 1
           }
         ]
       },
@@ -568,17 +563,12 @@
         "sources": [
           {
             "inputIndex": 0,
-            "statIndex": 1
+            "statIndex": 0
           }
         ]
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
+        "sources": []
       }
     ],
     "blendWeights": []

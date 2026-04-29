@@ -220,29 +220,29 @@ describe('ship deploy formulas', () => {
     })
 
     test('loader formula exact values at min', () => {
-        const r = computeLoaderCapabilities({hardness: 1, plasticity: 1})
+        const r = computeLoaderCapabilities({insulation: 1, plasticity: 1})
         assert.equal(r.mass, 1998)
         assert.equal(r.thrust, 1)
         assert.equal(r.quantity, 1)
     })
 
     test('loader formula exact values at mid', () => {
-        const r = computeLoaderCapabilities({hardness: 500, plasticity: 500})
+        const r = computeLoaderCapabilities({insulation: 500, plasticity: 500})
         assert.equal(r.mass, 1000)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
     test('loader formula exact values at max', () => {
-        const r = computeLoaderCapabilities({hardness: 999, plasticity: 999})
+        const r = computeLoaderCapabilities({insulation: 999, plasticity: 999})
         assert.equal(r.mass, 200)
         assert.equal(r.thrust, 2)
         assert.equal(r.quantity, 1)
     })
 
-    test('higher FIN = lower loader mass', () => {
-        const low = computeLoaderCapabilities({hardness: 100, plasticity: 500})
-        const high = computeLoaderCapabilities({hardness: 900, plasticity: 500})
+    test('higher insulation = lower loader mass', () => {
+        const low = computeLoaderCapabilities({insulation: 100, plasticity: 500})
+        const high = computeLoaderCapabilities({insulation: 900, plasticity: 500})
         assert.isAbove(low.mass, high.mass)
     })
 
@@ -325,52 +325,52 @@ describe('ship deploy formulas', () => {
     })
 
     test('hauler formula exact values at min', () => {
-        const r = computeHaulerCapabilities({resonance: 1, conductivity: 1, reflectivity: 1})
+        const r = computeHaulerCapabilities({fineness: 1, conductivity: 1, composition: 1})
         assert.equal(r.capacity, 1)
         assert.equal(r.efficiency, 2006)
         assert.equal(r.drain, 15)
     })
 
     test('hauler formula exact values at mid', () => {
-        const r = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 500})
+        const r = computeHaulerCapabilities({fineness: 500, conductivity: 500, composition: 500})
         assert.equal(r.capacity, 2)
         assert.equal(r.efficiency, 5000)
         assert.equal(r.drain, 9)
     })
 
     test('hauler formula exact values at max', () => {
-        const r = computeHaulerCapabilities({resonance: 999, conductivity: 999, reflectivity: 999})
+        const r = computeHaulerCapabilities({fineness: 999, conductivity: 999, composition: 999})
         assert.equal(r.capacity, 3)
         assert.equal(r.efficiency, 7994)
         assert.equal(r.drain, 3)
     })
 
-    test('higher RES = higher hauler capacity', () => {
-        const low = computeHaulerCapabilities({resonance: 0, conductivity: 500, reflectivity: 500})
+    test('higher fineness = higher hauler capacity', () => {
+        const low = computeHaulerCapabilities({fineness: 0, conductivity: 500, composition: 500})
         const high = computeHaulerCapabilities({
-            resonance: 999,
+            fineness: 999,
             conductivity: 500,
-            reflectivity: 500,
+            composition: 500,
         })
         assert.isBelow(low.capacity, high.capacity)
     })
 
-    test('higher CON = higher hauler efficiency', () => {
-        const low = computeHaulerCapabilities({resonance: 500, conductivity: 0, reflectivity: 500})
+    test('higher conductivity = higher hauler efficiency', () => {
+        const low = computeHaulerCapabilities({fineness: 500, conductivity: 0, composition: 500})
         const high = computeHaulerCapabilities({
-            resonance: 500,
+            fineness: 500,
             conductivity: 999,
-            reflectivity: 500,
+            composition: 500,
         })
         assert.isBelow(low.efficiency, high.efficiency)
     })
 
-    test('higher REF = lower hauler drain', () => {
-        const low = computeHaulerCapabilities({resonance: 500, conductivity: 500, reflectivity: 0})
+    test('higher composition = lower hauler drain', () => {
+        const low = computeHaulerCapabilities({fineness: 500, conductivity: 500, composition: 0})
         const high = computeHaulerCapabilities({
-            resonance: 500,
+            fineness: 500,
             conductivity: 500,
-            reflectivity: 999,
+            composition: 999,
         })
         assert.isBelow(high.drain, low.drain)
     })
