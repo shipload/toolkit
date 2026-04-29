@@ -157,6 +157,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Projects a haul beam to lock onto and transport containers or warehouses through group travel.',
         color: '#4ADBFF',
     },
+    10107: {
+        name: 'Warp',
+        description:
+            'Folds local space-time around the hull, projecting the ship across vast distances in a single discharge of the entire energy reserve.',
+        color: '#9be4ff',
+    },
 
     // === Entities (packed, T1) ===
     10200: {

@@ -6,6 +6,7 @@ import {
     MODULE_GENERATOR,
     MODULE_LOADER,
     MODULE_STORAGE,
+    MODULE_WARP,
 } from '../capabilities/modules'
 import {
     ITEM_CONTAINER_T1_PACKED,
@@ -18,6 +19,7 @@ import {
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
     ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
 
@@ -53,6 +55,7 @@ export const computeLoaderMass = (fin: number): number => Math.max(200, 2000 - f
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (com: number): number => Math.max(5, 30 - idiv(com, 33))
+export const computeWarpRange = (stat: number): number => 100 + stat * 3
 
 export function entityDisplayName(itemId: number): string {
     switch (itemId) {
@@ -83,6 +86,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Crafter'
         case ITEM_STORAGE_T1:
             return 'Storage'
+        case ITEM_WARP_T1:
+            return 'Warp'
         default:
             return 'Module'
     }
@@ -140,6 +145,11 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const sum = str + fin + sat
             const pct = 10 + idiv(sum * 10, 2997)
             out += `  +${pct}% capacity`
+            break
+        }
+        case MODULE_WARP: {
+            const stat = decodeStat(stats, 0)
+            out += `  Range ${computeWarpRange(stat)}`
             break
         }
     }

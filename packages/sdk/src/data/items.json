@@ -214,6 +214,13 @@
     "subtype": "hauler"
   },
   {
+    "id": 10107,
+    "mass": 180000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "warp"
+  },
+  {
     "id": 10200,
     "mass": 80000,
     "type": "entity",

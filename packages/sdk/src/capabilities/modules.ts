@@ -6,6 +6,7 @@ import {
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
     ITEM_STORAGE_T1,
+    ITEM_WARP_T1,
 } from '../data/item-ids'
 
 export const MODULE_ANY = 0
@@ -49,6 +50,8 @@ export function getModuleCapabilityType(itemId: number): number {
             return MODULE_STORAGE
         case ITEM_HAULER_T1:
             return MODULE_HAULER
+        case ITEM_WARP_T1:
+            return MODULE_WARP
         default:
             return 0xff
     }

@@ -75,6 +75,7 @@ export const itemAbbreviations: Record<number, string> = {
     10103: 'LD',
     10104: 'MF',
     10105: 'ST',
+    10107: 'WP',
     10200: 'CT',
     10201: 'SH',
     10202: 'WH',
