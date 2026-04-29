@@ -22,6 +22,16 @@ permission = active
 ; running shiploadindex instance.
 ; [indexer]
 ; url = https://your-shiploadindex-host
+
+; Uncomment and set this to enable \`shiploadcli debug entity\`, \`debug code\`,
+; and \`debug setcodes\` cross-checks. The URL points at an Antelope chain v1 API.
+; [chain]
+; url = https://jungle4.greymass.com
+
+; Uncomment and set this to enable \`shiploadcli debug actions\`, \`debug setcodes\`,
+; and \`debug trace\`. The URL points at a roborovski actionstream HTTP frontend.
+; [history]
+; url = https://jungle4.roborovski.io
 `
 
 export interface InitOptions {

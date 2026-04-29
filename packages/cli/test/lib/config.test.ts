@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConfigError, getIndexerUrl, loadConfig } from "../../src/lib/config";
+import {
+	ConfigError,
+	getChainUrl,
+	getHistoryUrl,
+	getIndexerUrl,
+	loadConfig,
+} from "../../src/lib/config";
 
 describe("loadConfig", () => {
 	let tmpDir: string;
@@ -191,5 +197,79 @@ describe("loadConfig", () => {
 		process.env.PLAYER_CONFIG = iniPath;
 
 		expect(getIndexerUrl()).toBe("https://idx.example.com");
+	});
+
+	test("chain.url parsed when [chain] section present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[chain]\nurl=https://jungle4.greymass.com\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.chainUrl).toBe("https://jungle4.greymass.com");
+	});
+
+	test("history.url parsed when [history] section present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[history]\nurl=https://jungle4.roborovski.io\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.historyUrl).toBe("https://jungle4.roborovski.io");
+	});
+
+	test("chainUrl and historyUrl are undefined when sections absent", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.chainUrl).toBeUndefined();
+		expect(cfg.historyUrl).toBeUndefined();
+	});
+
+	test("getChainUrl throws ConfigError naming the section when missing", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(() => getChainUrl()).toThrow(ConfigError);
+		try {
+			getChainUrl();
+		} catch (err) {
+			expect((err as Error).message).toContain("[chain]");
+			expect((err as Error).message).toContain("url");
+		}
+	});
+
+	test("getHistoryUrl throws ConfigError naming the section when missing", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(() => getHistoryUrl()).toThrow(ConfigError);
+		try {
+			getHistoryUrl();
+		} catch (err) {
+			expect((err as Error).message).toContain("[history]");
+			expect((err as Error).message).toContain("url");
+		}
+	});
+
+	test("getChainUrl / getHistoryUrl return configured URLs when present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[chain]\nurl=https://chain.example\n\n[history]\nurl=https://history.example\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(getChainUrl()).toBe("https://chain.example");
+		expect(getHistoryUrl()).toBe("https://history.example");
 	});
 });

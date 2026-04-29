@@ -39,6 +39,7 @@ import * as status from './commands/query/status'
 import * as stratum from './commands/query/stratum'
 import * as tasks from './commands/query/tasks'
 import * as whoami from './commands/query/whoami'
+import * as debug from './commands/debug'
 import * as tools from './commands/tools'
 import * as update from './commands/update'
 import {parseEntityType} from './lib/args'
@@ -118,6 +119,7 @@ export function build(): Command {
     registerEntitySubcommand(track.SUBCOMMAND)
 
     tools.register(program)
+    debug.register(program)
 
     return program
 }

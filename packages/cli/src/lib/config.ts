@@ -19,6 +19,8 @@ export interface PlayerConfig {
 	/** Whether to auto-resolve completed tasks after waiting. Defaults to false. */
 	autoResolve: boolean;
 	indexerUrl?: string;
+	chainUrl?: string;
+	historyUrl?: string;
 }
 
 export interface LoadConfigOptions {
@@ -50,6 +52,8 @@ interface ParsedSection {
 	permission?: string;
 	autoResolve?: boolean;
 	indexerUrl?: string;
+	chainUrl?: string;
+	historyUrl?: string;
 }
 
 function parseBool(v: unknown): boolean | undefined {
@@ -66,12 +70,16 @@ function parseIniFile(path: string): ParsedSection {
 	const parsed = parseIni(contents) as Record<string, unknown>;
 	const section = (parsed.default ?? parsed) as Record<string, unknown>;
 	const indexer = (parsed.indexer ?? {}) as Record<string, unknown>;
+	const chain = (parsed.chain ?? {}) as Record<string, unknown>;
+	const history = (parsed.history ?? {}) as Record<string, unknown>;
 	return {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
 		permission: section.permission as string | undefined,
 		autoResolve: parseBool(section.auto_resolve),
 		indexerUrl: indexer.url as string | undefined,
+		chainUrl: chain.url as string | undefined,
+		historyUrl: history.url as string | undefined,
 	};
 }
 
@@ -136,6 +144,8 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		permission: fileData.permission ?? "active",
 		autoResolve: fileData.autoResolve ?? false,
 		indexerUrl: fileData.indexerUrl,
+		chainUrl: fileData.chainUrl,
+		historyUrl: fileData.historyUrl,
 		source,
 	};
 }
@@ -157,4 +167,42 @@ export function getIndexerUrl(): string {
 		);
 	}
 	return cfg.indexerUrl;
+}
+
+export function getChainUrl(): string {
+	const cfg = loadConfig();
+	if (!cfg.chainUrl) {
+		throw new ConfigError(
+			[
+				"Missing [chain] url in config.ini.",
+				"",
+				`Add to ${cfg.source}:`,
+				"",
+				"  [chain]",
+				"  url = https://jungle4.greymass.com",
+				"",
+				"This is required for `shiploadcli debug entity`, `debug code`, and `debug setcodes` (cross-check).",
+			].join("\n"),
+		);
+	}
+	return cfg.chainUrl;
+}
+
+export function getHistoryUrl(): string {
+	const cfg = loadConfig();
+	if (!cfg.historyUrl) {
+		throw new ConfigError(
+			[
+				"Missing [history] url in config.ini.",
+				"",
+				`Add to ${cfg.source}:`,
+				"",
+				"  [history]",
+				"  url = https://jungle4.roborovski.io",
+				"",
+				"This is required for `shiploadcli debug actions`, `debug setcodes`, and `debug trace`.",
+			].join("\n"),
+		);
+	}
+	return cfg.historyUrl;
 }
