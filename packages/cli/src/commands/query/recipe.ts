@@ -201,9 +201,7 @@ function trimEnds(s: string): string {
 export function renderList(recipes: Recipe[]): string {
     const lines = [`Recipes (${recipes.length}):`]
     for (const r of recipes) {
-        const inputs = r.inputs
-            .map((i) => `${i.quantity}× ${inputName(i)}`)
-            .join(' + ')
+        const inputs = r.inputs.map((i) => `${i.quantity}× ${inputName(i)}`).join(' + ')
         const output = itemName(r.output_item_id)
         lines.push(`  [${r.output_item_id}] ${output} ← ${inputs}`)
     }
@@ -249,8 +247,7 @@ export function renderDetail(r: Recipe): string {
 
     const blendWeights = Array.isArray(r.blend_weights) ? r.blend_weights : []
     const blended = blendWeights.length > 0
-    const hasIgnoredSources =
-        !blended && r.stat_slots.some((s) => s.sources.length > 1)
+    const hasIgnoredSources = !blended && r.stat_slots.some((s) => s.sources.length > 1)
 
     const slotHead = blended
         ? ['Idx', 'Output stat', 'Source input', 'Source stat', 'Weight']
@@ -276,7 +273,9 @@ export function renderDetail(r: Recipe): string {
         for (let s = 0; s < sources.length; s++) {
             const src = sources[s]
             const inp = r.inputs[src.input_index]
-            const sourceInput = inp ? `[${src.input_index}] ${inputName(inp)}` : `[${src.input_index}]`
+            const sourceInput = inp
+                ? `[${src.input_index}] ${inputName(inp)}`
+                : `[${src.input_index}]`
             const sourceStat = resolveSourceStatLabel(
                 r.inputs,
                 src.input_index,
@@ -332,35 +331,30 @@ export function register(program: Command): void {
         .argument('[id]', 'output item id (omit to list all)', parseUint32)
         .option('--tier <n>', 'filter list by output tier', parseUint32)
         .option('--json', 'emit JSON instead of formatted text')
-        .action(
-            async (
-                id: number | undefined,
-                opts: {tier?: number; json?: boolean}
-            ) => {
-                if (id === undefined) {
-                    let recipes = await fetchAllRecipes()
-                    if (opts.tier !== undefined) {
-                        recipes = recipes.filter((r) => {
-                            try {
-                                return getItem(r.output_item_id).tier === opts.tier
-                            } catch {
-                                return false
-                            }
-                        })
-                    }
-                    console.log(formatOutput(recipes, {json: Boolean(opts.json)}, renderList))
-                    return
+        .action(async (id: number | undefined, opts: {tier?: number; json?: boolean}) => {
+            if (id === undefined) {
+                let recipes = await fetchAllRecipes()
+                if (opts.tier !== undefined) {
+                    recipes = recipes.filter((r) => {
+                        try {
+                            return getItem(r.output_item_id).tier === opts.tier
+                        } catch {
+                            return false
+                        }
+                    })
                 }
-                const res = (await server.readonly('getrecipe', {
-                    output_item_id: id,
-                })) as unknown as {recipes: Recipe[]}
-                const recipe = res.recipes?.[0]
-                if (!recipe) {
-                    console.error(`No recipe with output item id ${id}`)
-                    process.exitCode = 1
-                    return
-                }
-                console.log(formatOutput(recipe, {json: Boolean(opts.json)}, renderDetail))
+                console.log(formatOutput(recipes, {json: Boolean(opts.json)}, renderList))
+                return
             }
-        )
+            const res = (await server.readonly('getrecipe', {
+                output_item_id: id,
+            })) as unknown as {recipes: Recipe[]}
+            const recipe = res.recipes?.[0]
+            if (!recipe) {
+                console.error(`No recipe with output item id ${id}`)
+                process.exitCode = 1
+                return
+            }
+            console.log(formatOutput(recipe, {json: Boolean(opts.json)}, renderDetail))
+        })
 }
