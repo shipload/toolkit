@@ -34,7 +34,7 @@ import * as nftinfo from './commands/query/nftinfo'
 import * as player from './commands/query/player'
 import * as recipe from './commands/query/recipe'
 import * as resources from './commands/query/resources'
-import * as shipLocation from './commands/query/ship-location'
+import * as gatherable from './commands/query/gatherable'
 import * as status from './commands/query/status'
 import * as stratum from './commands/query/stratum'
 import * as tasks from './commands/query/tasks'
@@ -86,7 +86,7 @@ export function build(): Command {
     registerEntitySubcommand(history.SUBCOMMAND)
     location.register(program)
     registerEntitySubcommand(nearby.SUBCOMMAND)
-    registerEntitySubcommand(shipLocation.SUBCOMMAND)
+    registerEntitySubcommand(gatherable.SUBCOMMAND)
     items.register(program)
     recipe.register(program)
     config.register(program)
