@@ -1,14 +1,26 @@
 import {expect, test} from 'bun:test'
-import {render} from '../../../src/commands/query/items'
+import {getItem} from '@shipload/sdk'
+import {renderPretty} from '../../../src/commands/query/items'
 
-test('items renders list with item name resolved via formatItem', () => {
-    const out = render([{id: 501, mass: 42000, tier: 1, type: 0}] as any, false)
-    expect(out).toContain('Crude Biomass')
-    expect(out).toContain('mass 42000')
+test('items renders list with item name and tonnes mass', () => {
+    const out = renderPretty([getItem(501)])
+    expect(out).toContain('Biomass')
+    expect(out).toContain('42 t')
+    expect(out).not.toContain('42000')
 })
 
-test('items --raw emits JSON', () => {
-    const out = render([{id: 501, mass: 10}] as any, true)
-    expect(out).toContain('"id"')
-    expect(out).toContain('"mass"')
+test('items shows module subtype in Type column', () => {
+    const out = renderPretty([getItem(10100), getItem(10102)])
+    expect(out).toContain('Engine module')
+    expect(out).toContain('Gatherer module')
+})
+
+test('items shows category column for resources', () => {
+    const out = renderPretty([getItem(101)])
+    expect(out).toContain('Ore')
+})
+
+test('items list header reflects count', () => {
+    const out = renderPretty([getItem(101), getItem(201)])
+    expect(out).toContain('Items (2)')
 })
