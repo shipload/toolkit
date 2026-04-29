@@ -9,15 +9,29 @@ import {formatOutput} from '../../lib/format'
 export interface InventoryData {
     entityType: string
     id: bigint
-    cargo: ServerTypes.cargo_item[]
+    cargo: ServerTypes.cargo_view[]
 }
 
-export function render(entityType: string, id: bigint, cargo: ServerTypes.cargo_item[]): string {
+export function render(entityType: string, id: bigint, cargo: ServerTypes.cargo_view[]): string {
     const header = `Inventory for ${entityType} ${id}:`
     if (cargo.length === 0) return `${header}\n  (empty)`
 
-    const sorted = [...cargo].sort((a, b) => Number(a.item_id) - Number(b.item_id))
-    const table = formatCargoTable(sorted)
+    const sorted = [...cargo].sort((a, b) => {
+        const itemDiff = Number(a.item_id) - Number(b.item_id)
+        if (itemDiff !== 0) return itemDiff
+        const aIdRaw = (a as any).id
+        const bIdRaw = (b as any).id
+        const aId = aIdRaw === undefined || aIdRaw === null ? 0n : BigInt(aIdRaw.toString())
+        const bId = bIdRaw === undefined || bIdRaw === null ? 0n : BigInt(bIdRaw.toString())
+        if (aId === 0n && bId !== 0n) return 1
+        if (bId === 0n && aId !== 0n) return -1
+        if (aId < bId) return -1
+        if (aId > bId) return 1
+        return 0
+    })
+    const table = formatCargoTable(sorted, {
+        columns: ['rowId', 'item', 'itemId', 'stack', 'qty', 'each', 'mass', 'stats'],
+    })
     return `${header}\n${table}`
 }
 
@@ -25,7 +39,7 @@ export async function runInventory(ctx: EntityContext, opts: {json?: boolean}): 
     const info = (await server.readonly('getentity', {
         entity_type: ctx.entityType,
         entity_id: ctx.entityId,
-    })) as {cargo?: ServerTypes.cargo_item[]}
+    })) as {cargo?: ServerTypes.cargo_view[]}
     const data: InventoryData = {
         entityType: ctx.entityType,
         id: ctx.entityId,

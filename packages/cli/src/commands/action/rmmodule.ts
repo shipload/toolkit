@@ -46,7 +46,9 @@ export async function runRmModule(
     await transact(
         {action},
         {
-            description: `Removing module from ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
+            description:
+                `Removing module from ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}` +
+                (options.target ? ` (packed in cargo row ${options.target})` : ''),
         }
     )
 }
@@ -58,11 +60,15 @@ export const SUBCOMMAND: EntitySubcommand = {
     build: (ctx) =>
         new Command('rmmodule')
             .description('Remove a module from the ship')
-            .addHelpText('before', 'Requires: ship idle; module slot occupied.\n')
+            .addHelpText(
+                'before',
+                'Requires: ship idle; module slot occupied. ' +
+                    '`--target` takes a cargo-table row id (use the "Row ID" column from `inventory`).\n'
+            )
             .argument('<module-index>', 'module slot index', parseUint32)
             .option(
-                '--target <id>',
-                'target cargo id (for modules on cargo NFTs; default 0)',
+                '--target <row-id>',
+                'cargo row id of a packed-entity cargo to remove the module from (default 0 = the live entity itself)',
                 parseUint64
             )
             .option('--auto-resolve', 'resolve completed tasks on the target entity before acting')

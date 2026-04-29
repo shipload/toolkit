@@ -1,8 +1,14 @@
 import {describe, expect, test} from 'bun:test'
-import {render} from '../../../src/commands/query/inventory'
+import {render, SUBCOMMAND, SUBCOMMAND_CARGO_ALIAS} from '../../../src/commands/query/inventory'
 
-function stack(itemId: number, quantity: number, stats: bigint) {
-    return {item_id: itemId, quantity, stats, modules: []}
+function row(itemId: number, quantity: number, stats: bigint, id: bigint | undefined = undefined) {
+    return {
+        item_id: itemId,
+        quantity,
+        stats,
+        modules: [],
+        ...(id !== undefined ? {id} : {}),
+    } as any
 }
 
 describe('inventory.render', () => {
@@ -12,42 +18,44 @@ describe('inventory.render', () => {
         expect(out.toLowerCase()).toContain('empty')
     })
 
-    test('non-empty cargo prints a table with item-id and stack-id columns', () => {
-        const out = render('ship', 1n, [stack(301, 32, 214202522n), stack(201, 5, 999n)])
-        expect(out).toContain('Item')
+    test('non-empty cargo includes a Row ID column', () => {
+        const out = render('ship', 1n, [row(301, 32, 214202522n, 7n), row(201, 5, 999n, 11n)])
+        expect(out).toContain('Row ID')
         expect(out).toContain('Item ID')
         expect(out).toContain('Stack ID')
         expect(out).toContain('Qty')
         expect(out).toContain('301')
-        expect(out).toContain('214202522')
-        expect(out).toContain('32')
         expect(out).toContain('201')
-        expect(out).toContain('999')
+        expect(out).toContain('7')
+        expect(out).toContain('11')
     })
 
-    test('multiple stacks of same item appear as separate rows', () => {
-        const out = render('ship', 1n, [stack(301, 11, 1000n), stack(301, 21, 2000n)])
+    test('projected-only stacks (no row id) render —', () => {
+        const out = render('ship', 1n, [row(301, 1, 0n, 0n)])
+        expect(out).toContain('—')
+    })
+
+    test('rows sort by item-id ascending then row-id ascending; projected-only last within an item-id', () => {
+        const out = render('ship', 1n, [
+            row(501, 1, 0n, 9n),
+            row(301, 1, 0n, 5n),
+            row(101, 1, 0n, 0n),
+            row(101, 1, 1n, 3n),
+            row(101, 1, 2n, 2n),
+        ])
         const lines = out.split('\n')
-        const stack1Row = lines.find((l) => l.includes('1000'))
-        const stack2Row = lines.find((l) => l.includes('2000'))
-        expect(stack1Row).toBeDefined()
-        expect(stack2Row).toBeDefined()
-        expect(stack1Row).toContain('11')
-        expect(stack2Row).toContain('21')
-    })
-
-    test('rows sorted by item-id ascending', () => {
-        const out = render('ship', 1n, [stack(501, 1, 0n), stack(101, 1, 0n), stack(301, 1, 0n)])
-        const idx101 = out.indexOf('101')
-        const idx301 = out.indexOf('301')
-        const idx501 = out.indexOf('501')
-        expect(idx101).toBeGreaterThan(0)
-        expect(idx101).toBeLessThan(idx301)
-        expect(idx301).toBeLessThan(idx501)
+        const idxRow2 = lines.findIndex((l) => /\b2\b/.test(l) && l.includes('101'))
+        const idxRow3 = lines.findIndex((l) => /\b3\b/.test(l) && l.includes('101'))
+        const idxDash = lines.findIndex((l) => l.includes('—') && l.includes('101'))
+        const idxRow5 = lines.findIndex((l) => /\b5\b/.test(l) && l.includes('301'))
+        const idxRow9 = lines.findIndex((l) => /\b9\b/.test(l) && l.includes('501'))
+        expect(idxRow2).toBeGreaterThan(-1)
+        expect(idxRow2).toBeLessThan(idxRow3)
+        expect(idxRow3).toBeLessThan(idxDash)
+        expect(idxDash).toBeLessThan(idxRow5)
+        expect(idxRow5).toBeLessThan(idxRow9)
     })
 })
-
-import {SUBCOMMAND, SUBCOMMAND_CARGO_ALIAS} from '../../../src/commands/query/inventory'
 
 describe('cargo alias', () => {
     test("alias subcommand exists with name 'cargo'", () => {
