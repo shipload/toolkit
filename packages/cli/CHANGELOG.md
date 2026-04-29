@@ -1,5 +1,13 @@
 # @shipload/cli
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Cargo rework + warp + module add/remove
+- Updated dependencies
+  - @shipload/sdk@1.0.0-next.3
+
 ## 1.0.0-next.3
 
 ### Patch Changes
