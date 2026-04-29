@@ -21,6 +21,7 @@ import {
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
 import type { ServerTypes } from "@shipload/sdk";
+import { formatCargoTable } from "./cargo-table";
 import { shallowestPerItem } from "./reach";
 
 export function kvTable(rows: [string, string][], opts: { indent?: string } = {}): string {
@@ -237,29 +238,6 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 	return `${ref.entityType}:${ref.entityId}`;
 }
 
-function formatCargoItem(c:ServerTypes.cargo_item): string {
-	const itemId = Number(c.item_id);
-	const name = displayName(resolveItem(itemId));
-	const qty = Number(c.quantity);
-
-	let massStr = "";
-	try {
-		massStr = `    ${formatMass(getItem(itemId).mass * qty)}`;
-	} catch {}
-
-	const stackId = BigInt(c.stats.toString());
-	const statsStr = formatStats(stackId, itemId);
-	const statsDisplay = statsStr ? `    ${statsStr}` : "";
-	const stackRaw = `    stack=${stackId}`;
-
-	return `${qty} × ${name}${statsDisplay}${massStr}${stackRaw}`;
-}
-
-export function formatCargo(cargo:ServerTypes.cargo_item[]): string {
-	if (cargo.length === 0) return "";
-	return cargo.map(formatCargoItem).join("\n");
-}
-
 export function formatPlayer(player:ServerTypes.player_info): string {
 	const lines = [
 		`${player.company_name || "No Company"} (${player.owner})`,
@@ -290,25 +268,31 @@ export function formatEntity(entity:ServerTypes.entity_info): string {
 	const header = `${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`;
 	const sections: string[] = [];
 
-	const statRows: [string, string][] = [];
+	const statusRows: [string, string][] = [];
 	const statusStr = entity.is_idle ? "idle" : "busy";
-	statRows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
+	statusRows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
 
 	if (!entity.is_idle && entity.current_task) {
 		const remaining = formatDuration(Number(entity.current_task_remaining));
-		statRows.push([
+		statusRows.push([
 			"Task:",
 			`${formatTaskShort(entity.current_task)}  ·  ${remaining} remaining`,
 		]);
 	}
 
+	sections.push([header, kvTable(statusRows)].join("\n"));
+
+	const specsRows: [string, string][] = [];
+	if (entity.hullmass) {
+		specsRows.push(["Hull:", formatMass(Number(entity.hullmass))]);
+	}
 	if (entity.generator) {
 		const elapsedMs = entity.is_idle
 			? undefined
 			: Number(entity.current_task_elapsed ?? 0) * 1000;
 		const activeTaskStartedAt =
 			elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
-		statRows.push([
+		specsRows.push([
 			"Energy:",
 			formatLiveEnergy({
 				storedEnergy: Number(entity.energy ?? 0),
@@ -318,26 +302,21 @@ export function formatEntity(entity:ServerTypes.entity_info): string {
 			}),
 		]);
 	}
-
-	if (entity.hullmass) {
-		statRows.push(["Hull:", formatMass(Number(entity.hullmass))]);
-	}
-
-	if (entity.capacity != null) {
-		statRows.push([
-			"Cargo:",
-			formatCargoUsage(Number(entity.cargomass ?? 0), Number(entity.capacity)),
-		]);
-		for (const c of entity.cargo ?? []) {
-			statRows.push(["", formatCargoItem(c)]);
-		}
-	}
-
-	sections.push([header, kvTable(statRows)].join("\n"));
-
 	const isShip = String(entity.type) === "ship";
-	const moduleRows = buildModuleRows(entity, isShip);
-	if (moduleRows.length > 0) sections.push(kvTable(moduleRows));
+	specsRows.push(...buildModuleRows(entity, isShip));
+	if (specsRows.length > 0) sections.push(kvTable(specsRows));
+
+	const cargo = entity.cargo ?? [];
+	if (entity.capacity != null) {
+		const cargoHeader = `  Cargo: ${formatCargoUsage(Number(entity.cargomass ?? 0), Number(entity.capacity))}`;
+		const cargoBlock =
+			cargo.length > 0
+				? [cargoHeader, formatCargoTable(cargo, { indent: "  " })].join("\n")
+				: cargoHeader;
+		sections.push(cargoBlock);
+	} else if (cargo.length > 0) {
+		sections.push(formatCargoTable(cargo, { indent: "  " }));
+	}
 
 	if ((entity.pending_tasks?.length ?? 0) > 0) {
 		sections.push(

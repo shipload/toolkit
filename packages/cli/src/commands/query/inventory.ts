@@ -1,67 +1,31 @@
-import {displayName, formatMass, getItem, resolveItem} from '@shipload/sdk'
-import Table from 'cli-table3'
 import {Command} from 'commander'
+import type {ServerTypes} from '@shipload/sdk'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
+import {formatCargoTable} from '../../lib/cargo-table'
 import {server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {formatOutput, formatStats} from '../../lib/format'
+import {formatOutput} from '../../lib/format'
 
 export interface InventoryData {
     entityType: string
     id: bigint
-    cargo: any[]
+    cargo: ServerTypes.cargo_item[]
 }
 
-export function render(entityType: string, id: bigint, cargo: any[]): string {
+export function render(entityType: string, id: bigint, cargo: ServerTypes.cargo_item[]): string {
     const header = `Inventory for ${entityType} ${id}:`
     if (cargo.length === 0) return `${header}\n  (empty)`
 
     const sorted = [...cargo].sort((a, b) => Number(a.item_id) - Number(b.item_id))
-
-    const table = new Table({
-        head: ['Item', 'Item ID', 'Stack ID', 'Qty', 'Stats', 'Mass'],
-        chars: {
-            top: '',
-            'top-mid': '',
-            'top-left': '',
-            'top-right': '',
-            bottom: '',
-            'bottom-mid': '',
-            'bottom-left': '',
-            'bottom-right': '',
-            left: '',
-            'left-mid': '',
-            mid: '',
-            'mid-mid': '',
-            right: '',
-            'right-mid': '',
-            middle: ' ',
-        },
-        style: {'padding-left': 0, 'padding-right': 2, head: [], border: []},
-    })
-
-    for (const c of sorted) {
-        const itemId = Number(c.item_id)
-        const stackId = BigInt(c.stats.toString())
-        const qty = Number(c.quantity)
-        let name = `Item ${itemId}`
-        let mass = ''
-        try {
-            name = displayName(resolveItem(itemId))
-            mass = formatMass(getItem(itemId).mass * qty)
-        } catch {}
-        const decoded = formatStats(stackId, itemId) ?? ''
-        table.push([name, String(itemId), String(stackId), String(qty), decoded, mass])
-    }
-
-    return `${header}\n${table.toString()}`
+    const table = formatCargoTable(sorted)
+    return `${header}\n${table}`
 }
 
 export async function runInventory(ctx: EntityContext, opts: {json?: boolean}): Promise<void> {
     const info = (await server.readonly('getentity', {
         entity_type: ctx.entityType,
         entity_id: ctx.entityId,
-    })) as any
+    })) as {cargo?: ServerTypes.cargo_item[]}
     const data: InventoryData = {
         entityType: ctx.entityType,
         id: ctx.entityId,

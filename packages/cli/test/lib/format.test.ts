@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { encodeStats, TaskType } from "@shipload/sdk";
 import { Checksum256, UInt64 } from "@wharfkit/antelope";
+import { formatCargoTable } from "../../src/lib/cargo-table";
 import {
-	formatCargo,
 	formatEntity,
 	formatInstallHint,
 	formatLiveEnergy,
@@ -347,15 +347,15 @@ describe("formatEntity — empty name", () => {
 	});
 });
 
-describe("formatCargo stack suffix", () => {
-	test("appends stack=<uint> to each stack line", () => {
+describe("formatCargoTable stack column", () => {
+	test("includes the raw stack identifier for each row", () => {
 		const cargo = [{ item_id: 201, quantity: 45, stats: 251479207179n, modules: [] } as any];
-		const out = formatCargo(cargo);
-		expect(out).toContain("stack=251479207179");
+		const out = formatCargoTable(cargo);
+		expect(out).toContain("251479207179");
 	});
-	test("stack=0 still rendered so the discriminator is always visible", () => {
+	test("renders 0 stack so the discriminator is always visible", () => {
 		const cargo = [{ item_id: 10200, quantity: 1, stats: 0n, modules: [] } as any];
-		const out = formatCargo(cargo);
-		expect(out).toContain("stack=0");
+		const out = formatCargoTable(cargo);
+		expect(out).toMatch(/\b0\b/);
 	});
 });
