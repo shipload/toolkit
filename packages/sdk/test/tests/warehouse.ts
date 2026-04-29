@@ -10,15 +10,16 @@ function mockLoaderModules() {
 }
 
 function createCargoItem(goodId: number, quantity: number) {
-    return ServerContract.Types.cargo_item.from({
+    return ServerContract.Types.cargo_view.from({
         item_id: goodId,
         quantity,
         stats: UInt64.from(0),
         modules: [],
+        id: UInt64.from(0),
     })
 }
 
-function makeStationaryWarehouse(cargo: ServerContract.Types.cargo_item[] = []) {
+function makeStationaryWarehouse(cargo: ServerContract.Types.cargo_view[] = []) {
     return makeWarehouse({
         id: UInt64.from(1),
         owner: 'teamgreymass',

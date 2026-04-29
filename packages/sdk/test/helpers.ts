@@ -60,13 +60,14 @@ export function makeShipFixture(
         energy?: number
     } = {}
 ) {
-    const cargoItems = (overrides.cargo ?? []).map((item) => {
+    const cargoItems = (overrides.cargo ?? []).map((item, idx) => {
         ensureTestItem(item.item_id, item.mass)
-        return ServerContract.Types.cargo_item.from({
+        return ServerContract.Types.cargo_view.from({
             item_id: UInt16.from(item.item_id),
             quantity: UInt32.from(item.quantity),
             stats: item.stats !== undefined ? UInt64.from(item.stats) : UInt64.from(0),
             modules: [],
+            id: UInt64.from(idx),
         })
     })
 

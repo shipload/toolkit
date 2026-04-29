@@ -24,18 +24,19 @@ function mockModules() {
 }
 
 function createCargoItem(goodId: number, quantity: number) {
-    return ServerContract.Types.cargo_item.from({
+    return ServerContract.Types.cargo_view.from({
         item_id: goodId,
         quantity: UInt32.from(quantity),
         stats: UInt64.from(0),
         modules: [],
+        id: UInt64.from(0),
     })
 }
 
 interface ShipOverrides {
     capacity?: number
     energy?: number
-    cargo?: ServerContract.Types.cargo_item[]
+    cargo?: ServerContract.Types.cargo_view[]
 }
 
 function makeStationaryShip(overrides: ShipOverrides = {}) {

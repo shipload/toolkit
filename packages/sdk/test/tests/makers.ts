@@ -198,11 +198,12 @@ describe('makeContainer factory', () => {
             hullmass: 50000,
             capacity: 1_000_000,
             cargo: [
-                ServerContract.Types.cargo_item.from({
+                ServerContract.Types.cargo_view.from({
                     item_id: UInt16.from(100),
                     quantity: UInt32.from(42),
                     stats: UInt64.from(0),
                     modules: [],
+                    id: UInt64.from(0),
                 }),
             ],
         })
