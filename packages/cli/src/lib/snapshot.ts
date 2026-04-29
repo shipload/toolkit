@@ -15,6 +15,9 @@ export interface EntitySnapshot {
 	cargo: {
 		item_id: number | bigint | { toString(): string };
 		quantity: number | bigint | { toString(): string };
+		stats?: bigint | number | { toString(): string };
+		modules?: unknown[];
+		id?: number | bigint | { toString(): string };
 	}[];
 	capacity?: number | bigint | { toString(): string };
 	energy?: number | bigint | { toString(): string };
