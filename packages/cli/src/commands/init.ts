@@ -16,6 +16,12 @@ permission = active
 
 ; Automatically resolve completed tasks after wait/track finishes. Defaults to false.
 ; auto_resolve = false
+
+; Uncomment and set this to enable \`shiploadcli history\` and entity history
+; subcommands (e.g. \`shiploadcli ship 1 history\`). The URL points at a
+; running shiploadindex instance.
+; [indexer]
+; url = https://your-shiploadindex-host
 `
 
 export interface InitOptions {

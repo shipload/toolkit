@@ -18,6 +18,7 @@ export interface PlayerConfig {
 	source: string;
 	/** Whether to auto-resolve completed tasks after waiting. Defaults to false. */
 	autoResolve: boolean;
+	indexerUrl?: string;
 }
 
 export interface LoadConfigOptions {
@@ -48,6 +49,7 @@ interface ParsedSection {
 	actor?: string;
 	permission?: string;
 	autoResolve?: boolean;
+	indexerUrl?: string;
 }
 
 function parseBool(v: unknown): boolean | undefined {
@@ -63,11 +65,13 @@ function parseIniFile(path: string): ParsedSection {
 	const contents = readFileSync(path, "utf8");
 	const parsed = parseIni(contents) as Record<string, unknown>;
 	const section = (parsed.default ?? parsed) as Record<string, unknown>;
+	const indexer = (parsed.indexer ?? {}) as Record<string, unknown>;
 	return {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
 		permission: section.permission as string | undefined,
 		autoResolve: parseBool(section.auto_resolve),
+		indexerUrl: indexer.url as string | undefined,
 	};
 }
 
@@ -131,6 +135,26 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		actor: fileData.actor,
 		permission: fileData.permission ?? "active",
 		autoResolve: fileData.autoResolve ?? false,
+		indexerUrl: fileData.indexerUrl,
 		source,
 	};
+}
+
+export function getIndexerUrl(): string {
+	const cfg = loadConfig();
+	if (!cfg.indexerUrl) {
+		throw new ConfigError(
+			[
+				"Missing [indexer] url in config.ini.",
+				"",
+				`Add to ${cfg.source}:`,
+				"",
+				"  [indexer]",
+				"  url = https://your-shiploadindex-host",
+				"",
+				"This is required for `shiploadcli history` and any entity history subcommand.",
+			].join("\n"),
+		);
+	}
+	return cfg.indexerUrl;
 }

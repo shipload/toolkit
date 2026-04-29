@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConfigError, loadConfig } from "../../src/lib/config";
+import { ConfigError, getIndexerUrl, loadConfig } from "../../src/lib/config";
 
 describe("loadConfig", () => {
 	let tmpDir: string;
@@ -145,5 +145,51 @@ describe("loadConfig", () => {
 			expect((err as Error).message).toContain(missingPath);
 			expect((err as Error).message).toContain("does not exist");
 		}
+	});
+
+	test("indexer.url parsed when [indexer] section present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[indexer]\nurl=https://idx.example.com\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.indexerUrl).toBe("https://idx.example.com");
+	});
+
+	test("indexerUrl is undefined when [indexer] section is absent", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.indexerUrl).toBeUndefined();
+	});
+
+	test("getIndexerUrl throws ConfigError naming the section when missing", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(() => getIndexerUrl()).toThrow(ConfigError);
+		try {
+			getIndexerUrl();
+		} catch (err) {
+			expect((err as Error).message).toContain("[indexer]");
+			expect((err as Error).message).toContain("url");
+		}
+	});
+
+	test("getIndexerUrl returns the configured URL when present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[indexer]\nurl=https://idx.example.com\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(getIndexerUrl()).toBe("https://idx.example.com");
 	});
 });

@@ -24,6 +24,7 @@ import * as config from './commands/query/config'
 import * as entities from './commands/query/entities'
 import * as entity from './commands/query/entity'
 import * as epoch from './commands/query/epoch'
+import * as history from './commands/query/history'
 import * as inventory from './commands/query/inventory'
 import * as items from './commands/query/items'
 import * as location from './commands/query/location'
@@ -80,6 +81,8 @@ export function build(): Command {
     buildEntityParent(program, 'container', entity.defaultShow)
     buildEntityParent(program, 'warehouse', entity.defaultShow)
     entities.register(program)
+    history.register(program)
+    registerEntitySubcommand(history.SUBCOMMAND)
     location.register(program)
     registerEntitySubcommand(nearby.SUBCOMMAND)
     registerEntitySubcommand(shipLocation.SUBCOMMAND)
