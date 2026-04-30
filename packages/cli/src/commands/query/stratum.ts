@@ -1,8 +1,9 @@
-import {encodeStats, resolveItemCategory} from '@shipload/sdk'
+import {encodeStats} from '@shipload/sdk'
 import type {Command} from 'commander'
 import {type EntityRef, parseEntityRef, parseInt64, parseUint32} from '../../lib/args'
 import {server} from '../../lib/client'
-import {formatItem, formatOutput, formatReserve, formatStats} from '../../lib/format'
+import {formatItem, formatOutput, formatReserve} from '../../lib/format'
+import {formatItemStats} from '../../lib/item-stats'
 import {loadLocationStrata} from '../../lib/location-loader'
 import {renderStrata} from '../../lib/strata-render'
 
@@ -22,9 +23,8 @@ export function renderDetail(s: any, stats: any, index: number): string {
         `  Seed:     ${s.seed}`,
     ]
     if (stats) {
-        const category = resolveItemCategory(itemId)
         const packed = encodeStats([Number(stats.stat1), Number(stats.stat2), Number(stats.stat3)])
-        lines.push(`  Stats:    ${formatStats(packed, category ?? itemId)}`)
+        lines.push(`  Stats:    ${formatItemStats(itemId, packed)}`)
     }
     return lines.join('\n')
 }

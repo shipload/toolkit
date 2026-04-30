@@ -1,7 +1,8 @@
 import type {Command} from 'commander'
 import {type EntityTypeName, parseEntityType} from '../../lib/args'
 import {server} from '../../lib/client'
-import {formatEntity, formatOutput} from '../../lib/format'
+import {renderEntityFull} from '../../lib/entity-header'
+import {formatOutput} from '../../lib/format'
 import {getAccountName} from '../../lib/session'
 
 interface EntitySummary {
@@ -57,7 +58,7 @@ export function renderSummaries(owner: string, rows: EntitySummary[]): string {
 export function renderFull(owner: string, rows: any[]): string {
     const header = `Entities for ${owner} (${rows.length}):`
     if (rows.length === 0) return header
-    return [header, ...rows.map((r) => formatEntity(r))].join('\n\n')
+    return [header, ...rows.map((r) => renderEntityFull(r))].join('\n\n')
 }
 
 async function runEntities(

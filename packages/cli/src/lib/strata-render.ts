@@ -1,6 +1,7 @@
 import { encodeStats, type LocationStratum, type LocationType } from "@shipload/sdk";
 import Table from "cli-table3";
-import { formatItem, formatStats } from "./format";
+import { formatItem } from "./format";
+import { formatItemStats } from "./item-stats";
 
 export interface StrataRenderOpts {
 	coords: { x: bigint; y: bigint };
@@ -114,7 +115,7 @@ export function renderStrataTable(opts: StrataRenderOpts): string {
 			formatPercent(s.reserve, s.reserveMax),
 			String(s.richness),
 			s.stats
-				? formatStats(encodeStats([s.stats.stat1, s.stats.stat2, s.stats.stat3]), s.itemId)
+				? formatItemStats(s.itemId, encodeStats([s.stats.stat1, s.stats.stat2, s.stats.stat3]))
 				: "",
 		];
 		if (showReachCol) cells.push(r.reachable ? "✓" : "OOD");

@@ -1,27 +1,16 @@
 import {
-	decodeStats,
 	deriveLocationSize,
 	deriveLocationStatic,
 	deriveStratum,
 	displayName,
 	formatMass,
-	getItem,
 	getLocationType,
-	getModuleCapabilityType,
-	getStatDefinitions,
 	LocationType,
-	type ProjectableSnapshot,
-	type ProjectedEntity,
-	projectFromCurrentState,
-	type ResourceCategory,
 	resolveItem,
-	resolveItemCategory,
-	schedule,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
 import type { ServerTypes } from "@shipload/sdk";
-import { formatCargoTable } from "./cargo-table";
 import { shallowestPerItem } from "./reach";
 
 export function kvTable(rows: [string, string][], opts: { indent?: string } = {}): string {
@@ -123,29 +112,6 @@ export function projectEnergy(
 	);
 }
 
-export function formatLiveEnergy({
-	storedEnergy,
-	capacity,
-	recharge,
-	drainPerSec = 0,
-	activeTaskStartedAt,
-	now = new Date(),
-}: {
-	storedEnergy: number;
-	capacity: number;
-	recharge: number;
-	drainPerSec?: number;
-	activeTaskStartedAt?: Date;
-	now?: Date;
-}): string {
-	if (!activeTaskStartedAt) {
-		return `${storedEnergy}/${capacity} (recharge: ${recharge}/s)`;
-	}
-	const elapsed_s = (now.getTime() - activeTaskStartedAt.getTime()) / 1000;
-	const projected = projectEnergy(storedEnergy, capacity, recharge, drainPerSec, elapsed_s);
-	return `${storedEnergy} → ${projected}/${capacity} (live, recharge: ${recharge}/s)`;
-}
-
 export function formatTimeUTC(d: Date): string {
 	return `${d.toISOString().slice(11, 19)} UTC`;
 }
@@ -203,30 +169,6 @@ export function formatResolveHint(
 	return `${completedCount} completed task(s) need resolve — run: shiploadcli ${entityType} ${entityId} resolve`;
 }
 
-export function formatStats(
-	packed: bigint | number | string | { toString(): string },
-	itemIdOrCategory?: number | ResourceCategory,
-): string {
-	const s = typeof packed === "bigint" ? packed : BigInt(String(packed));
-	if (s === 0n) return "";
-	const values = decodeStats(s, 6);
-	while (values.length > 3 && values[values.length - 1] === 0) values.pop();
-
-	let category: ResourceCategory | undefined;
-	if (typeof itemIdOrCategory === "string") {
-		category = itemIdOrCategory as ResourceCategory;
-	} else if (typeof itemIdOrCategory === "number") {
-		category = resolveItemCategory(itemIdOrCategory);
-	}
-	if (category) {
-		const defs = getStatDefinitions(category);
-		return values
-			.map((v, i) => (defs[i] ? `${defs[i].abbreviation} ${v}` : String(v)))
-			.join(" / ");
-	}
-	return values.join("/");
-}
-
 export function formatReserve(reserve: number, reserveMax: number): string {
 	if (reserveMax === 0) return "0";
 	if (reserve === reserveMax) return `${reserveMax}`;
@@ -247,198 +189,6 @@ export function formatPlayer(player:ServerTypes.player_info): string {
 		lines.unshift("[Not in game]");
 	}
 	return lines.join("\n");
-}
-
-function resolvedModuleNames(modules:ServerTypes.entity_info["modules"]): Map<number, string> {
-	const map = new Map<number, string>();
-	for (const m of modules ?? []) {
-		if (!m.installed) continue;
-		const itemId = Number(m.installed.item_id);
-		try {
-			const capType = getModuleCapabilityType(itemId);
-			map.set(capType, displayName(resolveItem(itemId)));
-		} catch {}
-	}
-	return map;
-}
-
-export function formatEntity(entity:ServerTypes.entity_info): string {
-	const trimmedName = entity.entity_name?.trim() ?? "";
-	const namePart = trimmedName ? ` "${trimmedName}"` : "";
-	const header = `${entity.type} ${entity.id}${namePart} owned by ${entity.owner}`;
-	const sections: string[] = [];
-
-	const statusRows: [string, string][] = [];
-	const statusStr = entity.is_idle ? "idle" : "busy";
-	statusRows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
-
-	if (!entity.is_idle && entity.current_task) {
-		const remaining = formatDuration(Number(entity.current_task_remaining));
-		statusRows.push([
-			"Task:",
-			`${formatTaskShort(entity.current_task)}  ·  ${remaining} remaining`,
-		]);
-	}
-
-	sections.push([header, kvTable(statusRows)].join("\n"));
-
-	const specsRows: [string, string][] = [];
-	if (entity.hullmass) {
-		specsRows.push(["Hull:", formatMass(Number(entity.hullmass))]);
-	}
-	if (entity.generator) {
-		const elapsedMs = entity.is_idle
-			? undefined
-			: Number(entity.current_task_elapsed ?? 0) * 1000;
-		const activeTaskStartedAt =
-			elapsedMs !== undefined ? new Date(Date.now() - elapsedMs) : undefined;
-		specsRows.push([
-			"Energy:",
-			formatLiveEnergy({
-				storedEnergy: Number(entity.energy ?? 0),
-				capacity: Number(entity.generator.capacity),
-				recharge: Number(entity.generator.recharge),
-				activeTaskStartedAt,
-			}),
-		]);
-	}
-	const isShip = String(entity.type) === "ship";
-	specsRows.push(...buildModuleRows(entity, isShip));
-	if (specsRows.length > 0) sections.push(kvTable(specsRows));
-
-	const cargo = entity.cargo ?? [];
-	if (entity.capacity != null) {
-		const cargoHeader = `  Cargo: ${formatCargoUsage(Number(entity.cargomass ?? 0), Number(entity.capacity))}`;
-		const cargoBlock =
-			cargo.length > 0
-				? [cargoHeader, formatCargoTable(cargo, { indent: "  " })].join("\n")
-				: cargoHeader;
-		sections.push(cargoBlock);
-	} else if (cargo.length > 0) {
-		sections.push(formatCargoTable(cargo, { indent: "  " }));
-	}
-
-	if ((entity.pending_tasks?.length ?? 0) > 0) {
-		sections.push(
-			kvTable([["Pending:", entity.pending_tasks.map(formatTaskShort).join(", ")]]),
-		);
-	}
-
-	const whenDone = formatWhenDone(entity);
-	if (whenDone) sections.push(whenDone);
-
-	const entityType = String(entity.type);
-	const entityId = BigInt(entity.id.toString());
-	const scheduleTasks = entity.schedule?.tasks.length ?? 0;
-	if (entity.is_idle && scheduleTasks > 0) {
-		sections.push(formatResolveHint(entityType, entityId, scheduleTasks));
-	}
-
-	return sections.join("\n\n");
-}
-
-function buildModuleRows(entity:ServerTypes.entity_info, isShip: boolean): [string, string][] {
-	const modNames = resolvedModuleNames(entity.modules);
-	const rows: [string, string][] = [];
-	const notInstalled = "— (not installed)";
-
-	if (entity.engines) {
-		rows.push([
-			`${modNames.get(1) ?? "Engine"}:`,
-			`thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`,
-		]);
-	}
-	if (entity.generator) {
-		rows.push([
-			`${modNames.get(2) ?? "Generator"}:`,
-			`capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`,
-		]);
-	}
-	if (entity.gatherer) {
-		rows.push([
-			`${modNames.get(3) ?? "Gatherer"}:`,
-			`depth ${entity.gatherer.depth} · yield ${entity.gatherer.yield} · speed ${entity.gatherer.speed} · ${entity.gatherer.drain} energy/s`,
-		]);
-	} else if (isShip) {
-		rows.push(["Gatherer:", notInstalled]);
-	}
-	if (entity.hauler) {
-		rows.push([
-			`${modNames.get(9) ?? "Hauler"}:`,
-			`capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`,
-		]);
-	} else if (isShip) {
-		rows.push(["Hauler:", notInstalled]);
-	}
-	if (entity.crafter) {
-		rows.push([
-			`${modNames.get(6) ?? "Crafter"}:`,
-			`speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`,
-		]);
-	} else if (isShip) {
-		rows.push(["Crafter:", notInstalled]);
-	}
-	if (entity.warp) {
-		rows.push([`${modNames.get(5) ?? "Warp"}:`, `range ${entity.warp.range}`]);
-	} else if (isShip) {
-		rows.push(["Warp:", notInstalled]);
-	}
-	if (entity.loaders) {
-		rows.push([
-			`${modNames.get(4) ?? "Loader"}:`,
-			`${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`,
-		]);
-	}
-	return rows;
-}
-
-function formatWhenDone(entity:ServerTypes.entity_info): string | null {
-	if (!entity.schedule || entity.schedule.tasks.length === 0) return null;
-	let projection: ProjectedEntity;
-	try {
-		projection = projectFromCurrentState(entity as unknown as ProjectableSnapshot);
-	} catch {
-		return null;
-	}
-
-	const currentX = Number(entity.coordinates.x.toString());
-	const currentY = Number(entity.coordinates.y.toString());
-	const projX = Number(projection.location.x.toString());
-	const projY = Number(projection.location.y.toString());
-	const positionChanged = projX !== currentX || projY !== currentY;
-
-	const currentEnergy = Number(entity.energy ?? 0);
-	const projEnergy = Number(projection.energy.toString());
-	const energyChanged = projEnergy !== currentEnergy;
-
-	const currentCargoMass = Number(entity.cargomass ?? 0);
-	const projCargoMass = Number(projection.cargoMass.toString());
-	const cargoChanged = projCargoMass !== currentCargoMass;
-
-	if (!positionChanged && !energyChanged && !cargoChanged) return null;
-
-	const remaining = schedule.scheduleRemaining(
-		entity as unknown as ProjectableSnapshot,
-		new Date(),
-	);
-	const header = remaining > 0 ? `When done (${formatDuration(remaining)}):` : "When done:";
-
-	const rows: [string, string][] = [];
-	if (positionChanged) rows.push(["Position:", `(${projX}, ${projY})`]);
-	if (energyChanged && entity.generator) {
-		rows.push(["Energy:", `${projEnergy}/${entity.generator.capacity}`]);
-	} else if (energyChanged) {
-		rows.push(["Energy:", String(projEnergy)]);
-	}
-	if (cargoChanged && entity.capacity != null) {
-		rows.push([
-			"Cargo:",
-			`${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
-		]);
-	} else if (cargoChanged) {
-		rows.push(["Cargo:", formatMass(projCargoMass)]);
-	}
-	return [`  ${header}`, kvTable(rows, { indent: "    " })].join("\n");
 }
 
 export function formatLocation(

@@ -1,12 +1,23 @@
 import {expect, test} from 'bun:test'
 import {render} from '../../../src/commands/query/tasks'
 
+const idleShip = {
+    type: 'ship',
+    id: 1n,
+    owner: 'agent.gm',
+    entity_name: 'Test Ship',
+    coordinates: {x: 0n, y: 0n},
+    is_idle: true,
+    current_task: null,
+    current_task_remaining: 0,
+    pending_tasks: [],
+}
+
 test('tasks renders schedule with per-task timing', () => {
     const now = new Date('2026-04-21T14:32:10Z')
     const started = new Date('2026-04-21T14:12:00Z')
     const out = render({
-        type: 'ship',
-        id: 1n,
+        entity: idleShip,
         schedule: {
             started,
             tasks: [
@@ -27,8 +38,7 @@ test('tasks renders schedule with per-task timing', () => {
 
 test('tasks renders idle when no schedule', () => {
     const out = render({
-        type: 'ship',
-        id: 1n,
+        entity: idleShip,
         schedule: null,
         pending: [],
         now: new Date(),

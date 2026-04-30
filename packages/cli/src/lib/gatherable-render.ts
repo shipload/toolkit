@@ -1,6 +1,8 @@
-import { encodeStats, formatMass, type LocationStratum, type LocationType } from "@shipload/sdk";
+import { encodeStats, type LocationStratum, type LocationType } from "@shipload/sdk";
 import Table from "cli-table3";
-import { formatDuration, formatItem, formatStats } from "./format";
+import { renderEntityForGather } from "./entity-header";
+import { formatDuration, formatItem } from "./format";
+import { formatItemStats } from "./item-stats";
 import type {
 	GatherBudget,
 	GathererCaps,
@@ -35,25 +37,21 @@ export interface GatherableRenderOpts {
 	top?: number;
 }
 
-function header(opts: GatherableRenderOpts): string[] {
-	const trimmedName = opts.entityName?.trim() ?? "";
-	const namePart = trimmedName ? ` "${trimmedName}"` : "";
-	const projectedTag = opts.projected ? " (projected)" : "";
-	const locationTag = `[${opts.locationTypeLabel}, ${opts.size} strata]`;
-	const title = `${opts.entityType} ${opts.entityId}${namePart} — gatherable at (${opts.coords.x}, ${opts.coords.y})${projectedTag}   ${locationTag}`;
-
-	const c = opts.caps;
-	const gatherer = `yield ${c.yield} · depth ${c.depth} · speed ${c.speed} · ${c.drain} energy/s`;
-
-	const energyBudget = `${opts.budget.energy}/${opts.energyCapacity}${opts.projected ? " (projected)" : ""}`;
-	const cargoBudget = `${formatMass(opts.budget.cargoFreeKg)} / ${formatMass(opts.cargoCapacityKg)} free${opts.projected ? " (projected)" : ""}`;
-
-	return [
-		title,
-		`  Gatherer:  ${gatherer}`,
-		`  Energy:    ${energyBudget}       Cargo:    ${cargoBudget}`,
-		`  Quantity:  ${opts.quantity}`,
-	];
+function header(opts: GatherableRenderOpts): string {
+	return renderEntityForGather({
+		entityType: opts.entityType,
+		entityId: opts.entityId,
+		entityName: opts.entityName,
+		coords: opts.coords,
+		caps: opts.caps,
+		energy: opts.budget.energy,
+		energyCapacity: opts.energyCapacity,
+		cargoFreeKg: opts.budget.cargoFreeKg,
+		cargoCapacityKg: opts.cargoCapacityKg,
+		quantity: opts.quantity,
+		locationContext: `${opts.locationTypeLabel}, ${opts.size} strata`,
+		projected: opts.projected,
+	});
 }
 
 function formatBound(bound: MaxQuantityBound): string {
@@ -62,13 +60,13 @@ function formatBound(bound: MaxQuantityBound): string {
 }
 
 export function renderGatherableTable(opts: GatherableRenderOpts): string {
-	const headerLines = header(opts);
+	const headerStr = header(opts);
 
 	if (opts.totalStrata === 0) {
-		return [...headerLines, "  (no non-empty strata)"].join("\n");
+		return [headerStr, "  (no non-empty strata)"].join("\n");
 	}
 	if (opts.rows.length === 0) {
-		const lines = [...headerLines];
+		const lines = [headerStr];
 		lines.push(opts.reachableTotal === 0 ? "  (no reachable strata)" : "  (none to display)");
 		lines.push(
 			`  ${opts.reachableTotal} reachable of ${opts.totalStrata} · gatherer depth ${opts.caps.depth}`,
@@ -116,7 +114,7 @@ export function renderGatherableTable(opts: GatherableRenderOpts): string {
 			String(s.reserve),
 			String(s.richness),
 			s.stats
-				? formatStats(encodeStats([s.stats.stat1, s.stats.stat2, s.stats.stat3]), s.itemId)
+				? formatItemStats(s.itemId, encodeStats([s.stats.stat1, s.stats.stat2, s.stats.stat3]))
 				: "",
 			r.reachable && m.gatherable ? formatDuration(m.timeS) : "—",
 			r.reachable && m.gatherable ? String(m.energyCost) : "—",
@@ -132,7 +130,7 @@ export function renderGatherableTable(opts: GatherableRenderOpts): string {
 		.map((line) => line.trimEnd())
 		.join("\n");
 
-	const lines = [...headerLines, tableStr];
+	const lines = [headerStr, tableStr];
 
 	const totalEligible = opts.showAll ? opts.totalStrata : opts.reachableTotal;
 	if (opts.rows.length < totalEligible) {

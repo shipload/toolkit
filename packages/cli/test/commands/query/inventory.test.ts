@@ -11,15 +11,26 @@ function row(itemId: number, quantity: number, stats: bigint, id: bigint | undef
     } as any
 }
 
+const idleShip = {
+    type: 'ship',
+    id: 1n,
+    owner: 'agent.gm',
+    entity_name: 'Test Ship',
+    coordinates: {x: 0n, y: 0n},
+    is_idle: true,
+    current_task: null,
+    current_task_remaining: 0,
+} as any
+
 describe('inventory.render', () => {
     test('empty cargo prints empty marker', () => {
-        const out = render('ship', 1n, [])
-        expect(out).toContain('Inventory for ship 1')
+        const out = render(idleShip, [])
+        expect(out).toContain('ship 1')
         expect(out.toLowerCase()).toContain('empty')
     })
 
     test('non-empty cargo includes a Row ID column', () => {
-        const out = render('ship', 1n, [row(301, 32, 214202522n, 7n), row(201, 5, 999n, 11n)])
+        const out = render(idleShip, [row(301, 32, 214202522n, 7n), row(201, 5, 999n, 11n)])
         expect(out).toContain('Row ID')
         expect(out).toContain('Item ID')
         expect(out).toContain('Stack ID')
@@ -31,12 +42,12 @@ describe('inventory.render', () => {
     })
 
     test('projected-only stacks (no row id) render —', () => {
-        const out = render('ship', 1n, [row(301, 1, 0n, 0n)])
+        const out = render(idleShip, [row(301, 1, 0n, 0n)])
         expect(out).toContain('—')
     })
 
     test('rows sort by item-id ascending then row-id ascending; projected-only last within an item-id', () => {
-        const out = render('ship', 1n, [
+        const out = render(idleShip, [
             row(501, 1, 0n, 9n),
             row(301, 1, 0n, 5n),
             row(101, 1, 0n, 0n),

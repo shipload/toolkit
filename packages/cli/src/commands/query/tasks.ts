@@ -1,7 +1,9 @@
+import type {ServerTypes} from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
 import {server} from '../../lib/client'
+import {renderEntityHeader} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {
     formatDuration,
@@ -22,8 +24,7 @@ interface Task {
 }
 
 interface TasksView {
-    type: string
-    id: bigint
+    entity: ServerTypes.entity_info
     schedule: {started: Date; tasks: Task[]} | null
     pending: Task[]
     now: Date
@@ -35,7 +36,7 @@ function fmtCoords(c: {x: number; y: number; z: number | null} | null | undefine
 }
 
 export function render(view: TasksView): string {
-    const header = `${view.type} ${view.id}  ·  ${formatTimeUTC(view.now)}`
+    const header = `${renderEntityHeader(view.entity)}\n  ${formatTimeUTC(view.now)}`
 
     if (!view.schedule || view.schedule.tasks.length === 0) {
         return [header, '', '  No scheduled tasks.'].join('\n')
@@ -86,15 +87,18 @@ export function render(view: TasksView): string {
 
     const out = [header, '', table.toString()]
     if (doneCount > 0) {
-        out.push('', formatResolveHint(view.type, view.id, doneCount))
+        out.push(
+            '',
+            formatResolveHint(String(view.entity.type), BigInt(view.entity.id.toString()), doneCount),
+        )
     }
     return out.join('\n')
 }
 
 function viewToJson(view: TasksView): Record<string, unknown> {
     return {
-        type: view.type,
-        id: view.id,
+        type: String(view.entity.type),
+        id: BigInt(view.entity.id.toString()),
         schedule: view.schedule
             ? {
                   started: view.schedule.started.toISOString(),
@@ -110,13 +114,12 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
     const info = (await server.readonly('getentity', {
         entity_type: ctx.entityType,
         entity_id: ctx.entityId,
-    })) as unknown as {
+    })) as unknown as ServerTypes.entity_info & {
         schedule?: {started: {toMilliseconds(): number}; tasks: Task[]}
         pending_tasks?: Task[]
     }
     const view: TasksView = {
-        type: ctx.entityType,
-        id: ctx.entityId,
+        entity: info,
         schedule: info.schedule
             ? {
                   started: new Date(info.schedule.started.toMilliseconds()),

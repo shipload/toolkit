@@ -3,17 +3,17 @@ import type {ServerTypes} from '@shipload/sdk'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
 import {formatCargoTable} from '../../lib/cargo-table'
 import {server} from '../../lib/client'
+import {renderEntityHeader} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {formatOutput} from '../../lib/format'
 
 export interface InventoryData {
-    entityType: string
-    id: bigint
+    entity: ServerTypes.entity_info
     cargo: ServerTypes.cargo_view[]
 }
 
-export function render(entityType: string, id: bigint, cargo: ServerTypes.cargo_view[]): string {
-    const header = `Inventory for ${entityType} ${id}:`
+export function render(entity: ServerTypes.entity_info, cargo: ServerTypes.cargo_view[]): string {
+    const header = renderEntityHeader(entity)
     if (cargo.length === 0) return `${header}\n  (empty)`
 
     const sorted = [...cargo].sort((a, b) => {
@@ -39,14 +39,13 @@ export async function runInventory(ctx: EntityContext, opts: {json?: boolean}): 
     const info = (await server.readonly('getentity', {
         entity_type: ctx.entityType,
         entity_id: ctx.entityId,
-    })) as {cargo?: ServerTypes.cargo_view[]}
+    })) as ServerTypes.entity_info & {cargo?: ServerTypes.cargo_view[]}
     const data: InventoryData = {
-        entityType: ctx.entityType,
-        id: ctx.entityId,
+        entity: info,
         cargo: info.cargo ?? [],
     }
     console.log(
-        formatOutput(data, {json: Boolean(opts.json)}, (d) => render(d.entityType, d.id, d.cargo))
+        formatOutput(data, {json: Boolean(opts.json)}, (d) => render(d.entity, d.cargo))
     )
 }
 

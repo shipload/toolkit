@@ -1,5 +1,6 @@
 import type { ServerTypes } from "@shipload/sdk";
-import { formatItem, formatStats } from "./format";
+import { formatItem } from "./format";
+import { formatItemStats } from "./item-stats";
 import { ValidationError } from "./validate";
 
 export interface ParsedCargoInput {
@@ -17,7 +18,7 @@ export interface ResolvedCargoInput {
 function stackRow(itemId: number, s:ServerTypes.cargo_item): string {
 	const stackId = BigInt(s.stats.toString());
 	const qty = Number(s.quantity.toString());
-	const decoded = formatStats(stackId, itemId);
+	const decoded = formatItemStats(itemId, stackId);
 	const decodedSuffix = decoded ? `, ${decoded}` : "";
 	return `  ${itemId}:${stackId}:<qty ≤ ${qty}>   (${qty}× ${formatItem(itemId)}${decodedSuffix})`;
 }
@@ -70,7 +71,7 @@ export function resolveCargoInputs(
 		const stackQty = Number(stack.quantity.toString());
 		const requested = requestedByKey.get(`${p.itemId}:${p.stackId}`) ?? 0;
 		if (requested > stackQty) {
-			const decoded = formatStats(p.stackId, p.itemId);
+			const decoded = formatItemStats(p.itemId, p.stackId);
 			const decodedSuffix = decoded ? ` (${decoded})` : "";
 			throw new ValidationError(
 				`cargo has ${stackQty}× ${formatItem(p.itemId)} in stack ${p.stackId}${decodedSuffix}, requested ${requested} — reduce qty or gather more`,

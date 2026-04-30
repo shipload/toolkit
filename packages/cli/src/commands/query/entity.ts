@@ -1,10 +1,11 @@
 import type {EntityTypeName} from '../../lib/args'
 import {server} from '../../lib/client'
-import {formatEntity, formatOutput} from '../../lib/format'
+import {renderEntityFull} from '../../lib/entity-header'
+import {formatOutput} from '../../lib/format'
 
 export function render(info: unknown): string {
     // biome-ignore lint/suspicious/noExplicitAny: readonly response is loosely typed
-    return formatEntity(info as any)
+    return renderEntityFull(info as any)
 }
 
 export async function defaultShow(type: EntityTypeName, id: bigint): Promise<void> {
