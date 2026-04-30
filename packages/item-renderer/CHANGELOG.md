@@ -1,5 +1,13 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Cargo/Items/Recipes UI improvements, entity history, debugging tools, adnd capabilities updates
+- Updated dependencies
+  - @shipload/sdk@1.0.0-next.4
+
 ## 1.0.0-next.3
 
 ### Patch Changes
