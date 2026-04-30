@@ -24,6 +24,14 @@ export class Container extends ServerContract.Types.entity_info {
         return this.entity_name
     }
 
+    get entityClass(): 'mobile' {
+        return 'mobile'
+    }
+
+    get canUndeploy(): boolean {
+        return true
+    }
+
     get sched(): ScheduleAccessor {
         this._sched ??= new ScheduleAccessor(this)
         return this._sched

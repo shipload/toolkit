@@ -55,6 +55,14 @@ export class Ship extends ServerContract.Types.entity_info {
         return this.entity_name
     }
 
+    get entityClass(): 'mobile' {
+        return 'mobile'
+    }
+
+    get canUndeploy(): boolean {
+        return true
+    }
+
     get inv(): InventoryAccessor {
         this._inv ??= new InventoryAccessor(this)
         return this._inv

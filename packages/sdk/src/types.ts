@@ -51,6 +51,9 @@ export enum TaskType {
     DEPLOY = 8,
     WRAP = 9,
     UNWRAP = 10,
+    UNDEPLOY = 11,
+    WRAP_ENTITY = 12,
+    DEMOLISH = 13,
 }
 
 export enum LocationType {

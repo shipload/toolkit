@@ -62,6 +62,9 @@ const TASK_TYPES = [
 	"Deploy",
 	"Wrap",
 	"Unwrap",
+	"Undeploy",
+	"WrapEntity",
+	"Demolish",
 ];
 
 export function formatTaskType(type: number): string {

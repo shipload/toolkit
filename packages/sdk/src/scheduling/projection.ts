@@ -267,6 +267,10 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
         case TaskType.DEPLOY:
             applyDeployTask(projected, task)
             break
+        case TaskType.UNDEPLOY:
+        case TaskType.WRAP_ENTITY:
+        case TaskType.DEMOLISH:
+            break
     }
 }
 
@@ -447,6 +451,10 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 break
             case TaskType.DEPLOY:
                 if (taskComplete) applyDeployTask(projected, task)
+                break
+            case TaskType.UNDEPLOY:
+            case TaskType.WRAP_ENTITY:
+            case TaskType.DEMOLISH:
                 break
         }
     }

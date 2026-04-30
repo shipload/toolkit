@@ -5,6 +5,7 @@ import * as blend from './commands/action/blend'
 import * as cancel from './commands/action/cancel'
 import * as claimstarter from './commands/action/claimstarter'
 import * as craft from './commands/action/craft'
+import * as demolish from './commands/action/demolish'
 import * as deploy from './commands/action/deploy'
 import * as foundcompany from './commands/action/foundcompany'
 import * as gather from './commands/action/gather'
@@ -16,9 +17,11 @@ import * as rmmodule from './commands/action/rmmodule'
 import * as track from './commands/action/track'
 import * as transfer from './commands/action/transfer'
 import * as travel from './commands/action/travel'
+import * as undeploy from './commands/action/undeploy'
 import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
+import * as wrapentity from './commands/action/wrapentity'
 import * as init from './commands/init'
 import * as config from './commands/query/config'
 import * as entities from './commands/query/entities'
@@ -110,7 +113,10 @@ export function build(): Command {
     registerEntitySubcommand(craft.SUBCOMMAND)
     registerEntitySubcommand(blend.SUBCOMMAND)
     registerEntitySubcommand(deploy.SUBCOMMAND)
+    registerEntitySubcommand(undeploy.SUBCOMMAND)
     registerEntitySubcommand(wrap.SUBCOMMAND)
+    registerEntitySubcommand(wrapentity.SUBCOMMAND)
+    registerEntitySubcommand(demolish.SUBCOMMAND)
     registerEntitySubcommand(addmodule.SUBCOMMAND)
     registerEntitySubcommand(rmmodule.SUBCOMMAND)
     registerEntitySubcommand(resolve.SUBCOMMAND)

@@ -15,7 +15,7 @@ import {type CoordinatesType, EntityType, type EntityTypeName} from '../types'
 import {ServerContract} from '../contracts'
 
 export type EntityRefInput = {
-    entityType: EntityTypeName
+    entityType: NameType
     entityId: UInt64Type
 }
 
@@ -241,6 +241,29 @@ export class ActionsManager extends BaseManager {
             entity_id: UInt64.from(entityId),
             cargo_id: UInt64.from(cargoId),
             quantity: UInt64.from(quantity),
+        })
+    }
+
+    undeploy(host: EntityRefInput, target: EntityRefInput): Action {
+        return this.server.action('undeploy', {
+            host_type: Name.from(host.entityType),
+            host_id: UInt64.from(host.entityId),
+            target_type: Name.from(target.entityType),
+            target_id: UInt64.from(target.entityId),
+        })
+    }
+
+    wrapEntity(entity: EntityRefInput): Action {
+        return this.server.action('wrapentity', {
+            entity_type: Name.from(entity.entityType),
+            entity_id: UInt64.from(entity.entityId),
+        })
+    }
+
+    demolish(entity: EntityRefInput): Action {
+        return this.server.action('demolish', {
+            entity_type: Name.from(entity.entityType),
+            entity_id: UInt64.from(entity.entityId),
         })
     }
 

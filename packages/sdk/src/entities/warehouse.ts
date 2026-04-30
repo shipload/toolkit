@@ -31,6 +31,14 @@ export class Warehouse extends ServerContract.Types.entity_info {
         return this.entity_name
     }
 
+    get entityClass(): 'building' {
+        return 'building'
+    }
+
+    get canDemolish(): boolean {
+        return true
+    }
+
     get inv(): InventoryAccessor {
         this._inv ??= new InventoryAccessor(this)
         return this._inv
