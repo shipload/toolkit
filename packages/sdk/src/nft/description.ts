@@ -4,6 +4,7 @@ import {
     MODULE_ENGINE,
     MODULE_GATHERER,
     MODULE_GENERATOR,
+    MODULE_HAULER,
     MODULE_LOADER,
     MODULE_STORAGE,
     MODULE_WARP,
@@ -15,6 +16,7 @@ import {
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
+    ITEM_HAULER_T1,
     ITEM_LOADER_T1,
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
@@ -58,6 +60,9 @@ export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - i
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (fin: number): number => Math.max(5, 30 - idiv(fin, 33))
+export const computeHaulerCapacity = (fin: number): number => Math.max(1, 1 + idiv(fin, 400))
+export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
+export const computeHaulerDrain = (com: number): number => Math.max(3, 15 - idiv(com, 80))
 export const computeWarpRange = (stat: number): number => 100 + stat * 3
 
 export function entityDisplayName(itemId: number): string {
@@ -89,6 +94,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Crafter'
         case ITEM_STORAGE_T1:
             return 'Storage'
+        case ITEM_HAULER_T1:
+            return 'Hauler'
         case ITEM_WARP_T1:
             return 'Warp'
         default:
@@ -150,6 +157,13 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const sum = str + fin + sat
             const pct = 10 + idiv(sum * 10, 2997)
             out += `  +${pct}% capacity`
+            break
+        }
+        case MODULE_HAULER: {
+            const fin = decodeStat(stats, 0)
+            const con = decodeStat(stats, 1)
+            const com = decodeStat(stats, 2)
+            out += `  Capacity ${computeHaulerCapacity(fin)}  Efficiency ${computeHaulerEfficiency(con)}  Drain ${computeHaulerDrain(com)}`
             break
         }
         case MODULE_WARP: {
