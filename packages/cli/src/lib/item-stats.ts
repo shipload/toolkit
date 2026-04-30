@@ -76,7 +76,7 @@ function formatModuleCapability(itemId: number, stats: bigint): string {
 			return `Generator: capacity ${c.capacity} · recharge ${c.recharge}/s`;
 		}
 		case MODULE_GATHERER: {
-			const c = computeGathererCapabilities(decoded);
+			const c = computeGathererCapabilities(decoded, getItem(itemId).tier);
 			return `Gatherer: depth ${c.depth} · yield ${c.yield} · speed ${c.speed} · ${c.drain} energy/s`;
 		}
 		case MODULE_HAULER: {

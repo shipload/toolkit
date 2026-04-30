@@ -22,6 +22,8 @@ import {
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
+import {gathererDepthForTier} from '../entities/ship-deploy'
+import {getItem} from '../data/catalog'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -49,7 +51,8 @@ export const computeGeneratorRech = (fin: number): number => 1 + idiv(fin * 3, 1
 export const computeGathererYield = (str: number): number => 200 + str
 export const computeGathererDrain = (con: number): number =>
     Math.max(250, 1250 - idiv(con * 25, 20))
-export const computeGathererDepth = (tol: number): number => 200 + idiv(tol * 3, 2)
+export const computeGathererDepth = (tol: number, tier: number): number =>
+    gathererDepthForTier(tol, tier)
 export const computeGathererSpeed = (ref: number): number => 100 + idiv(ref * 4, 5)
 export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
@@ -121,8 +124,10 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const tol = decodeStat(stats, 1)
             const con = decodeStat(stats, 3)
             const ref = decodeStat(stats, 4)
+            const tier = getItem(itemId).tier
             out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
-                tol
+                tol,
+                tier
             )}  Speed ${computeGathererSpeed(ref)}  Drain ${computeGathererDrain(con)}`
             break
         }

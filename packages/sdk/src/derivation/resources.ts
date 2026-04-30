@@ -1,10 +1,10 @@
 import {getItem} from '../data/catalog'
 
 export const DEPTH_THRESHOLD_T1 = 0
-export const DEPTH_THRESHOLD_T2 = 2000
-export const DEPTH_THRESHOLD_T3 = 10000
-export const DEPTH_THRESHOLD_T4 = 30000
-export const DEPTH_THRESHOLD_T5 = 55000
+export const DEPTH_THRESHOLD_T2 = 1500
+export const DEPTH_THRESHOLD_T3 = 5000
+export const DEPTH_THRESHOLD_T4 = 12000
+export const DEPTH_THRESHOLD_T5 = 22000
 
 export const LOCATION_MIN_DEPTH = 500
 export const LOCATION_MAX_DEPTH = 65535
@@ -46,9 +46,9 @@ export function getResourceWeight(itemId: number, stratum: number): number {
 
     switch (tier) {
         case 1:
-            if (stratum < 2000) return 100
-            if (stratum < 10000) return 80
-            if (stratum < 30000) return 50
+            if (stratum < DEPTH_THRESHOLD_T2) return 100
+            if (stratum < DEPTH_THRESHOLD_T3) return 80
+            if (stratum < DEPTH_THRESHOLD_T4) return 50
             return 30
         case 2:
             if (depthAbove < 3000) return 40

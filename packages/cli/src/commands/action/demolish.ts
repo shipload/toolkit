@@ -1,4 +1,4 @@
-import {type Action} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -21,10 +21,7 @@ interface DemolishCliOptions {
     track?: boolean
 }
 
-export async function runDemolish(
-    ctx: EntityContext,
-    options: DemolishCliOptions
-): Promise<void> {
+export async function runDemolish(ctx: EntityContext, options: DemolishCliOptions): Promise<void> {
     await withValidation(async () => {
         if (!options.confirm) {
             throw new ValidationError(

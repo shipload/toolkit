@@ -1,4 +1,4 @@
-import {type Action} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -74,11 +74,7 @@ Example:
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(
-                async (
-                    targetType: EntityTypeName,
-                    targetId: bigint,
-                    opts: UndeployCliOptions
-                ) => {
+                async (targetType: EntityTypeName, targetId: bigint, opts: UndeployCliOptions) => {
                     await runUndeploy(ctx, targetType, targetId, opts)
                 }
             ),

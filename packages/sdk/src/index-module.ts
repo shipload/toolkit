@@ -246,8 +246,11 @@ export {
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
     computeShipCapabilities,
+    GATHERER_DEPTH_TABLE,
+    GATHERER_DEPTH_MAX_TIER,
+    gathererDepthForTier,
 } from './entities/ship-deploy'
-export type {ShipCapabilities} from './entities/ship-deploy'
+export type {ShipCapabilities, GathererDepthParams} from './entities/ship-deploy'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {

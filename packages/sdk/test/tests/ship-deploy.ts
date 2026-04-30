@@ -12,6 +12,8 @@ import {
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
     encodeStats,
+    gathererDepthForTier,
+    ITEM_GATHERER_T1,
     ITEM_HAULER_T1,
 } from '$lib'
 
@@ -133,89 +135,71 @@ describe('ship deploy formulas', () => {
     })
 
     test('gatherer formula exact values at min', () => {
-        const r = computeGathererCapabilities({
-            strength: 1,
-            tolerance: 1,
-            conductivity: 1,
-            reflectivity: 1,
-        })
+        const r = computeGathererCapabilities(
+            {strength: 1, tolerance: 1, conductivity: 1, reflectivity: 1},
+            1
+        )
         assert.equal(r.yield, 201)
         assert.equal(r.drain, 1249)
-        assert.equal(r.depth, 201)
+        assert.equal(r.depth, 505)
         assert.equal(r.speed, 100)
     })
 
     test('gatherer formula exact values at mid', () => {
-        const r = computeGathererCapabilities({
-            strength: 500,
-            tolerance: 500,
-            conductivity: 500,
-            reflectivity: 500,
-        })
+        const r = computeGathererCapabilities(
+            {strength: 500, tolerance: 500, conductivity: 500, reflectivity: 500},
+            1
+        )
         assert.equal(r.yield, 700)
         assert.equal(r.drain, 625)
-        assert.equal(r.depth, 950)
+        assert.equal(r.depth, 3000)
         assert.equal(r.speed, 500)
     })
 
     test('gatherer formula exact values at max', () => {
-        const r = computeGathererCapabilities({
-            strength: 999,
-            tolerance: 999,
-            conductivity: 999,
-            reflectivity: 999,
-        })
+        const r = computeGathererCapabilities(
+            {strength: 999, tolerance: 999, conductivity: 999, reflectivity: 999},
+            1
+        )
         assert.equal(r.yield, 1199)
         assert.equal(r.drain, 250)
-        assert.equal(r.depth, 1698)
+        assert.equal(r.depth, 5495)
         assert.equal(r.speed, 899)
     })
 
     test('higher STR = higher gatherer yield', () => {
-        const low = computeGathererCapabilities({
-            strength: 100,
-            tolerance: 500,
-            conductivity: 500,
-            reflectivity: 500,
-        })
-        const high = computeGathererCapabilities({
-            strength: 900,
-            tolerance: 500,
-            conductivity: 500,
-            reflectivity: 500,
-        })
+        const low = computeGathererCapabilities(
+            {strength: 100, tolerance: 500, conductivity: 500, reflectivity: 500},
+            1
+        )
+        const high = computeGathererCapabilities(
+            {strength: 900, tolerance: 500, conductivity: 500, reflectivity: 500},
+            1
+        )
         assert.isBelow(low.yield, high.yield)
     })
 
     test('higher CON = lower gatherer drain', () => {
-        const low = computeGathererCapabilities({
-            strength: 500,
-            tolerance: 500,
-            conductivity: 100,
-            reflectivity: 500,
-        })
-        const high = computeGathererCapabilities({
-            strength: 500,
-            tolerance: 500,
-            conductivity: 900,
-            reflectivity: 500,
-        })
+        const low = computeGathererCapabilities(
+            {strength: 500, tolerance: 500, conductivity: 100, reflectivity: 500},
+            1
+        )
+        const high = computeGathererCapabilities(
+            {strength: 500, tolerance: 500, conductivity: 900, reflectivity: 500},
+            1
+        )
         assert.isAbove(low.drain, high.drain)
     })
 
     test('higher REF = higher speed', () => {
-        const low = computeGathererCapabilities({
-            strength: 500,
-            tolerance: 500,
-            conductivity: 500,
-            reflectivity: 100,
-        })
-        const high = computeGathererCapabilities({
-            strength: 500,
-            tolerance: 500,
-            conductivity: 500,
-            reflectivity: 900,
-        })
+        const low = computeGathererCapabilities(
+            {strength: 500, tolerance: 500, conductivity: 500, reflectivity: 100},
+            1
+        )
+        const high = computeGathererCapabilities(
+            {strength: 500, tolerance: 500, conductivity: 500, reflectivity: 900},
+            1
+        )
         assert.isBelow(low.speed, high.speed)
     })
 
@@ -401,5 +385,29 @@ describe('ship deploy formulas', () => {
     test('computeShipCapabilities with no hauler modules returns no hauler', () => {
         const caps = computeShipCapabilities([])
         assert.isUndefined(caps.hauler)
+    })
+
+    test('computeShipCapabilities uses MAX (not sum) for gatherer depth', () => {
+        const lowTolStats = encodeStats([0, 100, 0, 0, 0])
+        const highTolStats = encodeStats([0, 500, 0, 0, 0])
+        const caps = computeShipCapabilities([
+            {itemId: ITEM_GATHERER_T1, stats: lowTolStats},
+            {itemId: ITEM_GATHERER_T1, stats: highTolStats},
+        ])
+        assert.exists(caps.gatherer)
+        assert.equal(caps.gatherer!.depth, 3000)
+    })
+
+    test('gathererDepthForTier returns table values for each shipped tier', () => {
+        assert.equal(gathererDepthForTier(500, 1), 3000)
+        assert.equal(gathererDepthForTier(500, 2), 7500)
+        assert.equal(gathererDepthForTier(500, 3), 15000)
+        assert.equal(gathererDepthForTier(500, 4), 24000)
+        assert.equal(gathererDepthForTier(500, 5), 34500)
+    })
+
+    test('gathererDepthForTier throws on out-of-range tier', () => {
+        assert.throws(() => gathererDepthForTier(500, 0), /out of range/)
+        assert.throws(() => gathererDepthForTier(500, 6), /out of range/)
     })
 })

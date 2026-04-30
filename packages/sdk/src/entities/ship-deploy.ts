@@ -8,6 +8,7 @@ import {
     MODULE_HAULER,
     MODULE_LOADER,
 } from '../capabilities/modules'
+import {getItem} from '../data/catalog'
 
 export function computeShipHullCapabilities(stats: Record<string, number>): {
     hullmass: number
@@ -52,7 +53,33 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     }
 }
 
-export function computeGathererCapabilities(stats: Record<string, number>): {
+export interface GathererDepthParams {
+    readonly floor: number
+    readonly slope: number
+}
+
+export const GATHERER_DEPTH_TABLE: readonly GathererDepthParams[] = [
+    {floor: 500, slope: 5},
+    {floor: 2000, slope: 11},
+    {floor: 7000, slope: 16},
+    {floor: 15000, slope: 18},
+    {floor: 25000, slope: 19},
+]
+
+export const GATHERER_DEPTH_MAX_TIER = 5
+
+export function gathererDepthForTier(tol: number, tier: number): number {
+    if (tier < 1 || tier > GATHERER_DEPTH_MAX_TIER) {
+        throw new Error(`gatherer tier out of range: ${tier}`)
+    }
+    const p = GATHERER_DEPTH_TABLE[tier - 1]
+    return p.floor + tol * p.slope
+}
+
+export function computeGathererCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {
     yield: number
     drain: number
     depth: number
@@ -66,7 +93,7 @@ export function computeGathererCapabilities(stats: Record<string, number>): {
     return {
         yield: 200 + str,
         drain: Math.max(250, 1250 - Math.floor((con * 25) / 20)),
-        depth: 200 + Math.floor((tol * 3) / 2),
+        depth: gathererDepthForTier(tol, tier),
         speed: 100 + Math.floor((ref * 4) / 5),
     }
 }
@@ -197,16 +224,20 @@ export function computeShipCapabilities(
     if (gathererModules.length > 0) {
         let totalYield = 0
         let totalDrain = 0
-        let totalDepth = 0
+        let maxDepth = 0
         let totalSpeed = 0
         for (const m of gathererModules) {
-            const caps = computeGathererCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
+            const tier = getItem(m.itemId).tier
+            const caps = computeGathererCapabilities(
+                decodeCraftedItemStats(m.itemId, m.stats),
+                tier
+            )
             totalYield += caps.yield
             totalDrain += caps.drain
-            totalDepth += caps.depth
+            if (caps.depth > maxDepth) maxDepth = caps.depth
             totalSpeed += caps.speed
         }
-        ship.gatherer = {yield: totalYield, drain: totalDrain, depth: totalDepth, speed: totalSpeed}
+        ship.gatherer = {yield: totalYield, drain: totalDrain, depth: maxDepth, speed: totalSpeed}
     }
 
     const haulerModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_HAULER)

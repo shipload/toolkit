@@ -44,9 +44,7 @@ export async function runInventory(ctx: EntityContext, opts: {json?: boolean}): 
         entity: info,
         cargo: info.cargo ?? [],
     }
-    console.log(
-        formatOutput(data, {json: Boolean(opts.json)}, (d) => render(d.entity, d.cargo))
-    )
+    console.log(formatOutput(data, {json: Boolean(opts.json)}, (d) => render(d.entity, d.cargo)))
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

@@ -79,6 +79,7 @@ function createMockShip(
             thrust: overrides.loaderThrust ?? 100,
         },
         modules: [],
+        item_id: 0,
     })
 }
 

@@ -89,7 +89,11 @@ export function render(view: TasksView): string {
     if (doneCount > 0) {
         out.push(
             '',
-            formatResolveHint(String(view.entity.type), BigInt(view.entity.id.toString()), doneCount),
+            formatResolveHint(
+                String(view.entity.type),
+                BigInt(view.entity.id.toString()),
+                doneCount
+            )
         )
     }
     return out.join('\n')

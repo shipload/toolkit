@@ -155,7 +155,8 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
 
 function computeCapabilityGroup(
     moduleType: number,
-    stats: Record<string, number>
+    stats: Record<string, number>,
+    tier: number
 ): ResolvedAttributeGroup | undefined {
     switch (moduleType) {
         case MODULE_ENGINE: {
@@ -179,7 +180,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_GATHERER: {
-            const caps = computeGathererCapabilities(stats)
+            const caps = computeGathererCapabilities(stats, tier)
             return {
                 capability: 'Gatherer',
                 attributes: [
@@ -242,7 +243,7 @@ function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
         const modType = getModuleCapabilityType(id)
-        const group = computeCapabilityGroup(modType, decoded)
+        const group = computeCapabilityGroup(modType, decoded, item.tier)
         if (group) attributes = [group]
     }
     return {
@@ -311,13 +312,16 @@ function resolveEntity(
                 const modStats = BigInt(mod.installed.stats.toString())
                 const decodedStats = decodeCraftedItemStats(modItemId, modStats)
                 const modType = getModuleCapabilityType(modItemId)
-                const group = computeCapabilityGroup(modType, decodedStats)
                 let modName = 'Module'
+                let modTier = 1
                 try {
-                    modName = getItem(modItemId).name
+                    const modItem = getItem(modItemId)
+                    modName = modItem.name
+                    modTier = modItem.tier
                 } catch {
                     modName = itemMetadata[modItemId]?.name ?? 'Module'
                 }
+                const group = computeCapabilityGroup(modType, decodedStats, modTier)
                 return {
                     name: modName,
                     installed: true,
