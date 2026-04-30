@@ -1,56 +1,40 @@
-import recipes from '../data/recipes.json'
 import {SLOT_FORMULAS, type SlotConsumerKind} from '../data/capability-formulas'
 import {getStatDefinitions, type StatDefinition} from './stats'
-import type {ResourceCategory} from '../types'
+import {
+    getRecipe,
+    type Recipe,
+    type RecipeInput,
+    type RecipeInputCategory,
+} from '../data/recipes-runtime'
+import {
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_GATHERER_T1,
+    ITEM_LOADER_T1,
+    ITEM_CRAFTER_T1,
+    ITEM_STORAGE_T1,
+    ITEM_HAULER_T1,
+    ITEM_WARP_T1,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
+} from '../data/item-ids'
+import type {StatMapping} from '../data/capabilities'
 
-export interface StatMapping {
-    stat: string
-    capability: string
-    attribute: string
-}
-
-interface RecipeInputCategory {
-    category: ResourceCategory
-    tier: number
-    quantity: number
-}
-interface RecipeInputItem {
-    itemId: number
-    quantity: number
-}
-type RecipeInput = RecipeInputCategory | RecipeInputItem
-
-interface StatSlotSource {
-    inputIndex: number
-    statIndex: number
-}
-interface StatSlot {
-    sources: StatSlotSource[]
-}
-
-interface RecipeRow {
-    outputItemId: number
-    outputMass: number
-    inputs: RecipeInput[]
-    statSlots: StatSlot[]
-}
-
-const RECIPES = recipes as RecipeRow[]
-const RECIPE_BY_ID = new Map<number, RecipeRow>(RECIPES.map((r) => [r.outputItemId, r]))
-
-const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
-    engine: 10100,
-    generator: 10101,
-    gatherer: 10102,
-    loader: 10103,
-    crafter: 10104,
-    storage: 10105,
-    hauler: 10106,
-    warp: 10107,
-    'ship-t1': 10201,
-    'container-t1': 10200,
-    'warehouse-t1': 10202,
-    'container-t2': 20200,
+export const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
+    engine: ITEM_ENGINE_T1,
+    generator: ITEM_GENERATOR_T1,
+    gatherer: ITEM_GATHERER_T1,
+    loader: ITEM_LOADER_T1,
+    crafter: ITEM_CRAFTER_T1,
+    storage: ITEM_STORAGE_T1,
+    hauler: ITEM_HAULER_T1,
+    warp: ITEM_WARP_T1,
+    'ship-t1': ITEM_SHIP_T1_PACKED,
+    'container-t1': ITEM_CONTAINER_T1_PACKED,
+    'warehouse-t1': ITEM_WAREHOUSE_T1_PACKED,
+    'container-t2': ITEM_CONTAINER_T2_PACKED,
 }
 
 function isCategoryInput(input: RecipeInput): input is RecipeInputCategory {
@@ -65,9 +49,9 @@ function isCategoryInput(input: RecipeInput): input is RecipeInputCategory {
  * Multi-source sub-slots collapse to `sources[0]`; top-level multi-source slots
  * are expanded by the caller (`deriveStatMappings`).
  */
-export function traceToRawCategoryStat(
-    recipe: RecipeRow,
-    source: StatSlotSource,
+function traceToRawCategoryStat(
+    recipe: Recipe,
+    source: {inputIndex: number; statIndex: number},
     visited: Set<number> = new Set()
 ): StatDefinition | undefined {
     const input = recipe.inputs[source.inputIndex]
@@ -77,7 +61,7 @@ export function traceToRawCategoryStat(
         return defs[source.statIndex]
     }
     if (visited.has(input.itemId)) return undefined
-    const subRecipe = RECIPE_BY_ID.get(input.itemId)
+    const subRecipe = getRecipe(input.itemId)
     if (!subRecipe) return undefined
     const subSlot = subRecipe.statSlots[source.statIndex]
     if (!subSlot) return undefined
@@ -99,7 +83,7 @@ export function deriveStatMappings(): StatMapping[] {
         Record<number, {capability: string; attribute: string}>,
     ][]) {
         const itemId = KIND_TO_ITEM_ID[kind]
-        const recipe = RECIPE_BY_ID.get(itemId)
+        const recipe = getRecipe(itemId)
         if (!recipe) continue
         for (const [slotIdxStr, consumer] of Object.entries(slots)) {
             const slotIdx = Number(slotIdxStr)

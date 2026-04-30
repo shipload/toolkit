@@ -18,9 +18,6 @@ import {
 
 describe('makeShip factory', () => {
     test('stacks two hauler modules by capacity-weighted efficiency', () => {
-        // Hauler decoded keys post-rebalance: fineness (slot 0), conductivity
-        // (slot 1), composition (slot 2). Capacity uses fineness, efficiency
-        // uses conductivity, drain uses composition.
         const seedA = encodeStats([500, 500, 500, 500]) // cap=2, eff=5000, drain=9
         const seedB = encodeStats([999, 999, 999, 999]) // cap=3, eff=7994, drain=3
         const ship = makeShip({
@@ -67,13 +64,13 @@ describe('makeShip factory', () => {
             ],
         })
 
-        // uses strength + hardness + saturation (all encoded at indices 0, 2, 3).
-        // stats1: strength=100, hardness=100, saturation=100 → sum  300 → pct 11 → 110_000
-        // stats2: strength=500, hardness=500, saturation=500 → sum 1500 → pct 15 → 150_000
-        // stats3: strength=700, hardness=700, saturation=700 → sum 2100 → pct 17 → 170_000
-        // stats4: strength=999, hardness=999, saturation=999 → sum 2997 → pct 20 → 200_000
-        // total = 1_000_000 + 110_000 + 150_000 + 170_000 + 200_000 = 1_630_000
-        assert.equal(Number(ship.capacity!.value.toString()), 1_630_000)
+        // uses strength + density + hardness + saturation (slots 0/1/2/3).
+        // stats1: 100×4 =  400 → pct 11 → 110_000
+        // stats2: 500×4 = 2000 → pct 16 → 160_000
+        // stats3: 700×4 = 2800 → pct 19 → 190_000
+        // stats4: 999×4 = 3996 → pct 23 → 230_000
+        // total = 1_000_000 + 110_000 + 160_000 + 190_000 + 230_000 = 1_690_000
+        assert.equal(Number(ship.capacity!.value.toString()), 1_690_000)
     })
 
     test('rejects module with no compatible slot on the entity', () => {

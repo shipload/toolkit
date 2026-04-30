@@ -34,7 +34,7 @@ describe('ship deploy formulas', () => {
     })
 
     test('generator capabilities from stats', () => {
-        const result = computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
+        const result = computeGeneratorCapabilities({composition: 500, fineness: 500})
         assert.isAbove(result.capacity, 0)
         assert.isAbove(result.recharge, 0)
     })
@@ -87,19 +87,19 @@ describe('ship deploy formulas', () => {
     })
 
     test('generator formula exact values at min', () => {
-        const r = computeGeneratorCapabilities({resonance: 1, reflectivity: 1})
+        const r = computeGeneratorCapabilities({composition: 1, fineness: 1})
         assert.equal(r.capacity, 300)
         assert.equal(r.recharge, 1)
     })
 
     test('generator formula exact values at mid', () => {
-        const r = computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
+        const r = computeGeneratorCapabilities({composition: 500, fineness: 500})
         assert.equal(r.capacity, 383)
         assert.equal(r.recharge, 2)
     })
 
     test('generator formula exact values at max', () => {
-        const r = computeGeneratorCapabilities({resonance: 999, reflectivity: 999})
+        const r = computeGeneratorCapabilities({composition: 999, fineness: 999})
         assert.equal(r.capacity, 466)
         assert.equal(r.recharge, 3)
     })
@@ -247,32 +247,32 @@ describe('ship deploy formulas', () => {
     })
 
     test('crafter formula exact values at min', () => {
-        const r = computeCrafterCapabilities({reactivity: 1, composition: 1})
+        const r = computeCrafterCapabilities({reactivity: 1, fineness: 1})
         assert.equal(r.speed, 100)
         assert.equal(r.drain, 30)
     })
 
     test('crafter formula exact values at mid', () => {
-        const r = computeCrafterCapabilities({reactivity: 500, composition: 500})
+        const r = computeCrafterCapabilities({reactivity: 500, fineness: 500})
         assert.equal(r.speed, 500)
         assert.equal(r.drain, 15)
     })
 
     test('crafter formula exact values at max', () => {
-        const r = computeCrafterCapabilities({reactivity: 999, composition: 999})
+        const r = computeCrafterCapabilities({reactivity: 999, fineness: 999})
         assert.equal(r.speed, 899)
         assert.equal(r.drain, 5)
     })
 
     test('higher REA = higher crafter speed', () => {
-        const low = computeCrafterCapabilities({reactivity: 100, composition: 500})
-        const high = computeCrafterCapabilities({reactivity: 900, composition: 500})
+        const low = computeCrafterCapabilities({reactivity: 100, fineness: 500})
+        const high = computeCrafterCapabilities({reactivity: 900, fineness: 500})
         assert.isBelow(low.speed, high.speed)
     })
 
-    test('higher COM = lower crafter drain', () => {
-        const low = computeCrafterCapabilities({reactivity: 500, composition: 100})
-        const high = computeCrafterCapabilities({reactivity: 500, composition: 900})
+    test('higher FIN = lower crafter drain', () => {
+        const low = computeCrafterCapabilities({reactivity: 500, fineness: 100})
+        const high = computeCrafterCapabilities({reactivity: 500, fineness: 900})
         assert.isAbove(low.drain, high.drain)
     })
 

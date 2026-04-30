@@ -13,10 +13,10 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const density = stats.density ?? 500
-    const strength = stats.strength ?? 500
-    const hardness = stats.hardness ?? 500
-    const saturation = stats.saturation ?? 500
+    const density = stats.density
+    const strength = stats.strength
+    const hardness = stats.hardness
+    const saturation = stats.saturation
 
     const hullmass = 25000 + 75 * density
     const statSum = strength + hardness + saturation
@@ -30,8 +30,8 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
     thrust: number
     drain: number
 } {
-    const vol = stats.volatility ?? 500
-    const thm = stats.thermal ?? 500
+    const vol = stats.volatility
+    const thm = stats.thermal
 
     return {
         thrust: 400 + Math.floor((vol * 3) / 4),
@@ -43,12 +43,12 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     capacity: number
     recharge: number
 } {
-    const res = stats.resonance ?? 500
-    const ref = stats.reflectivity ?? 500
+    const com = stats.composition
+    const fin = stats.fineness
 
     return {
-        capacity: 300 + Math.floor(res / 6),
-        recharge: 1 + Math.floor((ref * 3) / 1000),
+        capacity: 300 + Math.floor(com / 6),
+        recharge: 1 + Math.floor((fin * 3) / 1000),
     }
 }
 
@@ -58,10 +58,10 @@ export function computeGathererCapabilities(stats: Record<string, number>): {
     depth: number
     speed: number
 } {
-    const str = stats.strength ?? 500
-    const con = stats.conductivity ?? 500
-    const ref = stats.reflectivity ?? 500
-    const tol = stats.tolerance ?? 500
+    const str = stats.strength
+    const con = stats.conductivity
+    const ref = stats.reflectivity
+    const tol = stats.tolerance
 
     return {
         yield: 200 + str,
@@ -76,11 +76,8 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
     thrust: number
     quantity: number
 } {
-    // Recipe slot 0 = Cargo Arm s1 (insulation), slot 1 = Cargo Arm s0
-    // (plasticity). Contract reads by slot index — see compute_loader_*
-    // in capabilities/modules.cpp.
-    const insulation = stats.insulation ?? 500
-    const plasticity = stats.plasticity ?? 500
+    const insulation = stats.insulation
+    const plasticity = stats.plasticity
 
     return {
         mass: Math.max(200, 2000 - Math.floor(insulation * 2)),
@@ -93,12 +90,12 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
     speed: number
     drain: number
 } {
-    const rea = stats.reactivity ?? 500
-    const com = stats.composition ?? 500
+    const rea = stats.reactivity
+    const fin = stats.fineness
 
     return {
         speed: 100 + Math.floor((rea * 4) / 5),
-        drain: Math.max(5, 30 - Math.floor(com / 33)),
+        drain: Math.max(5, 30 - Math.floor(fin / 33)),
     }
 }
 
@@ -107,12 +104,9 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     efficiency: number
     drain: number
 } {
-    // Recipe slot 0 = Power Cell s1 (fineness), slot 1 = Focusing Array s0
-    // (conductivity), slot 2 = Power Cell s0 (composition). Contract reads
-    // by slot index — see compute_hauler_* in capabilities/modules.cpp.
-    const fineness = stats.fineness ?? 500
-    const conductivity = stats.conductivity ?? 500
-    const composition = stats.composition ?? 500
+    const fineness = stats.fineness
+    const conductivity = stats.conductivity
+    const composition = stats.composition
 
     return {
         capacity: Math.max(1, 1 + Math.floor(fineness / 400)),
@@ -127,11 +121,12 @@ export function computeStorageCapabilities(
 ): {
     capacityBonus: number
 } {
-    const strength = stats.strength ?? 500
-    const density = stats.density ?? 500
-    const hardness = stats.hardness ?? 500
+    const strength = stats.strength
+    const density = stats.density
+    const hardness = stats.hardness
+    const saturation = stats.saturation
 
-    const statSum = strength + density + hardness
+    const statSum = strength + density + hardness + saturation
     const capacityBonus = Math.floor(
         (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
     )
@@ -143,10 +138,10 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     hullmass: number
     capacity: number
 } {
-    const density = stats.density ?? 500
-    const strength = stats.strength ?? 500
-    const hardness = stats.hardness ?? 500
-    const saturation = stats.saturation ?? 500
+    const density = stats.density
+    const strength = stats.strength
+    const hardness = stats.hardness
+    const saturation = stats.saturation
 
     const hullmass = 25000 + 75 * density
     const statSum = strength + hardness + saturation

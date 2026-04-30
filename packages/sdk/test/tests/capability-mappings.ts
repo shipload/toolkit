@@ -28,14 +28,14 @@ describe('deriveStatMappings', () => {
         assert.deepInclude(tuples, 'Storage.capacity')
     })
 
-    test('Insulation drives Loader.mass (wired in commit 3)', () => {
+    test('Insulation drives Loader.mass', () => {
         const tuples = getStatMappingsForStat('Insulation').map(
             (m) => `${m.capability}.${m.attribute}`
         )
         assert.deepInclude(tuples, 'Loader.mass')
     })
 
-    test('Composition currently drives Energy.capacity (pre-rebalance)', () => {
+    test('Composition drives Energy.capacity', () => {
         const tuples = getStatMappingsForStat('Composition').map(
             (m) => `${m.capability}.${m.attribute}`
         )
@@ -55,9 +55,7 @@ describe('deriveStatMappings', () => {
     })
 })
 
-describe('current-state stat coverage (pre-rebalance)', () => {
-    // Codifies what the derivation surfaces from today's recipes + contract.
-    // Updated by commit 3 (recipe rewires) and commit 4 (Storage slot 3 active).
+describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Gathering.yield', 'Storage.bonus', 'Storage.capacity'],
         Tolerance: ['Gathering.depth'],
@@ -72,8 +70,8 @@ describe('current-state stat coverage (pre-rebalance)', () => {
         Hardness: ['Storage.bonus', 'Storage.capacity'],
         Fineness: ['Energy.recharge', 'Crafter.drain', 'Hauler.capacity'],
         Plasticity: ['Loader.thrust'],
-        Insulation: ['Loader.mass'], // wired in commit 3
-        Saturation: ['Storage.capacity'],
+        Insulation: ['Loader.mass'],
+        Saturation: ['Storage.bonus', 'Storage.capacity'],
     }
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {

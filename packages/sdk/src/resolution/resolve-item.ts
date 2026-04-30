@@ -223,10 +223,11 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_STORAGE: {
-            const str = stats.strength ?? 500
-            const hrd = stats.hardness ?? 500
-            const sat = stats.saturation ?? 500
-            const statSum = str + hrd + sat
+            const str = stats.strength
+            const den = stats.density
+            const hrd = stats.hardness
+            const sat = stats.saturation
+            const statSum = str + den + hrd + sat
             const pct = 10 + Math.floor((statSum * 10) / 2997)
             return {capability: 'Storage', attributes: [{label: 'Capacity Bonus', value: pct}]}
         }

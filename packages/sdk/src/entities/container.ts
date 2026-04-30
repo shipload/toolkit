@@ -75,10 +75,10 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const density = stats['density'] ?? 500
-    const strength = stats['strength'] ?? 500
-    const hardness = stats['hardness'] ?? 500
-    const saturation = stats['saturation'] ?? 500
+    const density = stats.density
+    const strength = stats.strength
+    const hardness = stats.hardness
+    const saturation = stats.saturation
 
     const hullmass = 25000 + 75 * density
 
@@ -93,10 +93,10 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const strength = stats['strength'] ?? 0
-    const density = stats['density'] ?? 0
-    const hardness = stats['hardness'] ?? 0
-    const saturation = stats['saturation'] ?? 0
+    const strength = stats.strength
+    const density = stats.density
+    const hardness = stats.hardness
+    const saturation = stats.saturation
 
     const hullmass = 20000 + 50 * density
 

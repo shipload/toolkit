@@ -212,7 +212,6 @@ export {
     getStatMappings,
     getStatMappingsForStat,
     getStatMappingsForCapability,
-    traceToRawCategoryStat,
 } from './derivation/capability-mappings'
 export {SLOT_FORMULAS} from './data/capability-formulas'
 export type {SlotConsumer, SlotConsumerKind} from './data/capability-formulas'

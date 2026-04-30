@@ -1,7 +1,8 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
-import {SLOT_FORMULAS} from '../../src/data/capability-formulas'
+import {SLOT_FORMULAS, type SlotConsumerKind} from '../../src/data/capability-formulas'
+import {KIND_TO_ITEM_ID} from '../../src/derivation/capability-mappings'
 
 describe('SLOT_FORMULAS', () => {
     test('engine reads slots 0 and 1 only', () => {
@@ -14,8 +15,8 @@ describe('SLOT_FORMULAS', () => {
         assert.deepEqual(Object.keys(SLOT_FORMULAS.gatherer).sort(), ['0', '1', '3', '4'])
     })
 
-    test('storage reads only slots 0/1/2 (slot 3 still dead pre-rebalance)', () => {
-        assert.deepEqual(Object.keys(SLOT_FORMULAS.storage).sort(), ['0', '1', '2'])
+    test('storage reads slots 0/1/2/3', () => {
+        assert.deepEqual(Object.keys(SLOT_FORMULAS.storage).sort(), ['0', '1', '2', '3'])
     })
 
     test('hauler reads only slots 0/1/2 (slot 3 dead, 4th attr deferred)', () => {
@@ -40,22 +41,9 @@ describe('SLOT_FORMULAS', () => {
             statSlots: Array<{sources: Array<{inputIndex: number; statIndex: number}>}>
         }>
 
-        const KNOWN_INTERMEDIATE_LEAKS = new Set<string>(['storage|3'])
-
-        const ITEM_ID_TO_KIND: Record<number, keyof typeof SLOT_FORMULAS> = {
-            10100: 'engine',
-            10101: 'generator',
-            10102: 'gatherer',
-            10103: 'loader',
-            10104: 'crafter',
-            10105: 'storage',
-            10106: 'hauler',
-            10107: 'warp',
-            10200: 'container-t1',
-            10201: 'ship-t1',
-            10202: 'warehouse-t1',
-            20200: 'container-t2',
-        }
+        const ITEM_ID_TO_KIND = Object.fromEntries(
+            Object.entries(KIND_TO_ITEM_ID).map(([k, v]) => [v, k])
+        ) as Record<number, SlotConsumerKind>
 
         for (const recipe of recipes) {
             const kind = ITEM_ID_TO_KIND[recipe.outputItemId]
@@ -63,7 +51,6 @@ describe('SLOT_FORMULAS', () => {
             const formula = SLOT_FORMULAS[kind]
             for (let i = 0; i < recipe.statSlots.length; i++) {
                 if (recipe.statSlots[i].sources.length === 0) continue
-                if (KNOWN_INTERMEDIATE_LEAKS.has(`${kind}|${i}`)) continue
                 assert.property(
                     formula,
                     String(i),

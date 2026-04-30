@@ -44,17 +44,17 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
 export const computeEngineDrain = (thm: number): number => Math.max(30, 50 - idiv(thm, 70))
-export const computeGeneratorCap = (res: number): number => 300 + idiv(res, 6)
-export const computeGeneratorRech = (ref: number): number => 1 + idiv(ref * 3, 1000)
+export const computeGeneratorCap = (com: number): number => 300 + idiv(com, 6)
+export const computeGeneratorRech = (fin: number): number => 1 + idiv(fin * 3, 1000)
 export const computeGathererYield = (str: number): number => 200 + str
 export const computeGathererDrain = (con: number): number =>
     Math.max(250, 1250 - idiv(con * 25, 20))
 export const computeGathererDepth = (tol: number): number => 200 + idiv(tol * 3, 2)
 export const computeGathererSpeed = (ref: number): number => 100 + idiv(ref * 4, 5)
-export const computeLoaderMass = (fin: number): number => Math.max(200, 2000 - fin * 2)
+export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
-export const computeCrafterDrain = (com: number): number => Math.max(5, 30 - idiv(com, 33))
+export const computeCrafterDrain = (fin: number): number => Math.max(5, 30 - idiv(fin, 33))
 export const computeWarpRange = (stat: number): number => 100 + stat * 3
 
 export function entityDisplayName(itemId: number): string {

@@ -17,6 +17,13 @@ export type SlotConsumerKind =
     | 'warehouse-t1'
     | 'container-t2'
 
+const ENTITY_HULL_SLOTS: Record<number, SlotConsumer> = {
+    0: {capability: 'Storage', attribute: 'capacity'},
+    1: {capability: 'Hull', attribute: 'mass'},
+    2: {capability: 'Storage', attribute: 'capacity'},
+    3: {capability: 'Storage', attribute: 'capacity'},
+}
+
 export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer>> = {
     engine: {
         0: {capability: 'Movement', attribute: 'thrust'},
@@ -44,6 +51,7 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
         0: {capability: 'Storage', attribute: 'bonus'},
         1: {capability: 'Storage', attribute: 'bonus'},
         2: {capability: 'Storage', attribute: 'bonus'},
+        3: {capability: 'Storage', attribute: 'bonus'},
     },
     hauler: {
         0: {capability: 'Hauler', attribute: 'capacity'},
@@ -53,28 +61,8 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     warp: {
         0: {capability: 'Warp', attribute: 'range'},
     },
-    'ship-t1': {
-        0: {capability: 'Storage', attribute: 'capacity'},
-        1: {capability: 'Hull', attribute: 'mass'},
-        2: {capability: 'Storage', attribute: 'capacity'},
-        3: {capability: 'Storage', attribute: 'capacity'},
-    },
-    'container-t1': {
-        0: {capability: 'Storage', attribute: 'capacity'},
-        1: {capability: 'Hull', attribute: 'mass'},
-        2: {capability: 'Storage', attribute: 'capacity'},
-        3: {capability: 'Storage', attribute: 'capacity'},
-    },
-    'warehouse-t1': {
-        0: {capability: 'Storage', attribute: 'capacity'},
-        1: {capability: 'Hull', attribute: 'mass'},
-        2: {capability: 'Storage', attribute: 'capacity'},
-        3: {capability: 'Storage', attribute: 'capacity'},
-    },
-    'container-t2': {
-        0: {capability: 'Storage', attribute: 'capacity'},
-        1: {capability: 'Hull', attribute: 'mass'},
-        2: {capability: 'Storage', attribute: 'capacity'},
-        3: {capability: 'Storage', attribute: 'capacity'},
-    },
+    'ship-t1': ENTITY_HULL_SLOTS,
+    'container-t1': ENTITY_HULL_SLOTS,
+    'warehouse-t1': ENTITY_HULL_SLOTS,
+    'container-t2': ENTITY_HULL_SLOTS,
 }
