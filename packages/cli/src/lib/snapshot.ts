@@ -77,7 +77,7 @@ export function entityInfoToSnapshot(
 			recharge: BigInt(ei.generator.recharge.toString()),
 		};
 	}
-	if (ei.schedule !== undefined) {
+	if (ei.schedule != null) {
 		snap.schedule = {
 			started: ei.schedule.started,
 			tasks: ei.schedule.tasks,
