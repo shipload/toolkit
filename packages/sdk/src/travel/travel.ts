@@ -77,6 +77,55 @@ export function lerp(
     }
 }
 
+export interface FloatPosition {
+    x: number
+    y: number
+}
+
+export function easeFlightProgress(t: number): number {
+    if (t <= 0) return 0
+    if (t >= 1) return 1
+    return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t)
+}
+
+export function flightSpeedFactor(t: number): number {
+    if (t <= 0 || t >= 1) return 0
+    return t < 0.5 ? 4 * t : 4 * (1 - t)
+}
+
+export function interpolateFlightPosition(
+    origin: {x: Int64Type | number; y: Int64Type | number},
+    destination: {x: Int64Type | number; y: Int64Type | number},
+    taskProgress: number,
+    options?: {easing?: 'physics' | 'linear'}
+): FloatPosition {
+    const t = options?.easing === 'linear' ? taskProgress : easeFlightProgress(taskProgress)
+    return {
+        x: (1 - t) * Number(origin.x) + t * Number(destination.x),
+        y: (1 - t) * Number(origin.y) + t * Number(destination.y),
+    }
+}
+
+export function getInterpolatedPosition(
+    entity: HasScheduleAndLocation,
+    taskIndex: number,
+    taskProgress: number
+): FloatPosition {
+    if (!entity.schedule || entity.schedule.tasks.length === 0 || taskIndex < 0) {
+        return {x: Number(entity.coordinates.x), y: Number(entity.coordinates.y)}
+    }
+    const task = entity.schedule.tasks[taskIndex]
+    if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
+        const origin = getFlightOrigin(entity, taskIndex)
+        return {x: Number(origin.x), y: Number(origin.y)}
+    }
+    return interpolateFlightPosition(
+        getFlightOrigin(entity, taskIndex),
+        task.coordinates,
+        taskProgress
+    )
+}
+
 export function rotation(
     origin: ServerContract.ActionParams.Type.coordinates,
     destination: ServerContract.ActionParams.Type.coordinates
@@ -408,6 +457,7 @@ export function getDestinationLocation(
     return undefined
 }
 
+/** Returns chain-tile coordinates (rounded). For visual position use getInterpolatedPosition. */
 export function getPositionAt(
     entity: HasScheduleAndLocation,
     taskIndex: number,

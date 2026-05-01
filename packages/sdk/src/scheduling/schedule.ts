@@ -147,6 +147,20 @@ export function currentTaskProgress(entity: ScheduleData, now: Date): number {
     return Math.min(1, elapsed / duration)
 }
 
+export function currentTaskProgressFloat(entity: ScheduleData, now: Date): number {
+    if (!entity.schedule || entity.schedule.tasks.length === 0) return 0
+    const index = currentTaskIndex(entity, now)
+    if (index < 0) return 0
+    const task = entity.schedule.tasks[index]
+    const durationMs = task.duration.toNumber() * 1000
+    if (durationMs === 0) return 1
+    const startedMs = entity.schedule.started.toDate().getTime()
+    const taskStartMs = startedMs + getTaskStartTime(entity, index) * 1000
+    const elapsedMs = now.getTime() - taskStartMs
+    if (elapsedMs <= 0) return 0
+    return Math.min(1, elapsedMs / durationMs)
+}
+
 export function scheduleProgress(entity: ScheduleData, now: Date): number {
     const duration = scheduleDuration(entity)
     if (duration === 0) return hasSchedule(entity) ? 1 : 0

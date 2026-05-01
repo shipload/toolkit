@@ -23,6 +23,10 @@ import {
     calculateRefuelingTime,
     calculateTransferTime,
     distanceBetweenPoints,
+    easeFlightProgress,
+    flightSpeedFactor,
+    getInterpolatedPosition,
+    interpolateFlightPosition,
     lerp,
     rotation,
 } from 'src/travel'
@@ -517,5 +521,144 @@ describe('travel', () => {
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
         })
+    })
+})
+
+describe('easeFlightProgress', () => {
+    test('returns 0 at t=0', () => {
+        assert.strictEqual(easeFlightProgress(0), 0)
+    })
+    test('returns 1 at t=1', () => {
+        assert.strictEqual(easeFlightProgress(1), 1)
+    })
+    test('returns 0.5 at t=0.5 (curve symmetric)', () => {
+        assert.strictEqual(easeFlightProgress(0.5), 0.5)
+    })
+    test('clamps below 0', () => {
+        assert.strictEqual(easeFlightProgress(-0.5), 0)
+    })
+    test('clamps above 1', () => {
+        assert.strictEqual(easeFlightProgress(1.5), 1)
+    })
+    test('monotonic across [0,1]', () => {
+        let prev = easeFlightProgress(0)
+        for (let i = 1; i <= 20; i++) {
+            const v = easeFlightProgress(i / 20)
+            assert.isAtLeast(v, prev)
+            prev = v
+        }
+    })
+    test('first half is quadratic (2t²)', () => {
+        assert.closeTo(easeFlightProgress(0.25), 2 * 0.25 * 0.25, 1e-9)
+    })
+    test('second half mirrors first (1 - 2(1-t)²)', () => {
+        assert.closeTo(easeFlightProgress(0.75), 1 - 2 * 0.25 * 0.25, 1e-9)
+    })
+})
+
+describe('flightSpeedFactor', () => {
+    test('returns 0 at endpoints', () => {
+        assert.strictEqual(flightSpeedFactor(0), 0)
+        assert.strictEqual(flightSpeedFactor(1), 0)
+    })
+    test('peaks at midpoint', () => {
+        assert.closeTo(flightSpeedFactor(0.5), 2, 1e-9)
+    })
+    test('linear up then down', () => {
+        assert.closeTo(flightSpeedFactor(0.25), 1, 1e-9)
+        assert.closeTo(flightSpeedFactor(0.75), 1, 1e-9)
+    })
+})
+
+describe('interpolateFlightPosition', () => {
+    const o = {x: 0, y: 0}
+    const d = {x: 10, y: 0}
+
+    test('progress 0 returns origin', () => {
+        const p = interpolateFlightPosition(o, d, 0)
+        assert.strictEqual(p.x, 0)
+        assert.strictEqual(p.y, 0)
+    })
+    test('progress 1 returns destination', () => {
+        const p = interpolateFlightPosition(o, d, 1)
+        assert.strictEqual(p.x, 10)
+        assert.strictEqual(p.y, 0)
+    })
+    test('progress 0.5 with default easing sits at midpoint', () => {
+        const p = interpolateFlightPosition(o, d, 0.5)
+        assert.closeTo(p.x, 5, 1e-9)
+    })
+    test('progress 0.25 eased lags behind linear', () => {
+        const eased = interpolateFlightPosition(o, d, 0.25)
+        const linear = interpolateFlightPosition(o, d, 0.25, {easing: 'linear'})
+        assert.isBelow(eased.x, linear.x)
+        assert.closeTo(linear.x, 2.5, 1e-9)
+        assert.closeTo(eased.x, 1.25, 1e-9)
+    })
+    test('returns floats (not rounded)', () => {
+        const p = interpolateFlightPosition(o, {x: 7, y: 3}, 0.3)
+        assert.notStrictEqual(p.x, Math.round(p.x))
+    })
+})
+
+describe('getInterpolatedPosition', () => {
+    test('no schedule → returns entity coordinates as floats', () => {
+        const entity = {
+            coordinates: {x: 7, y: -3},
+            schedule: undefined,
+        } as any
+        const p = getInterpolatedPosition(entity, 0, 0)
+        assert.strictEqual(p.x, 7)
+        assert.strictEqual(p.y, -3)
+    })
+    test('TRAVEL task at progress 0 → origin', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            schedule: {
+                tasks: [
+                    {
+                        type: {equals: (t: any) => t === 1},
+                        coordinates: {x: 10, y: 0},
+                        duration: {toNumber: () => 100},
+                    },
+                ],
+            },
+        } as any
+        const p = getInterpolatedPosition(entity, 0, 0)
+        assert.strictEqual(p.x, 0)
+    })
+    test('TRAVEL task at progress 1 → destination', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            schedule: {
+                tasks: [
+                    {
+                        type: {equals: (t: any) => t === 1},
+                        coordinates: {x: 10, y: 4},
+                        duration: {toNumber: () => 100},
+                    },
+                ],
+            },
+        } as any
+        const p = getInterpolatedPosition(entity, 0, 1)
+        assert.strictEqual(p.x, 10)
+        assert.strictEqual(p.y, 4)
+    })
+    test('TRAVEL task at progress 0.5 → eased midpoint (no rounding)', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            schedule: {
+                tasks: [
+                    {
+                        type: {equals: (t: any) => t === 1},
+                        coordinates: {x: 7, y: 3},
+                        duration: {toNumber: () => 100},
+                    },
+                ],
+            },
+        } as any
+        const p = getInterpolatedPosition(entity, 0, 0.3)
+        assert.notStrictEqual(p.x, Math.round(p.x))
+        assert.notStrictEqual(p.y, Math.round(p.y))
     })
 })

@@ -2,7 +2,9 @@ import {type UInt16, type UInt16Type, UInt32, UInt64, type UInt64Type} from '@wh
 import {ServerContract} from '../contracts'
 import {Coordinates, type CoordinatesType} from '../types'
 import {
+    type FloatPosition,
     getDestinationLocation,
+    getInterpolatedPosition,
     getPositionAt,
     getFlightOrigin as travelGetFlightOrigin,
 } from '../travel/travel'
@@ -95,10 +97,17 @@ export class Ship extends ServerContract.Types.entity_info {
         return dest ? Coordinates.from(dest) : undefined
     }
 
+    /** Chain-tile coordinates at `now`. For smooth visual position use interpolatedPositionAt. */
     positionAt(now: Date): Coordinates {
         const taskIndex = this.sched.currentTaskIndex(now)
         const progress = this.sched.currentTaskProgress(now)
         return Coordinates.from(getPositionAt(this, taskIndex, progress))
+    }
+
+    interpolatedPositionAt(now: Date): FloatPosition {
+        const taskIndex = this.sched.currentTaskIndex(now)
+        const progress = this.sched.currentTaskProgressFloat(now)
+        return getInterpolatedPosition(this, taskIndex, progress)
     }
 
     isInFlight(now: Date): boolean {

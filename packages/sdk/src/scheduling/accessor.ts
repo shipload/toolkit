@@ -72,6 +72,10 @@ export class ScheduleAccessor {
         return schedule.currentTaskProgress(this.entity, now)
     }
 
+    currentTaskProgressFloat(now: Date): number {
+        return schedule.currentTaskProgressFloat(this.entity, now)
+    }
+
     progress(now: Date): number {
         return schedule.scheduleProgress(this.entity, now)
     }

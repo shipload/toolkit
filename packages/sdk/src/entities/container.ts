@@ -1,6 +1,7 @@
 import {UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import type {CoordinatesType} from '../types'
+import {type FloatPosition, getInterpolatedPosition} from '../travel/travel'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
 import * as schedule from '../scheduling/schedule'
@@ -39,6 +40,12 @@ export class Container extends ServerContract.Types.entity_info {
 
     get isIdle(): boolean {
         return this.is_idle
+    }
+
+    interpolatedPositionAt(now: Date): FloatPosition {
+        const taskIndex = this.sched.currentTaskIndex(now)
+        const progress = this.sched.currentTaskProgressFloat(now)
+        return getInterpolatedPosition(this, taskIndex, progress)
     }
 
     isLoading(now: Date): boolean {
