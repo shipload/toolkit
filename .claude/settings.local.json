@@ -1,0 +1,6 @@
+{
+    "permissions": {
+        "allow": ["WebSearch", "Bash(bun scripts/changeset-from-git.ts)", "Bash(bun *)"]
+    },
+    "enabledMcpjsonServers": ["mcp-memory-service", "obsidian-mcp-tools"]
+}
