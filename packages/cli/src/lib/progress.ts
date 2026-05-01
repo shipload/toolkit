@@ -112,7 +112,7 @@ function headerLine(snap: EntitySnapshot): string {
 
 function statsLine(t: ProgressTick): string | null {
 	const parts: string[] = [];
-	if (t.snap.coordinates) parts.push(formatCoords(t.snap.coordinates as ServerTypes.coordinates));
+	if (t.snap.coordinates) parts.push(formatCoords(t.snap.coordinates as unknown as ServerTypes.coordinates));
 	const energyStr = energySummary(t);
 	if (energyStr) parts.push(energyStr);
 	const cargoStr = cargoSummary(t.snap);

@@ -74,7 +74,7 @@ export async function runApp(opts: RunAppOpts, deps: AppDeps = {}): Promise<void
                 opts.view.dismissHelp?.()
                 return
             }
-            opts.view.keys.dispatch(key.name)
+            opts.view.keys.dispatch(key.name, key.shift)
         })
         await Promise.race([appExit, timeoutPromise])
     } finally {

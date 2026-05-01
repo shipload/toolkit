@@ -28,9 +28,9 @@ export interface SnapshotStreamOpts {
 
 export const DEFAULT_RENDER_INTERVAL_MS = 1_000;
 export const DEFAULT_FETCH_INTERVAL_MS = 5_000;
-const SMOOTH_TOLERANCE_S = 2;
+export const SMOOTH_TOLERANCE_S = 2;
 
-function toNumber(v: unknown): number {
+export function toNumber(v: unknown): number {
 	if (v === undefined || v === null) return 0;
 	if (typeof v === "number") return v;
 	if (typeof v === "bigint") return Number(v);

@@ -7,13 +7,14 @@ import {
     formatTimeUTC,
     projectEnergy,
 } from '../../lib/format'
-import type {EntitySnapshot} from '../../lib/snapshot'
+import {completedCount, type EntitySnapshot} from '../../lib/snapshot'
 import type {SnapshotTick} from '../../lib/snapshot-stream'
 import {type Hotkey, HotkeyRegistry} from '../hotkeys'
 import {renderField} from '../primitives/field'
 import {type FooterStatus, renderFooter} from '../primitives/footer'
 import {renderHeader} from '../primitives/header'
 import {renderProgressBar} from '../primitives/progress-bar'
+import {createResolveModal, type ResolveModalHandle} from '../primitives/resolve-modal'
 import {renderTaskRow} from '../primitives/task-row'
 import type {View} from '../view'
 
@@ -27,31 +28,23 @@ export interface ResolveResult {
     explorerUrl: string
 }
 
+export interface TrackEmbed {
+    onBack: () => void
+    onStepNext: () => void
+    onStepPrev: () => void
+    label?: string
+}
+
 export interface TrackViewOpts {
     ctx: TrackViewCtx
     initialSnapshot: EntitySnapshot
     stream: AsyncGenerator<SnapshotTick, void, void>
     resolveAction: (completedCount: number) => Promise<ResolveResult>
+    embed?: TrackEmbed
 }
 
 const ROOT_ID = 'track-root'
-const MODAL_BG = '#0d1117'
 const PENDING_RESOLVE_TIMEOUT_MS = 8_000
-
-type ModalState =
-    | {kind: 'none'}
-    | {kind: 'confirm-resolve'; count: number; selection: 'ok' | 'cancel'}
-    | {kind: 'submitting'; label: string}
-    | {
-          kind: 'success'
-          txid: string
-          explorerUrl: string
-          resolvedCount: number
-          copiedAt?: number
-      }
-    | {kind: 'error'; message: string}
-
-const COPIED_FLASH_MS = 2000
 
 interface PendingResolve {
     count: number
@@ -63,16 +56,8 @@ interface ViewState {
     tick: SnapshotTick
     status: FooterStatus
     helpOpen: boolean
-    modal: ModalState
+    modal: ResolveModalHandle | null
     pendingResolve: PendingResolve | null
-}
-
-function completedCount(snap: EntitySnapshot): number {
-    const all = snap.schedule?.tasks?.length ?? 0
-    if (snap.is_idle) return all
-    // Busy: schedule.tasks = [done..., active, ...pending]
-    const pending = snap.pending_tasks?.length ?? 0
-    return Math.max(0, all - pending - 1)
 }
 
 function applyOptimisticResolve(snap: EntitySnapshot, count: number): EntitySnapshot {
@@ -101,40 +86,13 @@ export function createTrackView(opts: TrackViewOpts): View {
         tick: initialTick(opts.initialSnapshot),
         status: {kind: 'ready'},
         helpOpen: false,
-        modal: {kind: 'none'},
+        modal: null,
         pendingResolve: null,
     }
     let resolveExit!: () => void
     const onExit = new Promise<void>((r) => {
         resolveExit = r
     })
-
-    async function executeResolve(count: number): Promise<void> {
-        state.modal = {kind: 'submitting', label: `Resolving ${count} task(s)`}
-        render()
-        try {
-            const result = await opts.resolveAction(count)
-            const baseTaskCount = state.tick.snap.schedule?.tasks?.length ?? 0
-            state.pendingResolve = {
-                count,
-                appliedAt: Date.now(),
-                baseTaskCount,
-            }
-            state.tick = {...state.tick, snap: applyOptimisticResolve(state.tick.snap, count)}
-            state.modal = {
-                kind: 'success',
-                txid: result.txid,
-                explorerUrl: result.explorerUrl,
-                resolvedCount: count,
-            }
-        } catch (err) {
-            state.modal = {
-                kind: 'error',
-                message: err instanceof Error ? err.message : String(err),
-            }
-        }
-        render()
-    }
 
     function applyTickFilter(tick: SnapshotTick): SnapshotTick {
         const pending = state.pendingResolve
@@ -152,92 +110,115 @@ export function createTrackView(opts: TrackViewOpts): View {
         return {...tick, snap: applyOptimisticResolve(tick.snap, pending.count)}
     }
 
-    const keys = new HotkeyRegistry<Hotkey>([
+    const embed = opts.embed
+    const baseHotkeys: Hotkey[] = [
         {
             key: 'r',
             label: 'resolve',
-            enabled: () => completedCount(state.tick.snap) > 0 && state.modal.kind === 'none',
+            enabled: () => completedCount(state.tick.snap) > 0 && state.modal === null,
             action: () => {
                 const count = completedCount(state.tick.snap)
                 if (count === 0) return
-                state.modal = {kind: 'confirm-resolve', count, selection: 'ok'}
+                const taskWord = count === 1 ? 'task' : 'tasks'
+                const ctx = opts.ctx
+                state.modal = createResolveModal({
+                    title: 'Resolve completed tasks?',
+                    body: `This submits an on-chain transaction resolving ${count} ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
+                    confirmLabel: 'OK',
+                    cancelLabel: 'Cancel',
+                    submittingLabel: `Resolving ${count} ${taskWord}`,
+                    successLabel: () =>
+                        `Resolved ${count} ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
+                    onCopyToClipboard: (text) => renderer?.copyToClipboardOSC52?.(text),
+                    onConfirm: async () => {
+                        const result = await opts.resolveAction(count)
+                        const baseTaskCount = state.tick.snap.schedule?.tasks?.length ?? 0
+                        state.pendingResolve = {
+                            count,
+                            appliedAt: Date.now(),
+                            baseTaskCount,
+                        }
+                        state.tick = {
+                            ...state.tick,
+                            snap: applyOptimisticResolve(state.tick.snap, count),
+                        }
+                        return result
+                    },
+                    onClose: () => {
+                        state.modal = null
+                        render()
+                    },
+                })
+                state.modal.onChange(render)
                 render()
             },
         },
         {
             key: '?',
             label: 'help',
-            enabled: () => state.modal.kind === 'none',
+            enabled: () => state.modal === null,
             action: () => {
                 state.helpOpen = !state.helpOpen
                 render()
             },
         },
-        {
-            key: 'q',
-            label: 'quit',
-            enabled: () => true,
-            action: () => resolveExit(),
-        },
-        {
-            key: '`',
-            label: 'console',
-            enabled: () => true,
-            action: () => {
-                renderer?.console?.toggle()
+    ]
+    if (embed) {
+        baseHotkeys.push(
+            {
+                key: 'escape',
+                label: 'back',
+                enabled: () => state.modal === null,
+                action: () => embed.onBack(),
             },
-        },
-    ])
+            {
+                key: 'tab',
+                label: 'next',
+                enabled: () => state.modal === null,
+                action: () => embed.onStepNext(),
+            },
+            {
+                key: 'tab',
+                shift: true,
+                label: 'prev',
+                enabled: () => state.modal === null,
+                action: () => embed.onStepPrev(),
+            },
+            {
+                key: '`',
+                label: 'console',
+                enabled: () => true,
+                action: () => {
+                    renderer?.console?.toggle()
+                },
+            }
+        )
+    } else {
+        baseHotkeys.push(
+            {
+                key: 'q',
+                label: 'quit',
+                enabled: () => state.modal?.state.kind !== 'submitting',
+                action: () => resolveExit(),
+            },
+            {
+                key: '`',
+                label: 'console',
+                enabled: () => true,
+                action: () => {
+                    renderer?.console?.toggle()
+                },
+            }
+        )
+    }
+    const keys = new HotkeyRegistry<Hotkey>(baseHotkeys)
 
     let renderer: CliRenderer | null = null
     let consumed = false
 
     function interceptKey(key: KeyEvent): boolean {
-        if (state.modal.kind === 'none') return false
-        const m = state.modal
-        if (m.kind === 'submitting') {
-            // Block all input while in flight.
-            return true
-        }
-        if (m.kind === 'confirm-resolve') {
-            if (key.name === 'left' || key.name === 'right' || key.name === 'tab') {
-                m.selection = m.selection === 'ok' ? 'cancel' : 'ok'
-                render()
-                return true
-            }
-            if (key.name === 'escape') {
-                state.modal = {kind: 'none'}
-                render()
-                return true
-            }
-            if (key.name === 'return') {
-                if (m.selection === 'ok') {
-                    void executeResolve(m.count)
-                } else {
-                    state.modal = {kind: 'none'}
-                    render()
-                }
-                return true
-            }
-            return true
-        }
-        if (m.kind === 'success') {
-            if (key.name === 'c') {
-                renderer?.copyToClipboardOSC52?.(m.explorerUrl)
-                m.copiedAt = Date.now()
-                render()
-                setTimeout(() => {
-                    if (state.modal.kind === 'success' && state.modal.copiedAt === m.copiedAt) {
-                        render()
-                    }
-                }, COPIED_FLASH_MS)
-                return true
-            }
-        }
-        if (key.name === 'return' || key.name === 'escape' || key.name === 'space') {
-            state.modal = {kind: 'none'}
-            render()
-        }
+        if (!state.modal) return false
+        state.modal.handleKey({name: String(key.name ?? '')})
         return true
     }
 
@@ -250,7 +231,7 @@ export function createTrackView(opts: TrackViewOpts): View {
         try {
             root.remove(ROOT_ID)
         } catch {}
-        root.add(layout(state, opts.ctx, keys))
+        root.add(layout(state, opts.ctx, keys, embed))
     }
 
     async function consume(): Promise<void> {
@@ -287,7 +268,15 @@ export function createTrackView(opts: TrackViewOpts): View {
     }
 }
 
-function layout(state: ViewState, ctx: TrackViewCtx, keys: HotkeyRegistry<Hotkey>): VChild {
+function layout(
+    state: ViewState,
+    ctx: TrackViewCtx,
+    keys: HotkeyRegistry<Hotkey>,
+    embed?: TrackEmbed
+): VChild {
+    const headerExtra: VChild[] = embed?.label
+        ? [Text({content: embed.label, fg: '#888888'})]
+        : []
     const panelChildren: VChild[] = [
         renderHeader({
             entityType: ctx.entityType,
@@ -295,6 +284,7 @@ function layout(state: ViewState, ctx: TrackViewCtx, keys: HotkeyRegistry<Hotkey
             entityName: state.tick.snap.entity_name,
             sinceLastFetch_s: state.tick.sinceLastFetch_s,
         }),
+        ...headerExtra,
         Text({content: ''}),
         statsRow(state.tick),
         Text({content: ''}),
@@ -316,11 +306,11 @@ function layout(state: ViewState, ctx: TrackViewCtx, keys: HotkeyRegistry<Hotkey
     )
     const footer = renderFooter(keys.hints(), state.status)
     const rootChildren: VChild[] = [panel, footer]
-    if (state.helpOpen && state.modal.kind === 'none') {
+    if (state.helpOpen && state.modal === null) {
         rootChildren.push(helpOverlay(keys))
     }
-    if (state.modal.kind !== 'none') {
-        rootChildren.push(renderModal(state.modal, ctx))
+    if (state.modal) {
+        rootChildren.push(state.modal.render())
     }
     return Box(
         {id: ROOT_ID, flexDirection: 'column', width: '100%', height: '100%'},
@@ -331,7 +321,7 @@ function layout(state: ViewState, ctx: TrackViewCtx, keys: HotkeyRegistry<Hotkey
 function statsRow(t: {snap: EntitySnapshot; elapsed_s: number}): VChild {
     const cells: string[] = []
     if (t.snap.coordinates) {
-        cells.push(`◷ ${formatCoords(t.snap.coordinates as ServerTypes.coordinates)}`)
+        cells.push(`◷ ${formatCoords(t.snap.coordinates as unknown as ServerTypes.coordinates)}`)
     }
     const energyStr = energySummary(t)
     if (energyStr) cells.push(energyStr)
@@ -431,148 +421,6 @@ function idleBody(t: SnapshotTick): VChild[] {
     lines.push(Text({content: ''}))
     lines.push(Text({content: `  Refresh in ${refreshIn}s.`, fg: '#888888'}))
     return lines
-}
-
-function renderModal(modal: Exclude<ModalState, {kind: 'none'}>, ctx: TrackViewCtx): VChild {
-    let body: VChild
-    switch (modal.kind) {
-        case 'confirm-resolve':
-            body = confirmResolveBody(modal, ctx)
-            break
-        case 'submitting':
-            body = submittingBody(modal)
-            break
-        case 'success':
-            body = successBody(modal, ctx)
-            break
-        case 'error':
-            body = errorBody(modal)
-            break
-    }
-    // Full-screen overlay that centers the modal box in the middle of the terminal.
-    return Box(
-        {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 200,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        Box(
-            {
-                width: 64,
-                borderStyle: 'double',
-                borderColor: '#FFFFFF',
-                backgroundColor: MODAL_BG,
-                padding: 1,
-                flexDirection: 'column',
-            },
-            body
-        )
-    )
-}
-
-function confirmResolveBody(
-    modal: {count: number; selection: 'ok' | 'cancel'},
-    ctx: TrackViewCtx
-): VChild {
-    const taskWord = modal.count === 1 ? 'task' : 'tasks'
-    return Box(
-        {flexDirection: 'column', backgroundColor: MODAL_BG},
-        Text({content: 'Resolve completed tasks?', fg: '#FFFF00', bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({
-            content: `This submits an on-chain transaction resolving ${modal.count} ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
-            bg: MODAL_BG,
-        }),
-        Text({content: '', bg: MODAL_BG}),
-        Box(
-            {flexDirection: 'row', justifyContent: 'center', backgroundColor: MODAL_BG},
-            modalButton('OK', modal.selection === 'ok'),
-            Text({content: '    ', bg: MODAL_BG}),
-            modalButton('Cancel', modal.selection === 'cancel')
-        ),
-        Text({content: '', bg: MODAL_BG}),
-        Text({
-            content: '  ←/→ or Tab to switch · Enter to confirm · Esc to cancel',
-            fg: '#888888',
-            bg: MODAL_BG,
-        })
-    )
-}
-
-function submittingBody(modal: {label: string}): VChild {
-    return Box(
-        {flexDirection: 'column', backgroundColor: MODAL_BG},
-        Text({content: '⏳  Submitting transaction...', fg: '#FFCC00', bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({content: `  ${modal.label}.`, bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({content: '  Awaiting chain confirmation.', fg: '#888888', bg: MODAL_BG})
-    )
-}
-
-function successBody(
-    modal: {
-        txid: string
-        explorerUrl: string
-        resolvedCount: number
-        copiedAt?: number
-    },
-    ctx: TrackViewCtx
-): VChild {
-    const taskWord = modal.resolvedCount === 1 ? 'task' : 'tasks'
-    const copyHint =
-        modal.copiedAt !== undefined && Date.now() - modal.copiedAt < COPIED_FLASH_MS
-            ? '  ✓ copied to clipboard'
-            : '  c to copy URL · Enter / Esc / Space to dismiss'
-    const copyHintColor =
-        modal.copiedAt !== undefined && Date.now() - modal.copiedAt < COPIED_FLASH_MS
-            ? '#00FF66'
-            : '#888888'
-    return Box(
-        {flexDirection: 'column', backgroundColor: MODAL_BG},
-        Text({content: '✓ Transaction confirmed', fg: '#00FF66', bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({
-            content: `  Resolved ${modal.resolvedCount} ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
-            bg: MODAL_BG,
-        }),
-        Text({content: '', bg: MODAL_BG}),
-        Text({content: '  View on explorer:', fg: '#888888', bg: MODAL_BG}),
-        Text({content: `  ${modal.explorerUrl}`, fg: '#88CCFF', bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({content: copyHint, fg: copyHintColor, bg: MODAL_BG})
-    )
-}
-
-function errorBody(modal: {message: string}): VChild {
-    return Box(
-        {flexDirection: 'column', backgroundColor: MODAL_BG},
-        Text({content: '✗ Transaction failed', fg: '#FF5555', bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({content: `  ${modal.message}`, bg: MODAL_BG}),
-        Text({content: '', bg: MODAL_BG}),
-        Text({
-            content: '  Enter / Esc / Space to dismiss',
-            fg: '#888888',
-            bg: MODAL_BG,
-        })
-    )
-}
-
-function modalButton(label: string, focused: boolean): VChild {
-    if (focused) {
-        return Text({
-            content: ` ▶ ${label} ◀ `,
-            fg: '#0d1117',
-            bg: '#FFCC00',
-        })
-    }
-    return Text({content: `   ${label}   `, fg: '#888888', bg: MODAL_BG})
 }
 
 function helpOverlay(keys: HotkeyRegistry<Hotkey>): VChild {

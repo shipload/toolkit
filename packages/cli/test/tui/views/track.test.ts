@@ -217,3 +217,98 @@ describe('createTrackView', () => {
         expect(view.helpOpen?.()).toBe(false)
     })
 })
+
+describe('createTrackView (embedded)', () => {
+    test("drops 'q' from the registry and adds escape/tab/shift-tab", () => {
+        const view = createTrackView({
+            ctx: {entityType: 'ship', entityId: 3n},
+            initialSnapshot: idle(0),
+            stream: emptyStream(),
+            resolveAction: okResolve,
+            embed: {
+                onBack: () => {},
+                onStepNext: () => {},
+                onStepPrev: () => {},
+                label: 'ship 1 of 7',
+            },
+        })
+        const keys = view.keys.all().map((h) => `${h.shift ? 'S+' : ''}${h.key}`)
+        expect(keys).not.toContain('q')
+        expect(keys).toContain('escape')
+        expect(keys).toContain('tab')
+        expect(keys).toContain('S+tab')
+    })
+
+    test('embed.onBack fires on escape', () => {
+        let backed = 0
+        const view = createTrackView({
+            ctx: {entityType: 'ship', entityId: 3n},
+            initialSnapshot: idle(0),
+            stream: emptyStream(),
+            resolveAction: okResolve,
+            embed: {
+                onBack: () => {
+                    backed++
+                },
+                onStepNext: () => {},
+                onStepPrev: () => {},
+            },
+        })
+        view.attach(fakeRenderer() as never)
+        view.keys.dispatch('escape')
+        expect(backed).toBe(1)
+    })
+
+    test('embed.onStepNext fires on tab; onStepPrev on shift+tab', () => {
+        let next = 0
+        let prev = 0
+        const view = createTrackView({
+            ctx: {entityType: 'ship', entityId: 3n},
+            initialSnapshot: idle(0),
+            stream: emptyStream(),
+            resolveAction: okResolve,
+            embed: {
+                onBack: () => {},
+                onStepNext: () => {
+                    next++
+                },
+                onStepPrev: () => {
+                    prev++
+                },
+            },
+        })
+        view.attach(fakeRenderer() as never)
+        view.keys.dispatch('tab', false)
+        view.keys.dispatch('tab', true)
+        expect(next).toBe(1)
+        expect(prev).toBe(1)
+    })
+
+    test('escape and tab/shift-tab are disabled while a modal is open', async () => {
+        let backed = 0
+        let next = 0
+        const view = createTrackView({
+            ctx: {entityType: 'ship', entityId: 3n},
+            initialSnapshot: idle(2),
+            stream: emptyStream(),
+            resolveAction: okResolve,
+            embed: {
+                onBack: () => {
+                    backed++
+                },
+                onStepNext: () => {
+                    next++
+                },
+                onStepPrev: () => {},
+            },
+        })
+        view.attach(fakeRenderer() as never)
+        view.keys.dispatch('r') // open modal
+        view.keys.dispatch('escape')
+        view.keys.dispatch('tab', false)
+        // Modal is open; the bare escape/tab keys should not trigger embed callbacks.
+        // (Within the modal, escape is consumed by interceptKey, not by hotkeys.)
+        expect(backed).toBe(0)
+        expect(next).toBe(0)
+    })
+})
