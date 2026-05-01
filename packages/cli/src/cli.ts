@@ -41,6 +41,7 @@ import * as gatherable from './commands/query/gatherable'
 import * as status from './commands/query/status'
 import * as stratum from './commands/query/stratum'
 import * as tasks from './commands/query/tasks'
+import * as fleetTrack from './commands/query/track'
 import * as whoami from './commands/query/whoami'
 import * as debug from './commands/debug'
 import * as tools from './commands/tools'
@@ -85,6 +86,7 @@ export function build(): Command {
     buildEntityParent(program, 'container', entity.defaultShow)
     buildEntityParent(program, 'warehouse', entity.defaultShow)
     entities.register(program)
+    fleetTrack.register(program)
     history.register(program)
     registerEntitySubcommand(history.SUBCOMMAND)
     location.register(program)

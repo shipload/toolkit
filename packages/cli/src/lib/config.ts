@@ -10,6 +10,16 @@ export class ConfigError extends Error {
 	}
 }
 
+export type TrackSortMode = "type+id" | "status" | "eta" | "name";
+export type TrackTypeFilter = "all" | "ship" | "container" | "warehouse";
+export type TrackStatusFilter = "all" | "busy" | "resolvable" | "idle";
+
+export interface TrackConfig {
+	defaultSort: TrackSortMode;
+	defaultTypeFilter: TrackTypeFilter;
+	defaultStatusFilter: TrackStatusFilter;
+}
+
 export interface PlayerConfig {
 	privateKey: string;
 	actor: string;
@@ -21,6 +31,7 @@ export interface PlayerConfig {
 	indexerUrl?: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	track: TrackConfig;
 }
 
 export interface LoadConfigOptions {
@@ -54,6 +65,9 @@ interface ParsedSection {
 	indexerUrl?: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	trackDefaultSort?: string;
+	trackDefaultTypeFilter?: string;
+	trackDefaultStatusFilter?: string;
 }
 
 function parseBool(v: unknown): boolean | undefined {
@@ -72,6 +86,7 @@ function parseIniFile(path: string): ParsedSection {
 	const indexer = (parsed.indexer ?? {}) as Record<string, unknown>;
 	const chain = (parsed.chain ?? {}) as Record<string, unknown>;
 	const history = (parsed.history ?? {}) as Record<string, unknown>;
+	const track = (parsed.track ?? {}) as Record<string, unknown>;
 	return {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
@@ -80,6 +95,9 @@ function parseIniFile(path: string): ParsedSection {
 		indexerUrl: indexer.url as string | undefined,
 		chainUrl: chain.url as string | undefined,
 		historyUrl: history.url as string | undefined,
+		trackDefaultSort: track.default_sort as string | undefined,
+		trackDefaultTypeFilter: track.default_type_filter as string | undefined,
+		trackDefaultStatusFilter: track.default_status_filter as string | undefined,
 	};
 }
 
@@ -138,6 +156,12 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		);
 	}
 
+	const track: TrackConfig = {
+		defaultSort: parseTrackSort(fileData.trackDefaultSort, source),
+		defaultTypeFilter: parseTrackTypeFilter(fileData.trackDefaultTypeFilter, source),
+		defaultStatusFilter: parseTrackStatusFilter(fileData.trackDefaultStatusFilter, source),
+	};
+
 	return {
 		privateKey: fileData.privateKey,
 		actor: fileData.actor,
@@ -146,6 +170,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		indexerUrl: fileData.indexerUrl,
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
+		track,
 		source,
 	};
 }
@@ -186,6 +211,34 @@ export function getChainUrl(): string {
 		);
 	}
 	return cfg.chainUrl;
+}
+
+const SORT_VALUES: TrackSortMode[] = ["type+id", "status", "eta", "name"];
+const TYPE_VALUES: TrackTypeFilter[] = ["all", "ship", "container", "warehouse"];
+const STATUS_VALUES: TrackStatusFilter[] = ["all", "busy", "resolvable", "idle"];
+
+function parseTrackSort(v: string | undefined, source: string): TrackSortMode {
+	if (v === undefined) return "type+id";
+	if ((SORT_VALUES as string[]).includes(v)) return v as TrackSortMode;
+	throw new ConfigError(
+		`Invalid [track] default_sort=${v} in ${source}; must be one of ${SORT_VALUES.join(", ")}`,
+	);
+}
+
+function parseTrackTypeFilter(v: string | undefined, source: string): TrackTypeFilter {
+	if (v === undefined) return "all";
+	if ((TYPE_VALUES as string[]).includes(v)) return v as TrackTypeFilter;
+	throw new ConfigError(
+		`Invalid [track] default_type_filter=${v} in ${source}; must be one of ${TYPE_VALUES.join(", ")}`,
+	);
+}
+
+function parseTrackStatusFilter(v: string | undefined, source: string): TrackStatusFilter {
+	if (v === undefined) return "all";
+	if ((STATUS_VALUES as string[]).includes(v)) return v as TrackStatusFilter;
+	throw new ConfigError(
+		`Invalid [track] default_status_filter=${v} in ${source}; must be one of ${STATUS_VALUES.join(", ")}`,
+	);
 }
 
 export function getHistoryUrl(): string {

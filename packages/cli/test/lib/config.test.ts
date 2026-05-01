@@ -272,4 +272,65 @@ describe("loadConfig", () => {
 		expect(getChainUrl()).toBe("https://chain.example");
 		expect(getHistoryUrl()).toBe("https://history.example");
 	});
+
+	describe("[track] section", () => {
+		test("loads default_sort, default_type_filter, default_status_filter", () => {
+			const iniPath = join(tmpDir, "config.ini");
+			writeFileSync(
+				iniPath,
+				[
+					"[default]",
+					"private_key=PVT_K1_x",
+					"actor=alice",
+					"",
+					"[track]",
+					"default_sort = eta",
+					"default_type_filter = ship",
+					"default_status_filter = resolvable",
+					"",
+				].join("\n"),
+			);
+			process.env.PLAYER_CONFIG = iniPath;
+
+			const cfg = loadConfig();
+			expect(cfg.track.defaultSort).toBe("eta");
+			expect(cfg.track.defaultTypeFilter).toBe("ship");
+			expect(cfg.track.defaultStatusFilter).toBe("resolvable");
+		});
+
+		test("falls back to in-code defaults when [track] is absent", () => {
+			const iniPath = join(tmpDir, "config.ini");
+			writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=alice\n");
+			process.env.PLAYER_CONFIG = iniPath;
+
+			const cfg = loadConfig();
+			expect(cfg.track.defaultSort).toBe("type+id");
+			expect(cfg.track.defaultTypeFilter).toBe("all");
+			expect(cfg.track.defaultStatusFilter).toBe("all");
+		});
+
+		test("rejects invalid default_sort value", () => {
+			const iniPath = join(tmpDir, "config.ini");
+			writeFileSync(
+				iniPath,
+				[
+					"[default]",
+					"private_key=PVT_K1_x",
+					"actor=alice",
+					"",
+					"[track]",
+					"default_sort = nonsense",
+					"",
+				].join("\n"),
+			);
+			process.env.PLAYER_CONFIG = iniPath;
+
+			expect(() => loadConfig()).toThrow(ConfigError);
+			try {
+				loadConfig();
+			} catch (err) {
+				expect((err as Error).message).toContain("default_sort");
+			}
+		});
+	});
 });

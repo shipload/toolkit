@@ -4,6 +4,7 @@ import {server} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import {formatOutput} from '../../lib/format'
 import {getAccountName} from '../../lib/session'
+import {getEntitiesSnapshot} from '../../lib/snapshot'
 
 interface EntitySummary {
     type: string
@@ -67,11 +68,15 @@ async function runEntities(
     options: {full?: boolean; json?: boolean}
 ): Promise<void> {
     const target = owner ?? getAccountName()
-    const action = options.full ? 'getentities' : 'getsummaries'
-    const params: Record<string, unknown> = {owner: target}
-    if (type) params.entity_type = type
-    const result = (await server.readonly(action, params as unknown as any)) as any
-    const rows: any[] = Array.isArray(result) ? result : (result?.entities ?? result)
+    let result: unknown
+    if (options.full) {
+        result = await getEntitiesSnapshot(target, type)
+    } else {
+        const params: Record<string, unknown> = {owner: target}
+        if (type) params.entity_type = type
+        result = await server.readonly('getsummaries', params as unknown as never)
+    }
+    const rows: any[] = Array.isArray(result) ? result : ((result as any)?.entities ?? result)
     if (options.full) {
         console.log(formatOutput(rows, {json: Boolean(options.json)}, (r) => renderFull(target, r)))
     } else {
