@@ -11,7 +11,7 @@ export interface EntityMetadata {
 }
 
 export const itemMetadata: Record<number, ItemMetadata> = {
-    // === Resources (raw) ===
+    // === Resources / Ore ===
     101: {name: 'Ore', description: 'Crude metallic ore.', color: '#C26D3F'},
     102: {name: 'Ore', description: 'Refined metallic ore with improved purity.', color: '#C26D3F'},
     103: {
@@ -19,6 +19,15 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'High-grade metallic ore with exceptional density.',
         color: '#C26D3F',
     },
+    104: {name: 'Ore', description: '', color: '#C26D3F'},
+    105: {name: 'Ore', description: '', color: '#C26D3F'},
+    106: {name: 'Ore', description: '', color: '#C26D3F'},
+    107: {name: 'Ore', description: '', color: '#C26D3F'},
+    108: {name: 'Ore', description: '', color: '#C26D3F'},
+    109: {name: 'Ore', description: '', color: '#C26D3F'},
+    110: {name: 'Ore', description: '', color: '#C26D3F'},
+
+    // === Resources / Crystal ===
     201: {name: 'Crystal', description: 'Raw resonant crystal.', color: '#4ADBFF'},
     202: {
         name: 'Crystal',
@@ -30,6 +39,15 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'High-grade resonant crystal with exceptional purity.',
         color: '#4ADBFF',
     },
+    204: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    205: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    206: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    207: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    208: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    209: {name: 'Crystal', description: '', color: '#4ADBFF'},
+    210: {name: 'Crystal', description: '', color: '#4ADBFF'},
+
+    // === Resources / Gas ===
     301: {name: 'Gas', description: 'Raw volatile gas.', color: '#B8E4A0'},
     302: {
         name: 'Gas',
@@ -41,6 +59,15 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'High-grade volatile gas with exceptional energy density.',
         color: '#B8E4A0',
     },
+    304: {name: 'Gas', description: '', color: '#B8E4A0'},
+    305: {name: 'Gas', description: '', color: '#B8E4A0'},
+    306: {name: 'Gas', description: '', color: '#B8E4A0'},
+    307: {name: 'Gas', description: '', color: '#B8E4A0'},
+    308: {name: 'Gas', description: '', color: '#B8E4A0'},
+    309: {name: 'Gas', description: '', color: '#B8E4A0'},
+    310: {name: 'Gas', description: '', color: '#B8E4A0'},
+
+    // === Resources / Regolith ===
     401: {name: 'Regolith', description: 'Crude regolith dust.', color: '#C4A57B'},
     402: {
         name: 'Regolith',
@@ -52,6 +79,15 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'High-grade regolith with exceptional uniformity.',
         color: '#C4A57B',
     },
+    404: {name: 'Regolith', description: '', color: '#C4A57B'},
+    405: {name: 'Regolith', description: '', color: '#C4A57B'},
+    406: {name: 'Regolith', description: '', color: '#C4A57B'},
+    407: {name: 'Regolith', description: '', color: '#C4A57B'},
+    408: {name: 'Regolith', description: '', color: '#C4A57B'},
+    409: {name: 'Regolith', description: '', color: '#C4A57B'},
+    410: {name: 'Regolith', description: '', color: '#C4A57B'},
+
+    // === Resources / Biomass ===
     501: {name: 'Biomass', description: 'Crude organic biomass.', color: '#5A8B3E'},
     502: {
         name: 'Biomass',
@@ -63,6 +99,13 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'High-grade biomass with exceptional saturation.',
         color: '#5A8B3E',
     },
+    504: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    505: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    506: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    507: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    508: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    509: {name: 'Biomass', description: '', color: '#5A8B3E'},
+    510: {name: 'Biomass', description: '', color: '#5A8B3E'},
 
     // === Components (T1) ===
     10001: {

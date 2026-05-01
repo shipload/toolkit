@@ -21,6 +21,55 @@
     "category": "ore"
   },
   {
+    "id": 104,
+    "mass": 71000,
+    "type": "resource",
+    "tier": 4,
+    "category": "ore"
+  },
+  {
+    "id": 105,
+    "mass": 78000,
+    "type": "resource",
+    "tier": 5,
+    "category": "ore"
+  },
+  {
+    "id": 106,
+    "mass": 87000,
+    "type": "resource",
+    "tier": 6,
+    "category": "ore"
+  },
+  {
+    "id": 107,
+    "mass": 96000,
+    "type": "resource",
+    "tier": 7,
+    "category": "ore"
+  },
+  {
+    "id": 108,
+    "mass": 107000,
+    "type": "resource",
+    "tier": 8,
+    "category": "ore"
+  },
+  {
+    "id": 109,
+    "mass": 118000,
+    "type": "resource",
+    "tier": 9,
+    "category": "ore"
+  },
+  {
+    "id": 110,
+    "mass": 130000,
+    "type": "resource",
+    "tier": 10,
+    "category": "ore"
+  },
+  {
     "id": 201,
     "mass": 35000,
     "type": "resource",
@@ -39,6 +88,55 @@
     "mass": 35000,
     "type": "resource",
     "tier": 3,
+    "category": "crystal"
+  },
+  {
+    "id": 204,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 4,
+    "category": "crystal"
+  },
+  {
+    "id": 205,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 5,
+    "category": "crystal"
+  },
+  {
+    "id": 206,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 6,
+    "category": "crystal"
+  },
+  {
+    "id": 207,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 7,
+    "category": "crystal"
+  },
+  {
+    "id": 208,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 8,
+    "category": "crystal"
+  },
+  {
+    "id": 209,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 9,
+    "category": "crystal"
+  },
+  {
+    "id": 210,
+    "mass": 35000,
+    "type": "resource",
+    "tier": 10,
     "category": "crystal"
   },
   {
@@ -63,6 +161,55 @@
     "category": "gas"
   },
   {
+    "id": 304,
+    "mass": 11000,
+    "type": "resource",
+    "tier": 4,
+    "category": "gas"
+  },
+  {
+    "id": 305,
+    "mass": 10000,
+    "type": "resource",
+    "tier": 5,
+    "category": "gas"
+  },
+  {
+    "id": 306,
+    "mass": 9000,
+    "type": "resource",
+    "tier": 6,
+    "category": "gas"
+  },
+  {
+    "id": 307,
+    "mass": 8000,
+    "type": "resource",
+    "tier": 7,
+    "category": "gas"
+  },
+  {
+    "id": 308,
+    "mass": 7500,
+    "type": "resource",
+    "tier": 8,
+    "category": "gas"
+  },
+  {
+    "id": 309,
+    "mass": 6500,
+    "type": "resource",
+    "tier": 9,
+    "category": "gas"
+  },
+  {
+    "id": 310,
+    "mass": 6000,
+    "type": "resource",
+    "tier": 10,
+    "category": "gas"
+  },
+  {
     "id": 401,
     "mass": 22000,
     "type": "resource",
@@ -84,6 +231,55 @@
     "category": "regolith"
   },
   {
+    "id": 404,
+    "mass": 32000,
+    "type": "resource",
+    "tier": 4,
+    "category": "regolith"
+  },
+  {
+    "id": 405,
+    "mass": 36000,
+    "type": "resource",
+    "tier": 5,
+    "category": "regolith"
+  },
+  {
+    "id": 406,
+    "mass": 40500,
+    "type": "resource",
+    "tier": 6,
+    "category": "regolith"
+  },
+  {
+    "id": 407,
+    "mass": 46000,
+    "type": "resource",
+    "tier": 7,
+    "category": "regolith"
+  },
+  {
+    "id": 408,
+    "mass": 52000,
+    "type": "resource",
+    "tier": 8,
+    "category": "regolith"
+  },
+  {
+    "id": 409,
+    "mass": 58500,
+    "type": "resource",
+    "tier": 9,
+    "category": "regolith"
+  },
+  {
+    "id": 410,
+    "mass": 66000,
+    "type": "resource",
+    "tier": 10,
+    "category": "regolith"
+  },
+  {
     "id": 501,
     "mass": 42000,
     "type": "resource",
@@ -102,6 +298,55 @@
     "mass": 33000,
     "type": "resource",
     "tier": 3,
+    "category": "biomass"
+  },
+  {
+    "id": 504,
+    "mass": 29000,
+    "type": "resource",
+    "tier": 4,
+    "category": "biomass"
+  },
+  {
+    "id": 505,
+    "mass": 26000,
+    "type": "resource",
+    "tier": 5,
+    "category": "biomass"
+  },
+  {
+    "id": 506,
+    "mass": 23000,
+    "type": "resource",
+    "tier": 6,
+    "category": "biomass"
+  },
+  {
+    "id": 507,
+    "mass": 20000,
+    "type": "resource",
+    "tier": 7,
+    "category": "biomass"
+  },
+  {
+    "id": 508,
+    "mass": 18000,
+    "type": "resource",
+    "tier": 8,
+    "category": "biomass"
+  },
+  {
+    "id": 509,
+    "mass": 16000,
+    "type": "resource",
+    "tier": 9,
+    "category": "biomass"
+  },
+  {
+    "id": 510,
+    "mass": 14000,
+    "type": "resource",
+    "tier": 10,
     "category": "biomass"
   },
   {

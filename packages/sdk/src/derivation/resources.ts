@@ -5,6 +5,11 @@ export const DEPTH_THRESHOLD_T2 = 1500
 export const DEPTH_THRESHOLD_T3 = 5000
 export const DEPTH_THRESHOLD_T4 = 12000
 export const DEPTH_THRESHOLD_T5 = 22000
+export const DEPTH_THRESHOLD_T6 = 32000
+export const DEPTH_THRESHOLD_T7 = 42000
+export const DEPTH_THRESHOLD_T8 = 50000
+export const DEPTH_THRESHOLD_T9 = 57000
+export const DEPTH_THRESHOLD_T10 = 63000
 
 export const LOCATION_MIN_DEPTH = 500
 export const LOCATION_MAX_DEPTH = 65535
@@ -18,19 +23,15 @@ export const PLANET_SUBTYPE_ICY = 3
 export const PLANET_SUBTYPE_OCEAN = 4
 export const PLANET_SUBTYPE_INDUSTRIAL = 5
 
+const DEPTH_THRESHOLD_TABLE = [
+    DEPTH_THRESHOLD_T1, DEPTH_THRESHOLD_T2, DEPTH_THRESHOLD_T3, DEPTH_THRESHOLD_T4,
+    DEPTH_THRESHOLD_T5, DEPTH_THRESHOLD_T6, DEPTH_THRESHOLD_T7, DEPTH_THRESHOLD_T8,
+    DEPTH_THRESHOLD_T9, DEPTH_THRESHOLD_T10,
+]
+
 export function getDepthThreshold(tier: number): number {
-    switch (tier) {
-        case 1:
-            return DEPTH_THRESHOLD_T1
-        case 2:
-            return DEPTH_THRESHOLD_T2
-        case 3:
-            return DEPTH_THRESHOLD_T3
-        case 4:
-            return DEPTH_THRESHOLD_T4
-        default:
-            return DEPTH_THRESHOLD_T5
-    }
+    if (tier < 1 || tier > 10) return 65535
+    return DEPTH_THRESHOLD_TABLE[tier - 1]
 }
 
 export function getResourceTier(itemId: number): number {

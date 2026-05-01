@@ -64,9 +64,14 @@ export const GATHERER_DEPTH_TABLE: readonly GathererDepthParams[] = [
     {floor: 7000, slope: 16},
     {floor: 15000, slope: 18},
     {floor: 25000, slope: 19},
+    {floor: 35000, slope: 16},
+    {floor: 46000, slope: 12},
+    {floor: 53500, slope: 10},
+    {floor: 60000, slope: 5},
+    {floor: 63500, slope: 2},
 ]
 
-export const GATHERER_DEPTH_MAX_TIER = 5
+export const GATHERER_DEPTH_MAX_TIER = 10
 
 export function gathererDepthForTier(tol: number, tier: number): number {
     if (tier < 1 || tier > GATHERER_DEPTH_MAX_TIER) {
