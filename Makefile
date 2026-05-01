@@ -48,7 +48,19 @@ sync/catalog:
 	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../game/build/catalog}
 
 changeset:
-	bun changeset add --message="$$(bun scripts/changeset-from-git.ts)"
+	$(MAKE) check
+	$(MAKE) test
+	@bun changeset add --message="$$(bun scripts/changeset-from-git.ts)"
+	@NEW=$$(git status --porcelain .changeset 2>/dev/null | grep -E '^\?\? .*\.md$$' | sed 's/^?? //'); \
+	if [ -z "$$NEW" ]; then \
+		echo "No new changeset created."; \
+		exit 0; \
+	fi; \
+	git add -- $$NEW && git commit -m "chore: add changeset" -- $$NEW; \
+	echo ""; \
+	echo "✓ Committed $$NEW"; \
+	echo ""; \
+	echo "Next:  git push"
 
 release-status:
 	bun changeset status --verbose
