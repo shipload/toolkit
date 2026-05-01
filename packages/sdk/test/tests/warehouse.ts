@@ -230,6 +230,12 @@ describe('Warehouse', () => {
             const now = new Date()
             assert.equal(warehouse.sched.currentTaskIndex(now), -1)
         })
+
+        test('sched.currentTaskIndex returns -1 when schedule is past completion', () => {
+            const warehouse = makeWarehouseWithSchedule()
+            const now = new Date('2024-06-04T23:45:00.000Z')
+            assert.equal(warehouse.sched.currentTaskIndex(now), -1)
+        })
     })
 
     test('Warehouse constructed from entity_info hydrates modules from Struct field', () => {

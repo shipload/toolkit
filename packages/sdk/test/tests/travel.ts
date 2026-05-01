@@ -661,4 +661,37 @@ describe('getInterpolatedPosition', () => {
         assert.notStrictEqual(p.x, Math.round(p.x))
         assert.notStrictEqual(p.y, Math.round(p.y))
     })
+
+    test('schedule complete (taskIndex < 0) → final TRAVEL destination, not chain origin', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            schedule: {
+                tasks: [
+                    {
+                        type: {equals: (t: any) => t === 1},
+                        coordinates: {x: 5, y: -2},
+                        duration: {toNumber: () => 100},
+                    },
+                    {
+                        type: {equals: (t: any) => t === 1},
+                        coordinates: {x: 8, y: 4},
+                        duration: {toNumber: () => 100},
+                    },
+                ],
+            },
+        } as any
+        const p = getInterpolatedPosition(entity, -1, 0)
+        assert.strictEqual(p.x, 8)
+        assert.strictEqual(p.y, 4)
+    })
+
+    test('no schedule and taskIndex < 0 → falls back to chain coordinates', () => {
+        const entity = {
+            coordinates: {x: 3, y: 9},
+            schedule: undefined,
+        } as any
+        const p = getInterpolatedPosition(entity, -1, 0)
+        assert.strictEqual(p.x, 3)
+        assert.strictEqual(p.y, 9)
+    })
 })

@@ -233,5 +233,11 @@ describe('Container', () => {
             const now = new Date()
             assert.equal(container.sched.currentTaskIndex(now), -1)
         })
+
+        test('sched.currentTaskIndex returns -1 when schedule is past completion', () => {
+            const container = makeContainerWithSchedule()
+            const now = new Date('2024-06-04T23:45:00.000Z')
+            assert.equal(container.sched.currentTaskIndex(now), -1)
+        })
     })
 })

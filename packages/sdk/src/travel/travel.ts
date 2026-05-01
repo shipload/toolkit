@@ -111,8 +111,12 @@ export function getInterpolatedPosition(
     taskIndex: number,
     taskProgress: number
 ): FloatPosition {
-    if (!entity.schedule || entity.schedule.tasks.length === 0 || taskIndex < 0) {
+    if (!entity.schedule || entity.schedule.tasks.length === 0) {
         return {x: Number(entity.coordinates.x), y: Number(entity.coordinates.y)}
+    }
+    if (taskIndex < 0) {
+        const settled = getFlightOrigin(entity, entity.schedule.tasks.length)
+        return {x: Number(settled.x), y: Number(settled.y)}
     }
     const task = entity.schedule.tasks[taskIndex]
     if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
@@ -463,8 +467,11 @@ export function getPositionAt(
     taskIndex: number,
     taskProgress: number
 ): ServerContract.ActionParams.Type.coordinates {
-    if (!entity.schedule || entity.schedule.tasks.length === 0 || taskIndex < 0) {
+    if (!entity.schedule || entity.schedule.tasks.length === 0) {
         return entity.coordinates
+    }
+    if (taskIndex < 0) {
+        return getFlightOrigin(entity, entity.schedule.tasks.length)
     }
 
     const task = entity.schedule.tasks[taskIndex]

@@ -77,7 +77,7 @@ export function currentTaskIndex(entity: ScheduleData, now: Date): number {
         timeAccum += taskDuration
     }
 
-    return entity.schedule.tasks.length - 1
+    return -1
 }
 
 export function currentTask(entity: ScheduleData, now: Date): Task | undefined {
