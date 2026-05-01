@@ -48,7 +48,7 @@ sync/catalog:
 	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../game/build/catalog}
 
 changeset:
-	bun changeset add -m "$$(bun scripts/changeset-from-git.ts)"
+	bun changeset add --message="$$(bun scripts/changeset-from-git.ts)"
 
 release-status:
 	bun changeset status --verbose
