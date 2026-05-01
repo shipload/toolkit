@@ -5,7 +5,7 @@ SHELL := /usr/bin/env bash
 .PHONY: build build/sdk build/item-renderer build/image-renderer build/cli
 .PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli
 .PHONY: format codegen sync/catalog
-.PHONY: changeset release-status release release/cli
+.PHONY: changeset release-status release publish release/cli
 .PHONY: clean
 
 install:
@@ -48,7 +48,7 @@ sync/catalog:
 	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../game/build/catalog}
 
 changeset:
-	bun changeset
+	bun changeset add -m "$$(bun scripts/changeset-from-git.ts)"
 
 release-status:
 	bun changeset status --verbose
@@ -62,16 +62,21 @@ release:
 	bun biome format packages/*/package.json --write
 	git add .
 	git commit -m "chore: version packages"
-	git push
+	@VER=$$(node -p "require('./packages/image-renderer/package.json').version"); \
+	git tag -a "@shipload/image-renderer@$$VER" -m "Release @shipload/image-renderer@$$VER"
+	git push --follow-tags
 	@echo ""
 	@echo "✓ Versions bumped, committed, and pushed."
 	@echo ""
-	@echo "Now publish manually (npm browser auth requires interactive terminal):"
-	@echo "    bun changeset publish"
-	@echo "    git push --follow-tags"
+	@echo "Next: publish to npm (kept separate as a safety gate; may prompt for OTP):"
+	@echo "    make publish"
 	@echo ""
 	@echo "Then cut the CLI binary release (uses the version just bumped):"
 	@echo "    make release/cli"
+
+publish:
+	bun changeset publish
+	git push --follow-tags
 
 release/cli:
 	@if [ -n "$(VERSION)" ] || [ -n "$(BUMP)" ]; then \
