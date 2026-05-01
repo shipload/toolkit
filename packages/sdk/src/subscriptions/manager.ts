@@ -34,6 +34,12 @@ export interface BoundsSubscriptionHandle {
     current: Map<number, EntityInstance>
 }
 
+export interface OwnerSubscriptionHandle {
+    readonly subId: string
+    unsubscribe(): void
+    current: Map<number, EntityInstance>
+}
+
 export interface EntitySubscriptionHandle {
     readonly subId: string
     readonly entityType: SubscriptionEntityType
@@ -62,7 +68,7 @@ export class SubscriptionsManager {
             onSnapshot?: (entities: EntityInstance[]) => void
             onUpdate?: (entity: EntityInstance) => void
             onBoundsDelta?: (entered: EntityInstance[], exited: number[]) => void
-            handle: BoundsSubscriptionHandle
+            handle: BoundsSubscriptionHandle | OwnerSubscriptionHandle
         }
     >()
     private subCounter = 0
@@ -156,6 +162,36 @@ export class SubscriptionsManager {
             onSnapshot: handlers.onSnapshot,
             onUpdate: handlers.onUpdate,
             onBoundsDelta: handlers.onBoundsDelta,
+            handle,
+        })
+        this.sendMessage(msg)
+        return handle
+    }
+
+    subscribeOwner(
+        owner: string,
+        handlers: {
+            onSnapshot?: (entities: EntityInstance[]) => void
+            onUpdate?: (entity: EntityInstance) => void
+        } = {}
+    ): OwnerSubscriptionHandle {
+        const subId = this.generateSubID('own')
+        const msg: SubscribeMessage = {
+            type: 'subscribe',
+            sub_id: subId,
+            owner,
+        }
+        const handle: OwnerSubscriptionHandle = {
+            subId,
+            unsubscribe: () => this.unsubscribeBounds(subId),
+            current: new Map(),
+        }
+        this.boundsSubs.set(subId, {
+            bounds: undefined,
+            owner,
+            prioritizeOwner: undefined,
+            onSnapshot: handlers.onSnapshot,
+            onUpdate: handlers.onUpdate,
             handle,
         })
         this.sendMessage(msg)

@@ -202,6 +202,61 @@ describe('SubscriptionsManager resubscribe-on-reconnect', () => {
     })
 })
 
+describe('SubscriptionsManager subscribeOwner', () => {
+    let fake: FakeWebSocketServer
+    let mgr: SubscriptionsManager
+
+    beforeEach(() => {
+        fake = new FakeWebSocketServer()
+        mgr = new SubscriptionsManager({url: 'ws://fake/', minReconnectDelay: 1})
+    })
+
+    afterEach(() => {
+        mgr.close()
+        fake.close()
+    })
+
+    test('subscribeOwner sends subscribe frame with owner and no bounds', async () => {
+        await new Promise((r) => setTimeout(r, 1))
+        const handle = mgr.subscribeOwner('alice', {})
+        const msg = await fake.nextMessage()
+        assert.equal(msg.type, 'subscribe')
+        assert.equal(msg.owner, 'alice')
+        assert.isUndefined(msg.bounds)
+        assert.isString(msg.sub_id)
+        handle.unsubscribe()
+    })
+
+    test('subscribeOwner unsubscribe sends unsubscribe frame', async () => {
+        await new Promise((r) => setTimeout(r, 1))
+        const handle = mgr.subscribeOwner('alice', {})
+        const first = await fake.nextMessage()
+        assert.equal(first.type, 'subscribe')
+        handle.unsubscribe()
+        const next = await fake.nextMessage()
+        assert.equal(next.type, 'unsubscribe')
+        assert.equal(next.sub_id, first.sub_id)
+    })
+
+    test('subscribeOwner replays after reconnect with same sub_id and no bounds', async () => {
+        await new Promise((r) => setTimeout(r, 1))
+        const handle = mgr.subscribeOwner('alice', {})
+        const first = await fake.nextMessage()
+        assert.equal(first.type, 'subscribe')
+        assert.equal(first.owner, 'alice')
+        assert.isUndefined(first.bounds)
+
+        fake.triggerClose()
+
+        const replay = await fake.nextMessage()
+        assert.equal(replay.type, 'subscribe')
+        assert.equal(replay.sub_id, first.sub_id)
+        assert.equal(replay.owner, 'alice')
+        assert.isUndefined(replay.bounds)
+        handle.unsubscribe()
+    })
+})
+
 describe('SubscriptionsManager heartbeat', () => {
     let fake: FakeWebSocketServer
 
