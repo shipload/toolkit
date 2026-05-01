@@ -48,9 +48,9 @@ async function dispatchResolve(
 }
 
 function wsUrlFromIndexer(httpUrl: string): string {
-    const trimmed = httpUrl.replace(/\/+$/, '')
+    const trimmed = httpUrl.trim().replace(/\/+$/, '')
     const base = trimmed.replace(/^http/i, 'ws')
-    return `${base}/ws`
+    return `${base}/v1/shipload/stream`
 }
 
 export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
