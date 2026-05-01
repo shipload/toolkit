@@ -40,8 +40,23 @@ describe('HotkeyRegistry', () => {
         let unshifted = 0
         let shifted = 0
         const reg = new HotkeyRegistry([
-            {key: 'r', label: 'lower', enabled: () => true, action: () => { unshifted++ }},
-            {key: 'r', shift: true, label: 'upper', enabled: () => true, action: () => { shifted++ }},
+            {
+                key: 'r',
+                label: 'lower',
+                enabled: () => true,
+                action: () => {
+                    unshifted++
+                },
+            },
+            {
+                key: 'r',
+                shift: true,
+                label: 'upper',
+                enabled: () => true,
+                action: () => {
+                    shifted++
+                },
+            },
         ])
         reg.dispatch('r', false)
         reg.dispatch('r', true)
@@ -52,7 +67,14 @@ describe('HotkeyRegistry', () => {
     test('dispatch defaults shift to false', () => {
         let calls = 0
         const reg = new HotkeyRegistry([
-            {key: 'r', label: 'lower', enabled: () => true, action: () => { calls++ }},
+            {
+                key: 'r',
+                label: 'lower',
+                enabled: () => true,
+                action: () => {
+                    calls++
+                },
+            },
         ])
         reg.dispatch('r')
         expect(calls).toBe(1)

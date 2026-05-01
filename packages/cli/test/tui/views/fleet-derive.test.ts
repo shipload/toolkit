@@ -7,13 +7,7 @@ import {
     type FleetViewState,
 } from '../../../src/tui/views/fleet-derive'
 
-function snap(
-    type: string,
-    id: number,
-    isIdle: boolean,
-    completed = 0,
-    name = ''
-): EntitySnapshot {
+function snap(type: string, id: number, isIdle: boolean, completed = 0, name = ''): EntitySnapshot {
     return {
         type,
         id: BigInt(id),
@@ -154,10 +148,7 @@ describe('deriveVisible — sort modes', () => {
 
 describe('resolveCursor', () => {
     test('returns prev key when still present', () => {
-        const rows = [
-            {key: 'ship:1' as EntityKey} as never,
-            {key: 'ship:2' as EntityKey} as never,
-        ]
+        const rows = [{key: 'ship:1' as EntityKey} as never, {key: 'ship:2' as EntityKey} as never]
         expect(resolveCursor(rows, 'ship:2' as EntityKey, rows)).toBe('ship:2')
     })
 

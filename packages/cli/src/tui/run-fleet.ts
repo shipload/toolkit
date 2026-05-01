@@ -4,11 +4,7 @@ import {SubscriptionsManager, type ServerTypes} from '@shipload/sdk'
 import type {EntityTypeName} from '../lib/args'
 import {getShipload} from '../lib/client'
 import {loadConfig} from '../lib/config'
-import {
-    entityInfoToSnapshot,
-    type EntitySnapshot,
-    getEntitiesSnapshot,
-} from '../lib/snapshot'
+import {entityInfoToSnapshot, type EntitySnapshot, getEntitiesSnapshot} from '../lib/snapshot'
 import {
     type FleetSubscribeManager,
     projectEntityStream,
@@ -73,14 +69,10 @@ export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
             const handle = sdkManager.subscribeOwner(ownerName, {
                 onSnapshot: (entities) =>
                     handlers.onSnapshot?.(
-                        entities.map((e) =>
-                            entityInfoToSnapshot(e as ServerTypes.entity_info)
-                        )
+                        entities.map((e) => entityInfoToSnapshot(e as ServerTypes.entity_info))
                     ),
                 onUpdate: (entity) =>
-                    handlers.onUpdate?.(
-                        entityInfoToSnapshot(entity as ServerTypes.entity_info)
-                    ),
+                    handlers.onUpdate?.(entityInfoToSnapshot(entity as ServerTypes.entity_info)),
             })
             // Connection-state surfacing is not exposed on the SDK handle today;
             // report 'live' optimistically.
@@ -127,10 +119,7 @@ export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
         bulkResolve: async (rows: EntityRow[]) => {
             const shipload = await getShipload()
             const actions = rows.map((r) =>
-                shipload.actions.resolve(
-                    BigInt(String(r.snap.id)),
-                    Name.from(String(r.snap.type))
-                )
+                shipload.actions.resolve(BigInt(String(r.snap.id)), Name.from(String(r.snap.type)))
             )
             return dispatchResolve(
                 dispatcher,

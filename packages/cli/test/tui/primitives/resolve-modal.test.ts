@@ -124,11 +124,11 @@ describe('createResolveModal', () => {
             body: 'b',
             confirmLabel: 'OK',
             cancelLabel: 'Cancel',
-            onConfirm: () => new Promise(() => {}),  // never resolves
+            onConfirm: () => new Promise(() => {}), // never resolves
         })
         m.handleKey({name: 'return'})
         expect(m.state.kind).toBe('submitting')
-        m.handleKey({name: 'escape'})  // should be ignored
+        m.handleKey({name: 'escape'}) // should be ignored
         expect(m.state.kind).toBe('submitting')
     })
 

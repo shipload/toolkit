@@ -274,9 +274,7 @@ function layout(
     keys: HotkeyRegistry<Hotkey>,
     embed?: TrackEmbed
 ): VChild {
-    const headerExtra: VChild[] = embed?.label
-        ? [Text({content: embed.label, fg: '#888888'})]
-        : []
+    const headerExtra: VChild[] = embed?.label ? [Text({content: embed.label, fg: '#888888'})] : []
     const panelChildren: VChild[] = [
         renderHeader({
             entityType: ctx.entityType,

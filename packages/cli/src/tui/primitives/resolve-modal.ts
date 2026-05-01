@@ -170,10 +170,7 @@ export function createResolveModal(opts: ResolveModalOpts): ResolveModalHandle {
     }
 }
 
-function renderConfirm(
-    opts: ResolveModalOpts,
-    state: {selection: 'ok' | 'cancel'}
-): VChild {
+function renderConfirm(opts: ResolveModalOpts, state: {selection: 'ok' | 'cancel'}): VChild {
     return Box(
         {flexDirection: 'column', backgroundColor: MODAL_BG},
         Text({content: opts.title, fg: '#FFFF00', bg: MODAL_BG}),
@@ -210,8 +207,7 @@ function renderSuccess(
     opts: ResolveModalOpts,
     state: {txid: string; explorerUrl: string; copiedAt?: number}
 ): VChild {
-    const flashing =
-        state.copiedAt !== undefined && Date.now() - state.copiedAt < COPIED_FLASH_MS
+    const flashing = state.copiedAt !== undefined && Date.now() - state.copiedAt < COPIED_FLASH_MS
     const copyHint = flashing
         ? '  ✓ copied to clipboard'
         : '  c to copy URL · Enter / Esc / Space to dismiss'

@@ -6,7 +6,11 @@ import type {FleetTick} from '../../lib/snapshot-fleet'
 import {type Hotkey, HotkeyRegistry} from '../hotkeys'
 import {renderFooter} from '../primitives/footer'
 import {renderPanel} from '../primitives/panel'
-import {createResolveModal, type ResolveModalHandle, type ResolveSuccess} from '../primitives/resolve-modal'
+import {
+    createResolveModal,
+    type ResolveModalHandle,
+    type ResolveSuccess,
+} from '../primitives/resolve-modal'
 import type {View} from '../view'
 import {
     deriveVisible,
@@ -56,9 +60,7 @@ interface FleetState {
     helpOpen: boolean
 }
 
-export function createFleetView(
-    opts: FleetViewOpts
-): View & {cursorKey: () => EntityKey | null} {
+export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => EntityKey | null} {
     const initialView: FleetViewState = {
         typeFilter: opts.defaults.typeFilter,
         statusFilter: opts.defaults.statusFilter,
@@ -100,7 +102,7 @@ export function createFleetView(
         if (n === 0) return
         const idx = state.lastRows.findIndex((r) => r.key === state.view.cursorKey)
         const start = idx < 0 ? 0 : idx
-        const next = ((start + delta) % n + n) % n
+        const next = (((start + delta) % n) + n) % n
         state.view.cursorKey = state.lastRows[next].key
     }
 
@@ -116,7 +118,7 @@ export function createFleetView(
     function cycleSort(delta: 1 | -1): void {
         const idx = SORT_CYCLE.indexOf(state.view.sortMode)
         const n = SORT_CYCLE.length
-        const next = ((idx + delta) % n + n) % n
+        const next = (((idx + delta) % n) + n) % n
         state.view.sortMode = SORT_CYCLE[next]
         recompute()
         render()
