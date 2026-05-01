@@ -404,10 +404,15 @@ describe('ship deploy formulas', () => {
         assert.equal(gathererDepthForTier(500, 3), 15000)
         assert.equal(gathererDepthForTier(500, 4), 24000)
         assert.equal(gathererDepthForTier(500, 5), 34500)
+        assert.equal(gathererDepthForTier(500, 6), 43000)
+        assert.equal(gathererDepthForTier(500, 7), 52000)
+        assert.equal(gathererDepthForTier(500, 8), 58500)
+        assert.equal(gathererDepthForTier(500, 9), 62500)
+        assert.equal(gathererDepthForTier(500, 10), 64500)
     })
 
     test('gathererDepthForTier throws on out-of-range tier', () => {
         assert.throws(() => gathererDepthForTier(500, 0), /out of range/)
-        assert.throws(() => gathererDepthForTier(500, 6), /out of range/)
+        assert.throws(() => gathererDepthForTier(500, 11), /out of range/)
     })
 })

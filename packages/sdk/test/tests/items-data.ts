@@ -8,18 +8,53 @@ const EXPECTED_RESOURCE_MASSES: Array<[number, string, number, number]> = [
     [101, 'ore', 1, 52000],
     [102, 'ore', 2, 58000],
     [103, 'ore', 3, 64000],
+    [104, 'ore', 4, 71000],
+    [105, 'ore', 5, 78000],
+    [106, 'ore', 6, 87000],
+    [107, 'ore', 7, 96000],
+    [108, 'ore', 8, 107000],
+    [109, 'ore', 9, 118000],
+    [110, 'ore', 10, 130000],
     [201, 'crystal', 1, 35000],
     [202, 'crystal', 2, 35000],
     [203, 'crystal', 3, 35000],
+    [204, 'crystal', 4, 35000],
+    [205, 'crystal', 5, 35000],
+    [206, 'crystal', 6, 35000],
+    [207, 'crystal', 7, 35000],
+    [208, 'crystal', 8, 35000],
+    [209, 'crystal', 9, 35000],
+    [210, 'crystal', 10, 35000],
     [301, 'gas', 1, 15000],
     [302, 'gas', 2, 13500],
     [303, 'gas', 3, 12000],
+    [304, 'gas', 4, 11000],
+    [305, 'gas', 5, 10000],
+    [306, 'gas', 6, 9000],
+    [307, 'gas', 7, 8000],
+    [308, 'gas', 8, 7500],
+    [309, 'gas', 9, 6500],
+    [310, 'gas', 10, 6000],
     [401, 'regolith', 1, 22000],
     [402, 'regolith', 2, 25000],
     [403, 'regolith', 3, 28000],
+    [404, 'regolith', 4, 32000],
+    [405, 'regolith', 5, 36000],
+    [406, 'regolith', 6, 40500],
+    [407, 'regolith', 7, 46000],
+    [408, 'regolith', 8, 52000],
+    [409, 'regolith', 9, 58500],
+    [410, 'regolith', 10, 66000],
     [501, 'biomass', 1, 42000],
     [502, 'biomass', 2, 37000],
     [503, 'biomass', 3, 33000],
+    [504, 'biomass', 4, 29000],
+    [505, 'biomass', 5, 26000],
+    [506, 'biomass', 6, 23000],
+    [507, 'biomass', 7, 20000],
+    [508, 'biomass', 8, 18000],
+    [509, 'biomass', 9, 16000],
+    [510, 'biomass', 10, 14000],
 ]
 
 interface ItemRow {
@@ -81,17 +116,4 @@ describe('getItem strictness', () => {
     test('throws on unknown item id', () => {
         assert.throws(() => getItem(60000), /Unknown item id: 60000/)
     })
-})
-
-describe('items.json T4-T10 are not surfaced', () => {
-    const allIds = new Set((items as unknown as ItemRow[]).map((item) => item.id))
-    const forbiddenIds = [
-        104, 105, 106, 107, 108, 109, 110, 204, 205, 206, 207, 208, 209, 210, 304, 305, 306, 307,
-        308, 309, 310, 404, 405, 406, 407, 408, 409, 410, 504, 505, 506, 507, 508, 509, 510,
-    ]
-    for (const id of forbiddenIds) {
-        test(`resource id ${id} is absent from items.json`, () => {
-            assert.isFalse(allIds.has(id))
-        })
-    }
 })
