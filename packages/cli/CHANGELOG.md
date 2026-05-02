@@ -1,5 +1,13 @@
 # @shipload/cli
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- 70bd1b4: - fix track view
+  - fixed connection path
+  - wider bad data catch
+
 ## 1.0.0-next.6
 
 ### Patch Changes
