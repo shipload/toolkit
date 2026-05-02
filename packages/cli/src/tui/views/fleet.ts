@@ -217,7 +217,13 @@ export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => E
         }
         const sub = opts.openTrackView(row, embed)
         state.drilled = sub
-        if (renderer) sub.attach(renderer)
+        if (renderer) {
+            const root = renderer.root as unknown as {remove: (id: string) => void}
+            try {
+                root.remove(ROOT_ID)
+            } catch {}
+            sub.attach(renderer)
+        }
     }
 
     function stepDrill(delta: number): void {

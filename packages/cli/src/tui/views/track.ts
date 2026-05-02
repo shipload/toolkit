@@ -256,6 +256,12 @@ export function createTrackView(opts: TrackViewOpts): View {
             }
         },
         dispose: async () => {
+            if (renderer) {
+                const root = renderer.root as unknown as {remove: (id: string) => void}
+                try {
+                    root.remove(ROOT_ID)
+                } catch {}
+            }
             renderer = null
         },
         onExit,
