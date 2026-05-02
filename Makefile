@@ -79,7 +79,13 @@ release:
 	git add .
 	git commit -m "chore: version packages"
 	@VER=$$(node -p "require('./packages/image-renderer/package.json').version"); \
-	git tag -a "@shipload/image-renderer@$$VER" -m "Release @shipload/image-renderer@$$VER"
+	TAG="@shipload/image-renderer@$$VER"; \
+	if git rev-parse --verify --quiet "refs/tags/$$TAG" >/dev/null; then \
+		echo "▸ $$TAG already exists; skipping (image-renderer not bumped this release)"; \
+	else \
+		git tag -a "$$TAG" -m "Release $$TAG"; \
+		echo "▸ Tagged $$TAG"; \
+	fi
 	git push --follow-tags
 	@echo ""
 	@echo "✓ Versions bumped, committed, and pushed."
