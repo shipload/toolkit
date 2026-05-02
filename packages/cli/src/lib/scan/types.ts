@@ -56,7 +56,7 @@ export interface WorkerResult {
 	histogram: HistogramSnapshot;
 	multiHigh: MultiHighSnapshot;
 	leaderboard: LeaderboardEntry[];
-	locationCounts: { planets: number; asteroids: number; nebulas: number };
+	locationCounts: { planets: number; asteroids: number; nebulas: number; iceFields: number };
 	strataCount: number;
 	cellsScanned: number;
 }

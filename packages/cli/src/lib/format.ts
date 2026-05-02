@@ -48,6 +48,7 @@ const LOCATION_TYPE_NAMES: Record<LocationType, string> = {
 	[LocationType.PLANET]: "Planet",
 	[LocationType.ASTEROID]: "Asteroid",
 	[LocationType.NEBULA]: "Nebula",
+	[LocationType.ICE_FIELD]: "Ice Field",
 };
 
 const TASK_TYPES = [

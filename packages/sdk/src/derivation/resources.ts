@@ -1,4 +1,5 @@
 import {getItem} from '../data/catalog'
+import {LocationType} from '../types'
 
 export const DEPTH_THRESHOLD_T1 = 0
 export const DEPTH_THRESHOLD_T2 = 1500
@@ -75,35 +76,105 @@ export function getResourceWeight(itemId: number, stratum: number): number {
     }
 }
 
-const ASTEROID_RESOURCES = [101, 102, 103, 201, 202]
-const NEBULA_RESOURCES = [202, 203, 301, 302, 303]
-const GAS_GIANT_RESOURCES = [301, 302, 303, 401, 501]
-const ROCKY_RESOURCES = [101, 102, 103, 401, 402, 403, 503]
-const TERRESTRIAL_RESOURCES = [201, 202, 401, 402, 501, 502, 503]
-const ICY_RESOURCES = [101, 301, 302, 401, 403, 501, 502]
-const OCEAN_RESOURCES = [201, 203, 301, 303, 501, 502, 503]
-const INDUSTRIAL_RESOURCES = [101, 102, 103, 201, 203, 402, 403]
+const RESOURCE_ORE = 0
+const RESOURCE_GAS = 1
+const RESOURCE_REGOLITH = 2
+const RESOURCE_BIOMASS = 3
+const RESOURCE_CRYSTAL = 4
 
-export function getLocationCandidates(locationType: number, subtype: number): number[] {
-    if (locationType === 2) return ASTEROID_RESOURCES
-    if (locationType === 3) return NEBULA_RESOURCES
-    if (locationType === 1) {
+interface LocationProfileEntry {
+    category: number
+    maxTier: number
+}
+
+function categoryBaseId(category: number): number {
+    switch (category) {
+        case RESOURCE_ORE:
+            return 100
+        case RESOURCE_CRYSTAL:
+            return 200
+        case RESOURCE_GAS:
+            return 300
+        case RESOURCE_REGOLITH:
+            return 400
+        case RESOURCE_BIOMASS:
+            return 500
+        default:
+            return 0
+    }
+}
+
+function resourceId(category: number, tier: number): number {
+    return categoryBaseId(category) + tier
+}
+
+export function getLocationProfile(locationType: number, subtype: number): LocationProfileEntry[] {
+    if (locationType === LocationType.ASTEROID) {
+        return [
+            {category: RESOURCE_ORE, maxTier: 5},
+            {category: RESOURCE_CRYSTAL, maxTier: 5},
+        ]
+    }
+    if (locationType === LocationType.NEBULA) {
+        return [
+            {category: RESOURCE_GAS, maxTier: 5},
+            {category: RESOURCE_REGOLITH, maxTier: 5},
+        ]
+    }
+    if (locationType === LocationType.ICE_FIELD) {
+        return [
+            {category: RESOURCE_GAS, maxTier: 5},
+            {category: RESOURCE_BIOMASS, maxTier: 5},
+        ]
+    }
+    if (locationType === LocationType.PLANET) {
         switch (subtype) {
             case PLANET_SUBTYPE_GAS_GIANT:
-                return GAS_GIANT_RESOURCES
+                return [
+                    {category: RESOURCE_GAS, maxTier: 10},
+                    {category: RESOURCE_CRYSTAL, maxTier: 3},
+                ]
             case PLANET_SUBTYPE_ROCKY:
-                return ROCKY_RESOURCES
+                return [
+                    {category: RESOURCE_REGOLITH, maxTier: 10},
+                    {category: RESOURCE_ORE, maxTier: 3},
+                ]
             case PLANET_SUBTYPE_TERRESTRIAL:
-                return TERRESTRIAL_RESOURCES
+                return [
+                    {category: RESOURCE_ORE, maxTier: 10},
+                    {category: RESOURCE_BIOMASS, maxTier: 3},
+                ]
             case PLANET_SUBTYPE_ICY:
-                return ICY_RESOURCES
+                return [
+                    {category: RESOURCE_CRYSTAL, maxTier: 10},
+                    {category: RESOURCE_REGOLITH, maxTier: 3},
+                ]
             case PLANET_SUBTYPE_OCEAN:
-                return OCEAN_RESOURCES
+                return [
+                    {category: RESOURCE_BIOMASS, maxTier: 10},
+                    {category: RESOURCE_GAS, maxTier: 3},
+                ]
             case PLANET_SUBTYPE_INDUSTRIAL:
-                return INDUSTRIAL_RESOURCES
+                return [
+                    {category: RESOURCE_ORE, maxTier: 3},
+                    {category: RESOURCE_CRYSTAL, maxTier: 3},
+                    {category: RESOURCE_REGOLITH, maxTier: 3},
+                    {category: RESOURCE_BIOMASS, maxTier: 3},
+                ]
         }
     }
     return []
+}
+
+export function getLocationCandidates(locationType: number, subtype: number): number[] {
+    const profile = getLocationProfile(locationType, subtype)
+    const ids: number[] = []
+    for (const {category, maxTier} of profile) {
+        for (let tier = 1; tier <= maxTier; tier++) {
+            ids.push(resourceId(category, tier))
+        }
+    }
+    return ids
 }
 
 export function getEligibleResources(

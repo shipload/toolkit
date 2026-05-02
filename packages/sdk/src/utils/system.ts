@@ -22,12 +22,10 @@ export function getLocationType(
         return LocationType.EMPTY
     }
 
-    if (hashResult.array[1] < 96) {
-        return LocationType.PLANET
-    } else if (hashResult.array[1] < 176) {
-        return LocationType.ASTEROID
-    }
-    return LocationType.NEBULA
+    if (hashResult.array[1] < 96) return LocationType.PLANET
+    if (hashResult.array[1] < 149) return LocationType.ASTEROID
+    if (hashResult.array[1] < 202) return LocationType.NEBULA
+    return LocationType.ICE_FIELD
 }
 
 export function isGatherableLocation(locationType: LocationType): boolean {
@@ -44,6 +42,8 @@ export function getLocationTypeName(type: LocationType): string {
             return 'Asteroid'
         case LocationType.NEBULA:
             return 'Nebula'
+        case LocationType.ICE_FIELD:
+            return 'Ice Field'
     }
 }
 
@@ -76,6 +76,15 @@ function generateNebulaName(hashResult: Checksum512): string {
     return `${nebulaAdjectives[adjIdx]} ${nebulaNouns[nounIdx]}`
 }
 
+function generateIceFieldName(hashResult: Checksum512): string {
+    const A = 65
+    const letter1 = String.fromCharCode(A + (hashResult.array[0] % 26))
+    const letter2 = String.fromCharCode(A + (hashResult.array[1] % 26))
+    const subId = (hashResult.array[2] % 9) + 1
+    const num = (uint16(hashResult, 3) % 9000) + 1000
+    return `${letter1}${letter2}-${subId}/${num}`
+}
+
 export function getSystemName(gameSeed: Checksum256Type, location: CoordinatesType): string {
     const seed = Checksum256.from(gameSeed)
     const locationType = getLocationType(seed, location)
@@ -91,6 +100,8 @@ export function getSystemName(gameSeed: Checksum256Type, location: CoordinatesTy
             return generateAsteroidName(hashResult)
         case LocationType.NEBULA:
             return generateNebulaName(hashResult)
+        case LocationType.ICE_FIELD:
+            return generateIceFieldName(hashResult)
         default:
             return generatePlanetName(hashResult)
     }
@@ -123,10 +134,12 @@ export function deriveLocationStatic(
 
     if (hashResult.array[1] < 96) {
         loc.type = UInt8.from(LocationType.PLANET)
-    } else if (hashResult.array[1] < 176) {
+    } else if (hashResult.array[1] < 149) {
         loc.type = UInt8.from(LocationType.ASTEROID)
-    } else {
+    } else if (hashResult.array[1] < 202) {
         loc.type = UInt8.from(LocationType.NEBULA)
+    } else {
+        loc.type = UInt8.from(LocationType.ICE_FIELD)
     }
 
     loc.subtype = UInt8.from(

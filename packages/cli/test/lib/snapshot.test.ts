@@ -97,7 +97,7 @@ describe('entityInfoToSnapshot', () => {
         expect(snap.energy).toBe(1000n)
         expect(snap.capacity).toBe(5000n)
         expect(snap.generator).toEqual({capacity: 200n, recharge: 50n})
-        expect(snap.gatherer).toEqual({depth: 4n})
+        expect(snap.gatherer).toEqual({yield: 1n, drain: 1n, depth: 4n, speed: 1n})
         expect(snap.cargo[0]).toMatchObject({
             item_id: 101n,
             quantity: 3n,

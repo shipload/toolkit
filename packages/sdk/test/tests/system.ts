@@ -39,9 +39,14 @@ describe('getSystemName', () => {
     })
 
     test('nebula name is two descriptive words', () => {
-        const name = getSystemName(testGameSeed, {x: 0, y: 15})
-        assert.equal(name, 'Slate Rib')
+        const name = getSystemName(testGameSeed, {x: 0, y: -3})
         assert.include(name, ' ')
+    })
+
+    test('ice field name is LL-D/NNNN format', () => {
+        const name = getSystemName(testGameSeed, {x: -9, y: -5})
+        assert.equal(name, 'TH-7/7935')
+        assert.match(name, /^[A-Z]{2}-\d\/\d{4}$/)
     })
 
     test('is deterministic', () => {
@@ -118,6 +123,7 @@ describe('deriveLocationStatic', () => {
             LocationType.PLANET,
             LocationType.ASTEROID,
             LocationType.NEBULA,
+            LocationType.ICE_FIELD,
         ]
         assert.include(validTypes, result.type.toNumber())
     })

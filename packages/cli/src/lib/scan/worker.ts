@@ -24,7 +24,7 @@ self.onmessage = (event: MessageEvent<WorkerInput>) => {
 	const histogram = new Histogram();
 	const multiHigh = new MultiHigh(threshold);
 	const leaderboard = new TopN(topN);
-	const locationCounts = { planets: 0, asteroids: 0, nebulas: 0 };
+	const locationCounts = { planets: 0, asteroids: 0, nebulas: 0, iceFields: 0 };
 	let strataCount = 0;
 	let cellsDone = 0;
 	let locationsSoFar = 0;
@@ -57,6 +57,9 @@ self.onmessage = (event: MessageEvent<WorkerInput>) => {
 				break;
 			case LocationType.NEBULA:
 				locationCounts.nebulas++;
+				break;
+			case LocationType.ICE_FIELD:
+				locationCounts.iceFields++;
 				break;
 		}
 		locationsSoFar++;

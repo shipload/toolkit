@@ -120,7 +120,7 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
     const histogram = new Histogram()
     const multiHigh = new MultiHigh(options.threshold)
     const leaderboard = new TopN(options.top)
-    const locationCounts = {planets: 0, asteroids: 0, nebulas: 0}
+    const locationCounts = {planets: 0, asteroids: 0, nebulas: 0, iceFields: 0}
     let cellsScanned = 0
     let strataCount = 0
     const startMs = Date.now()
@@ -203,6 +203,7 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
             locationCounts.planets += r.locationCounts.planets
             locationCounts.asteroids += r.locationCounts.asteroids
             locationCounts.nebulas += r.locationCounts.nebulas
+            locationCounts.iceFields += r.locationCounts.iceFields
             strataCount += r.strataCount
             cellsScanned += r.cellsScanned
         }
@@ -220,7 +221,7 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
                 const eta = remaining / Math.max(rate, 0.001)
                 const pct = Math.min(100, Math.floor((progressCells / cells.length) * 100))
                 console.error(
-                    `[${pct}%] ${progressCells}/${cells.length} cells · ${locationCounts.planets + locationCounts.asteroids + locationCounts.nebulas} locations · ${strataCount} strata · elapsed ${formatDuration(elapsed)} · ETA ${formatDuration(eta)}`
+                    `[${pct}%] ${progressCells}/${cells.length} cells · ${locationCounts.planets + locationCounts.asteroids + locationCounts.nebulas + locationCounts.iceFields} locations · ${strataCount} strata · elapsed ${formatDuration(elapsed)} · ETA ${formatDuration(eta)}`
                 )
             }
 
@@ -237,6 +238,9 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
                     break
                 case 3:
                     locationCounts.nebulas++
+                    break
+                case 4:
+                    locationCounts.iceFields++
                     break
             }
 

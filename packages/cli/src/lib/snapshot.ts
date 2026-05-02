@@ -21,11 +21,14 @@ export interface EntitySnapshot {
 	}[];
 	capacity?: bigint;
 	energy?: bigint;
-	gatherer?: { depth: bigint };
-	generator?: {
-		capacity: bigint;
-		recharge: bigint;
-	};
+	hullmass?: bigint;
+	engines?: { thrust: bigint; drain: bigint };
+	generator?: { capacity: bigint; recharge: bigint };
+	gatherer?: { yield: bigint; drain: bigint; depth: bigint; speed: bigint };
+	hauler?: { capacity: bigint; efficiency: bigint; drain: bigint };
+	crafter?: { speed: bigint; drain: bigint };
+	warp?: { range: bigint };
+	loaders?: { mass: bigint; thrust: bigint; quantity: bigint };
 	is_idle: boolean;
 	current_task?: ServerTypes.task;
 	current_task_elapsed?: bigint;
@@ -66,15 +69,50 @@ export function entityInfoToSnapshot(
 		current_task_remaining: BigInt(ei.current_task_remaining.toString()),
 		pending_tasks: ei.pending_tasks,
 	};
-	if (ei.capacity !== undefined) snap.capacity = BigInt(ei.capacity.toString());
-	if (ei.energy !== undefined) snap.energy = BigInt(ei.energy.toString());
-	if (ei.gatherer !== undefined) {
-		snap.gatherer = {depth: BigInt(ei.gatherer.depth.toString())};
+	if (ei.capacity != null) snap.capacity = BigInt(ei.capacity.toString());
+	if (ei.energy != null) snap.energy = BigInt(ei.energy.toString());
+	if (ei.hullmass != null) snap.hullmass = BigInt(ei.hullmass.toString());
+	if (ei.engines != null) {
+		snap.engines = {
+			thrust: BigInt(ei.engines.thrust.toString()),
+			drain: BigInt(ei.engines.drain.toString()),
+		};
 	}
-	if (ei.generator !== undefined) {
+	if (ei.generator != null) {
 		snap.generator = {
 			capacity: BigInt(ei.generator.capacity.toString()),
 			recharge: BigInt(ei.generator.recharge.toString()),
+		};
+	}
+	if (ei.gatherer != null) {
+		snap.gatherer = {
+			yield: BigInt(ei.gatherer.yield.toString()),
+			drain: BigInt(ei.gatherer.drain.toString()),
+			depth: BigInt(ei.gatherer.depth.toString()),
+			speed: BigInt(ei.gatherer.speed.toString()),
+		};
+	}
+	if (ei.hauler != null) {
+		snap.hauler = {
+			capacity: BigInt(ei.hauler.capacity.toString()),
+			efficiency: BigInt(ei.hauler.efficiency.toString()),
+			drain: BigInt(ei.hauler.drain.toString()),
+		};
+	}
+	if (ei.crafter != null) {
+		snap.crafter = {
+			speed: BigInt(ei.crafter.speed.toString()),
+			drain: BigInt(ei.crafter.drain.toString()),
+		};
+	}
+	if (ei.warp != null) {
+		snap.warp = {range: BigInt(ei.warp.range.toString())};
+	}
+	if (ei.loaders != null) {
+		snap.loaders = {
+			mass: BigInt(ei.loaders.mass.toString()),
+			thrust: BigInt(ei.loaders.thrust.toString()),
+			quantity: BigInt(ei.loaders.quantity.toString()),
 		};
 	}
 	if (ei.schedule != null) {

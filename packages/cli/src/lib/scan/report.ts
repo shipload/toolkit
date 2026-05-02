@@ -21,7 +21,7 @@ export interface ReportHeader {
 	cellsTotal: number;
 	cellsScanned: number;
 	runtimeSeconds: number;
-	locationCounts: { planets: number; asteroids: number; nebulas: number };
+	locationCounts: { planets: number; asteroids: number; nebulas: number; iceFields: number };
 	strata: number;
 	threshold: number;
 }
@@ -46,7 +46,10 @@ function bar(n: number, max: number, width = 40): string {
 
 export function renderHeader(h: ReportHeader): string {
 	const totalLocs =
-		h.locationCounts.planets + h.locationCounts.asteroids + h.locationCounts.nebulas;
+		h.locationCounts.planets +
+		h.locationCounts.asteroids +
+		h.locationCounts.nebulas +
+		h.locationCounts.iceFields;
 	return [
 		"Resource Scan Report",
 		`  game seed:  ${shortSeed(h.gameSeed)}`,
@@ -54,9 +57,10 @@ export function renderHeader(h: ReportHeader): string {
 		`  radius:     ${h.radius}  (scanned ${h.cellsScanned} / ${h.cellsTotal} cells)`,
 		`  runtime:    ${formatDuration(h.runtimeSeconds)}`,
 		`  locations:  ${totalLocs} non-empty`,
-		`              planets   ${h.locationCounts.planets}`,
-		`              asteroids ${h.locationCounts.asteroids}`,
-		`              nebulas   ${h.locationCounts.nebulas}`,
+		`              planets    ${h.locationCounts.planets}`,
+		`              asteroids  ${h.locationCounts.asteroids}`,
+		`              nebulas    ${h.locationCounts.nebulas}`,
+		`              ice fields ${h.locationCounts.iceFields}`,
 		`  strata:     ${h.strata} with reserve > 0`,
 		`  threshold:  ${h.threshold}`,
 	].join("\n");

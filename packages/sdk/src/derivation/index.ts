@@ -7,6 +7,7 @@ export {
     getEligibleResources,
     getResourceWeight,
     getLocationCandidates,
+    getLocationProfile,
     getDepthThreshold,
     getResourceTier,
     DEPTH_THRESHOLD_T1,

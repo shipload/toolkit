@@ -61,6 +61,7 @@ export enum LocationType {
     PLANET = 1,
     ASTEROID = 2,
     NEBULA = 3,
+    ICE_FIELD = 4,
 }
 
 export enum TaskCancelable {
