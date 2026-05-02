@@ -58,9 +58,13 @@ changeset:
 	fi; \
 	git add -- $$NEW && git commit -m "chore: add changeset" -- $$NEW; \
 	echo ""; \
-	echo "✓ Committed $$NEW"; \
-	echo ""; \
-	echo "Next:  git push"
+	echo "✓ Committed $$NEW"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. git push                 — share the changeset"
+	@echo "  2. make release             — bump versions, tag, push"
+	@echo "  3. make publish             — publish npm packages (npm OTP)"
+	@echo "  4. make release/cli         — cut CLI binaries + GitHub release"
 
 release-status:
 	bun changeset status --verbose
