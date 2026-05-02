@@ -1,5 +1,13 @@
 # @shipload/cli
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- 2c7eaad: - Reworked location types to mirror contract
+- Updated dependencies [2c7eaad]
+  - @shipload/sdk@1.0.0-next.6
+
 ## 1.0.0-next.7
 
 ### Patch Changes

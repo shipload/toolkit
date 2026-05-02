@@ -1,5 +1,11 @@
 # @shipload/sdk
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 2c7eaad: - Reworked location types to mirror contract
+
 ## 1.0.0-next.5
 
 ### Patch Changes

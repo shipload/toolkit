@@ -1,5 +1,14 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 2c7eaad: - Reworked location types to mirror contract
+- Updated dependencies [2c7eaad]
+  - @shipload/item-renderer@1.0.0-next.6
+  - @shipload/sdk@1.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes

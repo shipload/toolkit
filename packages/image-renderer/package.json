@@ -1,6 +1,6 @@
 {
     "name": "@shipload/image-renderer",
-    "version": "1.0.0-next.5",
+    "version": "1.0.0-next.6",
     "description": "Cloudflare Worker rendering Shipload item images",
     "type": "module",
     "private": true,
