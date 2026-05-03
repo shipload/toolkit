@@ -27,16 +27,18 @@ import {
 	calc_ship_rechargetime,
 	distanceBetweenPoints,
 	getItem,
+	hasSystem,
 	type ProjectableSnapshot,
 	projectFromCurrentState,
 	ServerTypes,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
-import type { ResolvedCargoInput } from "./cargo-resolve";
-import { server } from "./client";
+import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
+import { getGameSeed, server } from "./client";
 import {
 	checkCargoCapacity,
+	checkDestinationIsSystem,
 	checkEnergyAvailable,
 	checkEnergyCapacity,
 	checkOriginEqualsTarget,
@@ -180,14 +182,20 @@ export function populateTravelFeasibility(params: {
 	originY: number;
 	targetX: number;
 	targetY: number;
+	hasSystemAtDestination?: boolean;
 	willRechargeFirst?: boolean;
 	entity?: { entityType: string; entityId: bigint | number | string };
 }): FeasibilityIssue[] {
 	const energyForCheck = params.willRechargeFirst
 		? params.generatorCapacity
 		: params.currentEnergy;
+	const destinationCheck =
+		params.hasSystemAtDestination === undefined
+			? null
+			: checkDestinationIsSystem(params.hasSystemAtDestination, params.targetX, params.targetY);
 	return collectIssues(
 		checkOriginEqualsTarget(params.originX, params.originY, params.targetX, params.targetY),
+		destinationCheck,
 		checkEnergyCapacity(params.generatorCapacity, params.energyCost, "travel"),
 		checkEnergyAvailable(energyForCheck, params.energyCost, "travel", params.entity),
 		checkTravelDuration(params.flightSeconds),
@@ -244,6 +252,29 @@ function snapshotCargoMassInfo(snap: EntitySnapshot): ServerTypes.cargo_item[] {
 			modules: [],
 		}),
 	);
+}
+
+export async function estimateDeploy(params: {
+	entityType: EntityTypeName | string;
+	entityId: bigint | number;
+	packedItemId: number;
+	stackId: bigint;
+	snapshot?: EntitySnapshot;
+}): Promise<EstimateResult> {
+	const { entityType, entityId, packedItemId, stackId } = params;
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+
+	resolveCargoInputs(
+		[{ itemId: packedItemId, stackId, quantity: 1 }],
+		snap.cargo as unknown as ServerTypes.cargo_item[],
+	);
+
+	return {
+		duration_s: 0,
+		energy_cost: 0,
+		cargo_delta: { [packedItemId]: -1 },
+		feasibility: { ok: true, issues: [] },
+	};
 }
 
 export async function estimateRecharge(params: {
@@ -322,6 +353,9 @@ export async function estimateTravel(params: {
 	const startEnergyIsProjected = projectedAfterPending !== snapshotEnergy;
 	const endEnergy = Math.max(0, startEnergy - energyUsage);
 
+	const gameSeed = await getGameSeed();
+	const hasSystemAtDestination = hasSystem(gameSeed, { x: targetX, y: targetY });
+
 	const issues = populateTravelFeasibility({
 		generatorCapacity,
 		currentEnergy: projectedAfterPending,
@@ -331,6 +365,7 @@ export async function estimateTravel(params: {
 		originY,
 		targetX,
 		targetY,
+		hasSystemAtDestination,
 		willRechargeFirst: recharge,
 		entity: { entityType: String(entityType), entityId },
 	});
@@ -533,11 +568,16 @@ export async function estimateGroupTravel(params: {
 	const acceleration = (totalThrust / totalMass) * PRECISION;
 	const flightSeconds = computeFlightDurationSeconds(Number(distance), acceleration);
 
+	const gameSeed = await getGameSeed();
+	const issues = collectIssues(
+		checkDestinationIsSystem(hasSystem(gameSeed, { x: targetX, y: targetY }), targetX, targetY),
+	);
+
 	return {
 		duration_s: flightSeconds + maxRechargeSeconds,
 		energy_cost: maxEnergyCost,
 		cargo_delta: {},
-		feasibility: { ok: true, issues: [] },
+		feasibility: { ok: issues.length === 0, issues },
 		with_recharge: recharge,
 	};
 }

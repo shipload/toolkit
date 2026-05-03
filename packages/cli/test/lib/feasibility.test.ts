@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { FeasibilityIssue } from "../../src/lib/feasibility";
 import {
 	checkCargoCapacity,
+	checkDestinationIsSystem,
 	checkEnergyAvailable,
 	checkEnergyCapacity,
 	checkOriginEqualsTarget,
@@ -95,6 +96,18 @@ describe("checkOriginEqualsTarget", () => {
 	test("issue when same", () => {
 		const issue = checkOriginEqualsTarget(3, -4, 3, -4);
 		expect(issue?.code).toBe("origin_equals_target");
+	});
+});
+
+describe("checkDestinationIsSystem", () => {
+	test("null when destination has a system", () => {
+		expect(checkDestinationIsSystem(true, 5, 7)).toBeNull();
+	});
+	test("issue when destination has no system, includes coords in message and detail", () => {
+		const issue = checkDestinationIsSystem(false, 3, 8);
+		expect(issue?.code).toBe("no_system_at_destination");
+		expect(issue?.message).toContain("(3, 8)");
+		expect(issue?.detail).toEqual({ tx: 3, ty: 8 });
 	});
 });
 

@@ -4,7 +4,8 @@ export type FeasibilityCode =
 	| "insufficient_cargo_capacity"
 	| "insufficient_reserve"
 	| "excessive_travel_duration"
-	| "origin_equals_target";
+	| "origin_equals_target"
+	| "no_system_at_destination";
 
 export interface FeasibilityIssue {
 	code: FeasibilityCode;
@@ -87,6 +88,20 @@ export function checkOriginEqualsTarget(
 		code: "origin_equals_target",
 		severity: "error",
 		message: `ship is already at (${ox}, ${oy}) — no travel needed`,
+	};
+}
+
+export function checkDestinationIsSystem(
+	hasSystem: boolean,
+	tx: number,
+	ty: number,
+): FeasibilityIssue | null {
+	if (hasSystem) return null;
+	return {
+		code: "no_system_at_destination",
+		severity: "error",
+		message: `no system at (${tx}, ${ty}) — use \`nearby\` to list reachable systems`,
+		detail: { tx, ty },
 	};
 }
 

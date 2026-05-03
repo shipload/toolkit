@@ -80,11 +80,17 @@ function renderBlendEstimate(resolved: ResolvedCargoInput[]): string {
     )
     const packed = BigInt(blendedStats.toString())
     const statsLabel = formatItemStats(itemId, packed) || packed.toString()
-    return [
-        'Estimate: duration 0s',
-        'Output:',
-        `  ${formatItem(itemId)} ×${totalQty}  (stats ${statsLabel})`,
-    ].join('\n')
+    const itemName = formatItem(itemId)
+    const lines = ['Estimate: duration 0s', 'Inputs:']
+    if (resolved.length === 1) {
+        const r = resolved[0]
+        lines.push(`  ${itemName} ×${r.quantity}  (from stack ${r.stackId})`)
+    } else {
+        const breakdown = resolved.map((r) => `${r.quantity} from stack ${r.stackId}`).join(' + ')
+        lines.push(`  ${itemName} ×${totalQty}  (= ${breakdown})`)
+    }
+    lines.push('Output:', `  ${itemName} ×${totalQty}  (stats ${statsLabel})`)
+    return lines.join('\n')
 }
 
 export const SUBCOMMAND: EntitySubcommand = {
