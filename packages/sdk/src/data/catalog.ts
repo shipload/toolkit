@@ -1,6 +1,5 @@
 import {UInt16, type UInt16Type} from '@wharfkit/antelope'
 import items from './items.json'
-import {tierLabels} from './colors'
 import {itemMetadata} from './metadata'
 import {
     CATEGORY_LABELS,
@@ -113,10 +112,6 @@ export function typeLabel(type: ItemType | number): string {
 
 export function categoryLabel(cat: ResourceCategory): string {
     return CATEGORY_LABELS[cat]
-}
-
-export function tierLabel(tier: number): string {
-    return tierLabels[tier] ?? `T${tier}`
 }
 
 // Chain rescat enum order from server::getrescats.

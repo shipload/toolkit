@@ -10,7 +10,6 @@ import {
     getModules,
     getResources,
     resolveItemCategory,
-    tierLabel,
     typeLabel,
 } from 'src/items'
 
@@ -162,15 +161,4 @@ describe('item helpers', () => {
         })
     })
 
-    describe('tierLabel', () => {
-        test('returns rarity label for known tier', () => {
-            assert.equal(tierLabel(1), 'Common')
-            assert.equal(tierLabel(5), 'Legendary')
-            assert.equal(tierLabel(10), 'Transcendent')
-        })
-
-        test('falls back for unknown tier', () => {
-            assert.equal(tierLabel(99), 'T99')
-        })
-    })
 })

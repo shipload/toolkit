@@ -63,7 +63,6 @@ export {
     categoryLabel,
     categoryFromIndex,
     categoryLabelFromIndex,
-    tierLabel,
 } from './data/catalog'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
@@ -187,7 +186,6 @@ export * from './capabilities'
 export {
     categoryColors,
     tierColors,
-    tierLabels,
     categoryIcons,
     categoryIconShapes,
     componentIcon,

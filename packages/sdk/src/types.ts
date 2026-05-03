@@ -163,3 +163,7 @@ export interface Item {
 export function formatTier(tier: number): string {
     return 'T' + tier
 }
+
+export function tierAdjective(tier: number): string {
+    return TIER_ADJECTIVES[tier] ?? `T${tier}`
+}

@@ -21,22 +21,6 @@ export const tierColors: Record<number, string> = {
     10: '#ffffff',
 }
 
-// Rarity-tier names (badge labels). Kept disjoint from TIER_ADJECTIVES in
-// types.ts (resource descriptors like "Pristine Ore") so the two vocabularies
-// never collide at any tier.
-export const tierLabels: Record<number, string> = {
-    1: 'Common',
-    2: 'Uncommon',
-    3: 'Rare',
-    4: 'Epic',
-    5: 'Legendary',
-    6: 'Mythic',
-    7: 'Divine',
-    8: 'Celestial',
-    9: 'Eternal',
-    10: 'Transcendent',
-}
-
 export const categoryIcons: Record<ResourceCategory, string> = {
     ore: '⬡',
     crystal: '◈',
