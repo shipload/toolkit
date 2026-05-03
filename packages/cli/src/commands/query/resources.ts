@@ -2,7 +2,7 @@ import {categoryLabelFromIndex, formatTier} from '@shipload/sdk'
 import type {Command} from 'commander'
 import {parseInt64} from '../../lib/args'
 import {server} from '../../lib/client'
-import {formatItem, formatOutput} from '../../lib/format'
+import {formatItem, formatOutput, jsonStringify} from '../../lib/format'
 import {loadLocationStrata} from '../../lib/location-loader'
 import {renderStrata} from '../../lib/strata-render'
 
@@ -24,7 +24,7 @@ export function renderPretty(input: {resources: Resource[]}): string {
 }
 
 export function render(input: {resources: Resource[]}, raw: boolean): string {
-    if (raw) return JSON.stringify(input, null, 2)
+    if (raw) return jsonStringify(input)
     return renderPretty(input)
 }
 

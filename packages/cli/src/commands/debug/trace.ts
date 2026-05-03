@@ -1,5 +1,6 @@
 import type {Command} from 'commander'
 import {getHistoryUrl} from '../../lib/config'
+import {jsonStringify} from '../../lib/format'
 
 export interface DebugTraceOptions {
     historyUrl: string
@@ -29,7 +30,7 @@ export async function runDebugTrace(opts: DebugTraceOptions): Promise<void> {
     const trace = (await res.json()) as TraceResponse
 
     if (opts.json) {
-        console.log(JSON.stringify(trace, null, 2))
+        console.log(jsonStringify(trace))
         return
     }
 

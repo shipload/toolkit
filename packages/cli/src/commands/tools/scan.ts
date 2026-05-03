@@ -12,6 +12,7 @@ import {Checksum256} from '@wharfkit/antelope'
 import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
 import {client, getGameSeed} from '../../lib/client'
+import {jsonStringify} from '../../lib/format'
 import {resolveReach} from '../../lib/reach'
 import {Histogram} from '../../lib/scan/histogram'
 import {MultiHigh} from '../../lib/scan/multi-high'
@@ -335,7 +336,7 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
                       }
                     : undefined,
         }
-        console.log(JSON.stringify(payload, null, 2))
+        console.log(jsonStringify(payload))
     } else {
         console.log(renderHeader(header))
         console.log('')

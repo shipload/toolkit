@@ -4,7 +4,7 @@ import {ALL_ENTITY_TYPES} from '../../lib/args'
 import {getIndexerUrl} from '../../lib/config'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {summarizeEvent} from '../../lib/event-format'
-import {formatDateTimeUTC} from '../../lib/format'
+import {formatDateTimeUTC, jsonStringify} from '../../lib/format'
 import {type EventRecord, fetchEvents} from '../../lib/indexer'
 import {getAccountName} from '../../lib/session'
 
@@ -60,7 +60,7 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
     }
 
     if (opts.json) {
-        console.log(JSON.stringify(collected, null, 2))
+        console.log(jsonStringify(collected))
         return
     }
 

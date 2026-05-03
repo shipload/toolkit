@@ -363,8 +363,14 @@ export function formatCancelResults(results:ServerTypes.cancel_results): string 
 	return lines.join("\n");
 }
 
-function bigintReplacer(_key: string, value: unknown): unknown {
-	return typeof value === "bigint" ? value.toString() : value;
+function safeJsonReplacer(key: string, value: unknown): unknown {
+	if (typeof value === "bigint") return value.toString();
+	if (key === "stats" && typeof value === "number") return String(value);
+	return value;
+}
+
+export function jsonStringify(data: unknown): string {
+	return JSON.stringify(data, safeJsonReplacer, 2);
 }
 
 export function formatOutput<T>(
@@ -372,5 +378,5 @@ export function formatOutput<T>(
 	opts: { json?: boolean },
 	pretty: (d: T) => string,
 ): string {
-	return opts.json ? JSON.stringify(data, bigintReplacer, 2) : pretty(data);
+	return opts.json ? jsonStringify(data) : pretty(data);
 }

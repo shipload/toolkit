@@ -1,6 +1,6 @@
 import { encodeStats, type LocationStratum, type LocationType } from "@shipload/sdk";
 import Table from "cli-table3";
-import { formatItem } from "./format";
+import { formatItem, jsonStringify } from "./format";
 import { formatItemStats } from "./item-stats";
 
 export interface StrataRenderOpts {
@@ -149,7 +149,7 @@ export function renderStrataTable(opts: StrataRenderOpts): string {
 }
 
 export function renderStrata(opts: StrataRenderOpts, asJson: boolean): string {
-	if (asJson) return JSON.stringify(strataToJsonShape(opts), null, 2);
+	if (asJson) return jsonStringify(strataToJsonShape(opts));
 	return renderStrataTable(opts);
 }
 

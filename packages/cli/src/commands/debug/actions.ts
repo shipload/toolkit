@@ -2,6 +2,7 @@ import type {Command} from 'commander'
 import {type ActivityResult, fetchActivity} from '../../lib/actionstream'
 import {type EntityRef, parseEntityRef} from '../../lib/args'
 import {getHistoryUrl} from '../../lib/config'
+import {jsonStringify} from '../../lib/format'
 
 export interface DebugActionsOptions {
     historyUrl: string
@@ -87,7 +88,7 @@ export async function runDebugActions(opts: DebugActionsOptions): Promise<void> 
     }
 
     if (opts.json) {
-        console.log(JSON.stringify(collected, null, 2))
+        console.log(jsonStringify(collected))
         return
     }
 

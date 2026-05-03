@@ -4,6 +4,7 @@ import {join} from 'node:path'
 import type {Command} from 'commander'
 import {fetchActivity} from '../../lib/actionstream'
 import {getHistoryUrl} from '../../lib/config'
+import {jsonStringify} from '../../lib/format'
 import {parseSetcodeHexData} from '../../lib/setcode-parser'
 
 export interface DebugSetcodesOptions {
@@ -50,7 +51,7 @@ export async function runDebugSetcodes(opts: DebugSetcodesOptions): Promise<void
     }
 
     if (opts.json) {
-        console.log(JSON.stringify(entries, null, 2))
+        console.log(jsonStringify(entries))
         return
     }
     if (entries.length === 0) {

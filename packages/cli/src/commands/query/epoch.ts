@@ -1,6 +1,6 @@
 import type {Command} from 'commander'
 import {getGameConfig, server} from '../../lib/client'
-import {formatOutput} from '../../lib/format'
+import {formatOutput, jsonStringify} from '../../lib/format'
 
 export interface EpochView {
     seed: string
@@ -53,7 +53,7 @@ export function render(view: EpochView, raw: boolean): string {
     const data = buildJsonData(view)
 
     if (raw) {
-        return JSON.stringify(data, null, 2)
+        return jsonStringify(data)
     }
 
     return [

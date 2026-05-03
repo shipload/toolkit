@@ -55,6 +55,24 @@ describe("formatOutput", () => {
 		const out = formatOutput(data, { json: true }, () => "unused");
 		expect(JSON.parse(out)).toEqual({ level: { list: ["1", "2", { inner: "3" }] } });
 	});
+	test("coerces small numeric `stats` field to string for safe consumption", () => {
+		const data = { cargo: [{ item_id: 201, quantity: 1, stats: 239829 }] };
+		const out = formatOutput(data, { json: true }, () => "unused");
+		const parsed = JSON.parse(out);
+		expect(parsed.cargo[0].stats).toBe("239829");
+		expect(typeof parsed.cargo[0].stats).toBe("string");
+	});
+	test("leaves large numeric `stats` (already string from wharfkit) as string", () => {
+		const data = { cargo: [{ item_id: 201, quantity: 1, stats: "251479207179" }] };
+		const out = formatOutput(data, { json: true }, () => "unused");
+		const parsed = JSON.parse(out);
+		expect(parsed.cargo[0].stats).toBe("251479207179");
+	});
+	test("does not coerce object-shaped `stats` (e.g. stratum stats)", () => {
+		const data = { stats: { stat1: 1, stat2: 2, stat3: 3 } };
+		const out = formatOutput(data, { json: true }, () => "unused");
+		expect(JSON.parse(out)).toEqual({ stats: { stat1: 1, stat2: 2, stat3: 3 } });
+	});
 });
 
 describe("formatInstallHint", () => {

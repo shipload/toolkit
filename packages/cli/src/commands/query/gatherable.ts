@@ -6,6 +6,7 @@ import {
 import {Command} from 'commander'
 import {parseUint32} from '../../lib/args'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
+import {jsonStringify} from '../../lib/format'
 import {
     type GatherableRenderOpts,
     type GatherableRow,
@@ -149,7 +150,7 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
     }
 
     if (opts.json) {
-        console.log(JSON.stringify(gatherableToJsonShape(renderOpts), null, 2))
+        console.log(jsonStringify(gatherableToJsonShape(renderOpts)))
     } else {
         console.log(renderGatherableTable(renderOpts))
     }

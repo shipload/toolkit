@@ -1,6 +1,6 @@
 import type {Command} from 'commander'
 import {server} from '../../lib/client'
-import {formatOutput} from '../../lib/format'
+import {formatOutput, jsonStringify} from '../../lib/format'
 
 function formatValue(v: unknown): string {
     if (v === null || v === undefined) return ''
@@ -14,7 +14,7 @@ export function renderPretty(config: unknown): string {
 }
 
 export function render(config: unknown, raw: boolean): string {
-    if (raw) return JSON.stringify(config, null, 2)
+    if (raw) return jsonStringify(config)
     return renderPretty(config)
 }
 

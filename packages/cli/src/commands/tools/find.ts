@@ -11,6 +11,7 @@ import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
 import {client, getGameSeed, server} from '../../lib/client'
 import {EXIT} from '../../lib/errors'
+import {jsonStringify} from '../../lib/format'
 import {isReachable, resolveReach} from '../../lib/reach'
 import {getAccountName} from '../../lib/session'
 import type {Coord} from './scan'
@@ -297,7 +298,7 @@ export function registerSubcommand(tools: Command): void {
                             distance: h.distance,
                         })),
                     }
-                    console.log(JSON.stringify(payload, null, 2))
+                    console.log(jsonStringify(payload))
                 } else {
                     console.log(
                         renderFindResult(hits, resourceId, origin, entityLabel, depth, opts.radius)

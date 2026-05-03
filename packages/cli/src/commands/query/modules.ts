@@ -1,6 +1,6 @@
 import type {Command} from 'commander'
 import {server} from '../../lib/client'
-import {formatItem, formatOutput} from '../../lib/format'
+import {formatItem, formatOutput, jsonStringify} from '../../lib/format'
 
 interface Module {
     id: number
@@ -21,7 +21,7 @@ export function renderPretty(input: {modules: Module[]}): string {
 }
 
 export function render(input: {modules: Module[]}, raw: boolean): string {
-    if (raw) return JSON.stringify(input, null, 2)
+    if (raw) return jsonStringify(input)
     return renderPretty(input)
 }
 

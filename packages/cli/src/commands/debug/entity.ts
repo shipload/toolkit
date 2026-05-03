@@ -2,6 +2,7 @@ import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef} from '../../lib/args'
 import {getTableRows} from '../../lib/chain-debug'
 import {getChainUrl} from '../../lib/config'
+import {jsonStringify} from '../../lib/format'
 
 export interface DebugEntityOptions {
     chainUrl: string
@@ -29,11 +30,7 @@ export async function runDebugEntity(opts: DebugEntityOptions): Promise<void> {
         return
     }
     const row = res.rows[0]
-    if (opts.json) {
-        console.log(JSON.stringify(row, null, 2))
-    } else {
-        console.log(JSON.stringify(row, null, 2))
-    }
+    console.log(jsonStringify(row))
 }
 
 export function registerSubcommand(parent: Command): void {

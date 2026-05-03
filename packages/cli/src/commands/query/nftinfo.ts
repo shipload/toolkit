@@ -1,6 +1,6 @@
 import type {Command} from 'commander'
 import {server} from '../../lib/client'
-import {formatItem, formatOutput} from '../../lib/format'
+import {formatItem, formatOutput, jsonStringify} from '../../lib/format'
 
 interface SchemaField {
     name: string
@@ -38,7 +38,7 @@ export function renderPretty(input: NftInfo): string {
 }
 
 export function render(input: NftInfo, raw: boolean): string {
-    if (raw) return JSON.stringify(input, null, 2)
+    if (raw) return jsonStringify(input)
     return renderPretty(input)
 }
 
