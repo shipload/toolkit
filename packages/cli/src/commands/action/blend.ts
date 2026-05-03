@@ -1,5 +1,5 @@
-import {ServerTypes} from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import {blendCargoStacks, ServerTypes} from '@shipload/sdk'
+import {type Action, Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName} from '../../lib/args'
 import {
@@ -10,9 +10,11 @@ import {
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
-import {renderEstimate} from '../../lib/render-estimate'
+import {formatItem} from '../../lib/format'
+import {formatItemStats} from '../../lib/item-stats'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
+import {ValidationError} from '../../lib/validate'
 
 export interface BlendOpts {
     entityType: EntityTypeName
@@ -44,23 +46,16 @@ export async function runBlend(
     opts: BlendCliOptions
 ): Promise<void> {
     assertNotBoth(opts, ['estimate', 'wait'])
-    if (opts.estimate) {
-        console.log(
-            renderEstimate({
-                duration_s: 0,
-                energy_cost: 0,
-                cargo_delta: {},
-                feasibility: {ok: true, issues: []},
-            })
-        )
-        return
-    }
     await withValidation(async () => {
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
             snap.cargo as unknown as ServerTypes.cargo_item[]
         )
+        if (opts.estimate) {
+            console.log(renderBlendEstimate(resolved))
+            return
+        }
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
@@ -71,6 +66,25 @@ export async function runBlend(
             console.log('blend is instantaneous; --wait is a no-op')
         }
     })
+}
+
+function renderBlendEstimate(resolved: ResolvedCargoInput[]): string {
+    const itemId = resolved[0].itemId
+    if (resolved.some((r) => r.itemId !== itemId)) {
+        throw new ValidationError('blend requires all inputs to be the same item')
+    }
+    const totalQty = resolved.reduce((s, r) => s + r.quantity, 0)
+    const blendedStats = blendCargoStacks(
+        itemId,
+        resolved.map((r) => ({quantity: r.quantity, stats: UInt64.from(r.stackId)}))
+    )
+    const packed = BigInt(blendedStats.toString())
+    const statsLabel = formatItemStats(itemId, packed) || packed.toString()
+    return [
+        'Estimate: duration 0s',
+        'Output:',
+        `  ${formatItem(itemId)} ×${totalQty}  (stats ${statsLabel})`,
+    ].join('\n')
 }
 
 export const SUBCOMMAND: EntitySubcommand = {
