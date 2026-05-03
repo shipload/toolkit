@@ -1,12 +1,15 @@
+import type {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {type EntityRef, parseEntityRefList, parseInt64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
+import {renderEntityFull} from '../../lib/entity-header'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGroupTravel} from '../../lib/estimate'
 import {renderEstimate} from '../../lib/render-estimate'
 import {resolveGroupCompleted} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
+import {getEntitySnapshot} from '../../lib/snapshot'
 import {
     AUTO_RESOLVE_OPTION,
     maybeAwaitAndPrint,
@@ -79,13 +82,24 @@ export function register(program: Command): void {
                     {action},
                     {description: `Group travel to (${x}, ${y})`}
                 )
+                const shouldRender = Boolean(options.wait || options.track)
                 await maybeAwaitAndPrint(
                     entities[0].entityType,
                     entities[0].entityId,
                     {wait: options.wait, track: options.track, autoResolve: false},
                     result
                 )
-                if (options.autoResolve && (options.wait || options.track)) {
+                if (shouldRender) {
+                    const snaps = await Promise.all(
+                        entities
+                            .slice(1)
+                            .map((ref) => getEntitySnapshot(ref.entityType, ref.entityId))
+                    )
+                    for (const snap of snaps) {
+                        console.log(renderEntityFull(snap as unknown as ServerTypes.entity_info))
+                    }
+                }
+                if (options.autoResolve && shouldRender) {
                     await resolveGroupCompleted(entities)
                 }
             }
