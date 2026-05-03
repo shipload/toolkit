@@ -85,6 +85,7 @@ export function build(): Command {
     buildEntityParent(program, 'ship', entity.defaultShow)
     buildEntityParent(program, 'container', entity.defaultShow)
     buildEntityParent(program, 'warehouse', entity.defaultShow)
+    registerEntitySubcommand(entity.SUBCOMMAND)
     entities.register(program)
     fleetTrack.register(program)
     history.register(program)
