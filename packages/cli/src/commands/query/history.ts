@@ -8,7 +8,7 @@ import {formatDateTimeUTC} from '../../lib/format'
 import {type EventRecord, fetchEvents} from '../../lib/indexer'
 import {getAccountName} from '../../lib/session'
 
-const DEFAULT_LIMIT = 50
+const DEFAULT_LIMIT = 25
 const MAX_LIMIT = 1000
 const DEFAULT_PAGE_SIZE = 100
 const MAX_PAGE_SIZE = 1000
@@ -120,9 +120,16 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
 
 function renderEntityCell(e: EventRecord): string {
     if (!e.entity_id) return ''
-    const d = e.data as Record<string, unknown>
-    const type = typeof d.entity_type === 'string' ? d.entity_type : null
+    const type = resolveEntityType(e.data as Record<string, unknown>)
     return type ? `${type} #${e.entity_id}` : `#${e.entity_id}`
+}
+
+function resolveEntityType(d: Record<string, unknown>): string | null {
+    if (typeof d.entity_type === 'string') return d.entity_type
+    if (typeof d.source_type === 'string') return d.source_type
+    const source = d.source as Record<string, unknown> | undefined
+    if (source && typeof source.entity_type === 'string') return source.entity_type
+    return null
 }
 
 export function register(program: Command): void {
