@@ -33,6 +33,12 @@ export const TIMEOUT_OPTION = new Option("--timeout <s>", "timeout in seconds").
 	(v) => Number(v) * 1000,
 );
 
+export type WaitableOptions = {
+	wait?: boolean;
+	track?: boolean;
+	autoResolve?: boolean;
+};
+
 export function nextInterval(s: { remaining_s: number; attempt: number }): number {
 	if (s.remaining_s <= 2) return 1000;
 	if (s.remaining_s < 120) return 2000;
@@ -87,7 +93,7 @@ function loadAutoResolveDefault(): boolean {
 export async function maybeAwaitAndPrint(
 	entityType: EntityTypeName | string,
 	entityId: bigint | number,
-	options: { wait?: boolean; track?: boolean },
+	options: WaitableOptions,
 	result?: TransactResult,
 ): Promise<void> {
 	if (!options.wait && !options.track) return;
@@ -97,6 +103,7 @@ export async function maybeAwaitAndPrint(
 	await awaitAndPrint(entityType, entityId, {
 		progress: !!options.track,
 		initialSnapshot,
+		autoResolve: options.autoResolve,
 	});
 }
 

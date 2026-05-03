@@ -13,7 +13,13 @@ import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {checkCapacity, checkDepth, ValidationError} from '../../lib/validate'
-import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
+import {
+    AUTO_RESOLVE_OPTION,
+    maybeAwaitAndPrint,
+    TRACK_OPTION,
+    WAIT_OPTION,
+    type WaitableOptions,
+} from '../../lib/wait'
 import {buildAction as buildRechargeAction} from './recharge'
 
 export interface GatherOpts {
@@ -145,10 +151,8 @@ async function enrichGatherError(err: unknown, ctx: GatherErrorContext): Promise
     return msg
 }
 
-type GatherCliOptions = {
+type GatherCliOptions = WaitableOptions & {
     estimate?: boolean
-    wait?: boolean
-    track?: boolean
     force?: boolean
     recharge?: boolean
 }
@@ -241,6 +245,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
+            .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
             .option(
                 '--recharge',

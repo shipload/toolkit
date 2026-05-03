@@ -1,5 +1,5 @@
 import { Name } from "@wharfkit/antelope";
-import type { EntityTypeName } from "./args";
+import type { EntityRef, EntityTypeName } from "./args";
 import { getShipload } from "./client";
 import { transact } from "./session";
 import { completedTaskCount, getEntitySnapshot } from "./snapshot";
@@ -31,4 +31,21 @@ export async function checkResolveEntity(
 	const snap = await getEntitySnapshot(entityType, entityId);
 	const completed = completedTaskCount(snap);
 	await ensureNoPendingResolve(entityType, entityId, completed, autoResolve);
+}
+
+export async function resolveGroupCompleted(entities: EntityRef[]): Promise<void> {
+	if (entities.length === 0) return;
+	const snaps = await Promise.all(
+		entities.map((e) => getEntitySnapshot(e.entityType, e.entityId)),
+	);
+	const toResolve = entities.filter((_, i) => completedTaskCount(snaps[i]) > 0);
+	if (toResolve.length === 0) return;
+	const shipload = await getShipload();
+	const actions = toResolve.map((e) =>
+		shipload.actions.resolve(e.entityId, Name.from(e.entityType)),
+	);
+	await transact(
+		{ actions },
+		{ description: `Auto-resolved ${actions.length} entit${actions.length === 1 ? "y" : "ies"}` },
+	);
 }

@@ -7,7 +7,13 @@ import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateRecharge} from '../../lib/estimate'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
-import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
+import {
+    AUTO_RESOLVE_OPTION,
+    maybeAwaitAndPrint,
+    TRACK_OPTION,
+    WAIT_OPTION,
+    type WaitableOptions,
+} from '../../lib/wait'
 
 export interface RechargeOpts {
     entityType: EntityTypeName
@@ -19,14 +25,9 @@ export async function buildAction(opts: RechargeOpts): Promise<Action> {
     return shipload.actions.recharge(opts.entityId, Name.from(opts.entityType))
 }
 
-export async function runRecharge(
-    ctx: EntityContext,
-    opts: {
-        estimate?: boolean
-        wait?: boolean
-        track?: boolean
-    }
-): Promise<void> {
+type RechargeCliOptions = WaitableOptions & {estimate?: boolean}
+
+export async function runRecharge(ctx: EntityContext, opts: RechargeCliOptions): Promise<void> {
     assertNotBoth(opts, ['estimate', 'wait'], ['estimate', 'track'])
     if (opts.estimate) {
         const est = await withValidation(() =>
@@ -57,7 +58,8 @@ export const SUBCOMMAND: EntitySubcommand = {
             .option('--estimate', 'print duration/energy estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
-            .action(async (opts: {estimate?: boolean; wait?: boolean; track?: boolean}) => {
+            .addOption(AUTO_RESOLVE_OPTION)
+            .action(async (opts: RechargeCliOptions) => {
                 await runRecharge(ctx, opts)
             }),
 }

@@ -8,7 +8,13 @@ import {estimateTravel} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate, renderTravelSummary} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
-import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
+import {
+    AUTO_RESOLVE_OPTION,
+    maybeAwaitAndPrint,
+    TRACK_OPTION,
+    WAIT_OPTION,
+    type WaitableOptions,
+} from '../../lib/wait'
 
 export interface TravelOpts {
     shipId: bigint
@@ -22,11 +28,9 @@ export async function buildAction(opts: TravelOpts): Promise<Action> {
     return shipload.actions.travel(opts.shipId, {x: opts.x, y: opts.y}, opts.recharge)
 }
 
-type TravelCliOptions = {
+type TravelCliOptions = WaitableOptions & {
     recharge?: boolean
     estimate?: boolean
-    wait?: boolean
-    track?: boolean
     force?: boolean
 }
 
@@ -90,6 +94,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
+            .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
             .action(async (x: bigint, y: bigint, opts: TravelCliOptions) => {
                 await runTravel(ctx, x, y, opts)

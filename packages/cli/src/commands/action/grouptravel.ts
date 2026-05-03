@@ -5,8 +5,15 @@ import {getShipload} from '../../lib/client'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGroupTravel} from '../../lib/estimate'
 import {renderEstimate} from '../../lib/render-estimate'
+import {resolveGroupCompleted} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
-import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
+import {
+    AUTO_RESOLVE_OPTION,
+    maybeAwaitAndPrint,
+    TRACK_OPTION,
+    WAIT_OPTION,
+    type WaitableOptions,
+} from '../../lib/wait'
 
 export interface GroupTravelOpts {
     entities: EntityRef[]
@@ -42,17 +49,13 @@ export function register(program: Command): void {
         .option('--estimate', 'print duration/energy/cargo estimate without submitting')
         .addOption(WAIT_OPTION)
         .addOption(TRACK_OPTION)
+        .addOption(AUTO_RESOLVE_OPTION)
         .action(
             async (
                 entities: EntityRef[],
                 x: bigint,
                 y: bigint,
-                options: {
-                    recharge?: boolean
-                    estimate?: boolean
-                    wait?: boolean
-                    track?: boolean
-                }
+                options: WaitableOptions & {recharge?: boolean; estimate?: boolean}
             ) => {
                 assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
                 if (options.estimate) {
@@ -79,9 +82,12 @@ export function register(program: Command): void {
                 await maybeAwaitAndPrint(
                     entities[0].entityType,
                     entities[0].entityId,
-                    options,
+                    {wait: options.wait, track: options.track, autoResolve: false},
                     result
                 )
+                if (options.autoResolve && (options.wait || options.track)) {
+                    await resolveGroupCompleted(entities)
+                }
             }
         )
 }

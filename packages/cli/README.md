@@ -128,7 +128,7 @@ Shared flags on transacting actions:
 
 - `--wait` — block until the scheduled task completes, auto-resolve, and print post-state.
 - `--estimate` — preview `{ duration, energy cost, cargo delta }` without submitting. Mutually exclusive with `--wait`.
-- `--auto-resolve` — resolve completed tasks on the target before acting.
+- `--auto-resolve` — resolve completed tasks on the target. For `addmodule`/`rmmodule`/`warp` this clears blockers before submission. For `gather`/`craft`/`recharge`/`travel`/`grouptravel`/`wait` it issues the resolve after `--wait`/`--track` returns; `grouptravel` bundles one resolve per group member into a single signed transaction.
 
 Exit codes:
 
@@ -143,7 +143,7 @@ Tasks move through four states: **scheduled → active → completed → resolve
 
 - `bun run shiploadcli <entity-type> <id> tasks` shows the current schedule and pending queue.
 - Some tasks are uncancelable: `gather` (commits a reserve at submission). Once scheduled they must run to completion — wait or let the schedule drain.
-- `bun run shiploadcli <entity-type> <id> resolve` processes completed tasks. Passing `--auto-resolve` on the next action does this automatically before submission.
+- `bun run shiploadcli <entity-type> <id> resolve` processes completed tasks. Passing `--auto-resolve` on the next action handles them automatically — before submission for `addmodule`/`rmmodule`/`warp`, after `--wait`/`--track` for `gather`/`craft`/`recharge`/`travel`/`grouptravel`.
 
 ## Craft vs blend
 
