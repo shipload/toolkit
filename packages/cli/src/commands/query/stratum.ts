@@ -18,8 +18,8 @@ export function renderDetail(s: any, stats: any, index: number): string {
     const lines = [
         `Stratum [${index}]:`,
         `  Item:     ${formatItem(itemId)}`,
-        `  Reserve:  ${formatReserve(Number(s.reserve), Number(s.reserve_max))}`,
-        `  Richness: ${s.richness}`,
+        `  Reserve:  ${formatReserve(Number(s.reserve), Number(s.reserve_max))} units`,
+        `  Richness: ${s.richness} / 1000`,
         `  Seed:     ${s.seed}`,
     ]
     if (stats) {
@@ -45,7 +45,12 @@ function registerSingular(program: Command): void {
         .argument('<y>', 'y coordinate', parseInt64)
         .argument('<index>', 'stratum index', parseUint32)
         .option('--json', 'emit JSON instead of formatted text')
-        .addHelpText('after', '\nFor a list of all strata at a location, use `strata <x> <y>`.')
+        .addHelpText(
+            'after',
+            '\nReserve = remaining gatherable units (resets each epoch). ' +
+                'Richness = stratum quality, 1–1000 (higher = faster gather).\n' +
+                'For a list of all strata at a location, use `strata <x> <y>`.'
+        )
         .action(async (x: bigint, y: bigint, index: number, opts: {json?: boolean}) => {
             const result = (await server.readonly('getstratum', {
                 x,
@@ -86,7 +91,12 @@ function registerList(program: Command): void {
         )
         .option('--sort <mode>', "sort by 'available' (default) or 'index'", 'available')
         .option('--json', 'emit JSON with full strata data instead of formatted text')
-        .addHelpText('after', '\nFor detail on a single stratum, use `stratum <x> <y> <index>`.')
+        .addHelpText(
+            'after',
+            '\nAvail/Initial = reserve units (Avail decrements per gather and resets each epoch).\n' +
+                'Rich = richness, 1–1000 (higher = faster gather).\n' +
+                'For detail on a single stratum, use `stratum <x> <y> <index>`.'
+        )
         .action(async (x: bigint, y: bigint, opts: StrataListOpts) => {
             const view = await loadLocationStrata({x, y}, {entity: opts.entity})
             console.log(

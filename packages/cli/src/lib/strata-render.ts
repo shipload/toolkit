@@ -143,6 +143,7 @@ export function renderStrataTable(opts: StrataRenderOpts): string {
 	if (opts.reach) {
 		lines.push(`  ${reachLabel(opts, reachableTotal)}`);
 	}
+	lines.push("  Avail/Initial: reserve units (Avail resets each epoch). Rich: 1–1000.");
 
 	return lines.join("\n");
 }

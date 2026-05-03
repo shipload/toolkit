@@ -238,6 +238,11 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'before',
                 'Requires: idle source ship; gatherer module installed; stratum within gatherer depth; cargo capacity available.\n'
             )
+            .addHelpText(
+                'after',
+                '\nReserve = remaining gatherable units at the stratum (resets each epoch). ' +
+                    'Richness = stratum quality, 1–1000 (higher = faster gather).'
+            )
             .argument('<dest-type>', 'destination entity type', parseEntityType)
             .argument('<dest-id>', 'destination entity id', parseUint64)
             .argument('<stratum>', 'stratum index', parseUint32)
