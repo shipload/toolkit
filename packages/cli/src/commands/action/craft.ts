@@ -1,6 +1,6 @@
 import {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
-import {Command, Option} from 'commander'
+import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName, parseUint16, parseUint32} from '../../lib/args'
 import {
     type ParsedCargoInput,
@@ -9,7 +9,7 @@ import {
 } from '../../lib/cargo-resolve'
 import {getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {assertNotBoth, EXIT, withValidation} from '../../lib/errors'
+import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateCraft} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
@@ -180,16 +180,6 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
             .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
             .option('--recharge', 'recharge to full energy before crafting')
-            .addOption(new Option('--input [values...]').hideHelp())
-            .on('option:input', () => {
-                console.error(
-                    'Error: --input was removed in the 2026-04-26 cargo refactor.\n' +
-                        'Inputs are now positional: <item-id>:<stack-id>:<qty>, repeated per stack.\n\n' +
-                        'Example: shiploadcli ship 1 craft 10003 1 301:214202522:32\n\n' +
-                        'Use `shiploadcli ship N cargo` to find item-ids and stack-ids.'
-                )
-                process.exit(EXIT.USER_ERROR)
-            })
             .action(
                 async (
                     recipeId: number,
