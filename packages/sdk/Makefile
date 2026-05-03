@@ -10,7 +10,7 @@ build: lib
 lib: ${SRC_FILES} package.json tsconfig.json node_modules rollup.config.js
 	@${BIN}/rollup -c && touch lib
 
-CATALOG_SRC ?= ../game/build/catalog
+CATALOG_SRC ?= ../../../game/build/catalog
 
 .PHONY: sync-catalog
 sync-catalog:
