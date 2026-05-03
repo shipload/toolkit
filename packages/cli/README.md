@@ -95,7 +95,7 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `grouptravel <entities> <x> <y>` — fly multiple entities together (e.g., `ship:1,container:2`).
 - `<entity-type> <id> warp <x> <y>` — instant-transit via the warp module.
 - `<src-type> <src-id> gather <dest-type> <dest-id> <stratum> <quantity>` — extract resources from a stratum into a destination entity.
-- `<src-type> <src-id> transfer <dest-type> <dest-id> <item-id> <stats> <quantity>` — move cargo between entities of the same owner.
+- `<src-type> <src-id> transfer <dest-type> <dest-id> <item-id> <stack-id> <quantity>` — move cargo between entities of the same owner.
 - `<entity-type> <id> recharge` — recharge energy on an entity with a generator.
 - `<entity-type> <id> craft <recipe-id> <quantity> <input>...` — produce items from a recipe. Each input is `<item-id>:<stack-id>:<qty>`; total qty per slot must equal `recipe.qty × quantity`. Multiple inputs with the same item-id draw from multiple stacks.
 - `<entity-type> <id> blend <input>...` — merge multiple stacks of the same item into one with blended stats. Each input is `<item-id>:<stack-id>:<qty>`.

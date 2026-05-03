@@ -12,7 +12,7 @@ export interface TransferOpts {
     destType: EntityTypeName
     destId: bigint
     itemId: bigint
-    stats: bigint
+    stackId: bigint
     quantity: bigint
 }
 
@@ -24,7 +24,7 @@ export async function buildAction(opts: TransferOpts): Promise<Action> {
         Name.from(opts.destType),
         opts.destId,
         opts.itemId,
-        opts.stats,
+        opts.stackId,
         opts.quantity
     )
 }
@@ -39,7 +39,7 @@ export async function runTransfer(
     destType: EntityTypeName,
     destId: bigint,
     itemId: bigint,
-    stats: bigint,
+    stackId: bigint,
     quantity: bigint,
     options: TransferCliOptions
 ): Promise<void> {
@@ -49,7 +49,7 @@ export async function runTransfer(
         destType,
         destId,
         itemId,
-        stats,
+        stackId,
         quantity,
     })
     const result = await transact(
@@ -75,7 +75,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             .argument('<dest-type>', 'destination entity type', parseEntityType)
             .argument('<dest-id>', 'destination entity id', parseUint64)
             .argument('<item-id>', 'item id', parseUint64)
-            .argument('<stats>', 'cargo stack discriminator (often 0)', parseUint64)
+            .argument('<stack-id>', 'cargo stack id (often 0)', parseUint64)
             .argument('<quantity>', 'quantity', parseUint64)
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
@@ -84,11 +84,11 @@ export const SUBCOMMAND: EntitySubcommand = {
                     destType: EntityTypeName,
                     destId: bigint,
                     itemId: bigint,
-                    stats: bigint,
+                    stackId: bigint,
                     quantity: bigint,
                     opts: TransferCliOptions
                 ) => {
-                    await runTransfer(ctx, destType, destId, itemId, stats, quantity, opts)
+                    await runTransfer(ctx, destType, destId, itemId, stackId, quantity, opts)
                 }
             ),
 }

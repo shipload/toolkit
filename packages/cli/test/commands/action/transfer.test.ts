@@ -8,7 +8,7 @@ test('transfer builds action with all args', async () => {
         destType: 'warehouse',
         destId: 2n,
         itemId: 5n,
-        stats: 0n,
+        stackId: 0n,
         quantity: 100n,
     })
     expect(action.name.toString()).toBe('transfer')
