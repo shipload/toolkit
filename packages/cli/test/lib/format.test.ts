@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Checksum256 } from "@wharfkit/antelope";
 import { formatCargoTable } from "../../src/lib/cargo-table";
 import {
+	formatDateTimeUTC,
 	formatInstallHint,
 	formatLocation,
 	formatOutput,
@@ -97,5 +98,22 @@ describe("formatCargoTable stack column", () => {
 		const cargo = [{ item_id: 10200, quantity: 1, stats: 0n, modules: [] } as any];
 		const out = formatCargoTable(cargo);
 		expect(out).toMatch(/\b0\b/);
+	});
+});
+
+describe("formatDateTimeUTC", () => {
+	test("formats ISO date and time with UTC suffix", () => {
+		const d = new Date("2026-04-28T17:32:19Z");
+		expect(formatDateTimeUTC(d)).toBe("2026-04-28 17:32:19 UTC");
+	});
+
+	test("zero-pads single-digit month, day, hour, minute, second", () => {
+		const d = new Date("2026-01-05T03:07:09Z");
+		expect(formatDateTimeUTC(d)).toBe("2026-01-05 03:07:09 UTC");
+	});
+
+	test("handles end-of-year boundary", () => {
+		const d = new Date("2026-12-31T23:59:59Z");
+		expect(formatDateTimeUTC(d)).toBe("2026-12-31 23:59:59 UTC");
 	});
 });

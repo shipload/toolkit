@@ -124,4 +124,43 @@ describe("fetchEvents", () => {
             fetchEvents({ indexerUrl: "https://idx.example.com" }),
         ).rejects.toThrow(/500/);
     });
+
+    test("URL includes direction when set to desc", async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            response: new Response(JSON.stringify(SAMPLE_RESPONSE), { status: 200 }),
+        };
+        restore = installFetch(spy);
+
+        await fetchEvents({ indexerUrl: "https://idx.example.com", direction: "desc" });
+
+        const url = new URL(spy.calls[0].url);
+        expect(url.searchParams.get("direction")).toBe("desc");
+    });
+
+    test("URL includes direction when set to asc", async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            response: new Response(JSON.stringify(SAMPLE_RESPONSE), { status: 200 }),
+        };
+        restore = installFetch(spy);
+
+        await fetchEvents({ indexerUrl: "https://idx.example.com", direction: "asc" });
+
+        const url = new URL(spy.calls[0].url);
+        expect(url.searchParams.get("direction")).toBe("asc");
+    });
+
+    test("URL omits direction when unset", async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            response: new Response(JSON.stringify(SAMPLE_RESPONSE), { status: 200 }),
+        };
+        restore = installFetch(spy);
+
+        await fetchEvents({ indexerUrl: "https://idx.example.com" });
+
+        const url = new URL(spy.calls[0].url);
+        expect(url.searchParams.get("direction")).toBeNull();
+    });
 });

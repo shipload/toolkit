@@ -120,6 +120,10 @@ export function formatTimeUTC(d: Date): string {
 	return `${d.toISOString().slice(11, 19)} UTC`;
 }
 
+export function formatDateTimeUTC(d: Date): string {
+	return `${d.toISOString().slice(0, 19).replace("T", " ")} UTC`;
+}
+
 export function formatCargoUsage(used: number, capacity?: number): string {
 	return capacity != null ? `${formatMass(used)} / ${formatMass(capacity)}` : formatMass(used);
 }

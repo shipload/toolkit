@@ -23,6 +23,7 @@ export interface FetchEventsOptions {
 	owner?: string;
 	entityId?: number;
 	eventType?: string;
+	direction?: "asc" | "desc";
 }
 
 export async function fetchEvents(opts: FetchEventsOptions): Promise<EventsResponse> {
@@ -33,6 +34,7 @@ export async function fetchEvents(opts: FetchEventsOptions): Promise<EventsRespo
 	if (opts.owner) url.searchParams.set("owner", opts.owner);
 	if (opts.entityId !== undefined) url.searchParams.set("entity_id", String(opts.entityId));
 	if (opts.eventType) url.searchParams.set("event_type", opts.eventType);
+	if (opts.direction) url.searchParams.set("direction", opts.direction);
 
 	const res = await fetch(url.toString());
 	if (!res.ok) {

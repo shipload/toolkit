@@ -4,7 +4,7 @@ import {ALL_ENTITY_TYPES} from '../../lib/args'
 import {getIndexerUrl} from '../../lib/config'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {summarizeEvent} from '../../lib/event-format'
-import {formatTimeUTC} from '../../lib/format'
+import {formatDateTimeUTC} from '../../lib/format'
 import {type EventRecord, fetchEvents} from '../../lib/indexer'
 import {getAccountName} from '../../lib/session'
 
@@ -22,6 +22,7 @@ export interface HistoryOptions {
     fromSeq?: number
     pageSize: number
     json: boolean
+    verbose?: boolean
 }
 
 function clamp(n: number, lo: number, hi: number): number {
@@ -48,13 +49,13 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
             eventType: opts.eventType,
             fromSeq,
             limit: Math.min(need, pageSize),
+            direction: 'desc',
         })
         for (const e of page.events) {
             collected.push(e)
             if (collected.length >= limit) break
         }
         if (!page.has_more) break
-        if (page.events.length === 0) break
         fromSeq = page.next_seq
     }
 
@@ -67,6 +68,28 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
         console.log('  No events.')
         return
     }
+
+    const columns = (opts.verbose ?? false)
+        ? {
+              head: ['seq', 'time', 'entity', 'type', 'summary'],
+              colAligns: ['right', 'left', 'left', 'left', 'left'] as Array<'left' | 'right'>,
+              row: (e: EventRecord) => [
+                  String(e.seq),
+                  formatDateTimeUTC(new Date(e.block_time)),
+                  renderEntityCell(e),
+                  e.type,
+                  summarizeEvent(e),
+              ],
+          }
+        : {
+              head: ['time', 'entity', 'summary'],
+              colAligns: ['left', 'left', 'left'] as Array<'left' | 'right'>,
+              row: (e: EventRecord) => [
+                  formatDateTimeUTC(new Date(e.block_time)),
+                  renderEntityCell(e),
+                  summarizeEvent(e),
+              ],
+          }
 
     const table = new Table({
         chars: {
@@ -87,18 +110,19 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
             middle: '  ',
         },
         style: {head: [], border: []},
-        head: ['seq', 'time', 'type', 'summary'],
-        colAligns: ['right', 'left', 'left', 'left'],
+        head: columns.head,
+        colAligns: columns.colAligns,
     })
-    for (const e of collected) {
-        table.push([
-            String(e.seq),
-            formatTimeUTC(new Date(e.block_time)),
-            e.type,
-            summarizeEvent(e),
-        ])
-    }
+
+    for (const e of collected) table.push(columns.row(e))
     console.log(table.toString())
+}
+
+function renderEntityCell(e: EventRecord): string {
+    if (!e.entity_id) return ''
+    const d = e.data as Record<string, unknown>
+    const type = typeof d.entity_type === 'string' ? d.entity_type : null
+    return type ? `${type} #${e.entity_id}` : `#${e.entity_id}`
 }
 
 export function register(program: Command): void {
@@ -119,6 +143,7 @@ export function register(program: Command): void {
             DEFAULT_PAGE_SIZE
         )
         .option('--json', 'emit JSON instead of formatted table', false)
+        .option('-v, --verbose', 'show seq and event-type columns', false)
         .action(
             async (
                 account: string | undefined,
@@ -128,6 +153,7 @@ export function register(program: Command): void {
                     fromSeq?: number
                     pageSize: number
                     json: boolean
+                    verbose: boolean
                 }
             ) => {
                 await runHistory({
@@ -138,6 +164,7 @@ export function register(program: Command): void {
                     fromSeq: opts.fromSeq,
                     pageSize: opts.pageSize,
                     json: opts.json,
+                    verbose: opts.verbose,
                 })
             }
         )
@@ -165,6 +192,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 DEFAULT_PAGE_SIZE
             )
             .option('--json', 'emit JSON instead of formatted table', false)
+            .option('-v, --verbose', 'show seq and event-type columns', false)
             .action(
                 async (opts: {
                     limit: number
@@ -172,6 +200,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                     fromSeq?: number
                     pageSize: number
                     json: boolean
+                    verbose: boolean
                 }) => {
                     await runHistory({
                         indexerUrl: getIndexerUrl(),
@@ -181,6 +210,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                         fromSeq: opts.fromSeq,
                         pageSize: opts.pageSize,
                         json: opts.json,
+                        verbose: opts.verbose,
                     })
                 }
             ),

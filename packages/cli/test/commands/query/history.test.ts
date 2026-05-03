@@ -57,7 +57,7 @@ afterEach(() => {
 })
 
 describe('runHistory', () => {
-    test('renders table with seq, time, type, summary columns', async () => {
+    test('renders default table with time, entity, summary columns', async () => {
         const spy: FetchSpy = {
             calls: [],
             queue: [
@@ -80,9 +80,12 @@ describe('runHistory', () => {
         })
 
         const out = captured.join('\n')
-        expect(out).toContain('1100')
         expect(out).toContain('travel')
         expect(out).toContain('(5, 7)')
+        expect(out).toContain('2026-04-28 17:32:19 UTC')
+        expect(out).toContain('ship #3')
+        expect(out).not.toContain('Resolute')
+        expect(out).not.toContain('1100')
     })
 
     test('--json emits raw event array', async () => {
@@ -260,5 +263,117 @@ describe('runHistory', () => {
         expect(spy.calls).toHaveLength(75)
         const parsed = JSON.parse(captured.join('\n'))
         expect(parsed).toHaveLength(75)
+    })
+
+    test('passes direction=desc on every page', async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            queue: [
+                jsonResponse({
+                    latest_seq: 1100,
+                    events: Array.from({length: 100}, (_, i) => ({
+                        ...SAMPLE_TRAVEL,
+                        seq: 1000 + i,
+                    })),
+                    next_seq: 1100,
+                    has_more: true,
+                }),
+                jsonResponse({
+                    latest_seq: 1200,
+                    events: Array.from({length: 50}, (_, i) => ({
+                        ...SAMPLE_TRAVEL,
+                        seq: 1100 + i,
+                    })),
+                    next_seq: 1150,
+                    has_more: false,
+                }),
+            ],
+        }
+        restoreFetch = installFetch(spy)
+
+        await runHistory({
+            indexerUrl: 'https://idx.example.com',
+            account: 'alice',
+            limit: 150,
+            pageSize: 100,
+            json: true,
+        })
+
+        expect(spy.calls).toHaveLength(2)
+        expect(new URL(spy.calls[0].url).searchParams.get('direction')).toBe('desc')
+        expect(new URL(spy.calls[1].url).searchParams.get('direction')).toBe('desc')
+    })
+
+    test('drains across empty pages while has_more=true (sparse filter)', async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            queue: [
+                jsonResponse({
+                    latest_seq: 1100,
+                    events: [],
+                    next_seq: 500,
+                    has_more: true,
+                }),
+                jsonResponse({
+                    latest_seq: 1100,
+                    events: [],
+                    next_seq: 1000,
+                    has_more: true,
+                }),
+                jsonResponse({
+                    latest_seq: 1100,
+                    events: [SAMPLE_TRAVEL],
+                    next_seq: 1100,
+                    has_more: false,
+                }),
+            ],
+        }
+        restoreFetch = installFetch(spy)
+
+        await runHistory({
+            indexerUrl: 'https://idx.example.com',
+            account: 'alice',
+            eventType: 'craft_started',
+            limit: 5,
+            pageSize: 100,
+            json: true,
+        })
+
+        expect(spy.calls).toHaveLength(3)
+        expect(new URL(spy.calls[0].url).searchParams.get('from_seq')).toBeNull()
+        expect(new URL(spy.calls[1].url).searchParams.get('from_seq')).toBe('500')
+        expect(new URL(spy.calls[2].url).searchParams.get('from_seq')).toBe('1000')
+        const parsed = JSON.parse(captured.join('\n'))
+        expect(parsed).toHaveLength(1)
+        expect(parsed[0].seq).toBe(1100)
+    })
+
+    test('--verbose mode includes seq and type columns', async () => {
+        const spy: FetchSpy = {
+            calls: [],
+            queue: [
+                jsonResponse({
+                    latest_seq: 1100,
+                    events: [SAMPLE_TRAVEL],
+                    next_seq: 1101,
+                    has_more: false,
+                }),
+            ],
+        }
+        restoreFetch = installFetch(spy)
+
+        await runHistory({
+            indexerUrl: 'https://idx.example.com',
+            account: 'alice',
+            limit: 50,
+            pageSize: 100,
+            json: false,
+            verbose: true,
+        })
+
+        const out = captured.join('\n')
+        expect(out).toContain('1100')
+        expect(out).toContain('travel')
+        expect(out).toContain('ship #3')
     })
 })
