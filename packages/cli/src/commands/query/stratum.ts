@@ -93,7 +93,7 @@ function registerList(program: Command): void {
         .option('--json', 'emit JSON with full strata data instead of formatted text')
         .addHelpText(
             'after',
-            '\nAvail/Initial = reserve units (Avail decrements per gather and resets each epoch).\n' +
+            '\nReserve/Initial = gatherable units (Reserve decrements per gather and resets each epoch).\n' +
                 'Rich = richness, 1–1000 (higher = faster gather).\n' +
                 'For detail on a single stratum, use `stratum <x> <y> <index>`.'
         )

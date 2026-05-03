@@ -75,7 +75,7 @@ export function renderStrataTable(opts: StrataRenderOpts): string {
 	}
 
 	const showReachCol = !!opts.reach && !!opts.showAll;
-	const head: string[] = ["Idx", "Item", "Avail", "Initial", "%", "Rich", "Stats"];
+	const head: string[] = ["Idx", "Item", "Reserve", "Initial", "%", "Rich", "Stats"];
 	if (showReachCol) head.push("Reach");
 
 	const table = new Table({
@@ -143,7 +143,7 @@ export function renderStrataTable(opts: StrataRenderOpts): string {
 	if (opts.reach) {
 		lines.push(`  ${reachLabel(opts, reachableTotal)}`);
 	}
-	lines.push("  Avail/Initial: reserve units (Avail resets each epoch). Rich: 1–1000.");
+	lines.push("  Reserve/Initial: gatherable units (Reserve resets each epoch). Rich: 1–1000.");
 
 	return lines.join("\n");
 }
