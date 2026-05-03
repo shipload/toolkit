@@ -1,7 +1,10 @@
 import {categoryLabelFromIndex, formatTier} from '@shipload/sdk'
 import type {Command} from 'commander'
+import {parseInt64} from '../../lib/args'
 import {server} from '../../lib/client'
 import {formatItem, formatOutput} from '../../lib/format'
+import {loadLocationStrata} from '../../lib/location-loader'
+import {renderStrata} from '../../lib/strata-render'
 
 interface Resource {
     id: number
@@ -28,19 +31,37 @@ export function render(input: {resources: Resource[]}, raw: boolean): string {
 export function register(program: Command): void {
     program
         .command('resources')
-        .description('List resource definitions')
+        .description('List resource definitions, or strata at a coordinate.')
+        .argument('[x]', 'optional x coordinate', parseInt64)
+        .argument('[y]', 'optional y coordinate', parseInt64)
         .option('--raw', 'emit raw JSON')
         .option('--json', 'emit JSON instead of formatted text')
-        .action(async (options: {raw?: boolean; json?: boolean}) => {
-            const result = (await server.readonly('getresources', {})) as unknown as {
-                resources: Resource[]
+        .addHelpText(
+            'after',
+            '\nWith no args: lists every resource definition.\n' +
+                'With <x> <y>: same as `strata <x> <y>` (use `strata` for filtering).'
+        )
+        .action(
+            async (
+                x: bigint | undefined,
+                y: bigint | undefined,
+                options: {raw?: boolean; json?: boolean}
+            ) => {
+                const asJson = Boolean(options.json) || Boolean(options.raw)
+                if ((x === undefined) !== (y === undefined)) {
+                    console.error('resources: provide both <x> and <y>, or neither')
+                    process.exitCode = 1
+                    return
+                }
+                if (x !== undefined && y !== undefined) {
+                    const view = await loadLocationStrata({x, y})
+                    console.log(renderStrata({...view, sort: 'available'}, asJson))
+                    return
+                }
+                const result = (await server.readonly('getresources', {})) as unknown as {
+                    resources: Resource[]
+                }
+                console.log(formatOutput(result, {json: asJson}, renderPretty))
             }
-            console.log(
-                formatOutput(
-                    result,
-                    {json: Boolean(options.json) || Boolean(options.raw)},
-                    renderPretty
-                )
-            )
-        })
+        )
 }
