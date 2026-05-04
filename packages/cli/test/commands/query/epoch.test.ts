@@ -11,6 +11,10 @@ test('epoch shows seed, started, and computed timing', () => {
             started,
             epochTimeSeconds: 446400,
             now,
+            contracts: [
+                {name: 'shipload.gm', lastCodeUpdate: new Date('2026-05-04T18:08:24Z')},
+                {name: 'platform.gm', lastCodeUpdate: new Date('2026-04-26T21:50:20Z')},
+            ],
         },
         false
     )
@@ -29,6 +33,7 @@ test('epoch --raw emits JSON', () => {
             started: new Date('2026-01-01T00:00:00Z'),
             epochTimeSeconds: 60,
             now: new Date('2026-01-01T00:00:30Z'),
+            contracts: [],
         },
         true
     )

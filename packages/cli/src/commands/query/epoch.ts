@@ -1,6 +1,12 @@
 import type {Command} from 'commander'
-import {getGameConfig, server} from '../../lib/client'
+import {client, getGameConfig, server} from '../../lib/client'
+import {loadConfig} from '../../lib/config'
 import {formatOutput, jsonStringify} from '../../lib/format'
+
+export interface ContractCodeView {
+    name: string
+    lastCodeUpdate: Date
+}
 
 export interface EpochView {
     seed: string
@@ -8,6 +14,7 @@ export interface EpochView {
     started: Date
     epochTimeSeconds: number
     now: Date
+    contracts: ContractCodeView[]
 }
 
 export interface EpochJsonData {
@@ -18,6 +25,7 @@ export interface EpochJsonData {
     elapsed_seconds: number
     remaining_seconds: number
     next_advance_at: string
+    contracts: {name: string; last_code_update: string}[]
 }
 
 function formatDuration(seconds: number): string {
@@ -46,6 +54,10 @@ function buildJsonData(view: EpochView): EpochJsonData {
         elapsed_seconds: elapsed,
         remaining_seconds: remaining,
         next_advance_at: nextAt.toISOString(),
+        contracts: view.contracts.map((c) => ({
+            name: c.name,
+            last_code_update: c.lastCodeUpdate.toISOString(),
+        })),
     }
 }
 
@@ -56,7 +68,7 @@ export function render(view: EpochView, raw: boolean): string {
         return jsonStringify(data)
     }
 
-    return [
+    const lines = [
         `Epoch:         ${data.epoch}`,
         `Seed:          ${data.seed}`,
         `Started at:    ${data.started}`,
@@ -64,7 +76,12 @@ export function render(view: EpochView, raw: boolean): string {
         `Elapsed:       ${formatDuration(data.elapsed_seconds)}`,
         `Remaining:     ${formatDuration(data.remaining_seconds)}`,
         `Next advance:  ${data.next_advance_at}`,
-    ].join('\n')
+    ]
+    const labelWidth = Math.max(15, ...data.contracts.map((c) => c.name.length + 7))
+    for (const c of data.contracts) {
+        lines.push(`${`${c.name} code:`.padEnd(labelWidth)}${c.last_code_update}`)
+    }
+    return lines.join('\n')
 }
 
 export function register(program: Command): void {
@@ -74,20 +91,33 @@ export function register(program: Command): void {
         .option('--raw', 'emit raw JSON')
         .option('--json', 'emit JSON instead of formatted text')
         .action(async (options: {raw?: boolean; json?: boolean}) => {
-            const state = (await server.table('state').get()) as unknown as {
-                seed: {toString(): string}
-                epoch: number | bigint
-            } | null
-            if (!state) throw new Error('Server state row not found')
-            const {epochTimeSeconds, gameStart} = await getGameConfig()
-            const epoch = Number(state.epoch)
+            const cfg = loadConfig()
+            const [stateRow, gameConfig, gameAccount, platformAccount] = await Promise.all([
+                server.table('state').get() as unknown as Promise<{
+                    seed: {toString(): string}
+                    epoch: number | bigint
+                } | null>,
+                getGameConfig(),
+                client.v1.chain.get_account(cfg.gameContract),
+                client.v1.chain.get_account(cfg.platformContract),
+            ])
+            if (!stateRow) throw new Error('Server state row not found')
+            const {epochTimeSeconds, gameStart} = gameConfig
+            const epoch = Number(stateRow.epoch)
             const started = new Date(gameStart.getTime() + (epoch - 1) * epochTimeSeconds * 1000)
             const view: EpochView = {
-                seed: String(state.seed),
+                seed: String(stateRow.seed),
                 epoch,
                 started,
                 epochTimeSeconds,
                 now: new Date(),
+                contracts: [
+                    {name: cfg.gameContract, lastCodeUpdate: gameAccount.last_code_update.toDate()},
+                    {
+                        name: cfg.platformContract,
+                        lastCodeUpdate: platformAccount.last_code_update.toDate(),
+                    },
+                ],
             }
             if (options.json) {
                 const data = buildJsonData(view)

@@ -20,6 +20,7 @@ export function renderDetail(s: any, stats: any, index: number): string {
         `  Item:     ${formatItem(itemId)}`,
         `  Reserve:  ${formatReserve(Number(s.reserve), Number(s.reserve_max))} units`,
         `  Richness: ${s.richness} / 1000`,
+        `  Required depth: ${index}`,
         `  Seed:     ${s.seed}`,
     ]
     if (stats) {

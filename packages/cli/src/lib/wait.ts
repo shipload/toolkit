@@ -26,7 +26,7 @@ export const TRACK_OPTION = new Option(
 
 export const AUTO_RESOLVE_OPTION = new Option(
 	"--auto-resolve",
-	"resolve completed tasks when done (overrides config)",
+	"resolve completed tasks when done (default: on with --wait/--track; pass --no-auto-resolve to disable)",
 );
 
 export const TIMEOUT_OPTION = new Option("--timeout <s>", "timeout in seconds").argParser(
@@ -103,7 +103,7 @@ export async function maybeAwaitAndPrint(
 	await awaitAndPrint(entityType, entityId, {
 		progress: !!options.track,
 		initialSnapshot,
-		autoResolve: options.autoResolve,
+		autoResolve: options.autoResolve ?? true,
 	});
 }
 

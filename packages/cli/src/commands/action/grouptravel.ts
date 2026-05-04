@@ -6,6 +6,7 @@ import {getShipload} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGroupTravel} from '../../lib/estimate'
+import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
 import {resolveGroupCompleted} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
@@ -53,24 +54,35 @@ export function register(program: Command): void {
         .addOption(WAIT_OPTION)
         .addOption(TRACK_OPTION)
         .addOption(AUTO_RESOLVE_OPTION)
+        .option('--force', 'submit despite failed feasibility checks (advanced)')
         .action(
             async (
                 entities: EntityRef[],
                 x: bigint,
                 y: bigint,
-                options: WaitableOptions & {recharge?: boolean; estimate?: boolean}
+                options: WaitableOptions & {
+                    recharge?: boolean
+                    estimate?: boolean
+                    force?: boolean
+                }
             ) => {
                 assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
+                const est = await withValidation(() =>
+                    estimateGroupTravel({
+                        entities,
+                        target: {x, y},
+                        recharge: Boolean(options.recharge),
+                    })
+                )
                 if (options.estimate) {
-                    const est = await withValidation(() =>
-                        estimateGroupTravel({
-                            entities,
-                            target: {x, y},
-                            recharge: Boolean(options.recharge),
-                        })
-                    )
-                    console.log(renderEstimate(est))
+                    const body = renderEstimate(est)
+                    const issues = est.feasibility.issues
+                    console.log(issues.length > 0 ? `${renderIssues(issues)}\n${body}` : body)
                     return
+                }
+                if (!est.feasibility.ok) {
+                    console.error(renderIssues(est.feasibility.issues))
+                    if (!options.force) process.exit(1)
                 }
                 const action = await buildAction({
                     entities,
@@ -99,7 +111,8 @@ export function register(program: Command): void {
                         console.log(renderEntityFull(snap as unknown as ServerTypes.entity_info))
                     }
                 }
-                if (options.autoResolve && shouldRender) {
+                const wantsAutoResolve = options.autoResolve ?? shouldRender
+                if (wantsAutoResolve && shouldRender) {
                     await resolveGroupCompleted(entities)
                 }
             }

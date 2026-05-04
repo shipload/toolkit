@@ -4,6 +4,7 @@ import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
+import {completedCount, getEntitySnapshot} from '../../lib/snapshot'
 
 export interface ResolveOpts {
     entityType: EntityTypeName
@@ -17,6 +18,11 @@ export async function buildAction(opts: ResolveOpts): Promise<Action> {
 }
 
 export async function runResolve(ctx: EntityContext, opts: {count?: bigint}): Promise<void> {
+    const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+    if (completedCount(snap) === 0) {
+        console.error(`No completed tasks to resolve for ${ctx.entityType}:${ctx.entityId}`)
+        return
+    }
     const action = await buildAction({
         entityType: ctx.entityType,
         entityId: ctx.entityId,

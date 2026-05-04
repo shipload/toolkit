@@ -31,6 +31,8 @@ export interface PlayerConfig {
 	indexerUrl?: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	gameContract: string;
+	platformContract: string;
 	track: TrackConfig;
 }
 
@@ -65,6 +67,8 @@ interface ParsedSection {
 	indexerUrl?: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	gameContract?: string;
+	platformContract?: string;
 	trackDefaultSort?: string;
 	trackDefaultTypeFilter?: string;
 	trackDefaultStatusFilter?: string;
@@ -86,6 +90,7 @@ function parseIniFile(path: string): ParsedSection {
 	const indexer = (parsed.indexer ?? {}) as Record<string, unknown>;
 	const chain = (parsed.chain ?? {}) as Record<string, unknown>;
 	const history = (parsed.history ?? {}) as Record<string, unknown>;
+	const contracts = (parsed.contracts ?? {}) as Record<string, unknown>;
 	const track = (parsed.track ?? {}) as Record<string, unknown>;
 	return {
 		privateKey: section.private_key as string | undefined,
@@ -95,6 +100,8 @@ function parseIniFile(path: string): ParsedSection {
 		indexerUrl: indexer.url as string | undefined,
 		chainUrl: chain.url as string | undefined,
 		historyUrl: history.url as string | undefined,
+		gameContract: contracts.game as string | undefined,
+		platformContract: contracts.platform as string | undefined,
 		trackDefaultSort: track.default_sort as string | undefined,
 		trackDefaultTypeFilter: track.default_type_filter as string | undefined,
 		trackDefaultStatusFilter: track.default_status_filter as string | undefined,
@@ -170,6 +177,8 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		indexerUrl: fileData.indexerUrl,
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
+		gameContract: fileData.gameContract ?? "shipload.gm",
+		platformContract: fileData.platformContract ?? "platform.gm",
 		track,
 		source,
 	};
