@@ -31,7 +31,6 @@ export type container_row = ServerContract.Types.container_row
 export type gatherer_stats = ServerContract.Types.gatherer_stats
 
 export type location_static = ServerContract.Types.location_static
-export type location_epoch = ServerContract.Types.location_epoch
 export type location_derived = ServerContract.Types.location_derived
 export type location_row = ServerContract.Types.location_row
 export {Player} from './entities/player'
@@ -73,7 +72,6 @@ export {
     getLocationTypeName,
     isGatherableLocation,
     deriveLocationStatic,
-    deriveLocationEpoch,
     deriveLocation,
 } from './utils/system'
 

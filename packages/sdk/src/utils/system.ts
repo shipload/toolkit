@@ -8,7 +8,6 @@ import nebulaAdjectives from '../data/nebula-adjectives.json'
 import nebulaNouns from '../data/nebula-nouns.json'
 
 const LOCATION_EXISTS_THRESHOLD = 0x10
-const LOCATION_ACTIVE_THRESHOLD = 0x80
 
 export function getLocationType(
     gameSeed: Checksum256Type,
@@ -151,31 +150,13 @@ export function deriveLocationStatic(
     return loc
 }
 
-export function deriveLocationEpoch(
-    epochSeed: Checksum256Type,
-    coordinates: CoordinatesType
-): ServerContract.Types.location_epoch {
-    const seed = Checksum256.from(epochSeed)
-    const coords = Coordinates.from(coordinates)
-    const str = `system-epoch-${coords.x}-${coords.y}`
-    const hashResult = hash512(seed, str)
-
-    return ServerContract.Types.location_epoch.from({
-        active: hashResult.array[0] < LOCATION_ACTIVE_THRESHOLD,
-        seed0: hashResult.array[1],
-        seed1: hashResult.array[2],
-    })
-}
-
 export function deriveLocation(
     gameSeed: Checksum256Type,
-    epochSeed: Checksum256Type,
     coordinates: CoordinatesType
 ): ServerContract.Types.location_derived {
     const staticProps = deriveLocationStatic(gameSeed, coordinates)
     return ServerContract.Types.location_derived.from({
         static_props: staticProps,
-        epoch_props: deriveLocationEpoch(epochSeed, coordinates),
         size: deriveLocationSize(staticProps),
     })
 }
