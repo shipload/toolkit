@@ -18,8 +18,11 @@ export interface EntityRow {
     key: EntityKey
     snap: EntitySnapshot
     remaining_s: number
+    totalRemaining_s: number
     completed: number
     isIdle: boolean
+    currentTaskType: number | null
+    pendingCount: number
 }
 
 function passesType(snap: EntitySnapshot, f: FleetViewState['typeFilter']): boolean {
@@ -83,12 +86,17 @@ export function deriveVisible(tick: FleetTick, state: FleetViewState): EntityRow
     const rows: EntityRow[] = []
     for (const [key, snap] of tick.snaps) {
         const remaining_s = tick.ticks.get(key)?.remaining_s ?? 0
+        const pending = snap.pending_tasks ?? []
+        const pendingDuration_s = pending.reduce((acc, t) => acc + Number(t.duration), 0)
         const row: EntityRow = {
             key,
             snap,
             remaining_s,
+            totalRemaining_s: remaining_s + pendingDuration_s,
             completed: completedCount(snap),
             isIdle: snap.is_idle,
+            currentTaskType: snap.current_task ? Number(snap.current_task.type) : null,
+            pendingCount: pending.length,
         }
         if (!passesType(snap, state.typeFilter)) continue
         if (!passesStatus(row, state.statusFilter)) continue

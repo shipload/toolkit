@@ -1,6 +1,6 @@
 import {Box, type CliRenderer, type KeyEvent, Text, type VChild} from '@opentui/core'
 import type {EntityTypeName} from '../../lib/args'
-import {formatDuration} from '../../lib/format'
+import {formatCargoUsage, formatDuration, formatTaskType} from '../../lib/format'
 import type {EntityKey} from '../../lib/snapshot'
 import type {FleetTick} from '../../lib/snapshot-fleet'
 import {type Hotkey, HotkeyRegistry} from '../hotkeys'
@@ -516,7 +516,7 @@ function layout(state: FleetState, owner: string, keys: HotkeyRegistry<Hotkey>):
 }
 
 function headerRow(): VChild {
-    const head = `  ${'TYPE'.padEnd(11)}${'ID'.padStart(4)}  ${'NAME'.padEnd(24)}${'STATUS'.padEnd(14)}ETA`
+    const head = `  ${'TYPE'.padEnd(11)}${'ID'.padStart(4)}  ${'NAME'.padEnd(24)}${'CARGO'.padEnd(20)}${'CURRENT'.padEnd(22)}QUEUE`
     return Text({content: head, fg: '#888888'})
 }
 
@@ -525,19 +525,38 @@ function rowLine(row: EntityRow, isCursor: boolean): VChild {
     const type = row.snap.type.padEnd(11)
     const id = String(row.snap.id).padStart(4)
     const name = (row.snap.entity_name ?? '').slice(0, 22).padEnd(24)
-    const status = statusLabel(row).padEnd(14)
-    const eta = row.isIdle ? '—' : formatDuration(Math.max(0, Math.ceil(row.remaining_s)))
+    const cargo = cargoCell(row.snap).padEnd(20)
+    const current = currentCell(row).padEnd(22)
+    const queue = queueCell(row)
     const fg = isCursor ? '#FFFF00' : undefined
     return Text({
-        content: `${prefix}${type}${id}  ${name}${status}${eta}`,
+        content: `${prefix}${type}${id}  ${name}${cargo}${current}${queue}`,
         fg,
     })
 }
 
-function statusLabel(row: EntityRow): string {
-    if (!row.isIdle) return 'busy'
+function cargoCell(snap: EntityRow['snap']): string {
+    const used = Number(snap.cargomass)
+    const cap = snap.capacity !== undefined ? Number(snap.capacity) : undefined
+    return formatCargoUsage(used, cap)
+}
+
+function currentCell(row: EntityRow): string {
+    if (!row.isIdle) {
+        const label = row.currentTaskType != null ? formatTaskType(row.currentTaskType) : 'busy'
+        const dur = formatDuration(Math.max(0, Math.ceil(row.remaining_s)))
+        return `${label} (${dur})`
+    }
     if (row.completed > 0) return `${row.completed} to resolve`
     return 'idle'
+}
+
+function queueCell(row: EntityRow): string {
+    if (row.pendingCount === 0) return ''
+    const word = row.pendingCount === 1 ? 'task' : 'tasks'
+    const pendingDuration = Math.max(0, row.totalRemaining_s - row.remaining_s)
+    const dur = formatDuration(Math.max(0, Math.ceil(pendingDuration)))
+    return `+${row.pendingCount} ${word} (${dur})`
 }
 
 function helpOverlay(keys: HotkeyRegistry<Hotkey>): VChild {
