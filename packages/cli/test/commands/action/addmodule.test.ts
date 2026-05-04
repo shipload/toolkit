@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {buildAction, preflightAgainstSnapshot} from '../../../src/commands/action/addmodule'
 import type {EntitySnapshot} from '../../../src/lib/snapshot'
+import {getLocalShipload} from '../../helpers/shipload'
 
 const ITEM_ENGINE_T1 = 10100 // ITEM_TYPE_MODULE — see game/contracts/server/include/server/items.hpp:81
 const ITEM_ORE_T1 = 101 // ITEM_TYPE_RESOURCE — see game/contracts/server/include/server/items.hpp:16
@@ -27,75 +28,86 @@ function snap(
 }
 
 describe('addmodule.buildAction', () => {
-    test('defaults target to 0', async () => {
-        const action = await buildAction({
-            entityType: 'ship',
-            entityId: 1n,
-            moduleIndex: 0,
-            moduleCargoId: 5n,
-            targetCargoId: 0n,
-        })
+    test('host-mode: target_ref defaults to null', async () => {
+        const action = await buildAction(
+            {
+                entityType: 'ship',
+                entityId: 1n,
+                moduleIndex: 0,
+                moduleItemId: BigInt(ITEM_ENGINE_T1),
+                moduleStats: 0n,
+            },
+            getLocalShipload()
+        )
         expect(action.name.toString()).toBe('addmodule')
     })
 
-    test('respects explicit target', async () => {
-        const action = await buildAction({
-            entityType: 'ship',
-            entityId: 1n,
-            moduleIndex: 0,
-            moduleCargoId: 5n,
-            targetCargoId: 42n,
-        })
+    test('packed-mode: target_ref present when target-* set', async () => {
+        const action = await buildAction(
+            {
+                entityType: 'ship',
+                entityId: 1n,
+                moduleIndex: 0,
+                moduleItemId: BigInt(ITEM_ENGINE_T1),
+                moduleStats: 0n,
+                targetItemId: 27n,
+                targetStats: 888888888n,
+                targetModules: [],
+            },
+            getLocalShipload()
+        )
         expect(action.name.toString()).toBe('addmodule')
     })
 })
 
 describe('addmodule.preflightAgainstSnapshot', () => {
-    test('passes when row id matches a module item in cargo', () => {
+    test('passes when (item-id, stats) matches a module item in cargo', () => {
         expect(() =>
             preflightAgainstSnapshot(snap([{id: 99n, item_id: ITEM_ENGINE_T1}]), {
                 entityType: 'ship',
                 entityId: 1n,
                 moduleIndex: 0,
-                moduleCargoId: 99n,
-                targetCargoId: 0n,
+                moduleItemId: BigInt(ITEM_ENGINE_T1),
+                moduleStats: 0n,
             })
         ).not.toThrow()
     })
 
-    test('throws when row id is not in cargo', () => {
+    test('throws when module item id is not in cargo', () => {
         expect(() =>
             preflightAgainstSnapshot(snap([]), {
                 entityType: 'ship',
                 entityId: 1n,
                 moduleIndex: 0,
-                moduleCargoId: 99n,
-                targetCargoId: 0n,
+                moduleItemId: BigInt(ITEM_ENGINE_T1),
+                moduleStats: 0n,
             })
-        ).toThrow(/cargo row 99/i)
+        ).toThrow(/no cargo with item/i)
     })
 
-    test('throws when the cargo row is not a module', () => {
+    test('throws when matched cargo is not a module', () => {
         expect(() =>
             preflightAgainstSnapshot(snap([{id: 12n, item_id: ITEM_ORE_T1}]), {
                 entityType: 'ship',
                 entityId: 1n,
                 moduleIndex: 0,
-                moduleCargoId: 12n,
-                targetCargoId: 0n,
+                moduleItemId: BigInt(ITEM_ORE_T1),
+                moduleStats: 0n,
             })
         ).toThrow(/not a module/i)
     })
 
-    test('throws when targetCargoId is non-zero and not in cargo', () => {
+    test('throws when target (item-id, stats) is not in cargo', () => {
         expect(() =>
             preflightAgainstSnapshot(snap([{id: 99n, item_id: ITEM_ENGINE_T1}]), {
                 entityType: 'ship',
                 entityId: 1n,
                 moduleIndex: 0,
-                moduleCargoId: 99n,
-                targetCargoId: 7n,
+                moduleItemId: BigInt(ITEM_ENGINE_T1),
+                moduleStats: 0n,
+                targetItemId: 27n,
+                targetStats: 888888888n,
             })
-        ).toThrow(/target cargo row 7/i)
+        ).toThrow(/no target cargo with item 27/i)
     })
 })

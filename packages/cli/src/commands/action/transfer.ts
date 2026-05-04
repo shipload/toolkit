@@ -1,5 +1,6 @@
+import {cargoItem, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
-import {Command} from 'commander'
+import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -14,24 +15,32 @@ export interface TransferOpts {
     itemId: bigint
     stackId: bigint
     quantity: bigint
+    modules?: unknown[]
 }
 
-export async function buildAction(opts: TransferOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.transfer(
+export async function buildAction(opts: TransferOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    const item = cargoItem(
+        {
+            item_id: Number(opts.itemId),
+            stats: opts.stackId,
+            modules: (opts.modules ?? []) as never,
+        },
+        opts.quantity
+    )
+    return sl.actions.transfer(
         Name.from(opts.sourceType),
         opts.sourceId,
         Name.from(opts.destType),
         opts.destId,
-        opts.itemId,
-        opts.stackId,
-        opts.quantity
+        [item]
     )
 }
 
 interface TransferCliOptions {
     wait?: boolean
     track?: boolean
+    modules?: string
 }
 
 export async function runTransfer(
@@ -43,6 +52,7 @@ export async function runTransfer(
     quantity: bigint,
     options: TransferCliOptions
 ): Promise<void> {
+    const modules = options.modules ? JSON.parse(options.modules) : []
     const action = await buildAction({
         sourceType: ctx.entityType,
         sourceId: ctx.entityId,
@@ -51,6 +61,7 @@ export async function runTransfer(
         itemId,
         stackId,
         quantity,
+        modules,
     })
     const result = await transact(
         {action},
@@ -70,13 +81,20 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Transfer cargo to another entity (same owner)')
             .addHelpText(
                 'before',
-                'Requires: source and destination entities owned by caller; source has the cargo; destination has capacity.\n'
+                'Requires: source and destination entities owned by caller; source has the cargo; destination has capacity.\n' +
+                    'Cargo is identified by (item-id, stack-id) — packed-entity stacks may also need --modules.\n'
             )
             .argument('<dest-type>', 'destination entity type', parseEntityType)
             .argument('<dest-id>', 'destination entity id', parseUint64)
             .argument('<item-id>', 'item id', parseUint64)
             .argument('<stack-id>', 'cargo stack id (often 0)', parseUint64)
             .argument('<quantity>', 'quantity', parseUint64)
+            .addOption(
+                new Option(
+                    '--modules <json>',
+                    'modules vector for packed entities (JSON array, default [])'
+                )
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(

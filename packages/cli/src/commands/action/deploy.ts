@@ -1,6 +1,6 @@
-import type {ServerTypes} from '@shipload/sdk'
+import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
-import {Command} from 'commander'
+import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {getShipload} from '../../lib/client'
@@ -18,15 +18,19 @@ export interface DeployOpts {
     entityId: bigint
     packedItemId: number
     stackId: bigint
+    modules?: unknown[]
 }
 
-export async function buildAction(opts: DeployOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.deploy(
+export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.deploy(
         Name.from(opts.entityType),
         opts.entityId,
-        opts.packedItemId,
-        opts.stackId
+        cargoRef({
+            item_id: opts.packedItemId,
+            stats: opts.stackId,
+            modules: (opts.modules ?? []) as never,
+        })
     )
 }
 
@@ -34,6 +38,7 @@ interface DeployCliOptions extends Record<string, unknown> {
     wait?: boolean
     track?: boolean
     estimate?: boolean
+    modules?: string
 }
 
 export async function runDeploy(
@@ -64,11 +69,13 @@ export async function runDeploy(
             [input],
             snap.cargo as unknown as ServerTypes.cargo_item[]
         )
+        const modules = options.modules ? JSON.parse(options.modules) : []
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             packedItemId: input.itemId,
             stackId: resolved.stackId,
+            modules,
         })
         const result = await transact(
             {action},
@@ -85,7 +92,11 @@ export const SUBCOMMAND: EntitySubcommand = {
     build: (ctx) =>
         new Command('deploy')
             .description('Deploy an entity from a packed cargo NFT')
-            .addHelpText('before', 'Requires: packed-entity NFT in cargo; deploy location valid.\n')
+            .addHelpText(
+                'before',
+                'Requires: packed-entity NFT in cargo; deploy location valid.\n' +
+                    'Pass --modules <json> if the packed entity carries modules.\n'
+            )
             .addHelpText(
                 'after',
                 `
@@ -101,6 +112,12 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 parseCargoInput
             )
             .option('--estimate', 'print cargo delta and validate inputs without submitting')
+            .addOption(
+                new Option(
+                    '--modules <json>',
+                    'modules vector for the packed entity (JSON array, default [])'
+                )
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(async (input: ParsedCargoInput, opts: DeployCliOptions) => {
