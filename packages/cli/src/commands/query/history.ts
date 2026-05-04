@@ -69,27 +69,28 @@ export async function runHistory(opts: HistoryOptions): Promise<void> {
         return
     }
 
-    const columns = (opts.verbose ?? false)
-        ? {
-              head: ['seq', 'time', 'entity', 'type', 'summary'],
-              colAligns: ['right', 'left', 'left', 'left', 'left'] as Array<'left' | 'right'>,
-              row: (e: EventRecord) => [
-                  String(e.seq),
-                  formatDateTimeUTC(new Date(e.block_time)),
-                  renderEntityCell(e),
-                  e.type,
-                  summarizeEvent(e),
-              ],
-          }
-        : {
-              head: ['time', 'entity', 'summary'],
-              colAligns: ['left', 'left', 'left'] as Array<'left' | 'right'>,
-              row: (e: EventRecord) => [
-                  formatDateTimeUTC(new Date(e.block_time)),
-                  renderEntityCell(e),
-                  summarizeEvent(e),
-              ],
-          }
+    const columns =
+        (opts.verbose ?? false)
+            ? {
+                  head: ['seq', 'time', 'entity', 'type', 'summary'],
+                  colAligns: ['right', 'left', 'left', 'left', 'left'] as Array<'left' | 'right'>,
+                  row: (e: EventRecord) => [
+                      String(e.seq),
+                      formatDateTimeUTC(new Date(e.block_time)),
+                      renderEntityCell(e),
+                      e.type,
+                      summarizeEvent(e),
+                  ],
+              }
+            : {
+                  head: ['time', 'entity', 'summary'],
+                  colAligns: ['left', 'left', 'left'] as Array<'left' | 'right'>,
+                  row: (e: EventRecord) => [
+                      formatDateTimeUTC(new Date(e.block_time)),
+                      renderEntityCell(e),
+                      summarizeEvent(e),
+                  ],
+              }
 
     const table = new Table({
         chars: {
