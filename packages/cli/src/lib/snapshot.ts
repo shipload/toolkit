@@ -159,7 +159,9 @@ export function completedTaskCount(snap: EntitySnapshot): number {
 	return snap.schedule?.tasks.length ?? 0;
 }
 
-export function completedCount(snap: EntitySnapshot): number {
+export function completedCount(
+	snap: Pick<EntitySnapshot, "is_idle" | "schedule" | "pending_tasks">,
+): number {
 	if (snap.is_idle) return snap.schedule?.tasks?.length ?? 0;
 	const all = snap.schedule?.tasks?.length ?? 0;
 	const pending = snap.pending_tasks?.length ?? 0;

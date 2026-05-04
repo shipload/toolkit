@@ -46,3 +46,32 @@ test('tasks renders idle when no schedule', () => {
     expect(out).toContain('ship 1')
     expect(out.toLowerCase()).toContain('no scheduled tasks')
 })
+
+test('busy entity past wall-clock schedule end keeps active task active', () => {
+    const busyShip = {
+        type: 'ship',
+        id: 1n,
+        owner: 'agent.gm',
+        entity_name: 'Starter',
+        coordinates: {x: 0n, y: 0n},
+        is_idle: false,
+        current_task: {type: 7, duration: 3120, cancelable: 0},
+        current_task_remaining: 8,
+        pending_tasks: [],
+    }
+    const started = new Date('2026-04-21T07:01:17Z')
+    const out = render({
+        entity: busyShip,
+        schedule: {
+            started,
+            tasks: [
+                {type: 2, duration: 51, cancelable: 0},
+                {type: 7, duration: 3120, cancelable: 0},
+            ],
+        },
+        pending: [],
+        now: new Date('2026-04-21T08:00:00Z'),
+    } as any)
+    expect(out).toMatch(/Recharge[^\n]*done/)
+    expect(out).toMatch(/Craft[^\n]*active/)
+})

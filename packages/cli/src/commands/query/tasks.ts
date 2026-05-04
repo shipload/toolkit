@@ -13,6 +13,7 @@ import {
     formatTimeUTC,
     reltime,
 } from '../../lib/format'
+import {completedCount} from '../../lib/snapshot'
 
 interface Task {
     type: number
@@ -65,15 +66,18 @@ export function render(view: TasksView): string {
         colAligns: ['left', 'left', 'left', 'left', 'left', 'left'],
     })
 
+    const totalTasks = view.schedule.tasks.length
+    const completed = completedCount({
+        is_idle: view.entity.is_idle,
+        schedule: {tasks: view.schedule.tasks},
+        pending_tasks: view.pending,
+    })
     let cursor = view.schedule.started.getTime()
-    let doneCount = 0
-    for (let i = 0; i < view.schedule.tasks.length; i++) {
+    for (let i = 0; i < totalTasks; i++) {
         const t = view.schedule.tasks[i]
-        const start = new Date(cursor)
         const end = new Date(cursor + t.duration * 1000)
         cursor = end.getTime()
-        const status = view.now >= end ? 'done' : view.now >= start ? 'active' : 'pending'
-        if (status === 'done') doneCount++
+        const status = i < completed ? 'done' : i === completed ? 'active' : 'pending'
         const endsLabel = reltime(end, view.now)
         table.push([
             String(i),
@@ -86,13 +90,13 @@ export function render(view: TasksView): string {
     }
 
     const out = [header, '', table.toString()]
-    if (doneCount > 0) {
+    if (completed > 0) {
         out.push(
             '',
             formatResolveHint(
                 String(view.entity.type),
                 BigInt(view.entity.id.toString()),
-                doneCount
+                completed
             )
         )
     }
