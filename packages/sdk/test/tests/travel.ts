@@ -462,6 +462,13 @@ describe('travel', () => {
             assert.equal(duration, 0)
         })
 
+        test('floors duration when source and dest share orbital altitude', () => {
+            const source = {location: {z: 800}, loaders: {thrust: 1, mass: 1450, quantity: 1}}
+            const dest = {location: {z: 800}, loaders: {thrust: 1, mass: 1450, quantity: 1}}
+            const duration = calc_transfer_duration(source, dest, 52000)
+            assert.isAbove(duration, 0)
+        })
+
         test('calculates duration based on z-distance', () => {
             const source = {location: {z: 1000}, loaders: {thrust: 100, mass: 5000, quantity: 1}}
             const dest = {location: {z: 1500}, loaders: {thrust: 100, mass: 5000, quantity: 1}}

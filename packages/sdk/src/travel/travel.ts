@@ -28,6 +28,7 @@ import {
     type Distance,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
+    MIN_TRANSFER_DISTANCE,
     PRECISION,
     type ShipLike,
     TaskType,
@@ -547,7 +548,8 @@ export function calc_transfer_duration(
             : (source.location.z?.toNumber() ?? 0)
     const destZ =
         typeof dest.location.z === 'number' ? dest.location.z : (dest.location.z?.toNumber() ?? 0)
-    const distance = Math.abs(sourceZ - destZ)
+    const rawDistance = Math.abs(sourceZ - destZ)
+    const distance = rawDistance < MIN_TRANSFER_DISTANCE ? MIN_TRANSFER_DISTANCE : rawDistance
 
     const totalMass = cargoMass + totalLoaderMass
     const acceleration = calc_acceleration(totalThrust, totalMass)
