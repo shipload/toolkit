@@ -7,18 +7,12 @@ import {Int64, UInt64} from '@wharfkit/antelope'
 import {EntityType} from 'src/types'
 
 const client = makeClient('https://jungle4.greymass.com')
-const platformContractName = 'platform.gm'
-const serverContractName = 'shipload.gm'
 
 describe('ActionsManager', () => {
     let shipload: Shipload
 
-    beforeEach(async () => {
-        shipload = await Shipload.load(Chains.Jungle4, {
-            client,
-            platformContractName,
-            serverContractName,
-        })
+    beforeEach(() => {
+        shipload = new Shipload(Chains.Jungle4, {client})
     })
 
     describe('travel', () => {
@@ -77,8 +71,83 @@ describe('ActionsManager', () => {
 
     describe('wrap', () => {
         test('creates wrap action', () => {
-            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, 7, 5)
+            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, [
+                {item_id: 7, stats: 0n, modules: [], quantity: 5},
+            ])
             assert.equal(action.name.toString(), 'wrap')
+            assert.isDefined(action.data)
+        })
+    })
+
+    describe('transfer', () => {
+        test('creates transfer action with single item', () => {
+            const action = shipload.actions.transfer(EntityType.SHIP, 1, EntityType.WAREHOUSE, 2, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+            ])
+            assert.equal(action.name.toString(), 'transfer')
+            assert.isDefined(action.data)
+        })
+
+        test('creates transfer action with multiple items', () => {
+            const action = shipload.actions.transfer(EntityType.SHIP, 1, EntityType.WAREHOUSE, 2, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+                {item_id: 201, stats: 1n, modules: [], quantity: 5},
+            ])
+            assert.equal(action.name.toString(), 'transfer')
+            assert.isDefined(action.data)
+        })
+    })
+
+    describe('deploy', () => {
+        test('creates deploy action with cargo_ref', () => {
+            const action = shipload.actions.deploy(EntityType.SHIP, 42, {
+                item_id: 1001,
+                stats: 12345n,
+                modules: [],
+            })
+            assert.equal(action.name.toString(), 'deploy')
+            assert.isDefined(action.data)
+        })
+    })
+
+    describe('addmodule', () => {
+        test('creates addmodule action without target', () => {
+            const action = shipload.actions.addmodule(EntityType.SHIP, 42, 0, {
+                item_id: 2001,
+                stats: 0n,
+                modules: [],
+            })
+            assert.equal(action.name.toString(), 'addmodule')
+            assert.isDefined(action.data)
+        })
+
+        test('creates addmodule action with target_ref', () => {
+            const action = shipload.actions.addmodule(
+                EntityType.SHIP,
+                42,
+                0,
+                {item_id: 2001, stats: 0n, modules: []},
+                {item_id: 1001, stats: 12345n, modules: []}
+            )
+            assert.equal(action.name.toString(), 'addmodule')
+            assert.isDefined(action.data)
+        })
+    })
+
+    describe('rmmodule', () => {
+        test('creates rmmodule action without target', () => {
+            const action = shipload.actions.rmmodule(EntityType.SHIP, 42, 0)
+            assert.equal(action.name.toString(), 'rmmodule')
+            assert.isDefined(action.data)
+        })
+
+        test('creates rmmodule action with target_ref', () => {
+            const action = shipload.actions.rmmodule(EntityType.SHIP, 42, 0, {
+                item_id: 1001,
+                stats: 12345n,
+                modules: [],
+            })
+            assert.equal(action.name.toString(), 'rmmodule')
             assert.isDefined(action.data)
         })
     })

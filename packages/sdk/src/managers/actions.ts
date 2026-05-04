@@ -90,18 +90,15 @@ export class ActionsManager extends BaseManager {
         sourceId: UInt64Type,
         destType: EntityTypeName,
         destId: UInt64Type,
-        itemId: UInt64Type,
-        stats: UInt64Type,
-        quantity: UInt64Type
+        items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
+        const cargoItems = items.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('transfer', {
             source_type: sourceType,
             source_id: UInt64.from(sourceId),
             dest_type: destType,
             dest_id: UInt64.from(destId),
-            item_id: UInt16.from(itemId),
-            stats: UInt64.from(stats),
-            quantity: UInt32.from(quantity),
+            items: cargoItems,
         })
     }
 
@@ -187,14 +184,12 @@ export class ActionsManager extends BaseManager {
     deploy(
         entityType: EntityTypeName,
         entityId: UInt64Type,
-        packedItemId: number,
-        stats: bigint
+        ref: ServerContract.ActionParams.Type.cargo_ref
     ): Action {
         return this.server.action('deploy', {
             entity_type: entityType,
             id: UInt64.from(entityId),
-            packed_item_id: UInt16.from(packedItemId),
-            stats: UInt64.from(stats),
+            ref: ServerContract.Types.cargo_ref.from(ref),
         })
     }
 
@@ -202,15 +197,15 @@ export class ActionsManager extends BaseManager {
         entityType: EntityTypeName,
         entityId: UInt64Type,
         moduleIndex: number,
-        moduleCargoId: UInt64Type,
-        targetCargoId: UInt64Type = UInt64.from(0)
+        moduleRef: ServerContract.ActionParams.Type.cargo_ref,
+        targetRef: ServerContract.ActionParams.Type.cargo_ref | null = null
     ): Action {
         return this.server.action('addmodule', {
             entity_type: entityType,
             entity_id: UInt64.from(entityId),
             module_index: moduleIndex,
-            module_cargo_id: UInt64.from(moduleCargoId),
-            target_cargo_id: UInt64.from(targetCargoId),
+            module_ref: ServerContract.Types.cargo_ref.from(moduleRef),
+            target_ref: targetRef ? ServerContract.Types.cargo_ref.from(targetRef) : null,
         })
     }
 
@@ -218,13 +213,13 @@ export class ActionsManager extends BaseManager {
         entityType: EntityTypeName,
         entityId: UInt64Type,
         moduleIndex: number,
-        targetCargoId: UInt64Type = UInt64.from(0)
+        targetRef: ServerContract.ActionParams.Type.cargo_ref | null = null
     ): Action {
         return this.server.action('rmmodule', {
             entity_type: entityType,
             entity_id: UInt64.from(entityId),
             module_index: moduleIndex,
-            target_cargo_id: UInt64.from(targetCargoId),
+            target_ref: targetRef ? ServerContract.Types.cargo_ref.from(targetRef) : null,
         })
     }
 
@@ -232,15 +227,14 @@ export class ActionsManager extends BaseManager {
         owner: NameType,
         entityType: EntityTypeName,
         entityId: UInt64Type,
-        cargoId: UInt64Type,
-        quantity: UInt64Type
+        items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
+        const cargoItems = items.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('wrap', {
             owner: Name.from(owner),
             entity_type: entityType,
             entity_id: UInt64.from(entityId),
-            cargo_id: UInt64.from(cargoId),
-            quantity: UInt64.from(quantity),
+            items: cargoItems,
         })
     }
 

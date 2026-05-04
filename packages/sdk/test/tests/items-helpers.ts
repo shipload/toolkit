@@ -160,5 +160,4 @@ describe('item helpers', () => {
             assert.equal(categoryLabelFromIndex(99), 'category 99')
         })
     })
-
 })
