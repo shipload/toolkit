@@ -2,6 +2,7 @@ import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
+import {parseModulesJson} from '../../lib/cargo-build'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -18,7 +19,7 @@ export interface DeployOpts {
     entityId: bigint
     packedItemId: number
     stackId: bigint
-    modules?: unknown[]
+    modules?: ServerTypes.module_entry[]
 }
 
 export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promise<Action> {
@@ -29,7 +30,7 @@ export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promis
         cargoRef({
             item_id: opts.packedItemId,
             stats: opts.stackId,
-            modules: (opts.modules ?? []) as never,
+            modules: opts.modules ?? [],
         })
     )
 }
@@ -69,13 +70,12 @@ export async function runDeploy(
             [input],
             snap.cargo as unknown as ServerTypes.cargo_item[]
         )
-        const modules = options.modules ? JSON.parse(options.modules) : []
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             packedItemId: input.itemId,
             stackId: resolved.stackId,
-            modules,
+            modules: parseModulesJson(options.modules),
         })
         const result = await transact(
             {action},

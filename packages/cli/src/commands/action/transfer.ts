@@ -1,7 +1,8 @@
-import {cargoItem, type Shipload} from '@shipload/sdk'
+import {cargoItem, type ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
+import {parseModulesJson} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
@@ -15,7 +16,7 @@ export interface TransferOpts {
     itemId: bigint
     stackId: bigint
     quantity: bigint
-    modules?: unknown[]
+    modules?: ServerTypes.module_entry[]
 }
 
 export async function buildAction(opts: TransferOpts, shipload?: Shipload): Promise<Action> {
@@ -24,7 +25,7 @@ export async function buildAction(opts: TransferOpts, shipload?: Shipload): Prom
         {
             item_id: Number(opts.itemId),
             stats: opts.stackId,
-            modules: (opts.modules ?? []) as never,
+            modules: opts.modules ?? [],
         },
         opts.quantity
     )
@@ -52,7 +53,6 @@ export async function runTransfer(
     quantity: bigint,
     options: TransferCliOptions
 ): Promise<void> {
-    const modules = options.modules ? JSON.parse(options.modules) : []
     const action = await buildAction({
         sourceType: ctx.entityType,
         sourceId: ctx.entityId,
@@ -61,7 +61,7 @@ export async function runTransfer(
         itemId,
         stackId,
         quantity,
-        modules,
+        modules: parseModulesJson(options.modules),
     })
     const result = await transact(
         {action},

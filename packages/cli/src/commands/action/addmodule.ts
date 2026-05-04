@@ -1,7 +1,15 @@
-import {cargoRef, getItem, type Item, resolveItem, type Shipload} from '@shipload/sdk'
+import {
+    cargoRef,
+    getItem,
+    type Item,
+    resolveItem,
+    type ServerTypes,
+    type Shipload,
+} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseUint32, parseUint64} from '../../lib/args'
+import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -16,22 +24,24 @@ export interface AddModuleOpts {
     moduleIndex: number
     moduleItemId: bigint
     moduleStats: bigint
-    moduleModules?: unknown[]
+    moduleModules?: ServerTypes.module_entry[]
     targetItemId?: bigint
     targetStats?: bigint
-    targetModules?: unknown[]
+    targetModules?: ServerTypes.module_entry[]
+}
+
+function findCargoEntry(cargo: EntitySnapshot['cargo'], itemId: number, stats: bigint): unknown {
+    return (cargo ?? []).find(
+        (c) =>
+            Number((c.item_id as {toString(): string}).toString()) === itemId &&
+            BigInt((c.stats ?? 0n).toString()) === stats
+    )
 }
 
 export function preflightAgainstSnapshot(snap: EntitySnapshot, opts: AddModuleOpts): void {
-    const cargo = snap.cargo ?? []
     const moduleItemId = Number(opts.moduleItemId)
     const moduleStats = opts.moduleStats
-    const matchingModule = cargo.find(
-        (c) =>
-            Number((c.item_id as {toString(): string}).toString()) === moduleItemId &&
-            BigInt((c.stats ?? 0n).toString()) === moduleStats
-    )
-    if (!matchingModule) {
+    if (!findCargoEntry(snap.cargo, moduleItemId, moduleStats)) {
         throw new ValidationError(
             `No cargo with item ${moduleItemId} stats ${moduleStats} on ${opts.entityType} ${opts.entityId}.`,
             'Run `<entity> <id> inventory` to see available cargo.'
@@ -52,12 +62,7 @@ export function preflightAgainstSnapshot(snap: EntitySnapshot, opts: AddModuleOp
     if (opts.targetItemId !== undefined) {
         const targetItemId = Number(opts.targetItemId)
         const targetStats = opts.targetStats!
-        const matchingTarget = cargo.find(
-            (c) =>
-                Number((c.item_id as {toString(): string}).toString()) === targetItemId &&
-                BigInt((c.stats ?? 0n).toString()) === targetStats
-        )
-        if (!matchingTarget) {
+        if (!findCargoEntry(snap.cargo, targetItemId, targetStats)) {
             throw new ValidationError(
                 `No target cargo with item ${targetItemId} stats ${targetStats} on ${opts.entityType} ${opts.entityId}.`
             )
@@ -75,14 +80,14 @@ export async function buildAction(opts: AddModuleOpts, shipload?: Shipload): Pro
     const moduleRef = cargoRef({
         item_id: Number(opts.moduleItemId),
         stats: opts.moduleStats,
-        modules: (opts.moduleModules ?? []) as never,
+        modules: opts.moduleModules ?? [],
     })
     const targetRef =
         opts.targetItemId !== undefined
             ? cargoRef({
                   item_id: Number(opts.targetItemId),
                   stats: opts.targetStats!,
-                  modules: (opts.targetModules ?? []) as never,
+                  modules: opts.targetModules ?? [],
               })
             : null
     return sl.actions.addmodule(
@@ -102,21 +107,6 @@ interface AddModuleCliOptions {
     autoResolve?: boolean
 }
 
-function validateTargetTriple(opts: AddModuleCliOptions): void {
-    const present = [
-        opts.targetItemId !== undefined,
-        opts.targetStats !== undefined,
-        opts.targetModules !== undefined,
-    ]
-    const someButNotAll =
-        present.some((p) => p) && !(opts.targetItemId !== undefined && opts.targetStats !== undefined)
-    if (someButNotAll) {
-        throw new ValidationError(
-            '--target-item-id and --target-stats must be provided together (--target-modules is optional, defaults to []).'
-        )
-    }
-}
-
 export async function runAddModule(
     ctx: EntityContext,
     moduleIndex: number,
@@ -124,23 +114,22 @@ export async function runAddModule(
     moduleStats: bigint,
     options: AddModuleCliOptions
 ): Promise<void> {
-    await withValidation(async () => {
-        validateTargetTriple(options)
-    })
-    const moduleModules = options.modules ? JSON.parse(options.modules) : []
-    const targetModules = options.targetModules ? JSON.parse(options.targetModules) : []
     const addOpts: AddModuleOpts = {
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         moduleIndex,
         moduleItemId,
         moduleStats,
-        moduleModules,
+        moduleModules: parseModulesJson(options.modules),
         targetItemId: options.targetItemId,
         targetStats: options.targetStats,
-        targetModules: options.targetItemId !== undefined ? targetModules : undefined,
+        targetModules:
+            options.targetItemId !== undefined
+                ? parseModulesJson(options.targetModules)
+                : undefined,
     }
     await withValidation(async () => {
+        validateTargetTriple(options)
         await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
         await preflightAddModule(addOpts)
     })

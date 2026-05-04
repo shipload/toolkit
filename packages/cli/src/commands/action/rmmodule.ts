@@ -1,13 +1,13 @@
-import {cargoRef, type Shipload} from '@shipload/sdk'
+import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseUint32, parseUint64} from '../../lib/args'
+import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {checkResolveEntity} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
-import {ValidationError} from '../../lib/validate'
 
 export interface RmModuleOpts {
     entityType: EntityTypeName
@@ -15,7 +15,7 @@ export interface RmModuleOpts {
     moduleIndex: number
     targetItemId?: bigint
     targetStats?: bigint
-    targetModules?: unknown[]
+    targetModules?: ServerTypes.module_entry[]
 }
 
 export async function buildAction(opts: RmModuleOpts, shipload?: Shipload): Promise<Action> {
@@ -25,7 +25,7 @@ export async function buildAction(opts: RmModuleOpts, shipload?: Shipload): Prom
             ? cargoRef({
                   item_id: Number(opts.targetItemId),
                   stats: opts.targetStats!,
-                  modules: (opts.targetModules ?? []) as never,
+                  modules: opts.targetModules ?? [],
               })
             : null
     return sl.actions.rmmodule(
@@ -43,38 +43,25 @@ interface RmModuleCliOptions {
     autoResolve?: boolean
 }
 
-function validateTargetTriple(opts: RmModuleCliOptions): void {
-    const present = [
-        opts.targetItemId !== undefined,
-        opts.targetStats !== undefined,
-        opts.targetModules !== undefined,
-    ]
-    const someButNotAll =
-        present.some((p) => p) && !(opts.targetItemId !== undefined && opts.targetStats !== undefined)
-    if (someButNotAll) {
-        throw new ValidationError(
-            '--target-item-id and --target-stats must be provided together (--target-modules is optional, defaults to []).'
-        )
-    }
-}
-
 export async function runRmModule(
     ctx: EntityContext,
     moduleIndex: number,
     options: RmModuleCliOptions
 ): Promise<void> {
-    await withValidation(() => {
+    await withValidation(async () => {
         validateTargetTriple(options)
-        return checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
+        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
     })
-    const targetModules = options.targetModules ? JSON.parse(options.targetModules) : []
     const action = await buildAction({
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         moduleIndex,
         targetItemId: options.targetItemId,
         targetStats: options.targetStats,
-        targetModules: options.targetItemId !== undefined ? targetModules : undefined,
+        targetModules:
+            options.targetItemId !== undefined
+                ? parseModulesJson(options.targetModules)
+                : undefined,
     })
     await transact(
         {action},
