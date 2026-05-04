@@ -1,6 +1,7 @@
 import type {Command} from 'commander'
 import * as actions from './actions'
 import * as code from './code'
+import * as drainSchedules from './drain-schedules'
 import * as entity from './entity'
 import * as setcodes from './setcodes'
 import * as trace from './trace'
@@ -18,4 +19,5 @@ export function register(program: Command): void {
     trace.registerSubcommand(debug)
     wasmImports.registerSubcommand(debug)
     wasmGrep.registerSubcommand(debug)
+    drainSchedules.registerSubcommand(debug)
 }
