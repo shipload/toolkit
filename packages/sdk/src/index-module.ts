@@ -319,6 +319,8 @@ export {
     computeLoaderThrust,
     computeCrafterSpeed,
     computeCrafterDrain,
+    computeHaulerCapacity,
+    computeHaulerEfficiency,
     computeWarpRange,
 } from './nft/description'
 

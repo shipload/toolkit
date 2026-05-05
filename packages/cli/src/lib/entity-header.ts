@@ -1,7 +1,34 @@
 import {
+	computeCrafterDrain,
+	computeCrafterSpeed,
+	computeEngineDrain,
+	computeEngineThrust,
+	computeGathererDepth,
+	computeGathererDrain,
+	computeGathererSpeed,
+	computeGathererYield,
+	computeGeneratorCap,
+	computeGeneratorRech,
+	computeHaulerCapacity,
+	computeHaulerEfficiency,
+	computeLoaderMass,
+	computeLoaderThrust,
+	computeWarpRange,
+	decodeStat,
 	displayName,
 	formatMass,
+	getItem,
 	getModuleCapabilityType,
+	MODULE_ANY,
+	MODULE_CRAFTER,
+	MODULE_ENGINE,
+	MODULE_GATHERER,
+	MODULE_GENERATOR,
+	MODULE_HAULER,
+	MODULE_LAUNCHER,
+	MODULE_LOADER,
+	MODULE_STORAGE,
+	MODULE_WARP,
 	type ProjectableSnapshot,
 	type ProjectedEntity,
 	projectFromCurrentState,
@@ -80,77 +107,114 @@ function entityEnergyValue(
 	return `${stored}/${capacity} (recharge: ${recharge}/s)`;
 }
 
-function resolvedModuleNames(
-	modules: ServerTypes.entity_info["modules"],
-): Map<number, string> {
-	const map = new Map<number, string>();
-	for (const m of modules ?? []) {
-		if (!m.installed) continue;
-		const itemId = Number(m.installed.item_id);
-		try {
-			const capType = getModuleCapabilityType(itemId);
-			map.set(capType, displayName(resolveItem(itemId)));
-		} catch {}
+function slotTypeLabel(t: number): string {
+	switch (t) {
+		case MODULE_ANY:
+			return "Any";
+		case MODULE_ENGINE:
+			return "Engine";
+		case MODULE_GENERATOR:
+			return "Generator";
+		case MODULE_GATHERER:
+			return "Gatherer";
+		case MODULE_LOADER:
+			return "Loader";
+		case MODULE_WARP:
+			return "Warp";
+		case MODULE_CRAFTER:
+			return "Crafter";
+		case MODULE_LAUNCHER:
+			return "Launcher";
+		case MODULE_STORAGE:
+			return "Storage";
+		case MODULE_HAULER:
+			return "Hauler";
+		default:
+			return `?${t}`;
 	}
-	return map;
+}
+
+function moduleNameWithTier(itemId: number): string {
+	try {
+		const item = getItem(itemId);
+		const name = displayName(resolveItem(itemId));
+		return `${name} T${item.tier}`;
+	} catch {
+		return `item ${itemId}`;
+	}
+}
+
+function formatModuleStatLine(itemId: number, stats: bigint): string {
+	const capType = getModuleCapabilityType(itemId);
+	switch (capType) {
+		case MODULE_ENGINE: {
+			const vol = decodeStat(stats, 0);
+			const thm = decodeStat(stats, 1);
+			return `thrust ${computeEngineThrust(vol)} · ${computeEngineDrain(thm)} energy/step`;
+		}
+		case MODULE_GENERATOR: {
+			const com = decodeStat(stats, 0);
+			const fin = decodeStat(stats, 1);
+			return `capacity ${computeGeneratorCap(com)} · recharge ${computeGeneratorRech(fin)}/s`;
+		}
+		case MODULE_GATHERER: {
+			const str = decodeStat(stats, 0);
+			const tol = decodeStat(stats, 1);
+			const con = decodeStat(stats, 3);
+			const ref = decodeStat(stats, 4);
+			const tier = getItem(itemId).tier;
+			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · speed ${computeGathererSpeed(ref)} · ${computeGathererDrain(con)} energy/s`;
+		}
+		case MODULE_LOADER: {
+			const ins = decodeStat(stats, 0);
+			const pla = decodeStat(stats, 1);
+			return `${formatMass(computeLoaderMass(ins))} each · thrust ${computeLoaderThrust(pla)}`;
+		}
+		case MODULE_CRAFTER: {
+			const rea = decodeStat(stats, 0);
+			const fin = decodeStat(stats, 1);
+			return `speed ${computeCrafterSpeed(rea)} · ${computeCrafterDrain(fin)} energy/craft`;
+		}
+		case MODULE_HAULER: {
+			const fin = decodeStat(stats, 0);
+			const con = decodeStat(stats, 1);
+			const com = decodeStat(stats, 2);
+			const drain = Math.max(3, 15 - Math.floor(com / 80));
+			return `capacity ${computeHaulerCapacity(fin)} · efficiency ${computeHaulerEfficiency(con)} · ${drain} energy/load`;
+		}
+		case MODULE_WARP: {
+			const res = decodeStat(stats, 0);
+			return `range ${computeWarpRange(res)}`;
+		}
+		case MODULE_STORAGE: {
+			const str = decodeStat(stats, 0);
+			const fin = decodeStat(stats, 2);
+			const sat = decodeStat(stats, 3);
+			const sum = str + fin + sat;
+			const pct = 10 + Math.floor((sum * 10) / 2997);
+			return `+${pct}% capacity`;
+		}
+		default:
+			return "";
+	}
 }
 
 function buildModuleRows(
 	entity: ServerTypes.entity_info,
-	isShip: boolean,
 ): [string, string][] {
-	const modNames = resolvedModuleNames(entity.modules);
-	const rows: [string, string][] = [];
-	const notInstalled = "— (not installed)";
-
-	if (entity.engines) {
-		rows.push([
-			`${modNames.get(1) ?? "Engine"}:`,
-			`thrust ${entity.engines.thrust} · ${entity.engines.drain} energy/step`,
-		]);
-	}
-	if (entity.generator) {
-		rows.push([
-			`${modNames.get(2) ?? "Generator"}:`,
-			`capacity ${entity.generator.capacity} · recharge ${entity.generator.recharge}/s`,
-		]);
-	}
-	if (entity.gatherer) {
-		rows.push([
-			`${modNames.get(3) ?? "Gatherer"}:`,
-			`depth ${entity.gatherer.depth} · yield ${entity.gatherer.yield} · speed ${entity.gatherer.speed} · ${entity.gatherer.drain} energy/s`,
-		]);
-	} else if (isShip) {
-		rows.push(["Gatherer:", notInstalled]);
-	}
-	if (entity.hauler) {
-		rows.push([
-			`${modNames.get(9) ?? "Hauler"}:`,
-			`capacity ${entity.hauler.capacity} · efficiency ${entity.hauler.efficiency} · ${entity.hauler.drain} energy/load`,
-		]);
-	} else if (isShip) {
-		rows.push(["Hauler:", notInstalled]);
-	}
-	if (entity.crafter) {
-		rows.push([
-			`${modNames.get(6) ?? "Crafter"}:`,
-			`speed ${entity.crafter.speed} · ${entity.crafter.drain} energy/craft`,
-		]);
-	} else if (isShip) {
-		rows.push(["Crafter:", notInstalled]);
-	}
-	if (entity.warp) {
-		rows.push([`${modNames.get(5) ?? "Warp"}:`, `range ${entity.warp.range}`]);
-	} else if (isShip) {
-		rows.push(["Warp:", notInstalled]);
-	}
-	if (entity.loaders) {
-		rows.push([
-			`${modNames.get(4) ?? "Loader"}:`,
-			`${entity.loaders.quantity}× · ${formatMass(Number(entity.loaders.mass))} each · thrust ${entity.loaders.thrust}`,
-		]);
-	}
-	return rows;
+	const slots = entity.modules ?? [];
+	if (slots.length === 0) return [];
+	return slots.map((m, idx): [string, string] => {
+		const slotType = Number(m.type);
+		const label = `#${idx} (${slotTypeLabel(slotType)}):`;
+		if (!m.installed) return [label, "(empty)"];
+		const itemId = Number(m.installed.item_id);
+		const stats = BigInt(m.installed.stats.toString());
+		const name = moduleNameWithTier(itemId);
+		const statLine = formatModuleStatLine(itemId, stats);
+		const value = statLine ? `${name} — ${statLine}` : name;
+		return [label, value];
+	});
 }
 
 function entitySpecsRows(
@@ -163,9 +227,13 @@ function entitySpecsRows(
 	}
 	const energyValue = entityEnergyValue(entity, ctx);
 	if (energyValue) rows.push(["Energy:", energyValue]);
-	const isShip = String(entity.type) === "ship";
-	rows.push(...buildModuleRows(entity, isShip));
 	return rows;
+}
+
+function entityModulesSection(entity: ServerTypes.entity_info): string | null {
+	const rows = buildModuleRows(entity);
+	if (rows.length === 0) return null;
+	return ["  Modules:", kvTable(rows, { indent: "    " })].join("\n");
 }
 
 function entityCargoSection(
@@ -281,6 +349,9 @@ export function renderEntityFull(
 
 	const specs = entitySpecsRows(entity, ctx);
 	if (specs.length > 0) sections.push(kvTable(specs));
+
+	const modulesSection = entityModulesSection(entity);
+	if (modulesSection) sections.push(modulesSection);
 
 	const cargoSection = entityCargoSection(entity, ctx);
 	if (cargoSection) sections.push(cargoSection);

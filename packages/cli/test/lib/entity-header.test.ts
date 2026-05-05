@@ -26,26 +26,32 @@ const idleShip = {
 } as any;
 
 describe("renderEntityFull modules", () => {
-	test("renders gatherer with full values when installed", () => {
+	test("renders installed module with slot index, accepted type, name, and stats", () => {
 		const out = renderEntityFull({
 			...idleShip,
-			gatherer: { depth: 100, yield: 700, drain: 25, speed: 500 },
+			modules: [
+				{ type: 0, installed: { item_id: 10102, stats: 0n } },
+			],
 		});
-		expect(out).toMatch(/Gatherer:\s+depth 100 · yield 700 · speed 500 · 25 energy\/s/);
+		expect(out).toMatch(/Modules:/);
+		expect(out).toMatch(/#0 \(Any\):\s+Gatherer T1 — depth \d+ · yield \d+ · speed \d+ · \d+ energy\/s/);
 	});
 
-	test("renders zero-valued slot to distinguish from absent", () => {
-		const out = renderEntityFull({ ...idleShip, warp: { range: 0 } });
-		expect(out).toMatch(/Warp:\s+range 0/);
-		expect(out).not.toMatch(/Warp:\s+— \(not installed\)/);
+	test("renders empty slot with its accepted type", () => {
+		const out = renderEntityFull({
+			...idleShip,
+			modules: [
+				{ type: 4, installed: null },
+				{ type: 8, installed: null },
+			],
+		});
+		expect(out).toMatch(/#0 \(Loader\):\s+\(empty\)/);
+		expect(out).toMatch(/#1 \(Storage\):\s+\(empty\)/);
 	});
 
-	test("renders absent slots as — (not installed)", () => {
+	test("omits Modules section when entity has no slots", () => {
 		const out = renderEntityFull({ ...idleShip });
-		expect(out).toMatch(/Gatherer:\s+— \(not installed\)/);
-		expect(out).toMatch(/Hauler:\s+— \(not installed\)/);
-		expect(out).toMatch(/Warp:\s+— \(not installed\)/);
-		expect(out).toMatch(/Crafter:\s+— \(not installed\)/);
+		expect(out).not.toMatch(/Modules:/);
 	});
 
 	test("skips completed tasks lingering in schedule (avoids double-apply crash)", () => {
