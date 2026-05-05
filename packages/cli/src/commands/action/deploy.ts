@@ -1,10 +1,20 @@
-import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
+import {
+    cargoRef,
+    EntityClass,
+    getEntityClass,
+    getLocationType,
+    getLocationTypeName,
+    getPackedEntityType,
+    isLocationBuildable,
+    type ServerTypes,
+    type Shipload,
+} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
-import {getShipload} from '../../lib/client'
+import {getGameSeed, getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateDeploy} from '../../lib/estimate'
@@ -55,6 +65,21 @@ export async function runDeploy(
             )
         }
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+        const packedEntityType = getPackedEntityType(input.itemId)
+        if (
+            packedEntityType !== null &&
+            getEntityClass(packedEntityType) === EntityClass.PlanetaryStructure
+        ) {
+            const coords = snap.coordinates
+            const gameSeed = await getGameSeed()
+            if (!isLocationBuildable(gameSeed, coords)) {
+                const locType = getLocationType(gameSeed, coords)
+                const locLabel = getLocationTypeName(locType)
+                throw new ValidationError(
+                    `Cannot deploy ${packedEntityType} at (${coords.x}, ${coords.y}): location is ${locLabel}, not a Planet. Buildings can only be deployed at planets — travel to a planet first.`
+                )
+            }
+        }
         if (options.estimate) {
             const est = await estimateDeploy({
                 entityType: ctx.entityType,

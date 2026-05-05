@@ -150,6 +150,13 @@ export function deriveLocationStatic(
     return loc
 }
 
+export function isLocationBuildable(
+    gameSeed: Checksum256Type,
+    coordinates: CoordinatesType
+): boolean {
+    return getLocationType(gameSeed, coordinates) === LocationType.PLANET
+}
+
 export function deriveLocation(
     gameSeed: Checksum256Type,
     coordinates: CoordinatesType

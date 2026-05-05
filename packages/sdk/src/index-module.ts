@@ -71,6 +71,7 @@ export {
     getLocationType,
     getLocationTypeName,
     isGatherableLocation,
+    isLocationBuildable,
     deriveLocationStatic,
     deriveLocation,
 } from './utils/system'
@@ -181,6 +182,7 @@ export type {
 
 export * from './types/capabilities'
 export * from './types/entity'
+export {EntityClass, getEntityClass, getPackedEntityType} from './types/entity-traits'
 export * from './capabilities'
 
 export {
