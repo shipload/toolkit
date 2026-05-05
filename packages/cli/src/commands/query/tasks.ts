@@ -1,8 +1,4 @@
-import {
-    taskCargoAdditions,
-    type ServerTypes,
-    type TaskCargoAddition,
-} from '@shipload/sdk'
+import {taskCargoChanges, type ServerTypes, type TaskCargoChange} from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
@@ -33,7 +29,7 @@ interface TasksView {
     entity: ServerTypes.entity_info
     schedule: {started: Date; tasks: Task[]} | null
     pending: Task[]
-    additions: TaskCargoAddition[][]
+    cargoChanges: TaskCargoChange[][]
     now: Date
 }
 
@@ -42,13 +38,14 @@ function fmtCoords(c: {x: number; y: number; z: number | null} | null | undefine
     return `(${c.x}, ${c.y})`
 }
 
-function fmtAddition(a: TaskCargoAddition): string {
-    return `${safeItemName(a.item_id)} ×${a.quantity} · stack ${a.stats.toString()}`
+function fmtChange(c: TaskCargoChange): string {
+    const arrow = c.direction === 'in' ? '↓' : '↑'
+    return `${arrow} ${safeItemName(c.item_id)} ×${c.quantity} · stack ${c.stats.toString()}`
 }
 
-function fmtCargoCell(additions: TaskCargoAddition[] | undefined): string {
-    if (!additions || additions.length === 0) return ''
-    return additions.map(fmtAddition).join('\n')
+function fmtCargoCell(changes: TaskCargoChange[] | undefined): string {
+    if (!changes || changes.length === 0) return ''
+    return changes.map(fmtChange).join('\n')
 }
 
 export function render(view: TasksView): string {
@@ -58,7 +55,7 @@ export function render(view: TasksView): string {
         return [header, '', '  No scheduled tasks.'].join('\n')
     }
 
-    const showCargo = view.additions.some((a) => a.length > 0)
+    const showCargo = view.cargoChanges.some((c) => c.length > 0)
 
     const head = ['#', 'dest', 'type', 'status', 'duration', 'ends']
     const colAligns: ('left' | 'right')[] = ['left', 'left', 'left', 'left', 'left', 'left']
@@ -111,7 +108,7 @@ export function render(view: TasksView): string {
             formatDuration(t.duration),
             endsLabel,
         ]
-        if (showCargo) row.push(fmtCargoCell(view.additions[i]))
+        if (showCargo) row.push(fmtCargoCell(view.cargoChanges[i]))
         table.push(row)
     }
 
@@ -129,12 +126,13 @@ export function render(view: TasksView): string {
     return out.join('\n')
 }
 
-function additionToJson(a: TaskCargoAddition): Record<string, unknown> {
+function changeToJson(c: TaskCargoChange): Record<string, unknown> {
     return {
-        item_id: a.item_id,
-        item_name: safeItemName(a.item_id),
-        quantity: a.quantity,
-        stack_id: a.stats.toString(),
+        direction: c.direction,
+        item_id: c.item_id,
+        item_name: safeItemName(c.item_id),
+        quantity: c.quantity,
+        stack_id: c.stats.toString(),
     }
 }
 
@@ -149,7 +147,7 @@ function viewToJson(view: TasksView): Record<string, unknown> {
               }
             : null,
         pending: view.pending,
-        additions: view.additions.map((a) => a.map(additionToJson)),
+        cargo_changes: view.cargoChanges.map((c) => c.map(changeToJson)),
         now: view.now.toISOString(),
     }
 }
@@ -163,7 +161,7 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
         pending_tasks?: Task[]
     }
     const rawTasks = (info.schedule?.tasks ?? []) as unknown as ServerTypes.task[]
-    const additions = rawTasks.map(taskCargoAdditions)
+    const cargoChanges = rawTasks.map(taskCargoChanges)
     const view: TasksView = {
         entity: info,
         schedule: info.schedule
@@ -173,7 +171,7 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
               }
             : null,
         pending: info.pending_tasks ?? [],
-        additions,
+        cargoChanges,
         now: new Date(),
     }
     if (opts.json) {

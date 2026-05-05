@@ -26,7 +26,7 @@ test('tasks renders schedule with per-task timing', () => {
             ],
         },
         pending: [],
-        additions: [[], []],
+        cargoChanges: [[], []],
         now,
     } as any)
     expect(out).toContain('ship 1')
@@ -42,7 +42,7 @@ test('tasks renders idle when no schedule', () => {
         entity: idleShip,
         schedule: null,
         pending: [],
-        additions: [],
+        cargoChanges: [],
         now: new Date(),
     } as any)
     expect(out).toContain('ship 1')
@@ -72,7 +72,7 @@ test('busy entity past wall-clock schedule end keeps active task active', () => 
             ],
         },
         pending: [],
-        additions: [[], []],
+        cargoChanges: [[], []],
         now: new Date('2026-04-21T08:00:00Z'),
     } as any)
     expect(out).toMatch(/Recharge[^\n]*done/)
