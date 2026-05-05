@@ -3,6 +3,7 @@ import {assert} from 'chai'
 import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     type CargoStack,
+    cargoItemToStack,
     INSUFFICIENT_ITEM_QUANTITY,
     mergeStacks,
     removeFromStacks,
@@ -79,6 +80,40 @@ describe('CargoStack helpers', () => {
                 () => removeFromStacks([stack(1, 5, 5)], stack(2, 1, 5)),
                 INSUFFICIENT_ITEM_QUANTITY
             )
+        })
+    })
+
+    describe('cargoItemToStack', () => {
+        test('coerces plain bigint stats into UInt64 (CLI snapshot path)', () => {
+            const plain = {
+                item_id: 1n,
+                quantity: 10n,
+                stats: 5n,
+                modules: [],
+            } as never
+            const result = cargoItemToStack(plain)
+            assert.instanceOf(result.stats, UInt64)
+            assert.instanceOf(result.item_id, UInt16)
+            assert.instanceOf(result.quantity, UInt32)
+        })
+
+        test('removeFromStacks works after cargoItemToStack on plain bigint input', () => {
+            const plainExisting = {
+                item_id: 1n,
+                quantity: 10n,
+                stats: 5n,
+                modules: [],
+            } as never
+            const projectedStack = cargoItemToStack(plainExisting)
+            const wharfRemove: CargoStack = {
+                item_id: UInt16.from(1),
+                quantity: UInt32.from(3),
+                stats: UInt64.from(5),
+                modules: [],
+            }
+            const result = removeFromStacks([projectedStack], wharfRemove)
+            assert.equal(result.length, 1)
+            assert.equal(result[0].quantity.toNumber(), 7)
         })
     })
 

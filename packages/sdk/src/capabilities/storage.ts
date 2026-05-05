@@ -97,7 +97,7 @@ export function cargoItemToStack(item: ServerContract.Types.cargo_item): CargoSt
     return {
         item_id: UInt16.from(item.item_id),
         quantity: UInt32.from(item.quantity),
-        stats: item.stats,
+        stats: UInt64.from(item.stats),
         modules: item.modules ?? [],
     }
 }
