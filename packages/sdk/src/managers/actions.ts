@@ -85,6 +85,13 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    refrshentity(entityType: NameType, entityId: UInt64Type): Action {
+        return this.server.action('refrshentity', {
+            entity_type: Name.from(entityType),
+            entity_id: UInt64.from(entityId),
+        })
+    }
+
     transfer(
         sourceType: EntityTypeName,
         sourceId: UInt64Type,
