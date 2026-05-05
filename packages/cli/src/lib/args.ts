@@ -84,10 +84,18 @@ export function parseInt64(s: string): bigint {
 	return BigInt(s);
 }
 
+export function parseUint8(s: string): number {
+	const n = Number(s);
+	if (!Number.isInteger(n) || n < 0 || n > 0xff) {
+		throw new InvalidArgumentError(`must be an integer in range 0–255 (got "${s}")`);
+	}
+	return n;
+}
+
 export function parseUint16(s: string): number {
 	const n = Number(s);
 	if (!Number.isInteger(n) || n < 0 || n > 0xffff) {
-		throw new InvalidArgumentError(`must be a non-negative 16-bit integer (got "${s}")`);
+		throw new InvalidArgumentError(`must be an integer in range 0–65535 (got "${s}")`);
 	}
 	return n;
 }
@@ -95,7 +103,7 @@ export function parseUint16(s: string): number {
 export function parseUint32(s: string): number {
 	const n = Number(s);
 	if (!Number.isInteger(n) || n < 0 || n > 0xffffffff) {
-		throw new InvalidArgumentError(`must be a non-negative 32-bit integer (got "${s}")`);
+		throw new InvalidArgumentError(`must be an integer in range 0–4294967295 (got "${s}")`);
 	}
 	return n;
 }

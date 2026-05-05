@@ -1,7 +1,7 @@
 import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseUint32, parseUint64} from '../../lib/args'
+import {type EntityTypeName, parseUint8, parseUint64} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -85,9 +85,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addHelpText(
                 'before',
                 'Requires: ship idle; module slot occupied. ' +
+                    'Module slots are 0-indexed; run `ship <id>` to see the slot map. ' +
                     'Default removes from the live ship. Pass --target-item-id and --target-stats to remove from a packed-entity cargo instead.\n'
             )
-            .argument('<module-index>', 'module slot index', parseUint32)
+            .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
             .addOption(
                 new Option('--target-item-id <id>', 'target packed-cargo item id').argParser(
                     parseUint64

@@ -8,7 +8,7 @@ import {
 } from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseUint32, parseUint64} from '../../lib/args'
+import {type EntityTypeName, parseUint8, parseUint64} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -152,10 +152,11 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addHelpText(
                 'before',
                 'Requires: ship idle; module cargo present in cargo. ' +
+                    'Module slots are 0-indexed; run `ship <id>` to see the slot map. ' +
                     'Identify the module by (item-id, stats); pass --modules if the module itself is a packed entity.\n' +
                     'Default behavior installs onto the live ship. Pass --target-item-id and --target-stats to install onto a packed-entity cargo instead.\n'
             )
-            .argument('<module-index>', 'module slot index', parseUint32)
+            .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
             .argument('<module-item-id>', 'item id of the module to install', parseUint64)
             .argument('<module-stats>', 'stats of the module to install', parseUint64)
             .addOption(

@@ -1,7 +1,13 @@
 import {getItem} from '@shipload/sdk'
 import {type Action, Checksum256, Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {type EntityTypeName, parseEntityType, parseUint32, parseUint64} from '../../lib/args'
+import {
+    type EntityTypeName,
+    parseEntityType,
+    parseUint16,
+    parseUint32,
+    parseUint64,
+} from '../../lib/args'
 import {getGameSeed, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
@@ -245,7 +251,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             )
             .argument('<dest-type>', 'destination entity type', parseEntityType)
             .argument('<dest-id>', 'destination entity id', parseUint64)
-            .argument('<stratum>', 'stratum index', parseUint32)
+            .argument('<stratum>', 'stratum index', parseUint16)
             .argument('<quantity>', 'quantity to gather', parseUint32)
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)
