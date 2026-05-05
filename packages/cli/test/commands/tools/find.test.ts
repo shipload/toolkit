@@ -1,9 +1,11 @@
 import {expect, test} from 'bun:test'
+import {Checksum256} from '@wharfkit/antelope'
 import {
     chebyshevDistance,
     enumerateSpiral,
     type FindHit,
     renderFindResult,
+    scanForResource,
 } from '../../../src/commands/tools/find'
 
 test('chebyshevDistance returns 0 for same coord', () => {
@@ -62,9 +64,40 @@ function makeHit(overrides: Partial<FindHit> = {}): FindHit {
         reserve: 100,
         richness: 500,
         distance: 0,
+        seed: 0n,
+        stats: {stat1: 0, stat2: 0, stat3: 0},
+        quality: 0,
         ...overrides,
     }
 }
+
+test('scanForResource populates stats and quality on each hit', () => {
+    const gameSeed = Checksum256.from(
+        '0000000000000000000000000000000000000000000000000000000000000001'
+    )
+    const epochSeed = Checksum256.from(
+        '0000000000000000000000000000000000000000000000000000000000000002'
+    )
+    const hits = scanForResource({
+        resourceId: 101,
+        origin: {x: 0, y: 0},
+        depth: 1000,
+        radius: 30,
+        maxResults: 5,
+        gameSeed,
+        epochSeed,
+    })
+    for (const h of hits) {
+        expect(h.seed).not.toBe(0n)
+        expect(h.stats.stat1).toBeGreaterThanOrEqual(1)
+        expect(h.stats.stat1).toBeLessThanOrEqual(999)
+        expect(h.stats.stat2).toBeGreaterThanOrEqual(1)
+        expect(h.stats.stat2).toBeLessThanOrEqual(999)
+        expect(h.stats.stat3).toBeGreaterThanOrEqual(1)
+        expect(h.stats.stat3).toBeLessThanOrEqual(999)
+        expect(h.quality).toBe(Math.round((h.stats.stat1 + h.stats.stat2 + h.stats.stat3) / 3))
+    }
+})
 
 test('renderFindResult with zero hits reports no strata message', () => {
     const out = renderFindResult([], 101, {x: 0, y: 0}, 'ship:1', 100, 30)
@@ -72,19 +105,42 @@ test('renderFindResult with zero hits reports no strata message', () => {
     expect(out).toContain('(no reachable strata found within radius)')
 })
 
-test('renderFindResult with hits includes each coord, stratum, reserve, and distance', () => {
+test('renderFindResult with hits emits a table with stats and Q columns', () => {
     const hits = [
-        makeHit({coord: {x: -3, y: 3}, stratumIndex: 45, reserve: 46, distance: 3}),
-        makeHit({coord: {x: 8, y: -4}, stratumIndex: 235, reserve: 181, distance: 8}),
+        makeHit({
+            coord: {x: -3, y: 3},
+            stratumIndex: 45,
+            reserve: 46,
+            distance: 3,
+            stats: {stat1: 412, stat2: 220, stat3: 880},
+            quality: 504,
+        }),
+        makeHit({
+            coord: {x: 8, y: -4},
+            stratumIndex: 235,
+            reserve: 181,
+            distance: 8,
+            stats: {stat1: 100, stat2: 100, stat3: 100},
+            quality: 100,
+        }),
     ]
     const out = renderFindResult(hits, 101, {x: 0, y: 0}, 'ship:1', 240, 30)
+    expect(out).toContain('ship:1')
+    expect(out).toContain('gatherer depth 240')
+    expect(out).toContain('radius 30')
+    expect(out).toContain('Idx')
+    expect(out).toContain('Coord')
+    expect(out).toContain('Reserve')
+    expect(out).toContain('Rich')
+    expect(out).toContain('Stats')
+    expect(out).toContain('Q')
+    expect(out).toContain('Dist')
+    expect(out).toContain('45')
     expect(out).toContain('(-3, 3)')
-    expect(out).toContain('stratum [45]')
-    expect(out).toContain('reserve 46')
-    expect(out).toContain('dist 3')
+    expect(out).toContain('46')
+    expect(out).toContain('504')
+    expect(out).toContain('235')
     expect(out).toContain('(8, -4)')
-    expect(out).toContain('stratum [235]')
-    expect(out).toContain('dist 8')
 })
 
 test('renderFindResult header contains entity label and depth', () => {

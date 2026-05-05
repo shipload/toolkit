@@ -1,17 +1,22 @@
 import {
     deriveLocationSize,
     deriveLocationStatic,
+    deriveResourceStats,
     deriveStratum,
+    encodeStats,
     getItem,
     type LocationType,
+    type ResourceStats,
     ServerContract,
 } from '@shipload/sdk'
+import Table from 'cli-table3'
 import {Checksum256} from '@wharfkit/antelope'
 import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
 import {client, getGameSeed, server} from '../../lib/client'
 import {EXIT} from '../../lib/errors'
 import {jsonStringify} from '../../lib/format'
+import {formatItemStats} from '../../lib/item-stats'
 import {isReachable, resolveReach} from '../../lib/reach'
 import {getAccountName} from '../../lib/session'
 import type {Coord} from './scan'
@@ -24,6 +29,9 @@ export interface FindHit {
     reserve: number
     richness: number
     distance: number
+    seed: bigint
+    stats: ResourceStats
+    quality: number
 }
 
 export function chebyshevDistance(a: Coord, b: Coord): number {
@@ -92,6 +100,9 @@ export function scanForResource(options: FindOptions): FindHit[] {
                 }
             })()
 
+            const stats = deriveResourceStats(s.seed)
+            const quality = Math.round((stats.stat1 + stats.stat2 + stats.stat3) / 3)
+
             hits.push({
                 coord,
                 stratumIndex: i,
@@ -100,6 +111,9 @@ export function scanForResource(options: FindOptions): FindHit[] {
                 reserve: s.reserve,
                 richness: s.richness,
                 distance: chebyshevDistance(origin, coord),
+                seed: s.seed,
+                stats,
+                quality,
             })
         }
 
@@ -137,13 +151,55 @@ export function renderFindResult(
         return [header, preamble, '', '  (no reachable strata found within radius)'].join('\n')
     }
 
-    const lines = [header, preamble, '']
+    const table = new Table({
+        head: ['Idx', 'Coord', 'Item', 'Reserve', 'Rich', 'Stats', 'Q', 'Dist'],
+        chars: {
+            top: '',
+            'top-mid': '',
+            'top-left': '',
+            'top-right': '',
+            bottom: '',
+            'bottom-mid': '',
+            'bottom-left': '',
+            'bottom-right': '',
+            left: '  ',
+            'left-mid': '',
+            mid: '',
+            'mid-mid': '',
+            right: '',
+            'right-mid': '',
+            middle: '  ',
+        },
+        style: {
+            head: [],
+            border: [],
+            'padding-left': 0,
+            'padding-right': 0,
+        },
+    })
+
     for (const hit of hits) {
-        lines.push(
-            `  ${formatCoord(hit.coord)} stratum [${hit.stratumIndex}] reserve ${hit.reserve} richness ${hit.richness} — dist ${hit.distance}`
-        )
+        const packed = encodeStats([hit.stats.stat1, hit.stats.stat2, hit.stats.stat3])
+        const statsLabel = formatItemStats(hit.itemId, packed)
+        table.push([
+            String(hit.stratumIndex),
+            formatCoord(hit.coord),
+            hit.itemName,
+            String(hit.reserve),
+            String(hit.richness),
+            statsLabel,
+            String(hit.quality),
+            String(hit.distance),
+        ])
     }
-    return lines.join('\n')
+
+    const tableStr = table
+        .toString()
+        .split('\n')
+        .map((line) => line.trimEnd())
+        .join('\n')
+
+    return [header, preamble, '', tableStr].join('\n')
 }
 
 function formatCoord(c: Coord): string {
@@ -296,6 +352,13 @@ export function registerSubcommand(tools: Command): void {
                             reserve: h.reserve,
                             richness: h.richness,
                             distance: h.distance,
+                            stats: {
+                                stat1: h.stats.stat1,
+                                stat2: h.stats.stat2,
+                                stat3: h.stats.stat3,
+                            },
+                            quality: h.quality,
+                            seed: h.seed.toString(),
                         })),
                     }
                     console.log(jsonStringify(payload))
