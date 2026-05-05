@@ -30,6 +30,7 @@ export interface Recipe {
 
 export interface EntitySlot {
     type: ModuleType
+    outputPct: number
 }
 
 export interface EntityLayout {

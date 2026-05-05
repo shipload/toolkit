@@ -10,6 +10,8 @@ import type {PackedModuleInput} from './ship'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 import {getModuleCapabilityType, MODULE_LOADER} from '../capabilities/modules'
 import {computeLoaderCapabilities} from './ship-deploy'
+import {applySlotMultiplier, clampUint16, getSlotAmp, type InstalledModule} from './slot-multiplier'
+import type {EntitySlot} from '../data/recipes-runtime'
 
 export interface WarehouseStateInput {
     id: UInt64Type
@@ -104,7 +106,10 @@ export class Warehouse extends ServerContract.Types.entity_info {
     }
 }
 
-export function computeWarehouseCapabilities(modules: {itemId: number; stats: bigint}[]): {
+export function computeWarehouseCapabilities(
+    modules: InstalledModule[],
+    layout: EntitySlot[]
+): {
     loaders?: {mass: number; thrust: number; quantity: number}
 } {
     const warehouse: {loaders?: {mass: number; thrust: number; quantity: number}} = {}
@@ -117,10 +122,14 @@ export function computeWarehouseCapabilities(modules: {itemId: number; stats: bi
         for (const m of loaderModules) {
             const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalMass += caps.mass
-            totalThrust += caps.thrust
+            totalThrust += applySlotMultiplier(caps.thrust, getSlotAmp(layout, m.slotIndex))
             totalQuantity += caps.quantity
         }
-        warehouse.loaders = {mass: totalMass, thrust: totalThrust, quantity: totalQuantity}
+        warehouse.loaders = {
+            mass: totalMass,
+            thrust: clampUint16(totalThrust),
+            quantity: totalQuantity,
+        }
     }
 
     return warehouse

@@ -7,19 +7,24 @@
     "entityItemId": 10201,
     "slots": [
       {
-        "type": "any"
+        "type": "any",
+        "outputPct": 100
       },
       {
-        "type": "any"
+        "type": "any",
+        "outputPct": 100
       },
       {
-        "type": "any"
+        "type": "any",
+        "outputPct": 100
       },
       {
-        "type": "any"
+        "type": "any",
+        "outputPct": 100
       },
       {
-        "type": "any"
+        "type": "any",
+        "outputPct": 100
       }
     ]
   },
@@ -27,19 +32,24 @@
     "entityItemId": 10202,
     "slots": [
       {
-        "type": "loader"
+        "type": "loader",
+        "outputPct": 100
       },
       {
-        "type": "storage"
+        "type": "storage",
+        "outputPct": 100
       },
       {
-        "type": "storage"
+        "type": "storage",
+        "outputPct": 100
       },
       {
-        "type": "storage"
+        "type": "storage",
+        "outputPct": 100
       },
       {
-        "type": "storage"
+        "type": "storage",
+        "outputPct": 100
       }
     ]
   },

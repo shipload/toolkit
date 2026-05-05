@@ -9,6 +9,10 @@ import {
     MODULE_LOADER,
 } from '../capabilities/modules'
 import {getItem} from '../data/catalog'
+import type {EntitySlot} from '../data/recipes-runtime'
+import {applySlotMultiplier, clampUint16, getSlotAmp, type InstalledModule} from './slot-multiplier'
+
+export type {InstalledModule}
 
 export function computeShipHullCapabilities(stats: Record<string, number>): {
     hullmass: number
@@ -193,7 +197,8 @@ export interface ShipCapabilities {
 }
 
 export function computeShipCapabilities(
-    modules: {itemId: number; stats: bigint}[]
+    modules: InstalledModule[],
+    layout: EntitySlot[]
 ): ShipCapabilities {
     const ship: ShipCapabilities = {}
 
@@ -203,7 +208,7 @@ export function computeShipCapabilities(
         let totalDrain = 0
         for (const m of engineModules) {
             const caps = computeEngineCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
-            totalThrust += caps.thrust
+            totalThrust += applySlotMultiplier(caps.thrust, getSlotAmp(layout, m.slotIndex))
             totalDrain += caps.drain
         }
         ship.engines = {thrust: totalThrust, drain: totalDrain}
@@ -217,10 +222,14 @@ export function computeShipCapabilities(
         let totalRecharge = 0
         for (const m of generatorModules) {
             const caps = computeGeneratorCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
-            totalCapacity += caps.capacity
-            totalRecharge += caps.recharge
+            const amp = getSlotAmp(layout, m.slotIndex)
+            totalCapacity += applySlotMultiplier(caps.capacity, amp)
+            totalRecharge += applySlotMultiplier(caps.recharge, amp)
         }
-        ship.generator = {capacity: totalCapacity, recharge: totalRecharge}
+        ship.generator = {
+            capacity: clampUint16(totalCapacity),
+            recharge: clampUint16(totalRecharge),
+        }
     }
 
     const gathererModules = modules.filter(
@@ -237,12 +246,18 @@ export function computeShipCapabilities(
                 decodeCraftedItemStats(m.itemId, m.stats),
                 tier
             )
-            totalYield += caps.yield
+            const amp = getSlotAmp(layout, m.slotIndex)
+            totalYield += applySlotMultiplier(caps.yield, amp)
             totalDrain += caps.drain
             if (caps.depth > maxDepth) maxDepth = caps.depth
-            totalSpeed += caps.speed
+            totalSpeed += applySlotMultiplier(caps.speed, amp)
         }
-        ship.gatherer = {yield: totalYield, drain: totalDrain, depth: maxDepth, speed: totalSpeed}
+        ship.gatherer = {
+            yield: clampUint16(totalYield),
+            drain: totalDrain,
+            depth: maxDepth,
+            speed: clampUint16(totalSpeed),
+        }
     }
 
     const haulerModules = modules.filter((m) => getModuleCapabilityType(m.itemId) === MODULE_HAULER)
@@ -252,13 +267,15 @@ export function computeShipCapabilities(
         let totalDrain = 0
         for (const m of haulerModules) {
             const caps = computeHaulerCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
+            const eff = applySlotMultiplier(caps.efficiency, getSlotAmp(layout, m.slotIndex))
             totalCapacity += caps.capacity
-            weightedEffNum += caps.efficiency * caps.capacity
+            weightedEffNum += eff * caps.capacity
             totalDrain += caps.drain
         }
+        const efficiency = totalCapacity > 0 ? Math.floor(weightedEffNum / totalCapacity) : 0
         ship.hauler = {
             capacity: totalCapacity,
-            efficiency: totalCapacity > 0 ? Math.floor(weightedEffNum / totalCapacity) : 0,
+            efficiency: clampUint16(efficiency),
             drain: totalDrain,
         }
     }
@@ -271,10 +288,14 @@ export function computeShipCapabilities(
         for (const m of loaderModules) {
             const caps = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
             totalMass += caps.mass
-            totalThrust += caps.thrust
+            totalThrust += applySlotMultiplier(caps.thrust, getSlotAmp(layout, m.slotIndex))
             totalQuantity += caps.quantity
         }
-        ship.loaders = {mass: totalMass, thrust: totalThrust, quantity: totalQuantity}
+        ship.loaders = {
+            mass: totalMass,
+            thrust: clampUint16(totalThrust),
+            quantity: totalQuantity,
+        }
     }
 
     const crafterModules = modules.filter(
@@ -285,10 +306,10 @@ export function computeShipCapabilities(
         let totalDrain = 0
         for (const m of crafterModules) {
             const caps = computeCrafterCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
-            totalSpeed += caps.speed
+            totalSpeed += applySlotMultiplier(caps.speed, getSlotAmp(layout, m.slotIndex))
             totalDrain += caps.drain
         }
-        ship.crafter = {speed: totalSpeed, drain: totalDrain}
+        ship.crafter = {speed: clampUint16(totalSpeed), drain: totalDrain}
     }
 
     return ship

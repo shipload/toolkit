@@ -142,12 +142,7 @@ export const SUBCOMMAND: CoordSubcommand = {
             .option('--expand', 'list every reachable resource per system (one row each)')
             .option('--include-ood', 'with --expand, also list out-of-depth (OOD) resources')
             .option('--top <n>', 'show only the top N systems', parseUint32, 20)
-            .option(
-                '--sort <field>',
-                'sort by distance | reserve',
-                parseSort,
-                'distance' as Sort
-            )
+            .option('--sort <field>', 'sort by distance | reserve', parseSort, 'distance' as Sort)
             .option('--json', 'emit JSON instead of formatted text')
             .action(async (opts: RunOptions) => {
                 await run(ctx, opts)

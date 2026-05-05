@@ -363,10 +363,10 @@ describe('ship deploy formulas', () => {
         const seedA = encodeStats([0, 0, 0, 0])
         const seedB = encodeStats([999, 999, 999, 999])
         const modules = [
-            {itemId: ITEM_HAULER_T1, stats: seedA},
-            {itemId: ITEM_HAULER_T1, stats: seedB},
+            {slotIndex: 0, itemId: ITEM_HAULER_T1, stats: seedA},
+            {slotIndex: 1, itemId: ITEM_HAULER_T1, stats: seedB},
         ]
-        const caps = computeShipCapabilities(modules)
+        const caps = computeShipCapabilities(modules, [])
         assert.exists(caps.hauler)
         assert.equal(caps.hauler!.capacity, 4)
         assert.equal(caps.hauler!.efficiency, 6495)
@@ -375,7 +375,10 @@ describe('ship deploy formulas', () => {
 
     test('computeShipCapabilities single hauler module', () => {
         const seed = encodeStats([500, 500, 500, 500])
-        const caps = computeShipCapabilities([{itemId: ITEM_HAULER_T1, stats: seed}])
+        const caps = computeShipCapabilities(
+            [{slotIndex: 0, itemId: ITEM_HAULER_T1, stats: seed}],
+            []
+        )
         assert.exists(caps.hauler)
         assert.equal(caps.hauler!.capacity, 2)
         assert.equal(caps.hauler!.efficiency, 5000)
@@ -383,17 +386,20 @@ describe('ship deploy formulas', () => {
     })
 
     test('computeShipCapabilities with no hauler modules returns no hauler', () => {
-        const caps = computeShipCapabilities([])
+        const caps = computeShipCapabilities([], [])
         assert.isUndefined(caps.hauler)
     })
 
     test('computeShipCapabilities uses MAX (not sum) for gatherer depth', () => {
         const lowTolStats = encodeStats([0, 100, 0, 0, 0])
         const highTolStats = encodeStats([0, 500, 0, 0, 0])
-        const caps = computeShipCapabilities([
-            {itemId: ITEM_GATHERER_T1, stats: lowTolStats},
-            {itemId: ITEM_GATHERER_T1, stats: highTolStats},
-        ])
+        const caps = computeShipCapabilities(
+            [
+                {slotIndex: 0, itemId: ITEM_GATHERER_T1, stats: lowTolStats},
+                {slotIndex: 1, itemId: ITEM_GATHERER_T1, stats: highTolStats},
+            ],
+            []
+        )
         assert.exists(caps.gatherer)
         assert.equal(caps.gatherer!.depth, 3000)
     })

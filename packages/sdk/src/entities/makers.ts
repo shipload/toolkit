@@ -4,7 +4,7 @@ import {type PackedModuleInput, Ship, type ShipStateInput} from './ship'
 import {computeWarehouseCapabilities, Warehouse, type WarehouseStateInput} from './warehouse'
 import {Container, type ContainerStateInput} from './container'
 import {ITEM_SHIP_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
-import {getEntityLayout} from '../data/recipes-runtime'
+import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
 import {itemMetadata} from '../data/metadata'
 import {getItem} from '../data/catalog'
 import {
@@ -14,6 +14,7 @@ import {
     moduleSlotTypeToCode,
 } from '../capabilities/modules'
 import {computeShipCapabilities, computeStorageCapabilities} from './ship-deploy'
+import type {InstalledModule} from './slot-multiplier'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 
 function assignModulesToSlots(
@@ -56,19 +57,22 @@ function assignModulesToSlots(
     )
 }
 
-function decodePackedInput(m: PackedModuleInput): {itemId: number; stats: bigint} {
-    return {
-        itemId: Number(UInt16.from(m.itemId).value.toString()),
-        stats: BigInt(UInt64.from(m.stats).toString()),
-    }
+function toInstalledModules(entries: ServerContract.Types.module_entry[]): InstalledModule[] {
+    const installed: InstalledModule[] = []
+    entries.forEach((entry, slotIndex) => {
+        if (!entry.installed) return
+        installed.push({
+            slotIndex,
+            itemId: Number(UInt16.from(entry.installed.item_id).value.toString()),
+            stats: BigInt(UInt64.from(entry.installed.stats).toString()),
+        })
+    })
+    return installed
 }
 
-function computeStorageBonus(
-    decoded: {itemId: number; stats: bigint}[],
-    baseCapacity: number
-): number {
+function computeStorageBonus(modules: InstalledModule[], baseCapacity: number): number {
     let totalBonus = 0
-    for (const m of decoded) {
+    for (const m of modules) {
         if (getModuleCapabilityType(m.itemId) !== MODULE_STORAGE) continue
         const stats = decodeCraftedItemStats(m.itemId, m.stats)
         const {capacityBonus} = computeStorageCapabilities(stats, baseCapacity)
@@ -78,15 +82,16 @@ function computeStorageBonus(
 }
 
 function deriveShipFromModules(
-    modules: PackedModuleInput[],
+    moduleEntries: ServerContract.Types.module_entry[],
+    layout: EntitySlot[],
     baseCapacity: number
 ): {
     capabilities: ReturnType<typeof computeShipCapabilities>
     finalCapacity: number
 } {
-    const decoded = modules.map(decodePackedInput)
-    const capabilities = computeShipCapabilities(decoded)
-    const totalBonus = computeStorageBonus(decoded, baseCapacity)
+    const installed = toInstalledModules(moduleEntries)
+    const capabilities = computeShipCapabilities(installed, layout)
+    const totalBonus = computeStorageBonus(installed, baseCapacity)
     return {capabilities, finalCapacity: baseCapacity + totalBonus}
 }
 
@@ -109,10 +114,12 @@ export function makeShip(state: ShipStateInput): Ship {
     if (state.schedule) info.schedule = state.schedule
 
     let moduleEntries: ServerContract.Types.module_entry[] = []
+    const shipLayout = getEntityLayout(ITEM_SHIP_T1_PACKED)?.slots ?? []
     if (state.modules && state.modules.length > 0) {
         moduleEntries = assignModulesToSlots(ITEM_SHIP_T1_PACKED, state.modules, 'Ship T1')
         const {capabilities, finalCapacity} = deriveShipFromModules(
-            state.modules,
+            moduleEntries,
+            shipLayout,
             state.capacity ?? 0
         )
         if (capabilities.engines) info.engines = capabilities.engines
@@ -152,17 +159,18 @@ export function makeWarehouse(state: WarehouseStateInput): Warehouse {
     if (state.schedule) info.schedule = state.schedule
 
     let moduleEntries: ServerContract.Types.module_entry[] = []
+    const warehouseLayout = getEntityLayout(ITEM_WAREHOUSE_T1_PACKED)?.slots ?? []
     if (state.modules && state.modules.length > 0) {
         moduleEntries = assignModulesToSlots(
             ITEM_WAREHOUSE_T1_PACKED,
             state.modules,
             'Warehouse T1'
         )
-        const decoded = state.modules.map(decodePackedInput)
-        const capabilities = computeWarehouseCapabilities(decoded)
+        const installed = toInstalledModules(moduleEntries)
+        const capabilities = computeWarehouseCapabilities(installed, warehouseLayout)
         if (capabilities.loaders) info.loaders = capabilities.loaders
 
-        const totalBonus = computeStorageBonus(decoded, state.capacity)
+        const totalBonus = computeStorageBonus(installed, state.capacity)
         info.capacity = UInt32.from(state.capacity + totalBonus)
     } else {
         moduleEntries = assignModulesToSlots(ITEM_WAREHOUSE_T1_PACKED, [], 'Warehouse T1')
