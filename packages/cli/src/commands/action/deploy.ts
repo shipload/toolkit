@@ -113,14 +113,14 @@ export async function runDeploy(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'deploy',
-    description: 'Deploy an entity from a packed cargo NFT',
+    description: 'Deploy an entity from a packed cargo item',
     appliesTo: ['ship'],
     build: (ctx) =>
         new Command('deploy')
-            .description('Deploy an entity from a packed cargo NFT')
+            .description('Deploy an entity from a packed cargo item')
             .addHelpText(
                 'before',
-                'Requires: packed-entity NFT in cargo; deploy location valid.\n' +
+                'Requires: packed entity in cargo; deploy location valid.\n' +
                     'Pass --modules <json> if the packed entity carries modules.\n'
             )
             .addHelpText(
