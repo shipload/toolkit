@@ -65,6 +65,7 @@ const PACKAGE = {
 export function build(): Command {
     const program = new Command()
     program.name(PACKAGE.name).version(PACKAGE.version).description(PACKAGE.description)
+    program.option('--debug', 'show full error details including stack traces')
 
     program.addHelpText(
         'before',
@@ -139,10 +140,25 @@ export function build(): Command {
     return program
 }
 
-export function run(argv: string[] = process.argv): void {
+export async function run(argv: string[] = process.argv): Promise<void> {
     const program = build()
-    program.parse(argv)
+    try {
+        await program.parseAsync(argv)
+    } catch (err) {
+        if (program.opts().debug) {
+            console.error(err)
+        } else {
+            console.error(`error: ${formatErrorMessage(err)}`)
+        }
+        process.exit(1)
+    }
     if (argv.slice(2).length === 0) {
         program.outputHelp()
     }
+}
+
+function formatErrorMessage(err: unknown): string {
+    const raw = err instanceof Error ? err.message : String(err)
+    const assertMatch = raw.match(/^assertion failure with message:\s*(.+)$/)
+    return assertMatch ? assertMatch[1] : raw
 }
