@@ -16,12 +16,12 @@ import {
 
 export const WAIT_OPTION = new Option(
 	"--wait",
-	"block until scheduled task completes, then print post-state",
+	"block until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state (use --no-auto-resolve to skip resolve)",
 );
 
 export const TRACK_OPTION = new Option(
 	"--track",
-	"wait with live progress display, then print post-state (implies --wait)",
+	"wait with live progress display until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state (implies --wait; use --no-auto-resolve to skip resolve)",
 );
 
 export const AUTO_RESOLVE_OPTION = new Option(
