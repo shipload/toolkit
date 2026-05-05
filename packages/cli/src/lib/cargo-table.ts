@@ -48,7 +48,7 @@ const COLUMN_HEADERS: Record<CargoColumn, string> = {
 
 const RIGHT_ALIGNED: Set<CargoColumn> = new Set(["qty", "itemId", "each", "mass", "stack", "rowId"]);
 
-function safeItemName(itemId: number, fallback?: string): string {
+export function safeItemName(itemId: number, fallback?: string): string {
 	try {
 		return displayName(resolveItem(itemId));
 	} catch {

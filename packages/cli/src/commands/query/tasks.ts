@@ -1,7 +1,13 @@
-import type {ServerTypes} from '@shipload/sdk'
+import {
+    predictTaskCargoEffects,
+    type PredictedCargoAddition,
+    type ServerTypes,
+    type TaskCargoEffect,
+} from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
+import {safeItemName} from '../../lib/cargo-table'
 import {server} from '../../lib/client'
 import {renderEntityHeader} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -28,6 +34,7 @@ interface TasksView {
     entity: ServerTypes.entity_info
     schedule: {started: Date; tasks: Task[]} | null
     pending: Task[]
+    cargoEffects: TaskCargoEffect[]
     now: Date
 }
 
@@ -36,11 +43,31 @@ function fmtCoords(c: {x: number; y: number; z: number | null} | null | undefine
     return `(${c.x}, ${c.y})`
 }
 
+function fmtAddition(a: PredictedCargoAddition): string {
+    const target =
+        a.target.kind === 'existing' ? `#${a.target.rowId.toString()}` : `(${a.target.label})`
+    return `${safeItemName(a.item_id)} ×${a.quantity} → ${target}`
+}
+
+function fmtCargoCell(effect: TaskCargoEffect | undefined): string {
+    if (!effect || effect.additions.length === 0) return ''
+    return effect.additions.map(fmtAddition).join('\n')
+}
+
 export function render(view: TasksView): string {
     const header = `${renderEntityHeader(view.entity)}\n  ${formatTimeUTC(view.now)}`
 
     if (!view.schedule || view.schedule.tasks.length === 0) {
         return [header, '', '  No scheduled tasks.'].join('\n')
+    }
+
+    const showCargo = view.cargoEffects.some((e) => e.additions.length > 0)
+
+    const head = ['#', 'dest', 'type', 'status', 'duration', 'ends']
+    const colAligns: ('left' | 'right')[] = ['left', 'left', 'left', 'left', 'left', 'left']
+    if (showCargo) {
+        head.push('cargo')
+        colAligns.push('left')
     }
 
     const table = new Table({
@@ -62,8 +89,8 @@ export function render(view: TasksView): string {
             middle: '  ',
         },
         style: {head: [], border: []},
-        head: ['#', 'dest', 'type', 'status', 'duration', 'ends'],
-        colAligns: ['left', 'left', 'left', 'left', 'left', 'left'],
+        head,
+        colAligns,
     })
 
     const totalTasks = view.schedule.tasks.length
@@ -79,14 +106,16 @@ export function render(view: TasksView): string {
         cursor = end.getTime()
         const status = i < completed ? 'done' : i === completed ? 'active' : 'pending'
         const endsLabel = reltime(end, view.now)
-        table.push([
+        const row: string[] = [
             String(i),
             fmtCoords(t.coordinates),
             formatTaskType(t.type),
             status,
             formatDuration(t.duration),
             endsLabel,
-        ])
+        ]
+        if (showCargo) row.push(fmtCargoCell(view.cargoEffects[i]))
+        table.push(row)
     }
 
     const out = [header, '', table.toString()]
@@ -103,6 +132,19 @@ export function render(view: TasksView): string {
     return out.join('\n')
 }
 
+function additionToJson(a: PredictedCargoAddition): Record<string, unknown> {
+    return {
+        item_id: a.item_id,
+        item_name: safeItemName(a.item_id),
+        quantity: a.quantity,
+        stats: a.stats.toString(),
+        target:
+            a.target.kind === 'existing'
+                ? {kind: 'existing', row_id: a.target.rowId.toString()}
+                : {kind: 'new', label: a.target.label},
+    }
+}
+
 function viewToJson(view: TasksView): Record<string, unknown> {
     return {
         type: String(view.entity.type),
@@ -114,6 +156,9 @@ function viewToJson(view: TasksView): Record<string, unknown> {
               }
             : null,
         pending: view.pending,
+        cargo_effects: view.cargoEffects.map((e) => ({
+            additions: e.additions.map(additionToJson),
+        })),
         now: view.now.toISOString(),
     }
 }
@@ -126,6 +171,10 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
         schedule?: {started: {toMilliseconds(): number}; tasks: Task[]}
         pending_tasks?: Task[]
     }
+    const cargoEffects = predictTaskCargoEffects(
+        info.cargo ?? [],
+        (info.schedule?.tasks ?? []) as unknown as ServerTypes.task[]
+    )
     const view: TasksView = {
         entity: info,
         schedule: info.schedule
@@ -135,6 +184,7 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
               }
             : null,
         pending: info.pending_tasks ?? [],
+        cargoEffects,
         now: new Date(),
     }
     if (opts.json) {

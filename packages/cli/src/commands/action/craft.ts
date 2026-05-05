@@ -2,6 +2,7 @@ import {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName, parseUint16, parseUint32} from '../../lib/args'
+import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
     type ParsedCargoInput,
     type ResolvedCargoInput,
@@ -96,7 +97,7 @@ export async function runCraft(
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
-            snap.cargo as unknown as ServerTypes.cargo_item[]
+            projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         await validateRecipeSlotTotals(recipeId, quantity, resolved)
         const est = await estimateCraft({

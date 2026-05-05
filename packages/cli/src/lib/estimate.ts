@@ -34,6 +34,7 @@ import {
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
+import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
 import {
@@ -266,7 +267,7 @@ export async function estimateDeploy(params: {
 
 	resolveCargoInputs(
 		[{ itemId: packedItemId, stackId, quantity: 1 }],
-		snap.cargo as unknown as ServerTypes.cargo_item[],
+		projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[],
 	);
 
 	return {

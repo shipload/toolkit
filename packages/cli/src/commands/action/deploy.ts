@@ -13,6 +13,7 @@ import {type Action, Name} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
+import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {getGameSeed, getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -93,7 +94,7 @@ export async function runDeploy(
         }
         const [resolved] = resolveCargoInputs(
             [input],
-            snap.cargo as unknown as ServerTypes.cargo_item[]
+            projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         const action = await buildAction({
             entityType: ctx.entityType,

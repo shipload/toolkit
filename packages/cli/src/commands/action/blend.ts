@@ -2,6 +2,7 @@ import {blendCargoStacks, ServerTypes} from '@shipload/sdk'
 import {type Action, Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName} from '../../lib/args'
+import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
     type ParsedCargoInput,
     type ResolvedCargoInput,
@@ -50,7 +51,7 @@ export async function runBlend(
         const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
-            snap.cargo as unknown as ServerTypes.cargo_item[]
+            projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         if (opts.estimate) {
             console.log(renderBlendEstimate(resolved))
