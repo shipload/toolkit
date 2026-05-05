@@ -17,21 +17,36 @@ const nearby: any = {
     ],
 }
 
-test('formatNearby with no opts produces unannotated output', () => {
+test('formatNearby without opts shows the system row', () => {
     const out = formatNearby(nearby, {})
     expect(out).toContain('(0, 4)')
-    expect(out).not.toContain('reachable')
-    expect(out).not.toContain('OOD')
+    expect(out).toContain('172/350')
+    expect(out).toContain('1m 20s')
 })
 
-test('formatNearby without seeds skips annotation even if reach is provided', () => {
+test('formatNearby without seeds still surfaces the reachable legend when reach is provided', () => {
     const out = formatNearby(nearby, {reach: {depth: 100}})
     expect(out).toContain('(0, 4)')
-    expect(out).toContain('Reach scope: gatherer depth 100')
+    expect(out).toContain('Reachable:')
+    expect(out).toContain('depth ≤ gatherer (100)')
 })
 
-test('formatNearby with showAll + reach still emits the cell line and legend', () => {
-    const out = formatNearby(nearby, {reach: {depth: 100}, showAll: true})
+test('formatNearby with includeOOD extends the legend with the OOD note', () => {
+    const out = formatNearby(nearby, {reach: {depth: 100}, expand: true, includeOOD: true})
     expect(out).toContain('(0, 4)')
-    expect(out).toContain('OOD = out of depth')
+    expect(out).toContain('Includes out-of-depth (OOD) strata.')
+})
+
+test('formatNearby --top trims output and notes the truncation in the heading', () => {
+    const out = formatNearby(nearby, {top: 1})
+    expect(out).toContain('Nearby (1')
+})
+
+test('formatNearby --json emits a parseable structure with travel metrics', () => {
+    const out = formatNearby(nearby, {json: true})
+    const parsed = JSON.parse(out)
+    expect(parsed.systems).toHaveLength(1)
+    expect(parsed.systems[0].coords).toEqual({x: 0, y: 4})
+    expect(parsed.systems[0].energy_cost).toBe(172)
+    expect(parsed.systems[0].flight_time_s).toBe(80)
 })

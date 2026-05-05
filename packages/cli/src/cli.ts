@@ -31,6 +31,7 @@ import * as history from './commands/query/history'
 import * as inventory from './commands/query/inventory'
 import * as items from './commands/query/items'
 import * as location from './commands/query/location'
+import * as locationNearby from './commands/query/location-nearby'
 import * as modules from './commands/query/modules'
 import * as nearby from './commands/query/nearby'
 import * as nftinfo from './commands/query/nftinfo'
@@ -47,6 +48,7 @@ import * as debug from './commands/debug'
 import * as tools from './commands/tools'
 import * as update from './commands/update'
 import {parseEntityType} from './lib/args'
+import {registerCoordSubcommand} from './lib/coord-scope'
 import {
     buildEntityParent,
     buildGenericEntityParent,
@@ -91,6 +93,7 @@ export function build(): Command {
     history.register(program)
     registerEntitySubcommand(history.SUBCOMMAND)
     location.register(program)
+    registerCoordSubcommand(locationNearby.SUBCOMMAND)
     registerEntitySubcommand(nearby.SUBCOMMAND)
     registerEntitySubcommand(gatherable.SUBCOMMAND)
     items.register(program)

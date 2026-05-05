@@ -1,10 +1,20 @@
 import {Checksum256} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import type {EntityTypeName} from '../../lib/args'
+import {parseUint32} from '../../lib/args'
 import {getGameSeed, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {formatNearby, formatOutput} from '../../lib/format'
+import {formatNearby, type NearbySort} from '../../lib/format'
 import {resolveReach} from '../../lib/reach'
+
+const SORT_VALUES = new Set<NearbySort>(['distance', 'energy', 'time', 'reserve'])
+
+function parseSort(v: string): NearbySort {
+    if (!SORT_VALUES.has(v as NearbySort)) {
+        throw new Error(`invalid sort '${v}', expected one of: distance, energy, time, reserve`)
+    }
+    return v as NearbySort
+}
 
 export interface NearbyOpts {
     entityType: EntityTypeName
@@ -24,10 +34,16 @@ export function buildQuery(opts: NearbyOpts): {
     }
 }
 
-export async function runNearby(
-    ctx: EntityContext,
-    options: {recharge: boolean; all?: boolean; json?: boolean}
-): Promise<void> {
+interface RunOptions {
+    recharge: boolean
+    expand?: boolean
+    includeOod?: boolean
+    sort: NearbySort
+    top: number
+    json?: boolean
+}
+
+export async function runNearby(ctx: EntityContext, options: RunOptions): Promise<void> {
     const [nearbyRaw, gameSeed, stateRaw, reach] = await Promise.all([
         server.readonly('getnearby', {
             entity_type: ctx.entityType,
@@ -47,28 +63,41 @@ export async function runNearby(
     const epochSeed = state?.seed ? Checksum256.from(state.seed) : undefined
 
     console.log(
-        formatOutput(nearby, {json: Boolean(options.json)}, (d) =>
-            formatNearby(d, {
-                gameSeed,
-                epochSeed,
-                reach,
-                showAll: Boolean(options.all),
-            })
-        )
+        formatNearby(nearby, {
+            gameSeed,
+            epochSeed,
+            reach,
+            expand: options.expand,
+            includeOOD: options.includeOod,
+            sort: options.sort,
+            top: options.top,
+            json: options.json,
+        })
     )
 }
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'nearby',
-    description: 'Show nearby systems reachable from an entity',
+    description: 'Show nearby systems and what they hold, ranked by distance.',
     appliesTo: ['ship'],
     build: (ctx) =>
         new Command('nearby')
-            .description('Show nearby systems reachable from an entity')
-            .option('--no-recharge', 'disable recharge projection')
-            .option('--all', 'expand each cell to list every resource (bypasses depth filter)')
+            .description(
+                'Show nearby systems and what they hold, ranked by distance. ' +
+                    'Reserves shown are remaining for the current epoch.'
+            )
+            .option('--no-recharge', 'use current energy instead of projecting a recharge first')
+            .option('--expand', 'list every reachable resource per system (one row each)')
+            .option('--include-ood', 'with --expand, also list out-of-depth (OOD) resources')
+            .option('--top <n>', 'show only the top N systems', parseUint32, 20)
+            .option(
+                '--sort <field>',
+                'sort by distance | energy | time | reserve',
+                parseSort,
+                'distance' as NearbySort
+            )
             .option('--json', 'emit JSON instead of formatted text')
-            .action(async (opts: {recharge: boolean; all?: boolean; json?: boolean}) => {
+            .action(async (opts: RunOptions) => {
                 await runNearby(ctx, opts)
             }),
 }

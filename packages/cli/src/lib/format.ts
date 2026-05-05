@@ -4,14 +4,19 @@ import {
 	deriveStratum,
 	displayName,
 	formatMass,
-	getLocationType,
 	LocationType,
+	PRECISION,
 	resolveItem,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
 import type { ServerTypes } from "@shipload/sdk";
-import { shallowestPerItem } from "./reach";
+import { buildLocationSummary, type LocationSummary } from "./location-summary";
+import {
+	formatLocationSummaryTable,
+	type LocationColumn,
+	summariesToJson,
+} from "./location-summary-table";
 
 export function kvTable(rows: [string, string][], opts: { indent?: string } = {}): string {
 	const indent = opts.indent ?? "  ";
@@ -269,71 +274,130 @@ export function formatLocation(
 	return lines.join("\n");
 }
 
+export type NearbySort = "distance" | "energy" | "time" | "reserve";
+
 export interface NearbyOpts {
 	gameSeed?: Checksum256Type;
 	epochSeed?: Checksum256Type;
 	reach?: { depth: number };
-	showAll?: boolean;
+	expand?: boolean;
+	includeOOD?: boolean;
+	sort?: NearbySort;
+	top?: number;
+	json?: boolean;
+}
+
+const NEARBY_COLUMNS: LocationColumn[] = [
+	"coords",
+	"type",
+	"subtype",
+	"size",
+	"distance",
+	"energy",
+	"time",
+	"resource",
+	"depth",
+	"reserve",
+	"stats",
+	"reach",
+];
+
+function compareSummaries(a: LocationSummary, b: LocationSummary, sort: NearbySort): number {
+	switch (sort) {
+		case "energy":
+			return (a.energyCost ?? 0) - (b.energyCost ?? 0);
+		case "time":
+			return (a.flightTimeS ?? 0) - (b.flightTimeS ?? 0);
+		case "reserve": {
+			const ar = a.resources[0]?.reserve ?? 0;
+			const br = b.resources[0]?.reserve ?? 0;
+			return br - ar;
+		}
+		default:
+			return (a.distance ?? 0) - (b.distance ?? 0);
+	}
 }
 
 export function formatNearby(nearby:ServerTypes.nearby_info, opts: NearbyOpts = {}): string {
-	const { gameSeed, epochSeed, reach, showAll } = opts;
+	const { gameSeed, epochSeed, reach, expand, includeOOD, sort = "distance", top } = opts;
+
+	const summaries: LocationSummary[] = nearby.systems.map((sys) => {
+		const coord = { x: Number(sys.location.coords.x), y: Number(sys.location.coords.y) };
+		const distance = Number(sys.distance) / PRECISION;
+		const travel = {
+			distance: Math.round(distance * 10) / 10,
+			energyCost: Number(sys.energy_cost),
+			flightTimeS: Number(sys.flight_time),
+		};
+		if (!gameSeed) {
+			return {
+				coords: coord,
+				type: LocationType.EMPTY,
+				typeLabel: "?",
+				size: 0,
+				totalNonEmpty: 0,
+				reachableNonEmpty: 0,
+				resources: [],
+				...travel,
+			};
+		}
+		return buildLocationSummary(coord, { gameSeed, epochSeed, reach, includeOOD }, travel);
+	});
+
+	summaries.sort((a, b) => compareSummaries(a, b, sort));
+	const limited = top && top > 0 ? summaries.slice(0, top) : summaries;
+
+	if (opts.json) {
+		return jsonStringify({
+			current: {
+				coords: { x: Number(nearby.current.coordinates.x), y: Number(nearby.current.coordinates.y) },
+				energy: Number(nearby.current.energy),
+			},
+			projected: {
+				coords: {
+					x: Number(nearby.projected.coordinates.x),
+					y: Number(nearby.projected.coordinates.y),
+				},
+				energy: Number(nearby.projected.energy),
+			},
+			max_energy: Number(nearby.max_energy),
+			can_travel: nearby.can_travel,
+			total: summaries.length,
+			shown: limited.length,
+			sort,
+			reach,
+			systems: summariesToJson(limited),
+		});
+	}
+
+	const maxEnergy = Number(nearby.max_energy);
 	const lines = [
-		`Current: ${formatCoords(nearby.current.coordinates)} | Energy: ${nearby.current.energy}/${nearby.max_energy}`,
-		`Projected: ${formatCoords(nearby.projected.coordinates)} | Energy: ${nearby.projected.energy}/${nearby.max_energy}`,
+		`Current:   ${formatCoords(nearby.current.coordinates)}  energy ${nearby.current.energy}/${maxEnergy}`,
+		`Projected: ${formatCoords(nearby.projected.coordinates)}  energy ${nearby.projected.energy}/${maxEnergy}`,
 		`Can Travel: ${nearby.can_travel ? "Yes" : "No"}`,
 		"",
-		`Nearby (${nearby.systems.length}):`,
+		`Nearby (${limited.length}${limited.length < summaries.length ? ` of ${summaries.length}` : ""}, sorted by ${sort}):`,
 	];
-	const sorted = [...nearby.systems].sort((a, b) => Number(a.distance) - Number(b.distance));
 
-	for (const sys of sorted) {
-		const dest = formatCoords(sys.location.coords);
-		const coord = { x: Number(sys.location.coords.x), y: Number(sys.location.coords.y) };
-		const locType = gameSeed ? getLocationType(gameSeed, coord) : undefined;
-		const locTag =
-			locType !== undefined ? ` [${LOCATION_TYPE_NAMES[locType] ?? "Unknown"}]` : "";
-		const cellHead = `  ${dest}${locTag} | ${sys.energy_cost} energy, ${sys.flight_time}s`;
-
-		if (!reach || !gameSeed || !epochSeed) {
-			lines.push(cellHead);
-			continue;
-		}
-
-		const maxDepth = showAll ? undefined : reach.depth;
-		const leads = shallowestPerItem(gameSeed, epochSeed, coord, maxDepth);
-
-		if (!showAll) {
-			const reachable = leads.filter((l) => l.index <= reach.depth);
-			if (reachable.length === 0) {
-				lines.push(`${cellHead} | none reachable`);
-			} else {
-				const top = reachable[0];
-				lines.push(
-					`${cellHead} | ${formatItem(top.itemId)} [${top.index}] reserve ${top.reserve} (${reachable.length} reachable)`,
-				);
-			}
-		} else {
-			lines.push(cellHead);
-			if (leads.length === 0) {
-				lines.push("    (no resources present)");
-			} else {
-				for (const l of leads) {
-					const unreachable = l.index > reach.depth;
-					const suffix = unreachable ? "  OOD" : "";
-					lines.push(
-						`    ${formatItem(l.itemId).padEnd(28)} [${l.index}] reserve ${l.reserve}${suffix}`,
-					);
-				}
-			}
-		}
+	if (limited.length > 0) {
+		lines.push(
+			formatLocationSummaryTable(limited, {
+				columns: NEARBY_COLUMNS,
+				expand: Boolean(expand),
+				maxEnergy,
+			}),
+		);
 	}
 
 	if (reach) {
 		lines.push("");
-		lines.push(`Reach scope: gatherer depth ${reach.depth}`);
-		if (showAll) lines.push("OOD = out of depth");
+		lines.push(
+			includeOOD
+				? `Reachable: non-empty strata at depth ≤ gatherer (${reach.depth}) / total non-empty strata. Includes out-of-depth (OOD) strata.`
+				: `Reachable: non-empty strata at depth ≤ gatherer (${reach.depth}) / total non-empty strata.`,
+		);
 	}
+	if (expand) lines.push("Expanded: one row per reachable resource per location.");
 	return lines.join("\n");
 }
 
