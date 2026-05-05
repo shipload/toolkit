@@ -1,5 +1,12 @@
 # @shipload/cli
 
+## 1.0.0-next.11
+
+### Patch Changes
+
+- f498e6b: - Switched to show cargo changes
+  - Simplified Cargo Additions
+
 ## 1.0.0-next.10
 
 ### Patch Changes
