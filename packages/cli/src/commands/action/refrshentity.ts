@@ -17,10 +17,7 @@ export async function buildAction(opts: RefrshEntityOpts): Promise<Action> {
 
 export async function runRefrshEntity(ctx: EntityContext): Promise<void> {
     const action = await buildAction({entityType: ctx.entityType, entityId: ctx.entityId})
-    await transact(
-        {action},
-        {description: `Refreshing ${ctx.entityType} ${ctx.entityId}`}
-    )
+    await transact({action}, {description: `Refreshing ${ctx.entityType} ${ctx.entityId}`})
 }
 
 const HELP_BEFORE =
