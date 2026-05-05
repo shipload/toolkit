@@ -180,12 +180,8 @@ export type {
     ProjectionOptions,
 } from './scheduling/projection'
 
-export {predictTaskCargoEffects} from './scheduling/predict-cargo'
-export type {
-    PredictedCargoAddition,
-    PredictedCargoTarget,
-    TaskCargoEffect,
-} from './scheduling/predict-cargo'
+export {taskCargoAdditions} from './scheduling/task-cargo'
+export type {TaskCargoAddition} from './scheduling/task-cargo'
 
 export * from './types/capabilities'
 export * from './types/entity'

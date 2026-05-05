@@ -1,8 +1,7 @@
 import {
-    predictTaskCargoEffects,
-    type PredictedCargoAddition,
+    taskCargoAdditions,
     type ServerTypes,
-    type TaskCargoEffect,
+    type TaskCargoAddition,
 } from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Command} from 'commander'
@@ -34,7 +33,7 @@ interface TasksView {
     entity: ServerTypes.entity_info
     schedule: {started: Date; tasks: Task[]} | null
     pending: Task[]
-    cargoEffects: TaskCargoEffect[]
+    additions: TaskCargoAddition[][]
     now: Date
 }
 
@@ -43,15 +42,13 @@ function fmtCoords(c: {x: number; y: number; z: number | null} | null | undefine
     return `(${c.x}, ${c.y})`
 }
 
-function fmtAddition(a: PredictedCargoAddition): string {
-    const target =
-        a.target.kind === 'existing' ? `#${a.target.rowId.toString()}` : `(${a.target.label})`
-    return `${safeItemName(a.item_id)} ×${a.quantity} → ${target}`
+function fmtAddition(a: TaskCargoAddition): string {
+    return `${safeItemName(a.item_id)} ×${a.quantity} · stack ${a.stats.toString()}`
 }
 
-function fmtCargoCell(effect: TaskCargoEffect | undefined): string {
-    if (!effect || effect.additions.length === 0) return ''
-    return effect.additions.map(fmtAddition).join('\n')
+function fmtCargoCell(additions: TaskCargoAddition[] | undefined): string {
+    if (!additions || additions.length === 0) return ''
+    return additions.map(fmtAddition).join('\n')
 }
 
 export function render(view: TasksView): string {
@@ -61,7 +58,7 @@ export function render(view: TasksView): string {
         return [header, '', '  No scheduled tasks.'].join('\n')
     }
 
-    const showCargo = view.cargoEffects.some((e) => e.additions.length > 0)
+    const showCargo = view.additions.some((a) => a.length > 0)
 
     const head = ['#', 'dest', 'type', 'status', 'duration', 'ends']
     const colAligns: ('left' | 'right')[] = ['left', 'left', 'left', 'left', 'left', 'left']
@@ -114,7 +111,7 @@ export function render(view: TasksView): string {
             formatDuration(t.duration),
             endsLabel,
         ]
-        if (showCargo) row.push(fmtCargoCell(view.cargoEffects[i]))
+        if (showCargo) row.push(fmtCargoCell(view.additions[i]))
         table.push(row)
     }
 
@@ -132,16 +129,12 @@ export function render(view: TasksView): string {
     return out.join('\n')
 }
 
-function additionToJson(a: PredictedCargoAddition): Record<string, unknown> {
+function additionToJson(a: TaskCargoAddition): Record<string, unknown> {
     return {
         item_id: a.item_id,
         item_name: safeItemName(a.item_id),
         quantity: a.quantity,
-        stats: a.stats.toString(),
-        target:
-            a.target.kind === 'existing'
-                ? {kind: 'existing', row_id: a.target.rowId.toString()}
-                : {kind: 'new', label: a.target.label},
+        stack_id: a.stats.toString(),
     }
 }
 
@@ -156,9 +149,7 @@ function viewToJson(view: TasksView): Record<string, unknown> {
               }
             : null,
         pending: view.pending,
-        cargo_effects: view.cargoEffects.map((e) => ({
-            additions: e.additions.map(additionToJson),
-        })),
+        additions: view.additions.map((a) => a.map(additionToJson)),
         now: view.now.toISOString(),
     }
 }
@@ -171,10 +162,8 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
         schedule?: {started: {toMilliseconds(): number}; tasks: Task[]}
         pending_tasks?: Task[]
     }
-    const cargoEffects = predictTaskCargoEffects(
-        info.cargo ?? [],
-        (info.schedule?.tasks ?? []) as unknown as ServerTypes.task[]
-    )
+    const rawTasks = (info.schedule?.tasks ?? []) as unknown as ServerTypes.task[]
+    const additions = rawTasks.map(taskCargoAdditions)
     const view: TasksView = {
         entity: info,
         schedule: info.schedule
@@ -184,7 +173,7 @@ export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Prom
               }
             : null,
         pending: info.pending_tasks ?? [],
-        cargoEffects,
+        additions,
         now: new Date(),
     }
     if (opts.json) {
