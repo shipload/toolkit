@@ -12,6 +12,7 @@ import * as gather from './commands/action/gather'
 import * as grouptravel from './commands/action/grouptravel'
 import * as join from './commands/action/join'
 import * as recharge from './commands/action/recharge'
+import * as refrshentity from './commands/action/refrshentity'
 import * as resolve from './commands/action/resolve'
 import * as rmmodule from './commands/action/rmmodule'
 import * as track from './commands/action/track'
@@ -125,6 +126,8 @@ export function build(): Command {
     registerEntitySubcommand(demolish.SUBCOMMAND)
     registerEntitySubcommand(addmodule.SUBCOMMAND)
     registerEntitySubcommand(rmmodule.SUBCOMMAND)
+    registerEntitySubcommand(refrshentity.SUBCOMMAND)
+    registerEntitySubcommand(refrshentity.SUBCOMMAND_REFRESHENTITY_ALIAS)
     registerEntitySubcommand(resolve.SUBCOMMAND)
     registerEntitySubcommand(cancel.SUBCOMMAND)
     registerEntitySubcommand(wait.SUBCOMMAND)
