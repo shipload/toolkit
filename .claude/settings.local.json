@@ -1,0 +1,9 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(make -C /Users/aaron/projects/shipload/toolkit check)",
+            "Bash(git *)",
+            "Bash(make -C /Users/aaron/projects/shipload/toolkit/packages/sdk build)"
+        ]
+    }
+}

@@ -1,5 +1,12 @@
 # @shipload/cli
 
+## 1.0.0-next.13
+
+### Patch Changes
+
+- 04e90dc: - add/rm module for all capable entities
+  - Exporting entity traits (signifying modules)
+
 ## 1.0.0-next.12
 
 ### Patch Changes
