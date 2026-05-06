@@ -8,6 +8,7 @@ import {
 } from '../data/recipes-runtime'
 import {
     ITEM_ENGINE_T1,
+    ITEM_EXTRACTOR_T1_PACKED,
     ITEM_GENERATOR_T1,
     ITEM_GATHERER_T1,
     ITEM_LOADER_T1,
@@ -34,6 +35,7 @@ export const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
     'ship-t1': ITEM_SHIP_T1_PACKED,
     'container-t1': ITEM_CONTAINER_T1_PACKED,
     'warehouse-t1': ITEM_WAREHOUSE_T1_PACKED,
+    'extractor-t1': ITEM_EXTRACTOR_T1_PACKED,
     'container-t2': ITEM_CONTAINER_T2_PACKED,
 }
 

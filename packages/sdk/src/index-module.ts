@@ -16,9 +16,11 @@ export {Ship} from './entities/ship'
 export type {ShipStateInput, PackedModuleInput} from './entities/ship'
 export {Warehouse, computeWarehouseCapabilities} from './entities/warehouse'
 export type {WarehouseStateInput} from './entities/warehouse'
+export {Extractor, computeExtractorCapabilities} from './entities/extractor'
+export type {ExtractorStateInput, ExtractorCapabilities} from './entities/extractor'
 export {Container} from './entities/container'
 export type {ContainerStateInput} from './entities/container'
-export {makeShip, makeWarehouse, makeContainer} from './entities/makers'
+export {makeShip, makeWarehouse, makeExtractor, makeContainer} from './entities/makers'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
@@ -185,7 +187,24 @@ export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 
 export * from './types/capabilities'
 export * from './types/entity'
-export {EntityClass, getEntityClass, getPackedEntityType} from './types/entity-traits'
+export {
+    EntityClass,
+    ENTITY_SHIP,
+    ENTITY_WAREHOUSE,
+    ENTITY_EXTRACTOR,
+    ENTITY_CONTAINER,
+    shipTraits,
+    warehouseTraits,
+    extractorTraits,
+    containerTraits,
+    getEntityClass,
+    getPackedEntityType,
+    getEntityTraits,
+    isShip,
+    isWarehouse,
+    isExtractor,
+    isContainer,
+} from './types/entity-traits'
 export * from './capabilities'
 
 export {

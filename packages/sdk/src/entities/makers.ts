@@ -3,7 +3,12 @@ import {ServerContract} from '../contracts'
 import {type PackedModuleInput, Ship, type ShipStateInput} from './ship'
 import {computeWarehouseCapabilities, Warehouse, type WarehouseStateInput} from './warehouse'
 import {Container, type ContainerStateInput} from './container'
-import {ITEM_SHIP_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
+import {Extractor, computeExtractorCapabilities, type ExtractorStateInput} from './extractor'
+import {
+    ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+} from '../data/item-ids'
 import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
 import {itemMetadata} from '../data/metadata'
 import {getItem} from '../data/catalog'
@@ -180,6 +185,44 @@ export function makeWarehouse(state: WarehouseStateInput): Warehouse {
 
     const entityInfo = ServerContract.Types.entity_info.from(info)
     return new Warehouse(entityInfo)
+}
+
+export function makeExtractor(state: ExtractorStateInput): Extractor {
+    const info: Record<string, unknown> = {
+        type: Name.from('extractor'),
+        id: UInt64.from(state.id),
+        owner: Name.from(state.owner),
+        entity_name: state.name,
+        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
+        cargomass: UInt32.from(0),
+        cargo: state.cargo || [],
+        is_idle: !state.schedule,
+        current_task_elapsed: UInt32.from(0),
+        current_task_remaining: UInt32.from(0),
+        pending_tasks: [],
+    }
+    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
+    if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
+    if (state.schedule) info.schedule = state.schedule
+    if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
+
+    const moduleEntries = assignModulesToSlots(
+        ITEM_EXTRACTOR_T1_PACKED,
+        state.modules ?? [],
+        'Extractor T1'
+    )
+    if (state.modules && state.modules.length > 0) {
+        const layout = getEntityLayout(ITEM_EXTRACTOR_T1_PACKED)?.slots ?? []
+        const installed = toInstalledModules(moduleEntries)
+        const capabilities = computeExtractorCapabilities(installed, layout)
+        if (capabilities.generator) info.generator = capabilities.generator
+        if (capabilities.gatherer) info.gatherer = capabilities.gatherer
+    }
+
+    info.modules = moduleEntries
+
+    const entityInfo = ServerContract.Types.entity_info.from(info)
+    return new Extractor(entityInfo)
 }
 
 export function makeContainer(state: ContainerStateInput): Container {

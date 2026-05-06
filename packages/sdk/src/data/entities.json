@@ -54,6 +54,19 @@
     ]
   },
   {
+    "entityItemId": 10203,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 100
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100
+      }
+    ]
+  },
+  {
     "entityItemId": 20200,
     "slots": []
   }

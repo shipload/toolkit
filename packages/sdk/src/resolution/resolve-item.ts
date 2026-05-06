@@ -39,6 +39,7 @@ import type {ServerContract} from '../contracts'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_EXTRACTOR_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
@@ -270,6 +271,8 @@ function hullCapsForEntity(
             return computeShipHullCapabilities(decoded)
         case ITEM_WAREHOUSE_T1_PACKED:
             return computeWarehouseHullCapabilities(decoded)
+        case ITEM_EXTRACTOR_T1_PACKED:
+            return computeShipHullCapabilities(decoded)
         case ITEM_CONTAINER_T1_PACKED:
             return computeContainerCapabilities(decoded)
         case ITEM_CONTAINER_T2_PACKED:

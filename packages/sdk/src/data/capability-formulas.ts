@@ -15,6 +15,7 @@ export type SlotConsumerKind =
     | 'ship-t1'
     | 'container-t1'
     | 'warehouse-t1'
+    | 'extractor-t1'
     | 'container-t2'
 
 const ENTITY_HULL_SLOTS: Record<number, SlotConsumer> = {
@@ -64,5 +65,6 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     'ship-t1': ENTITY_HULL_SLOTS,
     'container-t1': ENTITY_HULL_SLOTS,
     'warehouse-t1': ENTITY_HULL_SLOTS,
+    'extractor-t1': ENTITY_HULL_SLOTS,
     'container-t2': ENTITY_HULL_SLOTS,
 }

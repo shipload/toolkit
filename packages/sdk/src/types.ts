@@ -12,7 +12,7 @@ import {ServerContract} from './contracts'
 export const PRECISION = 10000
 export const CRAFT_ENERGY_DIVISOR = 150000
 
-export const WAREHOUSE_Z = 500
+export const PLANETARY_STRUCTURE_Z = 0
 
 export const CONTAINER_Z = 300
 

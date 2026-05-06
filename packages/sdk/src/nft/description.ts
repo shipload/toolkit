@@ -14,6 +14,7 @@ import {
     ITEM_CONTAINER_T2_PACKED,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
+    ITEM_EXTRACTOR_T1_PACKED,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
@@ -71,6 +72,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Ship'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
+        case ITEM_EXTRACTOR_T1_PACKED:
+            return 'Extractor'
         case ITEM_CONTAINER_T1_PACKED:
             return 'Container'
         case ITEM_CONTAINER_T2_PACKED:
@@ -187,6 +190,8 @@ export function buildEntityDescription(
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)
+    } else if (itemId === ITEM_EXTRACTOR_T1_PACKED) {
+        baseCapacity = computeBaseCapacityShip(hullStats)
     }
 
     let out = entityDisplayName(itemId)
