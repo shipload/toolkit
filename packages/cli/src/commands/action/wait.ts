@@ -18,11 +18,14 @@ export async function runWait(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'wait',
-    description: "Block until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state",
+    description:
+        'Block until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state',
     appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('wait')
-            .description("Block until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state")
+            .description(
+                'Block until the entity becomes idle (every queued task completes), auto-resolve completed tasks, then print post-state'
+            )
             .addOption(TIMEOUT_OPTION)
             .addOption(AUTO_RESOLVE_OPTION)
             .action(async (opts: {timeout?: number; autoResolve?: boolean}) => {
