@@ -45,6 +45,7 @@ import * as stratum from './commands/query/stratum'
 import * as tasks from './commands/query/tasks'
 import * as fleetTrack from './commands/query/track'
 import * as whoami from './commands/query/whoami'
+import * as waitCmd from './commands/wait'
 import * as debug from './commands/debug'
 import * as tools from './commands/tools'
 import * as update from './commands/update'
@@ -83,6 +84,7 @@ export function build(): Command {
     update.register(program)
     whoami.register(program)
     status.register(program)
+    waitCmd.register(program)
     epoch.register(program)
     player.register(program)
     buildGenericEntityParent(program, parseEntityType, entity.defaultShow)

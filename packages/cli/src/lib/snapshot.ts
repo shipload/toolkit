@@ -34,6 +34,7 @@ export interface EntitySnapshot {
 	current_task_elapsed?: bigint;
 	current_task_remaining?: bigint;
 	pending_tasks?: ServerTypes.task[];
+	modules?: ServerTypes.module_entry[];
 	schedule?: {
 		started?: { toMilliseconds(): number } | string | Date;
 		tasks: unknown[];
@@ -68,6 +69,7 @@ export function entityInfoToSnapshot(
 		current_task_elapsed: BigInt(ei.current_task_elapsed.toString()),
 		current_task_remaining: BigInt(ei.current_task_remaining.toString()),
 		pending_tasks: ei.pending_tasks,
+		modules: ei.modules,
 	};
 	if (ei.capacity != null) snap.capacity = BigInt(ei.capacity.toString());
 	if (ei.energy != null) snap.energy = BigInt(ei.energy.toString());

@@ -9,6 +9,7 @@ export async function ensureNoPendingResolve(
 	entityId: bigint | number,
 	completedCount: number,
 	autoResolve: boolean,
+	opts: { quiet?: boolean } = {},
 ): Promise<void> {
 	if (completedCount === 0) return;
 	if (!autoResolve) return;
@@ -19,7 +20,9 @@ export async function ensureNoPendingResolve(
 	);
 	await transact(
 		{ action },
-		{ description: `Auto-resolved completed tasks on ${entityType} ${entityId}` },
+		opts.quiet
+			? {}
+			: { description: `Auto-resolved completed tasks on ${entityType} ${entityId}` },
 	);
 }
 
