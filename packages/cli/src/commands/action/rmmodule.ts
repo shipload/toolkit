@@ -77,16 +77,16 @@ export async function runRmModule(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'rmmodule',
-    description: 'Remove a module from the ship',
-    appliesTo: ['ship'],
+    description: 'Remove a module from the entity',
+    appliesTo: (traits) => traits.hasModules,
     build: (ctx) =>
         new Command('rmmodule')
-            .description('Remove a module from the ship')
+            .description('Remove a module from the entity')
             .addHelpText(
                 'before',
-                'Requires: ship idle; module slot occupied. ' +
-                    'Module slots are 0-indexed; run `ship <id>` to see the slot map. ' +
-                    'Default removes from the live ship. Pass --target-item-id and --target-stats to remove from a packed-entity cargo instead.\n'
+                'Requires: entity idle; module slot occupied. ' +
+                    'Module slots are 0-indexed; run `<entity-type> <id>` to see the slot map. ' +
+                    'Default removes from the live entity. Pass --target-item-id and --target-stats to remove from a packed-entity cargo instead.\n'
             )
             .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
             .addOption(

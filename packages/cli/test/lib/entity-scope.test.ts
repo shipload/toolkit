@@ -127,4 +127,18 @@ describe("listEntitySubcommands", () => {
 		const result = listEntitySubcommands("container");
 		expect(result.map((s) => s.name)).toEqual(["universal"]);
 	});
+
+	test("supports predicate appliesTo gated by traits", () => {
+		resetRegistryForTesting();
+		registerEntitySubcommand({
+			name: "modules-only",
+			description: "needs module slots",
+			appliesTo: (t) => t.hasModules,
+			build: () => new Command("modules-only").action(() => {}),
+		});
+		expect(listEntitySubcommands("ship").map((s) => s.name)).toEqual(["modules-only"]);
+		expect(listEntitySubcommands("warehouse").map((s) => s.name)).toEqual(["modules-only"]);
+		expect(listEntitySubcommands("extractor").map((s) => s.name)).toEqual(["modules-only"]);
+		expect(listEntitySubcommands("container").map((s) => s.name)).toEqual([]);
+	});
 });

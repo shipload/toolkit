@@ -144,17 +144,17 @@ export async function runAddModule(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'addmodule',
-    description: 'Attach a module cargo to the ship',
-    appliesTo: ['ship'],
+    description: 'Attach a module cargo to the entity',
+    appliesTo: (traits) => traits.hasModules,
     build: (ctx) =>
         new Command('addmodule')
-            .description('Attach a module cargo to the ship')
+            .description('Attach a module cargo to the entity')
             .addHelpText(
                 'before',
-                'Requires: ship idle; module cargo present in cargo. ' +
-                    'Module slots are 0-indexed; run `ship <id>` to see the slot map. ' +
+                'Requires: entity idle; module cargo present in cargo. ' +
+                    'Module slots are 0-indexed; run `<entity-type> <id>` to see the slot map. ' +
                     'Identify the module by (item-id, stats); pass --modules if the module itself is a packed entity.\n' +
-                    'Default behavior installs onto the live ship. Pass --target-item-id and --target-stats to install onto a packed-entity cargo instead.\n'
+                    'Default behavior installs onto the live entity. Pass --target-item-id and --target-stats to install onto a packed-entity cargo instead.\n'
             )
             .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
             .argument('<module-item-id>', 'item id of the module to install', parseUint64)

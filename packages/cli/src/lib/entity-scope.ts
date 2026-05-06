@@ -1,3 +1,4 @@
+import { type EntityTraits, getEntityTraits } from "@shipload/sdk";
 import { type Command, CommanderError } from "commander";
 import { type EntityTypeName, parseUint64 } from "./args";
 import { withValidation } from "./errors";
@@ -8,12 +9,38 @@ export interface EntityContext {
 	entityId: bigint;
 }
 
+export type AppliesToPredicate = (traits: EntityTraits) => boolean;
+
+export type AppliesTo = readonly EntityTypeName[] | AppliesToPredicate;
+
 export interface EntitySubcommand {
 	name: string;
 	description: string;
-	appliesTo: readonly EntityTypeName[];
+	appliesTo: AppliesTo;
 	build: (ctx: EntityContext) => Command;
 }
+
+function appliesToType(applies: AppliesTo, type: EntityTypeName): boolean {
+	if (typeof applies === "function") {
+		return applies(getEntityTraits(type));
+	}
+	return applies.includes(type);
+}
+
+function describeAppliesTo(applies: AppliesTo): string {
+	if (typeof applies === "function") {
+		const matches = ALL_TYPES_FOR_HELP.filter((t) => applies(getEntityTraits(t)));
+		return matches.length > 0 ? matches.join(", ") : "(no entity types)";
+	}
+	return applies.join(", ");
+}
+
+const ALL_TYPES_FOR_HELP: readonly EntityTypeName[] = [
+	"ship",
+	"warehouse",
+	"extractor",
+	"container",
+];
 
 export interface DispatchOptions {
 	defaultShow: (type: EntityTypeName, id: bigint) => Promise<void> | void;
@@ -29,7 +56,7 @@ export function registerEntitySubcommand(sub: EntitySubcommand): void {
 }
 
 export function listEntitySubcommands(type: EntityTypeName): EntitySubcommand[] {
-	return REGISTRY.filter((s) => s.appliesTo.includes(type));
+	return REGISTRY.filter((s) => appliesToType(s.appliesTo, type));
 }
 
 export function resetRegistryForTesting(): void {
@@ -61,10 +88,10 @@ export async function dispatchEntityScope(
 			: `no actions are registered for ${type}`;
 		throw new ValidationError(`unknown action '${name}' for ${type} ${id}`, suggestion);
 	}
-	if (!sub.appliesTo.includes(type)) {
+	if (!appliesToType(sub.appliesTo, type)) {
 		throw new ValidationError(
 			`action '${name}' is not available for ${type}`,
-			`applies to: ${sub.appliesTo.join(", ")}`,
+			`applies to: ${describeAppliesTo(sub.appliesTo)}`,
 		);
 	}
 	const cmd = sub.build({ entityType: type, entityId: id });
@@ -142,7 +169,11 @@ export function buildGenericEntityParent(
 		.helpOption(false)
 		.allowUnknownOption(true)
 		.allowExcessArguments(true)
-		.argument("<type>", "entity type (ship/container/warehouse)", parseEntityType)
+		.argument(
+			"<type>",
+			"entity type (ship/container/warehouse/extractor)",
+			parseEntityType,
+		)
 		.argument("<id>", "entity id", parseUint64)
 		.action(async (type: EntityTypeName, id: bigint, _opts: unknown, cmd: Command) => {
 			await withValidation(() =>
