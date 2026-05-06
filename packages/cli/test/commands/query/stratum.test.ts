@@ -1,6 +1,7 @@
 import {expect, test} from 'bun:test'
 import {type LocationStratum, LocationType} from '@shipload/sdk'
-import {renderDetail} from '../../../src/commands/query/stratum'
+import {Command} from 'commander'
+import {register, renderDetail} from '../../../src/commands/query/stratum'
 import {renderStrataTable} from '../../../src/lib/strata-render'
 
 function stratum(
@@ -29,6 +30,33 @@ test('renderDetail still renders item, reserve, richness from raw stratum row', 
     )
     expect(out).toContain('1000')
     expect(out).toContain('101')
+})
+
+test('renderDetail annotates when the entity can reach the stratum', () => {
+    const out = renderDetail(
+        {item_id: 101, reserve: 1000, seed: 'abc', richness: 50} as any,
+        null,
+        5,
+        {entity: {entityType: 'ship', entityId: 1n}, depth: 5}
+    )
+    expect(out).toContain('Required depth: 5 · in reach for ship:1 (depth 5)')
+})
+
+test('renderDetail annotates when the entity is out of depth', () => {
+    const out = renderDetail(
+        {item_id: 101, reserve: 1000, seed: 'abc', richness: 50} as any,
+        null,
+        6,
+        {entity: {entityType: 'ship', entityId: 1n}, depth: 5}
+    )
+    expect(out).toContain('Required depth: 6 · out of depth for ship:1 (depth 5)')
+})
+
+test('stratum command exposes an entity reach option', () => {
+    const program = new Command()
+    register(program)
+    const command = program.commands.find((c) => c.name() === 'stratum')
+    expect(command?.options.some((o) => o.long === '--entity')).toBe(true)
 })
 
 test('renderStrataTable renders header and per-row non-empty strata', () => {

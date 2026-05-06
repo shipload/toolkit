@@ -5,22 +5,44 @@ import {server} from '../../lib/client'
 import {formatItem, formatOutput, formatReserve} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
 import {loadLocationStrata} from '../../lib/location-loader'
+import {isReachable, resolveReach} from '../../lib/reach'
 import {renderStrata} from '../../lib/strata-render'
+
+export interface StratumReachAnnotation {
+    entity: EntityRef
+    depth: number
+}
 
 export interface StratumDetailData {
     stratum: any
     stats: any
     index: number
+    reach?: StratumReachAnnotation
 }
 
-export function renderDetail(s: any, stats: any, index: number): string {
+function formatEntityRef(ref: EntityRef): string {
+    return `${ref.entityType}:${ref.entityId}`
+}
+
+function formatReachVerdict(index: number, reach?: StratumReachAnnotation): string {
+    if (!reach) return ''
+    const verdict = isReachable(index, reach.depth) ? 'in reach' : 'out of depth'
+    return ` · ${verdict} for ${formatEntityRef(reach.entity)} (depth ${reach.depth})`
+}
+
+export function renderDetail(
+    s: any,
+    stats: any,
+    index: number,
+    reach?: StratumReachAnnotation
+): string {
     const itemId = Number(s.item_id)
     const lines = [
         `Stratum [${index}]:`,
         `  Item:     ${formatItem(itemId)}`,
         `  Reserve:  ${formatReserve(Number(s.reserve), Number(s.reserve_max))} units`,
         `  Richness: ${s.richness} / 1000`,
-        `  Required depth: ${index}`,
+        `  Required depth: ${index}${formatReachVerdict(index, reach)}`,
         `  Seed:     ${s.seed}`,
     ]
     if (stats) {
@@ -45,6 +67,11 @@ function registerSingular(program: Command): void {
         .argument('<x>', 'x coordinate', parseInt64)
         .argument('<y>', 'y coordinate', parseInt64)
         .argument('<index>', 'stratum index', parseUint32)
+        .option(
+            '--entity <ref>',
+            "annotate reachability for this entity's gatherer depth (e.g. ship:1)",
+            parseEntityRef
+        )
         .option('--json', 'emit JSON instead of formatted text')
         .addHelpText(
             'after',
@@ -52,23 +79,33 @@ function registerSingular(program: Command): void {
                 'Richness = stratum quality, 1–1000 (higher = faster gather).\n' +
                 'For a list of all strata at a location, use `strata <x> <y>`.'
         )
-        .action(async (x: bigint, y: bigint, index: number, opts: {json?: boolean}) => {
-            const result = (await server.readonly('getstratum', {
-                x,
-                y,
-                stratum: index,
-            })) as {stratum: any; stats: any}
-            const data: StratumDetailData = {
-                stratum: result.stratum,
-                stats: result.stats,
-                index,
-            }
-            console.log(
-                formatOutput(data, {json: Boolean(opts.json)}, (d) =>
-                    renderDetail(d.stratum, d.stats, d.index)
+        .action(
+            async (
+                x: bigint,
+                y: bigint,
+                index: number,
+                opts: {json?: boolean; entity?: EntityRef}
+            ) => {
+                const entity = opts.entity
+                const result = (await server.readonly('getstratum', {
+                    x,
+                    y,
+                    stratum: index,
+                })) as {stratum: any; stats: any}
+                const reach = entity ? await resolveReach(entity) : undefined
+                const data: StratumDetailData = {
+                    stratum: result.stratum,
+                    stats: result.stats,
+                    index,
+                    reach: entity && reach ? {entity, depth: reach.gatherer.depth} : undefined,
+                }
+                console.log(
+                    formatOutput(data, {json: Boolean(opts.json)}, (d) =>
+                        renderDetail(d.stratum, d.stats, d.index, d.reach)
+                    )
                 )
-            )
-        })
+            }
+        )
 }
 
 function registerList(program: Command): void {
