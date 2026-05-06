@@ -205,6 +205,7 @@ export {
     isExtractor,
     isContainer,
 } from './types/entity-traits'
+export type {EntityTraits, EntityTypeName} from './types/entity-traits'
 export * from './capabilities'
 
 export {
