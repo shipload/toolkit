@@ -14,7 +14,7 @@ test: node_modules
 
 .PHONY: check
 check: node_modules
-	./node_modules/.bin/tsc --noEmit
+	bunx tsc --noEmit
 
 .PHONY: clean
 clean:

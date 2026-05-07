@@ -19,7 +19,7 @@ test-update: node_modules
 
 .PHONY: check
 check: node_modules
-	$(BIN)/tsc --noEmit
+	bunx tsc --noEmit
 
 .PHONY: format
 format: node_modules
