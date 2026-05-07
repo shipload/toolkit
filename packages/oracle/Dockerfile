@@ -8,10 +8,11 @@ COPY packages/cli/package.json ./packages/cli/
 COPY packages/item-renderer/package.json ./packages/item-renderer/
 COPY packages/image-renderer/package.json ./packages/image-renderer/
 COPY packages/oracle/package.json ./packages/oracle/
-RUN bun install --frozen-lockfile --production --ignore-scripts
+RUN bun install --frozen-lockfile --ignore-scripts
 
 FROM install AS source
 COPY . .
+RUN bun --cwd packages/sdk run build
 WORKDIR /app/packages/oracle
 
 FROM source AS release
