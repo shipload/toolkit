@@ -59,9 +59,10 @@ function createMockShip(
         cargomass: number
     }> = {}
 ) {
-    return ServerContract.Types.ship_row.from({
+    return ServerContract.Types.entity_row.from({
         id: UInt64.from(1),
         owner: 'testplayer',
+        kind: 'ship',
         name: 'Test Ship',
         stats: UInt64.from(0),
         coordinates: {x: 0, y: 0, z: overrides.locationZ},

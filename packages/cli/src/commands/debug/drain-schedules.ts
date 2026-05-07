@@ -7,11 +7,11 @@ interface DrainOptions {
     dryRun?: boolean
 }
 
-const ENTITY_TYPES = ['ship', 'warehouse', 'container', 'location'] as const
-type EntityTypeStr = (typeof ENTITY_TYPES)[number]
+type EntityTypeStr = 'ship' | 'warehouse' | 'extractor' | 'container' | 'location'
 
 interface ScheduledRow {
     id: {toString(): string}
+    kind?: {toString(): string}
     schedule?: {
         tasks?: unknown[]
     }
@@ -29,26 +29,33 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
         let progressedThisPass = false
         let totalOpenSchedules = 0
 
-        for (const type of ENTITY_TYPES) {
-            const rows = (await server.table(type).all()) as unknown as ScheduledRow[]
-            for (const row of rows) {
-                const tasks = row.schedule?.tasks
-                if (!tasks || tasks.length === 0) continue
-                totalOpenSchedules++
-                const id = BigInt(row.id.toString())
-                if (options.dryRun) {
-                    console.log(`  ${type}:${id} has ${tasks.length} task(s)`)
-                    continue
-                }
-                try {
-                    const action = shipload.actions.resolve(id, Name.from(type))
-                    await transact({action}, {description: `resolve ${type}:${id}`})
-                    totalDrained++
-                    progressedThisPass = true
-                } catch (err) {
-                    const reason = err instanceof Error ? err.message : String(err)
-                    stuck.push({type, id, reason})
-                }
+        const entityRows = (await server.table('entity').all()) as unknown as ScheduledRow[]
+        const locationRows = (await server.table('location').all()) as unknown as ScheduledRow[]
+        const allRows: Array<{row: ScheduledRow; type: EntityTypeStr}> = [
+            ...entityRows.map((row) => ({
+                row,
+                type: (row.kind?.toString() ?? 'ship') as EntityTypeStr,
+            })),
+            ...locationRows.map((row) => ({row, type: 'location' as EntityTypeStr})),
+        ]
+
+        for (const {row, type} of allRows) {
+            const tasks = row.schedule?.tasks
+            if (!tasks || tasks.length === 0) continue
+            totalOpenSchedules++
+            const id = BigInt(row.id.toString())
+            if (options.dryRun) {
+                console.log(`  ${type}:${id} has ${tasks.length} task(s)`)
+                continue
+            }
+            try {
+                const action = shipload.actions.resolve(id, Name.from(type))
+                await transact({action}, {description: `resolve ${type}:${id}`})
+                totalDrained++
+                progressedThisPass = true
+            } catch (err) {
+                const reason = err instanceof Error ? err.message : String(err)
+                stuck.push({type, id, reason})
             }
         }
 

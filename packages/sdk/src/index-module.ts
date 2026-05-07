@@ -28,8 +28,7 @@ export type loader_stats = ServerContract.Types.loader_stats
 export type schedule = ServerContract.Types.schedule
 export type task = ServerContract.Types.task
 export type cargo_item = ServerContract.Types.cargo_item
-export type warehouse_row = ServerContract.Types.warehouse_row
-export type container_row = ServerContract.Types.container_row
+export type entity_row = ServerContract.Types.entity_row
 export type gatherer_stats = ServerContract.Types.gatherer_stats
 
 export type location_static = ServerContract.Types.location_static
