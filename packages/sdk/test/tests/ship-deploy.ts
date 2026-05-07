@@ -41,14 +41,14 @@ describe('ship deploy formulas', () => {
         assert.isAbove(result.recharge, 0)
     })
 
-    test('lower density = lower hullmass', () => {
-        const light = computeShipHullCapabilities({
+    test('higher density = lower hullmass', () => {
+        const heavy = computeShipHullCapabilities({
             strength: 500,
             density: 100,
             hardness: 500,
             saturation: 500,
         })
-        const heavy = computeShipHullCapabilities({
+        const light = computeShipHullCapabilities({
             strength: 500,
             density: 900,
             hardness: 500,
@@ -108,7 +108,7 @@ describe('ship deploy formulas', () => {
 
     test('hull formula exact values at min', () => {
         const r = computeShipHullCapabilities({strength: 1, density: 1, hardness: 1, saturation: 1})
-        assert.equal(r.hullmass, 25075)
+        assert.equal(r.hullmass, 99925)
         assert.equal(r.capacity, 1002307)
     })
 
@@ -130,7 +130,7 @@ describe('ship deploy formulas', () => {
             hardness: 999,
             saturation: 999,
         })
-        assert.equal(r.hullmass, 99925)
+        assert.equal(r.hullmass, 25075)
         assert.equal(r.capacity, 10000000)
     })
 
@@ -267,7 +267,7 @@ describe('ship deploy formulas', () => {
             hardness: 0,
             saturation: 0,
         })
-        assert.equal(r.hullmass, 25000)
+        assert.equal(r.hullmass, 100000)
         assert.equal(r.capacity, 20000000)
     })
 

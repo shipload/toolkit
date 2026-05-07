@@ -25,8 +25,7 @@ const ORE_STATS: StatDefinition[] = [
         key: 'density',
         label: 'Density',
         abbreviation: 'DEN',
-        purpose: 'Mass per unit',
-        inverted: true,
+        purpose: 'Structural integrity — higher rolls produce lighter hulls',
     },
 ]
 

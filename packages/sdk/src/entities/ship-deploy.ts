@@ -23,7 +23,7 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
     const hardness = stats.hardness
     const saturation = stats.saturation
 
-    const hullmass = 25000 + 75 * density
+    const hullmass = 100000 - 75 * density
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(1000000 * 10 ** exponent)
@@ -179,7 +179,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const hardness = stats.hardness
     const saturation = stats.saturation
 
-    const hullmass = 25000 + 75 * density
+    const hullmass = 100000 - 75 * density
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2997.0
     const capacity = Math.floor(20000000 * 10 ** exponent)

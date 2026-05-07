@@ -95,7 +95,7 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
     const hardness = stats.hardness
     const saturation = stats.saturation
 
-    const hullmass = 25000 + 75 * density
+    const hullmass = 100000 - 75 * density
 
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2997
@@ -113,7 +113,7 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
     const hardness = stats.hardness
     const saturation = stats.saturation
 
-    const hullmass = 20000 + 50 * density
+    const hullmass = 70000 - 50 * density
 
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2500

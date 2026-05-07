@@ -34,7 +34,7 @@ function idiv(a: number, b: number): number {
 
 export function computeBaseHullmass(stats: bigint): number {
     const density = decodeStat(stats, 1)
-    return 25000 + 75 * density
+    return 100000 - 75 * density
 }
 
 export function computeBaseCapacityShip(stats: bigint): number {
