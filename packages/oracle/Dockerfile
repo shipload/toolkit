@@ -2,6 +2,7 @@ FROM oven/bun:1 AS base
 WORKDIR /app
 
 FROM base AS install
+RUN apt-get update && apt-get install -y --no-install-recommends make && rm -rf /var/lib/apt/lists/*
 COPY package.json bun.lock tsconfig.base.json ./
 COPY packages/sdk/package.json ./packages/sdk/
 COPY packages/cli/package.json ./packages/cli/
@@ -12,7 +13,7 @@ RUN bun install --frozen-lockfile --ignore-scripts
 
 FROM install AS source
 COPY . .
-RUN bun --cwd packages/sdk run build
+RUN cd packages/sdk && bun run build
 WORKDIR /app/packages/oracle
 
 FROM source AS release
