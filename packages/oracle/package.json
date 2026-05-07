@@ -1,0 +1,25 @@
+{
+    "name": "@shipload/oracle",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "bun src/index.ts",
+        "dev": "bun --hot src/index.ts",
+        "build": "bun build src/index.ts --compile --outfile dist/shipload-oracle",
+        "check": "tsc --noEmit",
+        "test": "exit 0"
+    },
+    "dependencies": {
+        "@shipload/sdk": "workspace:^",
+        "@wharfkit/antelope": "1.2.0",
+        "@wharfkit/session": "1.8.0-rc1",
+        "@wharfkit/wallet-plugin-privatekey": "1.1.0",
+        "toad-scheduler": "^3.0.0",
+        "winston": "^3.11.0"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.4.0"
+    }
+}

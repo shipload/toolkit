@@ -1,0 +1,9 @@
+services:
+  oracle:
+    build:
+      context: ../..
+      dockerfile: packages/oracle/Dockerfile
+    restart: always
+    env_file: .env
+    volumes:
+      - ./shared:/app/packages/oracle/shared

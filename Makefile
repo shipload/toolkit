@@ -1,9 +1,9 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: install check check/sdk check/item-renderer check/image-renderer check/cli
-.PHONY: test test/sdk test/item-renderer test/image-renderer test/cli
-.PHONY: build build/sdk build/item-renderer build/image-renderer build/cli
-.PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli
+.PHONY: install check check/sdk check/item-renderer check/image-renderer check/cli check/oracle
+.PHONY: test test/sdk test/item-renderer test/image-renderer test/cli test/oracle
+.PHONY: build build/sdk build/item-renderer build/image-renderer build/cli build/oracle
+.PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli dev/oracle
 .PHONY: format codegen sync/catalog
 .PHONY: changeset release-status release publish release/cli
 .PHONY: clean
@@ -19,6 +19,7 @@ check/sdk:           ; $(MAKE) -C packages/sdk check
 check/item-renderer: ; $(MAKE) -C packages/item-renderer check
 check/image-renderer:; $(MAKE) -C packages/image-renderer check
 check/cli:           ; $(MAKE) -C packages/cli check
+check/oracle:        ; $(MAKE) -C packages/oracle check
 
 test:
 	bun --filter='@shipload/*' run test
@@ -27,6 +28,7 @@ test/sdk:            ; $(MAKE) -C packages/sdk test
 test/item-renderer:  ; $(MAKE) -C packages/item-renderer test
 test/image-renderer: ; $(MAKE) -C packages/image-renderer test
 test/cli:            ; $(MAKE) -C packages/cli test
+test/oracle:         ; $(MAKE) -C packages/oracle test
 
 build:
 	bun --filter='@shipload/*' run build
@@ -35,8 +37,10 @@ build/sdk:           ; $(MAKE) -C packages/sdk build
 build/item-renderer: ; $(MAKE) -C packages/item-renderer build
 build/image-renderer:; $(MAKE) -C packages/image-renderer build
 build/cli:           ; $(MAKE) -C packages/cli build
+build/oracle:        ; $(MAKE) -C packages/oracle build
 
 dev/sdk:             ; $(MAKE) -C packages/sdk dev
+dev/oracle:          ; $(MAKE) -C packages/oracle dev
 
 format:
 	bun biome check . --write
