@@ -1,17 +1,21 @@
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
+import {parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
-export async function buildAction(ctx: EntityContext): Promise<Action> {
+export async function buildAction(ctx: EntityContext, nexusId: bigint): Promise<Action> {
     const shipload = await getShipload()
-    return shipload.actions.wrapEntity({
-        entityType: ctx.entityType,
-        entityId: ctx.entityId,
-    })
+    return shipload.actions.wrapEntity(
+        {
+            entityType: ctx.entityType,
+            entityId: ctx.entityId,
+        },
+        nexusId
+    )
 }
 
 interface WrapEntityCliOptions {
@@ -21,10 +25,11 @@ interface WrapEntityCliOptions {
 
 export async function runWrapEntity(
     ctx: EntityContext,
+    nexusId: bigint,
     options: WrapEntityCliOptions
 ): Promise<void> {
     await withValidation(async () => {
-        const action = await buildAction(ctx)
+        const action = await buildAction(ctx, nexusId)
         const result = await transact(
             {action},
             {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into NFT`}
@@ -46,12 +51,13 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'after',
                 `
 Example:
-  shiploadcli ship 2 wrapentity
+  shiploadcli ship 2 wrapentity 5
 `
             )
+            .argument('<nexus-id>', 'nexus id (entity must be at this nexus)', parseUint64)
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
-            .action(async (opts: WrapEntityCliOptions) => {
-                await runWrapEntity(ctx, opts)
+            .action(async (nexusId: bigint, opts: WrapEntityCliOptions) => {
+                await runWrapEntity(ctx, nexusId, opts)
             }),
 }

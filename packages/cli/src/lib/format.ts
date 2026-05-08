@@ -196,7 +196,6 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 export function formatPlayer(player:ServerTypes.player_info): string {
 	const lines = [
 		`${player.company_name || "No Company"} (${player.owner})`,
-		`Ships: ${player.ship_count} | Warehouses: ${player.warehouse_count} | Containers: ${player.container_count}`,
 	];
 	if (!player.is_player) {
 		lines.unshift("[Not in game]");

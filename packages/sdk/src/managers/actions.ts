@@ -234,6 +234,7 @@ export class ActionsManager extends BaseManager {
         owner: NameType,
         entityType: EntityTypeName,
         entityId: UInt64Type,
+        nexusId: UInt64Type,
         items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
         const cargoItems = items.map((i) => ServerContract.Types.cargo_item.from(i))
@@ -241,6 +242,7 @@ export class ActionsManager extends BaseManager {
             owner: Name.from(owner),
             entity_type: entityType,
             entity_id: UInt64.from(entityId),
+            nexus_id: UInt64.from(nexusId),
             items: cargoItems,
         })
     }
@@ -254,10 +256,11 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    wrapEntity(entity: EntityRefInput): Action {
+    wrapEntity(entity: EntityRefInput, nexusId: UInt64Type): Action {
         return this.server.action('wrapentity', {
             entity_type: Name.from(entity.entityType),
             entity_id: UInt64.from(entity.entityId),
+            nexus_id: UInt64.from(nexusId),
         })
     }
 

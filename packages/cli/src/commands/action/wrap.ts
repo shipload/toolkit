@@ -12,6 +12,7 @@ export interface WrapOpts {
     owner: string
     entityType: EntityTypeName
     entityId: bigint
+    nexusId: bigint
     itemId: bigint
     stackId: bigint
     quantity: bigint
@@ -28,7 +29,9 @@ export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<
         },
         opts.quantity
     )
-    return sl.actions.wrap(opts.owner, Name.from(opts.entityType), opts.entityId, [item])
+    return sl.actions.wrap(opts.owner, Name.from(opts.entityType), opts.entityId, opts.nexusId, [
+        item,
+    ])
 }
 
 interface WrapCliOptions {
@@ -40,6 +43,7 @@ interface WrapCliOptions {
 export async function runWrap(
     ctx: EntityContext,
     owner: string,
+    nexusId: bigint,
     itemId: bigint,
     stackId: bigint,
     quantity: bigint,
@@ -49,6 +53,7 @@ export async function runWrap(
         owner,
         entityType: ctx.entityType,
         entityId: ctx.entityId,
+        nexusId,
         itemId,
         stackId,
         quantity,
@@ -70,10 +75,11 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Wrap cargo into an NFT for the specified owner')
             .addHelpText(
                 'before',
-                'Requires: deployed entity with cargo; deploy target idle; caller owns both entities.\n' +
+                'Requires: deployed entity at a nexus with cargo; caller owns the entity.\n' +
                     'Cargo is identified by (item-id, stack-id) — packed-entity stacks may also need --modules.\n'
             )
             .argument('<owner>', 'recipient account name')
+            .argument('<nexus-id>', 'nexus id (entity must be at this nexus)', parseUint64)
             .argument('<item-id>', 'item id', parseUint64)
             .argument('<stack-id>', 'cargo stack id (often 0)', parseUint64)
             .argument('<quantity>', 'quantity to wrap', parseUint64)
@@ -88,12 +94,13 @@ export const SUBCOMMAND: EntitySubcommand = {
             .action(
                 async (
                     owner: string,
+                    nexusId: bigint,
                     itemId: bigint,
                     stackId: bigint,
                     quantity: bigint,
                     opts: WrapCliOptions
                 ) => {
-                    await runWrap(ctx, owner, itemId, stackId, quantity, opts)
+                    await runWrap(ctx, owner, nexusId, itemId, stackId, quantity, opts)
                 }
             ),
 }

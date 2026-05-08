@@ -9,7 +9,6 @@ function createMockStateRow(
         epoch: number
         seed: string
         salt: number
-        ships: number
         commit: string
     }> = {}
 ) {
@@ -18,7 +17,6 @@ function createMockStateRow(
         epoch: UInt64.from(overrides.epoch ?? 5),
         seed: overrides.seed ?? 'abcd'.repeat(16),
         salt: UInt64.from(overrides.salt ?? 12345),
-        ships: UInt64.from(overrides.ships ?? 100),
         commit: overrides.commit ?? 'ef01'.repeat(16),
     })
 }
@@ -128,15 +126,6 @@ describe('GameState', () => {
             const gameState = GameState.from(stateRow)
 
             assert.isFalse(gameState.isEnabled)
-        })
-    })
-
-    describe('shipCount', () => {
-        test('returns number of ships', () => {
-            const stateRow = createMockStateRow({ships: 42})
-            const gameState = GameState.from(stateRow)
-
-            assert.equal(gameState.shipCount, 42)
         })
     })
 
@@ -264,7 +253,6 @@ describe('GameState', () => {
             const stateRow = createMockStateRow({
                 enabled: true,
                 epoch: 10,
-                ships: 50,
             })
             const gameState = GameState.from(stateRow)
 
@@ -272,7 +260,6 @@ describe('GameState', () => {
             assert.isObject(summary)
             assert.equal(summary.enabled, true)
             assert.equal(summary.epoch, '10')
-            assert.equal(summary.ships, 50)
             assert.isBoolean(summary.hasSeed)
             assert.isBoolean(summary.hasCommit)
         })

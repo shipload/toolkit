@@ -13,6 +13,7 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+.claude/
 
 # Wrangler
 .wrangler/

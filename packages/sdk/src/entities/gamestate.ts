@@ -59,13 +59,6 @@ export class GameState extends ServerContract.Types.state_row {
     }
 
     /**
-     * Get the total number of ships in the game
-     */
-    get shipCount(): number {
-        return Number(this.ships)
-    }
-
-    /**
      * Get the current salt value (used for random number generation)
      */
     get currentSalt(): UInt64 {
@@ -137,14 +130,12 @@ export class GameState extends ServerContract.Types.state_row {
     get summary(): {
         enabled: boolean
         epoch: string
-        ships: number
         hasSeed: boolean
         hasCommit: boolean
     } {
         return {
             enabled: this.enabled,
             epoch: this.epoch.toString(),
-            ships: this.shipCount,
             hasSeed: !this.seed.equals(Checksum256.from('0'.repeat(64))),
             hasCommit: !this.commit.equals(Checksum256.from('0'.repeat(64))),
         }

@@ -71,7 +71,7 @@ describe('ActionsManager', () => {
 
     describe('wrap', () => {
         test('creates wrap action', () => {
-            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, [
+            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, 99, [
                 {item_id: 7, stats: 0n, modules: [], quantity: 5},
             ])
             assert.equal(action.name.toString(), 'wrap')

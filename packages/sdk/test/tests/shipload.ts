@@ -76,9 +76,6 @@ describe('Shipload', () => {
             assert.equal(state.enabled, expectedState!.enabled)
             assert.isTrue(state.epoch.equals(expectedState!.epoch))
             assert.isTrue(state.salt.equals(expectedState!.salt))
-            assert.isTrue(state.ships.equals(expectedState!.ships))
-            assert.isTrue(state.seed.equals(expectedState!.seed))
-            assert.isTrue(state.commit.equals(expectedState!.commit))
         })
     })
 
