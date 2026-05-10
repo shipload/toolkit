@@ -130,7 +130,7 @@ export function formatTaskShort(t: ServerTypes.task): string {
 			const last = t.cargo?.[t.cargo.length - 1];
 			if (!last) return "Craft";
 			const name = itemDisplayName(Number(last.item_id)) ?? `Item ${Number(last.item_id)}`;
-			return `Craft ${name}`;
+			return `Craft ${Number(last.quantity)} ${name}`;
 		}
 		case TaskType.DEPLOY: {
 			const first = t.cargo?.[0];

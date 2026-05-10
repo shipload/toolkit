@@ -9,7 +9,7 @@ import {renderEntitySummary} from '../primitives/entity-summary'
 import {type FooterStatus, renderFooter} from '../primitives/footer'
 import {renderProgressBar} from '../primitives/progress-bar'
 import {createResolveModal, type ResolveModalHandle} from '../primitives/resolve-modal'
-import {renderTaskRow} from '../primitives/task-row'
+import {GUTTER_WIDTH, renderTaskRow} from '../primitives/task-row'
 import type {View} from '../view'
 
 export interface TrackViewCtx {
@@ -350,14 +350,18 @@ function busyBody(t: SnapshotTick): VChild[] {
                 prefix: '  ▶ ',
                 task: active,
                 duration: formatDuration(Number(active.duration ?? 0)),
+                completionTime: completionTimes[activeIdx]
+                    ? formatTimeUTC(completionTimes[activeIdx])
+                    : '',
             })
         )
     }
     const remainingLabel = formatDuration(Math.max(0, Math.ceil(t.remaining_s)))
     const ratio = t.total_s > 0 ? t.elapsed_s / t.total_s : 0
+    const barIndent = ' '.repeat(GUTTER_WIDTH + 2)
     lines.push(
         Text({
-            content: `  ${renderProgressBar(ratio, 28)} ${remainingLabel} remaining`,
+            content: `${barIndent}${renderProgressBar(ratio, 28)} ${remainingLabel} remaining`,
         })
     )
 

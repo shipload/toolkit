@@ -204,7 +204,18 @@ describe("formatTaskShort", () => {
 				{ item_id: 10001 as never, quantity: 1 as never, stats: 0n as never },
 			] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Craft Hull Plates");
+		expect(formatTaskShort(t)).toBe("Craft 1 Hull Plates");
+	});
+
+	test("Craft includes the output quantity", () => {
+		const t = task({
+			type: 7 as never,
+			cargo: [
+				{ item_id: 101 as never, quantity: 30 as never, stats: 0n as never },
+				{ item_id: 10001 as never, quantity: 5 as never, stats: 0n as never },
+			] as never,
+		});
+		expect(formatTaskShort(t)).toBe("Craft 5 Hull Plates");
 	});
 
 	test("Craft with empty cargo is bare 'Craft' (defensive)", () => {
