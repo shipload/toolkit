@@ -11,11 +11,7 @@ export interface FooterMeta {
     sinceLastFetch_s: number
 }
 
-export function renderFooter(
-    hints: HotkeyHint[],
-    status: FooterStatus,
-    meta?: FooterMeta
-): VChild {
+export function renderFooter(hints: HotkeyHint[], status: FooterStatus, meta?: FooterMeta): VChild {
     const left = hints.map((h) => `${h.key} ${h.label}`).join('  ·  ')
     const right = formatStatus(status)
     const rightChildren: VChild[] = []
