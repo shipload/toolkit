@@ -1,5 +1,5 @@
-import {ServerTypes} from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import {ServerTypes, type Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName, parseUint16, parseUint32} from '../../lib/args'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
@@ -34,8 +34,8 @@ export interface CraftOpts {
     inputs: ResolvedCargoInput[]
 }
 
-export async function buildAction(opts: CraftOpts): Promise<Action> {
-    const shipload = await getShipload()
+export async function buildAction(opts: CraftOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
     const cargoInputs = opts.inputs.map((i) =>
         ServerTypes.cargo_item.from({
             item_id: i.itemId,
@@ -44,13 +44,7 @@ export async function buildAction(opts: CraftOpts): Promise<Action> {
             modules: [],
         })
     )
-    return shipload.actions.craft(
-        Name.from(opts.entityType),
-        opts.entityId,
-        opts.recipeId,
-        opts.quantity,
-        cargoInputs
-    )
+    return sl.actions.craft(opts.entityId, opts.recipeId, opts.quantity, cargoInputs)
 }
 
 type CraftCliOptions = WaitableOptions & {

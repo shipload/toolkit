@@ -6,15 +6,11 @@ import {Container} from '../entities/container'
 import {Extractor} from '../entities/extractor'
 import type {ServerContract} from '../contracts'
 
-export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'container' | 'location'
+export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'container'
 
 export class EntitiesManager extends BaseManager {
-    async getEntity(
-        type: EntityType,
-        id: UInt64Type
-    ): Promise<Ship | Warehouse | Extractor | Container> {
+    async getEntity(id: UInt64Type): Promise<Ship | Warehouse | Extractor | Container> {
         const result = await this.server.readonly('getentity', {
-            entity_type: Name.from(type),
             entity_id: id,
         })
         const entityInfo = result as ServerContract.Types.entity_info
@@ -28,7 +24,7 @@ export class EntitiesManager extends BaseManager {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
             owner: ownerName,
-            entity_type: type ? Name.from(type) : null,
+            entity_type: type,
         })
         const entities = result as ServerContract.Types.entity_info[]
         return entities.map((entity) => this.wrapEntity(entity))
@@ -41,25 +37,25 @@ export class EntitiesManager extends BaseManager {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getsummaries', {
             owner: ownerName,
-            entity_type: type ? Name.from(type) : null,
+            entity_type: type,
         })
         return result as ServerContract.Types.entity_summary[]
     }
 
     async getShip(id: UInt64Type): Promise<Ship> {
-        return (await this.getEntity('ship', id)) as Ship
+        return (await this.getEntity(id)) as Ship
     }
 
     async getWarehouse(id: UInt64Type): Promise<Warehouse> {
-        return (await this.getEntity('warehouse', id)) as Warehouse
+        return (await this.getEntity(id)) as Warehouse
     }
 
     async getContainer(id: UInt64Type): Promise<Container> {
-        return (await this.getEntity('container', id)) as Container
+        return (await this.getEntity(id)) as Container
     }
 
     async getExtractor(id: UInt64Type): Promise<Extractor> {
-        return (await this.getEntity('extractor', id)) as Extractor
+        return (await this.getEntity(id)) as Extractor
     }
 
     async getShips(owner: NameType | ServerContract.Types.player_row): Promise<Ship[]> {
@@ -105,15 +101,11 @@ export class EntitiesManager extends BaseManager {
     private wrapEntity(
         entity: ServerContract.Types.entity_info
     ): Ship | Warehouse | Extractor | Container {
-        if (entity.type.equals('ship')) {
-            return new Ship(entity)
-        } else if (entity.type.equals('warehouse')) {
-            return new Warehouse(entity)
-        } else if (entity.type.equals('extractor')) {
-            return new Extractor(entity)
-        } else {
-            return new Container(entity)
-        }
+        if (entity.type.equals('ship')) return new Ship(entity)
+        if (entity.type.equals('warehouse')) return new Warehouse(entity)
+        if (entity.type.equals('extractor')) return new Extractor(entity)
+        if (entity.type.equals('container')) return new Container(entity)
+        throw new Error(`unknown entity type: ${entity.type}`)
     }
 
     private resolveOwner(owner: NameType | ServerContract.Types.player_row): Name {

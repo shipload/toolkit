@@ -4,7 +4,6 @@ import {makeClient} from '@wharfkit/mock-data'
 import Shipload from '$lib'
 import {Chains} from '@wharfkit/common'
 import {Int64, UInt64} from '@wharfkit/antelope'
-import {EntityType} from 'src/types'
 
 const client = makeClient('https://jungle4.greymass.com')
 
@@ -71,7 +70,7 @@ describe('ActionsManager', () => {
 
     describe('wrap', () => {
         test('creates wrap action', () => {
-            const action = shipload.actions.wrap('alice', EntityType.SHIP, 42, 99, [
+            const action = shipload.actions.wrap('alice', 42, 99, [
                 {item_id: 7, stats: 0n, modules: [], quantity: 5},
             ])
             assert.equal(action.name.toString(), 'wrap')
@@ -81,7 +80,7 @@ describe('ActionsManager', () => {
 
     describe('transfer', () => {
         test('creates transfer action with single item', () => {
-            const action = shipload.actions.transfer(EntityType.SHIP, 1, EntityType.WAREHOUSE, 2, [
+            const action = shipload.actions.transfer(1, 2, [
                 {item_id: 101, stats: 0n, modules: [], quantity: 10},
             ])
             assert.equal(action.name.toString(), 'transfer')
@@ -89,7 +88,7 @@ describe('ActionsManager', () => {
         })
 
         test('creates transfer action with multiple items', () => {
-            const action = shipload.actions.transfer(EntityType.SHIP, 1, EntityType.WAREHOUSE, 2, [
+            const action = shipload.actions.transfer(1, 2, [
                 {item_id: 101, stats: 0n, modules: [], quantity: 10},
                 {item_id: 201, stats: 1n, modules: [], quantity: 5},
             ])
@@ -100,7 +99,7 @@ describe('ActionsManager', () => {
 
     describe('deploy', () => {
         test('creates deploy action with cargo_ref', () => {
-            const action = shipload.actions.deploy(EntityType.SHIP, 42, {
+            const action = shipload.actions.deploy(42, {
                 item_id: 1001,
                 stats: 12345n,
                 modules: [],
@@ -112,7 +111,7 @@ describe('ActionsManager', () => {
 
     describe('addmodule', () => {
         test('creates addmodule action without target', () => {
-            const action = shipload.actions.addmodule(EntityType.SHIP, 42, 0, {
+            const action = shipload.actions.addmodule(42, 0, {
                 item_id: 2001,
                 stats: 0n,
                 modules: [],
@@ -123,7 +122,6 @@ describe('ActionsManager', () => {
 
         test('creates addmodule action with target_ref', () => {
             const action = shipload.actions.addmodule(
-                EntityType.SHIP,
                 42,
                 0,
                 {item_id: 2001, stats: 0n, modules: []},
@@ -136,13 +134,13 @@ describe('ActionsManager', () => {
 
     describe('rmmodule', () => {
         test('creates rmmodule action without target', () => {
-            const action = shipload.actions.rmmodule(EntityType.SHIP, 42, 0)
+            const action = shipload.actions.rmmodule(42, 0)
             assert.equal(action.name.toString(), 'rmmodule')
             assert.isDefined(action.data)
         })
 
         test('creates rmmodule action with target_ref', () => {
-            const action = shipload.actions.rmmodule(EntityType.SHIP, 42, 0, {
+            const action = shipload.actions.rmmodule(42, 0, {
                 item_id: 1001,
                 stats: 12345n,
                 modules: [],

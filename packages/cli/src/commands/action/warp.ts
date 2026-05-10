@@ -1,4 +1,5 @@
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {type EntityTypeName, parseInt64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -15,9 +16,9 @@ export interface WarpOpts {
     y: bigint
 }
 
-export async function buildAction(opts: WarpOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.warp(opts.entityId, {x: opts.x, y: opts.y}, Name.from(opts.entityType))
+export async function buildAction(opts: WarpOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.warp(opts.entityId, {x: opts.x, y: opts.y})
 }
 
 interface WarpCliOptions {

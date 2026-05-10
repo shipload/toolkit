@@ -1,3 +1,4 @@
+import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseInt64} from '../../lib/args'
@@ -23,9 +24,9 @@ export interface TravelOpts {
     recharge: boolean
 }
 
-export async function buildAction(opts: TravelOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.travel(opts.shipId, {x: opts.x, y: opts.y}, opts.recharge)
+export async function buildAction(opts: TravelOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.travel(opts.shipId, {x: opts.x, y: opts.y}, opts.recharge)
 }
 
 type TravelCliOptions = WaitableOptions & {

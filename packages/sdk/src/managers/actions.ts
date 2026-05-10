@@ -11,7 +11,7 @@ import {
     type UInt64Type,
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {type CoordinatesType, EntityType, type EntityTypeName} from '../types'
+import type {CoordinatesType} from '../types'
 import {ServerContract} from '../contracts'
 
 export type EntityRefInput = {
@@ -25,7 +25,6 @@ export class ActionsManager extends BaseManager {
         const y = Int64.from(destination.y)
 
         return this.server.action('travel', {
-            entity_type: EntityType.SHIP,
             id: UInt64.from(shipId),
             x,
             y,
@@ -51,13 +50,8 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    resolve(
-        entityId: UInt64Type,
-        entityType: EntityTypeName = EntityType.SHIP,
-        count?: UInt64Type
-    ): Action {
+    resolve(entityId: UInt64Type, count?: UInt64Type): Action {
         const params: ServerContract.ActionParams.resolve = {
-            entity_type: entityType,
             id: UInt64.from(entityId),
         }
         if (count !== undefined) {
@@ -66,46 +60,34 @@ export class ActionsManager extends BaseManager {
         return this.server.action('resolve', params)
     }
 
-    cancel(
-        entityId: UInt64Type,
-        count: UInt64Type,
-        entityType: EntityTypeName = EntityType.SHIP
-    ): Action {
+    cancel(entityId: UInt64Type, count: UInt64Type): Action {
         return this.server.action('cancel', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
             count: UInt64.from(count),
         })
     }
 
-    recharge(entityId: UInt64Type, entityType: EntityTypeName = EntityType.SHIP): Action {
+    recharge(entityId: UInt64Type): Action {
         return this.server.action('recharge', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
         })
     }
 
-    refrshentity(entityType: NameType, entityId: UInt64Type): Action {
+    refrshentity(entityId: UInt64Type): Action {
         return this.server.action('refrshentity', {
-            entity_type: Name.from(entityType),
             entity_id: UInt64.from(entityId),
         })
     }
 
     transfer(
-        sourceType: EntityTypeName,
         sourceId: UInt64Type,
-        destType: EntityTypeName,
         destId: UInt64Type,
         items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const cargoItems = items.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('transfer', {
-            source_type: sourceType,
             source_id: UInt64.from(sourceId),
-            dest_type: destType,
             dest_id: UInt64.from(destId),
-            items: cargoItems,
+            items,
         })
     }
 
@@ -123,35 +105,24 @@ export class ActionsManager extends BaseManager {
     }
 
     gather(
-        source: EntityRefInput,
-        destination: EntityRefInput,
+        sourceId: UInt64Type,
+        destinationId: UInt64Type,
         stratum: UInt16Type,
         quantity: UInt32Type
     ): Action {
         return this.server.action('gather', {
-            source: ServerContract.Types.entity_ref.from({
-                entity_type: source.entityType,
-                entity_id: UInt64.from(source.entityId),
-            }),
-            destination: ServerContract.Types.entity_ref.from({
-                entity_type: destination.entityType,
-                entity_id: UInt64.from(destination.entityId),
-            }),
+            source_id: UInt64.from(sourceId),
+            destination_id: UInt64.from(destinationId),
             stratum: UInt16.from(stratum),
             quantity: UInt32.from(quantity),
         })
     }
 
-    warp(
-        entityId: UInt64Type,
-        destination: CoordinatesType,
-        entityType: EntityTypeName = EntityType.SHIP
-    ): Action {
+    warp(entityId: UInt64Type, destination: CoordinatesType): Action {
         const x = Int64.from(destination.x)
         const y = Int64.from(destination.y)
 
         return this.server.action('warp', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
             x,
             y,
@@ -159,115 +130,90 @@ export class ActionsManager extends BaseManager {
     }
 
     craft(
-        entityType: EntityTypeName,
         entityId: UInt64Type,
         recipeId: number,
         quantity: number,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const cargoInputs = inputs.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('craft', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
-            inputs: cargoInputs,
+            inputs,
         })
     }
 
-    blend(
-        entityType: EntityTypeName,
-        entityId: UInt64Type,
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
-    ): Action {
-        const cargoInputs = inputs.map((i) => ServerContract.Types.cargo_item.from(i))
+    blend(entityId: UInt64Type, inputs: ServerContract.ActionParams.Type.cargo_item[]): Action {
         return this.server.action('blend', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
-            inputs: cargoInputs,
+            inputs,
         })
     }
 
-    deploy(
-        entityType: EntityTypeName,
-        entityId: UInt64Type,
-        ref: ServerContract.ActionParams.Type.cargo_ref
-    ): Action {
+    deploy(entityId: UInt64Type, ref: ServerContract.ActionParams.Type.cargo_ref): Action {
         return this.server.action('deploy', {
-            entity_type: entityType,
             id: UInt64.from(entityId),
-            ref: ServerContract.Types.cargo_ref.from(ref),
+            ref,
         })
     }
 
     addmodule(
-        entityType: EntityTypeName,
         entityId: UInt64Type,
         moduleIndex: number,
         moduleRef: ServerContract.ActionParams.Type.cargo_ref,
         targetRef: ServerContract.ActionParams.Type.cargo_ref | null = null
     ): Action {
         return this.server.action('addmodule', {
-            entity_type: entityType,
             entity_id: UInt64.from(entityId),
             module_index: moduleIndex,
-            module_ref: ServerContract.Types.cargo_ref.from(moduleRef),
-            target_ref: targetRef ? ServerContract.Types.cargo_ref.from(targetRef) : null,
+            module_ref: moduleRef,
+            target_ref: targetRef ?? undefined,
         })
     }
 
     rmmodule(
-        entityType: EntityTypeName,
         entityId: UInt64Type,
         moduleIndex: number,
         targetRef: ServerContract.ActionParams.Type.cargo_ref | null = null
     ): Action {
         return this.server.action('rmmodule', {
-            entity_type: entityType,
             entity_id: UInt64.from(entityId),
             module_index: moduleIndex,
-            target_ref: targetRef ? ServerContract.Types.cargo_ref.from(targetRef) : null,
+            target_ref: targetRef ?? undefined,
         })
     }
 
     wrap(
         owner: NameType,
-        entityType: EntityTypeName,
         entityId: UInt64Type,
         nexusId: UInt64Type,
         items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const cargoItems = items.map((i) => ServerContract.Types.cargo_item.from(i))
         return this.server.action('wrap', {
             owner: Name.from(owner),
-            entity_type: entityType,
             entity_id: UInt64.from(entityId),
             nexus_id: UInt64.from(nexusId),
-            items: cargoItems,
+            items,
         })
     }
 
-    undeploy(host: EntityRefInput, target: EntityRefInput): Action {
+    undeploy(hostId: UInt64Type, targetId: UInt64Type): Action {
         return this.server.action('undeploy', {
-            host_type: Name.from(host.entityType),
-            host_id: UInt64.from(host.entityId),
-            target_type: Name.from(target.entityType),
-            target_id: UInt64.from(target.entityId),
+            host_id: UInt64.from(hostId),
+            target_id: UInt64.from(targetId),
         })
     }
 
-    wrapEntity(entity: EntityRefInput, nexusId: UInt64Type): Action {
+    wrapEntity(entityId: UInt64Type, nexusId: UInt64Type): Action {
         return this.server.action('wrapentity', {
-            entity_type: Name.from(entity.entityType),
-            entity_id: UInt64.from(entity.entityId),
+            entity_id: UInt64.from(entityId),
             nexus_id: UInt64.from(nexusId),
         })
     }
 
-    demolish(entity: EntityRefInput): Action {
+    demolish(entityId: UInt64Type): Action {
         return this.server.action('demolish', {
-            entity_type: Name.from(entity.entityType),
-            entity_id: UInt64.from(entity.entityId),
+            entity_id: UInt64.from(entityId),
         })
     }
 

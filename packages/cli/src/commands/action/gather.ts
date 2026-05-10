@@ -1,5 +1,5 @@
-import {getItem} from '@shipload/sdk'
-import {type Action, Checksum256, Name, UInt64} from '@wharfkit/antelope'
+import {getItem, type Shipload} from '@shipload/sdk'
+import {type Action, Checksum256} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
     type EntityTypeName,
@@ -8,7 +8,7 @@ import {
     parseUint32,
     parseUint64,
 } from '../../lib/args'
-import {getGameSeed, server} from '../../lib/client'
+import {getGameSeed, getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGather} from '../../lib/estimate'
@@ -35,19 +35,14 @@ export interface GatherOpts {
     quantity: number
 }
 
-export function buildAction(opts: GatherOpts): Action {
-    return server.action('gather', {
-        source: {
-            entity_type: Name.from(opts.source.entityType),
-            entity_id: UInt64.from(BigInt(opts.source.entityId.toString())),
-        },
-        destination: {
-            entity_type: Name.from(opts.destination.entityType),
-            entity_id: UInt64.from(BigInt(opts.destination.entityId.toString())),
-        },
-        stratum: opts.stratum,
-        quantity: opts.quantity,
-    })
+export async function buildAction(opts: GatherOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.gather(
+        opts.source.entityId,
+        opts.destination.entityId,
+        opts.stratum,
+        opts.quantity
+    )
 }
 
 interface GatherErrorContext {
@@ -198,7 +193,7 @@ export async function runGather(
         console.error(renderIssues(est.feasibility.issues))
         if (!options.force) process.exit(1)
     }
-    const action = buildAction(gatherOpts)
+    const action = await buildAction(gatherOpts)
     try {
         const result = options.recharge
             ? await transact(

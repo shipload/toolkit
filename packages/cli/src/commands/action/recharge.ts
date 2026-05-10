@@ -1,4 +1,5 @@
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import type {EntityTypeName} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -20,9 +21,9 @@ export interface RechargeOpts {
     entityId: bigint
 }
 
-export async function buildAction(opts: RechargeOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.recharge(opts.entityId, Name.from(opts.entityType))
+export async function buildAction(opts: RechargeOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.recharge(opts.entityId)
 }
 
 type RechargeCliOptions = WaitableOptions & {estimate?: boolean}

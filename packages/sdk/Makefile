@@ -30,11 +30,11 @@ dev: node_modules
 
 .PHONY: test
 test: node_modules
-	@MOCK_DIR='./test/data' bun test ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
+	@MOCK_DIR='./test/data' bun test ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts ./test/nft/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
 
 .PHONY: test/watch
 test/watch: node_modules
-	@MOCK_DIR='./test/data' bun test --watch ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
+	@MOCK_DIR='./test/data' bun test --watch ./test/tests/*.ts ./test/*.test.ts ./test/resolution/*.test.ts ./test/nft/*.test.ts $(if $(grep),--test-name-pattern='$(grep)')
 
 .PHONY: check
 check: node_modules

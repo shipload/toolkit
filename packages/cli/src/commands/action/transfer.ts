@@ -1,5 +1,5 @@
 import {cargoItem, type ServerTypes, type Shipload} from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
@@ -29,13 +29,7 @@ export async function buildAction(opts: TransferOpts, shipload?: Shipload): Prom
         },
         opts.quantity
     )
-    return sl.actions.transfer(
-        Name.from(opts.sourceType),
-        opts.sourceId,
-        Name.from(opts.destType),
-        opts.destId,
-        [item]
-    )
+    return sl.actions.transfer(opts.sourceId, opts.destId, [item])
 }
 
 interface TransferCliOptions {

@@ -1,4 +1,5 @@
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import type {EntityTypeName} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -10,9 +11,9 @@ export interface RefrshEntityOpts {
     entityId: bigint
 }
 
-export async function buildAction(opts: RefrshEntityOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.refrshentity(Name.from(opts.entityType), opts.entityId)
+export async function buildAction(opts: RefrshEntityOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.refrshentity(opts.entityId)
 }
 
 export async function runRefrshEntity(ctx: EntityContext): Promise<void> {

@@ -37,7 +37,6 @@ export function render(entity: ServerTypes.entity_info, cargo: ServerTypes.cargo
 
 export async function runInventory(ctx: EntityContext, opts: {json?: boolean}): Promise<void> {
     const info = (await server.readonly('getentity', {
-        entity_type: ctx.entityType,
         entity_id: ctx.entityId,
     })) as ServerTypes.entity_info & {cargo?: ServerTypes.cargo_view[]}
     const data: InventoryData = {

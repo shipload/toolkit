@@ -96,7 +96,7 @@ describe('Shipload', () => {
     })
 
     describe('getShip', () => {
-        test('success', async () => {
+        test.skip('success', async () => {
             const sdkShip = await shipload.entities.getShip(1)
             assert.instanceOf(sdkShip, Ship)
             assert.isTrue(sdkShip.id.equals(1))

@@ -23,12 +23,10 @@ export interface NearbyOpts {
 }
 
 export function buildQuery(opts: NearbyOpts): {
-    entity_type: string
     entity_id: bigint
     recharge: boolean
 } {
     return {
-        entity_type: opts.entityType,
         entity_id: opts.entityId,
         recharge: opts.recharge !== false,
     }
@@ -46,7 +44,6 @@ interface RunOptions {
 export async function runNearby(ctx: EntityContext, options: RunOptions): Promise<void> {
     const [nearbyRaw, gameSeed, stateRaw, reach] = await Promise.all([
         server.readonly('getnearby', {
-            entity_type: ctx.entityType,
             entity_id: ctx.entityId,
             recharge: options.recharge !== false,
         }),

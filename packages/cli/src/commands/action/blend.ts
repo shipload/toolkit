@@ -1,5 +1,5 @@
-import {blendCargoStacks, ServerTypes} from '@shipload/sdk'
-import {type Action, Name, UInt64} from '@wharfkit/antelope'
+import {blendCargoStacks, ServerTypes, type Shipload} from '@shipload/sdk'
+import {type Action, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName} from '../../lib/args'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
@@ -23,8 +23,8 @@ export interface BlendOpts {
     inputs: ResolvedCargoInput[]
 }
 
-export async function buildAction(opts: BlendOpts): Promise<Action> {
-    const shipload = await getShipload()
+export async function buildAction(opts: BlendOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
     const cargoInputs = opts.inputs.map((i) =>
         ServerTypes.cargo_item.from({
             item_id: i.itemId,
@@ -33,7 +33,7 @@ export async function buildAction(opts: BlendOpts): Promise<Action> {
             modules: [],
         })
     )
-    return shipload.actions.blend(Name.from(opts.entityType), opts.entityId, cargoInputs)
+    return sl.actions.blend(opts.entityId, cargoInputs)
 }
 
 type BlendCliOptions = {

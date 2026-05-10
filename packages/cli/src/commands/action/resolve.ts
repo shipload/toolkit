@@ -1,4 +1,5 @@
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -12,9 +13,9 @@ export interface ResolveOpts {
     count?: bigint
 }
 
-export async function buildAction(opts: ResolveOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.resolve(opts.entityId, Name.from(opts.entityType), opts.count)
+export async function buildAction(opts: ResolveOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.resolve(opts.entityId, opts.count)
 }
 
 export async function runResolve(ctx: EntityContext, opts: {count?: bigint}): Promise<void> {

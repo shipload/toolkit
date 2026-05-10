@@ -9,7 +9,7 @@ import {
     type ServerTypes,
     type Shipload,
 } from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
@@ -36,7 +36,6 @@ export interface DeployOpts {
 export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promise<Action> {
     const sl = shipload ?? (await getShipload())
     return sl.actions.deploy(
-        Name.from(opts.entityType),
         opts.entityId,
         cargoRef({
             item_id: opts.packedItemId,

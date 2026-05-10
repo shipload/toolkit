@@ -36,7 +36,6 @@ export function reachLegend(reachable: number, total: number, depth: number): st
 
 export async function resolveReach(ref: EntityRef): Promise<Reach> {
 	const info = (await server.readonly("getentity", {
-		entity_type: ref.entityType,
 		entity_id: ref.entityId,
 	})) as unknown as {
 		coordinates: {

@@ -12,7 +12,6 @@ export function render(info: unknown): string {
 
 export async function runShow(ctx: EntityContext, options: {json?: boolean}): Promise<void> {
     const data = await server.readonly('getentity', {
-        entity_type: ctx.entityType,
         entity_id: ctx.entityId,
     })
     console.log(formatOutput(data, {json: Boolean(options.json)}, render))

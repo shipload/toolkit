@@ -6,7 +6,7 @@ import {
     type ServerTypes,
     type Shipload,
 } from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseUint8, parseUint64} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
@@ -90,13 +90,7 @@ export async function buildAction(opts: AddModuleOpts, shipload?: Shipload): Pro
                   modules: opts.targetModules ?? [],
               })
             : null
-    return sl.actions.addmodule(
-        Name.from(opts.entityType),
-        opts.entityId,
-        opts.moduleIndex,
-        moduleRef,
-        targetRef
-    )
+    return sl.actions.addmodule(opts.entityId, opts.moduleIndex, moduleRef, targetRef)
 }
 
 interface AddModuleCliOptions {

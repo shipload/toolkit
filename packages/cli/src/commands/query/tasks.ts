@@ -154,7 +154,6 @@ function viewToJson(view: TasksView): Record<string, unknown> {
 
 export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Promise<void> {
     const info = (await server.readonly('getentity', {
-        entity_type: ctx.entityType,
         entity_id: ctx.entityId,
     })) as unknown as ServerTypes.entity_info & {
         schedule?: {started: {toMilliseconds(): number}; tasks: Task[]}

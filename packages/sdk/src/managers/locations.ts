@@ -1,6 +1,6 @@
-import {type UInt16Type, UInt64, type UInt64Type} from '@wharfkit/antelope'
+import type {UInt16Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {type CoordinatesType, coordsToLocationId, type Distance} from '../types'
+import type {CoordinatesType, Distance} from '../types'
 import {hasSystem} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 import type {ServerContract} from '../contracts'
@@ -46,23 +46,5 @@ export class LocationsManager extends BaseManager {
             reserveMax: s.reserve,
             reserve: overrideMap.get(s.index) ?? s.reserve,
         }))
-    }
-
-    async getLocationEntity(
-        id: UInt64Type
-    ): Promise<ServerContract.Types.location_row | undefined> {
-        const row = await this.server.table('location').get(UInt64.from(id))
-        return row ?? undefined
-    }
-
-    async getLocationEntityAt(
-        coords: CoordinatesType
-    ): Promise<ServerContract.Types.location_row | undefined> {
-        const id = coordsToLocationId(coords)
-        return this.getLocationEntity(id)
-    }
-
-    async getAllLocationEntities(): Promise<ServerContract.Types.location_row[]> {
-        return this.server.table('location').all()
     }
 }

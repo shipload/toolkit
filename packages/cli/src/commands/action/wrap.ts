@@ -1,5 +1,5 @@
 import {cargoItem, type ServerTypes, type Shipload} from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
@@ -29,9 +29,7 @@ export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<
         },
         opts.quantity
     )
-    return sl.actions.wrap(opts.owner, Name.from(opts.entityType), opts.entityId, opts.nexusId, [
-        item,
-    ])
+    return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, [item])
 }
 
 interface WrapCliOptions {

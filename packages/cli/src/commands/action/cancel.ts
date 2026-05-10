@@ -1,4 +1,5 @@
-import {type Action, Name} from '@wharfkit/antelope'
+import type {Shipload} from '@shipload/sdk'
+import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
@@ -11,9 +12,9 @@ export interface CancelOpts {
     count: bigint
 }
 
-export async function buildAction(opts: CancelOpts): Promise<Action> {
-    const shipload = await getShipload()
-    return shipload.actions.cancel(opts.entityId, opts.count, Name.from(opts.entityType))
+export async function buildAction(opts: CancelOpts, shipload?: Shipload): Promise<Action> {
+    const sl = shipload ?? (await getShipload())
+    return sl.actions.cancel(opts.entityId, opts.count)
 }
 
 export async function runCancel(ctx: EntityContext, count: bigint): Promise<void> {

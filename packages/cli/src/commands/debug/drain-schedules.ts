@@ -1,4 +1,3 @@
-import {Name} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {getShipload, server} from '../../lib/client'
 import {transact} from '../../lib/session'
@@ -7,7 +6,7 @@ interface DrainOptions {
     dryRun?: boolean
 }
 
-type EntityTypeStr = 'ship' | 'warehouse' | 'extractor' | 'container' | 'location'
+type EntityTypeStr = 'ship' | 'warehouse' | 'extractor' | 'container'
 
 interface ScheduledRow {
     id: {toString(): string}
@@ -30,14 +29,10 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
         let totalOpenSchedules = 0
 
         const entityRows = (await server.table('entity').all()) as unknown as ScheduledRow[]
-        const locationRows = (await server.table('location').all()) as unknown as ScheduledRow[]
-        const allRows: Array<{row: ScheduledRow; type: EntityTypeStr}> = [
-            ...entityRows.map((row) => ({
-                row,
-                type: (row.kind?.toString() ?? 'ship') as EntityTypeStr,
-            })),
-            ...locationRows.map((row) => ({row, type: 'location' as EntityTypeStr})),
-        ]
+        const allRows: Array<{row: ScheduledRow; type: EntityTypeStr}> = entityRows.map((row) => ({
+            row,
+            type: (row.kind?.toString() ?? 'ship') as EntityTypeStr,
+        }))
 
         for (const {row, type} of allRows) {
             const tasks = row.schedule?.tasks
@@ -49,7 +44,7 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
                 continue
             }
             try {
-                const action = shipload.actions.resolve(id, Name.from(type))
+                const action = shipload.actions.resolve(id)
                 await transact({action}, {description: `resolve ${type}:${id}`})
                 totalDrained++
                 progressedThisPass = true
@@ -61,7 +56,7 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
 
         if (options.dryRun) {
             console.log(
-                `\nFound ${totalOpenSchedules} entity(ies) with open schedules across ship/warehouse/container/location.`
+                `\nFound ${totalOpenSchedules} entity(ies) with open schedules across ship/warehouse/container.`
             )
             break
         }
@@ -91,7 +86,7 @@ export function registerSubcommand(parent: Command): void {
         .addHelpText(
             'before',
             'Operator-only. Use before a contract redeploy that breaks task serialization. ' +
-                'Iterates ship/warehouse/container/location tables and calls `resolve` on each entity ' +
+                'Iterates ship/warehouse/container tables and calls `resolve` on each entity ' +
                 'whose schedule has open tasks, until all schedules are empty or no further progress is possible.\n'
         )
         .option('--dry-run', 'list entities with open schedules without resolving')
