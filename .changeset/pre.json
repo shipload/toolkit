@@ -5,7 +5,8 @@
     "@shipload/cli": "1.0.0-beta1",
     "@shipload/image-renderer": "1.0.0-beta1",
     "@shipload/item-renderer": "1.0.0-beta1",
-    "@shipload/sdk": "1.0.0-beta1"
+    "@shipload/sdk": "1.0.0-beta1",
+    "@shipload/oracle": "0.0.0"
   },
   "changesets": [
     "busy-coins-refuse",
@@ -13,6 +14,7 @@
     "eight-peaches-fail",
     "fruity-cats-invent",
     "lazy-impalas-say",
+    "lazy-peas-hang",
     "lovely-frogs-own",
     "many-mammals-knock",
     "modern-cycles-check",
