@@ -1,7 +1,9 @@
 import {describe, expect, test} from 'bun:test'
+import {TimePoint} from '@wharfkit/antelope'
 import type {EntitySnapshot} from '../../../src/lib/snapshot'
 import type {SnapshotTick} from '../../../src/lib/snapshot-stream'
 import {createTrackView, type ResolveResult} from '../../../src/tui/views/track'
+import {collectText} from '../render-tree'
 
 const okResolve = async (_count: number): Promise<ResolveResult> => ({
     txid: 'fake-txid',
@@ -215,6 +217,30 @@ describe('createTrackView', () => {
         expect(view.helpOpen?.()).toBe(true)
         view.dismissHelp?.()
         expect(view.helpOpen?.()).toBe(false)
+    })
+
+    test('busy body renders done rows with done + UTC completion-time', () => {
+        const view = createTrackView({
+            ctx: {entityType: 'ship', entityId: 1n},
+            initialSnapshot: {
+                ...busy(60),
+                schedule: {
+                    started: TimePoint.from('2026-05-10T22:00:00.000'),
+                    tasks: [
+                        {type: 1, duration: 60n, cancelable: 0, cargo: []} as never,
+                        {type: 2, duration: 30n, cancelable: 0, cargo: []} as never,
+                    ],
+                } as never,
+                pending_tasks: [],
+            },
+            stream: emptyStream(),
+            resolveAction: okResolve,
+        })
+        const r = fakeRenderer()
+        view.attach(r as never)
+        const joined = r.__added.flatMap(collectText).join('|')
+        expect(joined).toContain('done')
+        expect(joined).toMatch(/22:01:00 UTC/)
     })
 })
 

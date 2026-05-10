@@ -7,6 +7,7 @@ import {
 	LocationType,
 	PRECISION,
 	resolveItem,
+	TaskType,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
@@ -85,23 +86,77 @@ function itemDisplayName(itemId: number): string | null {
 	}
 }
 
-export function formatTaskShort(t:ServerTypes.task): string {
-	const label = formatTaskType(Number(t.type));
-	const parts: string[] = [label];
-	if (t.coordinates) parts.push(`to ${formatCoords(t.coordinates)}`);
-	if (t.entitytarget) {
-		parts.push(`→ ${String(t.entitytarget.entity_type)} ${String(t.entitytarget.entity_id)}`);
+function formatItemList(cargo: ServerTypes.task["cargo"]): string {
+	if (!cargo || cargo.length === 0) return "";
+	const labelOne = (c: ServerTypes.task["cargo"][number]): string => {
+		const name = itemDisplayName(Number(c.item_id)) ?? `Item ${Number(c.item_id)}`;
+		return `${Number(c.quantity)} ${name}`;
+	};
+	if (cargo.length <= 2) return cargo.map(labelOne).join(", ");
+	const head = cargo.slice(0, 2).map(labelOne).join(", ");
+	return `${head}, +${cargo.length - 2} more`;
+}
+
+function formatEntityRefShort(ref: ServerTypes.entity_ref): string {
+	return `${String(ref.entity_type)} ${String(ref.entity_id)}`;
+}
+
+export function formatTaskShort(t: ServerTypes.task): string {
+	const type = Number(t.type);
+	switch (type) {
+		case TaskType.IDLE:
+			return "Idle";
+		case TaskType.TRAVEL:
+			return t.coordinates ? `Travel to ${formatCoords(t.coordinates)}` : "Travel";
+		case TaskType.RECHARGE:
+			return "Recharge";
+		case TaskType.LOAD: {
+			const items = formatItemList(t.cargo);
+			const head = items ? `Receive ${items}` : "Receive cargo";
+			return t.entitytarget ? `${head} from ${formatEntityRefShort(t.entitytarget)}` : head;
+		}
+		case TaskType.UNLOAD: {
+			const items = formatItemList(t.cargo);
+			const head = items ? `Send ${items}` : "Send cargo";
+			return t.entitytarget ? `${head} to ${formatEntityRefShort(t.entitytarget)}` : head;
+		}
+		case TaskType.GATHER: {
+			const items = formatItemList(t.cargo);
+			return items ? `Gather ${items}` : "Gather";
+		}
+		case TaskType.WARP:
+			return t.coordinates ? `Warp to ${formatCoords(t.coordinates)}` : "Warp";
+		case TaskType.CRAFT: {
+			const last = t.cargo?.[t.cargo.length - 1];
+			if (!last) return "Craft";
+			const name = itemDisplayName(Number(last.item_id)) ?? `Item ${Number(last.item_id)}`;
+			return `Craft ${name}`;
+		}
+		case TaskType.DEPLOY: {
+			const first = t.cargo?.[0];
+			if (!first) return "Deploy";
+			const name = itemDisplayName(Number(first.item_id)) ?? `Item ${Number(first.item_id)}`;
+			return `Deploy ${name}`;
+		}
+		case TaskType.WRAP: {
+			const items = formatItemList(t.cargo);
+			return items ? `Wrap ${items}` : "Wrap";
+		}
+		case TaskType.UNWRAP: {
+			const items = formatItemList(t.cargo);
+			return items ? `Unwrap ${items}` : "Unwrap";
+		}
+		case TaskType.UNDEPLOY: {
+			const items = formatItemList(t.cargo);
+			return items ? `Undeploy ${items}` : "Undeploy";
+		}
+		case TaskType.WRAP_ENTITY:
+			return "Wrap entity";
+		case TaskType.DEMOLISH:
+			return "Demolish";
+		default:
+			return formatTaskType(type);
 	}
-	const cargo = t.cargo ?? [];
-	if (cargo.length === 1) {
-		const c = cargo[0];
-		parts.push(
-			`× ${Number(c.quantity)} ${itemDisplayName(Number(c.item_id)) ?? `Item ${Number(c.item_id)}`}`,
-		);
-	} else if (cargo.length > 1) {
-		parts.push(`× ${cargo.length} item types`);
-	}
-	return parts.join(" ");
 }
 
 export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {

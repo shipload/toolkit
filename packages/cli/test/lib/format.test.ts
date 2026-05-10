@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Checksum256 } from "@wharfkit/antelope";
+import type { ServerTypes } from "@shipload/sdk";
 import { formatCargoTable } from "../../src/lib/cargo-table";
 import {
 	formatDateTimeUTC,
@@ -8,6 +9,7 @@ import {
 	formatOutput,
 	formatReserve,
 	formatResolveHint,
+	formatTaskShort,
 } from "../../src/lib/format";
 
 describe("formatLocation with reach", () => {
@@ -116,6 +118,130 @@ describe("formatCargoTable stack column", () => {
 		const cargo = [{ item_id: 10200, quantity: 1, stats: 0n, modules: [] } as any];
 		const out = formatCargoTable(cargo);
 		expect(out).toMatch(/\b0\b/);
+	});
+});
+
+function task(partial: Partial<ServerTypes.task>): ServerTypes.task {
+	return {
+		type: 0 as never,
+		duration: 0n as never,
+		cancelable: 0 as never,
+		coordinates: undefined,
+		cargo: [],
+		entitytarget: undefined,
+		entitygroup: undefined,
+		energy_cost: undefined,
+		...partial,
+	} as ServerTypes.task;
+}
+
+describe("formatTaskShort", () => {
+	test("Idle", () => {
+		expect(formatTaskShort(task({ type: 0 as never }))).toBe("Idle");
+	});
+
+	test("Travel includes destination coords", () => {
+		expect(
+			formatTaskShort(
+				task({ type: 1 as never, coordinates: { x: -64n, y: -10n } as never }),
+			),
+		).toBe("Travel to (-64, -10)");
+	});
+
+	test("Recharge", () => {
+		expect(formatTaskShort(task({ type: 2 as never }))).toBe("Recharge");
+	});
+
+	test("Load reads as 'Receive <items> from <target>'", () => {
+		const t = task({
+			type: 3 as never,
+			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
+			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
+		});
+		expect(formatTaskShort(t)).toBe("Receive 5 Crude Ore from warehouse 6");
+	});
+
+	test("Unload reads as 'Send <items> to <target>'", () => {
+		const t = task({
+			type: 4 as never,
+			cargo: [{ item_id: 10001 as never, quantity: 7 as never, stats: 0n as never }] as never,
+			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
+		});
+		expect(formatTaskShort(t)).toBe("Send 7 Hull Plates to warehouse 6");
+	});
+
+	test("Load works with non-warehouse targets (ship-to-ship transfer)", () => {
+		const t = task({
+			type: 3 as never,
+			cargo: [{ item_id: 101 as never, quantity: 3 as never, stats: 0n as never }] as never,
+			entitytarget: { entity_type: "ship" as never, entity_id: 12n as never } as never,
+		});
+		expect(formatTaskShort(t)).toBe("Receive 3 Crude Ore from ship 12");
+	});
+
+	test("Gather lists items without target phrasing", () => {
+		const t = task({
+			type: 5 as never,
+			cargo: [{ item_id: 101 as never, quantity: 40 as never, stats: 0n as never }] as never,
+		});
+		expect(formatTaskShort(t)).toBe("Gather 40 Crude Ore");
+	});
+
+	test("Warp includes destination coords", () => {
+		expect(
+			formatTaskShort(
+				task({ type: 6 as never, coordinates: { x: 100n, y: 200n } as never }),
+			),
+		).toBe("Warp to (100, 200)");
+	});
+
+	test("Craft shows output item name (last cargo entry), not inputs", () => {
+		const t = task({
+			type: 7 as never,
+			cargo: [
+				{ item_id: 101 as never, quantity: 6 as never, stats: 0n as never },
+				{ item_id: 201 as never, quantity: 2 as never, stats: 0n as never },
+				{ item_id: 10001 as never, quantity: 1 as never, stats: 0n as never },
+			] as never,
+		});
+		expect(formatTaskShort(t)).toBe("Craft Hull Plates");
+	});
+
+	test("Craft with empty cargo is bare 'Craft' (defensive)", () => {
+		expect(formatTaskShort(task({ type: 7 as never }))).toBe("Craft");
+	});
+
+	test("Deploy uses first cargo entry as the deployed item", () => {
+		const t = task({
+			type: 8 as never,
+			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
+		});
+		expect(formatTaskShort(t)).toBe("Deploy Loader");
+	});
+
+	test("Wrap / Unwrap / Undeploy list cargo", () => {
+		const wrap = task({
+			type: 9 as never,
+			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
+		});
+		expect(formatTaskShort(wrap)).toBe("Wrap 5 Crude Ore");
+
+		const unwrap = task({
+			type: 10 as never,
+			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
+		});
+		expect(formatTaskShort(unwrap)).toBe("Unwrap 5 Crude Ore");
+
+		const undeploy = task({
+			type: 11 as never,
+			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
+		});
+		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Loader");
+	});
+
+	test("WrapEntity / Demolish are bare verbs", () => {
+		expect(formatTaskShort(task({ type: 12 as never }))).toBe("Wrap entity");
+		expect(formatTaskShort(task({ type: 13 as never }))).toBe("Demolish");
 	});
 });
 

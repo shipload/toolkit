@@ -1,18 +1,12 @@
 import {Box, type CliRenderer, type KeyEvent, Text, type VChild} from '@opentui/core'
 import type {ServerTypes} from '@shipload/sdk'
-import {
-    formatCargoUsage,
-    formatCoords,
-    formatDuration,
-    formatTimeUTC,
-    projectEnergy,
-} from '../../lib/format'
+import {formatDuration, formatTimeUTC} from '../../lib/format'
 import {completedCount, type EntitySnapshot} from '../../lib/snapshot'
 import type {SnapshotTick} from '../../lib/snapshot-stream'
+import {computeTaskCompletionTimes} from '../../lib/task-times'
 import {type Hotkey, HotkeyRegistry} from '../hotkeys'
-import {renderField} from '../primitives/field'
+import {renderEntitySummary} from '../primitives/entity-summary'
 import {type FooterStatus, renderFooter} from '../primitives/footer'
-import {renderHeader} from '../primitives/header'
 import {renderProgressBar} from '../primitives/progress-bar'
 import {createResolveModal, type ResolveModalHandle} from '../primitives/resolve-modal'
 import {renderTaskRow} from '../primitives/task-row'
@@ -282,15 +276,14 @@ function layout(
 ): VChild {
     const headerExtra: VChild[] = embed?.label ? [Text({content: embed.label, fg: '#888888'})] : []
     const panelChildren: VChild[] = [
-        renderHeader({
+        renderEntitySummary({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
-            entityName: state.tick.snap.entity_name,
+            snap: state.tick.snap,
             sinceLastFetch_s: state.tick.sinceLastFetch_s,
+            elapsed_s: state.tick.elapsed_s,
         }),
         ...headerExtra,
-        Text({content: ''}),
-        statsRow(state.tick),
         Text({content: ''}),
         Box(
             {flexDirection: 'column'},
@@ -322,37 +315,6 @@ function layout(
     )
 }
 
-function statsRow(t: {snap: EntitySnapshot; elapsed_s: number}): VChild {
-    const cells: string[] = []
-    if (t.snap.coordinates) {
-        cells.push(`◷ ${formatCoords(t.snap.coordinates as unknown as ServerTypes.coordinates)}`)
-    }
-    const energyStr = energySummary(t)
-    if (energyStr) cells.push(energyStr)
-    const cargoStr = cargoSummary(t.snap)
-    if (cargoStr) cells.push(cargoStr)
-    return Text({content: cells.join('    ')})
-}
-
-function energySummary(t: {snap: EntitySnapshot; elapsed_s: number}): string | null {
-    if (t.snap.energy === undefined) return null
-    const stored = Number(t.snap.energy)
-    if (!t.snap.generator) return renderField({icon: '⚡', value: String(stored)})
-    const cap = Number(t.snap.generator.capacity)
-    const recharge = Number(t.snap.generator.recharge)
-    if (t.snap.is_idle || !recharge) {
-        return renderField({icon: '⚡', value: `${stored}/${cap}`})
-    }
-    const projected = projectEnergy(stored, cap, recharge, 0, t.elapsed_s)
-    return renderField({icon: '⚡', value: `${projected}/${cap}`})
-}
-
-function cargoSummary(snap: EntitySnapshot): string | null {
-    if (snap.cargomass === undefined) return null
-    const cap = snap.capacity !== undefined ? Number(snap.capacity) : undefined
-    return `cargo ${formatCargoUsage(Number(snap.cargomass), cap)}`
-}
-
 function busyBody(t: SnapshotTick): VChild[] {
     const all = (t.snap.schedule?.tasks ?? []) as ServerTypes.task[]
     const pendingCount = (t.snap.pending_tasks ?? []).length
@@ -361,16 +323,33 @@ function busyBody(t: SnapshotTick): VChild[] {
     const active = all[activeIdx] ?? t.snap.current_task
     const pending = all.slice(activeIdx + 1)
 
+    const now = new Date()
+    const completionTimes = t.snap.schedule
+        ? computeTaskCompletionTimes(t.snap.schedule, {
+              now,
+              activeIndex: activeIdx,
+              remainingS: Math.max(0, Math.ceil(t.remaining_s)),
+          })
+        : []
+
     const lines: VChild[] = []
-    for (const task of done) {
-        lines.push(renderTaskRow({prefix: '  ✓ ', task, suffix: 'done', fg: '#00FF66'}))
+    for (let i = 0; i < done.length; i++) {
+        lines.push(
+            renderTaskRow({
+                prefix: '  ✓ ',
+                task: done[i],
+                duration: 'done',
+                completionTime: completionTimes[i] ? formatTimeUTC(completionTimes[i]) : '',
+                fg: '#00FF66',
+            })
+        )
     }
     if (active) {
         lines.push(
             renderTaskRow({
                 prefix: '  ▶ ',
                 task: active,
-                suffix: formatDuration(Number(active.duration ?? 0)),
+                duration: formatDuration(Number(active.duration ?? 0)),
             })
         )
     }
@@ -385,12 +364,17 @@ function busyBody(t: SnapshotTick): VChild[] {
     if (pending.length > 0) {
         lines.push(Text({content: ''}))
         lines.push(Text({content: '  Queued', fg: '#888888'}))
-        for (const task of pending) {
+        for (let i = 0; i < pending.length; i++) {
+            const task = pending[i]
+            const absoluteIndex = activeIdx + 1 + i
             lines.push(
                 renderTaskRow({
                     prefix: '    ',
                     task,
-                    suffix: formatDuration(Number(task.duration ?? 0)),
+                    duration: formatDuration(Number(task.duration ?? 0)),
+                    completionTime: completionTimes[absoluteIndex]
+                        ? formatTimeUTC(completionTimes[absoluteIndex])
+                        : '',
                     fg: '#888888',
                 })
             )
