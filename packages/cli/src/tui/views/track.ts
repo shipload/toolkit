@@ -280,7 +280,6 @@ function layout(
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             snap: state.tick.snap,
-            sinceLastFetch_s: state.tick.sinceLastFetch_s,
             elapsed_s: state.tick.elapsed_s,
         }),
         ...headerExtra,
@@ -301,7 +300,9 @@ function layout(
         },
         ...panelChildren
     )
-    const footer = renderFooter(keys.hints(), state.status)
+    const footer = renderFooter(keys.hints(), state.status, {
+        sinceLastFetch_s: state.tick.sinceLastFetch_s,
+    })
     const rootChildren: VChild[] = [panel, footer]
     if (state.helpOpen && state.modal === null) {
         rootChildren.push(helpOverlay(keys))

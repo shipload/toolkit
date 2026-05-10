@@ -9,7 +9,6 @@ export interface EntitySummaryOpts {
     entityType: string
     entityId: bigint | number
     snap: EntitySnapshot
-    sinceLastFetch_s: number
     elapsed_s: number
 }
 
@@ -20,9 +19,8 @@ export function renderEntitySummary(opts: EntitySummaryOpts): VChild {
             entityType: opts.entityType,
             entityId: opts.entityId,
             entityName: opts.snap.entity_name,
-            sinceLastFetch_s: opts.sinceLastFetch_s,
+            owner: opts.snap.owner,
         }),
-        Text({content: ''}),
         renderStatsRow(opts.snap, opts.elapsed_s)
     )
 }
@@ -55,5 +53,5 @@ function energySummary(snap: EntitySnapshot, elapsed_s: number): string | null {
 function cargoSummary(snap: EntitySnapshot): string | null {
     if (snap.cargomass === undefined) return null
     const cap = snap.capacity !== undefined ? Number(snap.capacity) : undefined
-    return `cargo ${formatCargoUsage(Number(snap.cargomass), cap)}`
+    return renderField({icon: '◧', value: formatCargoUsage(Number(snap.cargomass), cap)})
 }

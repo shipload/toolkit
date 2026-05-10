@@ -7,14 +7,36 @@ export type FooterStatus =
     | {kind: 'ok'; label: string}
     | {kind: 'err'; label: string}
 
-export function renderFooter(hints: HotkeyHint[], status: FooterStatus): VChild {
+export interface FooterMeta {
+    sinceLastFetch_s: number
+}
+
+export function renderFooter(
+    hints: HotkeyHint[],
+    status: FooterStatus,
+    meta?: FooterMeta
+): VChild {
     const left = hints.map((h) => `${h.key} ${h.label}`).join('  ·  ')
     const right = formatStatus(status)
+    const rightChildren: VChild[] = []
+    if (meta) {
+        const {glyph, label, fg} = formatMeta(meta)
+        rightChildren.push(Text({content: glyph, fg}))
+        rightChildren.push(Text({content: ` ${label}  ·  `, fg: '#888888'}))
+    }
+    rightChildren.push(Text({content: right, fg: statusColor(status)}))
     return Box(
         {flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 1, paddingRight: 1},
         Text({content: left, fg: '#888888'}),
-        Text({content: right, fg: statusColor(status)})
+        Box({flexDirection: 'row'}, ...rightChildren)
     )
+}
+
+function formatMeta(meta: FooterMeta): {glyph: string; label: string; fg: string} {
+    const s = Math.max(0, Math.round(meta.sinceLastFetch_s))
+    if (s < 10) return {glyph: '●', label: `live · ${s}s`, fg: '#00FF66'}
+    if (s < 30) return {glyph: '◐', label: `live · ${s}s`, fg: '#FFCC00'}
+    return {glyph: '○', label: `stale · ${s}s`, fg: '#FF5555'}
 }
 
 function formatStatus(status: FooterStatus): string {
