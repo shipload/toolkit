@@ -37,7 +37,6 @@ describe("waitForEntityIdle", () => {
 		let calls = 0;
 		const resolveCalls: unknown[] = [];
 		await waitForEntityIdle({
-			entityType: "ship",
 			entityId: 1n,
 			fetchSnapshot: async () => snapshots[Math.min(calls++, snapshots.length - 1)],
 			sleep: async () => {},
@@ -55,28 +54,25 @@ describe("waitForEntityIdle", () => {
 			makeSnapshot({ is_idle: true, tasks: 2 }),
 		];
 		let calls = 0;
-		const resolveCalls: Array<[string, bigint | number, number, boolean]> = [];
+		const resolveCalls: Array<[bigint | number, number, boolean]> = [];
 		await waitForEntityIdle({
-			entityType: "ship",
 			entityId: 7n,
 			autoResolve: true,
 			fetchSnapshot: async () => snapshots[Math.min(calls++, snapshots.length - 1)],
 			sleep: async () => {},
-			resolveFn: async (entityType, entityId, completed, auto) => {
-				resolveCalls.push([entityType, entityId, completed, auto]);
+			resolveFn: async (entityId, completed, auto) => {
+				resolveCalls.push([entityId, completed, auto]);
 			},
 		});
 		expect(resolveCalls.length).toBe(1);
-		expect(resolveCalls[0][0]).toBe("ship");
-		expect(resolveCalls[0][1]).toBe(7n);
-		expect(resolveCalls[0][2]).toBe(2);
-		expect(resolveCalls[0][3]).toBe(true);
+		expect(resolveCalls[0][0]).toBe(7n);
+		expect(resolveCalls[0][1]).toBe(2);
+		expect(resolveCalls[0][2]).toBe(true);
 	});
 
 	test("honors timeoutMs", async () => {
 		const busy = makeSnapshot({ is_idle: false, remaining: 1000 });
 		const promise = waitForEntityIdle({
-			entityType: "ship",
 			entityId: 1n,
 			timeoutMs: 50,
 			fetchSnapshot: async () => busy,
@@ -97,7 +93,6 @@ describe("streamEntitySnapshot", () => {
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
 		for await (const tick of streamEntitySnapshot({
-			entityType: "ship",
 			entityId: 1n,
 			fetchSnapshot: async () => snapshots[Math.min(calls++, snapshots.length - 1)],
 			sleep: async () => {},
@@ -114,7 +109,6 @@ describe("streamEntitySnapshot", () => {
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
 		for await (const tick of streamEntitySnapshot({
-			entityType: "ship",
 			entityId: 1n,
 			renderIntervalMs: 1000,
 			fetchIntervalMs: 5000,
@@ -146,7 +140,6 @@ describe("streamEntitySnapshot", () => {
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
 		for await (const tick of streamEntitySnapshot({
-			entityType: "ship",
 			entityId: 1n,
 			renderIntervalMs: 1000,
 			fetchIntervalMs: 5000,
@@ -170,7 +163,6 @@ describe("streamEntitySnapshot", () => {
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
 		for await (const tick of streamEntitySnapshot({
-			entityType: "ship",
 			entityId: 1n,
 			renderIntervalMs: 1000,
 			fetchIntervalMs: 5000,
@@ -190,7 +182,6 @@ describe("streamEntitySnapshot", () => {
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
 		for await (const tick of streamEntitySnapshot({
-			entityType: "ship",
 			entityId: 1n,
 			renderIntervalMs: 1,
 			fetchIntervalMs: 1,

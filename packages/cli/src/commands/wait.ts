@@ -99,7 +99,7 @@ export async function runWait(ownerArg: string | undefined, opts: WaitCliOptions
             owner,
             typeFilter: opts.type,
             timeoutMs: opts.timeout,
-            resolveFn: (t, i, c, a, o) => ensureNoPendingResolve(t, i, c, a, o ?? {}),
+            resolveFn: (i, c, a, o) => ensureNoPendingResolve(i, c, a, o ?? {}),
             fetchSnapshot: getEntitySnapshot,
         })
 

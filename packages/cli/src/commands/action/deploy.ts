@@ -64,7 +64,7 @@ export async function runDeploy(
                 `deploy expects qty=1 in <input> (packed entities are unique); got ${input.quantity}`
             )
         }
-        const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+        const snap = await getEntitySnapshot(ctx.entityId)
         const packedEntityType = getPackedEntityType(input.itemId)
         if (
             packedEntityType !== null &&
@@ -82,7 +82,6 @@ export async function runDeploy(
         }
         if (options.estimate) {
             const est = await estimateDeploy({
-                entityType: ctx.entityType,
                 entityId: ctx.entityId,
                 packedItemId: input.itemId,
                 stackId: input.stackId,
@@ -106,7 +105,7 @@ export async function runDeploy(
             {action},
             {description: `Deploying from ${ctx.entityType}:${ctx.entityId}`}
         )
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }
 

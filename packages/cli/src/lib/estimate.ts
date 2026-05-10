@@ -33,7 +33,6 @@ import {
 	ServerTypes,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
-import type { EntityTypeName } from "./args";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
@@ -256,14 +255,13 @@ function snapshotCargoMassInfo(snap: EntitySnapshot): ServerTypes.cargo_item[] {
 }
 
 export async function estimateDeploy(params: {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	packedItemId: number;
 	stackId: bigint;
 	snapshot?: EntitySnapshot;
 }): Promise<EstimateResult> {
-	const { entityType, entityId, packedItemId, stackId } = params;
-	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+	const { entityId, packedItemId, stackId } = params;
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
 	resolveCargoInputs(
 		[{ itemId: packedItemId, stackId, quantity: 1 }],
@@ -279,12 +277,11 @@ export async function estimateDeploy(params: {
 }
 
 export async function estimateRecharge(params: {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	snapshot?: EntitySnapshot;
 }): Promise<EstimateResult> {
-	const { entityType, entityId } = params;
-	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+	const { entityId } = params;
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
 	const ship = toShipLike(snap);
 	if (!ship.generator) {
@@ -306,15 +303,14 @@ export async function estimateRecharge(params: {
 }
 
 export async function estimateTravel(params: {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	target: { x: number | bigint; y: number | bigint };
 	recharge?: boolean;
 	snapshot?: EntitySnapshot;
 }): Promise<EstimateResult> {
-	const { entityType, entityId, target } = params;
+	const { entityId, target } = params;
 	const recharge = params.recharge ?? false;
-	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
 	const ship = toShipLike(snap);
 	if (!ship.engines || !ship.generator || !ship.hullmass) {
@@ -368,7 +364,7 @@ export async function estimateTravel(params: {
 		targetY,
 		hasSystemAtDestination,
 		willRechargeFirst: recharge,
-		entity: { entityType: String(entityType), entityId },
+		entity: { entityType: snap.type, entityId },
 	});
 
 	return {
@@ -393,15 +389,14 @@ export async function estimateTravel(params: {
 }
 
 export async function estimateGather(params: {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	stratum: number;
 	quantity: number;
 	snapshot?: EntitySnapshot;
 	recharge?: boolean;
 }): Promise<EstimateResult> {
-	const { entityType, entityId, stratum, quantity } = params;
-	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+	const { entityId, stratum, quantity } = params;
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
 	if (!snap.gatherer) {
 		return {
@@ -479,7 +474,7 @@ export async function estimateGather(params: {
 		reserveRemaining: Number(stratumResponse?.stratum?.reserve?.toString() ?? "0"),
 		quantity,
 		willRechargeFirst: recharge,
-		entity: { entityType: String(entityType), entityId },
+		entity: { entityType: snap.type, entityId },
 	});
 
 	return {
@@ -498,7 +493,7 @@ export async function estimateGather(params: {
  * own drain). Returned energy_cost is the worst participant's usage.
  */
 export async function estimateGroupTravel(params: {
-	entities: { entityType: EntityTypeName | string; entityId: bigint | number }[];
+	entities: { entityId: bigint | number }[];
 	target: { x: number | bigint; y: number | bigint };
 	recharge?: boolean;
 }): Promise<EstimateResult> {
@@ -514,7 +509,7 @@ export async function estimateGroupTravel(params: {
 	}
 
 	const snapshots = await Promise.all(
-		params.entities.map((e) => getEntitySnapshot(e.entityType, e.entityId)),
+		params.entities.map((e) => getEntitySnapshot(e.entityId)),
 	);
 
 	const originX = Number(snapshots[0].coordinates.x.toString());
@@ -584,7 +579,6 @@ export async function estimateGroupTravel(params: {
 }
 
 export async function estimateCraft(params: {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	recipeId: number;
 	quantity: number;
@@ -592,8 +586,8 @@ export async function estimateCraft(params: {
 	snapshot?: EntitySnapshot;
 	recharge?: boolean;
 }): Promise<EstimateResult> {
-	const { entityType, entityId, recipeId, quantity, inputs } = params;
-	const snap = params.snapshot ?? (await getEntitySnapshot(entityType, entityId));
+	const { entityId, recipeId, quantity, inputs } = params;
+	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
 	type CrafterSnap = { speed?: { toString(): string }; drain?: { toString(): string } };
 	const crafter = (snap as unknown as { crafter?: CrafterSnap }).crafter;
@@ -677,7 +671,7 @@ export async function estimateCraft(params: {
 		availableCargo: Number(String(craftCapacity)) - Number(String(craftCargomass)),
 		cargoDelta,
 		willRechargeFirst: recharge,
-		entity: { entityType: String(entityType), entityId },
+		entity: { entityType: snap.type, entityId },
 	});
 
 	const craftSlots =

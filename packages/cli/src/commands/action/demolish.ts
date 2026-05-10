@@ -34,7 +34,7 @@ export async function runDemolish(ctx: EntityContext, options: DemolishCliOption
             {action},
             {description: `Demolishing ${ctx.entityType}:${ctx.entityId} (PERMANENT)`}
         )
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }
 

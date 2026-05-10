@@ -1,4 +1,3 @@
-import {Name} from '@wharfkit/antelope'
 import {getShipload} from '../lib/client'
 import type {EntityContext} from '../lib/entity-scope'
 import {transact} from '../lib/session'
@@ -19,9 +18,8 @@ function explorerUrlFor(txid: string): string {
 }
 
 export async function runTrackView(ctx: EntityContext, opts: RunTrackViewOpts = {}): Promise<void> {
-    const initial = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+    const initial = await getEntitySnapshot(ctx.entityId)
     const stream = streamEntitySnapshot({
-        entityType: ctx.entityType,
         entityId: ctx.entityId,
         initialSnapshot: initial,
     })
@@ -35,10 +33,7 @@ export async function runTrackView(ctx: EntityContext, opts: RunTrackViewOpts = 
             let capturedTxid = ''
             const dispatch = await dispatcher.run('resolve', async () => {
                 const shipload = await getShipload()
-                const action = shipload.actions.resolve(
-                    BigInt(ctx.entityId.toString()),
-                    Name.from(String(ctx.entityType))
-                )
+                const action = shipload.actions.resolve(BigInt(ctx.entityId.toString()))
                 const txResult = await transact(
                     {action},
                     {

@@ -45,7 +45,7 @@ export async function runRmModule(
 ): Promise<void> {
     await withValidation(async () => {
         validateTargetTriple(options)
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
+        await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
     })
     const action = await buildAction({
         entityType: ctx.entityType,

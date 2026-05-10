@@ -1,9 +1,7 @@
 import { Option } from "commander";
 import type { ServerTypes } from "@shipload/sdk";
-import type { EntityTypeName } from "./args";
 import { loadConfig } from "./config";
 import { renderEntityFull } from "./entity-header";
-import { formatEntityRef } from "./format";
 import { makeProgressRenderer } from "./progress";
 import { ensureNoPendingResolve } from "./resolve-prompt";
 import type { TransactResult } from "./session";
@@ -46,12 +44,10 @@ export function nextInterval(s: { remaining_s: number; attempt: number }): numbe
 }
 
 export type FetchSnapshotFn = (
-	entityType: EntityTypeName | string,
 	entityId: bigint | number,
 ) => Promise<EntitySnapshot>;
 
 export type ResolveFn = (
-	entityType: EntityTypeName | string,
 	entityId: bigint | number,
 	completedCount: number,
 	autoResolve: boolean,
@@ -68,7 +64,6 @@ export interface WaitTick {
 }
 
 export interface WaitOpts {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	timeoutMs?: number;
 	renderIntervalMs?: number;
@@ -91,16 +86,15 @@ function loadAutoResolveDefault(): boolean {
 }
 
 export async function maybeAwaitAndPrint(
-	entityType: EntityTypeName | string,
 	entityId: bigint | number,
 	options: WaitableOptions,
 	result?: TransactResult,
 ): Promise<void> {
 	if (!options.wait && !options.track) return;
-	const initialSnapshot = result?.snapshots.get(
-		formatEntityRef({ entityType: String(entityType), entityId }),
-	) as EntitySnapshot | undefined;
-	await awaitAndPrint(entityType, entityId, {
+	const initialSnapshot = result?.snapshots.get(String(entityId)) as
+		| EntitySnapshot
+		| undefined;
+	await awaitAndPrint(entityId, {
 		progress: !!options.track,
 		initialSnapshot,
 		autoResolve: options.autoResolve ?? true,
@@ -108,16 +102,14 @@ export async function maybeAwaitAndPrint(
 }
 
 export async function awaitAndPrint(
-	entityType: EntityTypeName | string,
 	entityId: bigint | number,
-	opts?: Omit<WaitOpts, "entityType" | "entityId"> & { progress?: boolean },
+	opts?: Omit<WaitOpts, "entityId"> & { progress?: boolean },
 ): Promise<void> {
 	const { progress, ...waitOpts } = opts ?? {};
 	const renderer = progress ? makeProgressRenderer() : null;
 	let snap: EntitySnapshot;
 	try {
 		snap = await waitForEntityIdle({
-			entityType,
 			entityId,
 			...waitOpts,
 			autoResolve: waitOpts.autoResolve ?? loadAutoResolveDefault(),
@@ -141,8 +133,8 @@ export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot>
 	const maybeAutoResolve = async (s: EntitySnapshot): Promise<EntitySnapshot> => {
 		const completed = s.schedule?.tasks?.length ?? 0;
 		if (completed > 0 && opts.autoResolve) {
-			await resolveFn(opts.entityType, opts.entityId, completed, true);
-			return await fetchSnapshot(opts.entityType, opts.entityId);
+			await resolveFn(opts.entityId, completed, true);
+			return await fetchSnapshot(opts.entityId);
 		}
 		return s;
 	};
@@ -151,7 +143,6 @@ export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot>
 	let lastSnap: EntitySnapshot | undefined;
 
 	for await (const tick of streamEntitySnapshot({
-		entityType: opts.entityType,
 		entityId: opts.entityId,
 		initialSnapshot: opts.initialSnapshot,
 		fetchSnapshot: opts.fetchSnapshot,
@@ -163,7 +154,8 @@ export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot>
 		lastSnap = tick.snap;
 
 		if (deadline !== null && modelNow >= deadline) {
-			throw new Error(`Timed out waiting for ${opts.entityType} ${opts.entityId}`);
+			const kind = lastSnap?.type ?? "entity";
+			throw new Error(`Timed out waiting for ${kind} ${opts.entityId}`);
 		}
 		modelNow += renderInterval;
 

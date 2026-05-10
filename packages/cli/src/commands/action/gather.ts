@@ -52,7 +52,7 @@ interface GatherErrorContext {
 }
 
 async function preflightGather(opts: GatherOpts): Promise<void> {
-    const src = await getEntitySnapshot(opts.source.entityType, opts.source.entityId)
+    const src = await getEntitySnapshot(opts.source.entityId)
     const depth = src.gatherer ? Number(src.gatherer.depth.toString()) : 0
     checkDepth(depth, opts.stratum)
 
@@ -83,7 +83,7 @@ async function preflightGather(opts: GatherOpts): Promise<void> {
         opts.destination.entityType === opts.source.entityType &&
         opts.destination.entityId === opts.source.entityId
             ? src
-            : await getEntitySnapshot(opts.destination.entityType, opts.destination.entityId)
+            : await getEntitySnapshot(opts.destination.entityId)
 
     const item = getItem(itemId)
     const itemMass = item.mass
@@ -175,7 +175,6 @@ export async function runGather(
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     const est = await withValidation(() =>
         estimateGather({
-            entityType: ctx.entityType,
             entityId: ctx.entityId,
             stratum,
             quantity,
@@ -216,7 +215,7 @@ export async function runGather(
                       description: `Gathering ${quantity} from stratum ${stratum}`,
                   }
               )
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     } catch (err) {
         const enriched = await enrichGatherError(err, {
             sourceType: ctx.entityType,

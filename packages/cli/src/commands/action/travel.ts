@@ -44,7 +44,6 @@ export async function runTravel(
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     const est = await withValidation(() =>
         estimateTravel({
-            entityType: 'ship',
             entityId: ctx.entityId,
             target: {x, y},
             recharge: Boolean(options.recharge),
@@ -72,7 +71,7 @@ export async function runTravel(
         {description: summary ?? `Ship ${ctx.entityId} → (${x}, ${y})`}
     )
     if (!result.txid) return
-    await maybeAwaitAndPrint('ship', ctx.entityId, options, result)
+    await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

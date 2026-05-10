@@ -34,7 +34,7 @@ export async function runWrapEntity(
             {action},
             {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into NFT`}
         )
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }
 

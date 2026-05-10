@@ -181,7 +181,7 @@ describe('waitForFleetAvailable — first-match', () => {
 		})
 		const stream = fromTicks([tickOf([idleWithCompleted])])
 		const resolveCalls: Array<
-			[string, bigint | number, number, boolean, {quiet?: boolean}?]
+			[bigint | number, number, boolean, {quiet?: boolean}?]
 		> = []
 		const result = await waitForFleetAvailable({
 			stream,
@@ -191,19 +191,18 @@ describe('waitForFleetAvailable — first-match', () => {
 			resolveFn: async (...args) => {
 				resolveCalls.push(args as never)
 			},
-			fetchSnapshot: async (t, i) =>
+			fetchSnapshot: async (i) =>
 				snap({
-					type: t as 'ship',
+					type: 'ship',
 					id: BigInt(i.toString()),
 					modules: [{} as never],
 					is_idle: true,
 				}),
 		})
 		expect(resolveCalls.length).toBe(1)
-		expect(resolveCalls[0][0]).toBe('ship')
-		expect(resolveCalls[0][1]).toBe(1n)
-		expect(resolveCalls[0][3]).toBe(true)
-		expect(resolveCalls[0][4]?.quiet).toBe(true)
+		expect(resolveCalls[0][0]).toBe(1n)
+		expect(resolveCalls[0][2]).toBe(true)
+		expect(resolveCalls[0][3]?.quiet).toBe(true)
 		expect(result.matched.length).toBe(1)
 	})
 

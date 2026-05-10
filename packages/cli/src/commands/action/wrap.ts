@@ -61,7 +61,7 @@ export async function runWrap(
         {action},
         {description: `Wrapping ${quantity} cargo for ${owner}`}
     )
-    await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+    await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

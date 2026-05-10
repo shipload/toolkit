@@ -1,8 +1,6 @@
-import type { EntityTypeName } from "./args";
 import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
 
 export type FetchSnapshotFn = (
-	entityType: EntityTypeName | string,
 	entityId: bigint | number,
 ) => Promise<EntitySnapshot>;
 
@@ -17,7 +15,6 @@ export interface SnapshotTick {
 }
 
 export interface SnapshotStreamOpts {
-	entityType: EntityTypeName | string;
 	entityId: bigint | number;
 	initialSnapshot?: EntitySnapshot;
 	fetchSnapshot?: FetchSnapshotFn;
@@ -46,7 +43,7 @@ export async function* streamEntitySnapshot(
 	const fetchInterval = opts.fetchIntervalMs ?? DEFAULT_FETCH_INTERVAL_MS;
 
 	let modelNow = 0;
-	let snap = opts.initialSnapshot ?? (await fetchSnapshot(opts.entityType, opts.entityId));
+	let snap = opts.initialSnapshot ?? (await fetchSnapshot(opts.entityId));
 	let snapAtModel = modelNow;
 	let lastFetchAtModel = modelNow;
 	let elapsedAtFetch = snap.is_idle ? 0 : toNumber(snap.current_task_elapsed);
@@ -88,7 +85,7 @@ export async function* streamEntitySnapshot(
 		);
 
 		try {
-			snap = await fetchSnapshot(opts.entityType, opts.entityId);
+			snap = await fetchSnapshot(opts.entityId);
 		} catch {
 			lastFetchAtModel = modelNow;
 			continue;

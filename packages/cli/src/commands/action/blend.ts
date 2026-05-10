@@ -48,7 +48,7 @@ export async function runBlend(
 ): Promise<void> {
     assertNotBoth(opts, ['estimate', 'wait'])
     await withValidation(async () => {
-        const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+        const snap = await getEntitySnapshot(ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]

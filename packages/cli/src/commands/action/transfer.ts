@@ -63,7 +63,7 @@ export async function runTransfer(
             description: `Transferred ${quantity} of item ${itemId} from ${ctx.entityType}:${ctx.entityId} to ${destType}:${destId}`,
         }
     )
-    await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+    await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

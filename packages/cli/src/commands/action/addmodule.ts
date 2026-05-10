@@ -71,7 +71,7 @@ export function preflightAgainstSnapshot(snap: EntitySnapshot, opts: AddModuleOp
 }
 
 export async function preflightAddModule(opts: AddModuleOpts): Promise<void> {
-    const snap = await getEntitySnapshot(opts.entityType, opts.entityId)
+    const snap = await getEntitySnapshot(opts.entityId)
     preflightAgainstSnapshot(snap, opts)
 }
 
@@ -124,7 +124,7 @@ export async function runAddModule(
     }
     await withValidation(async () => {
         validateTargetTriple(options)
-        await checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
+        await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
         await preflightAddModule(addOpts)
     })
     const action = await buildAction(addOpts)

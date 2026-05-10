@@ -33,7 +33,6 @@ export function detectCohort(
 export type WaitFleetMode = 'first' | 'all'
 
 export type WaitFleetResolveFn = (
-	entityType: string,
 	entityId: bigint | number,
 	completedCount: number,
 	autoResolve: boolean,
@@ -41,7 +40,6 @@ export type WaitFleetResolveFn = (
 ) => Promise<void>
 
 export type WaitFleetFetchSnapshotFn = (
-	entityType: string,
 	entityId: bigint | number,
 ) => Promise<EntitySnapshot>
 
@@ -122,10 +120,10 @@ export async function waitForFleetAvailable(opts: WaitFleetOpts): Promise<WaitFl
 				if (!opts.autoResolve) continue
 				if (!opts.resolveFn)
 					throw new Error('resolveFn required when autoResolve is true')
-				await opts.resolveFn(String(s.type), s.id, completed, true, {
+				await opts.resolveFn(s.id, completed, true, {
 					quiet: opts.quiet,
 				})
-				const refreshed = await fetchSnapshot(String(s.type), s.id)
+				const refreshed = await fetchSnapshot(s.id)
 				if (!isAvailable(refreshed)) continue
 				matched.set(key, refreshed)
 			} else {

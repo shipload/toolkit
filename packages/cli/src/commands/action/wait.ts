@@ -9,7 +9,7 @@ export async function runWait(
     opts: {timeout?: number; autoResolve?: boolean}
 ): Promise<void> {
     await withValidation(() =>
-        awaitAndPrint(ctx.entityType, ctx.entityId, {
+        awaitAndPrint(ctx.entityId, {
             timeoutMs: opts.timeout,
             autoResolve: opts.autoResolve,
         })

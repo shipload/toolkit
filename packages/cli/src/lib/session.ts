@@ -14,7 +14,6 @@ import { printError } from "./errors";
 import {
 	formatCancelResults,
 	formatDuration,
-	formatEntityRef,
 	formatResolveResults,
 } from "./format";
 import { getEntitySnapshot } from "./snapshot";
@@ -93,8 +92,8 @@ async function formatTaskAddition(
 ): Promise<string> {
 	const taskWord = addedCount === 1 ? "task" : "tasks";
 	try {
-		const snap = await getEntitySnapshot(entityType, entityId);
-		snapshots.set(formatEntityRef({ entityType, entityId }), snap);
+		const snap = await getEntitySnapshot(entityId);
+		snapshots.set(String(entityId), snap);
 		const projectable = snap as unknown as Projectable;
 		const totalTasks = projectable.schedule?.tasks?.length ?? 0;
 		const totalWord = totalTasks === 1 ? "task" : "tasks";

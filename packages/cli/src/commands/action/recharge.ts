@@ -33,7 +33,6 @@ export async function runRecharge(ctx: EntityContext, opts: RechargeCliOptions):
     if (opts.estimate) {
         const est = await withValidation(() =>
             estimateRecharge({
-                entityType: ctx.entityType,
                 entityId: ctx.entityId,
             })
         )
@@ -45,7 +44,7 @@ export async function runRecharge(ctx: EntityContext, opts: RechargeCliOptions):
         {action},
         {description: `Recharging ${ctx.entityType} ${ctx.entityId}`}
     )
-    await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, opts, result)
+    await maybeAwaitAndPrint(ctx.entityId, opts, result)
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

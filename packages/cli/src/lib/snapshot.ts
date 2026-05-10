@@ -127,7 +127,6 @@ export function entityInfoToSnapshot(
 }
 
 export async function getEntitySnapshot(
-	_entityType: EntityTypeName | string,
 	entityId: bigint | number,
 ): Promise<EntitySnapshot> {
 	const data = await server.readonly("getentity", {

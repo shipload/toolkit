@@ -98,7 +98,7 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
         throw new ValidationError('--quantity must be at least 1')
     }
     const useProjected = Boolean(opts.projected)
-    const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+    const snap = await getEntitySnapshot(ctx.entityId)
     const state = resolveState(snap, useProjected, ctx)
 
     const view = await loadLocationStrata(state.coords)

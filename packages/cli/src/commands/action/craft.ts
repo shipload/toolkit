@@ -88,14 +88,13 @@ export async function runCraft(
 ): Promise<void> {
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     await withValidation(async () => {
-        const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+        const snap = await getEntitySnapshot(ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         await validateRecipeSlotTotals(recipeId, quantity, resolved)
         const est = await estimateCraft({
-            entityType: ctx.entityType,
             entityId: ctx.entityId,
             recipeId,
             quantity,
@@ -132,7 +131,7 @@ export async function runCraft(
                   {description: `Recharge + craft recipe ${recipeId} x${quantity}`}
               )
             : await transact({action}, {description: `Crafting recipe ${recipeId} x${quantity}`})
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }
 

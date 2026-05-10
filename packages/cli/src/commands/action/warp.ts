@@ -33,9 +33,7 @@ export async function runWarp(
     y: bigint,
     options: WarpCliOptions
 ): Promise<void> {
-    await withValidation(() =>
-        checkResolveEntity(ctx.entityType, ctx.entityId, Boolean(options.autoResolve))
-    )
+    await withValidation(() => checkResolveEntity(ctx.entityId, Boolean(options.autoResolve)))
     const action = await buildAction({
         entityType: ctx.entityType,
         entityId: ctx.entityId,
@@ -48,7 +46,7 @@ export async function runWarp(
             description: `Warping ${ctx.entityType} ${ctx.entityId} to (${x}, ${y})`,
         }
     )
-    await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+    await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
 
 export const SUBCOMMAND: EntitySubcommand = {

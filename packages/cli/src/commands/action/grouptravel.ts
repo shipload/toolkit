@@ -96,16 +96,13 @@ export function register(program: Command): void {
                 )
                 const shouldRender = Boolean(options.wait || options.track)
                 await maybeAwaitAndPrint(
-                    entities[0].entityType,
                     entities[0].entityId,
                     {wait: options.wait, track: options.track, autoResolve: false},
                     result
                 )
                 if (shouldRender) {
                     const snaps = await Promise.all(
-                        entities
-                            .slice(1)
-                            .map((ref) => getEntitySnapshot(ref.entityType, ref.entityId))
+                        entities.slice(1).map((ref) => getEntitySnapshot(ref.entityId))
                     )
                     for (const snap of snaps) {
                         console.log(renderEntityFull(snap as unknown as ServerTypes.entity_info))

@@ -19,7 +19,7 @@ export async function buildAction(opts: ResolveOpts, shipload?: Shipload): Promi
 }
 
 export async function runResolve(ctx: EntityContext, opts: {count?: bigint}): Promise<void> {
-    const snap = await getEntitySnapshot(ctx.entityType, ctx.entityId)
+    const snap = await getEntitySnapshot(ctx.entityId)
     if (completedCount(snap) === 0) {
         console.error(`No completed tasks to resolve for ${ctx.entityType}:${ctx.entityId}`)
         return

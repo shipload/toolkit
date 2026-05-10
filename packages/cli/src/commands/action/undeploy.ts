@@ -46,7 +46,7 @@ export async function runUndeploy(
                 description: `Undeploying ${targetType}:${targetId} into ${ctx.entityType}:${ctx.entityId}`,
             }
         )
-        await maybeAwaitAndPrint(ctx.entityType, ctx.entityId, options, result)
+        await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }
 
