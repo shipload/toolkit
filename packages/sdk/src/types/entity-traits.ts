@@ -13,6 +13,7 @@ export const ENTITY_WAREHOUSE = Name.from('warehouse')
 export const ENTITY_EXTRACTOR = Name.from('extractor')
 export const ENTITY_FACTORY = Name.from('factory')
 export const ENTITY_CONTAINER = Name.from('container')
+export const ENTITY_NEXUS = Name.from('nexus')
 
 export enum EntityClass {
     OrbitalVessel = 0,
@@ -24,6 +25,7 @@ export function getEntityClass(entityType: Name | EntityTypeName): EntityClass {
     switch (typeName) {
         case 'ship':
         case 'container':
+        case 'nexus':
             return EntityClass.OrbitalVessel
         case 'warehouse':
         case 'extractor':
@@ -52,7 +54,7 @@ export function getPackedEntityType(itemId: number): Name | null {
     }
 }
 
-export type EntityTypeName = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container'
+export type EntityTypeName = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container' | 'nexus'
 
 export interface EntityTraits {
     typeName: Name
@@ -113,6 +115,16 @@ export const containerTraits: EntityTraits = {
     notFoundError: 'container not found',
 }
 
+export const nexusTraits: EntityTraits = {
+    typeName: ENTITY_NEXUS,
+    isMovable: false,
+    hasEnergy: false,
+    hasLoaders: false,
+    hasModules: false,
+
+    notFoundError: 'nexus not found',
+}
+
 export function getEntityTraits(entityType: Name | EntityTypeName): EntityTraits {
     const typeName = typeof entityType === 'string' ? entityType : entityType.toString()
 
@@ -127,6 +139,8 @@ export function getEntityTraits(entityType: Name | EntityTypeName): EntityTraits
             return factoryTraits
         case 'container':
             return containerTraits
+        case 'nexus':
+            return nexusTraits
         default:
             throw new Error(`Unknown entity type: ${typeName}`)
     }
@@ -150,4 +164,8 @@ export function isFactory(entity: {type?: Name}): boolean {
 
 export function isContainer(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_CONTAINER) ?? false
+}
+
+export function isNexus(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_NEXUS) ?? false
 }

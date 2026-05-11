@@ -2,12 +2,16 @@ import {ServerContract} from '../contracts'
 import {Ship} from '../entities/ship'
 import {Warehouse} from '../entities/warehouse'
 import {Container} from '../entities/container'
+import {Nexus} from '../entities/nexus'
 import type {WireEntity} from './types'
 
-export function mapEntity(ei: ServerContract.Types.entity_info): Ship | Warehouse | Container {
+export function mapEntity(
+    ei: ServerContract.Types.entity_info
+): Ship | Warehouse | Container | Nexus {
     if (ei.type.equals('ship')) return new Ship(ei)
     if (ei.type.equals('warehouse')) return new Warehouse(ei)
     if (ei.type.equals('container')) return new Container(ei)
+    if (ei.type.equals('nexus')) return new Nexus(ei)
     throw new Error(`mapEntity: unknown entity type ${ei.type.toString()}`)
 }
 

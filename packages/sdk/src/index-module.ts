@@ -22,7 +22,16 @@ export {Factory, computeFactoryCapabilities} from './entities/factory'
 export type {FactoryStateInput, FactoryCapabilities} from './entities/factory'
 export {Container} from './entities/container'
 export type {ContainerStateInput} from './entities/container'
-export {makeShip, makeWarehouse, makeExtractor, makeFactory, makeContainer} from './entities/makers'
+export {Nexus} from './entities/nexus'
+export type {NexusStateInput} from './entities/nexus'
+export {
+    makeShip,
+    makeWarehouse,
+    makeExtractor,
+    makeFactory,
+    makeContainer,
+    makeNexus,
+} from './entities/makers'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats

@@ -5,12 +5,15 @@ import {Warehouse} from '../entities/warehouse'
 import {Container} from '../entities/container'
 import {Extractor} from '../entities/extractor'
 import {Factory} from '../entities/factory'
+import {Nexus} from '../entities/nexus'
 import type {ServerContract} from '../contracts'
 
-export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container'
+export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container' | 'nexus'
 
 export class EntitiesManager extends BaseManager {
-    async getEntity(id: UInt64Type): Promise<Ship | Warehouse | Extractor | Factory | Container> {
+    async getEntity(
+        id: UInt64Type
+    ): Promise<Ship | Warehouse | Extractor | Factory | Container | Nexus> {
         const result = await this.server.readonly('getentity', {
             entity_id: id,
         })
@@ -21,7 +24,7 @@ export class EntitiesManager extends BaseManager {
     async getEntities(
         owner: NameType | ServerContract.Types.player_row,
         type?: EntityType
-    ): Promise<(Ship | Warehouse | Extractor | Factory | Container)[]> {
+    ): Promise<(Ship | Warehouse | Extractor | Factory | Container | Nexus)[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
             owner: ownerName,
@@ -113,14 +116,29 @@ export class EntitiesManager extends BaseManager {
         return this.getSummaries(owner, 'factory')
     }
 
+    async getNexus(id: UInt64Type): Promise<Nexus> {
+        return (await this.getEntity(id)) as Nexus
+    }
+
+    async getNexuses(owner: NameType | ServerContract.Types.player_row): Promise<Nexus[]> {
+        return (await this.getEntities(owner, 'nexus')) as Nexus[]
+    }
+
+    async getNexusSummaries(
+        owner: NameType | ServerContract.Types.player_row
+    ): Promise<ServerContract.Types.entity_summary[]> {
+        return this.getSummaries(owner, 'nexus')
+    }
+
     private wrapEntity(
         entity: ServerContract.Types.entity_info
-    ): Ship | Warehouse | Extractor | Factory | Container {
+    ): Ship | Warehouse | Extractor | Factory | Container | Nexus {
         if (entity.type.equals('ship')) return new Ship(entity)
         if (entity.type.equals('warehouse')) return new Warehouse(entity)
         if (entity.type.equals('extractor')) return new Extractor(entity)
         if (entity.type.equals('factory')) return new Factory(entity)
         if (entity.type.equals('container')) return new Container(entity)
+        if (entity.type.equals('nexus')) return new Nexus(entity)
         throw new Error(`unknown entity type: ${entity.type}`)
     }
 

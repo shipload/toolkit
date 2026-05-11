@@ -34,8 +34,8 @@ export class Extractor extends ServerContract.Types.entity_info {
         return this.entity_name
     }
 
-    get entityClass(): 'building' {
-        return 'building'
+    get entityClass(): 'planetary' {
+        return 'planetary'
     }
 
     get canDemolish(): boolean {

@@ -39,7 +39,7 @@ export type UnsubscribeMessage = {
 export type SubscribeEntityMessage = {
     type: 'subscribe_entity'
     sub_id: string
-    entity_type: 'ship' | 'warehouse' | 'container'
+    entity_type: 'ship' | 'warehouse' | 'container' | 'nexus'
     entity_id: string
 }
 
@@ -80,7 +80,7 @@ export type AckMessage = {
 
 export type WireEntity = Record<string, unknown> & {
     type: number
-    type_name: 'ship' | 'warehouse' | 'container'
+    type_name: 'ship' | 'warehouse' | 'container' | 'nexus'
     id: string | number
     owner: string
     coordinates: WireCoordinates

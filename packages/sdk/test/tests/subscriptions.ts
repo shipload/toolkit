@@ -1,6 +1,6 @@
 import {describe, test, beforeEach, afterEach} from 'bun:test'
 import {assert} from 'chai'
-import {Container, ServerContract, Ship, Warehouse} from '$lib'
+import {Container, Nexus, ServerContract, Ship, Warehouse} from '$lib'
 import {mapEntity} from '../../src/subscriptions/mappers'
 import {SubscriptionsManager} from '../../src/subscriptions/manager'
 import {FakeWebSocketServer} from '../helpers/fake-ws'
@@ -60,6 +60,24 @@ describe('subscriptions/mappers', () => {
             pending_tasks: [],
         })
         assert.instanceOf(mapEntity(ei), Container)
+    })
+
+    test('mapEntity returns Nexus for type=nexus', () => {
+        const ei = ServerContract.Types.entity_info.from({
+            type: 'nexus',
+            id: 4,
+            owner: 'shipload.gm',
+            entity_name: 'Genesis Nexus',
+            coordinates: {x: 0, y: 0, z: 800},
+            cargomass: 0,
+            cargo: [],
+            modules: [],
+            is_idle: true,
+            current_task_elapsed: 0,
+            current_task_remaining: 0,
+            pending_tasks: [],
+        })
+        assert.instanceOf(mapEntity(ei), Nexus)
     })
 })
 

@@ -16,9 +16,10 @@ import {mapEntity, parseWireEntity} from './mappers'
 import type {Ship} from '../entities/ship'
 import type {Warehouse} from '../entities/warehouse'
 import type {Container} from '../entities/container'
+import type {Nexus} from '../entities/nexus'
 
-export type SubscriptionEntityType = 'ship' | 'warehouse' | 'container'
-export type EntityInstance = Ship | Warehouse | Container
+export type SubscriptionEntityType = 'ship' | 'warehouse' | 'container' | 'nexus'
+export type EntityInstance = Ship | Warehouse | Container | Nexus
 
 export interface SubscriptionsOptions {
     url: string

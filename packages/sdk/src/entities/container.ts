@@ -25,8 +25,8 @@ export class Container extends ServerContract.Types.entity_info {
         return this.entity_name
     }
 
-    get entityClass(): 'mobile' {
-        return 'mobile'
+    get entityClass(): 'orbital' {
+        return 'orbital'
     }
 
     get canUndeploy(): boolean {

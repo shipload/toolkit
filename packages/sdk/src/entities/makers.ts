@@ -3,6 +3,7 @@ import {ServerContract} from '../contracts'
 import {type PackedModuleInput, Ship, type ShipStateInput} from './ship'
 import {computeWarehouseCapabilities, Warehouse, type WarehouseStateInput} from './warehouse'
 import {Container, type ContainerStateInput} from './container'
+import {Nexus, type NexusStateInput} from './nexus'
 import {Extractor, computeExtractorCapabilities, type ExtractorStateInput} from './extractor'
 import {Factory, computeFactoryCapabilities, type FactoryStateInput} from './factory'
 import {
@@ -284,4 +285,22 @@ export function makeContainer(state: ContainerStateInput): Container {
         schedule: state.schedule,
     })
     return new Container(entityInfo)
+}
+
+export function makeNexus(state: NexusStateInput): Nexus {
+    const entityInfo = ServerContract.Types.entity_info.from({
+        type: Name.from('nexus'),
+        id: UInt64.from(state.id),
+        owner: Name.from(state.owner),
+        entity_name: state.name,
+        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
+        cargomass: UInt32.from(0),
+        cargo: [],
+        modules: [],
+        is_idle: true,
+        current_task_elapsed: UInt32.from(0),
+        current_task_remaining: UInt32.from(0),
+        pending_tasks: [],
+    })
+    return new Nexus(entityInfo)
 }
