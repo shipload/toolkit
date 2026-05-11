@@ -96,6 +96,9 @@ export function deserializeAtomicData(
             case 'uint64':
                 result[field.name] = readVarint64()
                 break
+            case 'int32':
+                result[field.name] = readZigzagInt64()
+                break
             case 'int64':
                 result[field.name] = readZigzagInt64()
                 break
