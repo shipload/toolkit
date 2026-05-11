@@ -1,5 +1,4 @@
 import type {AnyAction} from '@wharfkit/antelope'
-import {Name} from '@wharfkit/antelope'
 import {SubscriptionsManager, type ServerTypes} from '@shipload/sdk'
 import type {EntityTypeName} from '../lib/args'
 import {getShipload} from '../lib/client'
@@ -11,7 +10,7 @@ import {
     streamFleetSnapshots,
     teeFleet,
 } from '../lib/snapshot-fleet'
-import {transact} from '../lib/session'
+import {transactStrict} from '../lib/session'
 import {runApp} from './app'
 import type {ResolveSuccess} from './primitives/resolve-modal'
 import {ActionDispatcher} from './state/actions'
@@ -40,7 +39,7 @@ async function dispatchResolve(
     let txid = ''
     const dispatch = await dispatcher.run(label, async () => {
         const args = Array.isArray(actions) ? {actions} : {action: actions}
-        const result = await transact(args, {description})
+        const result = await transactStrict(args, {description})
         txid = result.txid
     })
     if (!dispatch.ok) throw new Error(dispatch.error)
@@ -105,10 +104,7 @@ export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
         },
         perEntityResolve: async (row: EntityRow) => {
             const shipload = await getShipload()
-            const action = shipload.actions.resolve(
-                BigInt(String(row.snap.id)),
-                Name.from(String(row.snap.type))
-            )
+            const action = shipload.actions.resolve(BigInt(String(row.snap.id)))
             return dispatchResolve(
                 dispatcher,
                 'resolve',
@@ -118,9 +114,7 @@ export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
         },
         bulkResolve: async (rows: EntityRow[]) => {
             const shipload = await getShipload()
-            const actions = rows.map((r) =>
-                shipload.actions.resolve(BigInt(String(r.snap.id)), Name.from(String(r.snap.type)))
-            )
+            const actions = rows.map((r) => shipload.actions.resolve(BigInt(String(r.snap.id))))
             return dispatchResolve(
                 dispatcher,
                 'bulk-resolve',
@@ -139,10 +133,7 @@ export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
                 stream: subStream,
                 resolveAction: async (count: number) => {
                     const shipload = await getShipload()
-                    const action = shipload.actions.resolve(
-                        BigInt(String(row.snap.id)),
-                        Name.from(String(row.snap.type))
-                    )
+                    const action = shipload.actions.resolve(BigInt(String(row.snap.id)))
                     return dispatchResolve(
                         dispatcher,
                         'resolve',

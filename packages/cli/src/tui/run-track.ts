@@ -1,6 +1,6 @@
 import {getShipload} from '../lib/client'
 import type {EntityContext} from '../lib/entity-scope'
-import {transact} from '../lib/session'
+import {transactStrict} from '../lib/session'
 import {getEntitySnapshot} from '../lib/snapshot'
 import {streamEntitySnapshot} from '../lib/snapshot-stream'
 import {runApp} from './app'
@@ -34,16 +34,13 @@ export async function runTrackView(ctx: EntityContext, opts: RunTrackViewOpts = 
             const dispatch = await dispatcher.run('resolve', async () => {
                 const shipload = await getShipload()
                 const action = shipload.actions.resolve(BigInt(ctx.entityId.toString()))
-                const txResult = await transact(
+                const txResult = await transactStrict(
                     {action},
                     {
                         description: `Resolved ${count} task(s) on ${ctx.entityType} ${ctx.entityId}`,
                     }
                 )
                 capturedTxid = txResult.txid
-                if (!capturedTxid) {
-                    throw new Error('transaction failed (no txid returned)')
-                }
             })
             if (!dispatch.ok) throw new Error(dispatch.error)
             return {

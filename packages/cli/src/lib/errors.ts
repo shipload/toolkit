@@ -10,17 +10,12 @@ export const EXIT = {
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];
 
 export function extractChainError(err: unknown): string {
+	const body = chainErrorBody(err);
+	if (body) return pickPrimaryChainMessage(body);
 	if (err && typeof err === "object") {
-		const maybeSession = err as {
-			response?: { json?: { error?: { details?: { message?: string }[] } } };
-			message?: string;
-		};
-		const detail = maybeSession.response?.json?.error?.details?.[0]?.message;
-		if (typeof detail === "string" && detail.length > 0) {
-			return stripAssertionPrefix(detail);
-		}
-		if (typeof maybeSession.message === "string" && maybeSession.message.length > 0) {
-			return stripAssertionPrefix(maybeSession.message);
+		const maybe = err as { message?: string };
+		if (typeof maybe.message === "string" && maybe.message.length > 0) {
+			return stripAssertionPrefix(maybe.message);
 		}
 	}
 	return "unknown error";
@@ -28,6 +23,57 @@ export function extractChainError(err: unknown): string {
 
 function stripAssertionPrefix(msg: string): string {
 	return msg.replace(/^assertion failure with message:\s*/, "");
+}
+
+export interface ChainErrorDetail {
+	message?: string;
+	file?: string;
+	line_number?: number;
+	method?: string;
+}
+
+export interface ChainErrorBody {
+	code?: number;
+	name?: string;
+	what?: string;
+	details?: ChainErrorDetail[];
+}
+
+export function chainErrorBody(err: unknown): ChainErrorBody | null {
+	const maybe = err as { response?: { json?: { error?: ChainErrorBody } } };
+	const e = maybe?.response?.json?.error;
+	if (!e || !Array.isArray(e.details)) return null;
+	return e;
+}
+
+function isGenericMessage(msg: string): boolean {
+	const m = msg.trim().toLowerCase();
+	return m === "" || m === "assertion failed";
+}
+
+export function pickPrimaryChainMessage(body: ChainErrorBody): string {
+	const first = stripAssertionPrefix(body.details?.[0]?.message ?? "");
+	if (!isGenericMessage(first)) return first;
+	for (let i = 1; i < (body.details?.length ?? 0); i++) {
+		const candidate = stripAssertionPrefix(body.details?.[i]?.message ?? "");
+		if (!isGenericMessage(candidate) && candidate.length > 0) return candidate;
+	}
+	if (body.what && body.what.length > 0) return body.what;
+	return first || "unknown chain error";
+}
+
+export function logRichChainError(body: ChainErrorBody): void {
+	const header =
+		`[chain] ${body.name ?? "transaction_exception"} ` +
+		`(code ${body.code ?? 0}): ${body.what ?? ""}`.trim();
+	console.error(header);
+	for (const d of body.details ?? []) {
+		const loc =
+			d.file && d.line_number
+				? ` (${d.file}:${d.line_number}${d.method ? ` ${d.method}` : ""})`
+				: "";
+		console.error(`  - ${d.message ?? ""}${loc}`);
+	}
 }
 
 export interface ChainHint {
@@ -66,6 +112,8 @@ export function printError(err: unknown): ExitCode {
 		if (err.suggestion) console.error(`Try: ${err.suggestion}`);
 		return EXIT.USER_ERROR;
 	}
+	const body = chainErrorBody(err);
+	if (body) logRichChainError(body);
 	const msg = extractChainError(err);
 	console.error(`Error: ${msg}`);
 	const hint = HINTS.find((h) => h.matches(msg))?.hint;

@@ -28,6 +28,44 @@ describe("extractChainError", () => {
 	test("returns stringified fallback for unknown shapes", () => {
 		expect(extractChainError({})).toBe("unknown error");
 	});
+
+	test("falls through past a generic 'Assertion failed' top frame to a useful detail", () => {
+		const err = {
+			response: {
+				json: {
+					error: {
+						code: 3050003,
+						name: "eosio_assert_message_exception",
+						what: "eosio_assert_message assertion failure",
+						details: [
+							{ message: "Assertion failed" },
+							{
+								message:
+									"assertion failure with message: unload cargo insufficient on entity",
+								file: "resolve.cpp",
+								line_number: 297,
+							},
+						],
+					},
+				},
+			},
+		};
+		expect(extractChainError(err)).toBe("unload cargo insufficient on entity");
+	});
+
+	test("falls back to error.what when every detail is generic", () => {
+		const err = {
+			response: {
+				json: {
+					error: {
+						what: "eosio_assert_message assertion failure",
+						details: [{ message: "Assertion failed" }, { message: "" }],
+					},
+				},
+			},
+		};
+		expect(extractChainError(err)).toBe("eosio_assert_message assertion failure");
+	});
 });
 
 describe("EXIT codes", () => {

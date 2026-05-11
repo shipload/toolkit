@@ -10,7 +10,7 @@ import {
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey";
 import { chain, client } from "./client";
 import { loadConfig } from "./config";
-import { printError } from "./errors";
+import { extractChainError, printError } from "./errors";
 import {
 	formatCancelResults,
 	formatDuration,
@@ -152,53 +152,64 @@ export interface SessionLike {
 	}>;
 }
 
-export async function runTransact(
+export async function performTransact(
 	sessionLike: SessionLike,
 	args: TransactArgs,
 	options?: TransactOptions & { description?: string },
 ): Promise<TransactResult> {
 	const snapshots = new Map<string, unknown>();
-	try {
-		const result = await sessionLike.transact(args, { awaitIrreversible: true, ...options });
-		const txid = result.response?.transaction_id;
+	const result = await sessionLike.transact(args, { awaitIrreversible: true, ...options });
+	const txid = result.response?.transaction_id;
 
-		if (options?.description) {
-			console.log(options.description);
-			if (options.description.includes("\n")) {
-				console.log();
-			}
+	if (options?.description) {
+		console.log(options.description);
+		if (options.description.includes("\n")) {
+			console.log();
 		}
-
-		const actions = getActions(args);
-		const actionTraces = result.response?.processed?.action_traces || [];
-
-		for (let i = 0; i < actions.length; i++) {
-			const actionName = getActionName(actions[i]);
-			const trace = actionTraces[i];
-			const returnData = trace?.return_value_data;
-
-			if (returnData) {
-				const formatted = await formatActionResult(actionName, returnData, snapshots);
-				if (formatted) {
-					console.log(formatted);
-				}
-			}
-		}
-
-		console.log();
-		console.log(`https://jungle4.unicove.com/en/jungle4/transaction/${txid}`);
-		return { txid: String(txid), snapshots };
-	} catch (err) {
-		process.exitCode = printError(err);
-		return { txid: "", snapshots };
 	}
+
+	const actions = getActions(args);
+	const actionTraces = result.response?.processed?.action_traces || [];
+
+	for (let i = 0; i < actions.length; i++) {
+		const actionName = getActionName(actions[i]);
+		const trace = actionTraces[i];
+		const returnData = trace?.return_value_data;
+
+		if (returnData) {
+			const formatted = await formatActionResult(actionName, returnData, snapshots);
+			if (formatted) {
+				console.log(formatted);
+			}
+		}
+	}
+
+	console.log();
+	console.log(`https://jungle4.unicove.com/en/jungle4/transaction/${txid}`);
+	return { txid: String(txid), snapshots };
 }
 
 export async function transact(
 	args: TransactArgs,
 	options?: TransactOptions & { description?: string },
 ): Promise<TransactResult> {
-	return runTransact(getSession(), args, options);
+	try {
+		return await performTransact(getSession(), args, options);
+	} catch (err) {
+		process.exitCode = printError(err);
+		return { txid: "", snapshots: new Map() };
+	}
+}
+
+export async function transactStrict(
+	args: TransactArgs,
+	options?: TransactOptions & { description?: string },
+): Promise<TransactResult> {
+	try {
+		return await performTransact(getSession(), args, options);
+	} catch (err) {
+		throw new Error(extractChainError(err));
+	}
 }
 
 export { chain, client };

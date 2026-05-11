@@ -1,6 +1,5 @@
-import { describe, expect, mock, test } from "bun:test";
-import { EXIT } from "../../src/lib/errors";
-import { runTransact } from "../../src/lib/session";
+import { describe, expect, test } from "bun:test";
+import { performTransact } from "../../src/lib/session";
 
 describe("session lazy initialization", () => {
 	test("exports getter functions, not pre-initialized values", async () => {
@@ -11,8 +10,8 @@ describe("session lazy initialization", () => {
 	});
 });
 
-describe("runTransact error path", () => {
-	test("prints chain message and sets exitCode=CHAIN_ERROR", async () => {
+describe("performTransact", () => {
+	test("propagates the raw chain error so callers can format it", async () => {
 		const fakeSession = {
 			transact: async () => {
 				throw {
@@ -26,17 +25,12 @@ describe("runTransact error path", () => {
 				};
 			},
 		};
-		const errSpy = mock((..._args: unknown[]) => {});
-		const origErr = console.error;
-		console.error = errSpy;
 
 		// @ts-expect-error minimal session shape for test
-		await runTransact(fakeSession, { action: {} }, { description: "test" });
+		const call = performTransact(fakeSession, { action: {} }, { description: "test" });
 
-		console.error = origErr;
-		expect(process.exitCode).toBe(EXIT.CHAIN_ERROR);
-		const joined = errSpy.mock.calls.map((c) => String(c[0])).join("\n");
-		expect(joined).toContain("boom");
-		process.exitCode = 0;
+		await expect(call).rejects.toMatchObject({
+			response: { json: { error: { details: [{ message: expect.stringContaining("boom") }] } } },
+		});
 	});
 });
