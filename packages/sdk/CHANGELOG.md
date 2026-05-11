@@ -1,5 +1,22 @@
 # @shipload/sdk
 
+## 1.0.0-next.11
+
+### Patch Changes
+
+- c8d3c24: - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Fixed/simplified transact methods
+  - using projected coordinates for gather/deploy
+  - Formatting
+  - Entity header for track (and others)
+  - Better log-like formatting
+  - Renaming entity classes + adding nexus
+  - Added int32 type for nft data
+  - Standardizing entity errors/messaging
+  - Add new Factory entity
+
 ## 1.0.0-next.10
 
 ### Patch Changes
