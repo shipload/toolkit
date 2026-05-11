@@ -14,7 +14,7 @@ import {
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
     RECIPE_NOT_FOUND,
-    SHIP_CARGO_NOT_LOADED,
+    ENTITY_CARGO_NOT_LOADED,
 } from '../errors'
 import {getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
@@ -389,7 +389,7 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
                 break
             }
         }
-        if (!found) throw new Error(SHIP_CARGO_NOT_LOADED)
+        if (!found) throw new Error(ENTITY_CARGO_NOT_LOADED)
     }
 }
 

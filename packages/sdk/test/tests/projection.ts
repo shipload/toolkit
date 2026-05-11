@@ -14,7 +14,7 @@ import {
     RECIPE_INPUTS_INVALID,
     RECIPE_NOT_FOUND,
     ServerContract,
-    SHIP_CARGO_NOT_LOADED,
+    ENTITY_CARGO_NOT_LOADED,
     TaskType,
     validateSchedule,
 } from '$lib'
@@ -263,7 +263,7 @@ describe('projectEntity (stack-aware)', () => {
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
             })
 
-            test('throws SHIP_CARGO_NOT_LOADED when input not in projected cargo', () => {
+            test('throws ENTITY_CARGO_NOT_LOADED when input not in projected cargo', () => {
                 // Cargo empty but craft task declares inputs
                 const ship = makeShipFixture({capacity: 10_000_000})
                 ship.schedule = ServerContract.Types.schedule.from({
@@ -277,7 +277,7 @@ describe('projectEntity (stack-aware)', () => {
                         }),
                     ],
                 })
-                assert.throws(() => validateSchedule(ship), SHIP_CARGO_NOT_LOADED)
+                assert.throws(() => validateSchedule(ship), ENTITY_CARGO_NOT_LOADED)
             })
 
             test('validates itemId-typed recipe slots (Engine from Thruster Cores)', () => {
