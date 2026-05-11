@@ -118,6 +118,9 @@ exports[`EntitiesManager method surface 1`] = `
   "getExtractor",
   "getExtractorSummaries",
   "getExtractors",
+  "getFactories",
+  "getFactory",
+  "getFactorySummaries",
   "getShip",
   "getShipSummaries",
   "getShips",
@@ -127,5 +130,24 @@ exports[`EntitiesManager method surface 1`] = `
   "getWarehouses",
   "resolveOwner",
   "wrapEntity",
+]
+`;
+
+exports[`Factory public surface 1`] = `
+[
+  "availableCapacity",
+  "canDemolish",
+  "constructor",
+  "entityClass",
+  "inv",
+  "inventory",
+  "isFull",
+  "isIdle",
+  "location",
+  "maxCapacity",
+  "name",
+  "sched",
+  "totalCargoMass",
+  "totalMass",
 ]
 `;

@@ -4,8 +4,10 @@ import {type PackedModuleInput, Ship, type ShipStateInput} from './ship'
 import {computeWarehouseCapabilities, Warehouse, type WarehouseStateInput} from './warehouse'
 import {Container, type ContainerStateInput} from './container'
 import {Extractor, computeExtractorCapabilities, type ExtractorStateInput} from './extractor'
+import {Factory, computeFactoryCapabilities, type FactoryStateInput} from './factory'
 import {
     ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_FACTORY_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
@@ -223,6 +225,44 @@ export function makeExtractor(state: ExtractorStateInput): Extractor {
 
     const entityInfo = ServerContract.Types.entity_info.from(info)
     return new Extractor(entityInfo)
+}
+
+export function makeFactory(state: FactoryStateInput): Factory {
+    const info: Record<string, unknown> = {
+        type: Name.from('factory'),
+        id: UInt64.from(state.id),
+        owner: Name.from(state.owner),
+        entity_name: state.name,
+        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
+        cargomass: UInt32.from(0),
+        cargo: state.cargo || [],
+        is_idle: !state.schedule,
+        current_task_elapsed: UInt32.from(0),
+        current_task_remaining: UInt32.from(0),
+        pending_tasks: [],
+    }
+    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
+    if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
+    if (state.schedule) info.schedule = state.schedule
+    if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
+
+    const moduleEntries = assignModulesToSlots(
+        ITEM_FACTORY_T1_PACKED,
+        state.modules ?? [],
+        'Factory T1'
+    )
+    if (state.modules && state.modules.length > 0) {
+        const layout = getEntityLayout(ITEM_FACTORY_T1_PACKED)?.slots ?? []
+        const installed = toInstalledModules(moduleEntries)
+        const capabilities = computeFactoryCapabilities(installed, layout)
+        if (capabilities.generator) info.generator = capabilities.generator
+        if (capabilities.crafter) info.crafter = capabilities.crafter
+    }
+
+    info.modules = moduleEntries
+
+    const entityInfo = ServerContract.Types.entity_info.from(info)
+    return new Factory(entityInfo)
 }
 
 export function makeContainer(state: ContainerStateInput): Container {

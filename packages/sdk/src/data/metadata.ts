@@ -229,6 +229,11 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Planetary resource extraction facility with generator and gatherer module slots.',
         color: '#D4726F',
     },
+    10204: {
+        name: 'Factory',
+        description: 'Planetary fabrication facility with generator and crafter module slots.',
+        color: '#7BA7D4',
+    },
 
     // === Components (T2) ===
     20001: {
@@ -255,6 +260,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10201: {moduleSlotLabels: ['Engine', 'Generator', 'Gatherer', 'Loader', 'Storage']},
     10202: {moduleSlotLabels: ['Loader', 'Storage', 'Storage', 'Storage', 'Storage']},
     10203: {moduleSlotLabels: ['Generator', 'Gatherer']},
+    10204: {moduleSlotLabels: ['Generator', 'Crafter']},
 }
 
 for (const item of items as Array<{id: number}>) {

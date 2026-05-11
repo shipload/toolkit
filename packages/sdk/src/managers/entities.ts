@@ -4,12 +4,13 @@ import {Ship} from '../entities/ship'
 import {Warehouse} from '../entities/warehouse'
 import {Container} from '../entities/container'
 import {Extractor} from '../entities/extractor'
+import {Factory} from '../entities/factory'
 import type {ServerContract} from '../contracts'
 
-export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'container'
+export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container'
 
 export class EntitiesManager extends BaseManager {
-    async getEntity(id: UInt64Type): Promise<Ship | Warehouse | Extractor | Container> {
+    async getEntity(id: UInt64Type): Promise<Ship | Warehouse | Extractor | Factory | Container> {
         const result = await this.server.readonly('getentity', {
             entity_id: id,
         })
@@ -20,7 +21,7 @@ export class EntitiesManager extends BaseManager {
     async getEntities(
         owner: NameType | ServerContract.Types.player_row,
         type?: EntityType
-    ): Promise<(Ship | Warehouse | Extractor | Container)[]> {
+    ): Promise<(Ship | Warehouse | Extractor | Factory | Container)[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
             owner: ownerName,
@@ -58,6 +59,10 @@ export class EntitiesManager extends BaseManager {
         return (await this.getEntity(id)) as Extractor
     }
 
+    async getFactory(id: UInt64Type): Promise<Factory> {
+        return (await this.getEntity(id)) as Factory
+    }
+
     async getShips(owner: NameType | ServerContract.Types.player_row): Promise<Ship[]> {
         return (await this.getEntities(owner, 'ship')) as Ship[]
     }
@@ -72,6 +77,10 @@ export class EntitiesManager extends BaseManager {
 
     async getExtractors(owner: NameType | ServerContract.Types.player_row): Promise<Extractor[]> {
         return (await this.getEntities(owner, 'extractor')) as Extractor[]
+    }
+
+    async getFactories(owner: NameType | ServerContract.Types.player_row): Promise<Factory[]> {
+        return (await this.getEntities(owner, 'factory')) as Factory[]
     }
 
     async getShipSummaries(
@@ -98,12 +107,19 @@ export class EntitiesManager extends BaseManager {
         return this.getSummaries(owner, 'extractor')
     }
 
+    async getFactorySummaries(
+        owner: NameType | ServerContract.Types.player_row
+    ): Promise<ServerContract.Types.entity_summary[]> {
+        return this.getSummaries(owner, 'factory')
+    }
+
     private wrapEntity(
         entity: ServerContract.Types.entity_info
-    ): Ship | Warehouse | Extractor | Container {
+    ): Ship | Warehouse | Extractor | Factory | Container {
         if (entity.type.equals('ship')) return new Ship(entity)
         if (entity.type.equals('warehouse')) return new Warehouse(entity)
         if (entity.type.equals('extractor')) return new Extractor(entity)
+        if (entity.type.equals('factory')) return new Factory(entity)
         if (entity.type.equals('container')) return new Container(entity)
         throw new Error(`unknown entity type: ${entity.type}`)
     }

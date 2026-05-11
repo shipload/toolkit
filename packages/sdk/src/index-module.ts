@@ -18,9 +18,11 @@ export {Warehouse, computeWarehouseCapabilities} from './entities/warehouse'
 export type {WarehouseStateInput} from './entities/warehouse'
 export {Extractor, computeExtractorCapabilities} from './entities/extractor'
 export type {ExtractorStateInput, ExtractorCapabilities} from './entities/extractor'
+export {Factory, computeFactoryCapabilities} from './entities/factory'
+export type {FactoryStateInput, FactoryCapabilities} from './entities/factory'
 export {Container} from './entities/container'
 export type {ContainerStateInput} from './entities/container'
-export {makeShip, makeWarehouse, makeExtractor, makeContainer} from './entities/makers'
+export {makeShip, makeWarehouse, makeExtractor, makeFactory, makeContainer} from './entities/makers'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
@@ -190,10 +192,12 @@ export {
     ENTITY_SHIP,
     ENTITY_WAREHOUSE,
     ENTITY_EXTRACTOR,
+    ENTITY_FACTORY,
     ENTITY_CONTAINER,
     shipTraits,
     warehouseTraits,
     extractorTraits,
+    factoryTraits,
     containerTraits,
     getEntityClass,
     getPackedEntityType,
@@ -201,6 +205,7 @@ export {
     isShip,
     isWarehouse,
     isExtractor,
+    isFactory,
     isContainer,
 } from './types/entity-traits'
 export type {EntityTraits, EntityTypeName} from './types/entity-traits'
