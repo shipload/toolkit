@@ -6,7 +6,8 @@ import {
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import type { EntityRef } from "./args";
-import { server } from "./client";
+import { projectedCoords } from "./projection";
+import { getEntitySnapshot } from "./snapshot";
 
 export interface GathererStats {
 	depth: number;
@@ -35,35 +36,19 @@ export function reachLegend(reachable: number, total: number, depth: number): st
 }
 
 export async function resolveReach(ref: EntityRef): Promise<Reach> {
-	const info = (await server.readonly("getentity", {
-		entity_id: ref.entityId,
-	})) as unknown as {
-		coordinates: {
-			x: bigint | number | { toString(): string };
-			y: bigint | number | { toString(): string };
-		};
-		gatherer?: {
-			depth: number | bigint | { toString(): string };
-			yield: number | bigint | { toString(): string };
-			drain: number | bigint | { toString(): string };
-			speed: number | bigint | { toString(): string };
-		};
-	};
-	if (!info.gatherer) {
+	const snap = await getEntitySnapshot(ref.entityId);
+	if (!snap.gatherer) {
 		throw new Error(
 			`${ref.entityType}:${ref.entityId} has no gatherer module; cannot filter by depth`,
 		);
 	}
 	return {
-		coords: {
-			x: BigInt(info.coordinates.x.toString()),
-			y: BigInt(info.coordinates.y.toString()),
-		},
+		coords: projectedCoords(snap),
 		gatherer: {
-			depth: Number(info.gatherer.depth.toString()),
-			yield: Number(info.gatherer.yield.toString()),
-			drain: Number(info.gatherer.drain.toString()),
-			speed: Number(info.gatherer.speed.toString()),
+			depth: Number(snap.gatherer.depth.toString()),
+			yield: Number(snap.gatherer.yield.toString()),
+			drain: Number(snap.gatherer.drain.toString()),
+			speed: Number(snap.gatherer.speed.toString()),
 		},
 	};
 }

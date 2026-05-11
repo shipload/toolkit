@@ -14,6 +14,7 @@ import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateGather} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {formatItem} from '../../lib/format'
+import {projectedCoords} from '../../lib/projection'
 import {resolveReach, shallowestPerItem} from '../../lib/reach'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
@@ -56,10 +57,7 @@ async function preflightGather(opts: GatherOpts): Promise<void> {
     const depth = src.gatherer ? Number(src.gatherer.depth.toString()) : 0
     checkDepth(depth, opts.stratum)
 
-    const coords = {
-        x: BigInt(src.coordinates.x.toString()),
-        y: BigInt(src.coordinates.y.toString()),
-    }
+    const coords = projectedCoords(src)
     const stratumData = (await server.readonly('getstratum', {
         x: coords.x,
         y: coords.y,

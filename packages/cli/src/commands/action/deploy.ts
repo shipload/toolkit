@@ -19,6 +19,7 @@ import {getGameSeed, getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
 import {estimateDeploy} from '../../lib/estimate'
+import {projectedCoords} from '../../lib/projection'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
@@ -70,7 +71,7 @@ export async function runDeploy(
             packedEntityType !== null &&
             getEntityClass(packedEntityType) === EntityClass.PlanetaryStructure
         ) {
-            const coords = snap.coordinates
+            const coords = projectedCoords(snap)
             const gameSeed = await getGameSeed()
             if (!isLocationBuildable(gameSeed, coords)) {
                 const locType = getLocationType(gameSeed, coords)

@@ -36,6 +36,7 @@ import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
+import { projectedCoords } from "./projection";
 import {
 	checkCargoCapacity,
 	checkDestinationIsSystem,
@@ -408,8 +409,7 @@ export async function estimateGather(params: {
 		};
 	}
 
-	const x = BigInt(snap.coordinates.x.toString());
-	const y = BigInt(snap.coordinates.y.toString());
+	const { x, y } = projectedCoords(snap);
 
 	const stratumResponse = (await server.readonly("getstratum", {
 		x,
@@ -512,8 +512,9 @@ export async function estimateGroupTravel(params: {
 		params.entities.map((e) => getEntitySnapshot(e.entityId)),
 	);
 
-	const originX = Number(snapshots[0].coordinates.x.toString());
-	const originY = Number(snapshots[0].coordinates.y.toString());
+	const groupOrigin = projectedCoords(snapshots[0]);
+	const originX = Number(groupOrigin.x);
+	const originY = Number(groupOrigin.y);
 	const targetX = typeof params.target.x === "bigint" ? Number(params.target.x) : params.target.x;
 	const targetY = typeof params.target.y === "bigint" ? Number(params.target.y) : params.target.y;
 
