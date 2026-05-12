@@ -49,7 +49,7 @@ codegen:
 	$(MAKE) -C packages/sdk codegen
 
 sync/catalog:
-	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../game/build/catalog}
+	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../contracts/build/catalog}
 
 changeset:
 	$(MAKE) check

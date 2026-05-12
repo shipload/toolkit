@@ -3,8 +3,8 @@ import {buildAction, preflightAgainstSnapshot} from '../../../src/commands/actio
 import type {EntitySnapshot} from '../../../src/lib/snapshot'
 import {getLocalShipload} from '../../helpers/shipload'
 
-const ITEM_ENGINE_T1 = 10100 // ITEM_TYPE_MODULE — see game/contracts/server/include/server/items.hpp:81
-const ITEM_ORE_T1 = 101 // ITEM_TYPE_RESOURCE — see game/contracts/server/include/server/items.hpp:16
+const ITEM_ENGINE_T1 = 10100 // ITEM_TYPE_MODULE — see contracts/src/server/include/server/items.hpp:81
+const ITEM_ORE_T1 = 101 // ITEM_TYPE_RESOURCE — see contracts/src/server/include/server/items.hpp:16
 
 function snap(
     cargo: Array<{id: bigint; item_id: number; stats?: bigint; quantity?: number}>

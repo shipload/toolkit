@@ -6,12 +6,12 @@
  * re-mirroring.
  *
  * Contract sources for the underlying formulas (for reference):
- *   - Travel duration : game/contracts/server/src/capabilities/movement.cpp:191 (calc_flighttime)
- *   - Travel energy  : game/contracts/server/src/capabilities/energy.cpp    (calc_entity_energyusage)
- *   - Gather duration: game/contracts/server/src/capabilities/gathering.cpp:7  (calc_gather_duration)
- *   - Gather energy  : game/contracts/server/src/capabilities/gathering.cpp:23 (calc_gather_energy)
- *   - Craft duration : game/contracts/server/src/capabilities/crafting.cpp:6   (calc_craft_duration)
- *   - Craft energy   : game/contracts/server/src/capabilities/crafting.cpp:13  (calc_craft_energy)
+ *   - Travel duration : contracts/src/server/src/capabilities/movement.cpp:191 (calc_flighttime)
+ *   - Travel energy  : contracts/src/server/src/capabilities/energy.cpp    (calc_entity_energyusage)
+ *   - Gather duration: contracts/src/server/src/capabilities/gathering.cpp:7  (calc_gather_duration)
+ *   - Gather energy  : contracts/src/server/src/capabilities/gathering.cpp:23 (calc_gather_energy)
+ *   - Craft duration : contracts/src/server/src/capabilities/crafting.cpp:6   (calc_craft_duration)
+ *   - Craft energy   : contracts/src/server/src/capabilities/crafting.cpp:13  (calc_craft_energy)
  *
  * No readonly endpoint currently exposes an estimate for an arbitrary (x,y) /
  * stratum / recipe without an existing schedule, so we compute locally from the
