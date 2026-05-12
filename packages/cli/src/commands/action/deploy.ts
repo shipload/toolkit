@@ -81,6 +81,12 @@ export async function runDeploy(
                 )
             }
         }
+        if (!snap.loaders) {
+            throw new ValidationError(
+                `Cannot deploy from ${ctx.entityType}:${ctx.entityId}: host has no loaders installed. ` +
+                    `Install a loader module first.`
+            )
+        }
         if (options.estimate) {
             const est = await estimateDeploy({
                 entityId: ctx.entityId,

@@ -9,13 +9,7 @@ import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export async function buildAction(ctx: EntityContext, nexusId: bigint): Promise<Action> {
     const shipload = await getShipload()
-    return shipload.actions.wrapEntity(
-        {
-            entityType: ctx.entityType,
-            entityId: ctx.entityId,
-        },
-        nexusId
-    )
+    return shipload.actions.wrapEntity(ctx.entityId, nexusId)
 }
 
 interface WrapEntityCliOptions {
