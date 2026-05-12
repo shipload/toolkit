@@ -1,8 +1,9 @@
 import {cargoItem, type ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint64} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseCargoInput, parseUint64} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
+import type {ParsedCargoInput} from '../../lib/cargo-resolve'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
@@ -42,9 +43,7 @@ export async function runWrap(
     ctx: EntityContext,
     owner: string,
     nexusId: bigint,
-    itemId: bigint,
-    stackId: bigint,
-    quantity: bigint,
+    input: ParsedCargoInput,
     options: WrapCliOptions
 ): Promise<void> {
     const action = await buildAction({
@@ -52,14 +51,14 @@ export async function runWrap(
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         nexusId,
-        itemId,
-        stackId,
-        quantity,
+        itemId: BigInt(input.itemId),
+        stackId: input.stackId,
+        quantity: BigInt(input.quantity),
         modules: parseModulesJson(options.modules),
     })
     const result = await transact(
         {action},
-        {description: `Wrapping ${quantity} cargo for ${owner}`}
+        {description: `Wrapping ${input.quantity} cargo for ${owner}`}
     )
     await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
@@ -74,13 +73,20 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addHelpText(
                 'before',
                 'Requires: deployed entity at a nexus with cargo; caller owns the entity.\n' +
-                    'Cargo is identified by (item-id, stack-id) — packed-entity stacks may also need --modules.\n'
+                    'Cargo is identified by <item-id>:<stack-id>:<qty> — packed-entity stacks may also need --modules.\n'
+            )
+            .addHelpText(
+                'after',
+                `
+Example:
+  # Wrap 5 of item 7 (stack 0) into an NFT for alice
+  shiploadcli ship 1 wrap alice 99 7:0:5
+
+Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
             )
             .argument('<owner>', 'recipient account name')
             .argument('<nexus-id>', 'nexus id (entity must be at this nexus)', parseUint64)
-            .argument('<item-id>', 'item id', parseUint64)
-            .argument('<stack-id>', 'cargo stack id (often 0)', parseUint64)
-            .argument('<quantity>', 'quantity to wrap', parseUint64)
+            .argument('<input>', '<item-id>:<stack-id>:<qty> — cargo to wrap.', parseCargoInput)
             .addOption(
                 new Option(
                     '--modules <json>',
@@ -93,12 +99,10 @@ export const SUBCOMMAND: EntitySubcommand = {
                 async (
                     owner: string,
                     nexusId: bigint,
-                    itemId: bigint,
-                    stackId: bigint,
-                    quantity: bigint,
+                    input: ParsedCargoInput,
                     opts: WrapCliOptions
                 ) => {
-                    await runWrap(ctx, owner, nexusId, itemId, stackId, quantity, opts)
+                    await runWrap(ctx, owner, nexusId, input, opts)
                 }
             ),
 }

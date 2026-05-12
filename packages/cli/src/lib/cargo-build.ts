@@ -15,15 +15,9 @@ export interface TargetTriple {
 }
 
 export function validateTargetTriple(opts: TargetTriple): void {
-	const anyPresent =
-		opts.targetItemId !== undefined ||
-		opts.targetStats !== undefined ||
-		opts.targetModules !== undefined;
-	const corePresent =
-		opts.targetItemId !== undefined && opts.targetStats !== undefined;
-	if (anyPresent && !corePresent) {
+	if (opts.targetModules !== undefined && opts.targetItemId === undefined) {
 		throw new ValidationError(
-			"--target-item-id and --target-stats must be provided together (--target-modules is optional, defaults to []).",
+			"--target-modules requires --target <item-id>:<stack-id>.",
 		);
 	}
 }

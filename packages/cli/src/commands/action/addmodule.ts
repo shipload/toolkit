@@ -8,7 +8,7 @@ import {
 } from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseUint8, parseUint64} from '../../lib/args'
+import {type EntityTypeName, parseCargoRef, type ParsedCargoRef, parseUint8} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -95,8 +95,7 @@ export async function buildAction(opts: AddModuleOpts, shipload?: Shipload): Pro
 
 interface AddModuleCliOptions {
     modules?: string
-    targetItemId?: bigint
-    targetStats?: bigint
+    target?: ParsedCargoRef
     targetModules?: string
     autoResolve?: boolean
 }
@@ -104,26 +103,27 @@ interface AddModuleCliOptions {
 export async function runAddModule(
     ctx: EntityContext,
     moduleIndex: number,
-    moduleItemId: bigint,
-    moduleStats: bigint,
+    moduleRef: ParsedCargoRef,
     options: AddModuleCliOptions
 ): Promise<void> {
     const addOpts: AddModuleOpts = {
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         moduleIndex,
-        moduleItemId,
-        moduleStats,
+        moduleItemId: BigInt(moduleRef.itemId),
+        moduleStats: moduleRef.stackId,
         moduleModules: parseModulesJson(options.modules),
-        targetItemId: options.targetItemId,
-        targetStats: options.targetStats,
+        targetItemId: options.target !== undefined ? BigInt(options.target.itemId) : undefined,
+        targetStats: options.target?.stackId,
         targetModules:
-            options.targetItemId !== undefined
-                ? parseModulesJson(options.targetModules)
-                : undefined,
+            options.target !== undefined ? parseModulesJson(options.targetModules) : undefined,
     }
     await withValidation(async () => {
-        validateTargetTriple(options)
+        validateTargetTriple({
+            targetItemId: addOpts.targetItemId,
+            targetStats: addOpts.targetStats,
+            targetModules: options.targetModules,
+        })
         await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
         await preflightAddModule(addOpts)
     })
@@ -131,7 +131,7 @@ export async function runAddModule(
     await transact(
         {action},
         {
-            description: `Adding module item ${moduleItemId} stats ${moduleStats} to ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
+            description: `Adding module item ${moduleRef.itemId} stats ${moduleRef.stackId} to ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
         }
     )
 }
@@ -147,12 +147,11 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'before',
                 'Requires: entity idle; module cargo present in cargo. ' +
                     'Module slots are 0-indexed; run `<entity-type> <id>` to see the slot map. ' +
-                    'Identify the module by (item-id, stats); pass --modules if the module itself is a packed entity.\n' +
-                    'Default behavior installs onto the live entity. Pass --target-item-id and --target-stats to install onto a packed-entity cargo instead.\n'
+                    'Identify the module by <item-id>:<stack-id>; pass --modules if the module itself is a packed entity.\n' +
+                    'Default behavior installs onto the live entity. Pass --target <item-id>:<stack-id> to install onto a packed-entity cargo instead.\n'
             )
             .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
-            .argument('<module-item-id>', 'item id of the module to install', parseUint64)
-            .argument('<module-stats>', 'stats of the module to install', parseUint64)
+            .argument('<module>', '<item-id>:<stack-id> — module cargo to install.', parseCargoRef)
             .addOption(
                 new Option(
                     '--modules <json>',
@@ -160,14 +159,10 @@ export const SUBCOMMAND: EntitySubcommand = {
                 )
             )
             .addOption(
-                new Option('--target-item-id <id>', 'target packed-cargo item id').argParser(
-                    parseUint64
-                )
-            )
-            .addOption(
-                new Option('--target-stats <stats>', 'target packed-cargo stats').argParser(
-                    parseUint64
-                )
+                new Option(
+                    '--target <item-id>:<stack-id>',
+                    'target packed-cargo to install into'
+                ).argParser(parseCargoRef)
             )
             .addOption(
                 new Option(
@@ -179,11 +174,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             .action(
                 async (
                     moduleIndex: number,
-                    moduleItemId: bigint,
-                    moduleStats: bigint,
+                    moduleRef: ParsedCargoRef,
                     opts: AddModuleCliOptions
                 ) => {
-                    await runAddModule(ctx, moduleIndex, moduleItemId, moduleStats, opts)
+                    await runAddModule(ctx, moduleIndex, moduleRef, opts)
                 }
             ),
 }

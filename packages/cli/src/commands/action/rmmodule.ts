@@ -1,7 +1,7 @@
 import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseUint8, parseUint64} from '../../lib/args'
+import {type EntityTypeName, parseCargoRef, type ParsedCargoRef, parseUint8} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -32,8 +32,7 @@ export async function buildAction(opts: RmModuleOpts, shipload?: Shipload): Prom
 }
 
 interface RmModuleCliOptions {
-    targetItemId?: bigint
-    targetStats?: bigint
+    target?: ParsedCargoRef
     targetModules?: string
     autoResolve?: boolean
 }
@@ -43,28 +42,32 @@ export async function runRmModule(
     moduleIndex: number,
     options: RmModuleCliOptions
 ): Promise<void> {
+    const targetItemId = options.target !== undefined ? BigInt(options.target.itemId) : undefined
+    const targetStats = options.target?.stackId
     await withValidation(async () => {
-        validateTargetTriple(options)
+        validateTargetTriple({
+            targetItemId,
+            targetStats,
+            targetModules: options.targetModules,
+        })
         await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
     })
     const action = await buildAction({
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         moduleIndex,
-        targetItemId: options.targetItemId,
-        targetStats: options.targetStats,
+        targetItemId,
+        targetStats,
         targetModules:
-            options.targetItemId !== undefined
-                ? parseModulesJson(options.targetModules)
-                : undefined,
+            targetItemId !== undefined ? parseModulesJson(options.targetModules) : undefined,
     })
     await transact(
         {action},
         {
             description:
                 `Removing module from ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}` +
-                (options.targetItemId !== undefined
-                    ? ` (packed in cargo item ${options.targetItemId} stats ${options.targetStats})`
+                (targetItemId !== undefined
+                    ? ` (packed in cargo item ${targetItemId} stats ${targetStats})`
                     : ''),
         }
     )
@@ -81,18 +84,14 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'before',
                 'Requires: entity idle; module slot occupied. ' +
                     'Module slots are 0-indexed; run `<entity-type> <id>` to see the slot map. ' +
-                    'Default removes from the live entity. Pass --target-item-id and --target-stats to remove from a packed-entity cargo instead.\n'
+                    'Default removes from the live entity. Pass --target <item-id>:<stack-id> to remove from a packed-entity cargo instead.\n'
             )
             .argument('<module-index>', 'module slot index (0-indexed)', parseUint8)
             .addOption(
-                new Option('--target-item-id <id>', 'target packed-cargo item id').argParser(
-                    parseUint64
-                )
-            )
-            .addOption(
-                new Option('--target-stats <stats>', 'target packed-cargo stats').argParser(
-                    parseUint64
-                )
+                new Option(
+                    '--target <item-id>:<stack-id>',
+                    'target packed-cargo to remove from'
+                ).argParser(parseCargoRef)
             )
             .addOption(
                 new Option(

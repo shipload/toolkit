@@ -48,6 +48,33 @@ export function parseEntityRefList(s: string): EntityRef[] {
 	});
 }
 
+export interface ParsedCargoRef {
+	itemId: number;
+	stackId: bigint;
+}
+
+export function parseCargoRef(s: string): ParsedCargoRef {
+	const parts = s.split(":");
+	if (parts.length !== 2) {
+		throw new InvalidArgumentError(
+			`cargo ref must be "<item-id>:<stack-id>" (got "${s}")`,
+		);
+	}
+	const itemId = Number(parts[0]);
+	const stackIdStr = parts[1];
+	if (!Number.isInteger(itemId) || itemId < 0) {
+		throw new InvalidArgumentError(
+			`cargo item-id must be a non-negative integer (got "${parts[0]}")`,
+		);
+	}
+	if (!/^\d+$/.test(stackIdStr)) {
+		throw new InvalidArgumentError(
+			`cargo stack-id must be a non-negative integer (got "${parts[1]}")`,
+		);
+	}
+	return { itemId, stackId: BigInt(stackIdStr) };
+}
+
 export function parseCargoInput(s: string): ParsedCargoInput {
 	const parts = s.split(":");
 	if (parts.length !== 3) {
