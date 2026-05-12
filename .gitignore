@@ -13,7 +13,14 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+
+# AI/agent tooling artifacts (kept out of repo per workspace convention)
 .claude/
+.superpowers/
+.impeccable.md
+CLAUDE.md
+AGENTS.md
+PRODUCT.md
 
 # Wrangler
 .wrangler/
