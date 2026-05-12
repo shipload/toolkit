@@ -103,6 +103,8 @@ export function deserializeAtomicData(
                 result[field.name] = readZigzagInt64()
                 break
             case 'string':
+            case 'image':
+            case 'ipfs':
                 result[field.name] = readString()
                 break
             case 'uint16[]': {
