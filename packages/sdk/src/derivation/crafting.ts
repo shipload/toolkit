@@ -340,7 +340,7 @@ export function computeCraftedOutputStats(
  * returns a UInt64 whose bit-packed form matches what the contract writes
  * to cargo_item.stats on gather.
  *
- * Use this whenever off-chain code simulates a gather (testmap, player
+ * Use this whenever off-chain code simulates a gather (webapp, player
  * scanners that project cargo outcomes) and needs a value that matches
  * what on-chain cargo would carry.
  */

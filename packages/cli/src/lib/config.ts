@@ -194,7 +194,7 @@ export function getIndexerUrl(): string {
 				`Add to ${cfg.source}:`,
 				"",
 				"  [indexer]",
-				"  url = https://your-shiploadindex-host",
+				"  url = https://your-indexer-host",
 				"",
 				"This is required for `shiploadcli history` and any entity history subcommand.",
 			].join("\n"),

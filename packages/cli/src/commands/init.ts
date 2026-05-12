@@ -19,9 +19,9 @@ permission = active
 
 ; Uncomment and set this to enable \`shiploadcli history\` and entity history
 ; subcommands (e.g. \`shiploadcli ship 1 history\`). The URL points at a
-; running shiploadindex instance.
+; running indexer instance.
 ; [indexer]
-; url = https://your-shiploadindex-host
+; url = https://your-indexer-host
 
 ; Uncomment and set this to enable \`shiploadcli debug entity\`, \`debug code\`,
 ; and \`debug setcodes\` cross-checks. The URL points at an Antelope chain v1 API.

@@ -17,7 +17,7 @@ export {linkToItemPage, linkToItemImage, linkToItemSocial} from './links.ts'
 export {itemPageMeta, svgDimensions} from './meta.ts'
 export type {ItemPageMeta, ItemPageMetaOptions} from './meta.ts'
 
-// Tokens (consumed by testmap tailwind.config)
+// Tokens (consumed by webapp tailwind.config)
 export {tokens} from './tokens/index.ts'
 export type {Tokens} from './tokens/index.ts'
 export type {CategoryColorKey, TierColorKey} from './tokens/colors.ts'
