@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { ServerContract, TaskType } from "@shipload/sdk";
-import { projectCargoFromSnapshot } from "../../src/lib/cargo-projection";
+import {
+	diffStacks,
+	type ProjectedCargoStack,
+	projectCargoFromSnapshot,
+	stackKey,
+} from "../../src/lib/cargo-projection";
 import { entityInfoToSnapshot } from "../../src/lib/snapshot";
 
 function makeShip(opts: {
@@ -139,5 +144,85 @@ describe("projectCargoFromSnapshot", () => {
 		const out = projectCargoFromSnapshot(snap);
 		expect(out).toHaveLength(1);
 		expect(out[0].quantity).toBe(7n);
+	});
+});
+
+function stack(
+	item_id: bigint,
+	stats: bigint,
+	quantity: bigint,
+	modules: unknown[] = [],
+	id: bigint = 0n,
+): ProjectedCargoStack {
+	return { item_id, stats, quantity, modules, id };
+}
+
+describe("diffStacks", () => {
+	test("empty current and empty projected yields empty map", () => {
+		const out = diffStacks([], []);
+		expect(out.size).toBe(0);
+	});
+
+	test("unchanged stack yields empty map", () => {
+		const current = [stack(101n, 100n, 5n)];
+		const projected = [stack(101n, 100n, 5n)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(0);
+	});
+
+	test("quantity increase yields single add entry", () => {
+		const current = [stack(101n, 100n, 5n)];
+		const projected = [stack(101n, 100n, 12n)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(1);
+		const delta = out.get(stackKey(101n, 100n, []));
+		expect(delta).toEqual({ kind: "add", quantity: 7n });
+	});
+
+	test("quantity decrease yields single remove entry", () => {
+		const current = [stack(101n, 100n, 20n)];
+		const projected = [stack(101n, 100n, 8n)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(1);
+		const delta = out.get(stackKey(101n, 100n, []));
+		expect(delta).toEqual({ kind: "remove", quantity: 12n });
+	});
+
+	test("projected stack absent from current yields new entry", () => {
+		const current: ProjectedCargoStack[] = [];
+		const projected = [stack(101n, 46318911n, 15n)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(1);
+		const delta = out.get(stackKey(101n, 46318911n, []));
+		expect(delta).toEqual({ kind: "new", quantity: 15n });
+	});
+
+	test("current stack absent from projected yields full remove entry", () => {
+		const current = [stack(101n, 100n, 40n)];
+		const projected: ProjectedCargoStack[] = [];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(1);
+		const delta = out.get(stackKey(101n, 100n, []));
+		expect(delta).toEqual({ kind: "remove", quantity: 40n });
+	});
+
+	test("same item with different stats stay distinct", () => {
+		const current = [stack(101n, 100n, 5n)];
+		const projected = [stack(101n, 100n, 5n), stack(101n, 46318911n, 15n)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(1);
+		expect(out.get(stackKey(101n, 100n, []))).toBeUndefined();
+		expect(out.get(stackKey(101n, 46318911n, []))).toEqual({ kind: "new", quantity: 15n });
+	});
+
+	test("modules-differing stacks stay distinct", () => {
+		const modsA = [{ type: "engine", installed: { item_id: 7000n, stats: 200n } }];
+		const modsB = [{ type: "engine", installed: { item_id: 7000n, stats: 999n } }];
+		const current = [stack(20000n, 0n, 1n, modsA)];
+		const projected = [stack(20000n, 0n, 1n, modsB)];
+		const out = diffStacks(current, projected);
+		expect(out.size).toBe(2);
+		expect(out.get(stackKey(20000n, 0n, modsA))).toEqual({ kind: "remove", quantity: 1n });
+		expect(out.get(stackKey(20000n, 0n, modsB))).toEqual({ kind: "new", quantity: 1n });
 	});
 });

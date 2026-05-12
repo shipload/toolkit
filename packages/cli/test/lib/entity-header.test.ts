@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { TaskType } from "@shipload/sdk";
-import { UInt64 } from "@wharfkit/antelope";
+import { ServerContract, TaskType } from "@shipload/sdk";
+import { TimePoint, UInt64 } from "@wharfkit/antelope";
 import {
 	type HeaderContext,
 	renderEntityFull,
 	renderEntityHeader,
+	renderInventoryView,
 } from "../../src/lib/entity-header";
 
 const idleShip = {
@@ -219,5 +220,282 @@ describe("renderEntityHeader", () => {
 		});
 		expect(out).not.toContain("Hull:");
 		expect(out).not.toContain("Energy:");
+	});
+});
+
+function makeInventoryEntity(opts: {
+	cargo?: { item_id: number; quantity: number; stats: number | bigint; id?: number }[];
+	current_task?: ServerContract.Types.task;
+	pending_tasks?: ServerContract.Types.task[];
+}) {
+	return ServerContract.Types.entity_info.from({
+		type: "ship",
+		id: 1,
+		owner: "alice",
+		entity_name: "Test",
+		coordinates: { x: 0, y: 0, z: 800 },
+		cargomass: 0,
+		cargo: (opts.cargo ?? []).map((c) => ({
+			item_id: c.item_id,
+			quantity: c.quantity,
+			stats: c.stats,
+			modules: [],
+			id: c.id ?? 0,
+		})),
+		modules: [],
+		is_idle: !opts.current_task,
+		current_task: opts.current_task,
+		current_task_elapsed: 0,
+		current_task_remaining: 0,
+		pending_tasks: opts.pending_tasks ?? [],
+	});
+}
+
+function invTask(
+	type: TaskType,
+	items: { item_id: number; quantity: number; stats: number | bigint }[],
+	extras: Record<string, unknown> = {},
+) {
+	return ServerContract.Types.task.from({
+		type,
+		duration: 60,
+		cancelable: 0,
+		cargo: items.map((i) => ({
+			item_id: i.item_id,
+			quantity: i.quantity,
+			stats: i.stats,
+			modules: [],
+		})),
+		...extras,
+	});
+}
+
+describe("renderInventoryView", () => {
+	test("idle entity with empty queue renders raw cargo, no projection", () => {
+		const entity = makeInventoryEntity({
+			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
+		});
+		const result = renderInventoryView(entity);
+		expect(result.projectionApplied).toBe(false);
+		expect(result.tasksConsidered).toBe(0);
+		expect(result.text).toContain('ship 1 "Test" owned by alice');
+		expect(result.text).toContain("5");
+		expect(result.text).not.toContain("(+");
+		expect(result.text).not.toContain("(-");
+		expect(result.text).not.toContain("(new)");
+	});
+
+	test("idle entity with queued WRAP removing 1u shows (-1) annotation", () => {
+		const entity = makeInventoryEntity({
+			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
+			pending_tasks: [invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }])],
+		});
+		const result = renderInventoryView(entity);
+		expect(result.projectionApplied).toBe(true);
+		expect(result.tasksConsidered).toBe(1);
+		expect(result.text).toContain("(-1)");
+	});
+
+	test("idle entity with queued GATHER adding 5u of a new stack shows (new) 5", () => {
+		const entity = makeInventoryEntity({
+			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
+			pending_tasks: [invTask(TaskType.GATHER, [{ item_id: 401, quantity: 5, stats: 0n }])],
+		});
+		const result = renderInventoryView(entity);
+		expect(result.projectionApplied).toBe(true);
+		expect(result.text).toContain("(new) 5");
+	});
+
+	test("busy entity counts current_task + pending_tasks for tasksConsidered", () => {
+		const entity = makeInventoryEntity({
+			cargo: [{ item_id: 301, quantity: 10, stats: 0n, id: 1 }],
+			current_task: invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
+			pending_tasks: [
+				invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
+				invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
+			],
+		});
+		const result = renderInventoryView(entity);
+		expect(result.tasksConsidered).toBe(3);
+		expect(result.projectionApplied).toBe(true);
+	});
+
+	test("opts.current=true skips projection entirely (tasksConsidered=0)", () => {
+		const entity = makeInventoryEntity({
+			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
+			pending_tasks: [invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }])],
+		});
+		const result = renderInventoryView(entity, { current: true });
+		expect(result.projectionApplied).toBe(false);
+		expect(result.tasksConsidered).toBe(0);
+		expect(result.text).not.toContain("(-1)");
+		expect(result.text).not.toContain("(new)");
+		expect(result.text).toContain("5");
+	});
+
+	test("empty cargo renders (empty) footer", () => {
+		const entity = makeInventoryEntity({ cargo: [] });
+		const result = renderInventoryView(entity);
+		expect(result.text).toContain("(empty)");
+		expect(result.projectionApplied).toBe(false);
+		expect(result.tasksConsidered).toBe(0);
+	});
+});
+
+function makeBusyEntity(opts: {
+	cargo: { item_id: number; quantity: number; stats: number | bigint; id?: number }[];
+	cargomass: number;
+	capacity?: number;
+	current_task: ServerContract.Types.task;
+	pending_tasks?: ServerContract.Types.task[];
+}) {
+	const startedMs = Date.now() - 1000;
+	const totalDurationS = [opts.current_task, ...(opts.pending_tasks ?? [])].reduce(
+		(sum, t) => sum + Number(t.duration.toString()),
+		0,
+	);
+	const allTasks = [opts.current_task, ...(opts.pending_tasks ?? [])];
+	return ServerContract.Types.entity_info.from({
+		type: "ship",
+		id: 7,
+		owner: "alice",
+		entity_name: "Busy",
+		coordinates: { x: 0, y: 0, z: 800 },
+		cargomass: opts.cargomass,
+		capacity: opts.capacity ?? 4_000_000_000,
+		cargo: opts.cargo.map((c) => ({
+			item_id: c.item_id,
+			quantity: c.quantity,
+			stats: c.stats,
+			modules: [],
+			id: c.id ?? 0,
+		})),
+		modules: [],
+		is_idle: false,
+		current_task: opts.current_task,
+		current_task_elapsed: 1,
+		current_task_remaining: Math.max(0, totalDurationS - 1),
+		pending_tasks: opts.pending_tasks ?? [],
+		schedule: {
+			started: TimePoint.fromMilliseconds(startedMs),
+			tasks: allTasks,
+		},
+	});
+}
+
+function busyTask(
+	type: TaskType,
+	durationS: number,
+	items: { item_id: number; quantity: number; stats: number | bigint }[],
+) {
+	return ServerContract.Types.task.from({
+		type,
+		duration: durationS,
+		cancelable: 0,
+		cargo: items.map((i) => ({
+			item_id: i.item_id,
+			quantity: i.quantity,
+			stats: i.stats,
+			modules: [],
+		})),
+	});
+}
+
+describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
+	test("WRAP -1u of a stack renders remove line with current → projected", () => {
+		const STAT = 296902688n;
+		const entity = makeBusyEntity({
+			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
+			cargomass: 73 * 52_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.WRAP, 60, [
+				{ item_id: 101, quantity: 1, stats: STAT },
+			]),
+		});
+		const out = renderEntityFull(entity);
+		expect(out).toMatch(/When done/);
+		expect(out).toMatch(/Cargo:\s+[^\n]*→/);
+		expect(out).toMatch(/-\s+Crude Ore stack 296902688:\s+73 → 72/);
+	});
+
+	test("GATHER creating a new stack renders add line with (new) +N", () => {
+		const entity = makeBusyEntity({
+			cargo: [{ item_id: 101, quantity: 10, stats: 100n, id: 1 }],
+			cargomass: 10 * 52_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.GATHER, 60, [
+				{ item_id: 101, quantity: 5, stats: 555n },
+			]),
+		});
+		const out = renderEntityFull(entity);
+		expect(out).toMatch(/When done/);
+		expect(out).toMatch(/\+\s+Crude Ore stack 555:\s+\(new\) \+5/);
+	});
+
+	test("CRAFT renders per-stack lines for each consumed input and produced output", () => {
+		const entity = makeBusyEntity({
+			cargo: [
+				{ item_id: 101, quantity: 40, stats: 100n, id: 1 },
+				{ item_id: 201, quantity: 20, stats: 200n, id: 2 },
+			],
+			cargomass: 40 * 52_000 + 20 * 35_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.CRAFT, 60, [
+				{ item_id: 101, quantity: 10, stats: 100n },
+				{ item_id: 201, quantity: 5, stats: 200n },
+				{ item_id: 10100, quantity: 1, stats: 0n },
+			]),
+		});
+		const out = renderEntityFull(entity);
+		expect(out).toMatch(/When done/);
+		expect(out).toMatch(/-\s+Crude Ore stack 100:\s+40 → 30/);
+		expect(out).toMatch(/-\s+Crude Crystal stack 200:\s+20 → 15/);
+		expect(out).toMatch(/\+\s+[^\n]*stack 0:\s+\(new\) \+1/);
+	});
+
+	test("no-op task with no cargo changes leaves whenDoneBlock empty", () => {
+		const entity = makeBusyEntity({
+			cargo: [{ item_id: 101, quantity: 10, stats: 100n, id: 1 }],
+			cargomass: 10 * 52_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.WRAP_ENTITY, 60, []),
+		});
+		const out = renderEntityFull(entity);
+		expect(out).not.toMatch(/When done/);
+	});
+});
+
+describe("renderEntityFull suppressWhenDone", () => {
+	test("suppressWhenDone: true on busy entity hides When done block", () => {
+		const STAT = 296902688n;
+		const entity = makeBusyEntity({
+			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
+			cargomass: 73 * 52_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.WRAP, 60, [
+				{ item_id: 101, quantity: 1, stats: STAT },
+			]),
+		});
+		const out = renderEntityFull(entity, { suppressWhenDone: true });
+		expect(out).not.toMatch(/When done/);
+	});
+
+	test("suppressWhenDone: false (default) on busy entity still shows When done block", () => {
+		const STAT = 296902688n;
+		const entity = makeBusyEntity({
+			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
+			cargomass: 73 * 52_000,
+			capacity: 4_000_000_000,
+			current_task: busyTask(TaskType.WRAP, 60, [
+				{ item_id: 101, quantity: 1, stats: STAT },
+			]),
+		});
+		const out = renderEntityFull(entity, { suppressWhenDone: false });
+		expect(out).toMatch(/When done/);
+	});
+
+	test("suppressWhenDone: true on idle entity is a no-op", () => {
+		const out = renderEntityFull(idleShip, { suppressWhenDone: true });
+		expect(out).not.toMatch(/When done/);
 	});
 });

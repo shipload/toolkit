@@ -5,16 +5,23 @@ import {renderEntityFull} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {formatOutput} from '../../lib/format'
 
-export function render(info: unknown): string {
+export function render(info: unknown, opts: {current?: boolean} = {}): string {
     // biome-ignore lint/suspicious/noExplicitAny: readonly response is loosely typed
-    return renderEntityFull(info as any)
+    return renderEntityFull(info as any, {suppressWhenDone: Boolean(opts.current)})
 }
 
-export async function runShow(ctx: EntityContext, options: {json?: boolean}): Promise<void> {
+export async function runShow(
+    ctx: EntityContext,
+    options: {json?: boolean; current?: boolean}
+): Promise<void> {
     const data = await server.readonly('getentity', {
         entity_id: ctx.entityId,
     })
-    console.log(formatOutput(data, {json: Boolean(options.json)}, render))
+    console.log(
+        formatOutput(data, {json: Boolean(options.json)}, (info) =>
+            render(info, {current: options.current})
+        )
+    )
 }
 
 export async function defaultShow(type: EntityTypeName, id: bigint): Promise<void> {
@@ -29,7 +36,8 @@ export const SUBCOMMAND: EntitySubcommand = {
         new Command('show')
             .description('Show full entity state')
             .option('--json', 'emit JSON instead of formatted text')
-            .action(async (opts: {json?: boolean}) => {
+            .option('--current', 'show on-chain state without applying the pending task queue')
+            .action(async (opts: {json?: boolean; current?: boolean}) => {
                 await runShow(ctx, opts)
             }),
 }

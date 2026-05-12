@@ -36,7 +36,19 @@ import {
 	schedule,
 	type ServerTypes,
 } from "@shipload/sdk";
-import { formatCargoTable } from "./cargo-table";
+import {
+	type CargoColumn,
+	formatCargoTable,
+	safeItemName,
+	sortCargoForDisplay,
+} from "./cargo-table";
+import {
+	diffStacks,
+	type ProjectedCargoStack,
+	projectCargoFromSnapshot,
+	snapshotToStacks,
+	stackKey,
+} from "./cargo-projection";
 import {
 	formatCoords,
 	formatDuration,
@@ -45,11 +57,13 @@ import {
 	kvTable,
 	projectEnergy,
 } from "./format";
+import { entityInfoToSnapshot } from "./snapshot";
 
 export interface HeaderContext {
 	projected?: Partial<ProjectedEntity>;
 	projectionLabel?: "live" | "projected" | "when done";
 	now?: Date;
+	suppressWhenDone?: boolean;
 }
 
 function entityIdentityLine(entity: ServerTypes.entity_info): string {
@@ -301,12 +315,82 @@ function whenDoneBlock(entity: ServerTypes.entity_info): string | null {
 	if (cargoChanged && entity.capacity != null) {
 		rows.push([
 			"Cargo:",
-			`${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
+			`${formatMass(currentCargoMass)} → ${formatMass(projCargoMass)} / ${formatMass(Number(entity.capacity))}`,
 		]);
 	} else if (cargoChanged) {
-		rows.push(["Cargo:", formatMass(projCargoMass)]);
+		rows.push(["Cargo:", `${formatMass(currentCargoMass)} → ${formatMass(projCargoMass)}`]);
 	}
-	return [`  ${header}`, kvTable(rows, { indent: "    " })].join("\n");
+
+	const parts = [`  ${header}`, kvTable(rows, { indent: "    " })];
+
+	if (cargoChanged) {
+		const cargoSnap = entityInfoToSnapshot(entity);
+		const current = snapshotToStacks(cargoSnap);
+		const projected = projectCargoFromSnapshot(cargoSnap);
+		const deltas = diffStacks(current, projected);
+		const stackLines = formatStackDeltaLines(current, projected, deltas);
+		if (stackLines.length > 0) parts.push(stackLines.join("\n"));
+	}
+
+	return parts.join("\n");
+}
+
+function formatStackDeltaLines(
+	current: readonly ProjectedCargoStack[],
+	projected: readonly ProjectedCargoStack[],
+	deltas: ReturnType<typeof diffStacks>,
+): string[] {
+	const indent = "      ";
+	type Entry = {
+		item_id: bigint;
+		stats: bigint;
+		isNew: boolean;
+		text: string;
+	};
+	const entries: Entry[] = [];
+	for (const [key, delta] of deltas) {
+		const projEntry = projected.find(
+			(p) => stackKey(p.item_id, p.stats, p.modules) === key,
+		);
+		const curEntry = current.find(
+			(c) => stackKey(c.item_id, c.stats, c.modules) === key,
+		);
+		const ref = projEntry ?? curEntry;
+		if (!ref) continue;
+		const itemId = ref.item_id;
+		const stats = ref.stats;
+		const name = safeItemName(Number(itemId));
+		const stackLabel = `${name} stack ${stats.toString()}`;
+		let prefix: string;
+		let body: string;
+		if (delta.kind === "new") {
+			prefix = "+";
+			body = `(new) +${(projEntry?.quantity ?? delta.quantity).toString()}`;
+		} else if (delta.kind === "add") {
+			prefix = "+";
+			const cur = curEntry?.quantity ?? 0n;
+			const proj = projEntry?.quantity ?? 0n;
+			body = `${cur.toString()} → ${proj.toString()}`;
+		} else {
+			prefix = "-";
+			const cur = curEntry?.quantity ?? 0n;
+			const proj = projEntry?.quantity ?? 0n;
+			body = `${cur.toString()} → ${proj.toString()}`;
+		}
+		entries.push({
+			item_id: itemId,
+			stats,
+			isNew: delta.kind === "new",
+			text: `${indent}${prefix} ${stackLabel}:  ${body}`,
+		});
+	}
+	entries.sort((a, b) => {
+		if (a.item_id !== b.item_id) return a.item_id < b.item_id ? -1 : 1;
+		if (a.stats !== b.stats) return a.stats < b.stats ? -1 : 1;
+		if (a.isNew !== b.isNew) return a.isNew ? 1 : -1;
+		return 0;
+	});
+	return entries.map((e) => e.text);
 }
 
 function entityScheduleSection(
@@ -323,7 +407,7 @@ function entityScheduleSection(
 
 	const callerHasWhenDone =
 		ctx.projectionLabel === "when done" && ctx.projected != null;
-	if (!callerHasWhenDone) {
+	if (!callerHasWhenDone && !ctx.suppressWhenDone) {
 		const block = whenDoneBlock(entity);
 		if (block) sections.push(block);
 	}
@@ -370,6 +454,90 @@ export function renderEntityHeader(
 		entityIdentityLine(entity),
 		kvTable(entityStatusRows(entity, ctx)),
 	].join("\n");
+}
+
+export interface InventoryViewOptions {
+	current?: boolean;
+	columns?: CargoColumn[];
+}
+
+export interface InventoryViewResult {
+	text: string;
+	projectionApplied: boolean;
+	tasksConsidered: number;
+}
+
+const INVENTORY_DEFAULT_COLUMNS: CargoColumn[] = [
+	"rowId",
+	"item",
+	"itemId",
+	"stack",
+	"qty",
+	"each",
+	"mass",
+	"stats",
+];
+
+export function renderInventoryView(
+	entity: ServerTypes.entity_info,
+	opts: InventoryViewOptions = {},
+): InventoryViewResult {
+	const header = renderEntityHeader(entity);
+	const columns = opts.columns ?? INVENTORY_DEFAULT_COLUMNS;
+
+	const hasCurrent = entity.current_task != null;
+	const pendingCount = entity.pending_tasks?.length ?? 0;
+	const shouldProject =
+		opts.current !== true && (hasCurrent || pendingCount > 0);
+	const tasksConsidered = shouldProject ? (hasCurrent ? 1 : 0) + pendingCount : 0;
+
+	let cargoArr: unknown[];
+	let deltas: ReturnType<typeof diffStacks> | undefined;
+	let projectionApplied = false;
+
+	if (shouldProject) {
+		const snap = entityInfoToSnapshot(entity);
+		const current = snapshotToStacks(snap);
+		const projected = projectCargoFromSnapshot(snap);
+		const computedDeltas = diffStacks(current, projected);
+
+		const currentById = new Map<string, bigint>();
+		for (const c of current) {
+			const key = `${c.item_id.toString()}#${c.stats.toString()}`;
+			currentById.set(key, c.id);
+		}
+
+		const merged: ProjectedCargoStack[] = projected.map((p) => {
+			const key = `${p.item_id.toString()}#${p.stats.toString()}`;
+			const existingId = currentById.get(key);
+			return {
+				...p,
+				id: existingId ?? p.id,
+			};
+		});
+
+		cargoArr = merged;
+		deltas = computedDeltas;
+		projectionApplied = computedDeltas.size > 0;
+	} else {
+		cargoArr = (entity.cargo ?? []) as unknown[];
+	}
+
+	if (cargoArr.length === 0) {
+		return {
+			text: `${header}\n  (empty)`,
+			projectionApplied: false,
+			tasksConsidered: 0,
+		};
+	}
+
+	const sorted = sortCargoForDisplay(cargoArr as Parameters<typeof sortCargoForDisplay>[0]);
+	const table = formatCargoTable(sorted, { columns, deltas });
+	return {
+		text: `${header}\n${table}`,
+		projectionApplied,
+		tasksConsidered,
+	};
 }
 
 export interface GatherHeaderOpts {

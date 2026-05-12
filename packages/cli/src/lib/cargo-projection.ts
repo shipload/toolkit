@@ -14,18 +14,23 @@ interface ModuleEntryLike {
 	installed?: { item_id: { toString(): string }; stats: { toString(): string } };
 }
 
+function moduleSignature(modules: readonly unknown[]): string {
+	const parts: string[] = [];
+	for (const m of modules) {
+		const me = m as ModuleEntryLike;
+		const t = me.type.toString();
+		if (me.installed) {
+			parts.push(`${t}:${me.installed.item_id.toString()}:${me.installed.stats.toString()}`);
+		} else {
+			parts.push(`${t}:`);
+		}
+	}
+	return parts.join("|");
+}
+
 function modulesEqual(a: readonly unknown[], b: readonly unknown[]): boolean {
 	if (a.length !== b.length) return false;
-	for (let i = 0; i < a.length; i++) {
-		const ai = a[i] as ModuleEntryLike;
-		const bi = b[i] as ModuleEntryLike;
-		if (ai.type.toString() !== bi.type.toString()) return false;
-		if (!ai.installed && !bi.installed) continue;
-		if (!ai.installed || !bi.installed) return false;
-		if (ai.installed.item_id.toString() !== bi.installed.item_id.toString()) return false;
-		if (ai.installed.stats.toString() !== bi.installed.stats.toString()) return false;
-	}
-	return true;
+	return moduleSignature(a) === moduleSignature(b);
 }
 
 function sameKind(
@@ -37,6 +42,47 @@ function sameKind(
 	if (stack.item_id !== itemId) return false;
 	if (stack.stats !== stats) return false;
 	return modulesEqual(stack.modules, modules);
+}
+
+export type StackDeltaKind = "add" | "remove" | "new";
+
+export interface StackDelta {
+	kind: StackDeltaKind;
+	quantity: bigint;
+}
+
+export type StackKey = string;
+
+export function stackKey(itemId: bigint, stats: bigint, modules: readonly unknown[]): StackKey {
+	return `${itemId.toString()}#${stats.toString()}#${moduleSignature(modules)}`;
+}
+
+export function diffStacks(
+	current: readonly ProjectedCargoStack[],
+	projected: readonly ProjectedCargoStack[],
+): Map<StackKey, StackDelta> {
+	const out = new Map<StackKey, StackDelta>();
+	const seen = new Set<StackKey>();
+	for (const p of projected) {
+		const key = stackKey(p.item_id, p.stats, p.modules);
+		seen.add(key);
+		const match = current.find((c) => sameKind(c, p.item_id, p.stats, p.modules));
+		if (!match) {
+			out.set(key, { kind: "new", quantity: p.quantity });
+			continue;
+		}
+		if (p.quantity > match.quantity) {
+			out.set(key, { kind: "add", quantity: p.quantity - match.quantity });
+		} else if (p.quantity < match.quantity) {
+			out.set(key, { kind: "remove", quantity: match.quantity - p.quantity });
+		}
+	}
+	for (const c of current) {
+		const key = stackKey(c.item_id, c.stats, c.modules);
+		if (seen.has(key)) continue;
+		out.set(key, { kind: "remove", quantity: c.quantity });
+	}
+	return out;
 }
 
 function toBigInts(item: ServerTypes.cargo_item): {
@@ -109,14 +155,18 @@ function applyTaskToCargo(stacks: ProjectedCargoStack[], task: ServerTypes.task)
 	}
 }
 
-export function projectCargoFromSnapshot(snap: EntitySnapshot): ProjectedCargoStack[] {
-	const stacks: ProjectedCargoStack[] = snap.cargo.map((c) => ({
+export function snapshotToStacks(snap: EntitySnapshot): ProjectedCargoStack[] {
+	return snap.cargo.map((c) => ({
 		item_id: c.item_id,
 		stats: c.stats ?? 0n,
 		quantity: c.quantity,
 		modules: (c.modules ?? []) as unknown[],
 		id: c.id ?? 0n,
 	}));
+}
+
+export function projectCargoFromSnapshot(snap: EntitySnapshot): ProjectedCargoStack[] {
+	const stacks = snapshotToStacks(snap);
 
 	if (snap.current_task) applyTaskToCargo(stacks, snap.current_task);
 	if (snap.pending_tasks) {
