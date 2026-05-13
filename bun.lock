@@ -14,7 +14,7 @@
     },
     "packages/cli": {
       "name": "@shipload/cli",
-      "version": "1.0.0-next.13",
+      "version": "1.0.0-next.15",
       "bin": {
         "shiploadcli": "src/index.ts",
       },
@@ -38,7 +38,7 @@
     },
     "packages/image-renderer": {
       "name": "@shipload/image-renderer",
-      "version": "1.0.0-next.9",
+      "version": "1.0.0-next.11",
       "dependencies": {
         "@resvg/resvg-wasm": "^2.6.0",
         "@shipload/item-renderer": "workspace:^",
@@ -54,7 +54,7 @@
     },
     "packages/item-renderer": {
       "name": "@shipload/item-renderer",
-      "version": "1.0.0-next.9",
+      "version": "1.0.0-next.11",
       "dependencies": {
         "@shipload/sdk": "workspace:^",
         "@wharfkit/antelope": "1.2.0",
@@ -72,7 +72,7 @@
     },
     "packages/oracle": {
       "name": "@shipload/oracle",
-      "version": "0.0.0",
+      "version": "0.0.1-next.1",
       "dependencies": {
         "@shipload/sdk": "workspace:^",
         "@wharfkit/antelope": "1.2.0",
@@ -88,7 +88,7 @@
     },
     "packages/sdk": {
       "name": "@shipload/sdk",
-      "version": "1.0.0-next.9",
+      "version": "1.0.0-next.11",
       "dependencies": {
         "@wharfkit/antelope": "1.2.0",
         "@wharfkit/common": "1.5.0",
@@ -1475,6 +1475,8 @@
 
     "@rollup/plugin-node-resolve/@rollup/pluginutils": ["@rollup/pluginutils@3.1.0", "", { "dependencies": { "@types/estree": "0.0.39", "estree-walker": "^1.0.1", "picomatch": "^2.2.2" }, "peerDependencies": { "rollup": "^1.20.0||^2.0.0" } }, "sha512-GksZ6pr6TpIjHm8h9lSQ8pi8BE9VeubNT0OMJ3B5uZJ8pz73NPiqOtCog/x2/QzM1ENChPKxMDhiQuRHsqc+lg=="],
 
+    "@shipload/sdk/@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
+
     "@so-ric/colorspace/color": ["color@5.0.3", "", { "dependencies": { "color-convert": "^3.1.3", "color-string": "^2.1.3" } }, "sha512-ezmVcLR3xAVp8kYOm4GS45ZLLgIE6SPAFoduLr6hTDajwb3KZ2F46gulK3XpcwRFb5KKGCSezCBAY4Dw4HsyXA=="],
 
     "@vitest/expect/chai": ["chai@5.3.3", "", { "dependencies": { "assertion-error": "^2.0.1", "check-error": "^2.1.1", "deep-eql": "^5.0.1", "loupe": "^3.1.0", "pathval": "^2.0.0" } }, "sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw=="],
@@ -1590,6 +1592,8 @@
     "@rollup/plugin-node-resolve/@rollup/pluginutils/estree-walker": ["estree-walker@1.0.1", "", {}, "sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg=="],
 
     "@rollup/plugin-node-resolve/@rollup/pluginutils/picomatch": ["picomatch@2.3.2", "", {}, "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA=="],
+
+    "@shipload/sdk/@types/bun/bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
 
     "@so-ric/colorspace/color/color-convert": ["color-convert@3.1.3", "", { "dependencies": { "color-name": "^2.0.0" } }, "sha512-fasDH2ont2GqF5HpyO4w0+BcewlhHEZOFn9c1ckZdHpJ56Qb7MHhH/IcJZbBGgvdtwdwNbLvxiBEdg336iA9Sg=="],
 
