@@ -2,7 +2,12 @@ import {describe, expect, test} from 'bun:test'
 import {applySlotMultiplier} from '../src/entities/slot-multiplier'
 import {computeEntityCapabilities} from '../src/derivation/capabilities'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
-import {ITEM_GATHERER_T1, ITEM_GENERATOR_T1, ITEM_LOADER_T1, ITEM_SHIP_T1_PACKED} from '../src/data/item-ids'
+import {
+    ITEM_GATHERER_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T1,
+    ITEM_SHIP_T1_PACKED,
+} from '../src/data/item-ids'
 import type {EntitySlot} from '../src/data/recipes-runtime'
 
 describe('applySlotMultiplier', () => {
@@ -44,7 +49,12 @@ describe('computeEntityCapabilities slot-multiplier integration', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: sampleStats},
         ]
-        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
+        const baseline = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            baselineLayout
+        )
         expect(baseline.generator?.capacity).toBeGreaterThan(0)
         expect(baseline.generator?.recharge).toBeGreaterThan(0)
     })
@@ -56,8 +66,18 @@ describe('computeEntityCapabilities slot-multiplier integration', () => {
         const ampGenLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 0 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
-        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampGenLayout)
+        const baseline = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            baselineLayout
+        )
+        const amplified = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            ampGenLayout
+        )
         expect(amplified.generator!.capacity).toBe(2 * baseline.generator!.capacity)
         expect(amplified.generator!.recharge).toBe(2 * baseline.generator!.recharge)
     })
@@ -71,8 +91,18 @@ describe('computeEntityCapabilities — selective application', () => {
         const ampGathLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 1 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
-        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampGathLayout)
+        const baseline = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            baselineLayout
+        )
+        const amplified = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            ampGathLayout
+        )
 
         expect(amplified.gatherer!.yield).toBe(2 * baseline.gatherer!.yield)
         expect(amplified.gatherer!.speed).toBe(2 * baseline.gatherer!.speed)
@@ -87,8 +117,18 @@ describe('computeEntityCapabilities — selective application', () => {
         const ampLoadLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 2 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
-        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampLoadLayout)
+        const baseline = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            baselineLayout
+        )
+        const amplified = computeEntityCapabilities(
+            baseStats,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            ampLoadLayout
+        )
 
         expect(amplified.loaders!.thrust).toBe(2 * baseline.loaders!.thrust)
         expect(amplified.loaders!.mass).toBe(baseline.loaders!.mass)

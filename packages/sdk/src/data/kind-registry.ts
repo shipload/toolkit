@@ -16,13 +16,7 @@ const CLASSIFICATION_BY_NAME: Record<string, EntityClass> = {
     PlanetaryStructure: EntityClass.PlanetaryStructure,
 }
 
-export type EntityTypeName =
-    | 'ship'
-    | 'warehouse'
-    | 'extractor'
-    | 'factory'
-    | 'container'
-    | 'nexus'
+export type EntityTypeName = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container' | 'nexus'
 
 export interface KindMeta {
     kind: Name
@@ -57,7 +51,9 @@ const KIND_META: Map<string, KindMeta> = (() => {
     for (const r of kindRegistryJson.kinds as RawKindEntry[]) {
         const cls = CLASSIFICATION_BY_NAME[r.classification]
         if (cls === undefined) {
-            throw new Error(`kind-registry: unknown classification "${r.classification}" for kind ${r.kind}`)
+            throw new Error(
+                `kind-registry: unknown classification "${r.classification}" for kind ${r.kind}`
+            )
         }
         m.set(r.kind, {
             kind: Name.from(r.kind),

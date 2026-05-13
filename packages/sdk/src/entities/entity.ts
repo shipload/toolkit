@@ -5,7 +5,7 @@ import {
     CAP_MODULES,
     CAP_UNDEPLOY,
     CAP_WRAP,
-    EntityClass,
+    type EntityClass,
     getEntityClass,
     kindCan,
 } from '../data/kind-registry'

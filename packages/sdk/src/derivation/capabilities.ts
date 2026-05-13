@@ -174,7 +174,12 @@ import {
 } from '../capabilities/modules'
 import {getItem} from '../data/catalog'
 import {decodeCraftedItemStats} from './crafting'
-import {applySlotMultiplier, clampUint16, getSlotAmp, type InstalledModule} from '../entities/slot-multiplier'
+import {
+    applySlotMultiplier,
+    clampUint16,
+    getSlotAmp,
+    type InstalledModule,
+} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
@@ -228,7 +233,7 @@ export function computeEntityCapabilities(
     stats: Record<string, number>,
     itemId: number,
     modules: InstalledModule[],
-    layout: EntitySlot[],
+    layout: EntitySlot[]
 ): ComputedCapabilities {
     let totalThrust = 0
     let totalEngineDrain = 0
@@ -352,9 +357,7 @@ export function computeEntityCapabilities(
     }
     if (hasHauler) {
         const efficiency =
-            totalHaulerCapacity > 0
-                ? Number(weightedHaulerEffNum / BigInt(totalHaulerCapacity))
-                : 0
+            totalHaulerCapacity > 0 ? Number(weightedHaulerEffNum / BigInt(totalHaulerCapacity)) : 0
         result.hauler = {
             capacity: totalHaulerCapacity,
             efficiency: clampUint16(efficiency),

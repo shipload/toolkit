@@ -14,9 +14,16 @@ export class EntitiesManager extends BaseManager {
         return new Entity(result as ServerContract.Types.entity_info)
     }
 
+    async getProjection(id: UInt64Type, taskCount?: number): Promise<unknown> {
+        return this.server.readonly('getprojstate', {
+            entity_id: id,
+            task_count: taskCount,
+        })
+    }
+
     async getEntities(
         owner: NameType | ServerContract.Types.player_row,
-        kind?: EntityTypeName,
+        kind?: EntityTypeName
     ): Promise<Entity[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
@@ -29,7 +36,7 @@ export class EntitiesManager extends BaseManager {
 
     async getSummaries(
         owner: NameType | ServerContract.Types.player_row,
-        kind?: EntityTypeName,
+        kind?: EntityTypeName
     ): Promise<ServerContract.Types.entity_summary[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getsummaries', {

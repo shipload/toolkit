@@ -22,7 +22,14 @@ import {
 
 describe('kind-registry', () => {
     test('getKindMeta returns metadata for each registered kind', () => {
-        for (const kind of ['ship', 'warehouse', 'extractor', 'factory', 'container', 'nexus'] as EntityTypeName[]) {
+        for (const kind of [
+            'ship',
+            'warehouse',
+            'extractor',
+            'factory',
+            'container',
+            'nexus',
+        ] as EntityTypeName[]) {
             const meta = getKindMeta(kind)
             expect(meta, `missing kind ${kind}`).toBeDefined()
             expect(meta!.kind.toString()).toBe(kind)

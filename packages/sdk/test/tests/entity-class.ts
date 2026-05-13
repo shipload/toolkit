@@ -1,7 +1,15 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
-import {EntityClass, getEntityClass, getPackedEntityType, isLocationBuildable, ENTITY_SHIP, ENTITY_WAREHOUSE, ENTITY_CONTAINER} from '$lib'
+import {
+    EntityClass,
+    getEntityClass,
+    getPackedEntityType,
+    isLocationBuildable,
+    ENTITY_SHIP,
+    ENTITY_WAREHOUSE,
+    ENTITY_CONTAINER,
+} from '$lib'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,

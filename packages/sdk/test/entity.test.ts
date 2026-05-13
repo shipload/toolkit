@@ -96,7 +96,10 @@ describe('Entity unification — registry-driven', () => {
     describe('EntityTypeName drift detection', () => {
         test('every kind in kind-registry.json is in PREDICATE_BY_KIND', () => {
             for (const k of kindRegistry.kinds) {
-                expect(PREDICATE_BY_KIND[k.kind], `EntityTypeName missing for ${k.kind}`).toBeDefined()
+                expect(
+                    PREDICATE_BY_KIND[k.kind],
+                    `EntityTypeName missing for ${k.kind}`
+                ).toBeDefined()
             }
         })
     })

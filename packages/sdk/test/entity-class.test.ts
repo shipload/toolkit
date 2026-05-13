@@ -63,7 +63,9 @@ describe('Entity universal accessors', () => {
     })
 
     test('totalMass adds hullmass and cargo mass', () => {
-        const e = new Entity(bareEntityInfo({hullmass: UInt32.from(100), capacity: UInt32.from(5000)}))
+        const e = new Entity(
+            bareEntityInfo({hullmass: UInt32.from(100), capacity: UInt32.from(5000)})
+        )
         expect(e.totalMass.equals(UInt64.from(100))).toBeTrue()
     })
 })

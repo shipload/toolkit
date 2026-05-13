@@ -1,6 +1,8 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {TimePoint} from '@wharfkit/antelope'
+import {readFileSync} from 'node:fs'
+import {resolve} from 'node:path'
 import {
     type CargoStack,
     ENTITY_CAPACITY_EXCEEDED,
@@ -18,6 +20,12 @@ import {
     TaskType,
     validateSchedule,
 } from '$lib'
+import {
+    assertProjectionEquals,
+    CATALOG_FILES_REL,
+    computeCatalogHash,
+    type ContractProjectedState,
+} from '../../src/testing'
 import {registerMockItem} from '../item-mock'
 import {makeShipFixture, makeTask} from '../helpers'
 
@@ -307,52 +315,9 @@ describe('projectEntity (stack-aware)', () => {
         })
     })
 
-    describe('cross-validation against contract (synthetic — fixture deferred)', () => {
-        test('gather + craft produces expected output stack matching contract semantics', () => {
-            const RESOURCE_ID = 101
-            const COMPONENT_ID = 10005
-            const COMPONENT_MASS = 50000
-            const RESOURCE_SEED = 1234
-            const COMPONENT_SEED = 5678
-            const INPUT_QTY = 15
-            const OUTPUT_QTY = 1
-
-            registerMockItem({
-                id: COMPONENT_ID,
-                name: 'Matter Conduit',
-                description: 'Heavy-duty metal shaft used in gathering equipment.',
-                mass: COMPONENT_MASS,
-                type: 'component',
-                tier: 1,
-                color: '#7B8D9E',
-            })
-
-            const ship = makeShipFixture({})
-            ship.schedule = ServerContract.Types.schedule.from({
-                started: '2024-06-04T23:41:09.000',
-                tasks: [
-                    makeTask(TaskType.GATHER, {
-                        cargo: [{item_id: RESOURCE_ID, quantity: INPUT_QTY, stats: RESOURCE_SEED}],
-                    }),
-                    makeTask(TaskType.CRAFT, {
-                        cargo: [
-                            {item_id: RESOURCE_ID, quantity: INPUT_QTY, stats: RESOURCE_SEED},
-                            {item_id: COMPONENT_ID, quantity: OUTPUT_QTY, stats: COMPONENT_SEED},
-                        ],
-                    }),
-                ],
-            })
-            const projected = projectEntity(ship)
-            assert.equal(projected.cargo.length, 1, 'expected single output stack')
-            assert.equal(projected.cargo[0].item_id.toNumber(), COMPONENT_ID)
-            assert.equal(projected.cargo[0].quantity.toNumber(), OUTPUT_QTY)
-            assert.equal(
-                projected.cargoMass.toNumber(),
-                COMPONENT_MASS * OUTPUT_QTY,
-                'cargoMass should match component mass × quantity'
-            )
-        })
-    })
+    // Cross-validation against the contract now lives in the `projection — fixture replay`
+    // describe block below, which replays real contract-dumped projected_state via
+    // assertProjectionEquals. See `make -C contracts build/projection-fixtures`.
 })
 
 describe('projectFromCurrentState', () => {
@@ -447,4 +412,78 @@ describe('projectFromCurrentStateAt', () => {
         assert.isAtLeast(x, 40)
         assert.isAtMost(x, 60)
     })
+})
+
+interface FixturePayload {
+    catalog_hash: string
+    generated_at: string
+    cases: Array<{name: string; input: unknown; task_count: number; expected: unknown}>
+}
+
+const FIXTURE_PATH = resolve(__dirname, '../fixtures/projection-cases.json')
+const SDK_CATALOG_DIR = resolve(__dirname, '../../src/data')
+
+describe('projection — fixture replay', () => {
+    let payload: FixturePayload
+    try {
+        payload = JSON.parse(readFileSync(FIXTURE_PATH, 'utf8')) as FixturePayload
+    } catch (e) {
+        test('fixture file present (regenerate with `make -C contracts build/projection-fixtures`)', () => {
+            throw new Error(`Cannot read ${FIXTURE_PATH}: ${(e as Error).message}`)
+        })
+        return
+    }
+
+    const currentHash = computeCatalogHash(
+        CATALOG_FILES_REL.map((f) => resolve(SDK_CATALOG_DIR, f))
+    )
+
+    if (currentHash !== payload.catalog_hash) {
+        test('catalog hash matches fixture (regenerate with `make -C contracts build/projection-fixtures`)', () => {
+            throw new Error(
+                `Projection fixture catalog hash mismatch.\n` +
+                    `  fixture: ${payload.catalog_hash}\n` +
+                    `  current: ${currentHash}\n` +
+                    `Re-run \`make -C contracts build/projection-fixtures\` after \`make -C toolkit/packages/sdk sync-catalog\`.`
+            )
+        })
+        return
+    }
+
+    for (const c of payload.cases) {
+        test(c.name, () => {
+            const inputObj = c.input as Record<string, unknown>
+            const cargoJson = (inputObj.cargo as Array<Record<string, unknown>>) ?? []
+            const rowJson = {...inputObj, cargo: undefined}
+            delete rowJson.cargo
+            const row = ServerContract.Types.entity_row.from(rowJson)
+            const cargo = cargoJson.map((item) =>
+                ServerContract.Types.cargo_item.from({
+                    item_id: Number(item.item_id),
+                    stats: String(item.stats),
+                    modules: (item.modules as never[]) ?? [],
+                    quantity: Number(item.quantity),
+                })
+            )
+            const sdk = projectEntity(
+                {
+                    coordinates: row.coordinates,
+                    energy: row.energy,
+                    hullmass: row.hullmass,
+                    cargo,
+                    cargomass: row.cargomass,
+                    engines: row.engines,
+                    loaders: row.loaders,
+                    generator: row.generator,
+                    hauler: row.hauler,
+                    capacity: row.capacity,
+                    owner: row.owner,
+                    schedule: row.schedule ?? undefined,
+                },
+                {upToTaskIndex: c.task_count}
+            )
+            const expected = c.expected as ContractProjectedState
+            assertProjectionEquals(expected, sdk, {step: c.task_count})
+        })
+    }
 })

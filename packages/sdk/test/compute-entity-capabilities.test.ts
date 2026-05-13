@@ -28,7 +28,12 @@ const SAMPLE_STATS_RECORD = {strength: 100, density: 100, hardness: 100, saturat
 
 describe('computeEntityCapabilities', () => {
     test('returns hullmass and capacity for ship with no modules', () => {
-        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, [], SHIP_LAYOUT)
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [],
+            SHIP_LAYOUT
+        )
         expect(result.hullmass).toBeGreaterThan(0)
         expect(result.capacity).toBeGreaterThan(0)
         expect(result.engines).toBeUndefined()
@@ -44,7 +49,12 @@ describe('computeEntityCapabilities', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: ZERO_STATS},
         ]
-        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
         expect(result.engines).toBeDefined()
         expect(result.generator).toBeUndefined()
     })
@@ -53,38 +63,56 @@ describe('computeEntityCapabilities', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: ZERO_STATS},
         ]
-        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
         expect(result.generator).toBeDefined()
         expect(result.engines).toBeUndefined()
     })
 
     test('warp field populated when warp module installed', () => {
-        const modules: InstalledModule[] = [
-            {slotIndex: 0, itemId: ITEM_WARP_T1, stats: ZERO_STATS},
-        ]
-        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
+        const modules: InstalledModule[] = [{slotIndex: 0, itemId: ITEM_WARP_T1, stats: ZERO_STATS}]
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
         expect(result.warp).toBeDefined()
     })
 
     test('storage module increases capacity but has no storage field', () => {
-        const base = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, [], SHIP_LAYOUT)
+        const base = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [],
+            SHIP_LAYOUT
+        )
         const withStorage = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
             [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: ZERO_STATS}],
-            SHIP_LAYOUT,
+            SHIP_LAYOUT
         )
         expect(withStorage.capacity).toBeGreaterThan(base.capacity)
         expect((withStorage as any).storage).toBeUndefined()
     })
 
     test('hullmass increases with each installed module (mass accumulates)', () => {
-        const baseResult = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, [], SHIP_LAYOUT)
+        const baseResult = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [],
+            SHIP_LAYOUT
+        )
         const withEngine = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
             [{slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: ZERO_STATS}],
-            SHIP_LAYOUT,
+            SHIP_LAYOUT
         )
         expect(withEngine.hullmass).toBeGreaterThan(baseResult.hullmass)
     })
@@ -93,7 +121,12 @@ describe('computeEntityCapabilities', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_LOADER_T1, stats: ZERO_STATS},
         ]
-        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
         expect(result.loaders).toBeDefined()
         expect(result.loaders?.quantity).toBeGreaterThan(0)
         expect(result.loaders?.mass).toBeGreaterThan(0)
