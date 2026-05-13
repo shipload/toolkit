@@ -1,7 +1,8 @@
 import {describe, expect, test} from 'bun:test'
 import {applySlotMultiplier} from '../src/entities/slot-multiplier'
-import {computeShipCapabilities, type InstalledModule} from '../src/entities/ship-deploy'
-import {ITEM_GATHERER_T1, ITEM_GENERATOR_T1, ITEM_LOADER_T1} from '../src/data/item-ids'
+import {computeEntityCapabilities} from '../src/derivation/capabilities'
+import type {InstalledModule} from '../src/entities/slot-multiplier'
+import {ITEM_GATHERER_T1, ITEM_GENERATOR_T1, ITEM_LOADER_T1, ITEM_SHIP_T1_PACKED} from '../src/data/item-ids'
 import type {EntitySlot} from '../src/data/recipes-runtime'
 
 describe('applySlotMultiplier', () => {
@@ -35,14 +36,15 @@ const baselineLayout: EntitySlot[] = Array.from({length: 5}, () => ({
     outputPct: 100,
 }))
 
+const baseStats = {strength: 100, density: 100, hardness: 100, saturation: 100}
 const sampleStats = 0n
 
-describe('computeShipCapabilities slot-multiplier integration', () => {
+describe('computeEntityCapabilities slot-multiplier integration', () => {
     test('100% on generator slot produces nonzero baseline', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: sampleStats},
         ]
-        const baseline = computeShipCapabilities(modules, baselineLayout)
+        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
         expect(baseline.generator?.capacity).toBeGreaterThan(0)
         expect(baseline.generator?.recharge).toBeGreaterThan(0)
     })
@@ -54,14 +56,14 @@ describe('computeShipCapabilities slot-multiplier integration', () => {
         const ampGenLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 0 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeShipCapabilities(modules, baselineLayout)
-        const amplified = computeShipCapabilities(modules, ampGenLayout)
+        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
+        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampGenLayout)
         expect(amplified.generator!.capacity).toBe(2 * baseline.generator!.capacity)
         expect(amplified.generator!.recharge).toBe(2 * baseline.generator!.recharge)
     })
 })
 
-describe('computeShipCapabilities — selective application', () => {
+describe('computeEntityCapabilities — selective application', () => {
     test('200% on gatherer slot amplifies yield + speed only', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 1, itemId: ITEM_GATHERER_T1, stats: sampleStats},
@@ -69,8 +71,8 @@ describe('computeShipCapabilities — selective application', () => {
         const ampGathLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 1 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeShipCapabilities(modules, baselineLayout)
-        const amplified = computeShipCapabilities(modules, ampGathLayout)
+        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
+        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampGathLayout)
 
         expect(amplified.gatherer!.yield).toBe(2 * baseline.gatherer!.yield)
         expect(amplified.gatherer!.speed).toBe(2 * baseline.gatherer!.speed)
@@ -85,11 +87,11 @@ describe('computeShipCapabilities — selective application', () => {
         const ampLoadLayout: EntitySlot[] = baselineLayout.map((s, i) =>
             i === 2 ? {...s, outputPct: 200} : s
         )
-        const baseline = computeShipCapabilities(modules, baselineLayout)
-        const amplified = computeShipCapabilities(modules, ampLoadLayout)
+        const baseline = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, baselineLayout)
+        const amplified = computeEntityCapabilities(baseStats, ITEM_SHIP_T1_PACKED, modules, ampLoadLayout)
 
         expect(amplified.loaders!.thrust).toBe(2 * baseline.loaders!.thrust)
         expect(amplified.loaders!.mass).toBe(baseline.loaders!.mass)
-        expect(amplified.loaders!.quantity).toBe(baseline.loaders!.quantity)
+        expect(amplified.loaders!.count).toBe(baseline.loaders!.count)
     })
 })

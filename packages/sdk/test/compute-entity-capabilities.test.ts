@@ -1,8 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {
-    computeEntityCapabilities,
-    type EntityCapabilities,
-} from '../src/derivation/capabilities'
+import {computeEntityCapabilities} from '../src/derivation/capabilities'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {
     ITEM_SHIP_T1_PACKED,
@@ -15,7 +12,6 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_GATHERER_T1,
 } from '../src/data/item-ids'
-import {computeShipCapabilities} from '../src/entities/ship-deploy'
 import type {EntitySlot} from '../src/data/recipes-runtime'
 
 const SHIP_LAYOUT: EntitySlot[] = [
@@ -82,44 +78,6 @@ describe('computeEntityCapabilities', () => {
         expect((withStorage as any).storage).toBeUndefined()
     })
 
-    test('parity with computeShipCapabilities — engine and generator', () => {
-        const modules: InstalledModule[] = [
-            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: ZERO_STATS},
-            {slotIndex: 1, itemId: ITEM_GENERATOR_T1, stats: ZERO_STATS},
-        ]
-        const unified = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
-        const ship = computeShipCapabilities(modules, SHIP_LAYOUT)
-        expect(unified.engines).toEqual(ship.engines)
-        expect(unified.generator).toEqual(ship.generator)
-    })
-
-    test('parity with computeShipCapabilities — gatherer', () => {
-        const modules: InstalledModule[] = [
-            {slotIndex: 0, itemId: ITEM_GATHERER_T1, stats: ZERO_STATS},
-        ]
-        const unified = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
-        const ship = computeShipCapabilities(modules, SHIP_LAYOUT)
-        expect(unified.gatherer).toEqual(ship.gatherer)
-    })
-
-    test('parity with computeShipCapabilities — hauler', () => {
-        const modules: InstalledModule[] = [
-            {slotIndex: 0, itemId: ITEM_HAULER_T1, stats: ZERO_STATS},
-        ]
-        const unified = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
-        const ship = computeShipCapabilities(modules, SHIP_LAYOUT)
-        expect(unified.hauler).toEqual(ship.hauler)
-    })
-
-    test('parity with computeShipCapabilities — crafter', () => {
-        const modules: InstalledModule[] = [
-            {slotIndex: 0, itemId: ITEM_CRAFTER_T1, stats: ZERO_STATS},
-        ]
-        const unified = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
-        const ship = computeShipCapabilities(modules, SHIP_LAYOUT)
-        expect(unified.crafter).toEqual(ship.crafter)
-    })
-
     test('hullmass increases with each installed module (mass accumulates)', () => {
         const baseResult = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, [], SHIP_LAYOUT)
         const withEngine = computeEntityCapabilities(
@@ -131,14 +89,13 @@ describe('computeEntityCapabilities', () => {
         expect(withEngine.hullmass).toBeGreaterThan(baseResult.hullmass)
     })
 
-    test('loader: single module parity with computeShipCapabilities', () => {
+    test('loader: single module populates loaders field', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_LOADER_T1, stats: ZERO_STATS},
         ]
-        const unified = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
-        const ship = computeShipCapabilities(modules, SHIP_LAYOUT)
-        expect(unified.loaders?.thrust).toEqual(ship.loaders?.thrust)
-        expect(unified.loaders?.count).toEqual(ship.loaders?.quantity)
-        expect(unified.loaders?.mass).toEqual(ship.loaders?.mass)
+        const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
+        expect(result.loaders).toBeDefined()
+        expect(result.loaders?.count).toBeGreaterThan(0)
+        expect(result.loaders?.mass).toBeGreaterThan(0)
     })
 })

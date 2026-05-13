@@ -12,14 +12,7 @@ export {Types as PlatformTypes} from './contracts/platform'
 import type {ServerContract} from './contracts'
 
 export {Shipload} from './shipload'
-export {Ship} from './entities/ship'
-export {Warehouse, computeWarehouseCapabilities} from './entities/warehouse'
-export {Extractor, computeExtractorCapabilities} from './entities/extractor'
-export type {ExtractorCapabilities} from './entities/extractor'
-export {Factory, computeFactoryCapabilities} from './entities/factory'
-export type {FactoryCapabilities} from './entities/factory'
-export {Container} from './entities/container'
-export {Nexus} from './entities/nexus'
+export {Entity} from './entities/entity'
 export {makeEntity} from './entities/makers'
 export type {EntityStateInput, PackedModuleInput} from './entities/makers'
 
@@ -267,8 +260,6 @@ export {
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
 
-export {computeContainerCapabilities, computeContainerT2Capabilities} from './entities/container'
-
 export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
@@ -279,12 +270,13 @@ export {
     computeCrafterCapabilities,
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
-    computeShipCapabilities,
+    computeContainerCapabilities,
+    computeContainerT2Capabilities,
     GATHERER_DEPTH_TABLE,
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
-} from './entities/ship-deploy'
-export type {ShipCapabilities, GathererDepthParams} from './entities/ship-deploy'
+} from './derivation/capabilities'
+export type {GathererDepthParams} from './derivation/capabilities'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {

@@ -377,3 +377,39 @@ export function computeEntityCapabilities(
 
     return result
 }
+
+export function computeContainerCapabilities(stats: Record<string, number>): {
+    hullmass: number
+    capacity: number
+} {
+    const density = stats.density
+    const strength = stats.strength
+    const hardness = stats.hardness
+    const saturation = stats.saturation
+
+    const hullmass = 100000 - 75 * density
+
+    const statSum = strength + hardness + saturation
+    const exponent = statSum / 2997
+    const capacity = Math.floor(1000000 * 10 ** exponent)
+
+    return {hullmass, capacity}
+}
+
+export function computeContainerT2Capabilities(stats: Record<string, number>): {
+    hullmass: number
+    capacity: number
+} {
+    const strength = stats.strength
+    const density = stats.density
+    const hardness = stats.hardness
+    const saturation = stats.saturation
+
+    const hullmass = 70000 - 50 * density
+
+    const statSum = strength + hardness + saturation
+    const exponent = statSum / 2500
+    const capacity = Math.floor(1500000 * 10 ** exponent)
+
+    return {hullmass, capacity}
+}

@@ -10,17 +10,24 @@ import {getItem} from '../data/catalog'
 import {
     getModuleCapabilityType,
     MODULE_STORAGE,
+    MODULE_ENGINE,
+    MODULE_GENERATOR,
+    MODULE_GATHERER,
+    MODULE_LOADER,
+    MODULE_CRAFTER,
+    MODULE_HAULER,
     moduleAccepts,
     moduleSlotTypeToCode,
 } from '../capabilities/modules'
 import {
-    computeShipCapabilities,
     computeStorageCapabilities,
-    computeWarehouseHullCapabilities,
-} from './ship-deploy'
-import {computeWarehouseCapabilities} from './warehouse'
-import {computeExtractorCapabilities} from './extractor'
-import {computeFactoryCapabilities} from './factory'
+    computeEngineCapabilities,
+    computeGeneratorCapabilities,
+    computeGathererCapabilities,
+    computeLoaderCapabilities,
+    computeCrafterCapabilities,
+    computeHaulerCapabilities,
+} from '../derivation/capabilities'
 import {applySlotMultiplier, clampUint16, getSlotAmp, type InstalledModule} from './slot-multiplier'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 
@@ -96,6 +103,7 @@ function toInstalledModules(entries: ServerContract.Types.module_entry[]): Insta
     return installed
 }
 
+
 function computeStorageBonus(modules: InstalledModule[], baseCapacity: number): number {
     let totalBonus = 0
     for (const m of modules) {
@@ -114,13 +122,79 @@ function applyShipCapabilities(
     baseCapacity: number
 ): void {
     const installed = toInstalledModules(moduleEntries)
-    const capabilities = computeShipCapabilities(installed, layout)
-    if (capabilities.engines) info.engines = capabilities.engines
-    if (capabilities.generator) info.generator = capabilities.generator
-    if (capabilities.gatherer) info.gatherer = capabilities.gatherer
-    if (capabilities.hauler) info.hauler = capabilities.hauler
-    if (capabilities.loaders) info.loaders = capabilities.loaders
-    if (capabilities.crafter) info.crafter = capabilities.crafter
+    let totalThrust = 0
+    let totalEngineDrain = 0
+    let hasEngine = false
+    let totalGenCapacity = 0
+    let totalGenRecharge = 0
+    let hasGenerator = false
+    let totalGathYield = 0
+    let totalGathDrain = 0
+    let maxGathDepth = 0
+    let totalGathSpeed = 0
+    let hasGatherer = false
+    let totalLoaderMass = 0
+    let totalLoaderThrust = 0
+    let totalLoaderQty = 0
+    let hasLoader = false
+    let totalCrafterSpeed = 0
+    let totalCrafterDrain = 0
+    let hasCrafter = false
+    let totalHaulerCap = 0
+    let weightedHaulerEff = 0
+    let totalHaulerDrain = 0
+    let hasHauler = false
+    for (const m of installed) {
+        const modType = getModuleCapabilityType(m.itemId)
+        const amp = getSlotAmp(layout, m.slotIndex)
+        const stats = decodeCraftedItemStats(m.itemId, m.stats)
+        if (modType === MODULE_ENGINE) {
+            hasEngine = true
+            const c = computeEngineCapabilities(stats)
+            totalThrust += applySlotMultiplier(c.thrust, amp)
+            totalEngineDrain += c.drain
+        } else if (modType === MODULE_GENERATOR) {
+            hasGenerator = true
+            const c = computeGeneratorCapabilities(stats)
+            totalGenCapacity += applySlotMultiplier(c.capacity, amp)
+            totalGenRecharge += applySlotMultiplier(c.recharge, amp)
+        } else if (modType === MODULE_GATHERER) {
+            hasGatherer = true
+            const tier = getItem(m.itemId).tier
+            const c = computeGathererCapabilities(stats, tier)
+            totalGathYield += applySlotMultiplier(c.yield, amp)
+            totalGathDrain += c.drain
+            if (c.depth > maxGathDepth) maxGathDepth = c.depth
+            totalGathSpeed += applySlotMultiplier(c.speed, amp)
+        } else if (modType === MODULE_LOADER) {
+            hasLoader = true
+            const c = computeLoaderCapabilities(stats)
+            totalLoaderMass += c.mass
+            totalLoaderThrust += applySlotMultiplier(c.thrust, amp)
+            totalLoaderQty += c.quantity
+        } else if (modType === MODULE_CRAFTER) {
+            hasCrafter = true
+            const c = computeCrafterCapabilities(stats)
+            totalCrafterSpeed += applySlotMultiplier(c.speed, amp)
+            totalCrafterDrain += c.drain
+        } else if (modType === MODULE_HAULER) {
+            hasHauler = true
+            const c = computeHaulerCapabilities(stats)
+            const eff = applySlotMultiplier(c.efficiency, amp)
+            totalHaulerCap += c.capacity
+            weightedHaulerEff += eff * c.capacity
+            totalHaulerDrain += c.drain
+        }
+    }
+    if (hasEngine) info.engines = {thrust: totalThrust, drain: totalEngineDrain}
+    if (hasGenerator) info.generator = {capacity: clampUint16(totalGenCapacity), recharge: clampUint16(totalGenRecharge)}
+    if (hasGatherer) info.gatherer = {yield: clampUint16(totalGathYield), drain: totalGathDrain, depth: maxGathDepth, speed: clampUint16(totalGathSpeed)}
+    if (hasLoader) info.loaders = {mass: totalLoaderMass, thrust: clampUint16(totalLoaderThrust), quantity: totalLoaderQty}
+    if (hasCrafter) info.crafter = {speed: clampUint16(totalCrafterSpeed), drain: totalCrafterDrain}
+    if (hasHauler) {
+        const eff = totalHaulerCap > 0 ? Math.floor(weightedHaulerEff / totalHaulerCap) : 0
+        info.hauler = {capacity: totalHaulerCap, efficiency: clampUint16(eff), drain: totalHaulerDrain}
+    }
     const storageBonus = computeStorageBonus(installed, baseCapacity)
     if (storageBonus > 0) info.capacity = UInt32.from(baseCapacity + storageBonus)
 }
@@ -132,8 +206,20 @@ function applyWarehouseCapabilities(
     baseCapacity: number
 ): void {
     const installed = toInstalledModules(moduleEntries)
-    const capabilities = computeWarehouseCapabilities(installed, layout)
-    if (capabilities.loaders) info.loaders = capabilities.loaders
+    let totalLoaderMass = 0
+    let totalLoaderThrust = 0
+    let totalLoaderQty = 0
+    let hasLoader = false
+    for (const m of installed) {
+        if (getModuleCapabilityType(m.itemId) !== MODULE_LOADER) continue
+        hasLoader = true
+        const amp = getSlotAmp(layout, m.slotIndex)
+        const c = computeLoaderCapabilities(decodeCraftedItemStats(m.itemId, m.stats))
+        totalLoaderMass += c.mass
+        totalLoaderThrust += applySlotMultiplier(c.thrust, amp)
+        totalLoaderQty += c.quantity
+    }
+    if (hasLoader) info.loaders = {mass: totalLoaderMass, thrust: clampUint16(totalLoaderThrust), quantity: totalLoaderQty}
     const storageBonus = computeStorageBonus(installed, baseCapacity)
     info.capacity = UInt32.from(baseCapacity + storageBonus)
 }
@@ -144,9 +230,35 @@ function applyExtractorCapabilities(
     layout: EntitySlot[]
 ): void {
     const installed = toInstalledModules(moduleEntries)
-    const capabilities = computeExtractorCapabilities(installed, layout)
-    if (capabilities.generator) info.generator = capabilities.generator
-    if (capabilities.gatherer) info.gatherer = capabilities.gatherer
+    let totalGenCapacity = 0
+    let totalGenRecharge = 0
+    let hasGenerator = false
+    let totalGathYield = 0
+    let totalGathDrain = 0
+    let maxGathDepth = 0
+    let totalGathSpeed = 0
+    let hasGatherer = false
+    for (const m of installed) {
+        const modType = getModuleCapabilityType(m.itemId)
+        const amp = getSlotAmp(layout, m.slotIndex)
+        const stats = decodeCraftedItemStats(m.itemId, m.stats)
+        if (modType === MODULE_GENERATOR) {
+            hasGenerator = true
+            const c = computeGeneratorCapabilities(stats)
+            totalGenCapacity += applySlotMultiplier(c.capacity, amp)
+            totalGenRecharge += applySlotMultiplier(c.recharge, amp)
+        } else if (modType === MODULE_GATHERER) {
+            hasGatherer = true
+            const tier = getItem(m.itemId).tier
+            const c = computeGathererCapabilities(stats, tier)
+            totalGathYield += applySlotMultiplier(c.yield, amp)
+            totalGathDrain += c.drain
+            if (c.depth > maxGathDepth) maxGathDepth = c.depth
+            totalGathSpeed += applySlotMultiplier(c.speed, amp)
+        }
+    }
+    if (hasGenerator) info.generator = {capacity: clampUint16(totalGenCapacity), recharge: clampUint16(totalGenRecharge)}
+    if (hasGatherer) info.gatherer = {yield: clampUint16(totalGathYield), drain: totalGathDrain, depth: maxGathDepth, speed: clampUint16(totalGathSpeed)}
 }
 
 function applyFactoryCapabilities(
@@ -155,9 +267,30 @@ function applyFactoryCapabilities(
     layout: EntitySlot[]
 ): void {
     const installed = toInstalledModules(moduleEntries)
-    const capabilities = computeFactoryCapabilities(installed, layout)
-    if (capabilities.generator) info.generator = capabilities.generator
-    if (capabilities.crafter) info.crafter = capabilities.crafter
+    let totalGenCapacity = 0
+    let totalGenRecharge = 0
+    let hasGenerator = false
+    let totalCrafterSpeed = 0
+    let totalCrafterDrain = 0
+    let hasCrafter = false
+    for (const m of installed) {
+        const modType = getModuleCapabilityType(m.itemId)
+        const amp = getSlotAmp(layout, m.slotIndex)
+        const stats = decodeCraftedItemStats(m.itemId, m.stats)
+        if (modType === MODULE_GENERATOR) {
+            hasGenerator = true
+            const c = computeGeneratorCapabilities(stats)
+            totalGenCapacity += applySlotMultiplier(c.capacity, amp)
+            totalGenRecharge += applySlotMultiplier(c.recharge, amp)
+        } else if (modType === MODULE_CRAFTER) {
+            hasCrafter = true
+            const c = computeCrafterCapabilities(stats)
+            totalCrafterSpeed += applySlotMultiplier(c.speed, amp)
+            totalCrafterDrain += c.drain
+        }
+    }
+    if (hasGenerator) info.generator = {capacity: clampUint16(totalGenCapacity), recharge: clampUint16(totalGenRecharge)}
+    if (hasCrafter) info.crafter = {speed: clampUint16(totalCrafterSpeed), drain: totalCrafterDrain}
 }
 
 export function makeEntity(packedItemId: number, state: EntityStateInput): Entity {

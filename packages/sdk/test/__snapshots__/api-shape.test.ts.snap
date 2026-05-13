@@ -1,103 +1,20 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`Ship public surface 1`] = `
-[
-  "availableCapacity",
-  "canUndeploy",
-  "constructor",
-  "destinationLocation",
-  "energyPercent",
-  "entityClass",
-  "getCargoForItem",
-  "getFlightOrigin",
-  "hasEnergyFor",
-  "hasEngines",
-  "hasGatherer",
-  "hasGenerator",
-  "hasSellableCargo",
-  "hasSpace",
-  "hasWarp",
-  "interpolatedPositionAt",
-  "inv",
-  "inventory",
-  "isFull",
-  "isGathering",
-  "isIdle",
-  "isInFlight",
-  "isLoading",
-  "isRecharging",
-  "isUnloading",
-  "location",
-  "maxCapacity",
-  "maxDistance",
-  "name",
-  "needsRecharge",
-  "positionAt",
-  "project",
-  "projectAt",
-  "sched",
-  "sellableCargo",
-  "sellableGoodsCount",
-  "totalCargoMass",
-  "totalMass",
-]
-`;
-
-exports[`Warehouse public surface 1`] = `
+exports[`Entity public surface 1`] = `
 [
   "availableCapacity",
   "canDemolish",
-  "constructor",
-  "entityClass",
-  "getCargoForItem",
-  "hasSpace",
-  "inv",
-  "inventory",
-  "isFull",
-  "isIdle",
-  "isLoading",
-  "isUnloading",
-  "location",
-  "maxCapacity",
-  "name",
-  "orbitalAltitude",
-  "sched",
-  "totalCargoMass",
-  "totalMass",
-]
-`;
-
-exports[`Container public surface 1`] = `
-[
-  "availableCapacity",
   "canUndeploy",
-  "constructor",
-  "entityClass",
-  "hasSpace",
-  "interpolatedPositionAt",
-  "isFull",
-  "isIdle",
-  "isLoading",
-  "isUnloading",
-  "location",
-  "maxCapacity",
-  "name",
-  "orbitalAltitude",
-  "sched",
-  "totalMass",
-]
-`;
-
-exports[`Extractor public surface 1`] = `
-[
-  "availableCapacity",
-  "canDemolish",
+  "canUseModules",
+  "canWrap",
   "constructor",
   "entityClass",
   "inv",
   "inventory",
   "isFull",
   "isIdle",
+  "isLoading",
+  "isUnloading",
   "location",
   "maxCapacity",
   "name",
@@ -114,24 +31,5 @@ exports[`EntitiesManager method surface 1`] = `
   "getEntity",
   "getSummaries",
   "resolveOwner",
-]
-`;
-
-exports[`Factory public surface 1`] = `
-[
-  "availableCapacity",
-  "canDemolish",
-  "constructor",
-  "entityClass",
-  "inv",
-  "inventory",
-  "isFull",
-  "isIdle",
-  "location",
-  "maxCapacity",
-  "name",
-  "sched",
-  "totalCargoMass",
-  "totalMass",
 ]
 `;

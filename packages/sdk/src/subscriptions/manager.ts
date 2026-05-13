@@ -13,13 +13,10 @@ import type {
     WireEntity,
 } from './types'
 import {mapEntity, parseWireEntity} from './mappers'
-import type {Ship} from '../entities/ship'
-import type {Warehouse} from '../entities/warehouse'
-import type {Container} from '../entities/container'
-import type {Nexus} from '../entities/nexus'
+import type {Entity} from '../entities/entity'
 
 export type SubscriptionEntityType = 'ship' | 'warehouse' | 'container' | 'nexus'
-export type EntityInstance = Ship | Warehouse | Container | Nexus
+export type EntityInstance = Entity
 
 export interface SubscriptionsOptions {
     url: string

@@ -1,28 +1,8 @@
 import {expect, test} from 'bun:test'
-import {Container, Extractor, Factory, Ship, Warehouse, EntitiesManager} from '../src'
+import {Entity, EntitiesManager} from '../src'
 
-test('Ship public surface', () => {
-    const props = Object.getOwnPropertyNames(Ship.prototype).sort()
-    expect(props).toMatchSnapshot()
-})
-
-test('Warehouse public surface', () => {
-    const props = Object.getOwnPropertyNames(Warehouse.prototype).sort()
-    expect(props).toMatchSnapshot()
-})
-
-test('Container public surface', () => {
-    const props = Object.getOwnPropertyNames(Container.prototype).sort()
-    expect(props).toMatchSnapshot()
-})
-
-test('Extractor public surface', () => {
-    const props = Object.getOwnPropertyNames(Extractor.prototype).sort()
-    expect(props).toMatchSnapshot()
-})
-
-test('Factory public surface', () => {
-    const props = Object.getOwnPropertyNames(Factory.prototype).sort()
+test('Entity public surface', () => {
+    const props = Object.getOwnPropertyNames(Entity.prototype).sort()
     expect(props).toMatchSnapshot()
 })
 
