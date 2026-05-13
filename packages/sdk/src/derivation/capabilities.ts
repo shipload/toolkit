@@ -154,6 +154,34 @@ export function computeStorageCapabilities(
     return {capacityBonus}
 }
 
+import {
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
+    ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_FACTORY_T1_PACKED,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+} from '../data/item-ids'
+
+export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
+    switch (itemId) {
+        case ITEM_SHIP_T1_PACKED:
+        case ITEM_EXTRACTOR_T1_PACKED:
+        case ITEM_FACTORY_T1_PACKED:
+        case ITEM_CONTAINER_T1_PACKED:
+            return computeShipHullCapabilities(stats).capacity
+        case ITEM_WAREHOUSE_T1_PACKED:
+            return computeWarehouseHullCapabilities(stats).capacity
+        case ITEM_CONTAINER_T2_PACKED: {
+            const statSum = stats.strength + stats.hardness + stats.saturation
+            const exponent = statSum / 2500.0
+            return Math.floor(1500000 * 10 ** exponent)
+        }
+        default:
+            return 0
+    }
+}
+
 export function computeWarehouseHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
