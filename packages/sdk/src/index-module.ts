@@ -10,11 +10,19 @@ export {Types as ServerTypes} from './contracts/server'
 export {Types as PlatformTypes} from './contracts/platform'
 
 import type {ServerContract} from './contracts'
+import type {Entity as EntityType} from './entities/entity'
 
 export {Shipload} from './shipload'
 export {Entity} from './entities/entity'
+export type Ship = EntityType
+export type Warehouse = EntityType
+export type Container = EntityType
+export type Extractor = EntityType
+export type Factory = EntityType
+export type Nexus = EntityType
 export {makeEntity} from './entities/makers'
 export type {EntityStateInput, PackedModuleInput} from './entities/makers'
+export type {InstalledModule} from './entities/slot-multiplier'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
@@ -272,11 +280,14 @@ export {
     computeStorageCapabilities,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
+    computeWarpCapabilities,
+    computeBaseCapacity,
+    computeEntityCapabilities,
     GATHERER_DEPTH_TABLE,
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
 } from './derivation/capabilities'
-export type {GathererDepthParams} from './derivation/capabilities'
+export type {GathererDepthParams, EntityCapabilities} from './derivation/capabilities'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {
