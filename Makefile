@@ -79,6 +79,7 @@ release:
 	$(MAKE) test
 	$(MAKE) build
 	bun changeset version
+	bun update
 	bun biome format packages/*/package.json --write
 	git add .
 	git commit -m "chore: version packages"
@@ -101,7 +102,20 @@ release:
 	@echo "    make release/cli"
 
 publish:
-	bun changeset publish
+	@TAG_FLAG=$$(test -f .changeset/pre.json && echo "--tag next" || echo ""); \
+	for pkg in packages/*/package.json; do \
+		DIR=$$(dirname $$pkg); \
+		PRIVATE=$$(node -p "require('./$$pkg').private === true ? 'yes' : 'no'"); \
+		if [ "$$PRIVATE" = "yes" ]; then \
+			echo "▸ skip $$DIR (private)"; \
+			continue; \
+		fi; \
+		NAME=$$(node -p "require('./$$pkg').name"); \
+		VER=$$(node -p "require('./$$pkg').version"); \
+		echo "▸ publish $$NAME@$$VER"; \
+		bun publish --cwd "$$DIR" --access public $$TAG_FLAG || exit 1; \
+	done
+	bun changeset tag
 	git push --follow-tags
 
 release/cli:
