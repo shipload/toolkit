@@ -369,10 +369,3 @@ export {displayName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
 
 export * from './subscriptions'
-
-export {assertProjectionEquals} from './testing/projection-parity'
-export type {
-    ContractProjectedState,
-    ProjectionComparisonOptions,
-} from './testing/projection-parity'
-export {CATALOG_FILES_REL, computeCatalogHash} from './testing/catalog-hash'

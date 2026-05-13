@@ -13,6 +13,19 @@
     "module": "lib/shipload.m.js",
     "types": "lib/shipload.d.ts",
     "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./lib/shipload.d.ts",
+            "import": "./lib/shipload.m.js",
+            "require": "./lib/shipload.js"
+        },
+        "./testing": {
+            "types": "./lib/testing.d.ts",
+            "import": "./lib/testing.m.js",
+            "require": "./lib/testing.js"
+        },
+        "./package.json": "./package.json"
+    },
     "files": [
         "lib/*",
         "src/*"
