@@ -8,10 +8,15 @@ import {
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
-    makeShip,
+    ITEM_SHIP_T1_PACKED,
+    makeEntity,
     ServerContract,
     Ship,
 } from '$lib'
+
+function makeShip(state: Parameters<typeof makeEntity>[1]) {
+    return new Ship(makeEntity(ITEM_SHIP_T1_PACKED, state))
+}
 
 const seed = encodeStats([500, 500, 500, 500])
 

@@ -2,19 +2,35 @@ import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
+    Container,
     encodeStats,
+    ITEM_CONTAINER_T1_PACKED,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
+    ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
-    makeContainer,
-    makeShip,
-    makeWarehouse,
+    ITEM_WAREHOUSE_T1_PACKED,
+    makeEntity,
     ServerContract,
+    Ship,
+    Warehouse,
 } from '$lib'
+
+function makeShip(state: Parameters<typeof makeEntity>[1]) {
+    return new Ship(makeEntity(ITEM_SHIP_T1_PACKED, state))
+}
+
+function makeWarehouse(state: Parameters<typeof makeEntity>[1]) {
+    return new Warehouse(makeEntity(ITEM_WAREHOUSE_T1_PACKED, state))
+}
+
+function makeContainer(state: Parameters<typeof makeEntity>[1]) {
+    return new Container(makeEntity(ITEM_CONTAINER_T1_PACKED, state))
+}
 
 describe('makeShip factory', () => {
     test('stacks two hauler modules by capacity-weighted efficiency', () => {

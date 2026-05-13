@@ -1,7 +1,11 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
-import {makeContainer, ServerContract} from '$lib'
+import {Container, ITEM_CONTAINER_T1_PACKED, makeEntity, ServerContract} from '$lib'
+
+function makeContainer(state: Parameters<typeof makeEntity>[1]) {
+    return new Container(makeEntity(ITEM_CONTAINER_T1_PACKED, state))
+}
 
 function makeStationaryContainer() {
     return makeContainer({

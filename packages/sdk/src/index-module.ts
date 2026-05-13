@@ -13,25 +13,15 @@ import type {ServerContract} from './contracts'
 
 export {Shipload} from './shipload'
 export {Ship} from './entities/ship'
-export type {ShipStateInput, PackedModuleInput} from './entities/ship'
 export {Warehouse, computeWarehouseCapabilities} from './entities/warehouse'
-export type {WarehouseStateInput} from './entities/warehouse'
 export {Extractor, computeExtractorCapabilities} from './entities/extractor'
-export type {ExtractorStateInput, ExtractorCapabilities} from './entities/extractor'
+export type {ExtractorCapabilities} from './entities/extractor'
 export {Factory, computeFactoryCapabilities} from './entities/factory'
-export type {FactoryStateInput, FactoryCapabilities} from './entities/factory'
+export type {FactoryCapabilities} from './entities/factory'
 export {Container} from './entities/container'
-export type {ContainerStateInput} from './entities/container'
 export {Nexus} from './entities/nexus'
-export type {NexusStateInput} from './entities/nexus'
-export {
-    makeShip,
-    makeWarehouse,
-    makeExtractor,
-    makeFactory,
-    makeContainer,
-    makeNexus,
-} from './entities/makers'
+export {makeEntity} from './entities/makers'
+export type {EntityStateInput, PackedModuleInput} from './entities/makers'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats

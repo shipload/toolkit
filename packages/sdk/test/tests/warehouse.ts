@@ -1,7 +1,11 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
-import {encodeStats, ITEM_LOADER_T1, makeWarehouse, ServerContract, Warehouse} from '$lib'
+import {encodeStats, ITEM_LOADER_T1, ITEM_WAREHOUSE_T1_PACKED, makeEntity, ServerContract, Warehouse} from '$lib'
+
+function makeWarehouse(state: Parameters<typeof makeEntity>[1]) {
+    return new Warehouse(makeEntity(ITEM_WAREHOUSE_T1_PACKED, state))
+}
 
 const loaderSeed = encodeStats([500, 500, 500, 500])
 
