@@ -1,0 +1,78 @@
+{
+  "kinds": [
+    {
+      "kind": "ship",
+      "classification": "OrbitalVessel",
+      "capabilityFlags": 19,
+      "zCoord": 800,
+      "defaultLabel": "Ship"
+    },
+    {
+      "kind": "warehouse",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 20,
+      "zCoord": 0,
+      "defaultLabel": "Warehouse"
+    },
+    {
+      "kind": "extractor",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 20,
+      "zCoord": 0,
+      "defaultLabel": "Extractor"
+    },
+    {
+      "kind": "factory",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 20,
+      "zCoord": 0,
+      "defaultLabel": "Factory"
+    },
+    {
+      "kind": "container",
+      "classification": "OrbitalVessel",
+      "capabilityFlags": 3,
+      "zCoord": 300,
+      "defaultLabel": "Container"
+    },
+    {
+      "kind": "nexus",
+      "classification": "OrbitalVessel",
+      "capabilityFlags": 0,
+      "zCoord": 800,
+      "defaultLabel": "Nexus"
+    }
+  ],
+  "templates": [
+    {
+      "itemId": 10201,
+      "kind": "ship",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10202,
+      "kind": "warehouse",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10203,
+      "kind": "extractor",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10204,
+      "kind": "factory",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10200,
+      "kind": "container",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 20200,
+      "kind": "container",
+      "displayLabel": ""
+    }
+  ]
+}

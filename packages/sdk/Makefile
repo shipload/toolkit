@@ -18,10 +18,11 @@ sync-catalog:
 		echo "Error: $(CATALOG_SRC) not found. Run 'make' in contracts/ first."; \
 		exit 1; \
 	fi
-	cp $(CATALOG_SRC)/items.json    src/data/items.json
-	cp $(CATALOG_SRC)/recipes.json  src/data/recipes.json
-	cp $(CATALOG_SRC)/entities.json src/data/entities.json
-	cp $(CATALOG_SRC)/item-ids.ts   src/data/item-ids.ts
+	cp $(CATALOG_SRC)/items.json         src/data/items.json
+	cp $(CATALOG_SRC)/recipes.json       src/data/recipes.json
+	cp $(CATALOG_SRC)/entities.json      src/data/entities.json
+	cp $(CATALOG_SRC)/item-ids.ts        src/data/item-ids.ts
+	cp $(CATALOG_SRC)/kind-registry.json src/data/kind-registry.json
 	@echo "Catalog synced from $(CATALOG_SRC)"
 
 .PHONY: dev
