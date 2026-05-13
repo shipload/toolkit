@@ -6,7 +6,8 @@ import {
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_LOADER_T1,
-    makeShip,
+    ITEM_SHIP_T1_PACKED,
+    makeEntity,
     ServerContract,
     type TaskType,
 } from '$lib'
@@ -72,7 +73,7 @@ export function makeShipFixture(
     })
 
     const seed = encodeStats([500, 500, 500, 500])
-    return makeShip({
+    return makeEntity(ITEM_SHIP_T1_PACKED, {
         id: UInt64.from(1),
         owner: 'teamgreymass',
         name: 'Test Ship',

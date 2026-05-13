@@ -26,8 +26,9 @@ import {
     computeLoaderCapabilities,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
-} from '../entities/ship-deploy'
-import {computeContainerCapabilities, computeContainerT2Capabilities} from '../entities/container'
+    computeContainerCapabilities,
+    computeContainerT2Capabilities,
+} from '../derivation/capabilities'
 import {
     categoryColors,
     categoryIcons,

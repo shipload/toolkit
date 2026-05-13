@@ -1,8 +1,7 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
-import {EntityType} from 'src/types'
-import {EntityClass, getEntityClass, getPackedEntityType, isLocationBuildable} from '$lib'
+import {EntityClass, getEntityClass, getPackedEntityType, isLocationBuildable, ENTITY_SHIP, ENTITY_WAREHOUSE, ENTITY_CONTAINER} from '$lib'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
@@ -17,15 +16,15 @@ const testGameSeed = Checksum256.from(
 
 describe('getEntityClass', () => {
     test('ship maps to OrbitalVessel', () => {
-        assert.equal(getEntityClass(EntityType.SHIP), EntityClass.OrbitalVessel)
+        assert.equal(getEntityClass(ENTITY_SHIP), EntityClass.OrbitalVessel)
     })
 
     test('container maps to OrbitalVessel', () => {
-        assert.equal(getEntityClass(EntityType.CONTAINER), EntityClass.OrbitalVessel)
+        assert.equal(getEntityClass(ENTITY_CONTAINER), EntityClass.OrbitalVessel)
     })
 
     test('warehouse maps to PlanetaryStructure', () => {
-        assert.equal(getEntityClass(EntityType.WAREHOUSE), EntityClass.PlanetaryStructure)
+        assert.equal(getEntityClass(ENTITY_WAREHOUSE), EntityClass.PlanetaryStructure)
     })
 
     test('string "ship" maps to OrbitalVessel', () => {

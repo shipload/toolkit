@@ -1,4 +1,4 @@
-import {cargoRef, type ServerTypes, type Shipload} from '@shipload/sdk'
+import {CAP_MODULES, cargoRef, kindCan, type ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {type EntityTypeName, parseCargoRef, type ParsedCargoRef, parseUint8} from '../../lib/args'
@@ -76,7 +76,7 @@ export async function runRmModule(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'rmmodule',
     description: 'Remove a module from the entity',
-    appliesTo: (traits) => traits.hasModules,
+    appliesTo: (kind) => kindCan(kind, CAP_MODULES),
     build: (ctx) =>
         new Command('rmmodule')
             .description('Remove a module from the entity')

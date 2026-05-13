@@ -1,51 +1,54 @@
 import {Name, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope'
+import type {NameType, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {type PackedModuleInput, Ship, type ShipStateInput} from './ship'
-import {computeWarehouseCapabilities, Warehouse, type WarehouseStateInput} from './warehouse'
-import {Container, type ContainerStateInput} from './container'
-import {Nexus, type NexusStateInput} from './nexus'
-import {Extractor, computeExtractorCapabilities, type ExtractorStateInput} from './extractor'
-import {Factory, computeFactoryCapabilities, type FactoryStateInput} from './factory'
-import {
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-} from '../data/item-ids'
-import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
+import {Entity} from './entity'
+import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
+import type {EntityTypeName} from '../data/kind-registry'
+import {getEntityLayout} from '../data/recipes-runtime'
+import type {EntitySlot} from '../data/recipes-runtime'
 import {itemMetadata} from '../data/metadata'
 import {getItem} from '../data/catalog'
-import {
-    getModuleCapabilityType,
-    MODULE_STORAGE,
-    moduleAccepts,
-    moduleSlotTypeToCode,
-} from '../capabilities/modules'
-import {computeShipCapabilities, computeStorageCapabilities} from './ship-deploy'
+import {getModuleCapabilityType, moduleAccepts, moduleSlotTypeToCode} from '../capabilities/modules'
+import {computeEntityCapabilities} from '../derivation/capabilities'
 import type {InstalledModule} from './slot-multiplier'
-import {decodeCraftedItemStats} from '../derivation/crafting'
+
+export interface PackedModuleInput {
+    itemId: number
+    stats: bigint
+}
+
+export interface EntityStateInput {
+    id: UInt64Type
+    owner: NameType
+    name: string
+    coordinates: {x: number; y: number; z?: number}
+    hullmass?: number
+    capacity?: number
+    cargomass?: number
+    energy?: number
+    modules?: PackedModuleInput[]
+    schedule?: ServerContract.Types.schedule
+    cargo?: ServerContract.Types.cargo_item[]
+}
 
 function assignModulesToSlots(
-    packedEntityItemId: number,
+    slots: EntitySlot[],
     modules: PackedModuleInput[],
     entityLabel: string
 ): ServerContract.Types.module_entry[] {
-    const layout = getEntityLayout(packedEntityItemId)
-    const slots = layout?.slots ?? []
     const result: Array<{type: number; installed?: ServerContract.Types.packed_module}> = slots.map(
         (s) => ({type: moduleSlotTypeToCode(s.type), installed: undefined})
     )
 
     for (const mod of modules) {
-        const itemId = Number(UInt16.from(mod.itemId).value.toString())
-        const modType = getModuleCapabilityType(itemId)
+        const modType = getModuleCapabilityType(mod.itemId)
         const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType))
         if (slotIdx === -1) {
             let modName: string
             try {
-                modName = getItem(itemId).name
+                modName = getItem(mod.itemId).name
             } catch {
-                modName = itemMetadata[itemId]?.name ?? `item ${itemId}`
+                modName = itemMetadata[mod.itemId]?.name ?? `item ${mod.itemId}`
             }
             throw new Error(
                 `No compatible slot for module ${modName} (type ${modType}) on ${entityLabel}`
@@ -71,236 +74,80 @@ function toInstalledModules(entries: ServerContract.Types.module_entry[]): Insta
         if (!entry.installed) return
         installed.push({
             slotIndex,
-            itemId: Number(UInt16.from(entry.installed.item_id).value.toString()),
-            stats: BigInt(UInt64.from(entry.installed.stats).toString()),
+            itemId: Number(entry.installed.item_id.value),
+            stats: BigInt(entry.installed.stats.toString()),
         })
     })
     return installed
 }
 
-function computeStorageBonus(modules: InstalledModule[], baseCapacity: number): number {
-    let totalBonus = 0
-    for (const m of modules) {
-        if (getModuleCapabilityType(m.itemId) !== MODULE_STORAGE) continue
-        const stats = decodeCraftedItemStats(m.itemId, m.stats)
-        const {capacityBonus} = computeStorageCapabilities(stats, baseCapacity)
-        totalBonus += capacityBonus
+const ZERO_HULL_STATS: Record<string, number> = {
+    density: 0,
+    strength: 0,
+    hardness: 0,
+    saturation: 0,
+}
+
+export function makeEntity(packedItemId: number, state: EntityStateInput): Entity {
+    const template = getTemplateMeta(packedItemId)
+    if (!template) {
+        throw new Error(`Unknown packed entity item ID: ${packedItemId}`)
     }
-    return totalBonus
-}
 
-function deriveShipFromModules(
-    moduleEntries: ServerContract.Types.module_entry[],
-    layout: EntitySlot[],
-    baseCapacity: number
-): {
-    capabilities: ReturnType<typeof computeShipCapabilities>
-    finalCapacity: number
-} {
-    const installed = toInstalledModules(moduleEntries)
-    const capabilities = computeShipCapabilities(installed, layout)
-    const totalBonus = computeStorageBonus(installed, baseCapacity)
-    return {capabilities, finalCapacity: baseCapacity + totalBonus}
-}
+    const kind = template.kind.toString() as EntityTypeName
+    const layout = getEntityLayout(packedItemId)?.slots ?? []
+    const mods = state.modules ?? []
 
-export function makeShip(state: ShipStateInput): Ship {
     const info: Record<string, unknown> = {
-        type: Name.from('ship'),
+        type: template.kind,
         id: UInt64.from(state.id),
         owner: Name.from(state.owner),
         entity_name: state.name,
         coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        cargomass: UInt32.from(0),
+        cargomass: UInt32.from(state.cargomass ?? 0),
         cargo: state.cargo || [],
         is_idle: !state.schedule,
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
     }
-    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
+
     if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
     if (state.schedule) info.schedule = state.schedule
 
-    let moduleEntries: ServerContract.Types.module_entry[] = []
-    const shipLayout = getEntityLayout(ITEM_SHIP_T1_PACKED)?.slots ?? []
-    if (state.modules && state.modules.length > 0) {
-        moduleEntries = assignModulesToSlots(ITEM_SHIP_T1_PACKED, state.modules, 'Ship T1')
-        const {capabilities, finalCapacity} = deriveShipFromModules(
-            moduleEntries,
-            shipLayout,
-            state.capacity ?? 0
-        )
-        if (capabilities.engines) info.engines = capabilities.engines
-        if (capabilities.generator) info.generator = capabilities.generator
-        if (capabilities.gatherer) info.gatherer = capabilities.gatherer
-        if (capabilities.hauler) info.hauler = capabilities.hauler
-        if (capabilities.loaders) info.loaders = capabilities.loaders
-        if (capabilities.crafter) info.crafter = capabilities.crafter
-        if (state.capacity !== undefined) info.capacity = UInt32.from(finalCapacity)
-    } else {
-        moduleEntries = assignModulesToSlots(ITEM_SHIP_T1_PACKED, [], 'Ship T1')
+    if (kind === 'container') {
+        info.modules = []
+        if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
         if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
-    }
-
-    info.modules = moduleEntries
-
-    const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Ship(entityInfo)
-}
-
-export function makeWarehouse(state: WarehouseStateInput): Warehouse {
-    const info: Record<string, unknown> = {
-        type: Name.from('warehouse'),
-        id: UInt64.from(state.id),
-        owner: Name.from(state.owner),
-        entity_name: state.name,
-        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        capacity: UInt32.from(state.capacity),
-        cargomass: UInt32.from(0),
-        cargo: state.cargo || [],
-        is_idle: !state.schedule,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-    }
-    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
-    if (state.schedule) info.schedule = state.schedule
-
-    let moduleEntries: ServerContract.Types.module_entry[] = []
-    const warehouseLayout = getEntityLayout(ITEM_WAREHOUSE_T1_PACKED)?.slots ?? []
-    if (state.modules && state.modules.length > 0) {
-        moduleEntries = assignModulesToSlots(
-            ITEM_WAREHOUSE_T1_PACKED,
-            state.modules,
-            'Warehouse T1'
-        )
-        const installed = toInstalledModules(moduleEntries)
-        const capabilities = computeWarehouseCapabilities(installed, warehouseLayout)
-        if (capabilities.loaders) info.loaders = capabilities.loaders
-
-        const totalBonus = computeStorageBonus(installed, state.capacity)
-        info.capacity = UInt32.from(state.capacity + totalBonus)
     } else {
-        moduleEntries = assignModulesToSlots(ITEM_WAREHOUSE_T1_PACKED, [], 'Warehouse T1')
-    }
+        const entityLabel = getKindMeta(template.kind)?.defaultLabel ?? kind
+        const moduleEntries = assignModulesToSlots(layout, mods, entityLabel)
+        info.modules = moduleEntries
 
-    info.modules = moduleEntries
-
-    const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Warehouse(entityInfo)
-}
-
-export function makeExtractor(state: ExtractorStateInput): Extractor {
-    const info: Record<string, unknown> = {
-        type: Name.from('extractor'),
-        id: UInt64.from(state.id),
-        owner: Name.from(state.owner),
-        entity_name: state.name,
-        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        cargomass: UInt32.from(0),
-        cargo: state.cargo || [],
-        is_idle: !state.schedule,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-    }
-    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
-    if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
-    if (state.schedule) info.schedule = state.schedule
-    if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
-
-    const moduleEntries = assignModulesToSlots(
-        ITEM_EXTRACTOR_T1_PACKED,
-        state.modules ?? [],
-        'Extractor T1'
-    )
-    if (state.modules && state.modules.length > 0) {
-        const layout = getEntityLayout(ITEM_EXTRACTOR_T1_PACKED)?.slots ?? []
         const installed = toInstalledModules(moduleEntries)
-        const capabilities = computeExtractorCapabilities(installed, layout)
-        if (capabilities.generator) info.generator = capabilities.generator
-        if (capabilities.gatherer) info.gatherer = capabilities.gatherer
-    }
+        const caps = computeEntityCapabilities(ZERO_HULL_STATS, packedItemId, installed, layout)
 
-    info.modules = moduleEntries
+        if (state.hullmass !== undefined) {
+            info.hullmass = UInt32.from(state.hullmass)
+        } else if (installed.length > 0) {
+            info.hullmass = UInt32.from(caps.hullmass)
+        }
+
+        if (state.capacity !== undefined) {
+            info.capacity = UInt32.from(state.capacity)
+        } else {
+            info.capacity = UInt32.from(caps.capacity)
+        }
+
+        if (caps.engines) info.engines = caps.engines
+        if (caps.generator) info.generator = caps.generator
+        if (caps.gatherer) info.gatherer = caps.gatherer
+        if (caps.loaders) info.loaders = caps.loaders
+        if (caps.crafter) info.crafter = caps.crafter
+        if (caps.hauler) info.hauler = caps.hauler
+        if (caps.warp) info.warp = caps.warp
+    }
 
     const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Extractor(entityInfo)
-}
-
-export function makeFactory(state: FactoryStateInput): Factory {
-    const info: Record<string, unknown> = {
-        type: Name.from('factory'),
-        id: UInt64.from(state.id),
-        owner: Name.from(state.owner),
-        entity_name: state.name,
-        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        cargomass: UInt32.from(0),
-        cargo: state.cargo || [],
-        is_idle: !state.schedule,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-    }
-    if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
-    if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
-    if (state.schedule) info.schedule = state.schedule
-    if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
-
-    const moduleEntries = assignModulesToSlots(
-        ITEM_FACTORY_T1_PACKED,
-        state.modules ?? [],
-        'Factory T1'
-    )
-    if (state.modules && state.modules.length > 0) {
-        const layout = getEntityLayout(ITEM_FACTORY_T1_PACKED)?.slots ?? []
-        const installed = toInstalledModules(moduleEntries)
-        const capabilities = computeFactoryCapabilities(installed, layout)
-        if (capabilities.generator) info.generator = capabilities.generator
-        if (capabilities.crafter) info.crafter = capabilities.crafter
-    }
-
-    info.modules = moduleEntries
-
-    const entityInfo = ServerContract.Types.entity_info.from(info)
-    return new Factory(entityInfo)
-}
-
-export function makeContainer(state: ContainerStateInput): Container {
-    const entityInfo = ServerContract.Types.entity_info.from({
-        type: Name.from('container'),
-        id: UInt64.from(state.id),
-        owner: Name.from(state.owner),
-        entity_name: state.name,
-        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        hullmass: UInt32.from(state.hullmass),
-        capacity: UInt32.from(state.capacity),
-        cargomass: UInt32.from(state.cargomass || 0),
-        cargo: state.cargo || [],
-        modules: [],
-        is_idle: !state.schedule,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-        schedule: state.schedule,
-    })
-    return new Container(entityInfo)
-}
-
-export function makeNexus(state: NexusStateInput): Nexus {
-    const entityInfo = ServerContract.Types.entity_info.from({
-        type: Name.from('nexus'),
-        id: UInt64.from(state.id),
-        owner: Name.from(state.owner),
-        entity_name: state.name,
-        coordinates: ServerContract.Types.coordinates.from(state.coordinates),
-        cargomass: UInt32.from(0),
-        cargo: [],
-        modules: [],
-        is_idle: true,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-    })
-    return new Nexus(entityInfo)
+    return new Entity(entityInfo)
 }

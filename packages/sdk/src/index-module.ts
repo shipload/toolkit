@@ -10,28 +10,19 @@ export {Types as ServerTypes} from './contracts/server'
 export {Types as PlatformTypes} from './contracts/platform'
 
 import type {ServerContract} from './contracts'
+import type {Entity as EntityType} from './entities/entity'
 
 export {Shipload} from './shipload'
-export {Ship} from './entities/ship'
-export type {ShipStateInput, PackedModuleInput} from './entities/ship'
-export {Warehouse, computeWarehouseCapabilities} from './entities/warehouse'
-export type {WarehouseStateInput} from './entities/warehouse'
-export {Extractor, computeExtractorCapabilities} from './entities/extractor'
-export type {ExtractorStateInput, ExtractorCapabilities} from './entities/extractor'
-export {Factory, computeFactoryCapabilities} from './entities/factory'
-export type {FactoryStateInput, FactoryCapabilities} from './entities/factory'
-export {Container} from './entities/container'
-export type {ContainerStateInput} from './entities/container'
-export {Nexus} from './entities/nexus'
-export type {NexusStateInput} from './entities/nexus'
-export {
-    makeShip,
-    makeWarehouse,
-    makeExtractor,
-    makeFactory,
-    makeContainer,
-    makeNexus,
-} from './entities/makers'
+export {Entity} from './entities/entity'
+export type Ship = EntityType
+export type Warehouse = EntityType
+export type Container = EntityType
+export type Extractor = EntityType
+export type Factory = EntityType
+export type Nexus = EntityType
+export {makeEntity} from './entities/makers'
+export type {EntityStateInput, PackedModuleInput} from './entities/makers'
+export type {InstalledModule} from './entities/slot-multiplier'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
@@ -57,7 +48,7 @@ export {
     EpochsManager,
     ActionsManager,
 } from './managers'
-export type {EntityType, LocationStratum} from './managers'
+export type {LocationStratum} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
 export {
@@ -203,21 +194,24 @@ export {
     ENTITY_EXTRACTOR,
     ENTITY_FACTORY,
     ENTITY_CONTAINER,
-    shipTraits,
-    warehouseTraits,
-    extractorTraits,
-    factoryTraits,
-    containerTraits,
+    ENTITY_NEXUS,
     getEntityClass,
     getPackedEntityType,
-    getEntityTraits,
+    getKindMeta,
+    getTemplateMeta,
+    kindCan,
+    CAP_WRAP,
+    CAP_UNDEPLOY,
+    CAP_DEMOLISH,
+    CAP_MODULES,
     isShip,
     isWarehouse,
     isExtractor,
     isFactory,
     isContainer,
-} from './types/entity-traits'
-export type {EntityTraits, EntityTypeName} from './types/entity-traits'
+    isNexus,
+} from './data/kind-registry'
+export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'
 
 export {
@@ -274,8 +268,6 @@ export {
 } from './derivation/crafting'
 export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
 
-export {computeContainerCapabilities, computeContainerT2Capabilities} from './entities/container'
-
 export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
@@ -286,12 +278,16 @@ export {
     computeCrafterCapabilities,
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
-    computeShipCapabilities,
+    computeContainerCapabilities,
+    computeContainerT2Capabilities,
+    computeWarpCapabilities,
+    computeBaseCapacity,
+    computeEntityCapabilities,
     GATHERER_DEPTH_TABLE,
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
-} from './entities/ship-deploy'
-export type {ShipCapabilities, GathererDepthParams} from './entities/ship-deploy'
+} from './derivation/capabilities'
+export type {GathererDepthParams, ComputedCapabilities} from './derivation/capabilities'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {

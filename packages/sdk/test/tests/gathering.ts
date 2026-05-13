@@ -19,7 +19,12 @@ import {
     ServerContract,
     TaskType,
 } from '../../src'
-import {makeShip} from '../../src/entities/makers'
+import {makeEntity} from '../../src/entities/makers'
+import {ITEM_SHIP_T1_PACKED} from '../../src/data/item-ids'
+
+function makeShip(state: Parameters<typeof makeEntity>[1]) {
+    return makeEntity(ITEM_SHIP_T1_PACKED, state)
+}
 
 const seed = encodeStats([500, 500, 500, 500])
 

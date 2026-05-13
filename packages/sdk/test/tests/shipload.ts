@@ -12,7 +12,7 @@ import Shipload, {
 } from '$lib'
 import {Chains} from '@wharfkit/common'
 import {APIClient} from '@wharfkit/antelope'
-import {Ship} from 'src/ship'
+import {Entity} from 'src/entities/entity'
 import {Contract} from '@wharfkit/contract'
 
 const client = makeClient('https://jungle4.greymass.com')
@@ -95,19 +95,19 @@ describe('Shipload', () => {
         })
     })
 
-    describe('getShip', () => {
+    describe('getEntity', () => {
         test.skip('success', async () => {
-            const sdkShip = await shipload.entities.getShip(1)
-            assert.instanceOf(sdkShip, Ship)
-            assert.isTrue(sdkShip.id.equals(1))
-            assert.isDefined(sdkShip.owner)
-            assert.isDefined(sdkShip.name)
+            const entity = await shipload.entities.getEntity(1)
+            assert.instanceOf(entity, Entity)
+            assert.isTrue(entity.id.equals(1))
+            assert.isDefined(entity.owner)
+            assert.isDefined(entity.name)
         })
     })
 
-    describe('getShips', () => {
+    describe('getEntities', () => {
         test('success', async () => {
-            const ships = await shipload.entities.getShips('wharfkittest')
+            const ships = await shipload.entities.getEntities('wharfkittest', 'ship')
             assert.isArray(ships)
         })
     })

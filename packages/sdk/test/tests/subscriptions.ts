@@ -1,6 +1,6 @@
 import {describe, test, beforeEach, afterEach} from 'bun:test'
 import {assert} from 'chai'
-import {Container, Nexus, ServerContract, Ship, Warehouse} from '$lib'
+import {Entity, ServerContract} from '$lib'
 import {mapEntity} from '../../src/subscriptions/mappers'
 import {SubscriptionsManager} from '../../src/subscriptions/manager'
 import {FakeWebSocketServer} from '../helpers/fake-ws'
@@ -8,7 +8,7 @@ import {FakeWebSocketServer} from '../helpers/fake-ws'
 const noop = (): void => undefined
 
 describe('subscriptions/mappers', () => {
-    test('mapEntity returns Ship for type=ship', () => {
+    test('mapEntity returns Entity for type=ship', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'ship',
             id: 1,
@@ -23,10 +23,10 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
         })
-        assert.instanceOf(mapEntity(ei), Ship)
+        assert.instanceOf(mapEntity(ei), Entity)
     })
 
-    test('mapEntity returns Warehouse for type=warehouse', () => {
+    test('mapEntity returns Entity for type=warehouse', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'warehouse',
             id: 2,
@@ -41,10 +41,10 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
         })
-        assert.instanceOf(mapEntity(ei), Warehouse)
+        assert.instanceOf(mapEntity(ei), Entity)
     })
 
-    test('mapEntity returns Container for type=container', () => {
+    test('mapEntity returns Entity for type=container', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'container',
             id: 3,
@@ -59,10 +59,10 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
         })
-        assert.instanceOf(mapEntity(ei), Container)
+        assert.instanceOf(mapEntity(ei), Entity)
     })
 
-    test('mapEntity returns Nexus for type=nexus', () => {
+    test('mapEntity returns Entity for type=nexus', () => {
         const ei = ServerContract.Types.entity_info.from({
             type: 'nexus',
             id: 4,
@@ -77,7 +77,7 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
         })
-        assert.instanceOf(mapEntity(ei), Nexus)
+        assert.instanceOf(mapEntity(ei), Entity)
     })
 })
 
@@ -108,7 +108,7 @@ describe('SubscriptionsManager', () => {
 
     test('subscribeEntity invokes callback on snapshot frame', async () => {
         await new Promise((r) => setTimeout(r, 1))
-        let received: Ship | Warehouse | Container | null = null
+        let received: Entity | null = null
         const handle = mgr.subscribeEntity('ship', '1', (e) => {
             received = e
         })
@@ -139,7 +139,7 @@ describe('SubscriptionsManager', () => {
         })
         await new Promise((r) => setTimeout(r, 10))
         assert.isNotNull(received)
-        assert.instanceOf(received!, Ship)
+        assert.instanceOf(received!, Entity)
         handle.unsubscribe()
     })
 

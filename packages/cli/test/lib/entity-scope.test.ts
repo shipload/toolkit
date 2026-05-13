@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Command } from "commander";
+import { CAP_MODULES, kindCan } from "@shipload/sdk";
 import {
 	dispatchEntityScope,
 	listEntitySubcommands,
@@ -133,7 +134,7 @@ describe("listEntitySubcommands", () => {
 		registerEntitySubcommand({
 			name: "modules-only",
 			description: "needs module slots",
-			appliesTo: (t) => t.hasModules,
+			appliesTo: (kind) => kindCan(kind, CAP_MODULES),
 			build: () => new Command("modules-only").action(() => {}),
 		});
 		expect(listEntitySubcommands("ship").map((s) => s.name)).toEqual(["modules-only"]);

@@ -1,7 +1,9 @@
 import {
+    CAP_MODULES,
     cargoRef,
     getItem,
     type Item,
+    kindCan,
     resolveItem,
     type ServerTypes,
     type Shipload,
@@ -139,7 +141,7 @@ export async function runAddModule(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'addmodule',
     description: 'Attach a module cargo to the entity',
-    appliesTo: (traits) => traits.hasModules,
+    appliesTo: (kind) => kindCan(kind, CAP_MODULES),
     build: (ctx) =>
         new Command('addmodule')
             .description('Attach a module cargo to the entity')

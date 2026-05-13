@@ -1,4 +1,3 @@
-import { type EntityTraits, getEntityTraits } from "@shipload/sdk";
 import { type Command, CommanderError } from "commander";
 import { type EntityTypeName, parseUint64 } from "./args";
 import { withValidation } from "./errors";
@@ -9,7 +8,7 @@ export interface EntityContext {
 	entityId: bigint;
 }
 
-export type AppliesToPredicate = (traits: EntityTraits) => boolean;
+export type AppliesToPredicate = (kind: EntityTypeName) => boolean;
 
 export type AppliesTo = readonly EntityTypeName[] | AppliesToPredicate;
 
@@ -22,14 +21,14 @@ export interface EntitySubcommand {
 
 function appliesToType(applies: AppliesTo, type: EntityTypeName): boolean {
 	if (typeof applies === "function") {
-		return applies(getEntityTraits(type));
+		return applies(type);
 	}
 	return applies.includes(type);
 }
 
 function describeAppliesTo(applies: AppliesTo): string {
 	if (typeof applies === "function") {
-		const matches = ALL_TYPES_FOR_HELP.filter((t) => applies(getEntityTraits(t)));
+		const matches = ALL_TYPES_FOR_HELP.filter((t) => applies(t));
 		return matches.length > 0 ? matches.join(", ") : "(no entity types)";
 	}
 	return applies.join(", ");

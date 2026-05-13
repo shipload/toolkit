@@ -25,7 +25,7 @@ import {
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
-import {gathererDepthForTier} from '../entities/ship-deploy'
+import {gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 
 function idiv(a: number, b: number): number {
