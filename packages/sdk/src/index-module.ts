@@ -47,7 +47,7 @@ export {
     EpochsManager,
     ActionsManager,
 } from './managers'
-export type {EntityType, LocationStratum} from './managers'
+export type {LocationStratum} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
 export {

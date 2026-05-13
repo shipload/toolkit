@@ -110,29 +110,10 @@ exports[`Extractor public surface 1`] = `
 exports[`EntitiesManager method surface 1`] = `
 [
   "constructor",
-  "getContainer",
-  "getContainerSummaries",
-  "getContainers",
   "getEntities",
   "getEntity",
-  "getExtractor",
-  "getExtractorSummaries",
-  "getExtractors",
-  "getFactories",
-  "getFactory",
-  "getFactorySummaries",
-  "getNexus",
-  "getNexusSummaries",
-  "getNexuses",
-  "getShip",
-  "getShipSummaries",
-  "getShips",
   "getSummaries",
-  "getWarehouse",
-  "getWarehouseSummaries",
-  "getWarehouses",
   "resolveOwner",
-  "wrapEntity",
 ]
 `;
 

@@ -1,145 +1,42 @@
 import {Name, type NameType, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {Ship} from '../entities/ship'
-import {Warehouse} from '../entities/warehouse'
-import {Container} from '../entities/container'
-import {Extractor} from '../entities/extractor'
-import {Factory} from '../entities/factory'
-import {Nexus} from '../entities/nexus'
+import {Entity} from '../entities/entity'
+import type {EntityTypeName} from '../data/kind-registry'
 import type {ServerContract} from '../contracts'
 
-export type EntityType = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container' | 'nexus'
+export type {EntityTypeName} from '../data/kind-registry'
 
 export class EntitiesManager extends BaseManager {
-    async getEntity(
-        id: UInt64Type
-    ): Promise<Ship | Warehouse | Extractor | Factory | Container | Nexus> {
+    async getEntity(id: UInt64Type): Promise<Entity> {
         const result = await this.server.readonly('getentity', {
             entity_id: id,
         })
-        const entityInfo = result as ServerContract.Types.entity_info
-        return this.wrapEntity(entityInfo)
+        return new Entity(result as ServerContract.Types.entity_info)
     }
 
     async getEntities(
         owner: NameType | ServerContract.Types.player_row,
-        type?: EntityType
-    ): Promise<(Ship | Warehouse | Extractor | Factory | Container | Nexus)[]> {
+        kind?: EntityTypeName,
+    ): Promise<Entity[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
             owner: ownerName,
-            entity_type: type,
+            entity_type: kind,
         })
         const entities = result as ServerContract.Types.entity_info[]
-        return entities.map((entity) => this.wrapEntity(entity))
+        return entities.map((e) => new Entity(e))
     }
 
     async getSummaries(
         owner: NameType | ServerContract.Types.player_row,
-        type?: EntityType
+        kind?: EntityTypeName,
     ): Promise<ServerContract.Types.entity_summary[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getsummaries', {
             owner: ownerName,
-            entity_type: type,
+            entity_type: kind,
         })
         return result as ServerContract.Types.entity_summary[]
-    }
-
-    async getShip(id: UInt64Type): Promise<Ship> {
-        return (await this.getEntity(id)) as Ship
-    }
-
-    async getWarehouse(id: UInt64Type): Promise<Warehouse> {
-        return (await this.getEntity(id)) as Warehouse
-    }
-
-    async getContainer(id: UInt64Type): Promise<Container> {
-        return (await this.getEntity(id)) as Container
-    }
-
-    async getExtractor(id: UInt64Type): Promise<Extractor> {
-        return (await this.getEntity(id)) as Extractor
-    }
-
-    async getFactory(id: UInt64Type): Promise<Factory> {
-        return (await this.getEntity(id)) as Factory
-    }
-
-    async getShips(owner: NameType | ServerContract.Types.player_row): Promise<Ship[]> {
-        return (await this.getEntities(owner, 'ship')) as Ship[]
-    }
-
-    async getWarehouses(owner: NameType | ServerContract.Types.player_row): Promise<Warehouse[]> {
-        return (await this.getEntities(owner, 'warehouse')) as Warehouse[]
-    }
-
-    async getContainers(owner: NameType | ServerContract.Types.player_row): Promise<Container[]> {
-        return (await this.getEntities(owner, 'container')) as Container[]
-    }
-
-    async getExtractors(owner: NameType | ServerContract.Types.player_row): Promise<Extractor[]> {
-        return (await this.getEntities(owner, 'extractor')) as Extractor[]
-    }
-
-    async getFactories(owner: NameType | ServerContract.Types.player_row): Promise<Factory[]> {
-        return (await this.getEntities(owner, 'factory')) as Factory[]
-    }
-
-    async getShipSummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'ship')
-    }
-
-    async getWarehouseSummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'warehouse')
-    }
-
-    async getContainerSummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'container')
-    }
-
-    async getExtractorSummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'extractor')
-    }
-
-    async getFactorySummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'factory')
-    }
-
-    async getNexus(id: UInt64Type): Promise<Nexus> {
-        return (await this.getEntity(id)) as Nexus
-    }
-
-    async getNexuses(owner: NameType | ServerContract.Types.player_row): Promise<Nexus[]> {
-        return (await this.getEntities(owner, 'nexus')) as Nexus[]
-    }
-
-    async getNexusSummaries(
-        owner: NameType | ServerContract.Types.player_row
-    ): Promise<ServerContract.Types.entity_summary[]> {
-        return this.getSummaries(owner, 'nexus')
-    }
-
-    private wrapEntity(
-        entity: ServerContract.Types.entity_info
-    ): Ship | Warehouse | Extractor | Factory | Container | Nexus {
-        if (entity.type.equals('ship')) return new Ship(entity)
-        if (entity.type.equals('warehouse')) return new Warehouse(entity)
-        if (entity.type.equals('extractor')) return new Extractor(entity)
-        if (entity.type.equals('factory')) return new Factory(entity)
-        if (entity.type.equals('container')) return new Container(entity)
-        if (entity.type.equals('nexus')) return new Nexus(entity)
-        throw new Error(`unknown entity type: ${entity.type}`)
     }
 
     private resolveOwner(owner: NameType | ServerContract.Types.player_row): Name {

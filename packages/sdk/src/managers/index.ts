@@ -1,7 +1,7 @@
 export {GameContext} from './context'
 export {BaseManager} from './base'
 export {EntitiesManager} from './entities'
-export type {EntityType} from './entities'
+export type {EntityTypeName} from './entities'
 export {PlayersManager} from './players'
 export {LocationsManager} from './locations'
 export type {LocationStratum} from './locations'
