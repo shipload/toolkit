@@ -203,21 +203,24 @@ export {
     ENTITY_EXTRACTOR,
     ENTITY_FACTORY,
     ENTITY_CONTAINER,
-    shipTraits,
-    warehouseTraits,
-    extractorTraits,
-    factoryTraits,
-    containerTraits,
+    ENTITY_NEXUS,
     getEntityClass,
     getPackedEntityType,
-    getEntityTraits,
+    getKindMeta,
+    getTemplateMeta,
+    kindCan,
+    CAP_WRAP,
+    CAP_UNDEPLOY,
+    CAP_DEMOLISH,
+    CAP_MODULES,
     isShip,
     isWarehouse,
     isExtractor,
     isFactory,
     isContainer,
-} from './types/entity-traits'
-export type {EntityTraits, EntityTypeName} from './types/entity-traits'
+    isNexus,
+} from './data/kind-registry'
+export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'
 
 export {

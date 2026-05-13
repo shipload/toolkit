@@ -4,9 +4,8 @@ import {
     ENTITY_FACTORY,
     getEntityClass,
     getPackedEntityType,
-    factoryTraits,
     isFactory,
-} from '../src/types/entity-traits'
+} from '../src/data/kind-registry'
 import {ITEM_FACTORY_T1_PACKED} from '../src/data/item-ids'
 import {makeFactory} from '../src/entities/makers'
 import {ITEM_GENERATOR_T1, ITEM_CRAFTER_T1} from '../src/data/item-ids'
@@ -24,12 +23,6 @@ describe('factory entity traits', () => {
         const t = getPackedEntityType(ITEM_FACTORY_T1_PACKED)
         expect(t).not.toBeNull()
         expect(t!.equals(ENTITY_FACTORY)).toBe(true)
-    })
-
-    test('factoryTraits has the expected shape', () => {
-        expect(factoryTraits.isMovable).toBe(false)
-        expect(factoryTraits.hasEnergy).toBe(true)
-        expect(factoryTraits.hasLoaders).toBe(false)
     })
 
     test('isFactory predicate', () => {

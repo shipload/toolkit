@@ -4,9 +4,8 @@ import {
     ENTITY_EXTRACTOR,
     getEntityClass,
     getPackedEntityType,
-    extractorTraits,
     isExtractor,
-} from '../src/types/entity-traits'
+} from '../src/data/kind-registry'
 import {ITEM_EXTRACTOR_T1_PACKED} from '../src/data/item-ids'
 import {makeExtractor} from '../src/entities/makers'
 import {ITEM_GENERATOR_T1, ITEM_GATHERER_T1} from '../src/data/item-ids'
@@ -24,12 +23,6 @@ describe('extractor entity traits', () => {
         const t = getPackedEntityType(ITEM_EXTRACTOR_T1_PACKED)
         expect(t).not.toBeNull()
         expect(t!.equals(ENTITY_EXTRACTOR)).toBe(true)
-    })
-
-    test('extractorTraits has the expected shape', () => {
-        expect(extractorTraits.isMovable).toBe(false)
-        expect(extractorTraits.hasEnergy).toBe(true)
-        expect(extractorTraits.hasLoaders).toBe(false)
     })
 
     test('isExtractor predicate', () => {

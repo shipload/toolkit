@@ -109,3 +109,29 @@ export function getEntityClass(kind: NameType | EntityTypeName): EntityClass {
     if (!m) throw new Error(`Entity type has no class: ${nameKey(kind)}`)
     return m.classification
 }
+
+export const ENTITY_SHIP = Name.from('ship')
+export const ENTITY_WAREHOUSE = Name.from('warehouse')
+export const ENTITY_EXTRACTOR = Name.from('extractor')
+export const ENTITY_FACTORY = Name.from('factory')
+export const ENTITY_CONTAINER = Name.from('container')
+export const ENTITY_NEXUS = Name.from('nexus')
+
+export function isShip(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_SHIP) ?? false
+}
+export function isWarehouse(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_WAREHOUSE) ?? false
+}
+export function isExtractor(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_EXTRACTOR) ?? false
+}
+export function isFactory(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_FACTORY) ?? false
+}
+export function isContainer(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_CONTAINER) ?? false
+}
+export function isNexus(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_NEXUS) ?? false
+}
