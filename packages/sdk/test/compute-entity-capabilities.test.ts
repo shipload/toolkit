@@ -95,7 +95,7 @@ describe('computeEntityCapabilities', () => {
         ]
         const result = computeEntityCapabilities(SAMPLE_STATS_RECORD, ITEM_SHIP_T1_PACKED, modules, SHIP_LAYOUT)
         expect(result.loaders).toBeDefined()
-        expect(result.loaders?.count).toBeGreaterThan(0)
+        expect(result.loaders?.quantity).toBeGreaterThan(0)
         expect(result.loaders?.mass).toBeGreaterThan(0)
     })
 })

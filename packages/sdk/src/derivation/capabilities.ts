@@ -221,13 +221,13 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     return {hullmass, capacity}
 }
 
-export interface EntityCapabilities {
+export interface ComputedCapabilities {
     hullmass: number
     capacity: number
     engines?: {thrust: number; drain: number}
     generator?: {capacity: number; recharge: number}
     gatherer?: {yield: number; drain: number; depth: number; speed: number}
-    loaders?: {mass: number; thrust: number; count: number}
+    loaders?: {mass: number; thrust: number; quantity: number}
     crafter?: {speed: number; drain: number}
     hauler?: {capacity: number; efficiency: number; drain: number}
     warp?: {range: number}
@@ -238,7 +238,7 @@ export function computeEntityCapabilities(
     itemId: number,
     modules: InstalledModule[],
     layout: EntitySlot[],
-): EntityCapabilities {
+): ComputedCapabilities {
     let totalThrust = 0
     let totalEngineDrain = 0
     let hasEngine = false
@@ -249,7 +249,7 @@ export function computeEntityCapabilities(
 
     let totalLoaderMass = 0
     let totalLoaderThrust = 0
-    let loaderCount = 0
+    let totalLoaderQuantity = 0
     let hasLoader = false
 
     let totalGathYield = 0
@@ -301,10 +301,10 @@ export function computeEntityCapabilities(
             totalGathSpeed += applySlotMultiplier(caps.speed, amp)
         } else if (modType === MODULE_LOADER) {
             hasLoader = true
-            loaderCount++
             const caps = computeLoaderCapabilities(decodedStats)
             totalLoaderMass += caps.mass
             totalLoaderThrust += applySlotMultiplier(caps.thrust, amp)
+            totalLoaderQuantity += caps.quantity
         } else if (modType === MODULE_STORAGE) {
             const caps = computeStorageCapabilities(decodedStats, baseCapacity)
             totalStorageBonus += caps.capacityBonus
@@ -328,7 +328,7 @@ export function computeEntityCapabilities(
     }
 
     const baseHullmass = 100000 - 75 * stats.density
-    const result: EntityCapabilities = {
+    const result: ComputedCapabilities = {
         hullmass: baseHullmass + installedModuleMass,
         capacity: baseCapacity + totalStorageBonus,
     }
@@ -352,9 +352,9 @@ export function computeEntityCapabilities(
     }
     if (hasLoader) {
         result.loaders = {
-            mass: Math.floor(totalLoaderMass / loaderCount),
+            mass: totalLoaderMass,
             thrust: clampUint16(totalLoaderThrust),
-            count: loaderCount,
+            quantity: totalLoaderQuantity,
         }
     }
     if (hasCrafter) {
