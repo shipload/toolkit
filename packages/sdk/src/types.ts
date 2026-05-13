@@ -1,6 +1,5 @@
 import {
     type Int64Type,
-    Name,
     type UInt16,
     type UInt16Type,
     type UInt32,
@@ -71,14 +70,6 @@ export enum TaskCancelable {
     BEFORE_START = 1,
     ALWAYS = 2,
 }
-
-export const EntityType = {
-    SHIP: Name.from('ship'),
-    WAREHOUSE: Name.from('warehouse'),
-    CONTAINER: Name.from('container'),
-} as const
-
-export type EntityTypeName = (typeof EntityType)[keyof typeof EntityType]
 
 export type CoordinatesType =
     | Coordinates

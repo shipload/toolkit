@@ -287,7 +287,7 @@ export {
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
 } from './derivation/capabilities'
-export type {GathererDepthParams, EntityCapabilities} from './derivation/capabilities'
+export type {GathererDepthParams, ComputedCapabilities} from './derivation/capabilities'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {
