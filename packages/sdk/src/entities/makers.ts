@@ -2,9 +2,10 @@ import {Name, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope'
 import type {NameType, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Entity} from './entity'
-import {getTemplateMeta} from '../data/kind-registry'
+import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import type {EntityTypeName} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
+import type {EntitySlot} from '../data/recipes-runtime'
 import {itemMetadata} from '../data/metadata'
 import {getItem} from '../data/catalog'
 import {getModuleCapabilityType, moduleAccepts, moduleSlotTypeToCode} from '../capabilities/modules'
@@ -31,26 +32,23 @@ export interface EntityStateInput {
 }
 
 function assignModulesToSlots(
-    packedEntityItemId: number,
+    slots: EntitySlot[],
     modules: PackedModuleInput[],
     entityLabel: string
 ): ServerContract.Types.module_entry[] {
-    const layout = getEntityLayout(packedEntityItemId)
-    const slots = layout?.slots ?? []
     const result: Array<{type: number; installed?: ServerContract.Types.packed_module}> = slots.map(
         (s) => ({type: moduleSlotTypeToCode(s.type), installed: undefined})
     )
 
     for (const mod of modules) {
-        const itemId = Number(UInt16.from(mod.itemId).value.toString())
-        const modType = getModuleCapabilityType(itemId)
+        const modType = getModuleCapabilityType(mod.itemId)
         const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType))
         if (slotIdx === -1) {
             let modName: string
             try {
-                modName = getItem(itemId).name
+                modName = getItem(mod.itemId).name
             } catch {
-                modName = itemMetadata[itemId]?.name ?? `item ${itemId}`
+                modName = itemMetadata[mod.itemId]?.name ?? `item ${mod.itemId}`
             }
             throw new Error(
                 `No compatible slot for module ${modName} (type ${modType}) on ${entityLabel}`
@@ -76,8 +74,8 @@ function toInstalledModules(entries: ServerContract.Types.module_entry[]): Insta
         if (!entry.installed) return
         installed.push({
             slotIndex,
-            itemId: Number(UInt16.from(entry.installed.item_id).value.toString()),
-            stats: BigInt(UInt64.from(entry.installed.stats).toString()),
+            itemId: Number(entry.installed.item_id.value),
+            stats: BigInt(entry.installed.stats.toString()),
         })
     })
     return installed
@@ -122,8 +120,8 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         if (state.hullmass !== undefined) info.hullmass = UInt32.from(state.hullmass)
         if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
     } else {
-        const kindStr = kind.charAt(0).toUpperCase() + kind.slice(1)
-        const moduleEntries = assignModulesToSlots(packedItemId, mods, kindStr)
+        const entityLabel = getKindMeta(template.kind)?.defaultLabel ?? kind
+        const moduleEntries = assignModulesToSlots(layout, mods, entityLabel)
         info.modules = moduleEntries
 
         const installed = toInstalledModules(moduleEntries)
