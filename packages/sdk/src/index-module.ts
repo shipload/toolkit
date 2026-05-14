@@ -377,7 +377,7 @@ export {
     itemTypeCode,
 } from './data/tiers'
 
-export {formatMass, formatMassDelta, formatLocation} from './format'
+export {formatMass, formatMassDelta, formatMassScaled, formatLocation} from './format'
 
 export {displayName, displayNameWithTier, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'

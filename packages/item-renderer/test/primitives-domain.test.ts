@@ -73,9 +73,12 @@ test('moduleSlot renders an installed state with capability description', () => 
     expect(svg).toContain('thrust')
 })
 
-test('quantityBadge is empty string when quantity <= 1', () => {
-    expect(quantityBadge({x: 0, y: 0, quantity: 1})).toBe('')
+test('quantityBadge is empty string when quantity is 0', () => {
     expect(quantityBadge({x: 0, y: 0, quantity: 0})).toBe('')
+})
+
+test('quantityBadge renders ×1 when quantity is 1', () => {
+    expect(quantityBadge({x: 250, y: 8, quantity: 1})).toContain('×1')
 })
 
 test('quantityBadge renders ×N chip when quantity > 1', () => {

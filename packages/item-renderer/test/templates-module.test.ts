@@ -45,7 +45,13 @@ test('renderModule ranges mode shows capability header without narrative or attr
     const svg = renderModule(item, resolved, {mode: 'ranges'})
     expect(svg).toContain('ENGINE')
     expect(svg).not.toMatch(/>\d{3,}<\/(text|tspan)>/)
-    expect(svg).toContain('MODULE')
+})
+
+test('renderModule omits the Type row', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved)
+    expect(svg).not.toContain('MODULE · T1')
 })
 
 test('renderModule values mode (default) still shows narrative', () => {
@@ -60,4 +66,26 @@ test('renderModule ranges mode matches snapshot', () => {
     const resolved = resolveItem(item.item_id)
     const svg = renderModule(item, resolved, {mode: 'ranges'})
     expect(svg).toMatchSnapshot('module-ranges')
+})
+
+test('renders tier suffix in the module name', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved)
+    expect(svg).toContain('(T1)')
+})
+
+test('renders Location row when location is provided', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved, {location: {x: 22, y: 8}})
+    expect(svg).toContain('Location')
+    expect(svg).toContain('22, 8')
+})
+
+test('omits Location row when location is absent', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved)
+    expect(svg).not.toContain('Location')
 })

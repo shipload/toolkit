@@ -32,7 +32,7 @@ export function itemPageMeta(
     return {
         title: `${displayName(resolved)} · Shipload Guide`,
         description: describeItem(resolved),
-        ogImage: linkToItemSocial(item, opts?.imageBaseUrl),
+        ogImage: linkToItemSocial(item, {baseUrl: opts?.imageBaseUrl}),
         ogImageWidth: SOCIAL_CARD_WIDTH,
         ogImageHeight: SOCIAL_CARD_HEIGHT,
     }

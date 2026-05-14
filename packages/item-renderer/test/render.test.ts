@@ -2,7 +2,7 @@ import {expect, test} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
 import {renderItem, renderFromPayload} from '../src/render.ts'
 import {RenderError} from '../src/errors.ts'
-import {encodePayload} from '../src/payload/codec.ts'
+import {encodeNftPayload} from '../src/payload/codec.ts'
 import {FIXTURES} from './fixtures/cargo-items.ts'
 
 test('renderItem dispatches to resource template for resources', () => {
@@ -16,14 +16,15 @@ test('renderItem dispatches to packed entity template for entities', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderItem(item, resolved)
-    expect(svg).toContain('HULL')
+    expect(svg).toContain('(Packed)')
+    expect(svg).toContain('Capacity')
 })
 
 test('renderItem dispatches to module template for modules', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderItem(item, resolved)
-    expect(svg).toContain('MODULE')
+    expect(svg).toContain('ENGINE')
 })
 
 test('renderItem throws RenderError for unknown types', () => {
@@ -36,7 +37,7 @@ test('renderItem throws RenderError for unknown types', () => {
 })
 
 test('renderFromPayload round-trips a payload into SVG', async () => {
-    const payload = encodePayload(FIXTURES.oreT1)
+    const payload = encodeNftPayload({item: FIXTURES.oreT1})
     const {svg, item} = await renderFromPayload(payload)
     expect(svg).toContain('Crude Ore')
     expect(item.itemType).toBe('resource')

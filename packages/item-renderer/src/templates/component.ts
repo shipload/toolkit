@@ -1,17 +1,33 @@
 import type {ResolvedItem, ResourceCategory} from '@shipload/sdk'
-import {formatTier, getRecipe, getStatDefinitions, categoryColors} from '@shipload/sdk'
+import {
+    formatTier,
+    getRecipe,
+    getStatDefinitions,
+    categoryColors,
+    displayNameWithTier,
+    formatLocation,
+} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
 import {text} from '../primitives/text.ts'
-import {divider} from '../primitives/divider.ts'
 import {statBar} from '../primitives/stat-bar.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {tokens} from '../tokens/index.ts'
-import {shortCode, formatMass, tierBorder} from './_shared.ts'
+import {
+    shortCode,
+    formatMass,
+    tierBorder,
+    metaRowBlock,
+    BADGE_Y,
+    HEADER_H,
+    ICON_Y,
+    META_BLOCK_GAP,
+} from './_shared.ts'
 
 export interface RenderComponentOpts {
     mode?: 'values' | 'ranges'
+    location?: {x: number; y: number}
 }
 
 type StatRow = {
@@ -63,19 +79,26 @@ export function renderComponent(
         })
     }
 
-    const headerH = 48
-    const metaRowH = 28
+    const metaRows = [
+        {label: 'Type', value: `COMPONENT · ${formatTier(resolved.tier)}`},
+        {label: 'Mass', value: formatMass(resolved.mass)},
+        ...(opts?.location ? [{label: 'Location', value: formatLocation(opts.location)}] : []),
+    ]
+
+    const metaYStart = pad + HEADER_H
+    const {svg: metaSvg, height: metaH} = metaRowBlock(pad, metaYStart, innerW, metaRows)
+    const statsYStart = metaYStart + metaH + META_BLOCK_GAP
     const statsH = rows.length * 26 + 8
-    const height = headerH + metaRowH + 14 + statsH + pad
+    const height = statsYStart + statsH + pad
 
     const chrome = panel({width: w, height, borderColor: tierBorder(resolved.tier)})
 
     const quantity = Number(BigInt(item.quantity.toString()))
-    const badge = quantityBadge({x: w - pad, y: pad, quantity})
+    const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
 
     const icon = iconHex({
         x: pad,
-        y: pad + 4,
+        y: pad + ICON_Y,
         color: tokens.colors.accent.component,
         code: shortCode(resolved.itemId),
     })
@@ -83,51 +106,17 @@ export function renderComponent(
     const name = text({
         x: pad + 34,
         y: pad + 22,
-        value: resolved.name,
+        value: displayNameWithTier(resolved),
         size: tokens.typography.sizes.title,
         weight: 700,
         family: tokens.typography.display,
     })
 
-    const subtitleText = text({
-        x: pad,
-        y: pad + headerH + 4,
-        value: 'Type',
-        size: tokens.typography.sizes.body,
-        color: tokens.colors.text.secondary,
-    })
-    const subtitleValue = text({
-        x: w - pad,
-        y: pad + headerH + 4,
-        value: `COMPONENT · ${formatTier(resolved.tier)}`,
-        size: tokens.typography.sizes.body,
-        weight: 600,
-        anchor: 'end',
-    })
-    const massLabel = text({
-        x: pad,
-        y: pad + headerH + metaRowH - 8,
-        value: 'Mass',
-        size: tokens.typography.sizes.body,
-        color: tokens.colors.text.secondary,
-    })
-    const massValue = text({
-        x: w - pad,
-        y: pad + headerH + metaRowH - 8,
-        value: formatMass(resolved.mass),
-        size: tokens.typography.sizes.body,
-        weight: 600,
-        anchor: 'end',
-    })
-
-    const sepY = pad + headerH + metaRowH + 6
-    const sep = divider({x: pad, y: sepY, width: innerW})
-
     const statsSvg = rows
         .map((row, i) =>
             statBar({
                 x: pad,
-                y: sepY + 18 + i * 26,
+                y: statsYStart + i * 26,
                 width: innerW,
                 label: row.label,
                 abbreviation: row.abbreviation,
@@ -138,7 +127,7 @@ export function renderComponent(
         )
         .join('')
 
-    const inner = `${chrome}${icon}${name}${badge}${subtitleText}${subtitleValue}${massLabel}${massValue}${sep}${statsSvg}`
+    const inner = `${chrome}${icon}${name}${badge}${metaSvg}${statsSvg}`
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${height}" viewBox="0 0 ${w} ${height}">${inner}</svg>`
 }

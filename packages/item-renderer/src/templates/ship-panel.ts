@@ -1,12 +1,15 @@
 import type {TextSpan} from '@shipload/sdk'
+import {formatLocation, formatMassScaled} from '@shipload/sdk'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
 import {text} from '../primitives/text.ts'
-import {divider} from '../primitives/divider.ts'
 import {moduleSlot} from '../primitives/module-slot.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {wrapText} from '../primitives/wrap.ts'
 import {tokens} from '../tokens/index.ts'
+import {tierBorder, metaRowBlock, BADGE_Y, HEADER_H, ICON_Y} from './_shared.ts'
+
+const HULL_MASS_LABELS = new Set(['mass', 'capacity'])
 
 export interface ShipPanelSlot {
     name?: string
@@ -18,16 +21,15 @@ export interface ShipPanelProps {
     name: string
     tier: number
     quantity?: number
+    location?: {x: number; y: number}
     attributes: {capability: string; attributes: {label: string; value: number}[]}[]
     slots: ShipPanelSlot[]
 }
 
-function formatNumber(n: number): string {
-    return n.toLocaleString('en-US')
-}
-
-function tierBorder(tier: number): string {
-    return tokens.colors.tier[tier] ?? tokens.colors.surface.panelBorder
+function formatHullValue(label: string, value: number): string {
+    return HULL_MASS_LABELS.has(label.toLowerCase())
+        ? formatMassScaled(value)
+        : value.toLocaleString('en-US')
 }
 
 const MODULE_LABEL_PREFIX = (capability: string) => `${capability}: `
@@ -54,22 +56,28 @@ export function renderShipPanel(props: ShipPanelProps): string {
     const quantity = props.quantity ?? 0
 
     const hullGroup = props.attributes?.find((g) => g.capability.toLowerCase() === 'hull')
-    const hullRows = hullGroup?.attributes ?? []
+    const hullAttrs = (hullGroup?.attributes ?? []).map((a) => ({
+        label: a.label,
+        value: formatHullValue(a.label, a.value),
+    }))
+    const metaRows = props.location
+        ? [{label: 'Location', value: formatLocation(props.location)}, ...hullAttrs]
+        : hullAttrs
 
-    const headerH = 48
-    const hullHeaderH = 20
-    const hullRowH = 22
     const sectionGap = 12
+
+    const metaYStart = pad + HEADER_H
+    const {svg: metaSvg, height: metaH} = metaRowBlock(pad, metaYStart, innerW, metaRows)
+
     const rowHeights = props.slots.map(rowHeightFor)
     const modulesHeight = rowHeights.reduce((a, b) => a + b, 0)
-    const height =
-        headerH + hullHeaderH + hullRows.length * hullRowH + sectionGap + modulesHeight + pad
+    const height = metaYStart + metaH + sectionGap + modulesHeight + pad
 
     const chrome = panel({width: w, height, borderColor: tierBorder(props.tier)})
 
     const icon = iconHex({
         x: pad,
-        y: pad + 4,
+        y: pad + ICON_Y,
         color: tokens.colors.text.accent,
         code: 'SH',
     })
@@ -83,47 +91,9 @@ export function renderShipPanel(props: ShipPanelProps): string {
         family: tokens.typography.display,
     })
 
-    const badge = quantityBadge({x: w - pad, y: pad, quantity})
+    const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
 
-    const hullHeader = text({
-        x: pad,
-        y: pad + headerH,
-        value: 'HULL',
-        size: tokens.typography.sizes.subtitle,
-        weight: 700,
-        color: tokens.colors.text.secondary,
-        letterSpacing: 1,
-    })
-
-    let y = pad + headerH + 6
-    let hullSvg = ''
-    for (const row of hullRows) {
-        hullSvg +=
-            text({
-                x: pad,
-                y: y + 12,
-                value: row.label,
-                size: tokens.typography.sizes.body,
-                color: tokens.colors.text.secondary,
-            }) +
-            text({
-                x: w - pad,
-                y: y + 12,
-                value: formatNumber(row.value),
-                size: tokens.typography.sizes.body,
-                weight: 700,
-                anchor: 'end',
-            }) +
-            divider({
-                x: pad,
-                y: y + hullRowH - 4,
-                width: innerW,
-                color: tokens.colors.surface.panelBorderBright,
-            })
-        y += hullRowH
-    }
-
-    y += sectionGap
+    let y = metaYStart + metaH + sectionGap
     let modulesSvg = ''
     for (let i = 0; i < props.slots.length; i++) {
         const slot = props.slots[i]!
@@ -139,6 +109,6 @@ export function renderShipPanel(props: ShipPanelProps): string {
         y += rowHeights[i]!
     }
 
-    const inner = `${chrome}${icon}${name}${badge}${hullHeader}${hullSvg}${modulesSvg}`
+    const inner = `${chrome}${icon}${name}${badge}${metaSvg}${modulesSvg}`
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${height}" viewBox="0 0 ${w} ${height}">${inner}</svg>`
 }

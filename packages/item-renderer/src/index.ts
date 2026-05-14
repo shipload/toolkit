@@ -5,8 +5,18 @@ export const VERSION = '0.1.0'
 export {InvalidPayloadError, UnknownItemError, RenderError} from './errors.ts'
 
 // Payload
-export {encodePayload, decodePayload} from './payload/codec.ts'
-export type {CargoItem, CargoItemLike} from './payload/codec.ts'
+export {
+    encodeCargoItem,
+    decodeCargoItem,
+    encodeNftPayload,
+    decodeNftPayload,
+} from './payload/codec.ts'
+export type {
+    CargoItem,
+    CargoItemLike,
+    NftItemPayload,
+    NftItemPayloadLike,
+} from './payload/codec.ts'
 
 // Rendering
 export {renderItem, renderFromPayload, type RenderOptions} from './render.ts'

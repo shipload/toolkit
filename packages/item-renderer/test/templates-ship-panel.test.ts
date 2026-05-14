@@ -17,7 +17,6 @@ test('renderShipPanel with empty slots renders empty module rows', () => {
         slots: [{installed: false}, {installed: false}, {installed: false}],
     })
     expect(svg).toContain('Ship T1 (Packed)')
-    expect(svg).toContain('HULL')
     expect(svg).toContain('Mass')
     expect(svg).toContain('Capacity')
     expect((svg.match(/Empty module/g) ?? []).length).toBe(3)

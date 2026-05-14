@@ -35,17 +35,30 @@ async function renderPng(svg: string): Promise<Buffer> {
 
 const CASES = [
     {name: 'resource-ore-t1', fixture: FIXTURES.oreT1},
+    {name: 'resource-ore-t1-with-location', fixture: FIXTURES.oreT1, location: {x: -64, y: -10}},
     {name: 'packed-entity-ship-t1-two-modules', fixture: FIXTURES.shipT1TwoModules},
+    {
+        name: 'packed-entity-ship-t1-with-location',
+        fixture: FIXTURES.shipT1TwoModules,
+        location: {x: 42, y: 17},
+    },
     {name: 'packed-entity-ship-t1-only-engine', fixture: FIXTURES.shipT1OnlyEngine},
     {name: 'component-hull-plates', fixture: FIXTURES.hullPlates},
+    {
+        name: 'component-hull-plates-with-location',
+        fixture: FIXTURES.hullPlates,
+        location: {x: 12, y: -7},
+    },
     {name: 'module-engine-t1', fixture: FIXTURES.engineT1},
+    {name: 'module-engine-t1-with-location', fixture: FIXTURES.engineT1, location: {x: 5, y: 5}},
     {name: 'module-storage-t1', fixture: FIXTURES.storageT1},
 ] as const
 
 for (const c of CASES) {
     test(`pixel golden — ${c.name}`, async () => {
         const resolved = resolveItem(c.fixture.item_id, c.fixture.stats, c.fixture.modules)
-        const svg = embedFontsInSvg(renderItem(c.fixture, resolved), fontData)
+        const opts = 'location' in c ? {location: c.location} : undefined
+        const svg = embedFontsInSvg(renderItem(c.fixture, resolved, opts), fontData)
         const png = await renderPng(svg)
         const goldPath = resolve(SNAP_DIR, `${c.name}.png`)
 

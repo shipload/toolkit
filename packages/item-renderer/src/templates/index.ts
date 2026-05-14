@@ -8,6 +8,7 @@ import {renderModule} from './module.ts'
 
 export interface RenderByTypeOpts {
     mode?: 'values' | 'ranges'
+    location?: {x: number; y: number}
 }
 
 export function renderByType(
@@ -19,7 +20,7 @@ export function renderByType(
         case 'resource':
             return renderResource(item, resolved, opts)
         case 'entity':
-            return renderPackedEntity(item, resolved)
+            return renderPackedEntity(item, resolved, opts)
         case 'component':
             return renderComponent(item, resolved, opts)
         case 'module':

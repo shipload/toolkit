@@ -9,7 +9,7 @@ export interface QuantityBadgeProps {
 }
 
 export function quantityBadge({x, y, quantity}: QuantityBadgeProps): string {
-    if (quantity <= 1) return ''
+    if (quantity <= 0) return ''
     const label = `×${quantity}`
     const w = label.length * 7 + 12
     const h = tokens.spacing.quantityBadgeHeight

@@ -24,6 +24,13 @@ test('linkToItemImage builds an SVG URL', () => {
     expect(url).toMatch(/\.svg$/)
 })
 
+test('linkToItemImage with location produces a different URL than without', () => {
+    const a = linkToItemImage(FIXTURES.oreT1, 'png')
+    const b = linkToItemImage(FIXTURES.oreT1, 'png', {location: {x: -64, y: -10}})
+    expect(a).not.toBe(b)
+    expect(b).toMatch(/^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/)
+})
+
 test('linkToItemSocial builds a social card URL', () => {
     const url = linkToItemSocial(FIXTURES.oreT1)
     expect(url).toMatch(/^https:\/\/item\.shiploadgame\.com\/social\/[A-Za-z0-9_-]+\.png$/)

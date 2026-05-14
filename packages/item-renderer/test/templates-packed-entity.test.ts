@@ -7,8 +7,7 @@ test('renders Ship with hull attributes and two modules', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderPackedEntity(item, resolved)
-    expect(svg).toContain('Ship (Packed)')
-    expect(svg).toContain('HULL')
+    expect(svg).toContain('Ship (T1) (Packed)')
     expect(svg).toContain('Mass')
     expect(svg).toContain('Capacity')
     expect(svg).toContain('Engine')
@@ -44,4 +43,19 @@ test('ship with two modules renders SDK-sourced narrative descriptions', () => {
     expect(svg).toContain('generates')
     expect(svg).toContain('Generator: ')
     expect(svg).toContain('holds')
+})
+
+test('renders Location row when location is provided', () => {
+    const item = FIXTURES.shipT1TwoModules
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderPackedEntity(item, resolved, {location: {x: 5, y: -3}})
+    expect(svg).toContain('Location')
+    expect(svg).toContain('5, -3')
+})
+
+test('omits Location row when location is absent', () => {
+    const item = FIXTURES.shipT1TwoModules
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderPackedEntity(item, resolved)
+    expect(svg).not.toContain('Location')
 })

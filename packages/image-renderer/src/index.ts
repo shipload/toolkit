@@ -1,4 +1,4 @@
-import {decodePayload, renderItem, resolveItem, socialCardSvg} from '@shipload/item-renderer'
+import {decodeNftPayload, renderItem, resolveItem, socialCardSvg} from '@shipload/item-renderer'
 import {CACHE_TTL_SECONDS, MAX_PAYLOAD_CHARS} from './config.ts'
 import {type ErrorCode, errorSvgResponse, errorTextResponse} from './errors.ts'
 import {renderPng} from './render-png.ts'
@@ -18,17 +18,22 @@ function immutableHeaders(contentType: string): HeadersInit {
 
 type DecodeError = {status: ErrorCode}
 type DecodeOk = {
-    cargoItem: ReturnType<typeof decodePayload>
+    cargoItem: ReturnType<typeof decodeNftPayload>['item']
+    location?: {x: number; y: number}
     resolved: ReturnType<typeof resolveItem>
 }
 
 function decodeAndResolve(payload: string): DecodeError | DecodeOk {
     if (payload.length > MAX_PAYLOAD_CHARS) return {status: 400}
     try {
-        const cargoItem = decodePayload(payload)
+        const decoded = decodeNftPayload(payload)
+        const cargoItem = decoded.item
+        const location = decoded.location
+            ? {x: Number(decoded.location.x), y: Number(decoded.location.y)}
+            : undefined
         try {
             const resolved = resolveItem(cargoItem.item_id, cargoItem.stats, cargoItem.modules)
-            return {cargoItem, resolved}
+            return {cargoItem, location, resolved}
         } catch {
             return {status: 404}
         }
@@ -40,7 +45,7 @@ function decodeAndResolve(payload: string): DecodeError | DecodeOk {
 async function handleItem(payload: string, ext: Ext): Promise<Response> {
     const r = decodeAndResolve(payload)
     if ('status' in r) return errorSvgResponse(r.status)
-    const svg = renderItem(r.cargoItem, r.resolved)
+    const svg = renderItem(r.cargoItem, r.resolved, {location: r.location})
     if (ext === 'svg') {
         return new Response(svg, {headers: immutableHeaders('image/svg+xml')})
     }

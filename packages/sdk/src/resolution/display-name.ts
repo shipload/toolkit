@@ -19,6 +19,10 @@ export function displayName(resolved: DisplayNameInput): string {
     return resolved.name
 }
 
+export function displayNameWithTier(resolved: DisplayNameInput): string {
+    return `${displayName(resolved)} (T${resolved.tier})`
+}
+
 export interface DescribeOptions {
     translate?: (key: string) => string
     formatNumber?: (n: number) => string
