@@ -99,7 +99,7 @@
     "outputMass": 30000,
     "inputs": [
       {
-        "category": "regolith",
+        "category": "crystal",
         "tier": 1,
         "quantity": 20
       }
@@ -109,7 +109,7 @@
         "sources": [
           {
             "inputIndex": 0,
-            "statIndex": 0
+            "statIndex": 1
           }
         ]
       },
@@ -547,7 +547,7 @@
         "sources": [
           {
             "inputIndex": 0,
-            "statIndex": 1
+            "statIndex": 0
           }
         ]
       },
@@ -563,7 +563,7 @@
         "sources": [
           {
             "inputIndex": 0,
-            "statIndex": 0
+            "statIndex": 1
           }
         ]
       },

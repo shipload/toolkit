@@ -190,10 +190,10 @@ describe('Crafting', () => {
         test('decoded hauler stats use input stat key names', () => {
             const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
-            assert.property(decoded, 'composition')
+            assert.property(decoded, 'resonance')
             assert.property(decoded, 'conductivity')
-            assert.property(decoded, 'fineness')
-            assert.notProperty(decoded, 'resonance')
+            assert.property(decoded, 'reflectivity')
+            assert.notProperty(decoded, 'composition')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')

@@ -31,12 +31,12 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     capacity: number
     recharge: number
 } {
-    const com = stats.composition
-    const fin = stats.fineness
+    const res = stats.resonance
+    const ref = stats.reflectivity
 
     return {
-        capacity: 300 + Math.floor(com / 6),
-        recharge: 1 + Math.floor((fin * 3) / 1000),
+        capacity: 300 + Math.floor(res / 6),
+        recharge: 1 + Math.floor((ref * 3) / 1000),
     }
 }
 
@@ -123,14 +123,14 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     efficiency: number
     drain: number
 } {
-    const fineness = stats.fineness
+    const resonance = stats.resonance
     const conductivity = stats.conductivity
-    const composition = stats.composition
+    const reflectivity = stats.reflectivity
 
     return {
-        capacity: Math.max(1, 1 + Math.floor(fineness / 400)),
+        capacity: Math.max(1, 1 + Math.floor(resonance / 400)),
         efficiency: 2000 + conductivity * 6,
-        drain: Math.max(3, 15 - Math.floor(composition / 80)),
+        drain: Math.max(3, 15 - Math.floor(reflectivity / 80)),
     }
 }
 

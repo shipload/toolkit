@@ -35,8 +35,8 @@ describe('deriveStatMappings', () => {
         assert.deepInclude(tuples, 'Loader.mass')
     })
 
-    test('Composition drives Energy.capacity', () => {
-        const tuples = getStatMappingsForStat('Composition').map(
+    test('Resonance drives Energy.capacity', () => {
+        const tuples = getStatMappingsForStat('Resonance').map(
             (m) => `${m.capability}.${m.attribute}`
         )
         assert.deepInclude(tuples, 'Energy.capacity')
@@ -61,14 +61,13 @@ describe('stat coverage', () => {
         Tolerance: ['Gathering.depth'],
         Density: ['Hull.mass', 'Storage.bonus'],
         Conductivity: ['Gathering.drain', 'Hauler.efficiency'],
-        Resonance: ['Warp.range'],
-        Reflectivity: ['Gathering.speed'],
+        Resonance: ['Energy.capacity', 'Hauler.capacity', 'Warp.range'],
+        Reflectivity: ['Energy.recharge', 'Gathering.speed', 'Hauler.drain'],
         Volatility: ['Movement.thrust'],
         Reactivity: ['Crafter.speed'],
         Thermal: ['Movement.drain', 'Warp.range'],
-        Composition: ['Energy.capacity', 'Hauler.drain'],
         Hardness: ['Storage.bonus', 'Storage.capacity'],
-        Fineness: ['Energy.recharge', 'Crafter.drain', 'Hauler.capacity'],
+        Fineness: ['Crafter.drain'],
         Plasticity: ['Loader.thrust'],
         Insulation: ['Loader.mass'],
         Saturation: ['Storage.bonus', 'Storage.capacity'],
