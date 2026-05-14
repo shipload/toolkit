@@ -331,6 +331,20 @@ export {deserializeAtomicData} from './nft/atomicdata'
 export type {SchemaField, RawData} from './nft/atomicdata'
 
 export {
+    fetchAtomicAssetsForOwner,
+    fetchAtomicSchemas,
+    decodeAtomicAsset,
+    ATOMICASSETS_ACCOUNT,
+    SHIPLOAD_COLLECTION,
+} from './nft/atomicassets'
+export type {
+    AtomicAssetRow,
+    AtomicSchemaRow,
+    DecodedAtomicAsset,
+    FetchAssetsOptions,
+} from './nft/atomicassets'
+
+export {
     buildEntityDescription,
     formatModuleLine,
     entityDisplayName,
@@ -363,9 +377,9 @@ export {
     itemTypeCode,
 } from './data/tiers'
 
-export {formatMass, formatMassDelta} from './format'
+export {formatMass, formatMassDelta, formatLocation} from './format'
 
-export {displayName, describeItem} from './resolution/display-name'
+export {displayName, displayNameWithTier, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
 
 export * from './subscriptions'

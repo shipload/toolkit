@@ -19,6 +19,7 @@ import * as track from './commands/action/track'
 import * as transfer from './commands/action/transfer'
 import * as travel from './commands/action/travel'
 import * as undeploy from './commands/action/undeploy'
+import * as unwrap from './commands/action/unwrap'
 import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
@@ -35,6 +36,7 @@ import * as location from './commands/query/location'
 import * as locationNearby from './commands/query/location-nearby'
 import * as modules from './commands/query/modules'
 import * as nearby from './commands/query/nearby'
+import * as nft from './commands/query/nft'
 import * as nftinfo from './commands/query/nftinfo'
 import * as player from './commands/query/player'
 import * as recipe from './commands/query/recipe'
@@ -107,6 +109,7 @@ export function build(): Command {
     resources.register(program)
     modules.register(program)
     nftinfo.register(program)
+    nft.register(program)
     stratum.register(program)
     registerEntitySubcommand(inventory.SUBCOMMAND)
     registerEntitySubcommand(inventory.SUBCOMMAND_CARGO_ALIAS)
@@ -126,6 +129,7 @@ export function build(): Command {
     registerEntitySubcommand(deploy.SUBCOMMAND)
     registerEntitySubcommand(undeploy.SUBCOMMAND)
     registerEntitySubcommand(wrap.SUBCOMMAND)
+    registerEntitySubcommand(unwrap.SUBCOMMAND)
     registerEntitySubcommand(wrapentity.SUBCOMMAND)
     registerEntitySubcommand(demolish.SUBCOMMAND)
     registerEntitySubcommand(addmodule.SUBCOMMAND)
