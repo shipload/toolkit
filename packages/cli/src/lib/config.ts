@@ -14,6 +14,8 @@ export type TrackSortMode = "type+id" | "status" | "eta" | "name";
 export type TrackTypeFilter = "all" | "ship" | "container" | "warehouse";
 export type TrackStatusFilter = "all" | "busy" | "resolvable" | "idle";
 
+export const DEFAULT_JUNGLE4_INDEXER_URL = "https://jungle4.shiploadgame.com";
+
 export interface TrackConfig {
 	defaultSort: TrackSortMode;
 	defaultTypeFilter: TrackTypeFilter;
@@ -28,7 +30,7 @@ export interface PlayerConfig {
 	source: string;
 	/** Whether to auto-resolve completed tasks after waiting. Defaults to false. */
 	autoResolve: boolean;
-	indexerUrl?: string;
+	indexerUrl: string;
 	chainUrl?: string;
 	historyUrl?: string;
 	gameContract: string;
@@ -174,7 +176,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		actor: fileData.actor,
 		permission: fileData.permission ?? "active",
 		autoResolve: fileData.autoResolve ?? false,
-		indexerUrl: fileData.indexerUrl,
+		indexerUrl: fileData.indexerUrl ?? DEFAULT_JUNGLE4_INDEXER_URL,
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
 		gameContract: fileData.gameContract ?? "shipload.gm",
@@ -186,20 +188,6 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 
 export function getIndexerUrl(): string {
 	const cfg = loadConfig();
-	if (!cfg.indexerUrl) {
-		throw new ConfigError(
-			[
-				"Missing [indexer] url in config.ini.",
-				"",
-				`Add to ${cfg.source}:`,
-				"",
-				"  [indexer]",
-				"  url = https://your-indexer-host",
-				"",
-				"This is required for `shiploadcli history` and any entity history subcommand.",
-			].join("\n"),
-		);
-	}
 	return cfg.indexerUrl;
 }
 
@@ -260,9 +248,9 @@ export function getHistoryUrl(): string {
 				`Add to ${cfg.source}:`,
 				"",
 				"  [history]",
-				"  url = https://jungle4.roborovski.io",
+				"  url = https://history.example.test",
 				"",
-				"This is required for `shiploadcli debug actions`, `debug setcodes`, and `debug trace`.",
+				"This must point at a Roborovski-compatible action-history API and is required for `shiploadcli debug actions`, `debug setcodes`, and `debug trace`.",
 			].join("\n"),
 		);
 	}

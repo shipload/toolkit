@@ -165,27 +165,21 @@ describe("loadConfig", () => {
 		expect(cfg.indexerUrl).toBe("https://idx.example.com");
 	});
 
-	test("indexerUrl is undefined when [indexer] section is absent", () => {
+	test("indexerUrl defaults to the public jungle4 indexer when [indexer] section is absent", () => {
 		const iniPath = join(tmpDir, "config.ini");
 		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
 		process.env.PLAYER_CONFIG = iniPath;
 
 		const cfg = loadConfig();
-		expect(cfg.indexerUrl).toBeUndefined();
+		expect(cfg.indexerUrl).toBe("https://jungle4.shiploadgame.com");
 	});
 
-	test("getIndexerUrl throws ConfigError naming the section when missing", () => {
+	test("getIndexerUrl returns the public jungle4 indexer when the section is missing", () => {
 		const iniPath = join(tmpDir, "config.ini");
 		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");
 		process.env.PLAYER_CONFIG = iniPath;
 
-		expect(() => getIndexerUrl()).toThrow(ConfigError);
-		try {
-			getIndexerUrl();
-		} catch (err) {
-			expect((err as Error).message).toContain("[indexer]");
-			expect((err as Error).message).toContain("url");
-		}
+		expect(getIndexerUrl()).toBe("https://jungle4.shiploadgame.com");
 	});
 
 	test("getIndexerUrl returns the configured URL when present", () => {
@@ -215,12 +209,12 @@ describe("loadConfig", () => {
 		const iniPath = join(tmpDir, "config.ini");
 		writeFileSync(
 			iniPath,
-			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[history]\nurl=https://jungle4.roborovski.io\n",
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[history]\nurl=https://jungle4.shiploadgame.com\n",
 		);
 		process.env.PLAYER_CONFIG = iniPath;
 
 		const cfg = loadConfig();
-		expect(cfg.historyUrl).toBe("https://jungle4.roborovski.io");
+		expect(cfg.historyUrl).toBe("https://jungle4.shiploadgame.com");
 	});
 
 	test("chainUrl and historyUrl are undefined when sections absent", () => {

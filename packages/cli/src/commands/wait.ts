@@ -64,11 +64,6 @@ interface WaitCliOptions {
 
 export async function runWait(ownerArg: string | undefined, opts: WaitCliOptions): Promise<void> {
     const cfg = loadConfig()
-    if (!cfg.indexerUrl) {
-        throw new Error(
-            `Missing [indexer] url in config.ini at ${cfg.source}; required for shiploadcli wait.`
-        )
-    }
     const owner = ownerArg ?? getAccountName()
     const wsUrl = wsUrlFromIndexer(cfg.indexerUrl)
     const sdkManager = new SubscriptionsManager({url: wsUrl})

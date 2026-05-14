@@ -55,11 +55,6 @@ function wsUrlFromIndexer(httpUrl: string): string {
 export async function runFleetView(opts: RunFleetViewOpts = {}): Promise<void> {
     const cfg = loadConfig()
     const owner = opts.owner ?? cfg.actor
-    if (!cfg.indexerUrl) {
-        throw new Error(
-            `Missing [indexer] url in config.ini at ${cfg.source}; required for shiploadcli track.`
-        )
-    }
     const wsUrl = wsUrlFromIndexer(cfg.indexerUrl)
     const sdkManager = new SubscriptionsManager({url: wsUrl})
 

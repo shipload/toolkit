@@ -17,11 +17,11 @@ permission = active
 ; Automatically resolve completed tasks after wait/track finishes. Defaults to false.
 ; auto_resolve = false
 
-; Uncomment and set this to enable \`shiploadcli history\` and entity history
-; subcommands (e.g. \`shiploadcli ship 1 history\`). The URL points at a
-; running indexer instance.
+; Optional: override the default Jungle 4 Shipload indexer used by
+; \`shiploadcli history\` and entity history subcommands.
+; Default: https://jungle4.shiploadgame.com
 ; [indexer]
-; url = https://your-indexer-host
+; url = https://jungle4.shiploadgame.com
 
 ; Uncomment and set this to enable \`shiploadcli debug entity\`, \`debug code\`,
 ; and \`debug setcodes\` cross-checks. The URL points at an Antelope chain v1 API.
@@ -29,9 +29,10 @@ permission = active
 ; url = https://jungle4.greymass.com
 
 ; Uncomment and set this to enable \`shiploadcli debug actions\`, \`debug setcodes\`,
-; and \`debug trace\`. The URL points at a roborovski actionstream HTTP frontend.
+; and \`debug trace\`. The URL must point at a Roborovski-compatible
+; action-history HTTP frontend.
 ; [history]
-; url = https://jungle4.roborovski.io
+; url = https://history.example.test
 `
 
 export interface InitOptions {
