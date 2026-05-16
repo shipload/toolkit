@@ -84,7 +84,7 @@ export interface ChainHint {
 const HINTS: ChainHint[] = [
 	{
 		matches: (m) => m.includes("task is non-cancelable"),
-		hint: "Gather tasks cannot be canceled once scheduled. Wait for completion (shiploadcli <type> <id> wait) or let the schedule drain.",
+		hint: "Certain tasks (Gather, Warp, and similar system tasks) cannot be canceled once scheduled. Cancel up to the blocker, then let the schedule drain or wait via `shiploadcli <type> <id> wait`.",
 	},
 	{
 		matches: (m) => m.includes("cargo capacity would be exceeded"),

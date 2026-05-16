@@ -164,7 +164,7 @@ bun run shiploadcli <type> <id>                                # confirm post-st
 
 ## Troubleshooting
 
-- **`Cannot cancel: task is non-cancelable.`** — `gather` tasks are uncancelable once scheduled (the gathered reserve is committed at submission). Wait for completion or let the queue drain.
+- **`Cannot cancel: task is non-cancelable.`** — certain tasks (`gather`, `warp`, and similar system tasks) are uncancelable once scheduled. Cancel up to the blocker, then wait for completion or let the queue drain.
 - **`cargo capacity would be exceeded`** — reduce `quantity`. Pre-flight validation catches most of these before they reach the chain; if the chain returns it, your `--estimate` numbers were off (rare).
 - **`no resources at this stratum`** — either the stratum is empty or it's below your gatherer's depth. Check `bun run shiploadcli stratum <x> <y> <index>` for the stratum and `bun run shiploadcli entity ship <id>` for the ship's gatherer depth.
 
