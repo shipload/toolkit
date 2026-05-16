@@ -94,6 +94,10 @@ const HINTS: ChainHint[] = [
 		matches: (m) => m.includes("no resources at this stratum"),
 		hint: "Either the stratum is empty, or it is below your gatherer's depth. Check: shiploadcli stratum <x> <y> <index>.",
 	},
+	{
+		matches: (m) => m.includes("reached account cpu limit") || m.includes("reached account net limit"),
+		hint: "Your account's staked CPU/NET regenerates over ~24h. Wait 10-30s and retry, stake more EOS, or use a PowerUp to top up temporarily. Batch-submitting many actions back-to-back is the usual trigger.",
+	},
 ];
 
 export function assertNotBoth(opts: Record<string, unknown>, ...pairs: [string, string][]): void {

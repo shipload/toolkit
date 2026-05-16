@@ -11,7 +11,7 @@ import {
 import {getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
-import {estimateCraft} from '../../lib/estimate'
+import {type EstimateResult, estimateCraft} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
@@ -51,6 +51,26 @@ type CraftCliOptions = WaitableOptions & {
     estimate?: boolean
     force?: boolean
     recharge?: boolean
+    autoRecharge?: boolean
+}
+
+export interface DecideUseRechargeInputs {
+    rechargeRequested: boolean
+    autoRecharge: boolean
+    baseEstimate: EstimateResult
+    reestimateWithRecharge: () => Promise<EstimateResult>
+}
+
+export async function decideUseRecharge(inputs: DecideUseRechargeInputs): Promise<boolean> {
+    if (inputs.rechargeRequested) return true
+    if (!inputs.autoRecharge) return false
+    if (inputs.baseEstimate.feasibility.ok) return false
+    const hasEnergyIssue = inputs.baseEstimate.feasibility.issues.some(
+        (i) => i.code === 'insufficient_energy'
+    )
+    if (!hasEnergyIssue) return false
+    const recharged = await inputs.reestimateWithRecharge()
+    return recharged.feasibility.ok
 }
 
 async function validateRecipeSlotTotals(
@@ -94,19 +114,34 @@ export async function runCraft(
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         await validateRecipeSlotTotals(recipeId, quantity, resolved)
+        const rechargeRequested = Boolean(options.recharge)
         const est = await estimateCraft({
             entityId: ctx.entityId,
             recipeId,
             quantity,
             inputs: resolved,
             snapshot: snap,
-            recharge: Boolean(options.recharge),
+            recharge: rechargeRequested,
         })
         if (options.estimate) {
             console.log(renderEstimate(est))
             return
         }
-        if (!est.feasibility.ok) {
+        const useRecharge = await decideUseRecharge({
+            rechargeRequested,
+            autoRecharge: Boolean(options.autoRecharge),
+            baseEstimate: est,
+            reestimateWithRecharge: () =>
+                estimateCraft({
+                    entityId: ctx.entityId,
+                    recipeId,
+                    quantity,
+                    inputs: resolved,
+                    snapshot: snap,
+                    recharge: true,
+                }),
+        })
+        if (!useRecharge && !est.feasibility.ok) {
             console.error(renderIssues(est.feasibility.issues))
             if (!options.force) process.exit(1)
         }
@@ -117,7 +152,7 @@ export async function runCraft(
             quantity,
             inputs: resolved,
         })
-        const result = options.recharge
+        const result = useRecharge
             ? await transact(
                   {
                       actions: [
@@ -174,6 +209,10 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
             .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
             .option('--recharge', 'recharge to full energy before crafting')
+            .option(
+                '--auto-recharge',
+                'recharge before crafting only when projected energy is insufficient (--recharge always recharges)'
+            )
             .action(
                 async (
                     recipeId: number,
