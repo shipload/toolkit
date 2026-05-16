@@ -157,7 +157,9 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
             )
         }
 
-        const workerUrl = new URL('../../lib/scan/worker.ts', import.meta.url).href
+        const workerUrl = import.meta.path.startsWith('/$bunfs/')
+            ? (await import('../../lib/scan/worker-bundle')).default
+            : new URL('../../lib/scan/worker.ts', import.meta.url).href
 
         const results = await Promise.all(
             chunks.map(

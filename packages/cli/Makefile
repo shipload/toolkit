@@ -3,6 +3,7 @@
 SIGNING_IDENTITY ?=
 NOTARY_PROFILE   ?= shiploadcli
 ENTITLEMENTS     := scripts/entitlements.plist
+WORKER_BUNDLE    := build/worker.bundle.js
 
 check:
 	bun run check
@@ -14,9 +15,13 @@ install:
 	@cd ../.. && bun install
 
 clean:
-	rm -rf $(DIST)
+	rm -rf $(DIST) build
 
-.PHONY: check test install clean
+worker-bundle:
+	@mkdir -p build
+	@bun build src/lib/scan/worker.ts --target=bun --outfile $(WORKER_BUNDLE) >/dev/null
+
+.PHONY: check test install clean worker-bundle
 
 # User-facing binary targets. Output: dist/shiploadcli-<target>[.exe]
 # Bun's --compile target identifiers use `bun-darwin-*`; we map mac→darwin internally.
@@ -44,7 +49,7 @@ install-natives:
 	done
 
 # Build a single binary. Usage: make binary TARGET=mac-arm64
-binary: install-natives
+binary: install-natives worker-bundle
 	@if [ -z "$(TARGET)" ]; then echo "usage: make binary TARGET=mac-arm64 (one of: $(BINARY_TARGETS))"; exit 1; fi
 	@mkdir -p $(DIST)
 	@BUN_TARGET=bun-$$(echo $(TARGET) | sed 's/^mac/darwin/'); \
