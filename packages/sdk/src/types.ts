@@ -120,7 +120,7 @@ export type ModuleType =
     | 'storage'
     | 'hauler'
 
-export const TIER_ADJECTIVES: Record<number, string> = {
+export const RESOURCE_TIER_ADJECTIVES: Record<number, string> = {
     1: 'Crude',
     2: 'Dense',
     3: 'Pure',
@@ -132,6 +132,9 @@ export const TIER_ADJECTIVES: Record<number, string> = {
     9: 'Cosmic',
     10: 'Ascendant',
 }
+
+export const COMPONENT_TIER_PREFIXES: Record<number, string> = {}
+export const MODULE_TIER_PREFIXES: Record<number, string> = {}
 
 export const CATEGORY_LABELS: Record<ResourceCategory, string> = {
     ore: 'Ore',
@@ -158,5 +161,5 @@ export function formatTier(tier: number): string {
 }
 
 export function tierAdjective(tier: number): string {
-    return TIER_ADJECTIVES[tier] ?? `T${tier}`
+    return RESOURCE_TIER_ADJECTIVES[tier] ?? `T${tier}`
 }

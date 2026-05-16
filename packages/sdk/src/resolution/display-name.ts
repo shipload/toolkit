@@ -1,26 +1,44 @@
 import type {ResolvedItem} from './resolve-item'
 import type {ResourceCategory} from '../types'
-import {CATEGORY_LABELS, TIER_ADJECTIVES} from '../types'
+import {
+    CATEGORY_LABELS,
+    RESOURCE_TIER_ADJECTIVES,
+    COMPONENT_TIER_PREFIXES,
+    MODULE_TIER_PREFIXES,
+} from '../types'
 import {formatMass as defaultFormatMass} from '../format'
 
-export interface DisplayNameInput {
-    itemType: 'resource' | 'component' | 'module' | 'entity' | string
+interface DisplayNameInputCommon {
     tier: number
     category?: ResourceCategory
     name: string
 }
 
-export function displayName(resolved: DisplayNameInput): string {
-    if (resolved.itemType === 'resource') {
-        const adj = TIER_ADJECTIVES[resolved.tier] ?? 'Unknown'
-        const cat = resolved.category ? CATEGORY_LABELS[resolved.category] : 'Resource'
-        return `${adj} ${cat}`
-    }
-    return resolved.name
+export type DisplayNameInput =
+    | (DisplayNameInputCommon & {itemType: 'resource' | 'component' | 'module' | 'entity' | string})
+    | (DisplayNameInputCommon & {type: string})
+
+function itemTypeOf(item: DisplayNameInput): string {
+    return 'itemType' in item ? item.itemType : item.type
 }
 
-export function displayNameWithTier(resolved: DisplayNameInput): string {
-    return `${displayName(resolved)} (T${resolved.tier})`
+function tierPrefix(item: DisplayNameInput): string | null {
+    const t = itemTypeOf(item)
+    if (t === 'resource') return RESOURCE_TIER_ADJECTIVES[item.tier] ?? null
+    if (t === 'component') return COMPONENT_TIER_PREFIXES[item.tier] ?? null
+    if (t === 'module') return MODULE_TIER_PREFIXES[item.tier] ?? null
+    return null
+}
+
+function baseName(item: DisplayNameInput): string {
+    if (itemTypeOf(item) !== 'resource') return item.name
+    return item.category ? CATEGORY_LABELS[item.category] : 'Resource'
+}
+
+export function displayName(item: DisplayNameInput): string {
+    const prefix = tierPrefix(item)
+    const head = prefix ? `${prefix} ${baseName(item)}` : baseName(item)
+    return `${head} (T${item.tier})`
 }
 
 export interface DescribeOptions {

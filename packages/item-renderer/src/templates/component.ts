@@ -4,7 +4,7 @@ import {
     getRecipe,
     getStatDefinitions,
     categoryColors,
-    displayNameWithTier,
+    displayName,
     formatLocation,
 } from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
@@ -106,7 +106,7 @@ export function renderComponent(
     const name = text({
         x: pad + 34,
         y: pad + 22,
-        value: displayNameWithTier(resolved),
+        value: displayName(resolved),
         size: tokens.typography.sizes.title,
         weight: 700,
         family: tokens.typography.display,

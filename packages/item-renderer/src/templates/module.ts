@@ -1,10 +1,5 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {
-    describeModuleForItem,
-    displayNameWithTier,
-    formatLocation,
-    renderDescription,
-} from '@shipload/sdk'
+import {describeModuleForItem, displayName, formatLocation, renderDescription} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
@@ -102,7 +97,7 @@ export function renderModule(
     const name = text({
         x: pad + 34,
         y: pad + 22,
-        value: displayNameWithTier(resolved),
+        value: displayName(resolved),
         size: tokens.typography.sizes.title,
         weight: 700,
         family: tokens.typography.display,

@@ -1,10 +1,5 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {
-    getStatDefinitions,
-    categoryColors,
-    displayNameWithTier,
-    formatLocation,
-} from '@shipload/sdk'
+import {getStatDefinitions, categoryColors, displayName, formatLocation} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
@@ -101,7 +96,7 @@ export function renderResource(
     const name = text({
         x: pad + 34,
         y: pad + 22,
-        value: displayNameWithTier(resolved),
+        value: displayName(resolved),
         size: tokens.typography.sizes.title,
         weight: 700,
         family: tokens.typography.display,

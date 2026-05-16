@@ -1,5 +1,5 @@
 import type {ResolvedItem, ResolvedModuleSlot} from '@shipload/sdk'
-import {describeModuleForSlot, displayNameWithTier, renderDescription} from '@shipload/sdk'
+import {describeModuleForSlot, displayName, renderDescription} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {renderShipPanel, type ShipPanelSlot} from './ship-panel.ts'
 
@@ -28,7 +28,7 @@ export function renderPackedEntity(
     const quantity = Number(BigInt(item.quantity.toString()))
     const slots = (resolved.moduleSlots ?? []).map(slotToPanelSlot)
     return renderShipPanel({
-        name: `${displayNameWithTier(resolved)} (Packed)`,
+        name: `${displayName(resolved)} (Packed)`,
         tier: resolved.tier,
         quantity,
         location: opts?.location,
