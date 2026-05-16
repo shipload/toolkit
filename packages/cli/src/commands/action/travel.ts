@@ -2,6 +2,7 @@ import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseInt64} from '../../lib/args'
+import {decideUseRecharge} from '../../lib/auto-recharge'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
@@ -9,6 +10,7 @@ import {estimateTravel} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate, renderTravelSummary} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
+import {getEntitySnapshot} from '../../lib/snapshot'
 import {
     AUTO_RESOLVE_OPTION,
     maybeAwaitAndPrint,
@@ -31,6 +33,7 @@ export async function buildAction(opts: TravelOpts, shipload?: Shipload): Promis
 
 type TravelCliOptions = WaitableOptions & {
     recharge?: boolean
+    autoRecharge?: boolean
     estimate?: boolean
     force?: boolean
 }
@@ -42,11 +45,14 @@ export async function runTravel(
     options: TravelCliOptions
 ): Promise<void> {
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
+    const rechargeRequested = Boolean(options.recharge)
+    const snap = await getEntitySnapshot(ctx.entityId)
     const est = await withValidation(() =>
         estimateTravel({
             entityId: ctx.entityId,
             target: {x, y},
-            recharge: Boolean(options.recharge),
+            snapshot: snap,
+            recharge: rechargeRequested,
         })
     )
     const summary = est.travel ? renderTravelSummary(est.travel, ctx.entityId) : null
@@ -56,7 +62,19 @@ export async function runTravel(
         console.log(issues.length > 0 ? `${renderIssues(issues)}\n${body}` : body)
         return
     }
-    if (!est.feasibility.ok) {
+    const useRecharge = await decideUseRecharge({
+        rechargeRequested,
+        autoRecharge: Boolean(options.autoRecharge),
+        baseEstimate: est,
+        reestimateWithRecharge: () =>
+            estimateTravel({
+                entityId: ctx.entityId,
+                target: {x, y},
+                snapshot: snap,
+                recharge: true,
+            }),
+    })
+    if (!useRecharge && !est.feasibility.ok) {
         console.error(renderIssues(est.feasibility.issues))
         if (!options.force) process.exit(1)
     }
@@ -64,7 +82,7 @@ export async function runTravel(
         shipId: ctx.entityId,
         x,
         y,
-        recharge: Boolean(options.recharge),
+        recharge: useRecharge,
     })
     const result = await transact(
         {action},
@@ -87,9 +105,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             )
             .argument('<x>', 'destination x', parseInt64)
             .argument('<y>', 'destination y', parseInt64)
+            .option('--recharge', 'recharge to full energy before travelling')
             .option(
-                '--recharge',
-                "chain a recharge task before travel via the contract's recharge:bool parameter"
+                '--auto-recharge',
+                'recharge before travelling only when projected energy is insufficient (--recharge always recharges)'
             )
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
             .addOption(WAIT_OPTION)

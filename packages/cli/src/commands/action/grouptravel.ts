@@ -2,6 +2,7 @@ import type {ServerTypes} from '@shipload/sdk'
 import {type Action, Name} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {type EntityRef, parseEntityRefList, parseInt64} from '../../lib/args'
+import {decideUseRecharge} from '../../lib/auto-recharge'
 import {getShipload} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import {assertNotBoth, withValidation} from '../../lib/errors'
@@ -46,9 +47,10 @@ export function register(program: Command): void {
         .argument('<entities>', 'comma-separated entity refs (type:id)', parseEntityRefList)
         .argument('<x>', 'destination x', parseInt64)
         .argument('<y>', 'destination y', parseInt64)
+        .option('--recharge', 'recharge to full energy before travelling')
         .option(
-            '--recharge',
-            "chain a recharge task before travel via the contract's recharge:bool parameter"
+            '--auto-recharge',
+            'recharge before travelling only when projected energy is insufficient (--recharge always recharges)'
         )
         .option('--estimate', 'print duration/energy/cargo estimate without submitting')
         .addOption(WAIT_OPTION)
@@ -62,16 +64,18 @@ export function register(program: Command): void {
                 y: bigint,
                 options: WaitableOptions & {
                     recharge?: boolean
+                    autoRecharge?: boolean
                     estimate?: boolean
                     force?: boolean
                 }
             ) => {
                 assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
+                const rechargeRequested = Boolean(options.recharge)
                 const est = await withValidation(() =>
                     estimateGroupTravel({
                         entities,
                         target: {x, y},
-                        recharge: Boolean(options.recharge),
+                        recharge: rechargeRequested,
                     })
                 )
                 if (options.estimate) {
@@ -80,7 +84,18 @@ export function register(program: Command): void {
                     console.log(issues.length > 0 ? `${renderIssues(issues)}\n${body}` : body)
                     return
                 }
-                if (!est.feasibility.ok) {
+                const useRecharge = await decideUseRecharge({
+                    rechargeRequested,
+                    autoRecharge: Boolean(options.autoRecharge),
+                    baseEstimate: est,
+                    reestimateWithRecharge: () =>
+                        estimateGroupTravel({
+                            entities,
+                            target: {x, y},
+                            recharge: true,
+                        }),
+                })
+                if (!useRecharge && !est.feasibility.ok) {
                     console.error(renderIssues(est.feasibility.issues))
                     if (!options.force) process.exit(1)
                 }
@@ -88,7 +103,7 @@ export function register(program: Command): void {
                     entities,
                     x,
                     y,
-                    recharge: Boolean(options.recharge),
+                    recharge: useRecharge,
                 })
                 const result = await transact(
                     {action},

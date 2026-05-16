@@ -1,5 +1,5 @@
 import {expect, test} from 'bun:test'
-import {buildAction} from '../../../src/commands/action/travel'
+import {buildAction, SUBCOMMAND} from '../../../src/commands/action/travel'
 import {getLocalShipload} from '../../helpers/shipload'
 
 test('travel includes recharge=true by default', async () => {
@@ -17,4 +17,11 @@ test('travel respects --no-recharge', async () => {
         getLocalShipload()
     )
     expect((action.decoded.data as any).recharge).toBe(false)
+})
+
+test('travel SUBCOMMAND exposes --recharge and --auto-recharge', () => {
+    const cmd = SUBCOMMAND.build({entityType: 'ship', entityId: 1n})
+    const longs = cmd.options.map((o) => o.long)
+    expect(longs).toContain('--recharge')
+    expect(longs).toContain('--auto-recharge')
 })

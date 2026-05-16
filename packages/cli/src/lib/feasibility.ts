@@ -109,6 +109,13 @@ export function collectIssues(...checks: (FeasibilityIssue | null)[]): Feasibili
 	return checks.filter((c): c is FeasibilityIssue => c !== null);
 }
 
+export function hasIssueWithCode(
+	issues: FeasibilityIssue[],
+	code: FeasibilityCode,
+): boolean {
+	return issues.some((i) => i.code === code);
+}
+
 export function renderIssues(issues: FeasibilityIssue[]): string {
 	return issues
 		.map((i) => (i.severity === "error" ? `❌ ${i.message}` : `⚠️  ${i.message}`))

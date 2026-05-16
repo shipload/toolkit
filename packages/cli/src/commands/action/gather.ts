@@ -8,6 +8,7 @@ import {
     parseUint32,
     parseUint64,
 } from '../../lib/args'
+import {decideUseRecharge} from '../../lib/auto-recharge'
 import {getGameSeed, getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
@@ -154,6 +155,7 @@ type GatherCliOptions = WaitableOptions & {
     estimate?: boolean
     force?: boolean
     recharge?: boolean
+    autoRecharge?: boolean
 }
 
 export async function runGather(
@@ -171,12 +173,15 @@ export async function runGather(
         quantity,
     }
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
+    const rechargeRequested = Boolean(options.recharge)
+    const snap = await getEntitySnapshot(ctx.entityId)
     const est = await withValidation(() =>
         estimateGather({
             entityId: ctx.entityId,
             stratum,
             quantity,
-            recharge: Boolean(options.recharge),
+            snapshot: snap,
+            recharge: rechargeRequested,
         })
     )
     if (options.estimate) {
@@ -186,13 +191,26 @@ export async function runGather(
     await withValidation(async () => {
         await preflightGather(gatherOpts)
     })
-    if (!est.feasibility.ok) {
+    const useRecharge = await decideUseRecharge({
+        rechargeRequested,
+        autoRecharge: Boolean(options.autoRecharge),
+        baseEstimate: est,
+        reestimateWithRecharge: () =>
+            estimateGather({
+                entityId: ctx.entityId,
+                stratum,
+                quantity,
+                snapshot: snap,
+                recharge: true,
+            }),
+    })
+    if (!useRecharge && !est.feasibility.ok) {
         console.error(renderIssues(est.feasibility.issues))
         if (!options.force) process.exit(1)
     }
     const action = await buildAction(gatherOpts)
     try {
-        const result = options.recharge
+        const result = useRecharge
             ? await transact(
                   {
                       actions: [
@@ -250,9 +268,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addOption(TRACK_OPTION)
             .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
+            .option('--recharge', 'recharge to full energy before gathering')
             .option(
-                '--recharge',
-                'prepend a recharge action to the same signed transaction (recharges to full)'
+                '--auto-recharge',
+                'recharge before gathering only when projected energy is insufficient (--recharge always recharges)'
             )
             .action(
                 async (

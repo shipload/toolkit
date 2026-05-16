@@ -2,6 +2,7 @@ import {ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, type EntityTypeName, parseUint16, parseUint32} from '../../lib/args'
+import {decideUseRecharge} from '../../lib/auto-recharge'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
     type ParsedCargoInput,
@@ -11,7 +12,7 @@ import {
 import {getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
-import {type EstimateResult, estimateCraft} from '../../lib/estimate'
+import {estimateCraft} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
@@ -52,25 +53,6 @@ type CraftCliOptions = WaitableOptions & {
     force?: boolean
     recharge?: boolean
     autoRecharge?: boolean
-}
-
-export interface DecideUseRechargeInputs {
-    rechargeRequested: boolean
-    autoRecharge: boolean
-    baseEstimate: EstimateResult
-    reestimateWithRecharge: () => Promise<EstimateResult>
-}
-
-export async function decideUseRecharge(inputs: DecideUseRechargeInputs): Promise<boolean> {
-    if (inputs.rechargeRequested) return true
-    if (!inputs.autoRecharge) return false
-    if (inputs.baseEstimate.feasibility.ok) return false
-    const hasEnergyIssue = inputs.baseEstimate.feasibility.issues.some(
-        (i) => i.code === 'insufficient_energy'
-    )
-    if (!hasEnergyIssue) return false
-    const recharged = await inputs.reestimateWithRecharge()
-    return recharged.feasibility.ok
 }
 
 async function validateRecipeSlotTotals(

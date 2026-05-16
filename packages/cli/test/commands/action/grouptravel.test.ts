@@ -1,5 +1,6 @@
 import {expect, test} from 'bun:test'
-import {buildAction} from '../../../src/commands/action/grouptravel'
+import {Command} from 'commander'
+import {buildAction, register} from '../../../src/commands/action/grouptravel'
 
 test('grouptravel builds action with entity list', async () => {
     const action = await buildAction({
@@ -13,4 +14,14 @@ test('grouptravel builds action with entity list', async () => {
     })
     expect(action.name.toString()).toBe('grouptravel')
     expect((action.decoded.data as any).entities).toHaveLength(2)
+})
+
+test('grouptravel exposes --recharge and --auto-recharge', () => {
+    const program = new Command()
+    register(program)
+    const sub = program.commands.find((c) => c.name() === 'grouptravel')
+    expect(sub).toBeDefined()
+    const longs = sub?.options.map((o) => o.long) ?? []
+    expect(longs).toContain('--recharge')
+    expect(longs).toContain('--auto-recharge')
 })
