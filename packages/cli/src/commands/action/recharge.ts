@@ -1,7 +1,7 @@
 import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import type {EntityTypeName} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
@@ -50,7 +50,7 @@ export async function runRecharge(ctx: EntityContext, opts: RechargeCliOptions):
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'recharge',
     description: 'Recharge energy for the entity',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('recharge')
             .description('Recharge energy for the entity')

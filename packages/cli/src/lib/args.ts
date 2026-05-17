@@ -1,14 +1,8 @@
+import { ALL_ENTITY_TYPES, type EntityTypeName } from "@shipload/sdk";
 import { InvalidArgumentError } from "commander";
 import type { ParsedCargoInput } from "./cargo-resolve";
 
-export type EntityTypeName = "ship" | "container" | "warehouse" | "extractor";
-
-export const ALL_ENTITY_TYPES: readonly EntityTypeName[] = [
-	"ship",
-	"container",
-	"warehouse",
-	"extractor",
-];
+export { ALL_ENTITY_TYPES, type EntityTypeName };
 
 export function parseEntityType(s: string): EntityTypeName {
 	if ((ALL_ENTITY_TYPES as readonly string[]).includes(s)) {

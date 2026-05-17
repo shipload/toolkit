@@ -1,5 +1,5 @@
 import { type Command, CommanderError } from "commander";
-import { type EntityTypeName, parseUint64 } from "./args";
+import { ALL_ENTITY_TYPES, type EntityTypeName, parseUint64 } from "./args";
 import { withValidation } from "./errors";
 import { ValidationError } from "./validate";
 
@@ -28,18 +28,11 @@ function appliesToType(applies: AppliesTo, type: EntityTypeName): boolean {
 
 function describeAppliesTo(applies: AppliesTo): string {
 	if (typeof applies === "function") {
-		const matches = ALL_TYPES_FOR_HELP.filter((t) => applies(t));
+		const matches = ALL_ENTITY_TYPES.filter((t) => applies(t));
 		return matches.length > 0 ? matches.join(", ") : "(no entity types)";
 	}
 	return applies.join(", ");
 }
-
-const ALL_TYPES_FOR_HELP: readonly EntityTypeName[] = [
-	"ship",
-	"warehouse",
-	"extractor",
-	"container",
-];
 
 export interface DispatchOptions {
 	defaultShow: (type: EntityTypeName, id: bigint) => Promise<void> | void;
@@ -170,7 +163,7 @@ export function buildGenericEntityParent(
 		.allowExcessArguments(true)
 		.argument(
 			"<type>",
-			"entity type (ship/container/warehouse/extractor)",
+			`entity type (${ALL_ENTITY_TYPES.join("/")})`,
 			parseEntityType,
 		)
 		.argument("<id>", "entity id", parseUint64)

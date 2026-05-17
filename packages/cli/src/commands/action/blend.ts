@@ -1,7 +1,7 @@
 import {blendCargoStacks, ServerTypes, type Shipload} from '@shipload/sdk'
 import {type Action, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {accumulateCargoInputs, type EntityTypeName} from '../../lib/args'
+import {accumulateCargoInputs, ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
     type ParsedCargoInput,
@@ -97,7 +97,7 @@ function renderBlendEstimate(resolved: ResolvedCargoInput[]): string {
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'blend',
     description: 'Blend inputs into outputs',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('blend')
             .description('Blend inputs into outputs')

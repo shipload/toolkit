@@ -15,6 +15,7 @@ import {
 } from '@shipload/sdk'
 import {type AnyAction, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
+import {ALL_ENTITY_TYPES} from '../../lib/args'
 import {client, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {formatDuration, formatItem, jsonStringify} from '../../lib/format'
@@ -324,7 +325,7 @@ function parseAssetId(s: string): bigint {
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'unwrap',
     description: 'Unwrap one or more AtomicAssets NFTs back into entity cargo',
-    appliesTo: ['ship', 'warehouse'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('unwrap')
             .description('Unwrap one or more AtomicAssets NFTs back into entity cargo')

@@ -2,6 +2,7 @@ import {getItem, type Shipload} from '@shipload/sdk'
 import {type Action, Checksum256} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
+    ALL_ENTITY_TYPES,
     type EntityTypeName,
     parseEntityType,
     parseUint16,
@@ -246,7 +247,7 @@ export async function runGather(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'gather',
     description: 'Gather resources from a stratum into a destination entity',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('gather')
             .description('Gather resources from a stratum into a destination entity')

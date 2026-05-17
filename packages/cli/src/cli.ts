@@ -51,7 +51,7 @@ import * as waitCmd from './commands/wait'
 import * as debug from './commands/debug'
 import * as tools from './commands/tools'
 import * as update from './commands/update'
-import {parseEntityType} from './lib/args'
+import {ALL_ENTITY_TYPES, parseEntityType} from './lib/args'
 import {registerCoordSubcommand} from './lib/coord-scope'
 import {
     buildEntityParent,
@@ -90,10 +90,9 @@ export function build(): Command {
     epoch.register(program)
     player.register(program)
     buildGenericEntityParent(program, parseEntityType, entity.defaultShow)
-    buildEntityParent(program, 'ship', entity.defaultShow)
-    buildEntityParent(program, 'container', entity.defaultShow)
-    buildEntityParent(program, 'warehouse', entity.defaultShow)
-    buildEntityParent(program, 'extractor', entity.defaultShow)
+    for (const type of ALL_ENTITY_TYPES) {
+        buildEntityParent(program, type, entity.defaultShow)
+    }
     registerEntitySubcommand(entity.SUBCOMMAND)
     entities.register(program)
     fleetTrack.register(program)

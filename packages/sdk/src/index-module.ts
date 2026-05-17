@@ -200,6 +200,7 @@ export {
     getKindMeta,
     getTemplateMeta,
     kindCan,
+    ALL_ENTITY_TYPES,
     CAP_WRAP,
     CAP_UNDEPLOY,
     CAP_DEMOLISH,

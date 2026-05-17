@@ -1,5 +1,5 @@
 import {Command} from 'commander'
-import type {EntityTypeName} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {server} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -31,7 +31,7 @@ export async function defaultShow(type: EntityTypeName, id: bigint): Promise<voi
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'show',
     description: 'Show full entity state (use --json for raw JSON)',
-    appliesTo: ['ship', 'container', 'warehouse'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('show')
             .description('Show full entity state')

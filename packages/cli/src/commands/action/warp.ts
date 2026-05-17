@@ -1,7 +1,7 @@
 import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {type EntityTypeName, parseInt64} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseInt64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -52,7 +52,7 @@ export async function runWarp(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'warp',
     description: 'Warp the ship to coordinates',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('warp')
             .description('Warp the ship to coordinates')

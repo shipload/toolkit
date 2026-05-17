@@ -1,3 +1,4 @@
+import {CAP_MODULES, kindCan} from '@shipload/sdk'
 import type {EntityTypeName} from './args'
 import {
 	completedTaskCount,
@@ -8,7 +9,7 @@ import {
 import type {FleetTick} from './snapshot-fleet'
 
 export function isActionCapable(snap: EntitySnapshot): boolean {
-	if (snap.type === 'container') return false
+	if (!kindCan(snap.type, CAP_MODULES)) return false
 	return (snap.modules?.length ?? 0) > 0
 }
 
@@ -77,15 +78,23 @@ export class WaitFleetTimeoutError extends Error {
 	}
 }
 
-function rankType(t: string): number {
-	if (t === 'ship') return 0
-	if (t === 'warehouse') return 1
-	return 2
+const TYPE_RANK: Record<EntityTypeName, number> = {
+	ship: 0,
+	factory: 1,
+	extractor: 2,
+	warehouse: 3,
+	container: 4,
+	nexus: 5,
+}
+
+function rankType(t: EntitySnapshot['type']): number {
+	const key = String(t) as EntityTypeName
+	return TYPE_RANK[key] ?? Number.MAX_SAFE_INTEGER
 }
 
 function deterministicSort(items: EntitySnapshot[]): EntitySnapshot[] {
 	return [...items].sort((a, b) => {
-		const r = rankType(String(a.type)) - rankType(String(b.type))
+		const r = rankType(a.type) - rankType(b.type)
 		if (r !== 0) return r
 		const diff = BigInt(a.id.toString()) - BigInt(b.id.toString())
 		return diff < 0n ? -1 : diff > 0n ? 1 : 0

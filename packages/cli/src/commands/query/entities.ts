@@ -1,5 +1,5 @@
 import type {Command} from 'commander'
-import {type EntityTypeName, parseEntityType} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType} from '../../lib/args'
 import {server} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import {formatOutput} from '../../lib/format'
@@ -86,15 +86,10 @@ async function runEntities(
     }
 }
 
-function registerFiltered(
-    program: Command,
-    name: string,
-    type: EntityTypeName,
-    noun: string
-): void {
+function registerFiltered(program: Command, name: string, type: EntityTypeName): void {
     program
         .command(name)
-        .description(`List ${noun} for an owner. Shorthand for \`entities --type ${type}\`.`)
+        .description(`List ${name} for an owner. Shorthand for \`entities --type ${type}\`.`)
         .argument('[owner]', 'account name')
         .option('--full', 'show full entity state instead of summaries')
         .option('--json', 'emit JSON instead of formatted text')
@@ -108,7 +103,11 @@ export function register(program: Command): void {
         .command('entities')
         .description('List entities for an owner (defaults to self)')
         .argument('[owner]', 'account name')
-        .option('--type <t>', 'filter by entity type (ship/warehouse/container)', parseEntityType)
+        .option(
+            '--type <t>',
+            `filter by entity type (${ALL_ENTITY_TYPES.join('/')})`,
+            parseEntityType
+        )
         .option('--full', 'show full entity state instead of summaries')
         .option('--json', 'emit JSON instead of formatted text')
         .action(
@@ -120,7 +119,16 @@ export function register(program: Command): void {
             }
         )
 
-    registerFiltered(program, 'ships', 'ship', 'ships')
-    registerFiltered(program, 'containers', 'container', 'containers')
-    registerFiltered(program, 'warehouses', 'warehouse', 'warehouses')
+    for (const type of ALL_ENTITY_TYPES) {
+        registerFiltered(program, PLURAL[type], type)
+    }
+}
+
+const PLURAL: Record<EntityTypeName, string> = {
+    ship: 'ships',
+    container: 'containers',
+    warehouse: 'warehouses',
+    extractor: 'extractors',
+    factory: 'factories',
+    nexus: 'nexuses',
 }

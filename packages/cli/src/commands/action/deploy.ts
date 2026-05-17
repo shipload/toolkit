@@ -11,7 +11,7 @@ import {
 } from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseCargoInput} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseCargoInput} from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
@@ -119,7 +119,7 @@ export async function runDeploy(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'deploy',
     description: 'Deploy an entity from a packed cargo item',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('deploy')
             .description('Deploy an entity from a packed cargo item')

@@ -1,5 +1,5 @@
 import {Box, type CliRenderer, type KeyEvent, Text, type VChild} from '@opentui/core'
-import type {EntityTypeName} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {formatCargoUsage, formatDuration, formatTaskType} from '../../lib/format'
 import type {EntityKey} from '../../lib/snapshot'
 import type {FleetTick} from '../../lib/snapshot-fleet'
@@ -49,7 +49,7 @@ const BULK_LIMIT = 50
 
 const SORT_CYCLE: SortMode[] = ['type+id', 'status', 'eta', 'name']
 const STATUS_CYCLE: StatusFilter[] = ['all', 'busy', 'resolvable', 'idle']
-const TYPE_CYCLE: ('all' | EntityTypeName)[] = ['all', 'ship', 'container', 'warehouse']
+const TYPE_CYCLE: ('all' | EntityTypeName)[] = ['all', ...ALL_ENTITY_TYPES]
 
 interface FleetState {
     tick: FleetTick

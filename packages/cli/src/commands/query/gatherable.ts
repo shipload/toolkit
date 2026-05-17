@@ -4,7 +4,7 @@ import {
     projectFromCurrentState,
 } from '@shipload/sdk'
 import {Command} from 'commander'
-import {parseUint32} from '../../lib/args'
+import {ALL_ENTITY_TYPES, parseUint32} from '../../lib/args'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {jsonStringify} from '../../lib/format'
 import {
@@ -160,7 +160,7 @@ export const SUBCOMMAND: EntitySubcommand = {
     name: 'gatherable',
     description:
         'Show what this entity can gather at its location, with time, energy, and max-quantity per resource',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('gatherable')
             .description(

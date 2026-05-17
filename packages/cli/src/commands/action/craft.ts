@@ -1,7 +1,13 @@
 import {ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {accumulateCargoInputs, type EntityTypeName, parseUint16, parseUint32} from '../../lib/args'
+import {
+    accumulateCargoInputs,
+    ALL_ENTITY_TYPES,
+    type EntityTypeName,
+    parseUint16,
+    parseUint32,
+} from '../../lib/args'
 import {decideUseRecharge} from '../../lib/auto-recharge'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
@@ -155,7 +161,7 @@ export async function runCraft(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'craft',
     description: 'Craft items from a recipe',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('craft')
             .description('Craft items from a recipe')

@@ -1,6 +1,6 @@
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {parseUint64} from '../../lib/args'
+import {ALL_ENTITY_TYPES, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -36,7 +36,7 @@ export const SUBCOMMAND: EntitySubcommand = {
     name: 'wrapentity',
     description:
         'Wrap this deployed entity into an NFT (must be at a nexus, empty cargo + schedule)',
-    appliesTo: ['ship', 'container'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('wrapentity')
             .description('Wrap this deployed entity into an NFT')

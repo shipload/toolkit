@@ -1,6 +1,6 @@
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -53,7 +53,7 @@ export async function runUndeploy(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'undeploy',
     description: "Pack a deployed entity back into this entity's cargo",
-    appliesTo: ['ship', 'warehouse'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('undeploy')
             .description("Pack a deployed entity back into this entity's cargo")

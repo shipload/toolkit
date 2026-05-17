@@ -1,12 +1,11 @@
 import type {Command} from 'commander'
+import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {getShipload, server} from '../../lib/client'
 import {transact} from '../../lib/session'
 
 interface DrainOptions {
     dryRun?: boolean
 }
-
-type EntityTypeStr = 'ship' | 'warehouse' | 'extractor' | 'container'
 
 interface ScheduledRow {
     id: {toString(): string}
@@ -24,14 +23,14 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
     while (true) {
         pass++
         console.log(`pass ${pass}`)
-        const stuck: Array<{type: EntityTypeStr; id: bigint; reason: string}> = []
+        const stuck: Array<{type: EntityTypeName; id: bigint; reason: string}> = []
         let progressedThisPass = false
         let totalOpenSchedules = 0
 
         const entityRows = (await server.table('entity').all()) as unknown as ScheduledRow[]
-        const allRows: Array<{row: ScheduledRow; type: EntityTypeStr}> = entityRows.map((row) => ({
+        const allRows: Array<{row: ScheduledRow; type: EntityTypeName}> = entityRows.map((row) => ({
             row,
-            type: (row.kind?.toString() ?? 'ship') as EntityTypeStr,
+            type: (row.kind?.toString() ?? 'ship') as EntityTypeName,
         }))
 
         for (const {row, type} of allRows) {
@@ -56,7 +55,7 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
 
         if (options.dryRun) {
             console.log(
-                `\nFound ${totalOpenSchedules} entity(ies) with open schedules across ship/warehouse/container.`
+                `\nFound ${totalOpenSchedules} entity(ies) with open schedules across ${ALL_ENTITY_TYPES.join('/')}.`
             )
             break
         }
@@ -86,7 +85,7 @@ export function registerSubcommand(parent: Command): void {
         .addHelpText(
             'before',
             'Operator-only. Use before a contract redeploy that breaks task serialization. ' +
-                'Iterates ship/warehouse/container tables and calls `resolve` on each entity ' +
+                'Iterates the entity table and calls `resolve` on each entity ' +
                 'whose schedule has open tasks, until all schedules are empty or no further progress is possible.\n'
         )
         .option('--dry-run', 'list entities with open schedules without resolving')

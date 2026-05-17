@@ -1,16 +1,20 @@
 import {
-    CAP_MODULES,
     cargoRef,
     getItem,
     type Item,
-    kindCan,
     resolveItem,
     type ServerTypes,
     type Shipload,
 } from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
-import {type EntityTypeName, parseCargoRef, type ParsedCargoRef, parseUint8} from '../../lib/args'
+import {
+    ALL_ENTITY_TYPES,
+    type EntityTypeName,
+    parseCargoRef,
+    type ParsedCargoRef,
+    parseUint8,
+} from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -141,7 +145,7 @@ export async function runAddModule(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'addmodule',
     description: 'Attach a module cargo to the entity',
-    appliesTo: (kind) => kindCan(kind, CAP_MODULES),
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('addmodule')
             .description('Attach a module cargo to the entity')

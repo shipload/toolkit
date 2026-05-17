@@ -66,6 +66,10 @@ const KIND_META: Map<string, KindMeta> = (() => {
     return m
 })()
 
+export const ALL_ENTITY_TYPES: readonly EntityTypeName[] = Object.freeze([
+    ...KIND_META.keys(),
+] as EntityTypeName[])
+
 const TEMPLATE_BY_ITEM_ID: Map<number, TemplateMeta> = (() => {
     const m = new Map<number, TemplateMeta>()
     for (const r of kindRegistryJson.templates as RawTemplateEntry[]) {

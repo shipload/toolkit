@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir, platform } from "node:os";
 import { join, resolve } from "node:path";
 import { parse as parseIni } from "ini";
+import { ALL_ENTITY_TYPES, type EntityTypeName } from "./args";
 
 export class ConfigError extends Error {
 	constructor(message: string) {
@@ -11,7 +12,7 @@ export class ConfigError extends Error {
 }
 
 export type TrackSortMode = "type+id" | "status" | "eta" | "name";
-export type TrackTypeFilter = "all" | "ship" | "container" | "warehouse";
+export type TrackTypeFilter = "all" | EntityTypeName;
 export type TrackStatusFilter = "all" | "busy" | "resolvable" | "idle";
 
 export const DEFAULT_JUNGLE4_INDEXER_URL = "https://jungle4.shiploadgame.com";
@@ -211,7 +212,7 @@ export function getChainUrl(): string {
 }
 
 const SORT_VALUES: TrackSortMode[] = ["type+id", "status", "eta", "name"];
-const TYPE_VALUES: TrackTypeFilter[] = ["all", "ship", "container", "warehouse"];
+const TYPE_VALUES: TrackTypeFilter[] = ["all", ...ALL_ENTITY_TYPES];
 const STATUS_VALUES: TrackStatusFilter[] = ["all", "busy", "resolvable", "idle"];
 
 function parseTrackSort(v: string | undefined, source: string): TrackSortMode {

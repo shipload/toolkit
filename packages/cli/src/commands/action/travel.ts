@@ -1,7 +1,7 @@
 import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import {parseInt64} from '../../lib/args'
+import {ALL_ENTITY_TYPES, parseInt64} from '../../lib/args'
 import {decideUseRecharge} from '../../lib/auto-recharge'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -95,7 +95,7 @@ export async function runTravel(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'travel',
     description: 'Travel the ship to coordinates',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('travel')
             .description('Travel the ship to coordinates')

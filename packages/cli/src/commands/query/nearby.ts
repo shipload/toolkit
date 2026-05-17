@@ -1,7 +1,6 @@
 import {Checksum256} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import type {EntityTypeName} from '../../lib/args'
-import {parseUint32} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseUint32} from '../../lib/args'
 import {getGameSeed, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {formatNearby, type NearbySort} from '../../lib/format'
@@ -76,7 +75,7 @@ export async function runNearby(ctx: EntityContext, options: RunOptions): Promis
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'nearby',
     description: 'Show nearby systems and what they hold, ranked by distance.',
-    appliesTo: ['ship'],
+    appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('nearby')
             .description(

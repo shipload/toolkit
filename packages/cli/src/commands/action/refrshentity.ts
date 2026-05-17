@@ -1,7 +1,7 @@
 import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
-import type {EntityTypeName} from '../../lib/args'
+import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
@@ -30,7 +30,7 @@ function buildSubcommand(name: string, description: string): EntitySubcommand {
     return {
         name,
         description,
-        appliesTo: ['ship', 'warehouse', 'container'],
+        appliesTo: ALL_ENTITY_TYPES,
         build: (ctx) =>
             new Command(name)
                 .description(description)
