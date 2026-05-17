@@ -150,9 +150,7 @@ function slotTypeLabel(t: number): string {
 
 function moduleNameWithTier(itemId: number): string {
 	try {
-		const item = getItem(itemId);
-		const name = displayName(resolveItem(itemId));
-		return `${name} T${item.tier}`;
+		return displayName(resolveItem(itemId));
 	} catch {
 		return `item ${itemId}`;
 	}

@@ -35,7 +35,7 @@ describe("renderEntityFull modules", () => {
 			],
 		});
 		expect(out).toMatch(/Modules:/);
-		expect(out).toMatch(/#0 \(Any\):\s+Gatherer T1 — depth \d+ · yield \d+ · speed \d+ · \d+ energy\/s/);
+		expect(out).toMatch(/#0 \(Any\):\s+Gatherer \(T1\) — depth \d+ · yield \d+ · speed \d+ · \d+ energy\/s/);
 	});
 
 	test("renders empty slot with its accepted type", () => {
@@ -415,7 +415,7 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 		const out = renderEntityFull(entity);
 		expect(out).toMatch(/When done/);
 		expect(out).toMatch(/Cargo:\s+[^\n]*→/);
-		expect(out).toMatch(/-\s+Crude Ore stack 296902688:\s+73 → 72/);
+		expect(out).toMatch(/-\s+Crude Ore \(T1\) stack 296902688:\s+73 → 72/);
 	});
 
 	test("GATHER creating a new stack renders add line with (new) +N", () => {
@@ -429,7 +429,7 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 		});
 		const out = renderEntityFull(entity);
 		expect(out).toMatch(/When done/);
-		expect(out).toMatch(/\+\s+Crude Ore stack 555:\s+\(new\) \+5/);
+		expect(out).toMatch(/\+\s+Crude Ore \(T1\) stack 555:\s+\(new\) \+5/);
 	});
 
 	test("CRAFT renders per-stack lines for each consumed input and produced output", () => {
@@ -448,8 +448,8 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 		});
 		const out = renderEntityFull(entity);
 		expect(out).toMatch(/When done/);
-		expect(out).toMatch(/-\s+Crude Ore stack 100:\s+40 → 30/);
-		expect(out).toMatch(/-\s+Crude Crystal stack 200:\s+20 → 15/);
+		expect(out).toMatch(/-\s+Crude Ore \(T1\) stack 100:\s+40 → 30/);
+		expect(out).toMatch(/-\s+Crude Crystal \(T1\) stack 200:\s+20 → 15/);
 		expect(out).toMatch(/\+\s+[^\n]*stack 0:\s+\(new\) \+1/);
 	});
 

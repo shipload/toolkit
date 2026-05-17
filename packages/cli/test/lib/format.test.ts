@@ -158,7 +158,7 @@ describe("formatTaskShort", () => {
 			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
 			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
 		});
-		expect(formatTaskShort(t)).toBe("Receive 5 Crude Ore from warehouse 6");
+		expect(formatTaskShort(t)).toBe("Receive 5 Crude Ore (T1) from warehouse 6");
 	});
 
 	test("Unload reads as 'Send <items> to <target>'", () => {
@@ -167,7 +167,7 @@ describe("formatTaskShort", () => {
 			cargo: [{ item_id: 10001 as never, quantity: 7 as never, stats: 0n as never }] as never,
 			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
 		});
-		expect(formatTaskShort(t)).toBe("Send 7 Hull Plates to warehouse 6");
+		expect(formatTaskShort(t)).toBe("Send 7 Hull Plates (T1) to warehouse 6");
 	});
 
 	test("Load works with non-warehouse targets (ship-to-ship transfer)", () => {
@@ -176,7 +176,7 @@ describe("formatTaskShort", () => {
 			cargo: [{ item_id: 101 as never, quantity: 3 as never, stats: 0n as never }] as never,
 			entitytarget: { entity_type: "ship" as never, entity_id: 12n as never } as never,
 		});
-		expect(formatTaskShort(t)).toBe("Receive 3 Crude Ore from ship 12");
+		expect(formatTaskShort(t)).toBe("Receive 3 Crude Ore (T1) from ship 12");
 	});
 
 	test("Gather lists items without target phrasing", () => {
@@ -184,7 +184,7 @@ describe("formatTaskShort", () => {
 			type: 5 as never,
 			cargo: [{ item_id: 101 as never, quantity: 40 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Gather 40 Crude Ore");
+		expect(formatTaskShort(t)).toBe("Gather 40 Crude Ore (T1)");
 	});
 
 	test("Warp includes destination coords", () => {
@@ -204,7 +204,7 @@ describe("formatTaskShort", () => {
 				{ item_id: 10001 as never, quantity: 1 as never, stats: 0n as never },
 			] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Craft 1 Hull Plates");
+		expect(formatTaskShort(t)).toBe("Craft 1 Hull Plates (T1)");
 	});
 
 	test("Craft includes the output quantity", () => {
@@ -215,7 +215,7 @@ describe("formatTaskShort", () => {
 				{ item_id: 10001 as never, quantity: 5 as never, stats: 0n as never },
 			] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Craft 5 Hull Plates");
+		expect(formatTaskShort(t)).toBe("Craft 5 Hull Plates (T1)");
 	});
 
 	test("Craft with empty cargo is bare 'Craft' (defensive)", () => {
@@ -227,7 +227,7 @@ describe("formatTaskShort", () => {
 			type: 8 as never,
 			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Deploy Loader");
+		expect(formatTaskShort(t)).toBe("Deploy Loader (T1)");
 	});
 
 	test("Wrap / Unwrap / Undeploy list cargo", () => {
@@ -235,19 +235,19 @@ describe("formatTaskShort", () => {
 			type: 9 as never,
 			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(wrap)).toBe("Wrap 5 Crude Ore");
+		expect(formatTaskShort(wrap)).toBe("Wrap 5 Crude Ore (T1)");
 
 		const unwrap = task({
 			type: 10 as never,
 			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(unwrap)).toBe("Unwrap 5 Crude Ore");
+		expect(formatTaskShort(unwrap)).toBe("Unwrap 5 Crude Ore (T1)");
 
 		const undeploy = task({
 			type: 11 as never,
 			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Loader");
+		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Loader (T1)");
 	});
 
 	test("WrapEntity / Demolish are bare verbs", () => {
