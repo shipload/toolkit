@@ -19,7 +19,6 @@ import * as track from './commands/action/track'
 import * as transfer from './commands/action/transfer'
 import * as travel from './commands/action/travel'
 import * as undeploy from './commands/action/undeploy'
-import * as unwrap from './commands/action/unwrap'
 import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
@@ -128,7 +127,6 @@ export function build(): Command {
     registerEntitySubcommand(deploy.SUBCOMMAND)
     registerEntitySubcommand(undeploy.SUBCOMMAND)
     registerEntitySubcommand(wrap.SUBCOMMAND)
-    registerEntitySubcommand(unwrap.SUBCOMMAND)
     registerEntitySubcommand(wrapentity.SUBCOMMAND)
     registerEntitySubcommand(demolish.SUBCOMMAND)
     registerEntitySubcommand(addmodule.SUBCOMMAND)

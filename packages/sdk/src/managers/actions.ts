@@ -211,6 +211,24 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    deploynft(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.deploynft = {
+            owner: Name.from(owner),
+            asset_id: UInt64.from(assetId),
+            target_nexus_id: UInt64.from(targetNexusId),
+        }
+        return this.server.action('deploynft', params)
+    }
+
+    unwrapnft(owner: NameType, assetId: UInt64Type, hostId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.unwrapnft = {
+            owner: Name.from(owner),
+            asset_id: UInt64.from(assetId),
+            host_id: UInt64.from(hostId),
+        }
+        return this.server.action('unwrapnft', params)
+    }
+
     demolish(entityId: UInt64Type): Action {
         return this.server.action('demolish', {
             entity_id: UInt64.from(entityId),

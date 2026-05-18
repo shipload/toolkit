@@ -19,6 +19,8 @@ import {client, server} from '../../lib/client'
 import {formatItem, jsonStringify} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
 import {getAccountName} from '../../lib/session'
+import {buildDeployCommand} from '../action/nft-deploy'
+import {buildUnwrapCommand} from '../action/nft-unwrap'
 
 interface NftRow {
     asset_id: bigint
@@ -168,7 +170,7 @@ function rowsToJson(owner: string, rows: NftRow[]): unknown {
 }
 
 export function register(program: Command): void {
-    program
+    const nft = program
         .command('nft')
         .description(`List Shipload NFTs owned by an account (collection '${SHIPLOAD_COLLECTION}')`)
         .argument('[account]', 'account to inspect (defaults to configured actor)')
@@ -189,4 +191,6 @@ export function register(program: Command): void {
                 }
             }
         )
+    nft.addCommand(buildDeployCommand())
+    nft.addCommand(buildUnwrapCommand())
 }
