@@ -903,6 +903,8 @@ export namespace Types {
         declare item_id: UInt16
         @Struct.field(Name)
         declare schema_name: Name
+        @Struct.field(Int32)
+        declare template_id: Int32
     }
     @Struct.type('nftconfig_row')
     export class nftconfig_row extends Struct {

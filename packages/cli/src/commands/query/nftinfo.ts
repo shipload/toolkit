@@ -15,6 +15,7 @@ interface NftSchema {
 interface NftTemplate {
     item_id: number
     schema_name: string
+    template_id: number
 }
 
 interface NftInfo {
@@ -32,7 +33,10 @@ export function renderPretty(input: NftInfo): string {
     }
     lines.push('', `NFT templates (${templates.length}):`)
     for (const t of templates) {
-        lines.push(`  ${formatItem(t.item_id).padEnd(28)}  schema: ${t.schema_name}`)
+        const tpl = t.template_id ? String(t.template_id) : '—'
+        lines.push(
+            `  ${formatItem(t.item_id).padEnd(28)}  schema: ${t.schema_name.padEnd(16)}  template: ${tpl}`
+        )
     }
     return lines.join('\n')
 }
