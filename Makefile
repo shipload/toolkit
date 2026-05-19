@@ -81,23 +81,28 @@ release:
 	bun changeset version
 	bun update
 	bun biome format packages/*/package.json --write
-	git add .
-	git commit -m "chore: version packages"
-	@VER=$$(node -p "require('./packages/image-renderer/package.json').version"); \
+	@git add .; \
+	if git diff --cached --quiet; then \
+		echo "▸ No version changes to commit — changesets already consumed."; \
+		echo "▸ If you intended to publish, run 'make publish' next."; \
+		exit 0; \
+	fi; \
+	git commit -m "chore: version packages"; \
+	VER=$$(node -p "require('./packages/image-renderer/package.json').version"); \
 	TAG="@shipload/image-renderer@$$VER"; \
 	if git rev-parse --verify --quiet "refs/tags/$$TAG" >/dev/null; then \
 		echo "▸ $$TAG already exists; skipping (image-renderer not bumped this release)"; \
 	else \
 		git tag -a "$$TAG" -m "Release $$TAG"; \
 		echo "▸ Tagged $$TAG"; \
-	fi
-	git push --follow-tags
-	@echo ""
-	@echo "✓ Versions bumped, committed, and pushed."
-	@echo ""
-	@echo "Next: publish to npm (kept separate as a safety gate; may prompt for OTP):"
-	@echo "    make publish"
-	@echo ""
+	fi; \
+	git push --follow-tags; \
+	echo ""; \
+	echo "✓ Versions bumped, committed, and pushed."; \
+	echo ""; \
+	echo "Next: publish to npm (kept separate as a safety gate; may prompt for OTP):"; \
+	echo "    make publish"; \
+	echo ""
 	@echo "Then cut the CLI binary release (uses the version just bumped):"
 	@echo "    make release/cli"
 
