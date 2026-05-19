@@ -6,29 +6,10 @@ test('wrap builds action', async () => {
     const action = await buildAction(
         {
             owner: 'alice',
-            entityType: 'ship',
             entityId: 1n,
-            nexusId: 99n,
-            itemId: 7n,
-            stackId: 0n,
+            nexusId: 3n,
+            cargoId: 42n,
             quantity: 5n,
-        },
-        getLocalShipload()
-    )
-    expect(action.name.toString()).toBe('wrap')
-})
-
-test('wrap accepts modules vector', async () => {
-    const action = await buildAction(
-        {
-            owner: 'alice',
-            entityType: 'ship',
-            entityId: 1n,
-            nexusId: 99n,
-            itemId: 27n,
-            stackId: 888888888n,
-            quantity: 1n,
-            modules: [],
         },
         getLocalShipload()
     )

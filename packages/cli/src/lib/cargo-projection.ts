@@ -130,7 +130,6 @@ function applyTaskToCargo(stacks: ProjectedCargoStack[], task: ServerTypes.task)
 			for (const item of items) addCargo(stacks, item);
 			return;
 		case TaskType.UNLOAD:
-		case TaskType.WRAP:
 			for (const item of items) removeCargo(stacks, item);
 			return;
 		case TaskType.GATHER:

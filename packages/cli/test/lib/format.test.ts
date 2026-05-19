@@ -230,13 +230,7 @@ describe("formatTaskShort", () => {
 		expect(formatTaskShort(t)).toBe("Deploy Loader (T1)");
 	});
 
-	test("Wrap / Unwrap / Undeploy list cargo", () => {
-		const wrap = task({
-			type: 9 as never,
-			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
-		});
-		expect(formatTaskShort(wrap)).toBe("Wrap 5 Crude Ore (T1)");
-
+	test("Unwrap / Undeploy list cargo", () => {
 		const unwrap = task({
 			type: 10 as never,
 			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
@@ -250,8 +244,7 @@ describe("formatTaskShort", () => {
 		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Loader (T1)");
 	});
 
-	test("WrapEntity / Demolish are bare verbs", () => {
-		expect(formatTaskShort(task({ type: 12 as never }))).toBe("Wrap entity");
+	test("Demolish is bare verb", () => {
 		expect(formatTaskShort(task({ type: 13 as never }))).toBe("Demolish");
 	});
 });

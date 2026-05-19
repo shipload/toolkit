@@ -78,11 +78,11 @@ describe('inventory.render', () => {
         expect(out).toContain('11')
     })
 
-    test('busy entity with queued WRAP -1u shows (-1) delta and identity line', () => {
+    test('busy entity with queued UNLOAD -1u shows (-1) delta and identity line', () => {
         const out = render(
             makeEntity({
                 cargo: [{item_id: 301, quantity: 5, stats: 0n, id: 1}],
-                pending_tasks: [invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}])],
+                pending_tasks: [invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}])],
             })
         )
         expect(out).toContain('ship 1')
@@ -93,7 +93,7 @@ describe('inventory.render', () => {
         const out = render(
             makeEntity({
                 cargo: [{item_id: 301, quantity: 5, stats: 0n, id: 1}],
-                pending_tasks: [invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}])],
+                pending_tasks: [invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}])],
             }),
             {current: true}
         )
@@ -117,10 +117,10 @@ describe('inventory.buildInventoryData', () => {
         expect(data.projected_cargo[0].item_id).toBe(301n)
     })
 
-    test('queued WRAP -1u: projection.applies=true, projected_cargo reflects -1 qty', () => {
+    test('queued UNLOAD -1u: projection.applies=true, projected_cargo reflects -1 qty', () => {
         const entity = makeEntity({
             cargo: [{item_id: 301, quantity: 5, stats: 0n, id: 1}],
-            pending_tasks: [invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}])],
+            pending_tasks: [invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}])],
         })
         const data = buildInventoryData(entity)
         expect(data.projection.applies).toBe(true)
@@ -134,10 +134,10 @@ describe('inventory.buildInventoryData', () => {
     test('busy entity: tasks_considered = current_task (1) + pending.length', () => {
         const entity = makeEntity({
             cargo: [{item_id: 301, quantity: 10, stats: 0n, id: 1}],
-            current_task: invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}]),
+            current_task: invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}]),
             pending_tasks: [
-                invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}]),
-                invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}]),
+                invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}]),
+                invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}]),
             ],
         })
         const data = buildInventoryData(entity)
@@ -148,7 +148,7 @@ describe('inventory.buildInventoryData', () => {
     test('--current flag: projection.applies=false, tasks_considered=0, projected_cargo matches cargo', () => {
         const entity = makeEntity({
             cargo: [{item_id: 301, quantity: 5, stats: 0n, id: 1}],
-            pending_tasks: [invTask(TaskType.WRAP, [{item_id: 301, quantity: 1, stats: 0n}])],
+            pending_tasks: [invTask(TaskType.UNLOAD, [{item_id: 301, quantity: 1, stats: 0n}])],
         })
         const data = buildInventoryData(entity, {current: true})
         expect(data.projection.applies).toBe(false)

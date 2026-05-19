@@ -57,22 +57,20 @@ const LOCATION_TYPE_NAMES: Record<LocationType, string> = {
 	[LocationType.ICE_FIELD]: "Ice Field",
 };
 
-const TASK_TYPES = [
-	"Idle",
-	"Travel",
-	"Recharge",
-	"Load",
-	"Unload",
-	"Gather",
-	"Warp",
-	"Craft",
-	"Deploy",
-	"Wrap",
-	"Unwrap",
-	"Undeploy",
-	"WrapEntity",
-	"Demolish",
-];
+const TASK_TYPES: Record<number, string> = {
+	[TaskType.IDLE]: "Idle",
+	[TaskType.TRAVEL]: "Travel",
+	[TaskType.RECHARGE]: "Recharge",
+	[TaskType.LOAD]: "Load",
+	[TaskType.UNLOAD]: "Unload",
+	[TaskType.GATHER]: "Gather",
+	[TaskType.WARP]: "Warp",
+	[TaskType.CRAFT]: "Craft",
+	[TaskType.DEPLOY]: "Deploy",
+	[TaskType.UNWRAP]: "Unwrap",
+	[TaskType.UNDEPLOY]: "Undeploy",
+	[TaskType.DEMOLISH]: "Demolish",
+};
 
 export function formatTaskType(type: number): string {
 	return TASK_TYPES[type] ?? `Unknown(${type})`;
@@ -138,10 +136,6 @@ export function formatTaskShort(t: ServerTypes.task): string {
 			const name = itemDisplayName(Number(first.item_id)) ?? `Item ${Number(first.item_id)}`;
 			return `Deploy ${name}`;
 		}
-		case TaskType.WRAP: {
-			const items = formatItemList(t.cargo);
-			return items ? `Wrap ${items}` : "Wrap";
-		}
 		case TaskType.UNWRAP: {
 			const items = formatItemList(t.cargo);
 			return items ? `Unwrap ${items}` : "Unwrap";
@@ -150,8 +144,6 @@ export function formatTaskShort(t: ServerTypes.task): string {
 			const items = formatItemList(t.cargo);
 			return items ? `Undeploy ${items}` : "Undeploy";
 		}
-		case TaskType.WRAP_ENTITY:
-			return "Wrap entity";
 		case TaskType.DEMOLISH:
 			return "Demolish";
 		default:

@@ -187,13 +187,15 @@ export class ActionsManager extends BaseManager {
         owner: NameType,
         entityId: UInt64Type,
         nexusId: UInt64Type,
-        items: ServerContract.ActionParams.Type.cargo_item[]
+        cargoId: UInt64Type,
+        quantity: UInt64Type
     ): Action {
         return this.server.action('wrap', {
             owner: Name.from(owner),
             entity_id: UInt64.from(entityId),
             nexus_id: UInt64.from(nexusId),
-            items,
+            cargo_id: UInt64.from(cargoId),
+            quantity: UInt64.from(quantity),
         })
     }
 

@@ -1,9 +1,7 @@
-import {cargoItem, type ServerTypes, type Shipload} from '@shipload/sdk'
+import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
-import {Command, Option} from 'commander'
-import {ALL_ENTITY_TYPES, type EntityTypeName, parseCargoInput, parseUint64} from '../../lib/args'
-import {parseModulesJson} from '../../lib/cargo-build'
-import type {ParsedCargoInput} from '../../lib/cargo-resolve'
+import {Command} from 'commander'
+import {ALL_ENTITY_TYPES, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
@@ -11,54 +9,40 @@ import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export interface WrapOpts {
     owner: string
-    entityType: EntityTypeName
     entityId: bigint
     nexusId: bigint
-    itemId: bigint
-    stackId: bigint
+    cargoId: bigint
     quantity: bigint
-    modules?: ServerTypes.module_entry[]
 }
 
 export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<Action> {
     const sl = shipload ?? (await getShipload())
-    const item = cargoItem(
-        {
-            item_id: Number(opts.itemId),
-            stats: opts.stackId,
-            modules: opts.modules ?? [],
-        },
-        opts.quantity
-    )
-    return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, [item])
+    return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, opts.cargoId, opts.quantity)
 }
 
 interface WrapCliOptions {
     wait?: boolean
     track?: boolean
-    modules?: string
 }
 
 export async function runWrap(
     ctx: EntityContext,
     owner: string,
     nexusId: bigint,
-    input: ParsedCargoInput,
+    cargoId: bigint,
+    quantity: bigint,
     options: WrapCliOptions
 ): Promise<void> {
     const action = await buildAction({
         owner,
-        entityType: ctx.entityType,
         entityId: ctx.entityId,
         nexusId,
-        itemId: BigInt(input.itemId),
-        stackId: input.stackId,
-        quantity: BigInt(input.quantity),
-        modules: parseModulesJson(options.modules),
+        cargoId,
+        quantity,
     })
     const result = await transact(
         {action},
-        {description: `Wrapping ${input.quantity} cargo for ${owner}`}
+        {description: `Wrapping ${quantity} of cargo ${cargoId} for ${owner}`}
     )
     await maybeAwaitAndPrint(ctx.entityId, options, result)
 }
@@ -72,37 +56,37 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Wrap cargo into an NFT for the specified owner')
             .addHelpText(
                 'before',
-                'Requires: deployed entity at a nexus with cargo; caller owns the entity.\n' +
-                    'Cargo is identified by <item-id>:<stack-id>:<qty> — packed-entity stacks may also need --modules.\n'
+                'Requires: deployed entity at a nexus with loaders; caller owns the entity.\n' +
+                    'Cargo is identified by its cargo-id (row primary key). Mints instantly.\n'
             )
             .addHelpText(
                 'after',
                 `
 Example:
-  # Wrap 5 of item 7 (stack 0) into an NFT for alice
-  shiploadcli ship 1 wrap alice 99 7:0:5
+  # Wrap 5 units of cargo row 42 into an NFT for alice at nexus 3
+  shiploadcli ship 1 wrap alice 3 42 5
 
-Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
+Use \`shiploadcli ship N cargo\` to list cargo rows with their ids.`
             )
             .argument('<owner>', 'recipient account name')
-            .argument('<nexus-id>', 'nexus id (entity must be at this nexus)', parseUint64)
-            .argument('<input>', '<item-id>:<stack-id>:<qty> — cargo to wrap.', parseCargoInput)
-            .addOption(
-                new Option(
-                    '--modules <json>',
-                    'modules vector for packed entities (JSON array, default [])'
-                )
+            .argument(
+                '<nexus-id>',
+                'nexus entity id where the wrapping entity is located',
+                parseUint64
             )
+            .argument('<cargo-id>', 'cargo row id (primary key from the cargo table)', parseUint64)
+            .argument('<quantity>', 'amount to wrap', parseUint64)
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(
                 async (
                     owner: string,
                     nexusId: bigint,
-                    input: ParsedCargoInput,
+                    cargoId: bigint,
+                    quantity: bigint,
                     opts: WrapCliOptions
                 ) => {
-                    await runWrap(ctx, owner, nexusId, input, opts)
+                    await runWrap(ctx, owner, nexusId, cargoId, quantity, opts)
                 }
             ),
 }

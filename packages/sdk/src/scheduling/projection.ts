@@ -255,7 +255,6 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyAddCargoTask(projected, task)
             break
         case TaskType.UNLOAD:
-        case TaskType.WRAP:
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.GATHER:
@@ -268,7 +267,6 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyDeployTask(projected, task)
             break
         case TaskType.UNDEPLOY:
-        case TaskType.WRAP_ENTITY:
         case TaskType.DEMOLISH:
             break
     }
@@ -440,7 +438,6 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 if (taskComplete) applyAddCargoTask(projected, task)
                 break
             case TaskType.UNLOAD:
-            case TaskType.WRAP:
                 if (taskComplete) applyRemoveCargoTask(projected, task)
                 break
             case TaskType.GATHER:
@@ -453,7 +450,6 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 if (taskComplete) applyDeployTask(projected, task)
                 break
             case TaskType.UNDEPLOY:
-            case TaskType.WRAP_ENTITY:
             case TaskType.DEMOLISH:
                 break
         }

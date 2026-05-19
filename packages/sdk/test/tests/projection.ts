@@ -124,17 +124,7 @@ describe('projectEntity (stack-aware)', () => {
         })
     })
 
-    describe('WRAP / UNWRAP', () => {
-        test('WRAP removes cargo (mirrors UNLOAD)', () => {
-            const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 200}]})
-            ship.schedule = ServerContract.Types.schedule.from({
-                started: '2024-06-04T23:41:09.000',
-                tasks: [makeTask(TaskType.WRAP, {cargo: [{item_id: 5, quantity: 4, stats: 200}]})],
-            })
-            const projected = projectEntity(ship)
-            assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 6)
-        })
-
+    describe('UNWRAP', () => {
         test('UNWRAP adds cargo (mirrors LOAD)', () => {
             const ship = makeShipFixture({})
             ship.schedule = ServerContract.Types.schedule.from({

@@ -34,7 +34,6 @@ export function taskCargoChanges(task: ServerContract.Types.task): TaskCargoChan
         case TaskType.GATHER:
             return task.entitytarget ? [] : items.map((i) => toChange(i, 'in'))
         case TaskType.UNLOAD:
-        case TaskType.WRAP:
             return items.map((i) => toChange(i, 'out'))
         case TaskType.CRAFT:
             return [

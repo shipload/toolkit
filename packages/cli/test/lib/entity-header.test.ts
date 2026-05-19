@@ -285,10 +285,10 @@ describe("renderInventoryView", () => {
 		expect(result.text).not.toContain("(new)");
 	});
 
-	test("idle entity with queued WRAP removing 1u shows (-1) annotation", () => {
+	test("idle entity with queued UNLOAD removing 1u shows (-1) annotation", () => {
 		const entity = makeInventoryEntity({
 			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
-			pending_tasks: [invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }])],
+			pending_tasks: [invTask(TaskType.UNLOAD, [{ item_id: 301, quantity: 1, stats: 0n }])],
 		});
 		const result = renderInventoryView(entity);
 		expect(result.projectionApplied).toBe(true);
@@ -309,10 +309,10 @@ describe("renderInventoryView", () => {
 	test("busy entity counts current_task + pending_tasks for tasksConsidered", () => {
 		const entity = makeInventoryEntity({
 			cargo: [{ item_id: 301, quantity: 10, stats: 0n, id: 1 }],
-			current_task: invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
+			current_task: invTask(TaskType.UNLOAD, [{ item_id: 301, quantity: 1, stats: 0n }]),
 			pending_tasks: [
-				invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
-				invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }]),
+				invTask(TaskType.UNLOAD, [{ item_id: 301, quantity: 1, stats: 0n }]),
+				invTask(TaskType.UNLOAD, [{ item_id: 301, quantity: 1, stats: 0n }]),
 			],
 		});
 		const result = renderInventoryView(entity);
@@ -323,7 +323,7 @@ describe("renderInventoryView", () => {
 	test("opts.current=true skips projection entirely (tasksConsidered=0)", () => {
 		const entity = makeInventoryEntity({
 			cargo: [{ item_id: 301, quantity: 5, stats: 0n, id: 1 }],
-			pending_tasks: [invTask(TaskType.WRAP, [{ item_id: 301, quantity: 1, stats: 0n }])],
+			pending_tasks: [invTask(TaskType.UNLOAD, [{ item_id: 301, quantity: 1, stats: 0n }])],
 		});
 		const result = renderInventoryView(entity, { current: true });
 		expect(result.projectionApplied).toBe(false);
@@ -402,13 +402,13 @@ function busyTask(
 }
 
 describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
-	test("WRAP -1u of a stack renders remove line with current → projected", () => {
+	test("UNLOAD -1u of a stack renders remove line with current → projected", () => {
 		const STAT = 296902688n;
 		const entity = makeBusyEntity({
 			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
 			cargomass: 73 * 52_000,
 			capacity: 4_000_000_000,
-			current_task: busyTask(TaskType.WRAP, 60, [
+			current_task: busyTask(TaskType.UNLOAD, 60, [
 				{ item_id: 101, quantity: 1, stats: STAT },
 			]),
 		});
@@ -458,7 +458,7 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 			cargo: [{ item_id: 101, quantity: 10, stats: 100n, id: 1 }],
 			cargomass: 10 * 52_000,
 			capacity: 4_000_000_000,
-			current_task: busyTask(TaskType.WRAP_ENTITY, 60, []),
+			current_task: busyTask(TaskType.UNDEPLOY, 60, []),
 		});
 		const out = renderEntityFull(entity);
 		expect(out).not.toMatch(/When done/);
@@ -472,7 +472,7 @@ describe("renderEntityFull suppressWhenDone", () => {
 			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
 			cargomass: 73 * 52_000,
 			capacity: 4_000_000_000,
-			current_task: busyTask(TaskType.WRAP, 60, [
+			current_task: busyTask(TaskType.UNLOAD, 60, [
 				{ item_id: 101, quantity: 1, stats: STAT },
 			]),
 		});
@@ -486,7 +486,7 @@ describe("renderEntityFull suppressWhenDone", () => {
 			cargo: [{ item_id: 101, quantity: 73, stats: STAT, id: 1 }],
 			cargomass: 73 * 52_000,
 			capacity: 4_000_000_000,
-			current_task: busyTask(TaskType.WRAP, 60, [
+			current_task: busyTask(TaskType.UNLOAD, 60, [
 				{ item_id: 101, quantity: 1, stats: STAT },
 			]),
 		});
