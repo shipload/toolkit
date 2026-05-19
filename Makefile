@@ -117,6 +117,10 @@ publish:
 		fi; \
 		NAME=$$(node -p "require('./$$pkg').name"); \
 		VER=$$(node -p "require('./$$pkg').version"); \
+		if npm view "$$NAME@$$VER" version >/dev/null 2>&1; then \
+			echo "▸ skip $$NAME@$$VER (already published)"; \
+			continue; \
+		fi; \
 		echo "▸ publish $$NAME@$$VER"; \
 		bun publish --cwd "$$DIR" --access public $$TAG_FLAG || exit 1; \
 	done
