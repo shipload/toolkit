@@ -1,5 +1,16 @@
 # @shipload/sdk
 
+## 1.0.0-next.16
+
+### Patch Changes
+
+- cc2b1e9: - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Adding snapshot commands + NFT mint refactor
+  - Adding in template_id
+  - Switched to dual-action NFT deploy/unwrap pattern
+
 ## 1.0.0-next.15
 
 ### Patch Changes
