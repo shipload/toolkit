@@ -9,10 +9,10 @@ import {
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
-    ITEM_HULL_PLATES,
+    ITEM_PLATE,
     ITEM_LOADER_T1,
     ITEM_SHIP_T1_PACKED,
-    ITEM_THRUSTER_CORE,
+    ITEM_PLASMA_CELL,
     resolveItem,
 } from '$lib'
 
@@ -45,14 +45,14 @@ describe('resolveItem', () => {
     })
 
     test('resolves a component by item ID', () => {
-        const result = resolveItem(UInt16.from(ITEM_HULL_PLATES))
+        const result = resolveItem(UInt16.from(ITEM_PLATE))
         assert.equal(result.itemType, 'component')
-        assert.equal(result.icon, 'HP')
+        assert.equal(result.icon, 'PL')
         assert.isUndefined(result.stats)
     })
 
     test('resolves a component with seed and returns stats', () => {
-        const result = resolveItem(UInt16.from(ITEM_THRUSTER_CORE), UInt64.from(99999))
+        const result = resolveItem(UInt16.from(ITEM_PLASMA_CELL), UInt64.from(99999))
         assert.equal(result.itemType, 'component')
         assert.isDefined(result.stats)
         assert.isAbove(result.stats!.length, 0)
@@ -141,8 +141,8 @@ describe('resolveItem', () => {
 
 describe('ResolvedItem.abbreviation', () => {
     test('component exposes abbreviation', () => {
-        const resolved = resolveItem(UInt16.from(ITEM_HULL_PLATES))
-        assert.equal(resolved.abbreviation, 'HP')
+        const resolved = resolveItem(UInt16.from(ITEM_PLATE))
+        assert.equal(resolved.abbreviation, 'PL')
     })
 
     test('module exposes abbreviation', () => {

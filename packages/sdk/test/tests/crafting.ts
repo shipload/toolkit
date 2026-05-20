@@ -21,15 +21,15 @@ import {
     encodeGatheredCargoStats,
     encodeStats,
     findItemByCategoryAndTier,
-    ITEM_CARGO_LINING,
-    ITEM_CARGO_LINING_T2,
+    ITEM_FRAME,
+    ITEM_FRAME_T2,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
-    ITEM_FOCUSING_ARRAY,
+    ITEM_EMITTER,
     ITEM_HAULER_T1,
-    ITEM_HULL_PLATES,
-    ITEM_HULL_PLATES_T2,
-    ITEM_THRUSTER_CORE,
+    ITEM_PLATE,
+    ITEM_PLATE_T2,
+    ITEM_PLASMA_CELL,
     type RecipeSlotInput,
 } from '$lib'
 
@@ -86,8 +86,8 @@ describe('Crafting', () => {
     })
 
     describe('Component Stats', () => {
-        test('hull plates from ore stacks', () => {
-            const stats = computeComponentStats(ITEM_HULL_PLATES, [
+        test('plates from ore stacks', () => {
+            const stats = computeComponentStats(ITEM_PLATE, [
                 {
                     category: 'ore',
                     stacks: [
@@ -104,7 +104,7 @@ describe('Crafting', () => {
         })
 
         test('focusing array from crystal stacks blends weighted average', () => {
-            const stats = computeComponentStats(ITEM_FOCUSING_ARRAY, [
+            const stats = computeComponentStats(ITEM_EMITTER, [
                 {
                     category: 'crystal',
                     stacks: [
@@ -126,9 +126,9 @@ describe('Crafting', () => {
             assert.equal(res!.value, 560)
         })
 
-        test('cargo lining from regolith + biomass', () => {
+        test('frame from regolith + biomass', () => {
             // Recipe 10002 statSlots: [regolith stat 1 (hardness), biomass stat 2 (saturation)].
-            const stats = computeComponentStats(ITEM_CARGO_LINING, [
+            const stats = computeComponentStats(ITEM_FRAME, [
                 {
                     category: 'regolith',
                     stacks: [
@@ -156,11 +156,11 @@ describe('Crafting', () => {
     describe('Entity Stats', () => {
         test('container from component stacks', () => {
             const stats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
-                [ITEM_HULL_PLATES]: [
+                [ITEM_PLATE]: [
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 400, density: 200}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {hardness: 600, saturation: 700}}],
+                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, saturation: 700}}],
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
@@ -169,16 +169,16 @@ describe('Crafting', () => {
     })
 
     describe('Decode Crafted Item', () => {
-        test('decode hull plates seed', () => {
+        test('decode plate seed', () => {
             const seed = encodeStats([450, 300])
-            const stats = decodeCraftedItemStats(ITEM_HULL_PLATES, seed)
+            const stats = decodeCraftedItemStats(ITEM_PLATE, seed)
             assert.equal(stats['strength'], 450)
             assert.equal(stats['density'], 300)
         })
 
         test('decode container packed seed', () => {
-            // Container T1 statSlots derive from Hull Plates (strength, density)
-            // and Cargo Lining (hardness, saturation), so decode keys are those four.
+            // Container T1 statSlots derive from Plate (strength, density)
+            // and Frame (hardness, saturation), so decode keys are those four.
             const seed = encodeStats([500, 300, 600, 700])
             const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
@@ -231,7 +231,7 @@ describe('Crafting', () => {
     })
 
     describe('computeCraftedOutputStats', () => {
-        test('single-input single-category component (Thruster Core from gas)', () => {
+        test('single-input single-category component (Plasma Cell from gas)', () => {
             const seedA = 0x123456789abcdef0n
             const seedB = 0xfedcba9876543210n
             const slotInputs: RecipeSlotInput[] = [
@@ -244,7 +244,7 @@ describe('Crafting', () => {
                     ],
                 },
             ]
-            const outputStats = computeCraftedOutputStats(ITEM_THRUSTER_CORE, slotInputs)
+            const outputStats = computeCraftedOutputStats(ITEM_PLASMA_CELL, slotInputs)
 
             const rawA = {
                 stat1: decodeStat(seedA, 0),
@@ -256,7 +256,7 @@ describe('Crafting', () => {
                 stat2: decodeStat(seedB, 1),
                 stat3: decodeStat(seedB, 2),
             }
-            const expectedStats = computeComponentStats(ITEM_THRUSTER_CORE, [
+            const expectedStats = computeComponentStats(ITEM_PLASMA_CELL, [
                 {
                     category: 'gas',
                     stacks: [
@@ -279,17 +279,14 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            const decoded = decodeCraftedItemStats(
-                ITEM_THRUSTER_CORE,
-                BigInt(outputStats.toString())
-            )
+            const decoded = decodeCraftedItemStats(ITEM_PLASMA_CELL, BigInt(outputStats.toString()))
             const vol = expectedStats.find((s) => s.key === 'volatility')!.value
             const thm = expectedStats.find((s) => s.key === 'thermal')!.value
             assert.equal(decoded['volatility'], vol)
             assert.equal(decoded['thermal'], thm)
         })
 
-        test('multi-input multi-category component (Cargo Lining from regolith + biomass)', () => {
+        test('multi-input multi-category component (Frame from regolith + biomass)', () => {
             const regolithSeed = 0x1111222233334444n
             const biomassSeed = 0xaaaabbbbccccddddn
             const slotInputs: RecipeSlotInput[] = [
@@ -304,7 +301,7 @@ describe('Crafting', () => {
                     stacks: [{quantity: 20, stats: biomassSeed}],
                 },
             ]
-            const outputStats = computeCraftedOutputStats(ITEM_CARGO_LINING, slotInputs)
+            const outputStats = computeCraftedOutputStats(ITEM_FRAME, slotInputs)
 
             const rawR = {
                 stat1: decodeStat(regolithSeed, 0),
@@ -316,7 +313,7 @@ describe('Crafting', () => {
                 stat2: decodeStat(biomassSeed, 1),
                 stat3: decodeStat(biomassSeed, 2),
             }
-            const expectedStats = computeComponentStats(ITEM_CARGO_LINING, [
+            const expectedStats = computeComponentStats(ITEM_FRAME, [
                 {
                     category: 'regolith',
                     stacks: [
@@ -344,10 +341,7 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            const decoded = decodeCraftedItemStats(
-                ITEM_CARGO_LINING,
-                BigInt(outputStats.toString())
-            )
+            const decoded = decodeCraftedItemStats(ITEM_FRAME, BigInt(outputStats.toString()))
             const hard = expectedStats.find((s) => s.key === 'hardness')!.value
             const sat = expectedStats.find((s) => s.key === 'saturation')!.value
             assert.equal(decoded['hardness'], hard)
@@ -356,8 +350,8 @@ describe('Crafting', () => {
             assert.equal(decoded['saturation'], rawB.stat3)
         })
 
-        test('entity recipe (Container packed from hull_plates + cargo_lining)', () => {
-            // Hull Plates packs (strength, density); Cargo Lining packs
+        test('entity recipe (Container packed from plate + frame)', () => {
+            // Plate packs (strength, density); Frame packs
             // (hardness, saturation) per the new contract recipes.
             const hullSeedA = encodeStats([500, 300])
             const hullSeedB = encodeStats([700, 400])
@@ -365,7 +359,7 @@ describe('Crafting', () => {
 
             const slotInputs: RecipeSlotInput[] = [
                 {
-                    itemId: ITEM_HULL_PLATES,
+                    itemId: ITEM_PLATE,
                     category: undefined,
                     stacks: [
                         {quantity: 4, stats: hullSeedA},
@@ -373,7 +367,7 @@ describe('Crafting', () => {
                     ],
                 },
                 {
-                    itemId: ITEM_CARGO_LINING,
+                    itemId: ITEM_FRAME,
                     category: undefined,
                     stacks: [{quantity: 2, stats: liningSeed}],
                 },
@@ -381,11 +375,11 @@ describe('Crafting', () => {
             const outputStats = computeCraftedOutputStats(ITEM_CONTAINER_T1_PACKED, slotInputs)
 
             const expectedStats = computeEntityStats(ITEM_CONTAINER_T1_PACKED, {
-                [ITEM_HULL_PLATES]: [
+                [ITEM_PLATE]: [
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 700, density: 400}},
                 ],
-                [ITEM_CARGO_LINING]: [{quantity: 2, stats: {hardness: 600, saturation: 800}}],
+                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, saturation: 800}}],
             })
             const decoded = decodeCraftedItemStats(
                 ITEM_CONTAINER_T1_PACKED,
@@ -420,15 +414,15 @@ describe('Crafting', () => {
     })
 
     describe('T2 Multi-Source Blending', () => {
-        test('Hull Plates T2 blends component + raw ore stats', () => {
-            const hullPlatesEncoded = encodeStats([400, 300])
+        test('Plate T2 blends component + raw ore stats', () => {
+            const plateEncoded = encodeStats([400, 300])
             const oreT2Seed = encodeStats([600, 0, 200])
 
             const slotInputs: RecipeSlotInput[] = [
                 {
-                    itemId: ITEM_HULL_PLATES,
+                    itemId: ITEM_PLATE,
                     category: undefined,
-                    stacks: [{quantity: 2, stats: hullPlatesEncoded}],
+                    stacks: [{quantity: 2, stats: plateEncoded}],
                 },
                 {
                     itemId: 102,
@@ -436,23 +430,23 @@ describe('Crafting', () => {
                     stacks: [{quantity: 15, stats: oreT2Seed}],
                 },
             ]
-            const output = computeCraftedOutputStats(ITEM_HULL_PLATES_T2, slotInputs)
-            const decoded = decodeCraftedItemStats(ITEM_HULL_PLATES_T2, BigInt(output.toString()))
+            const output = computeCraftedOutputStats(ITEM_PLATE_T2, slotInputs)
+            const decoded = decodeCraftedItemStats(ITEM_PLATE_T2, BigInt(output.toString()))
 
             assert.equal(decoded['strength'], 500)
             assert.equal(decoded['density'], 250)
         })
 
-        test('Cargo Lining T2 blends component + regolith + biomass stats', () => {
-            const clEncoded = encodeStats([600, 700])
+        test('Frame T2 blends component + regolith + biomass stats', () => {
+            const frameEncoded = encodeStats([600, 700])
             const regolithSeed = encodeStats([0, 400, 0])
             const biomassSeed = encodeStats([0, 0, 800])
 
             const slotInputs: RecipeSlotInput[] = [
                 {
-                    itemId: ITEM_CARGO_LINING,
+                    itemId: ITEM_FRAME,
                     category: undefined,
-                    stacks: [{quantity: 2, stats: clEncoded}],
+                    stacks: [{quantity: 2, stats: frameEncoded}],
                 },
                 {
                     itemId: 402,
@@ -465,8 +459,8 @@ describe('Crafting', () => {
                     stacks: [{quantity: 20, stats: biomassSeed}],
                 },
             ]
-            const output = computeCraftedOutputStats(ITEM_CARGO_LINING_T2, slotInputs)
-            const decoded = decodeCraftedItemStats(ITEM_CARGO_LINING_T2, BigInt(output.toString()))
+            const output = computeCraftedOutputStats(ITEM_FRAME_T2, slotInputs)
+            const decoded = decodeCraftedItemStats(ITEM_FRAME_T2, BigInt(output.toString()))
 
             assert.equal(decoded['hardness'], 500)
             assert.equal(decoded['saturation'], 750)
@@ -634,7 +628,7 @@ describe('Crafting', () => {
 
     describe('computeInputMass', () => {
         test('component returns positive mass', () => {
-            const mass = computeInputMass(ITEM_HULL_PLATES)
+            const mass = computeInputMass(ITEM_PLATE)
             assert.isAbove(mass, 0)
             const oreT1 = findItemByCategoryAndTier('ore', 1)
             assert.equal(mass, 15 * oreT1.mass)
@@ -680,7 +674,7 @@ describe('Crafting', () => {
 
     describe('calc_craft_energy', () => {
         test('basic energy calculation', () => {
-            // Hull Plates: 450K input_mass × drain 17 / 150K = 51
+            // Plate: 450K input_mass × drain 17 / 150K = 51
             const energy = calc_craft_energy(17, 450000)
             assert.equal(energy.toNumber(), 51)
         })

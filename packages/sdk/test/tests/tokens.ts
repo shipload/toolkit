@@ -4,7 +4,7 @@ import {
     type CategoryIconShape,
     categoryIconShapes,
     ITEM_ENGINE_T1,
-    ITEM_HULL_PLATES,
+    ITEM_PLATE,
     ITEM_SHIP_T1_PACKED,
     itemAbbreviations,
     tierAdjective,
@@ -49,7 +49,7 @@ describe('tokens', () => {
 
     describe('itemAbbreviations', () => {
         test('covers known components, modules, and entities', () => {
-            assert.equal(itemAbbreviations[ITEM_HULL_PLATES], 'HP')
+            assert.equal(itemAbbreviations[ITEM_PLATE], 'PL')
             assert.equal(itemAbbreviations[ITEM_ENGINE_T1], 'EN')
             assert.equal(itemAbbreviations[ITEM_SHIP_T1_PACKED], 'SH')
         })

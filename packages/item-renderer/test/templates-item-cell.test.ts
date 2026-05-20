@@ -1,10 +1,10 @@
 import {test, expect} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
-import {ITEM_HULL_PLATES, ITEM_ENGINE_T1, ITEM_SHIP_T1_PACKED} from '@shipload/sdk'
+import {ITEM_PLATE, ITEM_ENGINE_T1, ITEM_SHIP_T1_PACKED} from '@shipload/sdk'
 import {renderItemCell, itemCellGroup} from '../src/templates/item-cell.ts'
 
 test('renderItemCell returns a self-contained <svg>', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svg = renderItemCell({resolved, size: 48})
     expect(svg.startsWith('<svg ')).toBe(true)
     expect(svg).toContain('viewBox="0 0 48 60"')
@@ -12,9 +12,9 @@ test('renderItemCell returns a self-contained <svg>', () => {
 })
 
 test('component cell renders abbreviation', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('>HP<')
+    expect(svg).toContain('>PL<')
 })
 
 test('module cell renders abbreviation', () => {
@@ -37,14 +37,14 @@ test('resource cell renders category icon (no abbreviation)', () => {
 })
 
 test('quantity renders as plain bold number when quantity > 1', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svg = renderItemCell({resolved, quantity: 42, size: 48})
     expect(svg).toContain('>42<')
     expect(svg).not.toContain('×')
 })
 
 test('no quantity text when quantity is 1 or omitted', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svgNoQty = renderItemCell({resolved, size: 48})
     const svgOne = renderItemCell({resolved, quantity: 1, size: 48})
     expect(svgNoQty).not.toContain('>1<')
@@ -52,7 +52,7 @@ test('no quantity text when quantity is 1 or omitted', () => {
 })
 
 test('itemCellGroup returns <g> with translate, no <svg> wrapper', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const g = itemCellGroup({resolved, size: 48, x: 100, y: 200})
     expect(g.startsWith('<g ')).toBe(true)
     expect(g).toContain('transform="translate(100, 200)"')
@@ -60,13 +60,13 @@ test('itemCellGroup returns <g> with translate, no <svg> wrapper', () => {
 })
 
 test('tier border uses SDK tierColors for the resolved tier', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svg = renderItemCell({resolved, size: 48})
     expect(svg).toContain('#8b8b8b')
 })
 
 test('abbreviation cell uses proportional font size for different sizes', () => {
-    const resolved = resolveItem(ITEM_HULL_PLATES)
+    const resolved = resolveItem(ITEM_PLATE)
     const svg28 = renderItemCell({resolved, size: 28})
     const svg80 = renderItemCell({resolved, size: 80})
     expect(svg28).toContain('font-size="8"')
@@ -83,7 +83,7 @@ test('resource icon renders in stroke-only mode', () => {
 test('matches golden SVG snapshot per itemType', () => {
     const cases: [number, string][] = [
         [101, 'item-cell-resource'],
-        [ITEM_HULL_PLATES, 'item-cell-component'],
+        [ITEM_PLATE, 'item-cell-component'],
         [ITEM_ENGINE_T1, 'item-cell-module'],
         [ITEM_SHIP_T1_PACKED, 'item-cell-entity'],
     ]

@@ -6,8 +6,8 @@ import {resolve} from 'node:path'
 import {
     type CargoStack,
     ENTITY_CAPACITY_EXCEEDED,
-    ITEM_HULL_PLATES,
-    ITEM_THRUSTER_CORE,
+    ITEM_PLATE,
+    ITEM_PLASMA_CELL,
     projectEntity,
     projectFromCurrentState,
     projectFromCurrentStateAt,
@@ -166,10 +166,10 @@ describe('projectEntity (stack-aware)', () => {
         })
 
         describe('craft input validation', () => {
-            // Hull Plates recipe: [{category: 'ore', quantity: 15}] → output qty 1
+            // Plate recipe: [{category: 'ore', quantity: 15}] → output qty 1
             const HULL_PLATES_QTY = 15
 
-            test('accepts valid craft inputs (Hull Plates from 15 ore)', () => {
+            test('accepts valid craft inputs (Plate from 15 ore)', () => {
                 const ship = makeShipFixture({
                     capacity: 10_000_000,
                     cargo: [{item_id: 101, quantity: HULL_PLATES_QTY, stats: 0}],
@@ -180,7 +180,7 @@ describe('projectEntity (stack-aware)', () => {
                         makeTask(TaskType.CRAFT, {
                             cargo: [
                                 {item_id: 101, quantity: HULL_PLATES_QTY, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                                {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
@@ -216,7 +216,7 @@ describe('projectEntity (stack-aware)', () => {
                         makeTask(TaskType.CRAFT, {
                             cargo: [
                                 {item_id: 101, quantity: 10, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                                {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
@@ -234,7 +234,7 @@ describe('projectEntity (stack-aware)', () => {
                         makeTask(TaskType.CRAFT, {
                             cargo: [
                                 {item_id: 101, quantity: 20, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                                {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
@@ -243,7 +243,7 @@ describe('projectEntity (stack-aware)', () => {
             })
 
             test('throws RECIPE_INPUTS_INVALID when input category does not match', () => {
-                // Crystal (201) offered to Hull Plates recipe which needs ore
+                // Crystal (201) offered to Plate recipe which needs ore
                 const ship = makeShipFixture({
                     cargo: [{item_id: 201, quantity: HULL_PLATES_QTY, stats: 0}],
                 })
@@ -253,7 +253,7 @@ describe('projectEntity (stack-aware)', () => {
                         makeTask(TaskType.CRAFT, {
                             cargo: [
                                 {item_id: 201, quantity: HULL_PLATES_QTY, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                                {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
@@ -270,7 +270,7 @@ describe('projectEntity (stack-aware)', () => {
                         makeTask(TaskType.CRAFT, {
                             cargo: [
                                 {item_id: 101, quantity: HULL_PLATES_QTY, stats: 0},
-                                {item_id: ITEM_HULL_PLATES, quantity: 1, stats: 0},
+                                {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
@@ -278,29 +278,29 @@ describe('projectEntity (stack-aware)', () => {
                 assert.throws(() => validateSchedule(ship), ENTITY_CARGO_NOT_LOADED)
             })
 
-            test('validates itemId-typed recipe slots (Engine from Thruster Cores)', () => {
-                // Engine recipe: [{itemId: ITEM_THRUSTER_CORE, quantity: 6}]
-                // Use wrong item (Power Cell instead of Thruster Core) → INVALID
-                const ITEM_POWER_CELL = 10004
+            test('validates itemId-typed recipe slots (Engine from Plasma Cells)', () => {
+                // Engine recipe: [{itemId: ITEM_PLASMA_CELL, quantity: 6}]
+                // Use wrong item (Resonator instead of Plasma Cell) → INVALID
+                const ITEM_RESONATOR = 10004
                 const ITEM_ENGINE_T1_LOCAL = 10100
                 const ship = makeShipFixture({
                     capacity: 10_000_000,
-                    cargo: [{item_id: ITEM_POWER_CELL, quantity: 6, stats: 0}],
+                    cargo: [{item_id: ITEM_RESONATOR, quantity: 6, stats: 0}],
                 })
                 ship.schedule = ServerContract.Types.schedule.from({
                     started: '2024-06-04T23:41:09.000',
                     tasks: [
                         makeTask(TaskType.CRAFT, {
                             cargo: [
-                                {item_id: ITEM_POWER_CELL, quantity: 6, stats: 0},
+                                {item_id: ITEM_RESONATOR, quantity: 6, stats: 0},
                                 {item_id: ITEM_ENGINE_T1_LOCAL, quantity: 1, stats: 0},
                             ],
                         }),
                     ],
                 })
                 assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INVALID)
-                // Silence unused-var warning — ITEM_THRUSTER_CORE imported for clarity above
-                assert.notEqual(ITEM_THRUSTER_CORE, ITEM_POWER_CELL)
+                // Silence unused-var warning — ITEM_PLASMA_CELL imported for clarity above
+                assert.notEqual(ITEM_PLASMA_CELL, ITEM_RESONATOR)
             })
         })
     })

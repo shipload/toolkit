@@ -12,7 +12,7 @@ test('renderByType forwards mode=ranges to resource template', () => {
 })
 
 test('renderByType forwards mode=ranges to component template', () => {
-    const item = FIXTURES.hullPlates
+    const item = FIXTURES.plate
     const resolved = resolveItem(item.item_id)
     const svg = renderByType(item, resolved, {mode: 'ranges'})
     expect(svg).not.toMatch(/>\d{3,}<\/text>/)

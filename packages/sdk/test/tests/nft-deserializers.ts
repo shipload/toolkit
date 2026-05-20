@@ -8,7 +8,7 @@ import {
     deserializeModule,
     deserializeResource,
     ITEM_ENGINE_T1,
-    ITEM_HULL_PLATES,
+    ITEM_PLATE,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '$lib'
@@ -32,8 +32,8 @@ describe('NFT deserializers', () => {
             strength: 500,
             density: 200,
         }
-        const result = deserializeComponent(data, ITEM_HULL_PLATES)
-        assert.equal(result.item_id, ITEM_HULL_PLATES)
+        const result = deserializeComponent(data, ITEM_PLATE)
+        assert.equal(result.item_id, ITEM_PLATE)
         assert.equal(result.quantity, 3)
         assert.equal(result.stats, '9999')
     })

@@ -94,7 +94,7 @@ describe('getItem strictness', () => {
 
     test('returns honest fields for a component', () => {
         const hp = getItem(10001)
-        assert.equal(hp.name, 'Hull Plates')
+        assert.equal(hp.name, 'Plate')
         assert.equal(hp.tier, 1)
         assert.isUndefined(hp.category)
         assert.equal(hp.type, 'component')
@@ -102,7 +102,7 @@ describe('getItem strictness', () => {
 
     test('returns honest fields for a T2 component', () => {
         const hpT2 = getItem(20001)
-        assert.equal(hpT2.name, 'Hull Plates')
+        assert.equal(hpT2.name, 'Plate')
         assert.equal(hpT2.tier, 2)
         assert.equal(hpT2.type, 'component')
     })

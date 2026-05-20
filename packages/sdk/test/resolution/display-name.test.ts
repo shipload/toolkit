@@ -14,9 +14,7 @@ test('resource T3: prefix + category + (Tn)', () => {
 })
 
 test('component with empty prefix table: bare name + (Tn)', () => {
-    expect(displayName({itemType: 'component', tier: 1, name: 'Hull Plates'})).toBe(
-        'Hull Plates (T1)'
-    )
+    expect(displayName({itemType: 'component', tier: 1, name: 'Plate'})).toBe('Plate (T1)')
 })
 
 test('module with empty prefix table: bare name + (Tn)', () => {
@@ -57,8 +55,8 @@ test('extension-hook: filling MODULE_TIER_PREFIXES produces a prefix', () => {
 test('extension-hook: filling COMPONENT_TIER_PREFIXES produces a prefix', () => {
     COMPONENT_TIER_PREFIXES[2] = 'Mk II'
     try {
-        expect(displayName({itemType: 'component', tier: 2, name: 'Hull Plates'})).toBe(
-            'Mk II Hull Plates (T2)'
+        expect(displayName({itemType: 'component', tier: 2, name: 'Plate'})).toBe(
+            'Mk II Plate (T2)'
         )
     } finally {
         delete COMPONENT_TIER_PREFIXES[2]

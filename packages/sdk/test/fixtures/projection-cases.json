@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "f080022c8c5febc0f5e99b5dba8731f1f4912c94c6704dc5c58482585bc1c3ff",
-    "generated_at": "2026-05-13T20:44:44.586Z",
+    "catalog_hash": "c2cfc092e21fe2c150f952d9507b8ac38b66a16dacd4cdb467c10fe9939a3342",
+    "generated_at": "2026-05-20T08:02:18.931Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -8,7 +8,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -141,7 +141,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -274,7 +274,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -403,7 +403,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -532,7 +532,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -672,7 +672,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -820,7 +820,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": -5,
@@ -962,7 +962,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": -5,
@@ -1112,7 +1112,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -1246,14 +1246,14 @@
                         "stats": 11111,
                         "modules": [],
                         "quantity": 15,
-                        "id": 0
+                        "id": 1000000
                     },
                     {
                         "item_id": 10002,
                         "stats": 22222,
                         "modules": [],
                         "quantity": 8,
-                        "id": 1
+                        "id": 1000001
                     }
                 ],
                 "hullmass": 642500,
@@ -1289,7 +1289,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": 0,
@@ -1459,7 +1459,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": -47,
@@ -1616,7 +1616,7 @@
                 "id": 1,
                 "owner": "alice",
                 "kind": "ship",
-                "name": "Ship (1)",
+                "name": "alice's ship",
                 "stats": "537395712500",
                 "coordinates": {
                     "x": -47,

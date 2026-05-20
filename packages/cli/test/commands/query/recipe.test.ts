@@ -21,7 +21,7 @@ test('recipe list shows count and per-row summary', () => {
 test('recipe detail shows output + inputs + stat slots', () => {
     const out = renderDetail(sample as any)
     expect(out).toContain('Output')
-    expect(out).toContain('Hull Plates')
+    expect(out).toContain('Plate')
     expect(out).toContain('Inputs')
     expect(out).toContain('15')
     expect(out).toContain('Stat slots')

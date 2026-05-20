@@ -193,10 +193,10 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'after',
                 `
 Examples:
-  # Craft 1× Thruster Core T1 (recipe needs 32 Gas T1)
+  # Craft 1× Plasma Cell T1 (recipe needs 32 Gas T1)
   shiploadcli ship 1 craft 10003 1 301:214202522:32
 
-  # Craft 5× Thruster Core T1 (32 × 5 = 160 Gas total from one stack)
+  # Craft 5× Plasma Cell T1 (32 × 5 = 160 Gas total from one stack)
   shiploadcli ship 1 craft 10003 5 301:214202522:160
 
   # Same recipe, drawing from two Gas stacks (11 + 149 = 160)

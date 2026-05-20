@@ -43,10 +43,10 @@ const CASES = [
         location: {x: 42, y: 17},
     },
     {name: 'packed-entity-ship-t1-only-engine', fixture: FIXTURES.shipT1OnlyEngine},
-    {name: 'component-hull-plates', fixture: FIXTURES.hullPlates},
+    {name: 'component-plate', fixture: FIXTURES.plate},
     {
-        name: 'component-hull-plates-with-location',
-        fixture: FIXTURES.hullPlates,
+        name: 'component-plate-with-location',
+        fixture: FIXTURES.plate,
         location: {x: 12, y: -7},
     },
     {name: 'module-engine-t1', fixture: FIXTURES.engineT1},

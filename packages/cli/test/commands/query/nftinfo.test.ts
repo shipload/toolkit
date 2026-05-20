@@ -13,7 +13,7 @@ test('nftinfo renders schemas and templates', () => {
             },
         ],
         templates: [
-            {item_id: 20001, schema_name: 'v1.hullplate'},
+            {item_id: 20001, schema_name: 'v1.plate'},
             {item_id: 10100, schema_name: 'v1.engine'},
         ],
     }
@@ -23,7 +23,7 @@ test('nftinfo renders schemas and templates', () => {
     expect(out).toContain('quantity:uint64')
     expect(out).toContain('NFT templates (2)')
     expect(out).toContain('20001')
-    expect(out).toContain('v1.hullplate')
+    expect(out).toContain('v1.plate')
 })
 
 test('nftinfo --raw emits JSON', () => {

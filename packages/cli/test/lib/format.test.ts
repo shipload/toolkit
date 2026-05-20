@@ -167,7 +167,7 @@ describe("formatTaskShort", () => {
 			cargo: [{ item_id: 10001 as never, quantity: 7 as never, stats: 0n as never }] as never,
 			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
 		});
-		expect(formatTaskShort(t)).toBe("Send 7 Hull Plates (T1) to warehouse 6");
+		expect(formatTaskShort(t)).toBe("Send 7 Plate (T1) to warehouse 6");
 	});
 
 	test("Load works with non-warehouse targets (ship-to-ship transfer)", () => {
@@ -204,7 +204,7 @@ describe("formatTaskShort", () => {
 				{ item_id: 10001 as never, quantity: 1 as never, stats: 0n as never },
 			] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Craft 1 Hull Plates (T1)");
+		expect(formatTaskShort(t)).toBe("Craft 1 Plate (T1)");
 	});
 
 	test("Craft includes the output quantity", () => {
@@ -215,7 +215,7 @@ describe("formatTaskShort", () => {
 				{ item_id: 10001 as never, quantity: 5 as never, stats: 0n as never },
 			] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Craft 5 Hull Plates (T1)");
+		expect(formatTaskShort(t)).toBe("Craft 5 Plate (T1)");
 	});
 
 	test("Craft with empty cargo is bare 'Craft' (defensive)", () => {

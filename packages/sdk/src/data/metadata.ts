@@ -109,56 +109,63 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 
     // === Components (T1) ===
     10001: {
-        name: 'Hull Plates',
-        description: 'Structural plating formed from ore. Used in hulls, containers, and frames.',
+        name: 'Plate',
+        description:
+            'Structural plating formed from ore. Used in hulls, containers, and storage modules.',
         color: '#7B8D9E',
     },
     10002: {
-        name: 'Cargo Lining',
+        name: 'Frame',
         description:
-            'Composite lining formed from fine regolith bound in biomass polymer. Dense enough to seal cargo holds, flexible enough to absorb vibration.',
+            'Composite framing formed from fine regolith bound in biomass polymer. Dense enough to seal cargo holds, flexible enough to absorb vibration.',
         color: '#C4A57B',
     },
     10003: {
-        name: 'Thruster Core',
-        description: 'High-energy propulsion component formed from volatile gases.',
+        name: 'Plasma Cell',
+        description:
+            'High-energy gaseous storage cell. Volatile gas held under controlled thermal conditions.',
         color: '#E86344',
     },
     10004: {
-        name: 'Power Cell',
+        name: 'Resonator',
         description:
-            'Crystalline energy storage matrix. Resonant lattices retain and release charge.',
+            'Crystalline resonance lattice. Stores and releases charge through coherent oscillation.',
         color: '#4ADBFF',
     },
     10005: {
-        name: 'Matter Conduit',
-        description: 'Heavy-duty ore shaft used in gathering equipment.',
+        name: 'Beam',
+        description:
+            'Heavy-duty structural beam machined from refined ore. Strong enough to bear load, tolerant enough to survive harsh environments.',
         color: '#7B8D9E',
     },
     10006: {
-        name: 'Survey Probe',
-        description: 'Crystal-lattice sensor array for deep resource detection.',
+        name: 'Sensor',
+        description:
+            'Crystal-lattice sensing element with conductive and reflective properties. Reads signal and surface alike.',
         color: '#4ADBFF',
     },
     10007: {
-        name: 'Cargo Arm',
-        description: 'Flexible biomass composite arm for cargo handling.',
+        name: 'Polymer',
+        description:
+            'Pliable biomass-derived polymer with high insulation. Flexible, durable, electrically inert.',
         color: '#5A8B3E',
     },
     10008: {
-        name: 'Tool Bit',
-        description: 'Dense regolith cutting head for crafting operations.',
+        name: 'Ceramic',
+        description:
+            'Hardened fine-grained ceramic refined from regolith. Hard enough to cut, fine enough to finish.',
         color: '#C4A57B',
     },
     10009: {
-        name: 'Reaction Chamber',
-        description: 'Gas-pressurized vessel for controlled crafting reactions.',
+        name: 'Reactor',
+        description:
+            'Gas-pressurized vessel for controlled reactions. Vents heat and contains volatility.',
         color: '#B8E4A0',
     },
     10010: {
-        name: 'Focusing Array',
+        name: 'Emitter',
         description:
-            "Precision-formed crystal lens array. Routes the haul beam's energy efficiently to the target lock.",
+            'Precision-formed crystal emitter array. Routes energy efficiently to a target lock.',
         color: '#4ADBFF',
     },
 
@@ -237,14 +244,14 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 
     // === Components (T2) ===
     20001: {
-        name: 'Hull Plates',
+        name: 'Plate',
         description: 'Advanced structural plating reinforced with tier 2 ore.',
         color: '#9BADB8',
     },
     20002: {
-        name: 'Cargo Lining',
+        name: 'Frame',
         description:
-            'Advanced composite lining reinforced with tier 2 regolith and biomass polymer.',
+            'Advanced composite framing reinforced with tier 2 regolith and biomass polymer.',
         color: '#C4A57B',
     },
 

@@ -49,7 +49,7 @@ export function cargoShipT1Packed(opts?: {
     })
 }
 
-export const ITEM_HULL_PLATES = 10001
+export const ITEM_PLATE = 10001
 
 export const FIXTURES = {
     oreT1: cargoOreT1('0x123456789ABCDEF'),
@@ -61,8 +61,8 @@ export const FIXTURES = {
         stats: '0xDEADBEEF1234',
         modules: [],
     }),
-    hullPlates: ServerContract.Types.cargo_item.from({
-        item_id: ITEM_HULL_PLATES,
+    plate: ServerContract.Types.cargo_item.from({
+        item_id: ITEM_PLATE,
         quantity: 1,
         stats: '0x7FFF',
         modules: [],
