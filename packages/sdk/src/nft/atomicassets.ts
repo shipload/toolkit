@@ -1,9 +1,132 @@
-import {type APIClient, Name, type NameType, UInt64} from '@wharfkit/antelope'
+import {
+    ABI,
+    type ABIDef,
+    Action,
+    type APIClient,
+    type NameType,
+    Name,
+    PermissionLevel,
+    UInt64,
+} from '@wharfkit/antelope'
 import {deserializeAtomicData, type SchemaField} from './atomicdata'
 import {deserializeAsset, type NFTCargoItem, type NFTModuleSlot} from './deserializers'
+import type {ImmutableEntry} from './buildImmutableData'
+
+const PLACEHOLDER_AUTH = PermissionLevel.from({
+    actor: '............1',
+    permission: '............2',
+})
 
 export const ATOMICASSETS_ACCOUNT = 'atomicassets'
 export const SHIPLOAD_COLLECTION = 'shipload'
+
+const ATOMIC_ATTRIBUTE_VARIANT_NAME =
+    'variant_int8_int16_int32_int64_uint8_uint16_uint32_uint64_float32_float64_string_INT8_VEC_INT16_VEC_INT32_VEC_INT64_VEC_UINT8_VEC_UINT16_VEC_UINT32_VEC_UINT64_VEC_FLOAT_VEC_DOUBLE_VEC_STRING_VEC'
+
+const MINTASSET_ABI_DEF: ABIDef = {
+    version: 'eosio::abi/1.2',
+    types: [
+        {new_type_name: 'ATOMIC_ATTRIBUTE', type: ATOMIC_ATTRIBUTE_VARIANT_NAME},
+        {new_type_name: 'ATTRIBUTE_MAP', type: 'pair_string_ATOMIC_ATTRIBUTE[]'},
+        {new_type_name: 'INT8_VEC', type: 'bytes'},
+        {new_type_name: 'INT16_VEC', type: 'int16[]'},
+        {new_type_name: 'INT32_VEC', type: 'int32[]'},
+        {new_type_name: 'INT64_VEC', type: 'int64[]'},
+        {new_type_name: 'UINT8_VEC', type: 'bytes'},
+        {new_type_name: 'UINT16_VEC', type: 'uint16[]'},
+        {new_type_name: 'UINT32_VEC', type: 'uint32[]'},
+        {new_type_name: 'UINT64_VEC', type: 'uint64[]'},
+        {new_type_name: 'FLOAT_VEC', type: 'float32[]'},
+        {new_type_name: 'DOUBLE_VEC', type: 'float64[]'},
+        {new_type_name: 'STRING_VEC', type: 'string[]'},
+    ],
+    structs: [
+        {
+            name: 'pair_string_ATOMIC_ATTRIBUTE',
+            base: '',
+            fields: [
+                {name: 'first', type: 'string'},
+                {name: 'second', type: 'ATOMIC_ATTRIBUTE'},
+            ],
+        },
+        {
+            name: 'mintasset',
+            base: '',
+            fields: [
+                {name: 'authorized_minter', type: 'name'},
+                {name: 'collection_name', type: 'name'},
+                {name: 'schema_name', type: 'name'},
+                {name: 'template_id', type: 'int32'},
+                {name: 'new_asset_owner', type: 'name'},
+                {name: 'immutable_data', type: 'ATTRIBUTE_MAP'},
+                {name: 'mutable_data', type: 'ATTRIBUTE_MAP'},
+                {name: 'tokens_to_back', type: 'asset[]'},
+            ],
+        },
+    ],
+    actions: [{name: 'mintasset', type: 'mintasset', ricardian_contract: ''}],
+    variants: [
+        {
+            name: ATOMIC_ATTRIBUTE_VARIANT_NAME,
+            types: [
+                'int8',
+                'int16',
+                'int32',
+                'int64',
+                'uint8',
+                'uint16',
+                'uint32',
+                'uint64',
+                'float32',
+                'float64',
+                'string',
+                'INT8_VEC',
+                'INT16_VEC',
+                'INT32_VEC',
+                'INT64_VEC',
+                'UINT8_VEC',
+                'UINT16_VEC',
+                'UINT32_VEC',
+                'UINT64_VEC',
+                'FLOAT_VEC',
+                'DOUBLE_VEC',
+                'STRING_VEC',
+            ],
+        },
+    ],
+}
+
+export interface MintAssetParams {
+    authorizedMinter: NameType
+    collectionName: NameType
+    schemaName: NameType
+    templateId: number
+    newAssetOwner: NameType
+    immutableData: ImmutableEntry[]
+}
+
+const MINTASSET_ABI = ABI.from(MINTASSET_ABI_DEF)
+
+export function buildMintAssetAction(params: MintAssetParams): Action {
+    return Action.from(
+        {
+            account: Name.from(ATOMICASSETS_ACCOUNT),
+            name: Name.from('mintasset'),
+            authorization: [PLACEHOLDER_AUTH],
+            data: {
+                authorized_minter: Name.from(params.authorizedMinter),
+                collection_name: Name.from(params.collectionName),
+                schema_name: Name.from(params.schemaName),
+                template_id: params.templateId,
+                new_asset_owner: Name.from(params.newAssetOwner),
+                immutable_data: params.immutableData,
+                mutable_data: [],
+                tokens_to_back: [],
+            },
+        },
+        MINTASSET_ABI
+    )
+}
 
 export interface AtomicAssetRow {
     asset_id: string

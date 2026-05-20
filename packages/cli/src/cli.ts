@@ -57,6 +57,7 @@ import {
     buildGenericEntityParent,
     registerEntitySubcommand,
 } from './lib/entity-scope'
+import {errorOrigin, printError} from './lib/errors'
 
 const PACKAGE = {
     name: 'shiploadcli',
@@ -150,19 +151,12 @@ export async function run(argv: string[] = process.argv): Promise<void> {
         await program.parseAsync(argv)
     } catch (err) {
         if (program.opts().debug) {
-            console.error(err)
-        } else {
-            console.error(`error: ${formatErrorMessage(err)}`)
+            console.error(`[${errorOrigin(err)}]`, err)
+            process.exit(1)
         }
-        process.exit(1)
+        process.exit(printError(err))
     }
     if (argv.slice(2).length === 0) {
         program.outputHelp()
     }
-}
-
-function formatErrorMessage(err: unknown): string {
-    const raw = err instanceof Error ? err.message : String(err)
-    const assertMatch = raw.match(/^assertion failure with message:\s*(.+)$/)
-    return assertMatch ? assertMatch[1] : raw
 }

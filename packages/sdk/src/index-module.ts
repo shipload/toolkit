@@ -47,8 +47,9 @@ export {
     LocationsManager,
     EpochsManager,
     ActionsManager,
+    NftManager,
 } from './managers'
-export type {LocationStratum} from './managers'
+export type {LocationStratum, NftConfigForItem} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
 export {
@@ -332,9 +333,24 @@ export {deserializeAtomicData} from './nft/atomicdata'
 export type {SchemaField, RawData} from './nft/atomicdata'
 
 export {
+    buildImmutableData,
+    buildResourceImmutable,
+    buildComponentImmutable,
+    buildModuleImmutable,
+    buildEntityImmutable,
+    computeNftImageUrl,
+} from './nft/buildImmutableData'
+export type {
+    AtomicAttributeType,
+    ImmutableEntry,
+    ImmutableModuleSlot,
+} from './nft/buildImmutableData'
+
+export {
     fetchAtomicAssetsForOwner,
     fetchAtomicSchemas,
     decodeAtomicAsset,
+    buildMintAssetAction,
     ATOMICASSETS_ACCOUNT,
     SHIPLOAD_COLLECTION,
 } from './nft/atomicassets'
@@ -343,6 +359,7 @@ export type {
     AtomicSchemaRow,
     DecodedAtomicAsset,
     FetchAssetsOptions,
+    MintAssetParams,
 } from './nft/atomicassets'
 
 export {

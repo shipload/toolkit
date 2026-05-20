@@ -1,9 +1,9 @@
 import {describe, test, beforeEach} from 'bun:test'
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
-import Shipload from '$lib'
+import Shipload, {ActionsManager, ServerContract, ServerTypes} from '$lib'
 import {Chains} from '@wharfkit/common'
-import {Int64, UInt64} from '@wharfkit/antelope'
+import {Int32, Int64, Name, UInt16, UInt64} from '@wharfkit/antelope'
 
 const client = makeClient('https://jungle4.greymass.com')
 
@@ -69,10 +69,142 @@ describe('ActionsManager', () => {
     })
 
     describe('wrap', () => {
-        test('creates wrap action', () => {
-            const action = shipload.actions.wrap('alice', 42, 7, 99, 5)
-            assert.equal(action.name.toString(), 'wrap')
-            assert.isDefined(action.data)
+        const cargoRow = ServerTypes.cargo_row.from({
+            id: 99,
+            entity_id: 42,
+            item_id: 101,
+            quantity: 20,
+            stats: '12345',
+            modules: [],
+        })
+        const entityRow = ServerTypes.entity_row.from({
+            id: 42,
+            owner: 'alice',
+            kind: 'ship',
+            name: 'Test Ship',
+            stats: 0,
+            coordinates: {x: 5, y: 10},
+            cargomass: 0,
+            modules: [],
+            item_id: 1001,
+        })
+        const nftConfigRow = ServerTypes.nftconfig_row.from({
+            item_id: UInt16.from(101),
+            template_id: Int32.from(42),
+            schema_name: Name.from('v1.ore'),
+        })
+
+        function makeStubManager() {
+            const realServer = new ServerContract.Contract({client})
+            const stubServer = {
+                action: realServer.action.bind(realServer),
+                table(name: string) {
+                    return {
+                        async get(key: unknown) {
+                            if (name === 'cargo') return cargoRow
+                            if (name === 'entity') return entityRow
+                            if (name === 'nftconfig') {
+                                const id = UInt16.from(key as any).toString()
+                                return id === '101' ? nftConfigRow : undefined
+                            }
+                            return undefined
+                        },
+                    }
+                },
+            }
+            const context = {server: stubServer} as any
+            const manager = new ActionsManager(context)
+            const nftLookup = {
+                async getNftConfigForItem(itemId: any) {
+                    if (Number(UInt16.from(itemId).toString()) === 101) {
+                        return {templateId: 42, schemaName: 'v1.ore'}
+                    }
+                    return undefined
+                },
+            }
+            context.nft = nftLookup
+            return manager
+        }
+
+        test('returns wrap + mintasset action pair', async () => {
+            const actions = await makeStubManager().wrap('alice', 42, 7, 99, 5)
+            assert.equal(actions.length, 2)
+            assert.equal(actions[0].name.toString(), 'wrap')
+            assert.equal(actions[0].account.toString(), 'shipload.gm')
+            assert.equal(actions[1].name.toString(), 'mintasset')
+            assert.equal(actions[1].account.toString(), 'atomicassets')
+            assert.isDefined(actions[0].data)
+            assert.isDefined(actions[1].data)
+        })
+
+        test('throws when cargo row missing', async () => {
+            const realServer = new ServerContract.Contract({client})
+            const stubServer = {
+                action: realServer.action.bind(realServer),
+                table() {
+                    return {async get() {}}
+                },
+            }
+            const context = {server: stubServer, nft: {async getNftConfigForItem() {}}} as any
+            const manager = new ActionsManager(context)
+            try {
+                await manager.wrap('alice', 42, 7, 99, 5)
+                assert.fail('expected wrap to throw')
+            } catch (err: any) {
+                assert.match(err.message, /cargo row 99 not found/)
+            }
+        })
+    })
+
+    describe('wrapEntity', () => {
+        const entityRow = ServerTypes.entity_row.from({
+            id: 50,
+            owner: 'alice',
+            kind: 'ship',
+            name: 'Wrappable',
+            stats: '7777',
+            coordinates: {x: 3, y: -4},
+            cargomass: 0,
+            modules: [],
+            item_id: 10200,
+        })
+
+        function makeStubManager() {
+            const realServer = new ServerContract.Contract({client})
+            const stubServer = {
+                action: realServer.action.bind(realServer),
+                table(name: string) {
+                    return {
+                        async get() {
+                            if (name === 'entity') return entityRow
+                            return undefined
+                        },
+                    }
+                },
+            }
+            const context = {
+                server: stubServer,
+                nft: {
+                    async getNftConfigForItem(itemId: any) {
+                        if (Number(UInt16.from(itemId).toString()) === 10200) {
+                            return {templateId: 9000, schemaName: 'v1.entity'}
+                        }
+                        return undefined
+                    },
+                },
+            } as any
+            return new ActionsManager(context)
+        }
+
+        test('returns wrapentity + mintasset action pair', async () => {
+            const actions = await makeStubManager().wrapEntity('alice', 50, 7)
+            assert.equal(actions.length, 2)
+            assert.equal(actions[0].name.toString(), 'wrapentity')
+            assert.equal(actions[0].account.toString(), 'shipload.gm')
+            assert.equal(actions[1].name.toString(), 'mintasset')
+            assert.equal(actions[1].account.toString(), 'atomicassets')
+            assert.isDefined(actions[0].data)
+            assert.isDefined(actions[1].data)
         })
     })
 

@@ -8,6 +8,7 @@ import {PlayersManager} from './players'
 import {LocationsManager} from './locations'
 import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
+import {NftManager} from './nft'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
 export class GameContext {
@@ -16,6 +17,7 @@ export class GameContext {
     private _locations?: LocationsManager
     private _epochs?: EpochsManager
     private _actions?: ActionsManager
+    private _nft?: NftManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
 
@@ -61,6 +63,13 @@ export class GameContext {
             this._actions = new ActionsManager(this)
         }
         return this._actions
+    }
+
+    get nft(): NftManager {
+        if (!this._nft) {
+            this._nft = new NftManager(this)
+        }
+        return this._nft
     }
 
     setSubscriptionsUrl(url: string) {

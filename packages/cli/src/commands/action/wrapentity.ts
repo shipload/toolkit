@@ -4,12 +4,16 @@ import {ALL_ENTITY_TYPES, parseUint64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {transact} from '../../lib/session'
+import {getAccountName, transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
-export async function buildAction(ctx: EntityContext, nexusId: bigint): Promise<Action> {
+export async function buildAction(
+    ctx: EntityContext,
+    owner: string,
+    nexusId: bigint
+): Promise<Action[]> {
     const shipload = await getShipload()
-    return shipload.actions.wrapEntity(ctx.entityId, nexusId)
+    return shipload.actions.wrapEntity(owner, ctx.entityId, nexusId)
 }
 
 interface WrapEntityCliOptions {
@@ -23,9 +27,10 @@ export async function runWrapEntity(
     options: WrapEntityCliOptions
 ): Promise<void> {
     await withValidation(async () => {
-        const action = await buildAction(ctx, nexusId)
+        const owner = getAccountName()
+        const actions = await buildAction(ctx, owner, nexusId)
         const result = await transact(
-            {action},
+            {actions},
             {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into NFT`}
         )
         await maybeAwaitAndPrint(ctx.entityId, options, result)

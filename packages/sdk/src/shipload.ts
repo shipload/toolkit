@@ -9,6 +9,7 @@ import type {PlayersManager} from './managers/players'
 import type {LocationsManager} from './managers/locations'
 import type {EpochsManager} from './managers/epochs'
 import type {ActionsManager} from './managers/actions'
+import type {NftManager} from './managers/nft'
 import type {SubscriptionsManager} from './subscriptions/manager'
 import type {GameState} from './entities/gamestate'
 
@@ -105,6 +106,10 @@ export class Shipload {
 
     get actions(): ActionsManager {
         return this._context.actions
+    }
+
+    get nft(): NftManager {
+        return this._context.nft
     }
 
     get subscriptions(): SubscriptionsManager {

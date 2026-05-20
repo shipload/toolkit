@@ -46,6 +46,12 @@ export function chainErrorBody(err: unknown): ChainErrorBody | null {
 	return e;
 }
 
+export type ErrorOrigin = "chain" | "client";
+
+export function errorOrigin(err: unknown): ErrorOrigin {
+	return chainErrorBody(err) ? "chain" : "client";
+}
+
 function isGenericMessage(msg: string): boolean {
 	const m = msg.trim().toLowerCase();
 	return m === "" || m === "assertion failed";

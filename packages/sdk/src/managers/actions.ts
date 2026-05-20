@@ -13,6 +13,12 @@ import {
 import {BaseManager} from './base'
 import type {CoordinatesType} from '../types'
 import {ServerContract} from '../contracts'
+import {
+    buildImmutableData,
+    type ImmutableModuleSlot,
+    moduleSlotsForImmutable,
+} from '../nft/buildImmutableData'
+import {buildMintAssetAction, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 
 export type EntityRefInput = {
     entityType: NameType
@@ -183,20 +189,81 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    wrap(
+    private async buildPairedMintAction(args: {
+        owner: NameType
+        itemId: number
+        quantity: number
+        stats: bigint
+        originX: number
+        originY: number
+        moduleSlots: ImmutableModuleSlot[]
+    }): Promise<Action> {
+        const nftCfg = await this.context.nft.getNftConfigForItem(args.itemId)
+        if (!nftCfg) {
+            throw new Error(`item ${args.itemId} has no nftconfig`)
+        }
+        const immutableData = buildImmutableData(
+            args.itemId,
+            args.quantity,
+            args.stats,
+            args.originX,
+            args.originY,
+            args.moduleSlots
+        )
+        return buildMintAssetAction({
+            authorizedMinter: Name.from(args.owner),
+            collectionName: SHIPLOAD_COLLECTION,
+            schemaName: nftCfg.schemaName,
+            templateId: nftCfg.templateId,
+            newAssetOwner: Name.from(args.owner),
+            immutableData,
+        })
+    }
+
+    async wrap(
         owner: NameType,
         entityId: UInt64Type,
         nexusId: UInt64Type,
         cargoId: UInt64Type,
         quantity: UInt64Type
-    ): Action {
-        return this.server.action('wrap', {
-            owner: Name.from(owner),
-            entity_id: UInt64.from(entityId),
-            nexus_id: UInt64.from(nexusId),
-            cargo_id: UInt64.from(cargoId),
-            quantity: UInt64.from(quantity),
+    ): Promise<Action[]> {
+        const cargoIdKey = UInt64.from(cargoId)
+        const entityIdKey = UInt64.from(entityId)
+        const [cargoRow, entityRow] = (await Promise.all([
+            this.server.table('cargo').get(cargoIdKey),
+            this.server.table('entity').get(entityIdKey),
+        ])) as [
+            ServerContract.Types.cargo_row | undefined,
+            ServerContract.Types.entity_row | undefined,
+        ]
+        if (!cargoRow) {
+            throw new Error(`cargo row ${cargoIdKey} not found`)
+        }
+        if (!entityRow) {
+            throw new Error(`entity ${entityIdKey} not found`)
+        }
+
+        const quantityValue = UInt64.from(quantity)
+        const mintAction = await this.buildPairedMintAction({
+            owner,
+            itemId: Number(cargoRow.item_id.toString()),
+            quantity: Number(quantityValue.toString()),
+            stats: BigInt(cargoRow.stats.toString()),
+            originX: Number(entityRow.coordinates.x.toString()),
+            originY: Number(entityRow.coordinates.y.toString()),
+            moduleSlots: moduleSlotsForImmutable(cargoRow.modules),
         })
+
+        return [
+            this.server.action('wrap', {
+                owner: Name.from(owner),
+                entity_id: UInt64.from(entityId),
+                nexus_id: UInt64.from(nexusId),
+                cargo_id: cargoIdKey,
+                quantity: quantityValue,
+            }),
+            mintAction,
+        ]
     }
 
     undeploy(hostId: UInt64Type, targetId: UInt64Type): Action {
@@ -206,11 +273,36 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    wrapEntity(entityId: UInt64Type, nexusId: UInt64Type): Action {
-        return this.server.action('wrapentity', {
-            entity_id: UInt64.from(entityId),
-            nexus_id: UInt64.from(nexusId),
+    async wrapEntity(
+        owner: NameType,
+        entityId: UInt64Type,
+        nexusId: UInt64Type
+    ): Promise<Action[]> {
+        const entityIdKey = UInt64.from(entityId)
+        const entityRow = (await this.server.table('entity').get(entityIdKey)) as
+            | ServerContract.Types.entity_row
+            | undefined
+        if (!entityRow) {
+            throw new Error(`entity ${entityIdKey} not found`)
+        }
+
+        const mintAction = await this.buildPairedMintAction({
+            owner,
+            itemId: Number(entityRow.item_id.toString()),
+            quantity: 1,
+            stats: BigInt(entityRow.stats.toString()),
+            originX: Number(entityRow.coordinates.x.toString()),
+            originY: Number(entityRow.coordinates.y.toString()),
+            moduleSlots: moduleSlotsForImmutable(entityRow.modules),
         })
+
+        return [
+            this.server.action('wrapentity', {
+                entity_id: entityIdKey,
+                nexus_id: UInt64.from(nexusId),
+            }),
+            mintAction,
+        ]
     }
 
     deploynft(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
