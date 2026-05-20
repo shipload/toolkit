@@ -76,6 +76,11 @@ export function safeItemName(itemId: number, fallback?: string): string {
 	}
 }
 
+export function formatCargoRef(itemId: number, stackId?: number | bigint): string {
+	const stackSuffix = stackId !== undefined ? `, stack ${stackId}` : "";
+	return `${safeItemName(itemId)} (item-id ${itemId}${stackSuffix})`;
+}
+
 function moduleSubRows(
 	modules: ServerTypes.module_entry[] | undefined,
 	columns: CargoColumn[],

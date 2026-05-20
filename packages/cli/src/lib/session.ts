@@ -191,12 +191,20 @@ export async function performTransact(
 
 export async function transact(
 	args: TransactArgs,
-	options?: TransactOptions & { description?: string },
+	options?: TransactOptions & {
+		description?: string;
+		errorHint?: (msg: string) => string | undefined | Promise<string | undefined>;
+	},
 ): Promise<TransactResult> {
 	try {
 		return await performTransact(getSession(), args, options);
 	} catch (err) {
-		process.exitCode = printError(err);
+		const exitCode = printError(err);
+		if (options?.errorHint) {
+			const hint = await options.errorHint(extractChainError(err));
+			if (hint) console.error(`Context: ${hint}`);
+		}
+		process.exitCode = exitCode;
 		return { txid: "", snapshots: new Map() };
 	}
 }

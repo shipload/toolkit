@@ -2,9 +2,11 @@ import type {Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, parseUint64} from '../../lib/args'
+import {safeItemName} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
+import {getEntitySnapshot} from '../../lib/snapshot'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export interface WrapOpts {
@@ -15,7 +17,7 @@ export interface WrapOpts {
     quantity: bigint
 }
 
-export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<Action> {
+export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<Action[]> {
     const sl = shipload ?? (await getShipload())
     return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, opts.cargoId, opts.quantity)
 }
@@ -33,7 +35,7 @@ export async function runWrap(
     quantity: bigint,
     options: WrapCliOptions
 ): Promise<void> {
-    const action = await buildAction({
+    const actions = await buildAction({
         owner,
         entityId: ctx.entityId,
         nexusId,
@@ -41,8 +43,30 @@ export async function runWrap(
         quantity,
     })
     const result = await transact(
-        {action},
-        {description: `Wrapping ${quantity} of cargo ${cargoId} for ${owner}`}
+        {actions},
+        {
+            description: `Wrapping ${quantity} of cargo ${cargoId} for ${owner}`,
+            errorHint: async (msg) => {
+                if (
+                    !msg.includes('cargo') &&
+                    !msg.includes('nexus') &&
+                    !msg.includes('wrap') &&
+                    !msg.includes('quantity')
+                ) {
+                    return undefined
+                }
+                let resolvedName: string | undefined
+                try {
+                    const snap = await getEntitySnapshot(ctx.entityId)
+                    const row = snap.cargo.find((c) => c.id === cargoId)
+                    if (row) resolvedName = safeItemName(Number(row.item_id))
+                } catch {}
+                const label = resolvedName
+                    ? `${quantity}× ${resolvedName} (cargo row ${cargoId})`
+                    : `${quantity} units from cargo row ${cargoId}`
+                return `tried to wrap ${label} for ${owner} at nexus ${nexusId}`
+            },
+        }
     )
     await maybeAwaitAndPrint(ctx.entityId, options, result)
 }

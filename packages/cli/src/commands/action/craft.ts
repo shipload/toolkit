@@ -1,4 +1,4 @@
-import {ServerTypes, type Shipload} from '@shipload/sdk'
+import {getRecipe, ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../lib/args'
 import {decideUseRecharge} from '../../lib/auto-recharge'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
+import {formatCargoRef, safeItemName} from '../../lib/cargo-table'
 import {
     type ParsedCargoInput,
     type ResolvedCargoInput,
@@ -140,6 +141,16 @@ export async function runCraft(
             quantity,
             inputs: resolved,
         })
+        const craftErrorHint = (): string => {
+            const recipe = getRecipe(recipeId)
+            const outputLabel = recipe
+                ? `${safeItemName(recipe.outputItemId)} (recipe ${recipeId})`
+                : `recipe ${recipeId}`
+            const inputSummary = resolved
+                .map((r) => `${r.quantity}× ${formatCargoRef(r.itemId, r.stackId)}`)
+                .join(', ')
+            return `tried to craft ${quantity}× ${outputLabel} using ${inputSummary}`
+        }
         const result = useRecharge
             ? await transact(
                   {
@@ -151,9 +162,18 @@ export async function runCraft(
                           action,
                       ],
                   },
-                  {description: `Recharge + craft recipe ${recipeId} x${quantity}`}
+                  {
+                      description: `Recharge + craft recipe ${recipeId} x${quantity}`,
+                      errorHint: craftErrorHint,
+                  }
               )
-            : await transact({action}, {description: `Crafting recipe ${recipeId} x${quantity}`})
+            : await transact(
+                  {action},
+                  {
+                      description: `Crafting recipe ${recipeId} x${quantity}`,
+                      errorHint: craftErrorHint,
+                  }
+              )
         await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
 }

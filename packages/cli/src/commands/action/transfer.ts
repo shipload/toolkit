@@ -10,6 +10,7 @@ import {
 } from '../../lib/args'
 import {parseModulesJson} from '../../lib/cargo-build'
 import type {ParsedCargoInput} from '../../lib/cargo-resolve'
+import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
@@ -66,6 +67,17 @@ export async function runTransfer(
         {action},
         {
             description: `Transferred ${input.quantity} of item ${input.itemId} from ${ctx.entityType}:${ctx.entityId} to ${destType}:${destId}`,
+            errorHint: (msg) => {
+                if (
+                    msg.includes('missing cargo to transfer') ||
+                    msg.includes('insufficient cargo to transfer') ||
+                    msg.includes('Invalid cargo specified') ||
+                    msg.includes('cargo capacity would be exceeded')
+                ) {
+                    return `tried to transfer ${input.quantity}× ${formatCargoRef(Number(input.itemId), input.stackId)}`
+                }
+                return undefined
+            },
         }
     )
     await maybeAwaitAndPrint(ctx.entityId, options, result)

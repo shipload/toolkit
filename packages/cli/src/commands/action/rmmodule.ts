@@ -9,6 +9,7 @@ import {
     parseUint8,
 } from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
+import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -75,6 +76,13 @@ export async function runRmModule(
                 (targetItemId !== undefined
                     ? ` (packed in cargo item ${targetItemId} stats ${targetStats})`
                     : ''),
+            errorHint: () => {
+                const base = `tried to remove module from slot ${moduleIndex} on ${ctx.entityType}:${ctx.entityId}`
+                if (options.target !== undefined) {
+                    return `${base} → packed cargo: ${formatCargoRef(options.target.itemId, options.target.stackId)}`
+                }
+                return base
+            },
         }
     )
 }

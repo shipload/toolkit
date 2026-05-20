@@ -3,6 +3,7 @@ import {type Action, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {accumulateCargoInputs, ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
+import {formatCargoRef} from '../../lib/cargo-table'
 import {
     type ParsedCargoInput,
     type ResolvedCargoInput,
@@ -62,7 +63,19 @@ export async function runBlend(
             entityId: ctx.entityId,
             inputs: resolved,
         })
-        await transact({action}, {description: `Blending on ${ctx.entityType} ${ctx.entityId}`})
+        await transact(
+            {action},
+            {
+                description: `Blending on ${ctx.entityType} ${ctx.entityId}`,
+                errorHint: () => {
+                    const itemId = resolved[0]?.itemId
+                    if (itemId === undefined) return undefined
+                    const totalQty = resolved.reduce((s, r) => s + r.quantity, 0)
+                    const stacks = resolved.map((r) => r.stackId.toString()).join(', ')
+                    return `tried to blend ${totalQty}× ${formatCargoRef(itemId)} from stacks ${stacks}`
+                },
+            }
+        )
         if (opts.wait) {
             console.log('blend is instantaneous; --wait is a no-op')
         }

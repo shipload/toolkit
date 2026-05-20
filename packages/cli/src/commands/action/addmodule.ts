@@ -16,6 +16,7 @@ import {
     parseUint8,
 } from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
+import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -138,6 +139,13 @@ export async function runAddModule(
         {action},
         {
             description: `Adding module item ${moduleRef.itemId} stats ${moduleRef.stackId} to ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
+            errorHint: () => {
+                const base = `tried to install ${formatCargoRef(moduleRef.itemId, moduleRef.stackId)} at slot ${moduleIndex} on ${ctx.entityType}:${ctx.entityId}`
+                if (options.target !== undefined) {
+                    return `${base} → packed into ${formatCargoRef(options.target.itemId, options.target.stackId)}`
+                }
+                return base
+            },
         }
     )
 }
