@@ -1,5 +1,20 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.17
+
+### Patch Changes
+
+- c50610d: - Removed gather speed, setup time, modified richness, and added battery
+  - Component rename/simplification pass
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updated NFT actions to use new pairs from contract
+  - more user friendly cargo errors
+  - Added battery module
+- Updated dependencies [c50610d]
+  - @shipload/sdk@1.0.0-next.17
+
 ## 1.0.0-next.16
 
 ### Patch Changes
