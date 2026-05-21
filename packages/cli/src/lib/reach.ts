@@ -13,7 +13,6 @@ export interface GathererStats {
 	depth: number;
 	yield: number;
 	drain: number;
-	speed: number;
 }
 
 export interface Reach {
@@ -48,7 +47,6 @@ export async function resolveReach(ref: EntityRef): Promise<Reach> {
 			depth: Number(snap.gatherer.depth.toString()),
 			yield: Number(snap.gatherer.yield.toString()),
 			drain: Number(snap.gatherer.drain.toString()),
-			speed: Number(snap.gatherer.speed.toString()),
 		},
 	};
 }

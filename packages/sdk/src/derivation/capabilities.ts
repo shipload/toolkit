@@ -75,18 +75,15 @@ export function computeGathererCapabilities(
     yield: number
     drain: number
     depth: number
-    speed: number
 } {
     const str = stats.strength
     const con = stats.conductivity
-    const ref = stats.reflectivity
     const tol = stats.tolerance
 
     return {
         yield: 200 + str,
         drain: Math.max(250, 1250 - Math.floor((con * 25) / 20)),
         depth: gathererDepthForTier(tol, tier),
-        speed: 100 + Math.floor((ref * 4) / 5),
     }
 }
 
@@ -223,7 +220,7 @@ export interface ComputedCapabilities {
     capacity: number
     engines?: {thrust: number; drain: number}
     generator?: {capacity: number; recharge: number}
-    gatherer?: {yield: number; drain: number; depth: number; speed: number}
+    gatherer?: {yield: number; drain: number; depth: number}
     loaders?: {mass: number; thrust: number; quantity: number}
     crafter?: {speed: number; drain: number}
     hauler?: {capacity: number; efficiency: number; drain: number}
@@ -252,7 +249,6 @@ export function computeEntityCapabilities(
     let totalGathYield = 0
     let totalGathDrain = 0
     let maxGathDepth = 0
-    let totalGathSpeed = 0
     let hasGatherer = false
 
     let totalStorageBonus = 0
@@ -298,7 +294,6 @@ export function computeEntityCapabilities(
             totalGathYield += applySlotMultiplier(caps.yield, amp)
             totalGathDrain += caps.drain
             if (caps.depth > maxGathDepth) maxGathDepth = caps.depth
-            totalGathSpeed += applySlotMultiplier(caps.speed, amp)
         } else if (modType === MODULE_LOADER) {
             hasLoader = true
             const caps = computeLoaderCapabilities(decodedStats)
@@ -359,7 +354,6 @@ export function computeEntityCapabilities(
             yield: clampUint16(totalGathYield),
             drain: totalGathDrain,
             depth: maxGathDepth,
-            speed: clampUint16(totalGathSpeed),
         }
     }
     if (hasLoader) {

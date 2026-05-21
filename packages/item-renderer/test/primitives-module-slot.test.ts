@@ -44,13 +44,11 @@ test('TextSpan[] description renders each span; highlighted spans get accent col
 
 test('TextSpan[] description wraps across lines preserving highlight boundaries', () => {
     const spans: TextSpan[] = [
-        {text: 'mines resources at '},
+        {text: 'mines resources with '},
         {text: '880', highlight: true},
-        {text: ' speed to a max depth of '},
+        {text: ' yield to a max depth of '},
         {text: '248', highlight: true},
-        {text: ' with '},
-        {text: '100', highlight: true},
-        {text: ' gather speed while draining '},
+        {text: ' while draining '},
         {text: '1,250', highlight: true},
         {text: ' energy per second'},
     ]
@@ -65,7 +63,6 @@ test('TextSpan[] description wraps across lines preserving highlight boundaries'
     })
     expect(svg).toContain('880')
     expect(svg).toContain('248')
-    expect(svg).toContain('100')
     expect(svg).toContain('1,250')
 })
 

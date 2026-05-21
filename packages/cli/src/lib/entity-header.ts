@@ -5,7 +5,6 @@ import {
 	computeEngineThrust,
 	computeGathererDepth,
 	computeGathererDrain,
-	computeGathererSpeed,
 	computeGathererYield,
 	computeGeneratorCap,
 	computeGeneratorRech,
@@ -173,9 +172,8 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 			const str = decodeStat(stats, 0);
 			const tol = decodeStat(stats, 1);
 			const con = decodeStat(stats, 3);
-			const ref = decodeStat(stats, 4);
 			const tier = getItem(itemId).tier;
-			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · speed ${computeGathererSpeed(ref)} · ${computeGathererDrain(con)} energy/s`;
+			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · ${computeGathererDrain(con)} energy/s`;
 		}
 		case MODULE_LOADER: {
 			const ins = decodeStat(stats, 0);
@@ -543,7 +541,7 @@ export interface GatherHeaderOpts {
 	entityId: bigint;
 	entityName?: string;
 	coords: { x: bigint; y: bigint };
-	caps: { yield: number; depth: number; speed: number; drain: number };
+	caps: { yield: number; depth: number; drain: number };
 	energy: number;
 	energyCapacity: number;
 	cargoFreeKg: number;
@@ -560,7 +558,7 @@ export function renderEntityForGather(opts: GatherHeaderOpts): string {
 	const title = `${opts.entityType} ${opts.entityId}${namePart} — gatherable at (${opts.coords.x}, ${opts.coords.y})${projSuffix}   [${opts.locationContext}]`;
 
 	const c = opts.caps;
-	const gatherer = `yield ${c.yield} · depth ${c.depth} · speed ${c.speed} · ${c.drain} energy/s`;
+	const gatherer = `yield ${c.yield} · depth ${c.depth} · ${c.drain} energy/s`;
 	const energyBudget = `${opts.energy}/${opts.energyCapacity}${projSuffix}`;
 	const cargoBudget = `${formatMass(opts.cargoFreeKg)} / ${formatMass(opts.cargoCapacityKg)} free${projSuffix}`;
 

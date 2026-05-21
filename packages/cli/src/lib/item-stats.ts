@@ -77,7 +77,7 @@ function formatModuleCapability(itemId: number, stats: bigint): string {
 		}
 		case MODULE_GATHERER: {
 			const c = computeGathererCapabilities(decoded, getItem(itemId).tier);
-			return `Gatherer: depth ${c.depth} · yield ${c.yield} · speed ${c.speed} · ${c.drain} energy/s`;
+			return `Gatherer: depth ${c.depth} · yield ${c.yield} · ${c.drain} energy/s`;
 		}
 		case MODULE_HAULER: {
 			const c = computeHaulerCapabilities(decoded);

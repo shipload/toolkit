@@ -324,8 +324,6 @@ export namespace Types {
         declare drain: UInt16
         @Struct.field(UInt16)
         declare depth: UInt16
-        @Struct.field(UInt16)
-        declare speed: UInt16
     }
     @Struct.type('hauler_stats')
     export class hauler_stats extends Struct {
@@ -1361,7 +1359,6 @@ export namespace ActionParams {
             yield: UInt16Type
             drain: UInt16Type
             depth: UInt16Type
-            speed: UInt16Type
         }
         export interface warp_stats {
             range: UInt32Type

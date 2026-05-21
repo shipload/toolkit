@@ -52,7 +52,6 @@ function resolveState(
     const caps: GathererCaps = {
         yield: Number(raw.gatherer.yield?.toString() ?? '0'),
         depth: Number(raw.gatherer.depth?.toString() ?? '0'),
-        speed: Number(raw.gatherer.speed?.toString() ?? '0'),
         drain: Number(raw.gatherer.drain?.toString() ?? '0'),
     }
 

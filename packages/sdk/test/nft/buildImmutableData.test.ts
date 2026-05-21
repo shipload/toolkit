@@ -9,7 +9,6 @@ import {
     computeEngineThrust,
     computeGathererDepth,
     computeGathererDrain,
-    computeGathererSpeed,
     computeGathererYield,
     computeHaulerCapacity,
     computeHaulerEfficiency,
@@ -120,12 +119,11 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeEngineDrain(thm)])
     })
 
-    test('module (gatherer) emits 4 stats + 4 computed values in fixed order', () => {
+    test('module (gatherer) emits 3 stats + 3 computed values in fixed order', () => {
         const str = 500
         const tol = 600
         const con = 400
-        const refx = 300
-        const stats = encodeStats([str, tol, 0, con, refx])
+        const stats = encodeStats([str, tol, 0, con, 300])
         const entries = buildModuleImmutable(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -137,11 +135,9 @@ describe('buildImmutableData', () => {
             'strength',
             'tolerance',
             'conductivity',
-            'reflectivity',
             'yield',
             'drain',
             'depth',
-            'speed',
         ])
         expect(findEntry(entries, 'yield')!.second).toEqual(['uint16', computeGathererYield(str)])
         expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeGathererDrain(con)])
@@ -149,7 +145,6 @@ describe('buildImmutableData', () => {
             'uint16',
             computeGathererDepth(tol, 1),
         ])
-        expect(findEntry(entries, 'speed')!.second).toEqual(['uint16', computeGathererSpeed(refx)])
     })
 
     test('module (hauler) emits 4 stats + 3 computed capabilities', () => {

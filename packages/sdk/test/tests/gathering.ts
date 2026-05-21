@@ -2,6 +2,7 @@ import {describe, test} from 'bun:test'
 import {Checksum256, Name, TimePoint, UInt16, UInt64} from '@wharfkit/antelope'
 import {assert} from 'chai'
 import {
+    calc_gather_rate,
     calc_gather_duration,
     calc_gather_energy,
     capsHasGatherer,
@@ -185,7 +186,6 @@ describe('gathering', () => {
             yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
-            speed: UInt16.from(500),
         })
 
         test('duration increases with quantity', () => {
@@ -217,7 +217,6 @@ describe('gathering', () => {
                 yield: UInt16.from(0),
                 drain: UInt16.from(25),
                 depth: UInt16.from(950),
-                speed: UInt16.from(500),
             })
             const duration = calc_gather_duration(zeroYield, 15000, 1, 600, 500)
             assert.equal(duration.toNumber(), 0)
@@ -225,12 +224,12 @@ describe('gathering', () => {
 
         test('median hydrogen at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 275)
+            assert.equal(duration.toNumber(), 39)
         })
 
         test('median copper at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 300)
+            assert.equal(duration.toNumber(), 64)
         })
 
         test('exact formula calculation', () => {
@@ -239,16 +238,37 @@ describe('gathering', () => {
             const stratum = 600
             const richness = 500
             const yieldValue = gatherer.yield.toNumber()
-            const speed = gatherer.speed.toNumber()
             const massFactor = Math.sqrt(itemMass)
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
-            const gatherTime =
+            const expected = Math.floor(
                 (quantity * massFactor * 100 * depthPenalty) / (yieldValue * richnessMul)
-            const speedTime = 300 * Math.log(1 + stratum / speed)
-            const expected = Math.floor(gatherTime + speedTime)
+            )
             const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness)
             assert.equal(duration.toNumber(), expected)
+        })
+
+        test('is linear by quantity after setup removal', () => {
+            const linearGatherer = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(500),
+                drain: UInt16.from(25),
+                depth: UInt16.from(1000),
+            })
+            const one = calc_gather_duration(linearGatherer, 10000, 1, 5000, 500).toNumber()
+            const ten = calc_gather_duration(linearGatherer, 10000, 10, 5000, 500).toNumber()
+            assert.equal(ten, one * 10)
+        })
+
+        test('calc_gather_rate reports contextual units per time', () => {
+            const rateGatherer = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(500),
+                drain: UInt16.from(25),
+                depth: UInt16.from(1000),
+            })
+            const rate = calc_gather_rate(rateGatherer, 10000, 5000, 500)
+            assert.equal(rate.secPerUnit, 80)
+            assert.equal(rate.unitsPerSec, 1 / 80)
+            assert.equal(rate.unitsPerMin, 60 / 80)
         })
     })
 
@@ -257,7 +277,6 @@ describe('gathering', () => {
             yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
-            speed: UInt16.from(500),
         })
 
         test('returns UInt16', () => {
@@ -281,13 +300,11 @@ describe('gathering', () => {
                 yield: UInt16.from(700),
                 drain: UInt16.from(10),
                 depth: UInt16.from(950),
-                speed: UInt16.from(500),
             })
             const highDrain = ServerContract.Types.gatherer_stats.from({
                 yield: UInt16.from(700),
                 drain: UInt16.from(50),
                 depth: UInt16.from(950),
-                speed: UInt16.from(500),
             })
             const lowEnergy = calc_gather_energy(lowDrain, 1000)
             const highEnergy = calc_gather_energy(highDrain, 1000)

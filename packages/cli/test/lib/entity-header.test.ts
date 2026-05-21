@@ -35,7 +35,7 @@ describe("renderEntityFull modules", () => {
 			],
 		});
 		expect(out).toMatch(/Modules:/);
-		expect(out).toMatch(/#0 \(Any\):\s+Gatherer \(T1\) — depth \d+ · yield \d+ · speed \d+ · \d+ energy\/s/);
+		expect(out).toMatch(/#0 \(Any\):\s+Gatherer \(T1\) — depth \d+ · yield \d+ · \d+ energy\/s/);
 	});
 
 	test("renders empty slot with its accepted type", () => {

@@ -3,9 +3,8 @@
  *
  * Time and energy mirror the contract via SDK helpers (calc_gather_duration /
  * calc_gather_energy). Max quantity is solved analytically against the linear
- * `q*A + B` shape of the duration formula, then verified by re-feeding the
- * candidate q through the SDK helpers — guarantees we never display a max
- * the contract would reject.
+ * gather duration formula, then verified by re-feeding the candidate q through
+ * the SDK helpers — guarantees we never display a max the contract would reject.
  */
 
 import {
@@ -21,7 +20,6 @@ import { UInt16 } from "@wharfkit/antelope";
 export interface GathererCaps {
 	yield: number;
 	depth: number;
-	speed: number;
 	drain: number;
 }
 
@@ -46,7 +44,6 @@ function gathererStats(caps: GathererCaps): ServerTypes.gatherer_stats {
 		yield: UInt16.from(caps.yield),
 		drain: UInt16.from(caps.drain),
 		depth: UInt16.from(caps.depth),
-		speed: UInt16.from(caps.speed),
 	});
 }
 
@@ -81,7 +78,6 @@ export function solveMaxGatherQuantity(args: {
 
 	if (
 		caps.yield === 0 ||
-		caps.speed === 0 ||
 		richness === 0 ||
 		reserve === 0
 	) {
@@ -95,9 +91,8 @@ export function solveMaxGatherQuantity(args: {
 	let energyCap = Number.POSITIVE_INFINITY;
 	if (caps.drain > 0) {
 		const A = (Math.sqrt(itemMassKg) * 100 * (1 + stratum / 5000)) / (caps.yield * (richness / 1000));
-		const B = 300 * Math.log(1 + stratum / caps.speed);
 		if (A > 0) {
-			const candidate = Math.floor((budget.energy * PRECISION / caps.drain - B) / A);
+			const candidate = Math.floor((budget.energy * PRECISION / caps.drain) / A);
 			energyCap = Number.isFinite(candidate) ? Math.max(0, candidate) : 0;
 		}
 	}
@@ -159,7 +154,7 @@ export function computeStratumGatherMetrics(args: {
 	const reserve = stratum.reserve;
 
 	const gatherable =
-		caps.yield > 0 && caps.speed > 0 && richness > 0 && reserve > 0 && quantity > 0;
+		caps.yield > 0 && richness > 0 && reserve > 0 && quantity > 0;
 
 	if (!gatherable) {
 		return {

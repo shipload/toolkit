@@ -21,6 +21,7 @@ export const capabilityNames: string[] = [
     'Crafter',
     'Launch',
     'Hauler',
+    'Battery',
 ]
 
 export const capabilityAttributes: CapabilityAttribute[] = [
@@ -40,7 +41,6 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Gathering', attribute: 'yield', description: 'Mass gathered per second'},
     {capability: 'Gathering', attribute: 'drain', description: 'Energy consumed per gather'},
     {capability: 'Gathering', attribute: 'depth', description: 'Maximum gather depth'},
-    {capability: 'Gathering', attribute: 'speed', description: 'Gathering speed/penetration'},
     {capability: 'Warp', attribute: 'range', description: 'Maximum warp distance'},
     {capability: 'Crafter', attribute: 'speed', description: 'Crafting time per item'},
     {
@@ -66,6 +66,11 @@ export const capabilityAttributes: CapabilityAttribute[] = [
         capability: 'Hauler',
         attribute: 'drain',
         description: 'Energy consumed per target during haul-beam operation',
+    },
+    {
+        capability: 'Battery',
+        attribute: 'bonus',
+        description: 'Energy capacity bonus added by an installed Battery module',
     },
 ]
 

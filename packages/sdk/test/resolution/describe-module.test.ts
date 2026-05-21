@@ -52,15 +52,14 @@ describe('describeModule', () => {
                 {label: 'Yield', value: 600},
                 {label: 'Drain', value: 300},
                 {label: 'Depth', value: 350},
-                {label: 'Speed', value: 200},
             ],
         })
         expect(desc?.id).toBe('module.gatherer.description')
         expect(desc?.template).toBe(
-            'mines resources at {yield} speed to a max depth of {depth} with {speed} gather speed while draining {drain} energy per second'
+            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per second'
         )
-        expect(desc?.params).toEqual({yield: 600, drain: 300, depth: 350, speed: 200})
-        expect(desc?.highlightKeys).toEqual(['yield', 'depth', 'speed', 'drain'])
+        expect(desc?.params).toEqual({yield: 600, drain: 300, depth: 350})
+        expect(desc?.highlightKeys).toEqual(['yield', 'depth', 'drain'])
     })
 
     test('Loader produces the expected description', () => {

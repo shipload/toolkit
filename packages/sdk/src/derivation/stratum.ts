@@ -76,15 +76,11 @@ export function deriveStratum(
         (BigInt(bytes[14]) << 8n) |
         BigInt(bytes[15])
 
-    const rawRichness = (bytes[16] << 8) | bytes[17]
-    const normalized = rawRichness / 65535
-    const baseRichness = Math.floor(normalized * normalized * 999) + 1
-
-    let depthBonus = 0
-    if (stratum > 1) {
-        depthBonus = (50 * Math.log(stratum)) / Math.log(65535)
-    }
-    const richness = Math.min(Math.floor(baseRichness + depthBonus), 1000)
+    let byteSum = 0
+    for (let i = 22; i <= 33; i++) byteSum += bytes[i]
+    const z = (byteSum - 1530) / 256
+    const roll = 500 + 100 * z
+    const richness = Math.max(1, Math.min(999, Math.round(roll)))
 
     return {itemId: selectedItemId, seed: seedBigInt, richness, reserve}
 }

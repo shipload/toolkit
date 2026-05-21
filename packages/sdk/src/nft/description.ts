@@ -56,7 +56,6 @@ export const computeGathererDrain = (con: number): number =>
     Math.max(250, 1250 - idiv(con * 25, 20))
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
-export const computeGathererSpeed = (ref: number): number => 100 + idiv(ref * 4, 5)
 export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
@@ -133,12 +132,11 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const str = decodeStat(stats, 0)
             const tol = decodeStat(stats, 1)
             const con = decodeStat(stats, 3)
-            const ref = decodeStat(stats, 4)
             const tier = getItem(itemId).tier
             out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
                 tol,
                 tier
-            )}  Speed ${computeGathererSpeed(ref)}  Drain ${computeGathererDrain(con)}`
+            )}  Drain ${computeGathererDrain(con)}`
             break
         }
         case MODULE_LOADER: {

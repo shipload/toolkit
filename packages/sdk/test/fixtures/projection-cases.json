@@ -35,8 +35,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -126,8 +125,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -168,8 +166,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -259,8 +256,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -301,8 +297,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -388,8 +383,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -430,8 +424,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -517,8 +510,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -559,8 +551,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -657,8 +648,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -699,8 +689,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -805,8 +794,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -847,8 +835,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -947,8 +934,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -989,8 +975,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1097,8 +1082,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1139,8 +1123,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1274,8 +1257,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1316,8 +1298,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1444,8 +1425,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1486,8 +1466,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1601,8 +1580,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1643,8 +1621,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,
@@ -1750,8 +1727,7 @@
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
-                    "depth": 3000,
-                    "speed": 100
+                    "depth": 3000
                 },
                 "crafter": {
                     "speed": 500,

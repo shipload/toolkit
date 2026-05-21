@@ -12,13 +12,12 @@ import {
 	solveMaxGatherQuantity,
 } from "../../src/lib/gatherable";
 
-const caps: GathererCaps = { yield: 700, depth: 950, speed: 500, drain: 25 };
+const caps: GathererCaps = { yield: 700, depth: 950, drain: 25 };
 
 const gathererStats = ServerTypes.gatherer_stats.from({
 	yield: UInt16.from(caps.yield),
 	drain: UInt16.from(caps.drain),
 	depth: UInt16.from(caps.depth),
-	speed: UInt16.from(caps.speed),
 });
 
 function makeStratum(overrides: Partial<LocationStratum> = {}): LocationStratum {
@@ -78,7 +77,6 @@ describe("solveMaxGatherQuantity", () => {
 			yield: UInt16.from(tightCaps.yield),
 			drain: UInt16.from(tightCaps.drain),
 			depth: UInt16.from(tightCaps.depth),
-			speed: UInt16.from(tightCaps.speed),
 		});
 		const dur = Number(
 			calc_gather_duration(tightStats, 15_000, result.maxQuantity, 600, 500),

@@ -87,7 +87,7 @@ describe('entityInfoToSnapshot', () => {
             energy: 1000,
             capacity: 5000,
             generator: {capacity: 200, recharge: 50},
-            gatherer: {yield: 1, drain: 1, depth: 4, speed: 1},
+            gatherer: {yield: 1, drain: 1, depth: 4},
             is_idle: true,
             current_task_elapsed: 0,
             current_task_remaining: 0,
@@ -97,7 +97,7 @@ describe('entityInfoToSnapshot', () => {
         expect(snap.energy).toBe(1000n)
         expect(snap.capacity).toBe(5000n)
         expect(snap.generator).toEqual({capacity: 200n, recharge: 50n})
-        expect(snap.gatherer).toEqual({yield: 1n, drain: 1n, depth: 4n, speed: 1n})
+        expect(snap.gatherer).toEqual({yield: 1n, drain: 1n, depth: 4n})
         expect(snap.cargo[0]).toMatchObject({
             item_id: 101n,
             quantity: 3n,

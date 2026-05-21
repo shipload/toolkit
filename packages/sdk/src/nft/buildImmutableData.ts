@@ -23,7 +23,6 @@ import {
     computeEngineThrust,
     computeGathererDepth,
     computeGathererDrain,
-    computeGathererSpeed,
     computeGathererYield,
     computeGeneratorCap,
     computeGeneratorRech,
@@ -195,15 +194,12 @@ export function buildModuleImmutable(
             const str = decodeStat(stats, 0)
             const tol = decodeStat(stats, 1)
             const con = decodeStat(stats, 3)
-            const refx = decodeStat(stats, 4)
             base.push({first: 'strength', second: ['uint16', str]})
             base.push({first: 'tolerance', second: ['uint16', tol]})
             base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'reflectivity', second: ['uint16', refx]})
             base.push({first: 'yield', second: ['uint16', computeGathererYield(str)]})
             base.push({first: 'drain', second: ['uint16', computeGathererDrain(con)]})
             base.push({first: 'depth', second: ['uint16', computeGathererDepth(tol, item.tier)]})
-            base.push({first: 'speed', second: ['uint16', computeGathererSpeed(refx)]})
             break
         }
         case MODULE_LOADER: {

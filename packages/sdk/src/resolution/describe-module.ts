@@ -53,14 +53,13 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     gatherer: {
         id: 'module.gatherer.description',
         template:
-            'mines resources at {yield} speed to a max depth of {depth} with {speed} gather speed while draining {drain} energy per second',
+            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per second',
         params: [
             ['yield', 'Yield'],
-            ['drain', 'Drain'],
             ['depth', 'Depth'],
-            ['speed', 'Speed'],
+            ['drain', 'Drain'],
         ],
-        highlightKeys: ['yield', 'depth', 'speed', 'drain'],
+        highlightKeys: ['yield', 'depth', 'drain'],
     },
     loader: {
         id: 'module.loader.description',

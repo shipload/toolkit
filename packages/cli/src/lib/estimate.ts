@@ -443,7 +443,6 @@ export async function estimateGather(params: {
 		yield: coerceUInt16(rawGatherer.yield),
 		drain: coerceUInt16(rawGatherer.drain),
 		depth: coerceUInt16(rawGatherer.depth),
-		speed: coerceUInt16(rawGatherer.speed),
 	});
 
 	const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness);

@@ -189,7 +189,6 @@ function computeCapabilityGroup(
                     {label: 'Yield', value: caps.yield},
                     {label: 'Drain', value: caps.drain},
                     {label: 'Depth', value: caps.depth},
-                    {label: 'Speed', value: caps.speed},
                 ],
             }
         }

@@ -15,8 +15,8 @@ import {
 } from '$lib'
 
 describe('Capabilities', () => {
-    test('capabilityNames has 10 entries', () => {
-        assert.equal(capabilityNames.length, 10)
+    test('capabilityNames has 11 entries', () => {
+        assert.equal(capabilityNames.length, 11)
     })
 
     test('getCapabilityAttributes returns all attributes', () => {
@@ -26,7 +26,7 @@ describe('Capabilities', () => {
 
     test('getCapabilityAttributes filters by capability', () => {
         const gathering = getCapabilityAttributes('Gathering')
-        assert.equal(gathering.length, 4)
+        assert.equal(gathering.length, 3)
         assert.isTrue(gathering.every((a) => a.capability === 'Gathering'))
     })
 

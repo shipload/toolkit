@@ -12,6 +12,7 @@ export type SlotConsumerKind =
     | 'storage'
     | 'hauler'
     | 'warp'
+    | 'battery'
     | 'ship-t1'
     | 'container-t1'
     | 'warehouse-t1'
@@ -38,7 +39,6 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
         0: {capability: 'Gathering', attribute: 'yield'},
         1: {capability: 'Gathering', attribute: 'depth'},
         3: {capability: 'Gathering', attribute: 'drain'},
-        4: {capability: 'Gathering', attribute: 'speed'},
     },
     loader: {
         0: {capability: 'Loader', attribute: 'mass'},
@@ -61,6 +61,12 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     },
     warp: {
         0: {capability: 'Warp', attribute: 'range'},
+    },
+    battery: {
+        0: {capability: 'Battery', attribute: 'bonus'},
+        1: {capability: 'Battery', attribute: 'bonus'},
+        2: {capability: 'Battery', attribute: 'bonus'},
+        3: {capability: 'Battery', attribute: 'bonus'},
     },
     'ship-t1': ENTITY_HULL_SLOTS,
     'container-t1': ENTITY_HULL_SLOTS,

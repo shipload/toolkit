@@ -84,7 +84,7 @@ describe('computeEntityCapabilities slot-multiplier integration', () => {
 })
 
 describe('computeEntityCapabilities — selective application', () => {
-    test('200% on gatherer slot amplifies yield + speed only', () => {
+    test('200% on gatherer slot amplifies yield only', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 1, itemId: ITEM_GATHERER_T1, stats: sampleStats},
         ]
@@ -105,9 +105,9 @@ describe('computeEntityCapabilities — selective application', () => {
         )
 
         expect(amplified.gatherer!.yield).toBe(2 * baseline.gatherer!.yield)
-        expect(amplified.gatherer!.speed).toBe(2 * baseline.gatherer!.speed)
         expect(amplified.gatherer!.drain).toBe(baseline.gatherer!.drain)
         expect(amplified.gatherer!.depth).toBe(baseline.gatherer!.depth)
+        expect('speed' in amplified.gatherer!).toBe(false)
     })
 
     test('200% on loader slot amplifies thrust only', () => {

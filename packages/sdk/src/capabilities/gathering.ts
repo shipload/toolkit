@@ -4,7 +4,6 @@ import {PRECISION} from '../types'
 
 const GATHER_TIME_SCALE = 100
 const DEPTH_PENALTY_DIVISOR = 5000
-const SPEED_TIME_SCALE = 300
 
 export function calc_gather_duration(
     gatherer: ServerContract.Types.gatherer_stats,
@@ -14,17 +13,27 @@ export function calc_gather_duration(
     richness: number
 ): UInt32 {
     const yieldValue = gatherer.yield.toNumber()
-    const speed = gatherer.speed.toNumber()
 
-    if (yieldValue === 0 || speed === 0 || richness === 0) return UInt32.from(0)
+    if (yieldValue === 0 || richness === 0) return UInt32.from(0)
 
     const massFactor = Math.sqrt(itemMass)
     const depthPenalty = 1 + stratum / DEPTH_PENALTY_DIVISOR
     const richnessMul = richness / 1000
-    const gatherTime =
+    const duration =
         (quantity * massFactor * GATHER_TIME_SCALE * depthPenalty) / (yieldValue * richnessMul)
-    const speedTime = SPEED_TIME_SCALE * Math.log(1 + stratum / speed)
-    return UInt32.from(Math.floor(gatherTime + speedTime))
+    return UInt32.from(Math.floor(duration))
+}
+
+export function calc_gather_rate(
+    gatherer: ServerContract.Types.gatherer_stats,
+    itemMass: number,
+    stratum: number,
+    richness: number
+): {unitsPerSec: number; unitsPerMin: number; secPerUnit: number} {
+    const seconds = calc_gather_duration(gatherer, itemMass, 1, stratum, richness).toNumber()
+    if (seconds <= 0) return {unitsPerSec: 0, unitsPerMin: 0, secPerUnit: 0}
+    const unitsPerSec = 1 / seconds
+    return {unitsPerSec, unitsPerMin: unitsPerSec * 60, secPerUnit: seconds}
 }
 
 export function calc_gather_energy(

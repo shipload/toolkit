@@ -377,7 +377,6 @@ export {
     computeGathererYield,
     computeGathererDrain,
     computeGathererDepth,
-    computeGathererSpeed,
     computeLoaderMass,
     computeLoaderThrust,
     computeCrafterSpeed,

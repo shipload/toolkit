@@ -24,7 +24,7 @@ export interface EntitySnapshot {
 	hullmass?: bigint;
 	engines?: { thrust: bigint; drain: bigint };
 	generator?: { capacity: bigint; recharge: bigint };
-	gatherer?: { yield: bigint; drain: bigint; depth: bigint; speed: bigint };
+	gatherer?: { yield: bigint; drain: bigint; depth: bigint };
 	hauler?: { capacity: bigint; efficiency: bigint; drain: bigint };
 	crafter?: { speed: bigint; drain: bigint };
 	warp?: { range: bigint };
@@ -91,7 +91,6 @@ export function entityInfoToSnapshot(
 			yield: BigInt(ei.gatherer.yield.toString()),
 			drain: BigInt(ei.gatherer.drain.toString()),
 			depth: BigInt(ei.gatherer.depth.toString()),
-			speed: BigInt(ei.gatherer.speed.toString()),
 		};
 	}
 	if (ei.hauler != null) {

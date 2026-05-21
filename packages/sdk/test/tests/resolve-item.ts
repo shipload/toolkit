@@ -83,7 +83,7 @@ describe('resolveItem', () => {
         const expectations: [number, string, string[]][] = [
             [ITEM_ENGINE_T1, 'Engine', ['Thrust', 'Drain']],
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
-            [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth', 'Speed']],
+            [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth']],
             [ITEM_LOADER_T1, 'Loader', ['Mass', 'Thrust', 'Quantity']],
             [ITEM_CRAFTER_T1, 'Crafter', ['Speed', 'Drain']],
         ]
