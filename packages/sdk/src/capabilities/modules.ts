@@ -1,4 +1,5 @@
 import {
+    ITEM_BATTERY_T1,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
@@ -19,6 +20,7 @@ export const MODULE_CRAFTER = 6
 export const MODULE_LAUNCHER = 7
 export const MODULE_STORAGE = 8
 export const MODULE_HAULER = 9
+export const MODULE_BATTERY = 10
 
 export interface PackedModule {
     itemId: number
@@ -52,6 +54,8 @@ export function getModuleCapabilityType(itemId: number): number {
             return MODULE_HAULER
         case ITEM_WARP_T1:
             return MODULE_WARP
+        case ITEM_BATTERY_T1:
+            return MODULE_BATTERY
         default:
             return 0xff
     }
@@ -83,6 +87,8 @@ export function moduleSlotTypeToCode(slotType: string): number {
             return MODULE_STORAGE
         case 'hauler':
             return MODULE_HAULER
+        case 'battery':
+            return MODULE_BATTERY
         default:
             return MODULE_ANY
     }

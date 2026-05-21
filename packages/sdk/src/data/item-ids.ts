@@ -68,6 +68,7 @@ export const ITEM_CRAFTER_T1 = 10104
 export const ITEM_STORAGE_T1 = 10105
 export const ITEM_HAULER_T1 = 10106
 export const ITEM_WARP_T1 = 10107
+export const ITEM_BATTERY_T1 = 10108
 export const ITEM_CONTAINER_T1_PACKED = 10200
 export const ITEM_SHIP_T1_PACKED = 10201
 export const ITEM_WAREHOUSE_T1_PACKED = 10202

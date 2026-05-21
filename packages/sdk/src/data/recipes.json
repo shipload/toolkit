@@ -606,6 +606,55 @@
     ]
   },
   {
+    "outputItemId": 10108,
+    "outputMass": 90000,
+    "inputs": [
+      {
+        "itemId": 10003,
+        "quantity": 4
+      },
+      {
+        "itemId": 10007,
+        "quantity": 3
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
     "outputItemId": 10200,
     "outputMass": 80000,
     "inputs": [

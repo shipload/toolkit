@@ -213,6 +213,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Folds local space-time around the hull, projecting the ship across vast distances in a single discharge of the entire energy reserve.',
         color: '#9be4ff',
     },
+    10108: {
+        name: 'Battery',
+        description:
+            'Extends energy capacity. Stores additional charge produced by generators, letting builds chain more high-drain actions between recharges.',
+        color: '#4ADBFF',
+    },
 
     // === Entities (packed, T1) ===
     10200: {

@@ -163,6 +163,7 @@ import {
 } from '../data/item-ids'
 import {
     getModuleCapabilityType,
+    MODULE_BATTERY,
     MODULE_ENGINE,
     MODULE_GENERATOR,
     MODULE_GATHERER,
@@ -270,6 +271,9 @@ export function computeEntityCapabilities(
     let totalWarpRange = 0
     let hasWarp = false
 
+    let totalBatteryStatSum = 0
+    let batteryCount = 0
+
     for (const mod of modules) {
         const item = getItem(mod.itemId)
         const modType = getModuleCapabilityType(mod.itemId)
@@ -320,7 +324,20 @@ export function computeEntityCapabilities(
             hasWarp = true
             const caps = computeWarpCapabilities(decodedStats)
             totalWarpRange += applySlotMultiplier(caps.range, amp)
+        } else if (modType === MODULE_BATTERY) {
+            batteryCount++
+            const vol = decodedStats.volatility ?? 0
+            const thm = decodedStats.thermal ?? 0
+            const pla = decodedStats.plasticity ?? 0
+            const ins = decodedStats.insulation ?? 0
+            totalBatteryStatSum += vol + thm + pla + ins
         }
+    }
+
+    if (hasGenerator && batteryCount > 0) {
+        const genCapBase = totalGenCapacity
+        const bonusPctNum = 10 * batteryCount + Math.floor((totalBatteryStatSum * 10) / 2997)
+        totalGenCapacity += Math.floor((genCapBase * bonusPctNum) / 100)
     }
 
     const result: ComputedCapabilities = {

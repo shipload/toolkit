@@ -466,6 +466,13 @@
     "subtype": "warp"
   },
   {
+    "id": 10108,
+    "mass": 90000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "battery"
+  },
+  {
     "id": 10200,
     "mass": 80000,
     "type": "entity",
