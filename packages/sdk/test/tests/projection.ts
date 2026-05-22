@@ -166,8 +166,8 @@ describe('projectEntity (stack-aware)', () => {
         })
 
         describe('craft input validation', () => {
-            // Plate recipe: [{category: 'ore', quantity: 15}] → output qty 1
-            const HULL_PLATES_QTY = 15
+            // Plate recipe: [{category: 'ore', quantity: 20}] → output qty 1
+            const HULL_PLATES_QTY = 20
 
             test('accepts valid craft inputs (Plate from 15 ore)', () => {
                 const ship = makeShipFixture({
@@ -226,14 +226,14 @@ describe('projectEntity (stack-aware)', () => {
 
             test('throws RECIPE_INPUTS_EXCESS when quantity above required', () => {
                 const ship = makeShipFixture({
-                    cargo: [{item_id: 101, quantity: 20, stats: 0}],
+                    cargo: [{item_id: 101, quantity: 25, stats: 0}],
                 })
                 ship.schedule = ServerContract.Types.schedule.from({
                     started: '2024-06-04T23:41:09.000',
                     tasks: [
                         makeTask(TaskType.CRAFT, {
                             cargo: [
-                                {item_id: 101, quantity: 20, stats: 0},
+                                {item_id: 101, quantity: 25, stats: 0},
                                 {item_id: ITEM_PLATE, quantity: 1, stats: 0},
                             ],
                         }),

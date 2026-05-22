@@ -17,6 +17,8 @@ import {
 } from "@shipload/sdk";
 import { UInt16 } from "@wharfkit/antelope";
 
+const GATHER_MASS_DIVISOR = 228;
+
 export interface GathererCaps {
 	yield: number;
 	depth: number;
@@ -90,7 +92,7 @@ export function solveMaxGatherQuantity(args: {
 
 	let energyCap = Number.POSITIVE_INFINITY;
 	if (caps.drain > 0) {
-		const A = (Math.sqrt(itemMassKg) * 100 * (1 + stratum / 5000)) / (caps.yield * (richness / 1000));
+		const A = ((itemMassKg / GATHER_MASS_DIVISOR) * 100 * (1 + stratum / 5000)) / (caps.yield * (richness / 1000));
 		if (A > 0) {
 			const candidate = Math.floor((budget.energy * PRECISION / caps.drain) / A);
 			energyCap = Number.isFinite(candidate) ? Math.max(0, candidate) : 0;

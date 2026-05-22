@@ -224,12 +224,12 @@ describe('gathering', () => {
 
         test('median hydrogen at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 39)
+            assert.equal(duration.toNumber(), 21)
         })
 
         test('median copper at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 64)
+            assert.equal(duration.toNumber(), 56)
         })
 
         test('exact formula calculation', () => {
@@ -238,7 +238,7 @@ describe('gathering', () => {
             const stratum = 600
             const richness = 500
             const yieldValue = gatherer.yield.toNumber()
-            const massFactor = Math.sqrt(itemMass)
+            const massFactor = itemMass / 228
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
             const expected = Math.floor(
@@ -266,9 +266,9 @@ describe('gathering', () => {
                 depth: UInt16.from(1000),
             })
             const rate = calc_gather_rate(rateGatherer, 10000, 5000, 500)
-            assert.equal(rate.secPerUnit, 80)
-            assert.equal(rate.unitsPerSec, 1 / 80)
-            assert.equal(rate.unitsPerMin, 60 / 80)
+            assert.equal(rate.secPerUnit, 35)
+            assert.equal(rate.unitsPerSec, 1 / 35)
+            assert.equal(rate.unitsPerMin, 60 / 35)
         })
     })
 

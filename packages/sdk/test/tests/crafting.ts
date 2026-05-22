@@ -631,7 +631,7 @@ describe('Crafting', () => {
             const mass = computeInputMass(ITEM_PLATE)
             assert.isAbove(mass, 0)
             const oreT1 = findItemByCategoryAndTier('ore', 1)
-            assert.equal(mass, 15 * oreT1.mass)
+            assert.equal(mass, 20 * oreT1.mass)
         })
 
         test('module returns positive mass', () => {

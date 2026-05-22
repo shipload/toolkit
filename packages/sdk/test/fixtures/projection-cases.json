@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "9ccda51f4b35b01f46941a9d797ef0be1b3f56c0a455ead8b956e72a75537545",
-    "generated_at": "2026-05-20T21:14:35.901Z",
+    "catalog_hash": "201ca23bfa4ba4ea446e57e5b571952697837dea29f5f100ff08fe56d50a6aed",
+    "generated_at": "2026-05-22T17:51:09.624Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -15,7 +15,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
                 "cargomass": 0,
@@ -83,7 +83,7 @@
                     "tasks": [
                         {
                             "type": 1,
-                            "duration": 161,
+                            "duration": 486,
                             "cancelable": 1,
                             "coordinates": {
                                 "x": -5,
@@ -107,7 +107,7 @@
                 "energy": 383,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -146,7 +146,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
                 "cargomass": 0,
@@ -214,7 +214,7 @@
                     "tasks": [
                         {
                             "type": 1,
-                            "duration": 161,
+                            "duration": 486,
                             "cancelable": 1,
                             "coordinates": {
                                 "x": -5,
@@ -233,12 +233,12 @@
                 "coordinates": {
                     "x": -5,
                     "y": 6,
-                    "z": 2578
+                    "z": 3000
                 },
                 "energy": 82,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -275,9 +275,9 @@
                 "coordinates": {
                     "x": 0,
                     "y": 1,
-                    "z": 2578
+                    "z": 3000
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 340,
                 "cargomass": 0,
@@ -360,12 +360,12 @@
                 "coordinates": {
                     "x": 0,
                     "y": 1,
-                    "z": 2578
+                    "z": 3000
                 },
                 "energy": 340,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -402,9 +402,9 @@
                 "coordinates": {
                     "x": 0,
                     "y": 1,
-                    "z": 2578
+                    "z": 3000
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 340,
                 "cargomass": 0,
@@ -487,12 +487,12 @@
                 "coordinates": {
                     "x": 0,
                     "y": 1,
-                    "z": 2578
+                    "z": 3000
                 },
                 "energy": 383,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -531,7 +531,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
                 "cargomass": 0,
@@ -630,7 +630,7 @@
                 "energy": 383,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -669,7 +669,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
                 "cargomass": 0,
@@ -776,7 +776,7 @@
                         "id": 0
                     }
                 ],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -813,9 +813,9 @@
                 "coordinates": {
                     "x": -5,
                     "y": 6,
-                    "z": 2578
+                    "z": 3000
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 82,
                 "cargomass": 0,
@@ -879,16 +879,16 @@
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:02:41.000",
+                    "started": "2024-01-29T00:08:06.000",
                     "tasks": [
                         {
                             "type": 5,
-                            "duration": 156,
+                            "duration": 22,
                             "cancelable": 0,
                             "coordinates": {
                                 "x": -5,
                                 "y": 6,
-                                "z": 2578
+                                "z": 3000
                             },
                             "cargo": [
                                 {
@@ -898,7 +898,7 @@
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 9
+                            "energy_cost": 1
                         }
                     ]
                 },
@@ -911,12 +911,12 @@
                 "coordinates": {
                     "x": -5,
                     "y": 6,
-                    "z": 2578
+                    "z": 3000
                 },
                 "energy": 82,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -953,9 +953,9 @@
                 "coordinates": {
                     "x": -5,
                     "y": 6,
-                    "z": 2578
+                    "z": 3000
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 82,
                 "cargomass": 0,
@@ -1019,16 +1019,16 @@
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:02:41.000",
+                    "started": "2024-01-29T00:08:06.000",
                     "tasks": [
                         {
                             "type": 5,
-                            "duration": 156,
+                            "duration": 22,
                             "cancelable": 0,
                             "coordinates": {
                                 "x": -5,
                                 "y": 6,
-                                "z": 2578
+                                "z": 3000
                             },
                             "cargo": [
                                 {
@@ -1038,7 +1038,7 @@
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 9
+                            "energy_cost": 1
                         }
                     ]
                 },
@@ -1051,9 +1051,9 @@
                 "coordinates": {
                     "x": -5,
                     "y": 6,
-                    "z": 2578
+                    "z": 3000
                 },
-                "energy": 73,
+                "energy": 81,
                 "cargomass": 22000,
                 "cargo": [
                     {
@@ -1064,7 +1064,7 @@
                         "id": 0
                     }
                 ],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1103,10 +1103,10 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
-                "cargomass": 990000,
+                "cargomass": 1040000,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1171,45 +1171,33 @@
                     "tasks": [
                         {
                             "type": 7,
-                            "duration": 1980,
+                            "duration": 2080,
                             "cancelable": 2,
                             "cargo": [
                                 {
+                                    "item_id": 101,
+                                    "stats": 0,
+                                    "modules": [],
+                                    "quantity": 20
+                                },
+                                {
                                     "item_id": 10001,
-                                    "stats": 11111,
-                                    "modules": [],
-                                    "quantity": 15
-                                },
-                                {
-                                    "item_id": 10002,
-                                    "stats": 22222,
-                                    "modules": [],
-                                    "quantity": 8
-                                },
-                                {
-                                    "item_id": 10203,
-                                    "stats": "23301466983",
+                                    "stats": 1025,
                                     "modules": [],
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 99
+                            "energy_cost": 104
                         }
                     ]
                 },
                 "item_id": 10201,
                 "cargo": [
                     {
-                        "item_id": 10001,
-                        "stats": "11111",
+                        "item_id": 101,
+                        "stats": "0",
                         "modules": [],
-                        "quantity": 15
-                    },
-                    {
-                        "item_id": 10002,
-                        "stats": "22222",
-                        "modules": [],
-                        "quantity": 8
+                        "quantity": 20
                     }
                 ]
             },
@@ -1222,24 +1210,17 @@
                     "z": 800
                 },
                 "energy": 383,
-                "cargomass": 990000,
+                "cargomass": 1040000,
                 "cargo": [
                     {
-                        "item_id": 10001,
-                        "stats": 11111,
+                        "item_id": 101,
+                        "stats": 0,
                         "modules": [],
-                        "quantity": 15,
+                        "quantity": 20,
                         "id": 1000000
-                    },
-                    {
-                        "item_id": 10002,
-                        "stats": 22222,
-                        "modules": [],
-                        "quantity": 8,
-                        "id": 1000001
                     }
                 ],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1278,10 +1259,10 @@
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
                 "energy": 383,
-                "cargomass": 990000,
+                "cargomass": 1040000,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1346,45 +1327,33 @@
                     "tasks": [
                         {
                             "type": 7,
-                            "duration": 1980,
+                            "duration": 2080,
                             "cancelable": 2,
                             "cargo": [
                                 {
+                                    "item_id": 101,
+                                    "stats": 0,
+                                    "modules": [],
+                                    "quantity": 20
+                                },
+                                {
                                     "item_id": 10001,
-                                    "stats": 11111,
-                                    "modules": [],
-                                    "quantity": 15
-                                },
-                                {
-                                    "item_id": 10002,
-                                    "stats": 22222,
-                                    "modules": [],
-                                    "quantity": 8
-                                },
-                                {
-                                    "item_id": 10203,
-                                    "stats": "23301466983",
+                                    "stats": 1025,
                                     "modules": [],
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 99
+                            "energy_cost": 104
                         }
                     ]
                 },
                 "item_id": 10201,
                 "cargo": [
                     {
-                        "item_id": 10001,
-                        "stats": "11111",
+                        "item_id": 101,
+                        "stats": "0",
                         "modules": [],
-                        "quantity": 15
-                    },
-                    {
-                        "item_id": 10002,
-                        "stats": "22222",
-                        "modules": [],
-                        "quantity": 8
+                        "quantity": 20
                     }
                 ]
             },
@@ -1396,18 +1365,18 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 284,
-                "cargomass": 800000,
+                "energy": 279,
+                "cargomass": 420000,
                 "cargo": [
                     {
-                        "item_id": 10203,
-                        "stats": "23301466983",
+                        "item_id": 10001,
+                        "stats": 1025,
                         "modules": [],
                         "quantity": 1,
                         "id": 0
                     }
                 ],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1446,10 +1415,10 @@
                     "y": -49,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
-                "energy": 284,
-                "cargomass": 800000,
+                "energy": 383,
+                "cargomass": 1490000,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1510,7 +1479,7 @@
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:33:00.000",
+                    "started": "2024-01-29T00:00:00.000",
                     "tasks": [
                         {
                             "type": 8,
@@ -1523,8 +1492,8 @@
                             },
                             "cargo": [
                                 {
-                                    "item_id": 10203,
-                                    "stats": "23301466983",
+                                    "item_id": 10200,
+                                    "stats": 11111,
                                     "modules": [],
                                     "quantity": 1
                                 }
@@ -1536,8 +1505,8 @@
                 "item_id": 10201,
                 "cargo": [
                     {
-                        "item_id": 10203,
-                        "stats": "23301466983",
+                        "item_id": 10200,
+                        "stats": "11111",
                         "modules": [],
                         "quantity": 1
                     }
@@ -1551,18 +1520,18 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 284,
-                "cargomass": 800000,
+                "energy": 383,
+                "cargomass": 1490000,
                 "cargo": [
                     {
-                        "item_id": 10203,
-                        "stats": "23301466983",
+                        "item_id": 10200,
+                        "stats": 11111,
                         "modules": [],
                         "quantity": 1,
-                        "id": 0
+                        "id": 1000000
                     }
                 ],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1601,10 +1570,10 @@
                     "y": -49,
                     "z": 800
                 },
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "capacity": 3165924,
-                "energy": 284,
-                "cargomass": 800000,
+                "energy": 383,
+                "cargomass": 1490000,
                 "engines": {
                     "thrust": 775,
                     "drain": 43
@@ -1665,7 +1634,7 @@
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:33:00.000",
+                    "started": "2024-01-29T00:00:00.000",
                     "tasks": [
                         {
                             "type": 8,
@@ -1678,8 +1647,8 @@
                             },
                             "cargo": [
                                 {
-                                    "item_id": 10203,
-                                    "stats": "23301466983",
+                                    "item_id": 10200,
+                                    "stats": 11111,
                                     "modules": [],
                                     "quantity": 1
                                 }
@@ -1691,8 +1660,8 @@
                 "item_id": 10201,
                 "cargo": [
                     {
-                        "item_id": 10203,
-                        "stats": "23301466983",
+                        "item_id": 10200,
+                        "stats": "11111",
                         "modules": [],
                         "quantity": 1
                     }
@@ -1706,10 +1675,10 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 284,
+                "energy": 383,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 642500,
+                "hullmass": 5862500,
                 "engines": {
                     "thrust": 775,
                     "drain": 43

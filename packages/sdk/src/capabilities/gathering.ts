@@ -3,6 +3,7 @@ import type {ServerContract} from '../contracts'
 import {PRECISION} from '../types'
 
 const GATHER_TIME_SCALE = 100
+const GATHER_MASS_DIVISOR = 228
 const DEPTH_PENALTY_DIVISOR = 5000
 
 export function calc_gather_duration(
@@ -16,7 +17,7 @@ export function calc_gather_duration(
 
     if (yieldValue === 0 || richness === 0) return UInt32.from(0)
 
-    const massFactor = Math.sqrt(itemMass)
+    const massFactor = itemMass / GATHER_MASS_DIVISOR
     const depthPenalty = 1 + stratum / DEPTH_PENALTY_DIVISOR
     const richnessMul = richness / 1000
     const duration =

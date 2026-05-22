@@ -1,12 +1,12 @@
 [
   {
     "outputItemId": 10001,
-    "outputMass": 50000,
+    "outputMass": 420000,
     "inputs": [
       {
         "category": "ore",
         "tier": 1,
-        "quantity": 15
+        "quantity": 20
       }
     ],
     "statSlots": [
@@ -31,12 +31,12 @@
   },
   {
     "outputItemId": 10002,
-    "outputMass": 30000,
+    "outputMass": 600000,
     "inputs": [
       {
         "category": "regolith",
         "tier": 1,
-        "quantity": 10
+        "quantity": 30
       },
       {
         "category": "biomass",
@@ -66,12 +66,12 @@
   },
   {
     "outputItemId": 10003,
-    "outputMass": 50000,
+    "outputMass": 390000,
     "inputs": [
       {
         "category": "gas",
         "tier": 1,
-        "quantity": 32
+        "quantity": 65
       }
     ],
     "statSlots": [
@@ -96,12 +96,17 @@
   },
   {
     "outputItemId": 10004,
-    "outputMass": 30000,
+    "outputMass": 600000,
     "inputs": [
       {
         "category": "crystal",
         "tier": 1,
-        "quantity": 20
+        "quantity": 25
+      },
+      {
+        "category": "biomass",
+        "tier": 1,
+        "quantity": 15
       }
     ],
     "statSlots": [
@@ -126,8 +131,173 @@
   },
   {
     "outputItemId": 10005,
-    "outputMass": 50000,
+    "outputMass": 600000,
     "inputs": [
+      {
+        "category": "ore",
+        "tier": 1,
+        "quantity": 20
+      },
+      {
+        "category": "gas",
+        "tier": 1,
+        "quantity": 30
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10006,
+    "outputMass": 420000,
+    "inputs": [
+      {
+        "category": "crystal",
+        "tier": 1,
+        "quantity": 30
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10007,
+    "outputMass": 420000,
+    "inputs": [
+      {
+        "category": "biomass",
+        "tier": 1,
+        "quantity": 25
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10008,
+    "outputMass": 400000,
+    "inputs": [
+      {
+        "category": "regolith",
+        "tier": 1,
+        "quantity": 45
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10009,
+    "outputMass": 590000,
+    "inputs": [
+      {
+        "category": "gas",
+        "tier": 1,
+        "quantity": 40
+      },
+      {
+        "category": "regolith",
+        "tier": 1,
+        "quantity": 40
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 10010,
+    "outputMass": 590000,
+    "inputs": [
+      {
+        "category": "crystal",
+        "tier": 1,
+        "quantity": 20
+      },
       {
         "category": "ore",
         "tier": 1,
@@ -155,158 +325,8 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 10006,
-    "outputMass": 30000,
-    "inputs": [
-      {
-        "category": "crystal",
-        "tier": 1,
-        "quantity": 10
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10007,
-    "outputMass": 30000,
-    "inputs": [
-      {
-        "category": "biomass",
-        "tier": 1,
-        "quantity": 32
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10008,
-    "outputMass": 30000,
-    "inputs": [
-      {
-        "category": "regolith",
-        "tier": 1,
-        "quantity": 20
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10009,
-    "outputMass": 50000,
-    "inputs": [
-      {
-        "category": "gas",
-        "tier": 1,
-        "quantity": 32
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10010,
-    "outputMass": 40000,
-    "inputs": [
-      {
-        "category": "crystal",
-        "tier": 1,
-        "quantity": 25
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
     "outputItemId": 10100,
-    "outputMass": 150000,
+    "outputMass": 940000,
     "inputs": [
       {
         "itemId": 10003,
@@ -335,11 +355,11 @@
   },
   {
     "outputItemId": 10101,
-    "outputMass": 75000,
+    "outputMass": 1440000,
     "inputs": [
       {
         "itemId": 10004,
-        "quantity": 5
+        "quantity": 6
       }
     ],
     "statSlots": [
@@ -364,11 +384,11 @@
   },
   {
     "outputItemId": 10102,
-    "outputMass": 145000,
+    "outputMass": 1220000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 4
+        "quantity": 3
       },
       {
         "itemId": 10006,
@@ -416,22 +436,18 @@
   },
   {
     "outputItemId": 10103,
-    "outputMass": 90000,
+    "outputMass": 1010000,
     "inputs": [
       {
-        "itemId": 10002,
-        "quantity": 3
-      },
-      {
         "itemId": 10007,
-        "quantity": 3
+        "quantity": 6
       }
     ],
     "statSlots": [
       {
         "sources": [
           {
-            "inputIndex": 1,
+            "inputIndex": 0,
             "statIndex": 1
           }
         ]
@@ -439,7 +455,7 @@
       {
         "sources": [
           {
-            "inputIndex": 1,
+            "inputIndex": 0,
             "statIndex": 0
           }
         ]
@@ -449,7 +465,7 @@
   },
   {
     "outputItemId": 10104,
-    "outputMass": 120000,
+    "outputMass": 1190000,
     "inputs": [
       {
         "itemId": 10008,
@@ -482,15 +498,15 @@
   },
   {
     "outputItemId": 10105,
-    "outputMass": 100000,
+    "outputMass": 1220000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 8
+        "quantity": 3
       },
       {
         "itemId": 10002,
-        "quantity": 4
+        "quantity": 3
       }
     ],
     "statSlots": [
@@ -531,7 +547,7 @@
   },
   {
     "outputItemId": 10106,
-    "outputMass": 120000,
+    "outputMass": 1430000,
     "inputs": [
       {
         "itemId": 10004,
@@ -575,15 +591,15 @@
   },
   {
     "outputItemId": 10107,
-    "outputMass": 180000,
+    "outputMass": 1420000,
     "inputs": [
       {
         "itemId": 10010,
-        "quantity": 6
+        "quantity": 3
       },
       {
         "itemId": 10009,
-        "quantity": 4
+        "quantity": 3
       }
     ],
     "statSlots": [
@@ -607,11 +623,11 @@
   },
   {
     "outputItemId": 10108,
-    "outputMass": 90000,
+    "outputMass": 970000,
     "inputs": [
       {
         "itemId": 10003,
-        "quantity": 4
+        "quantity": 3
       },
       {
         "itemId": 10007,
@@ -656,7 +672,7 @@
   },
   {
     "outputItemId": 10200,
-    "outputMass": 80000,
+    "outputMass": 1490000,
     "inputs": [
       {
         "itemId": 10001,
@@ -705,7 +721,7 @@
   },
   {
     "outputItemId": 10201,
-    "outputMass": 100000,
+    "outputMass": 2300000,
     "inputs": [
       {
         "itemId": 10001,
@@ -754,7 +770,7 @@
   },
   {
     "outputItemId": 10202,
-    "outputMass": 1300000,
+    "outputMass": 5760000,
     "inputs": [
       {
         "itemId": 10001,
@@ -803,7 +819,7 @@
   },
   {
     "outputItemId": 10203,
-    "outputMass": 800000,
+    "outputMass": 4440000,
     "inputs": [
       {
         "itemId": 10001,
@@ -852,7 +868,7 @@
   },
   {
     "outputItemId": 10204,
-    "outputMass": 800000,
+    "outputMass": 5540000,
     "inputs": [
       {
         "itemId": 10001,
