@@ -1,7 +1,7 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {Checksum256} from '@wharfkit/antelope'
-import {deriveResourceStats, deriveStratum, RESERVE_TIERS, type ReserveTier} from '$lib'
+import {deriveResourceStats, deriveStratum, tierOfReserve, type ReserveTier} from '$lib'
 
 describe('deriveResourceStats', () => {
     test('stat range [1, 999] is bounded', () => {
@@ -104,16 +104,15 @@ describe('deriveStratum reserve tiers', () => {
         for (const {x, y} of coords) {
             const r = deriveStratum(epochSeed, {x, y}, 1, 2, 0, 65535)
             assert.isAbove(r.reserve, 0, `pinned coord (${x},${y}) should yield nonzero reserve`)
-            const fits = (Object.values(RESERVE_TIERS) as Array<{min: number; max: number}>).some(
-                (range) => r.reserve >= range.min && r.reserve <= range.max
+            const tier = tierOfReserve(r.reserve, r.itemId)
+            assert.isNotNull(
+                tier,
+                `reserve ${r.reserve} of item ${r.itemId} at (${x},${y}) is outside all tier mass ranges`
             )
-            assert.isTrue(fits, `reserve ${r.reserve} at (${x},${y}) is in a gap`)
         }
     })
 
-    test('yield rate near 0.1%', () => {
-        // 30K samples at true rate ~0.001 gives 99% CI roughly [0.00066, 0.0015].
-        // The [0.0005, 0.002] bounds comfortably contain that CI.
+    test('shallow yield rate near 0.25%', () => {
         let yielded = 0
         const N = 30_000
         for (let i = 0; i < N; i++) {
@@ -123,8 +122,22 @@ describe('deriveStratum reserve tiers', () => {
             if (r.reserve > 0) yielded++
         }
         const rate = yielded / N
-        assert.isAbove(rate, 0.0005, `yield rate ${rate} too low`)
-        assert.isBelow(rate, 0.002, `yield rate ${rate} too high`)
+        assert.isAbove(rate, 0.0015, `shallow yield rate ${rate} too low`)
+        assert.isBelow(rate, 0.004, `shallow yield rate ${rate} too high`)
+    })
+
+    test('deep yield rate near 0.05%', () => {
+        let yielded = 0
+        const N = 100_000
+        for (let i = 0; i < N; i++) {
+            const x = i % 1000
+            const y = Math.floor(i / 1000)
+            const r = deriveStratum(epochSeed, {x, y}, 65000, 2, 0, 65535)
+            if (r.reserve > 0) yielded++
+        }
+        const rate = yielded / N
+        assert.isAbove(rate, 0.0003, `deep yield rate ${rate} too low`)
+        assert.isBelow(rate, 0.001, `deep yield rate ${rate} too high`)
     })
 
     test('deeper strata bias toward larger tiers', () => {
@@ -143,14 +156,8 @@ describe('deriveStratum reserve tiers', () => {
                 for (let y = 0; y < 50; y++) {
                     const r = deriveStratum(epochSeed, {x, y}, stratum, 2, 0, 65535)
                     if (r.reserve === 0) continue
-                    for (const [tier, range] of Object.entries(RESERVE_TIERS) as Array<
-                        [ReserveTier, {min: number; max: number}]
-                    >) {
-                        if (r.reserve >= range.min && r.reserve <= range.max) {
-                            c[tier]++
-                            break
-                        }
-                    }
+                    const tier = tierOfReserve(r.reserve, r.itemId)
+                    if (tier) c[tier]++
                 }
             }
             return c

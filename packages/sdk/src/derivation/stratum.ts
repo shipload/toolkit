@@ -1,7 +1,8 @@
 import {Bytes, Checksum256, type Checksum256Type} from '@wharfkit/antelope'
 import {hash512} from '../utils/hash'
 import {Coordinates, type CoordinatesType} from '../types'
-import {getEligibleResources, getResourceWeight, YIELD_THRESHOLD} from './resources'
+import {getItem} from '../data/catalog'
+import {getEligibleResources, getResourceWeight, yieldThresholdAt} from './resources'
 import {RESERVE_TIERS, rollTier, rollWithinTier} from './tiers'
 
 export interface StratumInfo {
@@ -33,15 +34,8 @@ export function deriveStratum(
 
     const rawReserve = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0
 
-    let reserve = 0
-    if (rawReserve <= YIELD_THRESHOLD) {
-        const tierRoll = ((bytes[18] << 8) | bytes[19]) >>> 0
-        const withinRoll = ((bytes[20] << 8) | bytes[21]) >>> 0
-        const tier = rollTier(tierRoll, stratum)
-        reserve = rollWithinTier(withinRoll, RESERVE_TIERS[tier])
-    }
-
-    if (reserve === 0) return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
+    if (rawReserve > yieldThresholdAt(stratum))
+        return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
 
     const eligible = getEligibleResources(locationType, subtype, stratum)
     if (eligible.length === 0) return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
@@ -65,6 +59,12 @@ export function deriveStratum(
             }
         }
     }
+
+    const tierRoll = ((bytes[18] << 8) | bytes[19]) >>> 0
+    const withinRoll = ((bytes[20] << 8) | bytes[21]) >>> 0
+    const tier = rollTier(tierRoll, stratum)
+    const unitMass = getItem(selectedItemId).mass
+    const reserve = rollWithinTier(withinRoll, RESERVE_TIERS[tier], unitMass)
 
     const seedBigInt =
         (BigInt(bytes[8]) << 56n) |

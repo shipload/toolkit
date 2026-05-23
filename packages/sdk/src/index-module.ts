@@ -97,6 +97,9 @@ export {
     DEPTH_THRESHOLD_T5,
     LOCATION_MIN_DEPTH,
     LOCATION_MAX_DEPTH,
+    yieldThresholdAt,
+    YIELD_FRACTION_SHALLOW,
+    YIELD_FRACTION_DEEP,
     PLANET_SUBTYPE_GAS_GIANT,
     PLANET_SUBTYPE_ROCKY,
     PLANET_SUBTYPE_TERRESTRIAL,
@@ -107,7 +110,7 @@ export {
 
 export type {StratumInfo, ResourceStats, DerivedStratum} from './derivation'
 
-export {RESERVE_TIERS, TIER_ROLL_MAX, rollTier, rollWithinTier} from './derivation'
+export {RESERVE_TIERS, TIER_ROLL_MAX, tierOfReserve, rollTier, rollWithinTier} from './derivation'
 export type {ReserveTier, TierRange} from './derivation'
 
 export {getStatDefinitions, getStatName, resolveStats} from './derivation'

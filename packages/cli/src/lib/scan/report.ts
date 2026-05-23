@@ -1,17 +1,11 @@
-import { getLocationTypeName, LocationType, RESERVE_TIERS } from "@shipload/sdk";
+import { getLocationTypeName, LocationType, tierOfReserve } from "@shipload/sdk";
 import type { Checksum256 } from "@wharfkit/antelope";
 import { formatDuration } from "./progress";
 import type { HistogramSnapshot, LeaderboardEntry, MultiHighSnapshot } from "./types";
 
-function tierLabel(reserve: number): string {
+function tierLabel(reserve: number, itemId: number): string {
 	if (reserve === 0) return "-";
-	if (reserve <= RESERVE_TIERS.small.max) return "small";
-	if (reserve >= RESERVE_TIERS.medium.min && reserve <= RESERVE_TIERS.medium.max) return "medium";
-	if (reserve >= RESERVE_TIERS.large.min && reserve <= RESERVE_TIERS.large.max) return "large";
-	if (reserve >= RESERVE_TIERS.massive.min && reserve <= RESERVE_TIERS.massive.max)
-		return "massive";
-	if (reserve >= RESERVE_TIERS.motherlode.min) return "motherlode";
-	return "?";
+	return tierOfReserve(reserve, itemId) ?? "?";
 }
 
 export interface ReportHeader {
@@ -143,7 +137,7 @@ export function renderLeaderboard(
 			e.itemName,
 			String(e.richness),
 			String(e.reserve),
-			tierLabel(e.reserve),
+			tierLabel(e.reserve, e.itemId),
 			stat(e.stats.stat1),
 			stat(e.stats.stat2),
 			stat(e.stats.stat3),

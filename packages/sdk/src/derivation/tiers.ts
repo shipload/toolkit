@@ -1,3 +1,5 @@
+import {getItem} from '../data/catalog'
+
 export type ReserveTier = 'small' | 'medium' | 'large' | 'massive' | 'motherlode'
 
 export interface TierRange {
@@ -6,11 +8,11 @@ export interface TierRange {
 }
 
 export const RESERVE_TIERS: Record<ReserveTier, TierRange> = {
-    small: {min: 15, max: 60},
-    medium: {min: 100, max: 200},
-    large: {min: 400, max: 700},
-    massive: {min: 1000, max: 2500},
-    motherlode: {min: 4000, max: 10000},
+    small: {min: 3_600_000, max: 14_400_000},
+    medium: {min: 24_000_000, max: 48_000_000},
+    large: {min: 96_000_000, max: 168_000_000},
+    massive: {min: 240_000_000, max: 600_000_000},
+    motherlode: {min: 960_000_000, max: 2_400_000_000},
 }
 
 const SHALLOW_THRESHOLDS = {
@@ -47,8 +49,27 @@ export function rollTier(tierRoll: number, stratum: number): ReserveTier {
     return 'motherlode'
 }
 
-export function rollWithinTier(withinRoll: number, range: TierRange): number {
+export function rollWithinTier(
+    withinRoll: number,
+    range: TierRange,
+    resourceUnitMass: number
+): number {
     const u = withinRoll / 65535
     const skewed = u * u
-    return Math.floor(range.min + skewed * (range.max - range.min))
+    const depositMass = range.min + skewed * (range.max - range.min)
+    return Math.max(1, Math.floor(depositMass / resourceUnitMass))
+}
+
+const RESERVE_TIER_ENTRIES = Object.entries(RESERVE_TIERS) as Array<[ReserveTier, TierRange]>
+
+export function tierOfReserve(reserve: number, itemId: number): ReserveTier | null {
+    if (reserve <= 0) return null
+    const unitMass = getItem(itemId).mass
+    if (unitMass <= 0) return null
+    const impliedMassLow = reserve * unitMass
+    const impliedMassHigh = impliedMassLow + unitMass
+    for (const [tier, range] of RESERVE_TIER_ENTRIES) {
+        if (impliedMassHigh > range.min && impliedMassLow <= range.max) return tier
+    }
+    return null
 }

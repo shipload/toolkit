@@ -6,6 +6,7 @@ import {
     RESERVE_TIERS,
     type ReserveTier,
     ServerContract,
+    tierOfReserve,
 } from '@shipload/sdk'
 import {Checksum256} from '@wharfkit/antelope'
 import type {Command} from 'commander'
@@ -28,14 +29,6 @@ export interface AnalysisResult {
     totalCells: number
     nonEmpty: number
     strata: number
-}
-
-function classifyReserve(reserve: number): ReserveTier | null {
-    for (const tier of ['small', 'medium', 'large', 'massive', 'motherlode'] as ReserveTier[]) {
-        const r = RESERVE_TIERS[tier]
-        if (reserve >= r.min && reserve <= r.max) return tier
-    }
-    return null
 }
 
 export function analyse(
@@ -75,7 +68,7 @@ export function analyse(
                 yielded++
                 if (s.reserve > maxReserve) maxReserve = s.reserve
 
-                const tier = classifyReserve(s.reserve)
+                const tier = tierOfReserve(s.reserve, s.itemId)
                 if (tier === null) {
                     inGap++
                 } else {

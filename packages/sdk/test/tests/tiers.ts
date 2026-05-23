@@ -1,8 +1,10 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
+    getItem,
     isCraftedItem,
     isRelatedItem,
+    ITEM_ORE_T1,
     itemCategory,
     itemOffset,
     itemTier,
@@ -60,11 +62,11 @@ describe('tier utilities', () => {
 
 describe('reserve tiers', () => {
     test('tier constants match spec', () => {
-        assert.deepEqual(RESERVE_TIERS.small, {min: 15, max: 60})
-        assert.deepEqual(RESERVE_TIERS.medium, {min: 100, max: 200})
-        assert.deepEqual(RESERVE_TIERS.large, {min: 400, max: 700})
-        assert.deepEqual(RESERVE_TIERS.massive, {min: 1000, max: 2500})
-        assert.deepEqual(RESERVE_TIERS.motherlode, {min: 4000, max: 10000})
+        assert.deepEqual(RESERVE_TIERS.small, {min: 3_600_000, max: 14_400_000})
+        assert.deepEqual(RESERVE_TIERS.medium, {min: 24_000_000, max: 48_000_000})
+        assert.deepEqual(RESERVE_TIERS.large, {min: 96_000_000, max: 168_000_000})
+        assert.deepEqual(RESERVE_TIERS.massive, {min: 240_000_000, max: 600_000_000})
+        assert.deepEqual(RESERVE_TIERS.motherlode, {min: 960_000_000, max: 2_400_000_000})
     })
 
     test('rollTier at shallow distributes ~80/19.2/0.8/0.005/0.0004', () => {
@@ -100,14 +102,17 @@ describe('reserve tiers', () => {
 
     test('rollWithinTier is skewed low', () => {
         const range = RESERVE_TIERS.large
+        const unitMass = getItem(ITEM_ORE_T1).mass
+        const minUnits = Math.floor(range.min / unitMass)
+        const maxUnits = Math.floor(range.max / unitMass)
         let belowMidpoint = 0
         const N = 10_000
         for (let i = 0; i < N; i++) {
             const r = Math.floor((i / N) * 65536)
-            const v = rollWithinTier(r, range)
-            assert.isAtLeast(v, range.min)
-            assert.isAtMost(v, range.max)
-            const midpoint = (range.min + range.max) / 2
+            const v = rollWithinTier(r, range, unitMass)
+            assert.isAtLeast(v, Math.max(1, minUnits))
+            assert.isAtMost(v, maxUnits)
+            const midpoint = (minUnits + maxUnits) / 2
             if (v < midpoint) belowMidpoint++
         }
         // u^2 skew: ~70% of values should be below midpoint
@@ -116,7 +121,8 @@ describe('reserve tiers', () => {
 
     test('rollWithinTier deterministic', () => {
         const range = RESERVE_TIERS.medium
-        assert.equal(rollWithinTier(0, range), range.min)
-        assert.equal(rollWithinTier(65535, range), range.max)
+        const unitMass = getItem(ITEM_ORE_T1).mass
+        assert.equal(rollWithinTier(0, range, unitMass), Math.floor(range.min / unitMass))
+        assert.equal(rollWithinTier(65535, range, unitMass), Math.floor(range.max / unitMass))
     })
 })
