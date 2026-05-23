@@ -37,10 +37,13 @@ export function renderDetail(
     reach?: StratumReachAnnotation
 ): string {
     const itemId = Number(s.item_id)
+    const effective = Number(s.reserve)
+    const max = Number(s.reserve_max)
+    const regenHint = effective < max ? ' · regenerating' : ''
     const lines = [
         `Stratum [${index}]:`,
         `  Item:     ${formatItem(itemId)}`,
-        `  Reserve:  ${formatReserve(Number(s.reserve), Number(s.reserve_max))} units`,
+        `  Reserve:  ${formatReserve(effective, max)} units${regenHint}`,
         `  Richness: ${s.richness} / 1000`,
         `  Required depth: ${index}${formatReachVerdict(index, reach)}`,
         `  Seed:     ${s.seed}`,

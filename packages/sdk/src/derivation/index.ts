@@ -31,5 +31,8 @@ export {
 export {RESERVE_TIERS, TIER_ROLL_MAX, tierOfReserve, rollTier, rollWithinTier} from './tiers'
 export type {ReserveTier, TierRange} from './tiers'
 
+export {getEffectiveReserve} from './reserve-regen'
+export type {EffectiveReserveInput} from './reserve-regen'
+
 export * from './stats'
 export * from './crafting'

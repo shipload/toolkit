@@ -24,7 +24,7 @@ function stratum(
 
 test('renderDetail still renders item, reserve, richness from raw stratum row', () => {
     const out = renderDetail(
-        {item_id: 101, reserve: 1000, seed: 'abc', richness: 50} as any,
+        {item_id: 101, reserve: 1000, reserve_max: 1000, seed: 'abc', richness: 50} as any,
         null,
         0
     )
@@ -34,7 +34,7 @@ test('renderDetail still renders item, reserve, richness from raw stratum row', 
 
 test('renderDetail annotates when the entity can reach the stratum', () => {
     const out = renderDetail(
-        {item_id: 101, reserve: 1000, seed: 'abc', richness: 50} as any,
+        {item_id: 101, reserve: 1000, reserve_max: 1000, seed: 'abc', richness: 50} as any,
         null,
         5,
         {entity: {entityType: 'ship', entityId: 1n}, depth: 5}
@@ -44,12 +44,21 @@ test('renderDetail annotates when the entity can reach the stratum', () => {
 
 test('renderDetail annotates when the entity is out of depth', () => {
     const out = renderDetail(
-        {item_id: 101, reserve: 1000, seed: 'abc', richness: 50} as any,
+        {item_id: 101, reserve: 1000, reserve_max: 1000, seed: 'abc', richness: 50} as any,
         null,
         6,
         {entity: {entityType: 'ship', entityId: 1n}, depth: 5}
     )
     expect(out).toContain('Required depth: 6 · out of depth for ship:1 (depth 5)')
+})
+
+test('renderDetail shows regenerating hint when effective is below max', () => {
+    const out = renderDetail(
+        {item_id: 101, reserve: 900, reserve_max: 1000, seed: 'abc', richness: 50} as any,
+        null,
+        0
+    )
+    expect(out).toContain('· regenerating')
 })
 
 test('stratum command exposes an entity reach option', () => {
