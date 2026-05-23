@@ -1,5 +1,18 @@
 # @shipload/oracle
 
+## 0.0.1-next.8
+
+### Patch Changes
+
+- dd9e222: - Mirror T1 standardization in SDK and CLI
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Handle regenerating reserves
+  - Mass-based deposit tiers
+- Updated dependencies [dd9e222]
+  - @shipload/sdk@1.0.0-next.18
+
 ## 0.0.1-next.7
 
 ### Patch Changes
