@@ -1,6 +1,6 @@
 import {Box, Text, type VChild} from '@opentui/core'
 import type {ServerTypes} from '@shipload/sdk'
-import {formatCargoUsage, formatCoords, projectEnergy} from '../../lib/format'
+import {formatCargoUsage, formatCoordinatePair, projectEnergy} from '../../lib/format'
 import type {EntitySnapshot} from '../../lib/snapshot'
 import {renderField} from './field'
 import {renderHeader} from './header'
@@ -28,7 +28,9 @@ export function renderEntitySummary(opts: EntitySummaryOpts): VChild {
 function renderStatsRow(snap: EntitySnapshot, elapsed_s: number): VChild {
     const cells: string[] = []
     if (snap.coordinates) {
-        cells.push(`◷ ${formatCoords(snap.coordinates as unknown as ServerTypes.coordinates)}`)
+        cells.push(
+            `◷ ${formatCoordinatePair(snap.coordinates as unknown as ServerTypes.coordinates)}`
+        )
     }
     const energyStr = energySummary(snap, elapsed_s)
     if (energyStr) cells.push(energyStr)

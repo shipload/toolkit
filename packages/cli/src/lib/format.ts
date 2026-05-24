@@ -3,6 +3,7 @@ import {
 	deriveLocationStatic,
 	deriveStratum,
 	displayName,
+	formatLocation as formatSdkLocation,
 	formatMass,
 	LocationType,
 	PRECISION,
@@ -105,7 +106,7 @@ export function formatTaskShort(t: ServerTypes.task): string {
 		case TaskType.IDLE:
 			return "Idle";
 		case TaskType.TRAVEL:
-			return t.coordinates ? `Travel to ${formatCoords(t.coordinates)}` : "Travel";
+			return t.coordinates ? `Travel to ${formatCoordinatePair(t.coordinates)}` : "Travel";
 		case TaskType.RECHARGE:
 			return "Recharge";
 		case TaskType.LOAD: {
@@ -123,7 +124,7 @@ export function formatTaskShort(t: ServerTypes.task): string {
 			return items ? `Gather ${items}` : "Gather";
 		}
 		case TaskType.WARP:
-			return t.coordinates ? `Warp to ${formatCoords(t.coordinates)}` : "Warp";
+			return t.coordinates ? `Warp to ${formatCoordinatePair(t.coordinates)}` : "Warp";
 		case TaskType.CRAFT: {
 			const last = t.cargo?.[t.cargo.length - 1];
 			if (!last) return "Craft";
@@ -180,8 +181,8 @@ export function formatCargoUsage(used: number, capacity?: number): string {
 	return capacity != null ? `${formatMass(used)} / ${formatMass(capacity)}` : formatMass(used);
 }
 
-export function formatCoords(coords:ServerTypes.coordinates): string {
-	return `(${coords.x}, ${coords.y})`;
+export function formatCoordinatePair(coords: { x: unknown; y: unknown }): string {
+	return `(${formatSdkLocation({ x: Number(coords.x), y: Number(coords.y) })})`;
 }
 
 export function reltime(d: Date, now: Date): string {
@@ -256,7 +257,7 @@ export function formatLocation(
 	epochSeed?: Checksum256Type,
 	reach?: { depth: number; showAll: boolean },
 ): string {
-	const coords = formatCoords(location.coords);
+	const coords = formatCoordinatePair(location.coords);
 	const lines = [`Location ${coords} | ${location.is_system ? "System" : "Empty Space"}`];
 
 	if (gameSeed && epochSeed && location.is_system) {
@@ -418,8 +419,8 @@ export function formatNearby(nearby:ServerTypes.nearby_info, opts: NearbyOpts = 
 
 	const maxEnergy = Number(nearby.max_energy);
 	const lines = [
-		`Current:   ${formatCoords(nearby.current.coordinates)}  energy ${nearby.current.energy}/${maxEnergy}`,
-		`Projected: ${formatCoords(nearby.projected.coordinates)}  energy ${nearby.projected.energy}/${maxEnergy}`,
+		`Current:   ${formatCoordinatePair(nearby.current.coordinates)}  energy ${nearby.current.energy}/${maxEnergy}`,
+		`Projected: ${formatCoordinatePair(nearby.projected.coordinates)}  energy ${nearby.projected.energy}/${maxEnergy}`,
 		`Can Travel: ${nearby.can_travel ? "Yes" : "No"}`,
 		"",
 		`Nearby (${limited.length}${limited.length < summaries.length ? ` of ${summaries.length}` : ""}, sorted by ${sort}):`,

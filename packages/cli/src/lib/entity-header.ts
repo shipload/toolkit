@@ -49,7 +49,7 @@ import {
 	stackKey,
 } from "./cargo-projection";
 import {
-	formatCoords,
+	formatCoordinatePair,
 	formatDuration,
 	formatResolveHint,
 	formatTaskShort,
@@ -77,7 +77,7 @@ function entityStatusRows(
 ): [string, string][] {
 	const rows: [string, string][] = [];
 	const statusStr = entity.is_idle ? "idle" : "busy";
-	rows.push(["Status:", `${statusStr}  ·  ${formatCoords(entity.coordinates)}`]);
+	rows.push(["Status:", `${statusStr}  ·  ${formatCoordinatePair(entity.coordinates)}`]);
 	if (!entity.is_idle && entity.current_task) {
 		const remaining = formatDuration(Number(entity.current_task_remaining));
 		rows.push([

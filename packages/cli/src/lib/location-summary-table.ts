@@ -1,6 +1,6 @@
 import { encodeStats } from "@shipload/sdk";
 import Table from "cli-table3";
-import { formatDuration, formatItem, jsonStringify } from "./format";
+import { formatCoordinatePair, formatDuration, formatItem, jsonStringify } from "./format";
 import { formatItemStats } from "./item-stats";
 import { type LocationSummary, locationSummaryToJson } from "./location-summary";
 
@@ -50,10 +50,6 @@ const RIGHT_ALIGNED: Set<LocationColumn> = new Set([
 	"reach",
 ]);
 
-function formatCoordsPair(c: { x: number; y: number }): string {
-	return `(${c.x}, ${c.y})`;
-}
-
 function formatStats(itemId: number, stats: { stat1: number; stat2: number; stat3: number }): string {
 	if (stats.stat1 === 0 && stats.stat2 === 0 && stats.stat3 === 0) return "";
 	return formatItemStats(itemId, encodeStats([stats.stat1, stats.stat2, stats.stat3]));
@@ -81,7 +77,7 @@ function summaryRow(
 	for (const col of columns) {
 		switch (col) {
 			case "coords":
-				row.push(showLocCells ? formatCoordsPair(s.coords) : "");
+				row.push(showLocCells ? formatCoordinatePair(s.coords) : "");
 				break;
 			case "type":
 				row.push(showLocCells ? s.typeLabel : "");
