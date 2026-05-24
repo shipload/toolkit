@@ -10,7 +10,7 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
     const exponent = statSum / 2997.0
     return {
         hullmass: computeBaseHullmass(stats),
-        capacity: Math.floor(1000000 * 10 ** exponent),
+        capacity: Math.floor(5000000 * 10 ** exponent),
     }
 }
 
@@ -185,8 +185,9 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
         case ITEM_SHIP_T1_PACKED:
         case ITEM_EXTRACTOR_T1_PACKED:
         case ITEM_FACTORY_T1_PACKED:
-        case ITEM_CONTAINER_T1_PACKED:
             return computeShipHullCapabilities(stats).capacity
+        case ITEM_CONTAINER_T1_PACKED:
+            return computeContainerCapabilities(stats).capacity
         case ITEM_WAREHOUSE_T1_PACKED:
             return computeWarehouseHullCapabilities(stats).capacity
         case ITEM_CONTAINER_T2_PACKED:
@@ -211,7 +212,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const exponent = statSum / 2997.0
     return {
         hullmass: computeBaseHullmass(stats),
-        capacity: Math.floor(20000000 * 10 ** exponent),
+        capacity: Math.floor(100000000 * 10 ** exponent),
     }
 }
 
@@ -386,7 +387,12 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    return computeShipHullCapabilities(stats)
+    const statSum = stats.strength + stats.hardness + stats.saturation
+    const exponent = statSum / 2997.0
+    return {
+        hullmass: computeBaseHullmass(stats),
+        capacity: Math.floor(20000000 * 10 ** exponent),
+    }
 }
 
 export function computeContainerT2Capabilities(stats: Record<string, number>): {
@@ -402,7 +408,7 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
 
     const statSum = strength + hardness + saturation
     const exponent = statSum / 2500
-    const capacity = Math.floor(1500000 * 10 ** exponent)
+    const capacity = Math.floor(40000000 * 10 ** exponent)
 
     return {hullmass, capacity}
 }

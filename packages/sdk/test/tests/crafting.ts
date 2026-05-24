@@ -476,8 +476,8 @@ describe('Crafting', () => {
                 saturation: 500,
             })
             assert.equal(caps.hullmass, 100000 - 75 * 500)
-            assert.equal(caps.capacity, Math.floor(1000000 * 10 ** (1500 / 2997)))
-            assert.approximately(caps.capacity, 3162000, 50000)
+            assert.equal(caps.capacity, Math.floor(20000000 * 10 ** (1500 / 2997)))
+            assert.approximately(caps.capacity, 63240000, 1000000)
         })
 
         test('minimum stats produce ceiling hullmass', () => {
@@ -490,8 +490,8 @@ describe('Crafting', () => {
             assert.equal(caps.hullmass, 99925)
             assert.isAtLeast(caps.hullmass, 99000)
             assert.isAtMost(caps.hullmass, 100000)
-            assert.isAtLeast(caps.capacity, 1000000)
-            assert.isAtMost(caps.capacity, 1100000)
+            assert.isAtLeast(caps.capacity, 20000000)
+            assert.isAtMost(caps.capacity, 22000000)
         })
 
         test('maximum stats produce floor hullmass', () => {
@@ -504,8 +504,8 @@ describe('Crafting', () => {
             assert.equal(caps.hullmass, 100000 - 75 * 999)
             assert.isAtLeast(caps.hullmass, 25000)
             assert.isAtMost(caps.hullmass, 26000)
-            assert.isAtLeast(caps.capacity, 9900000)
-            assert.isAtMost(caps.capacity, 10100000)
+            assert.isAtLeast(caps.capacity, 198000000)
+            assert.isAtMost(caps.capacity, 202000000)
         })
 
         test('hullmass range is 25k-100k', () => {
@@ -525,7 +525,7 @@ describe('Crafting', () => {
             assert.isAtLeast(lightest.hullmass, 25000)
         })
 
-        test('capacity range is 1M-10M', () => {
+        test('capacity range is 20M-200M', () => {
             const min = computeContainerCapabilities({
                 strength: 1,
                 hardness: 1,
@@ -538,8 +538,8 @@ describe('Crafting', () => {
                 saturation: 999,
                 density: 500,
             })
-            assert.isAtLeast(min.capacity, 1000000)
-            assert.isAtMost(max.capacity, 10100000)
+            assert.isAtLeast(min.capacity, 20000000)
+            assert.isAtMost(max.capacity, 202000000)
         })
 
         test('higher density means lighter hull', () => {
@@ -597,7 +597,7 @@ describe('Crafting', () => {
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 70000 - 50 * 300)
             const statSum = 400 + 600 + 200
-            const expected = Math.floor(1500000 * 10 ** (statSum / 2500))
+            const expected = Math.floor(40000000 * 10 ** (statSum / 2500))
             assert.equal(caps.capacity, expected)
         })
     })

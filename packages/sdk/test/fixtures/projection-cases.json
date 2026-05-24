@@ -1,6 +1,6 @@
 {
     "catalog_hash": "201ca23bfa4ba4ea446e57e5b571952697837dea29f5f100ff08fe56d50a6aed",
-    "generated_at": "2026-05-22T17:51:09.624Z",
+    "generated_at": "2026-05-23T23:34:42.725Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -16,7 +16,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 0,
                 "engines": {
@@ -121,7 +121,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -147,7 +147,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 0,
                 "engines": {
@@ -252,7 +252,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -278,7 +278,7 @@
                     "z": 3000
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 340,
                 "cargomass": 0,
                 "engines": {
@@ -379,7 +379,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -405,7 +405,7 @@
                     "z": 3000
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 340,
                 "cargomass": 0,
                 "engines": {
@@ -506,7 +506,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -532,7 +532,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 0,
                 "engines": {
@@ -644,7 +644,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -670,7 +670,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 0,
                 "engines": {
@@ -790,7 +790,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -816,7 +816,7 @@
                     "z": 3000
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 82,
                 "cargomass": 0,
                 "engines": {
@@ -930,7 +930,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -956,7 +956,7 @@
                     "z": 3000
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 82,
                 "cargomass": 0,
                 "engines": {
@@ -1078,7 +1078,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -1104,7 +1104,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 1040000,
                 "engines": {
@@ -1234,7 +1234,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -1260,7 +1260,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 1040000,
                 "engines": {
@@ -1390,7 +1390,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -1416,7 +1416,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 1490000,
                 "engines": {
@@ -1545,7 +1545,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,
@@ -1571,7 +1571,7 @@
                     "z": 800
                 },
                 "hullmass": 5862500,
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "energy": 383,
                 "cargomass": 1490000,
                 "engines": {
@@ -1692,7 +1692,7 @@
                     "capacity": 383,
                     "recharge": 2
                 },
-                "capacity": 3165924,
+                "capacity": 15829620,
                 "gatherer": {
                     "yield": 700,
                     "drain": 625,

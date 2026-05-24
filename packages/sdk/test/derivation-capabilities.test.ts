@@ -29,21 +29,21 @@ describe('computeBaseCapacity', () => {
         expect(Math.abs(wh - 20 * ship)).toBeLessThanOrEqual(20)
     })
 
-    test('container T1 uses the ship formula (1M base, /2997 divisor)', () => {
+    test('container T1 is 4x the ship formula (20M base, /2997 divisor)', () => {
         const ship = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
         const c1 = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
-        expect(c1).toBe(ship)
+        expect(Math.abs(c1 - 4 * ship)).toBeLessThanOrEqual(4)
     })
 
-    test('container T2 differs from T1 (1.5M base, /2500 divisor)', () => {
+    test('container T2 differs from T1 (25M base, /2500 divisor)', () => {
         const t1 = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
         const t2 = computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats)
         expect(t2).not.toBe(t1)
         expect(t2).toBeGreaterThan(0)
     })
 
-    test('container T2 formula at stats=100,100,100 = floor(1.5e6 * 10^(300/2500))', () => {
-        const expected = Math.floor(1500000 * 10 ** (300 / 2500))
+    test('container T2 formula at stats=100,100,100 = floor(40e6 * 10^(300/2500))', () => {
+        const expected = Math.floor(40000000 * 10 ** (300 / 2500))
         expect(
             computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, {
                 strength: 100,
