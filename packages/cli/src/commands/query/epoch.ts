@@ -11,6 +11,7 @@ export interface ContractCodeView {
 export interface EpochView {
     seed: string
     epoch: number
+    calculatedEpoch?: number
     started: Date
     epochTimeSeconds: number
     now: Date
@@ -20,6 +21,8 @@ export interface EpochView {
 export interface EpochJsonData {
     seed: string
     epoch: number
+    calculated_epoch?: number
+    epoch_diverged?: boolean
     started: string
     epoch_time_seconds: number
     elapsed_seconds: number
@@ -42,11 +45,15 @@ function formatDuration(seconds: number): string {
     return parts.join(' ')
 }
 
+function calculateCurrentEpoch(gameStart: Date, epochTimeSeconds: number, now: Date): number {
+    return Math.floor((now.getTime() - gameStart.getTime()) / (epochTimeSeconds * 1000)) + 1
+}
+
 function buildJsonData(view: EpochView): EpochJsonData {
     const elapsed = Math.floor((view.now.getTime() - view.started.getTime()) / 1000)
     const remaining = view.epochTimeSeconds - elapsed
     const nextAt = new Date(view.started.getTime() + view.epochTimeSeconds * 1000)
-    return {
+    const data: EpochJsonData = {
         seed: view.seed,
         epoch: view.epoch,
         started: view.started.toISOString(),
@@ -59,6 +66,11 @@ function buildJsonData(view: EpochView): EpochJsonData {
             last_code_update: c.lastCodeUpdate.toISOString(),
         })),
     }
+    if (view.calculatedEpoch !== undefined) {
+        data.calculated_epoch = view.calculatedEpoch
+        data.epoch_diverged = view.calculatedEpoch !== view.epoch
+    }
+    return data
 }
 
 export function render(view: EpochView, raw: boolean): string {
@@ -77,6 +89,13 @@ export function render(view: EpochView, raw: boolean): string {
         `Remaining:     ${formatDuration(data.remaining_seconds)}`,
         `Next advance:  ${data.next_advance_at}`,
     ]
+    if (data.epoch_diverged) {
+        lines.splice(
+            1,
+            0,
+            `WARNING: on-chain epoch ${data.epoch} differs from wall-clock epoch ${data.calculated_epoch}. The chain may need advance.`
+        )
+    }
     const labelWidth = Math.max(15, ...data.contracts.map((c) => c.name.length + 7))
     for (const c of data.contracts) {
         lines.push(`${`${c.name} code:`.padEnd(labelWidth)}${c.last_code_update}`)
@@ -104,13 +123,16 @@ export function register(program: Command): void {
             if (!stateRow) throw new Error('Server state row not found')
             const {epochTimeSeconds, gameStart} = gameConfig
             const epoch = Number(stateRow.epoch)
+            const now = new Date()
+            const calculatedEpoch = calculateCurrentEpoch(gameStart, epochTimeSeconds, now)
             const started = new Date(gameStart.getTime() + (epoch - 1) * epochTimeSeconds * 1000)
             const view: EpochView = {
                 seed: String(stateRow.seed),
                 epoch,
+                calculatedEpoch,
                 started,
                 epochTimeSeconds,
-                now: new Date(),
+                now,
                 contracts: [
                     {name: cfg.gameContract, lastCodeUpdate: gameAccount.last_code_update.toDate()},
                     {

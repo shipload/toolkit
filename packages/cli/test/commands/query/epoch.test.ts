@@ -42,3 +42,39 @@ test('epoch --raw emits JSON', () => {
     expect(parsed.elapsed_seconds).toBe(30)
     expect(parsed.remaining_seconds).toBe(30)
 })
+
+test('epoch warns when on-chain epoch differs from wall-clock epoch', () => {
+    const out = render(
+        {
+            seed: 'abc',
+            epoch: 2,
+            calculatedEpoch: 4,
+            started: new Date('2026-01-01T00:01:00Z'),
+            epochTimeSeconds: 60,
+            now: new Date('2026-01-01T00:03:30Z'),
+            contracts: [],
+        },
+        false
+    )
+    expect(out).toContain('WARNING:')
+    expect(out).toContain('on-chain epoch 2')
+    expect(out).toContain('wall-clock epoch 4')
+})
+
+test('epoch --raw includes calculated epoch divergence state', () => {
+    const out = render(
+        {
+            seed: 'abc',
+            epoch: 2,
+            calculatedEpoch: 4,
+            started: new Date('2026-01-01T00:01:00Z'),
+            epochTimeSeconds: 60,
+            now: new Date('2026-01-01T00:03:30Z'),
+            contracts: [],
+        },
+        true
+    )
+    const parsed = JSON.parse(out)
+    expect(parsed.calculated_epoch).toBe(4)
+    expect(parsed.epoch_diverged).toBe(true)
+})
