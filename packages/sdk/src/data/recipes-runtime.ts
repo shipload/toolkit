@@ -64,3 +64,8 @@ export function findItemByCategoryAndTier(category: ResourceCategory, tier: numb
     if (!item) throw new Error(`No resource found for category=${category} tier=${tier}`)
     return item
 }
+
+export function resolveRecipeInputItemId(input: RecipeInput): number {
+    if ('itemId' in input) return input.itemId
+    return findItemByCategoryAndTier(input.category, input.tier).id
+}

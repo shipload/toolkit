@@ -163,6 +163,25 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    claimplot(
+        entityId: UInt64Type,
+        targetItemId: UInt16Type,
+        coords: ServerContract.ActionParams.Type.coordinates
+    ): Action {
+        return this.server.action('claimplot', {
+            id: UInt64.from(entityId),
+            target_item_id: UInt16.from(targetItemId),
+            coords,
+        })
+    }
+
+    buildplot(entityId: UInt64Type, plotId: UInt64Type): Action {
+        return this.server.action('buildplot', {
+            id: UInt64.from(entityId),
+            plot_id: UInt64.from(plotId),
+        })
+    }
+
     addmodule(
         entityId: UInt64Type,
         moduleIndex: number,
