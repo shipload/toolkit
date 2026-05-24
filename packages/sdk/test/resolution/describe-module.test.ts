@@ -72,11 +72,9 @@ describe('describeModule', () => {
             ],
         })
         expect(desc?.id).toBe('module.loader.description')
-        expect(desc?.template).toBe(
-            '{quantity} loader that generates {thrust} thrust with a weight of {mass} per unit'
-        )
-        expect(desc?.params).toEqual({quantity: 20, thrust: 100, mass: 500})
-        expect(desc?.highlightKeys).toEqual(['quantity', 'thrust', 'mass'])
+        expect(desc?.template).toBe('generates {thrust} thrust with a weight of {mass} per unit')
+        expect(desc?.params).toEqual({thrust: 100, mass: 500})
+        expect(desc?.highlightKeys).toEqual(['thrust', 'mass'])
     })
 
     test('Crafter produces the expected description', () => {

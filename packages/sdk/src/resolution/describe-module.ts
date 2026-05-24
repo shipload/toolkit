@@ -63,14 +63,12 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     },
     loader: {
         id: 'module.loader.description',
-        template:
-            '{quantity} loader that generates {thrust} thrust with a weight of {mass} per unit',
+        template: 'generates {thrust} thrust with a weight of {mass} per unit',
         params: [
-            ['quantity', 'Quantity'],
             ['thrust', 'Thrust'],
             ['mass', 'Mass'],
         ],
-        highlightKeys: ['quantity', 'thrust', 'mass'],
+        highlightKeys: ['thrust', 'mass'],
     },
     crafter: {
         id: 'module.crafter.description',
