@@ -413,9 +413,6 @@
         ]
       },
       {
-        "sources": []
-      },
-      {
         "sources": [
           {
             "inputIndex": 1,
@@ -582,9 +579,6 @@
             "statIndex": 1
           }
         ]
-      },
-      {
-        "sources": []
       }
     ],
     "blendWeights": []
