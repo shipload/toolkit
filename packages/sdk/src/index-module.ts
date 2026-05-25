@@ -277,6 +277,16 @@ export {
 export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
 
 export {
+    availableBuildMethods,
+    isBuildable,
+    isPlotBuildable,
+    filterByBuildMethod,
+    allBuildableItems,
+    allPlotBuildableItems,
+} from './derivation/build-methods'
+export type {BuildMethod} from './derivation/build-methods'
+
+export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
     computeGeneratorCapabilities,
