@@ -1,5 +1,26 @@
 # @shipload/cli
 
+## 1.0.0-next.23
+
+### Patch Changes
+
+- c5b0a2f: - Stats/recipe compaction from contract
+  - Remove loader quantity copy
+  - Adjusted entity mass capacities
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Adding Plot + Linting
+  - Add ConstructionManager and plot kind support
+  - Add epoch divergence warning
+  - Use SDK location formatter
+  - Adding item_id from the entity_type
+  - Update recipes.json
+  - Add item build method helpers
+  - Support for build/claim plot actions
+- Updated dependencies [c5b0a2f]
+  - @shipload/sdk@1.0.0-next.19
+
 ## 1.0.0-next.22
 
 ### Patch Changes
