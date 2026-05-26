@@ -84,6 +84,7 @@ export type WireEntity = Record<string, unknown> & {
     id: string | number
     owner: string
     coordinates: WireCoordinates
+    item_id: number
 }
 
 export type SnapshotMessage = {
