@@ -131,7 +131,7 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         case MODULE_GATHERER: {
             const str = decodeStat(stats, 0)
             const tol = decodeStat(stats, 1)
-            const con = decodeStat(stats, 3)
+            const con = decodeStat(stats, 2)
             const tier = getItem(itemId).tier
             out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
                 tol,
@@ -161,10 +161,10 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             break
         }
         case MODULE_HAULER: {
-            const fin = decodeStat(stats, 0)
+            const res = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
-            const com = decodeStat(stats, 2)
-            out += `  Capacity ${computeHaulerCapacity(fin)}  Efficiency ${computeHaulerEfficiency(con)}  Drain ${computeHaulerDrain(com)}`
+            const ref = decodeStat(stats, 2)
+            out += `  Capacity ${computeHaulerCapacity(res)}  Efficiency ${computeHaulerEfficiency(con)}  Drain ${computeHaulerDrain(ref)}`
             break
         }
         case MODULE_WARP: {

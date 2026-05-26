@@ -12,7 +12,7 @@ describe('SLOT_FORMULAS', () => {
     })
 
     test('gatherer reads yield/depth/drain slots only', () => {
-        assert.deepEqual(Object.keys(SLOT_FORMULAS.gatherer).sort(), ['0', '1', '3'])
+        assert.deepEqual(Object.keys(SLOT_FORMULAS.gatherer).sort(), ['0', '1', '2'])
     })
 
     test('storage reads slots 0/1/2/3', () => {
@@ -51,7 +51,7 @@ describe('SLOT_FORMULAS', () => {
             const formula = SLOT_FORMULAS[kind]
             for (let i = 0; i < recipe.statSlots.length; i++) {
                 if (recipe.statSlots[i].sources.length === 0) continue
-                if (kind === 'gatherer' && (i === 2 || i === 4)) continue
+                if (kind === 'gatherer' && i === 3) continue
                 assert.property(
                     formula,
                     String(i),

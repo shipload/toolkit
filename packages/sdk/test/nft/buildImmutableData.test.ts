@@ -119,11 +119,12 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeEngineDrain(thm)])
     })
 
-    test('module (gatherer) emits 3 stats + 3 computed values in fixed order', () => {
+    test('module (gatherer) emits 4 stats + 3 computed values in fixed order', () => {
         const str = 500
         const tol = 600
         const con = 400
-        const stats = encodeStats([str, tol, 0, con, 300])
+        const ref = 700
+        const stats = encodeStats([str, tol, con, ref])
         const entries = buildModuleImmutable(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -135,6 +136,7 @@ describe('buildImmutableData', () => {
             'strength',
             'tolerance',
             'conductivity',
+            'reflectivity',
             'yield',
             'drain',
             'depth',
@@ -147,12 +149,11 @@ describe('buildImmutableData', () => {
         ])
     })
 
-    test('module (hauler) emits 4 stats + 3 computed capabilities', () => {
-        const com = 800
-        const con = 250
-        const fin = 600
+    test('module (hauler) emits 3 stats + 3 computed capabilities', () => {
         const res = 400
-        const stats = encodeStats([com, con, fin, res])
+        const con = 250
+        const ref = 600
+        const stats = encodeStats([res, con, ref])
         const entries = buildModuleImmutable(ITEM_HAULER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -161,18 +162,17 @@ describe('buildImmutableData', () => {
             'origin_x',
             'origin_y',
             'img',
-            'composition',
-            'conductivity',
-            'fineness',
             'resonance',
+            'conductivity',
+            'reflectivity',
             'capacity',
             'efficiency',
             'drain',
         ])
-        expect(findEntry(entries, 'composition')!.second).toEqual(['uint16', com])
+        expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', res])
         expect(findEntry(entries, 'capacity')!.second).toEqual([
             'uint8',
-            computeHaulerCapacity(com),
+            computeHaulerCapacity(res),
         ])
         expect(findEntry(entries, 'efficiency')!.second).toEqual([
             'uint16',
@@ -180,7 +180,7 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
-            moduleComputeHaulerDrain(fin),
+            moduleComputeHaulerDrain(ref),
         ])
     })
 

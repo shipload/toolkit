@@ -193,10 +193,12 @@ export function buildModuleImmutable(
         case MODULE_GATHERER: {
             const str = decodeStat(stats, 0)
             const tol = decodeStat(stats, 1)
-            const con = decodeStat(stats, 3)
+            const con = decodeStat(stats, 2)
+            const ref = decodeStat(stats, 3)
             base.push({first: 'strength', second: ['uint16', str]})
             base.push({first: 'tolerance', second: ['uint16', tol]})
             base.push({first: 'conductivity', second: ['uint16', con]})
+            base.push({first: 'reflectivity', second: ['uint16', ref]})
             base.push({first: 'yield', second: ['uint16', computeGathererYield(str)]})
             base.push({first: 'drain', second: ['uint16', computeGathererDrain(con)]})
             base.push({first: 'depth', second: ['uint16', computeGathererDepth(tol, item.tier)]})
@@ -241,17 +243,15 @@ export function buildModuleImmutable(
             break
         }
         case MODULE_HAULER: {
-            const com = decodeStat(stats, 0)
+            const res = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
-            const fin = decodeStat(stats, 2)
-            const res = decodeStat(stats, 3)
-            base.push({first: 'composition', second: ['uint16', com]})
-            base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'fineness', second: ['uint16', fin]})
+            const ref = decodeStat(stats, 2)
             base.push({first: 'resonance', second: ['uint16', res]})
-            base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(com)]})
+            base.push({first: 'conductivity', second: ['uint16', con]})
+            base.push({first: 'reflectivity', second: ['uint16', ref]})
+            base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res)]})
             base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(con)]})
-            base.push({first: 'drain', second: ['uint16', computeHaulerDrain(fin)]})
+            base.push({first: 'drain', second: ['uint16', computeHaulerDrain(ref)]})
             break
         }
     }

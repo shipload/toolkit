@@ -38,7 +38,7 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     gatherer: {
         0: {capability: 'Gathering', attribute: 'yield'},
         1: {capability: 'Gathering', attribute: 'depth'},
-        3: {capability: 'Gathering', attribute: 'drain'},
+        2: {capability: 'Gathering', attribute: 'drain'},
     },
     loader: {
         0: {capability: 'Loader', attribute: 'mass'},
