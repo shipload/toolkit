@@ -2,7 +2,9 @@ import {Command} from 'commander'
 import pkg from '../package.json' with {type: 'json'}
 import * as addmodule from './commands/action/addmodule'
 import * as blend from './commands/action/blend'
+import * as buildplot from './commands/action/buildplot'
 import * as cancel from './commands/action/cancel'
+import * as claimplot from './commands/action/claimplot'
 import * as claimstarter from './commands/action/claimstarter'
 import * as craft from './commands/action/craft'
 import * as demolish from './commands/action/demolish'
@@ -126,6 +128,8 @@ export function build(): Command {
     registerEntitySubcommand(craft.SUBCOMMAND)
     registerEntitySubcommand(blend.SUBCOMMAND)
     registerEntitySubcommand(deploy.SUBCOMMAND)
+    registerEntitySubcommand(claimplot.SUBCOMMAND)
+    registerEntitySubcommand(buildplot.SUBCOMMAND)
     registerEntitySubcommand(undeploy.SUBCOMMAND)
     registerEntitySubcommand(wrap.SUBCOMMAND)
     registerEntitySubcommand(wrapentity.SUBCOMMAND)

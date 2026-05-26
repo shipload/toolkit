@@ -228,6 +228,7 @@ export {
     isFactory,
     isContainer,
     isNexus,
+    isPlot,
 } from './data/kind-registry'
 export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'
