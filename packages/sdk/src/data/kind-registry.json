@@ -41,6 +41,13 @@
       "capabilityFlags": 0,
       "zCoord": 800,
       "defaultLabel": "Nexus"
+    },
+    {
+      "kind": "plot",
+      "classification": "Plot",
+      "capabilityFlags": 0,
+      "zCoord": 0,
+      "defaultLabel": "Plot"
     }
   ],
   "templates": [

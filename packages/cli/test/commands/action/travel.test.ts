@@ -8,7 +8,7 @@ test('travel includes recharge=true by default', async () => {
         getLocalShipload()
     )
     expect(action.name.toString()).toBe('travel')
-    expect((action.decoded.data as any).recharge).toBe(true)
+    expect((action.decoded.data as {recharge: boolean}).recharge).toBe(true)
 })
 
 test('travel respects --no-recharge', async () => {
@@ -16,7 +16,7 @@ test('travel respects --no-recharge', async () => {
         {shipId: 42n, x: 10n, y: 20n, recharge: false},
         getLocalShipload()
     )
-    expect((action.decoded.data as any).recharge).toBe(false)
+    expect((action.decoded.data as {recharge: boolean}).recharge).toBe(false)
 })
 
 test('travel SUBCOMMAND exposes --recharge and --auto-recharge', () => {
