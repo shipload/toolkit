@@ -9,14 +9,23 @@ export const CAP_MODULES = 0x10
 export enum EntityClass {
     OrbitalVessel = 0,
     PlanetaryStructure = 1,
+    Plot = 2,
 }
 
 const CLASSIFICATION_BY_NAME: Record<string, EntityClass> = {
     OrbitalVessel: EntityClass.OrbitalVessel,
     PlanetaryStructure: EntityClass.PlanetaryStructure,
+    Plot: EntityClass.Plot,
 }
 
-export type EntityTypeName = 'ship' | 'warehouse' | 'extractor' | 'factory' | 'container' | 'nexus'
+export type EntityTypeName =
+    | 'ship'
+    | 'warehouse'
+    | 'extractor'
+    | 'factory'
+    | 'container'
+    | 'nexus'
+    | 'plot'
 
 export interface KindMeta {
     kind: Name
@@ -116,6 +125,7 @@ export const ENTITY_EXTRACTOR = Name.from('extractor')
 export const ENTITY_FACTORY = Name.from('factory')
 export const ENTITY_CONTAINER = Name.from('container')
 export const ENTITY_NEXUS = Name.from('nexus')
+export const ENTITY_PLOT = Name.from('plot')
 
 export function isShip(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_SHIP) ?? false
@@ -134,4 +144,7 @@ export function isContainer(entity: {type?: Name}): boolean {
 }
 export function isNexus(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_NEXUS) ?? false
+}
+export function isPlot(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_PLOT) ?? false
 }

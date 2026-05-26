@@ -48,8 +48,18 @@ export {
     EpochsManager,
     ActionsManager,
     NftManager,
+    ConstructionManager,
 } from './managers'
-export type {LocationStratum, NftConfigForItem} from './managers'
+export type {
+    LocationStratum,
+    NftConfigForItem,
+    BuildableTarget,
+    BuildState,
+    SourceEntityRef,
+    SourceCargoStack,
+    FinalizerEntityRef,
+    FinalizerCapability,
+} from './managers'
 export type {EntityRefInput} from './managers/actions'
 
 export {

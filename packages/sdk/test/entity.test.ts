@@ -8,6 +8,7 @@ import {
     isExtractor,
     isFactory,
     isNexus,
+    isPlot,
     isShip,
     isWarehouse,
 } from '../src/data/kind-registry'
@@ -28,6 +29,7 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     factory: isFactory,
     container: isContainer,
     nexus: isNexus,
+    plot: isPlot,
 }
 
 const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {
@@ -51,7 +53,11 @@ describe('Entity unification — registry-driven', () => {
         for (const k of kindRegistry.kinds) {
             test(`${k.kind}: getEntityClass returns a valid class`, () => {
                 const cls = getEntityClass(k.kind)
-                expect([EntityClass.OrbitalVessel, EntityClass.PlanetaryStructure]).toContain(cls)
+                expect([
+                    EntityClass.OrbitalVessel,
+                    EntityClass.PlanetaryStructure,
+                    EntityClass.Plot,
+                ]).toContain(cls)
             })
 
             test(`${k.kind}: getKindMeta resolves`, () => {

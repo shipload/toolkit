@@ -234,6 +234,7 @@ function makeInventoryEntity(opts: {
 		owner: "alice",
 		entity_name: "Test",
 		coordinates: { x: 0, y: 0, z: 800 },
+		item_id: 0,
 		cargomass: 0,
 		cargo: (opts.cargo ?? []).map((c) => ({
 			item_id: c.item_id,
@@ -361,6 +362,7 @@ function makeBusyEntity(opts: {
 		owner: "alice",
 		entity_name: "Busy",
 		coordinates: { x: 0, y: 0, z: 800 },
+		item_id: 0,
 		cargomass: opts.cargomass,
 		capacity: opts.capacity ?? 4_000_000_000,
 		cargo: opts.cargo.map((c) => ({

@@ -1,9 +1,12 @@
+import {Name} from '@wharfkit/antelope'
 import {getItem} from '../data/catalog'
 import {getRecipe, resolveRecipeInputItemId} from '../data/recipes-runtime'
 import {computeInputMass} from '../derivation/crafting'
 import {calc_craft_duration} from '../capabilities/crafting'
+import {TaskType} from '../types'
 import {BaseManager} from './base'
 import type {ServerContract} from '../contracts'
+import type {BuildableTarget} from './construction-types'
 
 export interface PlotProgressInputRow {
     itemId: number
@@ -59,6 +62,46 @@ export class PlotManager extends BaseManager {
         const isComplete = rows.every((r) => r.missing === 0)
 
         return {targetItemId, rows, massProvided, massRequired, isComplete}
+    }
+
+    buildableTarget(
+        plot: ServerContract.Types.entity_row,
+        cargo: ServerContract.Types.cargo_row[],
+        activeTask?: ServerContract.Types.task
+    ): BuildableTarget {
+        const progress = this.progress(plot, cargo)
+        const targetItemId = Number(plot.item_id.toString())
+        const targetItem = getItem(targetItemId)
+        const recipe = getRecipe(targetItemId)
+        if (!recipe) {
+            throw new Error(`Plot target item ${targetItemId} has no recipe`)
+        }
+
+        let state: BuildableTarget['state']
+        const taskType = activeTask?.type.toNumber()
+        if (taskType === TaskType.CLAIMPLOT) {
+            state = 'initializing'
+        } else if (taskType === TaskType.BUILDPLOT) {
+            state = 'finalizing'
+        } else if (progress.isComplete) {
+            state = 'ready'
+        } else {
+            state = 'accepting'
+        }
+
+        return {
+            entityId: plot.id,
+            ownerName: plot.owner,
+            coordinates: plot.coordinates,
+            targetItemId,
+            targetItem,
+            state,
+            recipe,
+            progress,
+            finalizeAction: Name.from('buildplot'),
+            finalizerCapability: 'crafter',
+            activeTask,
+        }
     }
 
     canBuild(

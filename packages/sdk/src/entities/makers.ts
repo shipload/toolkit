@@ -22,6 +22,7 @@ export interface EntityStateInput {
     owner: NameType
     name: string
     coordinates: {x: number; y: number; z?: number}
+    itemId?: number
     hullmass?: number
     capacity?: number
     cargomass?: number
@@ -104,6 +105,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         owner: Name.from(state.owner),
         entity_name: state.name,
         coordinates: ServerContract.Types.coordinates.from(state.coordinates),
+        item_id: UInt16.from(state.itemId ?? template.itemId),
         cargomass: UInt32.from(state.cargomass ?? 0),
         cargo: state.cargo || [],
         is_idle: !state.schedule,

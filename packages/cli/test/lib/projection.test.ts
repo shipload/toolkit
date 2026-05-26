@@ -28,6 +28,7 @@ function makeShip(opts: {
 		owner: "alice",
 		entity_name: "Test",
 		coordinates: { x: opts.x, y: opts.y, z: 800 },
+		item_id: 0,
 		cargomass: 0,
 		cargo: [],
 		modules: [],

@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {Name, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {Entity} from '../src/entities/entity'
 import {ServerContract} from '../src/contracts'
 import {ENTITY_SHIP, ENTITY_NEXUS, EntityClass} from '../src/data/kind-registry'
@@ -13,6 +13,7 @@ function bareEntityInfo(
         type: ENTITY_SHIP,
         entity_name: 'Test Ship',
         coordinates: ServerContract.Types.coordinates.from({x: 10, y: 20}),
+        item_id: UInt16.from(0),
         is_idle: true,
         hullmass: UInt32.from(100),
         capacity: UInt32.from(5000),

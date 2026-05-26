@@ -1,0 +1,65 @@
+import {describe, expect, test} from 'bun:test'
+import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {PlotManager} from '../../src/managers/plot'
+import {ServerContract} from '../../src/contracts'
+import {ITEM_PLATE, ITEM_FRAME, ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
+
+let cargoIdSeq = 1
+
+function makePlotRow(itemId: number): ServerContract.Types.entity_row {
+    return ServerContract.Types.entity_row.from({
+        id: UInt64.from(101),
+        owner: Name.from('alice.gm'),
+        kind: Name.from('plot'),
+        name: '',
+        stats: UInt64.from(0),
+        coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
+        cargomass: UInt32.from(0),
+        capacity: UInt32.from(140),
+        modules: [],
+        item_id: UInt16.from(itemId),
+    })
+}
+
+function makeCargoRow(
+    entityId: bigint,
+    itemId: number,
+    quantity: number
+): ServerContract.Types.cargo_row {
+    return ServerContract.Types.cargo_row.from({
+        id: UInt64.from(cargoIdSeq++),
+        entity_id: UInt64.from(entityId),
+        item_id: UInt64.from(itemId),
+        quantity: UInt64.from(quantity),
+        stats: UInt64.from(0),
+        modules: [],
+    })
+}
+
+const manager = new PlotManager({} as any)
+
+describe('PlotManager.buildableTarget', () => {
+    test('returns BuildableTarget for plot entity with target item and recipe', () => {
+        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
+
+        const target = manager.buildableTarget(plot, [])
+
+        expect(target.entityId.equals(UInt64.from(101))).toBe(true)
+        expect(target.state).toBe('accepting')
+        expect(target.finalizeAction.equals(Name.from('buildplot'))).toBe(true)
+        expect(target.finalizerCapability).toBe('crafter')
+        expect(target.progress.isComplete).toBe(false)
+        expect(target.recipe).toBeDefined()
+    })
+
+    test('state is "ready" when all recipe inputs are deposited', () => {
+        // TODO: flesh out — warehouse-T1 recipe: 20x PLATE + 10x FRAME
+        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
+        const cargo = [makeCargoRow(101n, ITEM_PLATE, 20), makeCargoRow(101n, ITEM_FRAME, 10)]
+
+        const target = manager.buildableTarget(plot, cargo)
+
+        expect(target.progress.isComplete).toBe(true)
+        expect(target.state).toBe('ready')
+    })
+})

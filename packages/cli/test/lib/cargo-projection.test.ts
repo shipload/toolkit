@@ -19,6 +19,7 @@ function makeShip(opts: {
 		owner: "alice",
 		entity_name: "Test",
 		coordinates: { x: 0, y: 0, z: 800 },
+		item_id: 0,
 		cargomass: 0,
 		cargo: (opts.cargo ?? []).map((c) => ({
 			item_id: c.item_id,

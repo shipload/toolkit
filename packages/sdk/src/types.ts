@@ -53,6 +53,8 @@ export enum TaskType {
     UNWRAP = 10,
     UNDEPLOY = 11,
     DEMOLISH = 13,
+    CLAIMPLOT = 14,
+    BUILDPLOT = 15,
 }
 
 export enum LocationType {

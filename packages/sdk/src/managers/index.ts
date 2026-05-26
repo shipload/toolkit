@@ -11,3 +11,12 @@ export {NftManager} from './nft'
 export type {NftConfigForItem} from './nft'
 export {PlotManager} from './plot'
 export type {PlotProgress, PlotProgressInputRow} from './plot'
+export {ConstructionManager} from './construction'
+export type {
+    BuildableTarget,
+    BuildState,
+    SourceEntityRef,
+    SourceCargoStack,
+    FinalizerEntityRef,
+    FinalizerCapability,
+} from './construction-types'

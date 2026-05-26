@@ -131,4 +131,5 @@ const PLURAL: Record<EntityTypeName, string> = {
     extractor: 'extractors',
     factory: 'factories',
     nexus: 'nexuses',
+    plot: 'plots',
 }
