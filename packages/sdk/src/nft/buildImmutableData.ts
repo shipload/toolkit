@@ -110,6 +110,9 @@ function commonBaseImmutable(
         {first: 'origin_x', second: ['int32', originX]},
         {first: 'origin_y', second: ['int32', originY]},
         {first: 'img', second: ['string', img]},
+        {first: 'deposit_amount', second: ['uint64', '0']},
+        {first: 'deposit_token', second: ['uint64', '0']},
+        {first: 'deposit_symbol', second: ['uint64', '0']},
     ]
 }
 
