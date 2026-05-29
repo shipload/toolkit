@@ -10,7 +10,7 @@ export const colors = {
     text: {
         primary: '#e6e8ec',
         secondary: '#8f98a8',
-        muted: '#5b6373',
+        muted: '#7c8698',
         accent: '#f4c96b',
     },
     brand: {
@@ -27,7 +27,7 @@ export const colors = {
     },
     tier: tierColors,
     accent: {
-        component: '#8f98a8',
+        component: '#7E93C4',
     },
     capability: {
         engine: '#4a8abf',

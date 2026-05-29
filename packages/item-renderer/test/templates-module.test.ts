@@ -1,6 +1,7 @@
 import {test, expect} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
 import {renderModule} from '../src/templates/module.ts'
+import {tokens} from '../src/tokens/index.ts'
 import {FIXTURES} from './fixtures/cargo-items.ts'
 
 const CASES = [
@@ -22,28 +23,39 @@ for (const name of CASES) {
     })
 }
 
-test('Engine template embeds the narrative description', () => {
+test('Engine values mode renders the capability header + prose narrative', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderModule(item, resolved)
-    expect(svg).toContain('generates')
+    expect(svg).toContain('ENGINE')
     expect(svg).toContain('thrust for travel')
-    expect(svg).toContain('while draining')
-    expect(svg).toContain('distance travelled')
+    expect(svg).toContain('700')
+    expect(svg).toContain('45')
 })
 
-test('Hauler template falls back to compact rows when description is null', () => {
+test('Engine prose highlights numbers in white, never gold', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved)
+    expect(svg).toContain(tokens.colors.text.primary)
+    expect(svg).not.toContain(tokens.colors.text.accent)
+    expect(svg).not.toContain('#f4c96b')
+})
+
+test('Hauler template renders its capability prose', () => {
     const item = FIXTURES.haulerT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderModule(item, resolved)
-    expect(svg).toContain('Hauler')
+    expect(svg).toContain('HAULER')
+    expect(svg).toContain('locks onto')
 })
 
-test('renderModule ranges mode shows capability header without narrative or attribute values', () => {
+test('renderModule ranges mode shows capability header without narrative or values', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id)
     const svg = renderModule(item, resolved, {mode: 'ranges'})
     expect(svg).toContain('ENGINE')
+    expect(svg).not.toContain('thrust for travel')
     expect(svg).not.toMatch(/>\d{3,}<\/(text|tspan)>/)
 })
 
@@ -54,11 +66,12 @@ test('renderModule omits the Type row', () => {
     expect(svg).not.toContain('MODULE · T1')
 })
 
-test('renderModule values mode (default) still shows narrative', () => {
+test('renderModule values mode (default) shows prose with concrete numbers', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats)
     const svg = renderModule(item, resolved)
-    expect(svg).toMatch(/thrust|energy|generates/)
+    expect(svg).toContain('thrust for travel')
+    expect(svg).toContain('700')
 })
 
 test('renderModule ranges mode matches snapshot', () => {
@@ -72,7 +85,9 @@ test('renders tier suffix in the module name', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderModule(item, resolved)
-    expect(svg).toContain('(T1)')
+    expect(svg).toContain('<tspan')
+    expect(svg).toMatch(/>\s*T1<\/tspan>/)
+    expect(svg).not.toContain('(T1)')
 })
 
 test('renders Location row when location is provided', () => {

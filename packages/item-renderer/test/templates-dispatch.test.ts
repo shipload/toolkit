@@ -16,7 +16,7 @@ test('renderByType forwards mode=ranges to component template', () => {
     const resolved = resolveItem(item.item_id)
     const svg = renderByType(item, resolved, {mode: 'ranges'})
     expect(svg).not.toMatch(/>\d{3,}<\/text>/)
-    expect(svg).toContain('COMPONENT')
+    expect(svg).toContain('STR')
 })
 
 test('renderByType forwards mode=ranges to module template', () => {

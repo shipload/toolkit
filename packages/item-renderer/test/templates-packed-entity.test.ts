@@ -7,11 +7,14 @@ test('renders Ship with hull attributes and two modules', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderPackedEntity(item, resolved)
-    expect(svg).toContain('Ship (T1) (Packed)')
+    expect(svg).toContain('Ship')
+    expect(svg).not.toContain('(Packed)')
+    expect(svg).not.toContain('(T1)')
+    expect(svg).toMatch(/>\s*T1<\/tspan>/)
     expect(svg).toContain('Mass')
     expect(svg).toContain('Capacity')
-    expect(svg).toContain('Engine')
-    expect(svg).toContain('Generator')
+    expect(svg).toContain('Engine:')
+    expect(svg).toContain('Generator:')
 })
 
 test('renders empty-module rows when slots are unfilled', () => {
@@ -35,14 +38,19 @@ test('matches the committed Ship T1 (only engine) snapshot', async () => {
     expect(svg).toMatchSnapshot('packed-entity-ship-t1-only-engine.svg')
 })
 
-test('ship with two modules renders SDK-sourced narrative descriptions', () => {
+test('ship with two modules renders capability-colored prose, white highlights, no gold', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderPackedEntity(item, resolved)
-    expect(svg).toContain('Engine: ')
-    expect(svg).toContain('generates')
-    expect(svg).toContain('Generator: ')
-    expect(svg).toContain('holds')
+    // Capability prose labels in their capability colors.
+    expect(svg).toContain('Engine:')
+    expect(svg).toContain('#4a8abf')
+    expect(svg).toContain('Generator:')
+    expect(svg).toContain('#22c55e')
+    // Prose body present, highlighted numbers white, no gold.
+    expect(svg).toContain('thrust for')
+    expect(svg).toContain('#e6e8ec')
+    expect(svg).not.toContain('#f4c96b')
 })
 
 test('renders Location row when location is provided', () => {

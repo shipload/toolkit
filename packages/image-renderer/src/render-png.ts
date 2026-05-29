@@ -23,14 +23,26 @@ const FONT_DATA: Record<FontKey, Uint8Array> = {
     'jetbrains-500': new Uint8Array(jetbrains500),
 }
 
-export async function renderPng(svg: string): Promise<Uint8Array> {
+const MIN_SCALE = 1
+const MAX_SCALE = 3
+
+// Integer pixel-density multiplier in [1, 3]. Non-finite/out-of-range coerce to 1.
+export function clampScale(scale: number): number {
+    if (!Number.isFinite(scale)) return 1
+    return Math.max(MIN_SCALE, Math.min(MAX_SCALE, Math.round(scale)))
+}
+
+export async function renderPng(svg: string, scale = 1): Promise<Uint8Array> {
     await ensureWasm()
+    const s = clampScale(scale)
     const svgWithFonts = embedFontsInSvg(svg, FONT_DATA)
     const resvg = new Resvg(svgWithFonts, {
         font: {
             loadSystemFonts: false,
             fontBuffers: Object.values(FONT_DATA),
         },
+        // Omit fitTo at 1x so default-density output stays byte-identical.
+        ...(s !== 1 ? {fitTo: {mode: 'zoom' as const, value: s}} : {}),
     })
     return resvg.render().asPng()
 }

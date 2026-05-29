@@ -1,4 +1,5 @@
-import {formatMassScaled} from '@shipload/sdk'
+import type {ResolvedItem} from '@shipload/sdk'
+import {baseName, formatMassScaled} from '@shipload/sdk'
 import {text} from '../primitives/text.ts'
 import {divider} from '../primitives/divider.ts'
 import {tokens} from '../tokens/index.ts'
@@ -16,11 +17,57 @@ export function shortCode(itemId: number): string {
     return str.slice(-2).padStart(2, '0')
 }
 
+export function capabilityColor(name: string): string {
+    const key = name.toLowerCase().replace(/\s+/g, '') as keyof typeof tokens.colors.capability
+    return tokens.colors.capability[key] ?? tokens.colors.accent.component
+}
+
 export const META_ROW_H = 22
 export const HEADER_H = 48
 export const ICON_Y = 4
 export const BADGE_Y = 6
 export const META_BLOCK_GAP = 16
+
+export const STAT_ROW_H = 26
+export const CAP_HEADER_H = 22
+export const CAP_ROW_H = 18
+export const BODY_TAIL = 8
+
+// Gap from the meta block to the first stat row. Resources/components have no
+// body sub-header, and statBar draws its label 6px above its y, so this is
+// META_BLOCK_GAP plus the offset that puts the first stat label level with
+// where module/entity body sections begin — keeping the meta→body gap uniform.
+export const STAT_BLOCK_GAP = META_BLOCK_GAP + 22
+
+// Uniform gap between a card's last body element and the bottom frame edge.
+// Cards size their height to (last element bottom) + BOTTOM_PAD so trailing
+// space is consistent across resource / component / module / entity types.
+export const BOTTOM_PAD = 22
+
+export function titleParts(x: number, y: number, name: string, tier: number): string {
+    return text({
+        x,
+        y,
+        value: name,
+        size: tokens.typography.sizes.title,
+        weight: 700,
+        family: tokens.typography.display,
+        spans: [
+            {
+                value: `T${tier}`,
+                dx: 6,
+                size: tokens.typography.sizes.subtitle,
+                weight: 700,
+                color: tokens.colors.text.secondary,
+            },
+        ],
+    })
+}
+
+export function titleText(x: number, y: number, resolved: ResolvedItem): string {
+    // Prominent base name; tier rendered as a smaller, muted inline suffix.
+    return titleParts(x, y, baseName(resolved), resolved.tier)
+}
 
 export interface MetaRowProps {
     x: number

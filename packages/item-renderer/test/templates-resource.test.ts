@@ -87,7 +87,10 @@ test('renders tier suffix in the item name', () => {
     const item = FIXTURES.oreT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderResource(item, resolved)
-    expect(svg).toContain('Crude Ore (T1)')
+    expect(svg).toContain('Crude Ore')
+    expect(svg).toContain('<tspan')
+    expect(svg).toMatch(/>\s*T1<\/tspan>/)
+    expect(svg).not.toContain('Crude Ore (T1)')
 })
 
 test('renders Location row when location is provided', () => {

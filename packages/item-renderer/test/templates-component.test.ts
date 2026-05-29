@@ -17,8 +17,16 @@ test('renderComponent ranges mode shows stat abbreviations with no values', () =
     expect(svg).toContain('STR')
     expect(svg).toContain('DEN')
     expect(svg).not.toMatch(/>\d{3}<\/text>/)
-    expect(svg).toContain('COMPONENT')
+    expect(svg).not.toContain('COMPONENT')
     expect(svg).toContain('Mass')
+})
+
+test('renderComponent omits the Type row', () => {
+    const item = FIXTURES.plate
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderComponent(item, resolved)
+    expect(svg).not.toContain('COMPONENT')
+    expect(svg).not.toContain('Type')
 })
 
 test('renderComponent values mode (default) still shows concrete numbers', () => {
@@ -39,7 +47,10 @@ test('renders tier suffix in the item name', () => {
     const item = FIXTURES.plate
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderComponent(item, resolved)
-    expect(svg).toContain('Plate (T1)')
+    expect(svg).toContain('Plate')
+    expect(svg).toContain('<tspan')
+    expect(svg).toMatch(/>\s*T1<\/tspan>/)
+    expect(svg).not.toContain('Plate (T1)')
 })
 
 test('renders Location row when location is provided', () => {

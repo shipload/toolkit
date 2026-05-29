@@ -23,12 +23,14 @@ const resvgRoot = dirname(require.resolve('@resvg/resvg-wasm/package.json'))
 const wasmBytes = await readFile(join(resvgRoot, 'index_bg.wasm'))
 await initWasm(wasmBytes)
 
-async function renderPng(svg: string): Promise<Buffer> {
+// scale mirrors the image-renderer service's HiDPI option (Resvg fitTo zoom).
+async function renderPng(svg: string, scale = 1): Promise<Buffer> {
     const resvg = new Resvg(svg, {
         font: {
             loadSystemFonts: false,
             fontBuffers: Object.values(fontData).map((b) => new Uint8Array(b)),
         },
+        ...(scale !== 1 ? {fitTo: {mode: 'zoom' as const, value: scale}} : {}),
     })
     return Buffer.from(resvg.render().asPng())
 }
@@ -52,6 +54,9 @@ const CASES = [
     {name: 'module-engine-t1', fixture: FIXTURES.engineT1},
     {name: 'module-engine-t1-with-location', fixture: FIXTURES.engineT1, location: {x: 5, y: 5}},
     {name: 'module-storage-t1', fixture: FIXTURES.storageT1},
+    // HiDPI size variants — committed visual samples of the service's ?scale= output.
+    {name: 'resource-ore-t1@2x', fixture: FIXTURES.oreT1, scale: 2},
+    {name: 'resource-ore-t1@3x', fixture: FIXTURES.oreT1, scale: 3},
 ] as const
 
 for (const c of CASES) {
@@ -59,7 +64,7 @@ for (const c of CASES) {
         const resolved = resolveItem(c.fixture.item_id, c.fixture.stats, c.fixture.modules)
         const opts = 'location' in c ? {location: c.location} : undefined
         const svg = embedFontsInSvg(renderItem(c.fixture, resolved, opts), fontData)
-        const png = await renderPng(svg)
+        const png = await renderPng(svg, 'scale' in c ? c.scale : 1)
         const goldPath = resolve(SNAP_DIR, `${c.name}.png`)
 
         if (UPDATE || !existsSync(goldPath)) {

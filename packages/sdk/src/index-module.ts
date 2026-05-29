@@ -423,7 +423,7 @@ export {
 
 export {formatMass, formatMassDelta, formatMassScaled, formatLocation} from './format'
 
-export {displayName, describeItem} from './resolution/display-name'
+export {displayName, baseName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
 
 export * from './subscriptions'

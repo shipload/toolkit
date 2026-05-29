@@ -59,13 +59,15 @@ export function statBar({
         const displayFraction = inverted ? 1 - clamped / 1023 : clamped / 1023
         const filled = Math.floor(width * displayFraction)
 
+        // value text = primary; identity color = bar + code + chrome
         labelOut += text({
             x: x + width,
             y: y - 6,
             value: String(clamped),
             size: tokens.typography.sizes.statValue,
             weight: 700,
-            color,
+            family: tokens.typography.mono,
+            color: tokens.colors.text.primary,
             anchor: 'end',
         })
 

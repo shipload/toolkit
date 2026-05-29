@@ -7,9 +7,16 @@ export interface QuantityBadgeProps {
     y: number
     quantity: number
     label?: string
+    tone: string
 }
 
-export function quantityBadge({x, y, quantity, label: labelOverride}: QuantityBadgeProps): string {
+export function quantityBadge({
+    x,
+    y,
+    quantity,
+    label: labelOverride,
+    tone,
+}: QuantityBadgeProps): string {
     if (quantity <= 0) return ''
     const label = labelOverride ?? `×${quantity}`
     const w = label.length * 7 + 12
@@ -22,7 +29,9 @@ export function quantityBadge({x, y, quantity, label: labelOverride}: QuantityBa
             height: h,
             rx: h / 2,
             ry: h / 2,
-            fill: tokens.colors.text.accent,
+            fill: tokens.colors.surface.panel,
+            stroke: tone,
+            'stroke-width': 1.5,
         }) +
         text({
             x: x - w / 2,
@@ -31,7 +40,7 @@ export function quantityBadge({x, y, quantity, label: labelOverride}: QuantityBa
             size: tokens.typography.sizes.label,
             weight: 700,
             family: tokens.typography.mono,
-            color: tokens.colors.surface.background,
+            color: tokens.colors.text.primary,
             anchor: 'middle',
         })
     )

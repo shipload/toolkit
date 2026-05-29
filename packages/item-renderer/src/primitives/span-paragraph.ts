@@ -43,7 +43,7 @@ export function spanParagraph(props: SpanParagraphProps): {svg: string; lineCoun
     const chars = props.charsPerLine ?? 36
     const lh = props.lineHeight ?? 14
     const bodyColor = props.bodyColor ?? tokens.colors.text.secondary
-    const highlightColor = props.highlightColor ?? tokens.colors.text.accent
+    const highlightColor = props.highlightColor ?? tokens.colors.text.primary
     const size = props.fontSize ?? tokens.typography.sizes.body
 
     const plain = props.spans.map((s) => s.text).join('')

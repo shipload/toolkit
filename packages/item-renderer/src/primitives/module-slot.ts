@@ -71,7 +71,7 @@ export function moduleSlot(props: ModuleSlotProps): string {
         )
     }
 
-    const accent = props.accentColor ?? tokens.colors.text.accent
+    const accent = props.accentColor ?? tokens.colors.accent.component
     const label = `${props.capability ?? 'Module'}: `
 
     const desc = props.description
@@ -89,7 +89,7 @@ export function moduleSlot(props: ModuleSlotProps): string {
                 value: label.trimEnd(),
                 size: tokens.typography.sizes.body,
                 weight: 600,
-                color: tokens.colors.text.primary,
+                color: accent,
             })
         )
     }
@@ -99,9 +99,9 @@ export function moduleSlot(props: ModuleSlotProps): string {
     const combined = label + descPlain
     const lines = wrapText({value: combined, charsPerLine: 36})
 
-    const highlightColor = tokens.colors.text.accent
+    const highlightColor = tokens.colors.text.primary
     const bodyColor = tokens.colors.text.secondary
-    const labelColor = tokens.colors.text.primary
+    const labelColor = accent
     const size = tokens.typography.sizes.body
     const fontFamily = escapeXml(tokens.typography.sans)
     const labelEnd = label.length

@@ -30,15 +30,21 @@ function tierPrefix(item: DisplayNameInput): string | null {
     return null
 }
 
-function baseName(item: DisplayNameInput): string {
+function rootName(item: DisplayNameInput): string {
     if (itemTypeOf(item) !== 'resource') return item.name
     return item.category ? CATEGORY_LABELS[item.category] : 'Resource'
 }
 
-export function displayName(item: DisplayNameInput): string {
+// Tier-free display name: includes the resource tier adjective / component-module
+// prefix, but no "(T#)" suffix. Use this when the tier is shown separately.
+export function baseName(item: DisplayNameInput): string {
     const prefix = tierPrefix(item)
-    const head = prefix ? `${prefix} ${baseName(item)}` : baseName(item)
-    return `${head} (T${item.tier})`
+    const root = rootName(item)
+    return prefix ? `${prefix} ${root}` : root
+}
+
+export function displayName(item: DisplayNameInput): string {
+    return `${baseName(item)} (T${item.tier})`
 }
 
 export interface DescribeOptions {

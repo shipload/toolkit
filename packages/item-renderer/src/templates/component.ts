@@ -1,17 +1,8 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {
-    formatTier,
-    getRecipe,
-    getStatDefinitions,
-    resolveItemCategory,
-    categoryColors,
-    displayName,
-    formatLocation,
-} from '@shipload/sdk'
+import {getRecipe, getStatDefinitions, resolveItemCategory, formatLocation} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
-import {text} from '../primitives/text.ts'
 import {statBar} from '../primitives/stat-bar.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {tokens} from '../tokens/index.ts'
@@ -20,10 +11,13 @@ import {
     formatMass,
     tierBorder,
     metaRowBlock,
+    titleText,
     BADGE_Y,
     HEADER_H,
     ICON_Y,
-    META_BLOCK_GAP,
+    STAT_BLOCK_GAP,
+    STAT_ROW_H,
+    BOTTOM_PAD,
 } from './_shared.ts'
 
 export interface RenderComponentOpts {
@@ -49,13 +43,15 @@ export function renderComponent(
     const pad = tokens.spacing.panelPadding
     const innerW = w - pad * 2
 
+    const identity = tokens.colors.accent.component
+
     let rows: StatRow[]
     if (mode === 'values') {
         rows = (resolved.stats ?? []).map((s) => ({
             label: s.label,
             abbreviation: s.abbreviation,
             value: s.value,
-            color: s.color,
+            color: identity,
             inverted: s.inverted,
         }))
     } else {
@@ -74,7 +70,7 @@ export function renderComponent(
                     label: def.label,
                     abbreviation: def.abbreviation,
                     value: null,
-                    color: categoryColors[category],
+                    color: identity,
                     inverted: def.inverted,
                 },
             ]
@@ -83,42 +79,35 @@ export function renderComponent(
 
     const quantity = Number(BigInt(item.quantity.toString()))
     const metaRows = [
-        {label: 'Type', value: `COMPONENT · ${formatTier(resolved.tier)}`},
         {label: 'Mass', value: formatMass(resolved.mass * Math.max(quantity, 1))},
         ...(opts?.location ? [{label: 'Location', value: formatLocation(opts.location)}] : []),
     ]
 
     const metaYStart = pad + HEADER_H
     const {svg: metaSvg, height: metaH} = metaRowBlock(pad, metaYStart, innerW, metaRows)
-    const statsYStart = metaYStart + metaH + META_BLOCK_GAP
-    const statsH = rows.length * 26 + 8
-    const height = statsYStart + statsH + pad
+    const statsYStart = metaYStart + metaH + STAT_BLOCK_GAP
+    const statsBottom =
+        statsYStart + Math.max(0, rows.length - 1) * STAT_ROW_H + tokens.spacing.statBarHeight
+    const height = statsBottom + BOTTOM_PAD
 
     const chrome = panel({width: w, height, borderColor: tierBorder(resolved.tier)})
 
-    const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
+    const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity, tone: identity})
 
     const icon = iconHex({
         x: pad,
         y: pad + ICON_Y,
-        color: tokens.colors.accent.component,
+        color: identity,
         code: shortCode(resolved.itemId),
     })
 
-    const name = text({
-        x: pad + 34,
-        y: pad + 22,
-        value: displayName(resolved),
-        size: tokens.typography.sizes.title,
-        weight: 700,
-        family: tokens.typography.display,
-    })
+    const name = titleText(pad + 34, pad + 22, resolved)
 
     const statsSvg = rows
         .map((row, i) =>
             statBar({
                 x: pad,
-                y: statsYStart + i * 26,
+                y: statsYStart + i * STAT_ROW_H,
                 width: innerW,
                 label: row.label,
                 abbreviation: row.abbreviation,
