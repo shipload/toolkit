@@ -71,7 +71,6 @@ export function renderResource(
     }
 
     const metaRows = [
-        {label: 'Mass', value: formatMass(resolved.mass)},
         ...(opts?.location ? [{label: 'Location', value: formatLocation(opts.location)}] : []),
     ]
 
@@ -84,7 +83,12 @@ export function renderResource(
     const chrome = panel({width: w, height, borderColor: tierBorder(resolved.tier)})
 
     const quantity = Number(BigInt(item.quantity.toString()))
-    const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
+    const badge = quantityBadge({
+        x: w - pad,
+        y: pad + BADGE_Y,
+        quantity,
+        label: formatMass(quantity * resolved.mass),
+    })
 
     const icon = iconHex({
         x: pad,

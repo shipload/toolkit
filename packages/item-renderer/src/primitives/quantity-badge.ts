@@ -6,11 +6,12 @@ export interface QuantityBadgeProps {
     x: number
     y: number
     quantity: number
+    label?: string
 }
 
-export function quantityBadge({x, y, quantity}: QuantityBadgeProps): string {
+export function quantityBadge({x, y, quantity, label: labelOverride}: QuantityBadgeProps): string {
     if (quantity <= 0) return ''
-    const label = `×${quantity}`
+    const label = labelOverride ?? `×${quantity}`
     const w = label.length * 7 + 12
     const h = tokens.spacing.quantityBadgeHeight
     return (

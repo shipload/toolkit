@@ -8,7 +8,7 @@ test('renders Crude Ore with mass and three stat bars', () => {
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderResource(item, resolved)
     expect(svg).toContain('Crude Ore')
-    expect(svg).toContain('52 t') // mass
+    expect(svg).toContain('1 t') // mass
     expect(svg).toContain('STR') // strength abbreviation
     expect(svg).toContain('TOL')
     expect(svg).toContain('DEN')
@@ -21,18 +21,26 @@ test('renderResource does not render a Category row', () => {
     expect(svg).not.toContain('Category')
 })
 
-test('renders quantity badge when stack > 1', () => {
+test('badge shows stack tonnage when stack > 1', () => {
     const item = FIXTURES.oreT1StackOf50
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderResource(item, resolved)
-    expect(svg).toContain('×50')
+    expect(svg).toContain('50 t') // 50 units × 1 t = 50 t total
+    expect(svg).not.toContain('×50') // resources read in tonnes, not a count
 })
 
-test('renders ×1 quantity badge when stack == 1', () => {
+test('badge shows tonnage (1 t) when stack == 1', () => {
     const item = FIXTURES.oreT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderResource(item, resolved)
-    expect(svg).toContain('×1')
+    expect(svg).toContain('1 t')
+})
+
+test('resource card has no standalone Mass row (tonnage is in the badge)', () => {
+    const item = FIXTURES.oreT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderResource(item, resolved)
+    expect(svg).not.toContain('Mass')
 })
 
 test('matches the committed Crude Ore snapshot', async () => {
@@ -58,7 +66,7 @@ test('renderResource ranges mode shows stat abbreviations with no values', () =>
         expect(svg).toContain(def.abbreviation)
     }
     expect(svg).not.toMatch(/>\d{3}<\/text>/)
-    expect(svg).toContain('Mass')
+    expect(svg).toContain('1 t') // stack tonnage still shown in the badge
 })
 
 test('renderResource values mode (default) still shows concrete numbers', () => {

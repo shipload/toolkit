@@ -458,7 +458,7 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 	test("no-op task with no cargo changes leaves whenDoneBlock empty", () => {
 		const entity = makeBusyEntity({
 			cargo: [{ item_id: 101, quantity: 10, stats: 100n, id: 1 }],
-			cargomass: 10 * 52_000,
+			cargomass: 10 * 1_000,
 			capacity: 4_000_000_000,
 			current_task: busyTask(TaskType.UNDEPLOY, 60, []),
 		});

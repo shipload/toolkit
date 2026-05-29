@@ -1,12 +1,10 @@
 import {
-    categoryFromIndex,
-    categoryLabelFromIndex,
     formatMass,
     formatTier,
     getItem,
     getRecipe,
     getStatDefinitions,
-    type Item,
+    type ResourceCategory,
     typeLabel,
 } from '@shipload/sdk'
 import Table from 'cli-table3'
@@ -17,8 +15,6 @@ import {formatOutput} from '../../lib/format'
 
 interface WireRecipeInput {
     item_id: number
-    category: number
-    tier: number
     quantity: number
 }
 
@@ -36,61 +32,10 @@ interface Recipe {
     input_items?: {id: number; mass: number}[]
 }
 
-function inputName(i: WireRecipeInput): string {
-    const itemId = Number(i.item_id)
-    const tier = Number(i.tier)
-    const tierSuffix = Number.isFinite(tier) && tier > 0 ? ` ${formatTier(tier)}` : ''
-    if (itemId > 0) {
-        const item = getItem(itemId)
-        return `${item.name} ${formatTier(item.tier)}`
-    }
-    return `${categoryLabelFromIndex(Number(i.category))}${tierSuffix}`
-}
-
-function inputItemId(i: WireRecipeInput): number | undefined {
-    const itemId = Number(i.item_id)
-    if (itemId > 0) return itemId
-    const cat = categoryFromIndex(Number(i.category))
-    if (!cat) return undefined
-    return findResourceItem(cat, Number(i.tier))?.id
-}
-
 function inputUnitMass(i: WireRecipeInput): number | undefined {
     const itemId = Number(i.item_id)
-    if (itemId > 0) {
-        try {
-            return getItem(itemId).mass
-        } catch {
-            return undefined
-        }
-    }
-    const cat = categoryFromIndex(Number(i.category))
-    if (!cat) return undefined
     try {
-        // Resource items follow the {category}{tier} convention; look up via a
-        // resources query through the catalog by matching tier+category.
-        const tier = Number(i.tier)
-        const lookup = findResourceItem(cat, tier)
-        return lookup?.mass
-    } catch {
-        return undefined
-    }
-}
-
-function findResourceItem(category: string, tier: number): Item | undefined {
-    // Resource items have ids encoded as category-block * 100 + tier.
-    // Avoid pulling getResources to keep this hot path tight; getItem is fine.
-    const baseByCat: Record<string, number> = {
-        ore: 100,
-        crystal: 200,
-        gas: 300,
-        regolith: 400,
-        biomass: 500,
-    }
-    const base = baseByCat[category]
-    if (!base) return undefined
-    try {
-        return getItem(base + tier)
+        return getItem(itemId).mass
     } catch {
         return undefined
     }
@@ -119,9 +64,9 @@ function outputTypeLabel(itemId: number): string {
 }
 
 // Resolve the stat label produced at slot.sources[k] for a recipe whose inputs
-// match `inputs`. Recurses through itemId-typed inputs by following their own
-// recipes until it bottoms out at a category (resource) input, where stat
-// indices map to ResourceCategory stat definitions.
+// match `inputs`. Recurses through component/module inputs by following their
+// own recipes until it bottoms out at a resource input, where stat indices map
+// to that resource's ResourceCategory stat definitions.
 function resolveSourceStatLabel(
     inputs: WireRecipeInput[],
     inputIndex: number,
@@ -130,40 +75,27 @@ function resolveSourceStatLabel(
     const input = inputs[inputIndex]
     if (!input) return `stat ${statIndex}`
     const itemId = Number(input.item_id)
-    if (itemId === 0) {
-        const cat = categoryFromIndex(Number(input.category))
-        if (!cat) return `stat ${statIndex}`
-        const def = getStatDefinitions(cat)[statIndex]
+    let category: ResourceCategory | undefined
+    try {
+        const item = getItem(itemId)
+        if (item.type === 'resource') category = item.category
+    } catch {
+        return `stat ${statIndex}`
+    }
+    if (category) {
+        const def = getStatDefinitions(category)[statIndex]
         return def?.label ?? `stat ${statIndex}`
     }
     const sub = getRecipe(itemId)
     if (!sub) return `stat ${statIndex}`
     const slot = sub.statSlots[statIndex]
     if (!slot || slot.sources.length === 0) return `stat ${statIndex}`
-    const subInputs: WireRecipeInput[] = sub.inputs.map((si) =>
-        'category' in si
-            ? {
-                  item_id: 0,
-                  category: categoryIndex(si.category),
-                  tier: si.tier,
-                  quantity: si.quantity,
-              }
-            : {item_id: si.itemId, category: 0, tier: 0, quantity: si.quantity}
-    )
+    const subInputs: WireRecipeInput[] = sub.inputs.map((si) => ({
+        item_id: si.itemId,
+        quantity: si.quantity,
+    }))
     const src = slot.sources[0]
     return resolveSourceStatLabel(subInputs, src.inputIndex, src.statIndex)
-}
-
-const CAT_INDEX: Record<string, number> = {
-    ore: 0,
-    gas: 1,
-    regolith: 2,
-    biomass: 3,
-    crystal: 4,
-}
-
-function categoryIndex(category: string): number {
-    return CAT_INDEX[category] ?? 0
 }
 
 function borderlessTable(head: string[], aligns: ('left' | 'right')[]): Table.Table {
@@ -201,7 +133,9 @@ function trimEnds(s: string): string {
 export function renderList(recipes: Recipe[]): string {
     const lines = [`Recipes (${recipes.length}):`]
     for (const r of recipes) {
-        const inputs = r.inputs.map((i) => `${i.quantity}× ${inputName(i)}`).join(' + ')
+        const inputs = r.inputs
+            .map((i) => `${i.quantity}× ${itemName(Number(i.item_id))}`)
+            .join(' + ')
         const output = itemName(r.output_item_id)
         lines.push(`  [${r.output_item_id}] ${output} ← ${inputs}`)
     }
@@ -229,12 +163,12 @@ export function renderDetail(r: Recipe): string {
         const each = inputUnitMass(inp)
         const totalForRow = each !== undefined ? each * qty : undefined
         if (totalForRow !== undefined) totalInputMass += totalForRow
-        const id = inputItemId(inp)
+        const id = Number(inp.item_id)
         inputsTable.push([
             String(i),
             String(qty),
-            inputName(inp),
-            id !== undefined ? String(id) : '—',
+            itemName(id),
+            String(id),
             each !== undefined ? formatMass(each) : '—',
             totalForRow !== undefined ? formatMass(totalForRow) : '—',
         ])
@@ -274,7 +208,7 @@ export function renderDetail(r: Recipe): string {
             const src = sources[s]
             const inp = r.inputs[src.input_index]
             const sourceInput = inp
-                ? `[${src.input_index}] ${inputName(inp)}`
+                ? `[${src.input_index}] ${itemName(Number(inp.item_id))}`
                 : `[${src.input_index}]`
             const sourceStat = resolveSourceStatLabel(
                 r.inputs,

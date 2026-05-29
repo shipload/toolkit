@@ -4,58 +4,30 @@ import {assert} from 'chai'
 import {getItem} from '$lib'
 import items from '../../src/data/items.json'
 
-const EXPECTED_RESOURCE_MASSES: Array<[number, string, number, number]> = [
-    [101, 'ore', 1, 52000],
-    [102, 'ore', 2, 58000],
-    [103, 'ore', 3, 64000],
-    [104, 'ore', 4, 71000],
-    [105, 'ore', 5, 78000],
-    [106, 'ore', 6, 87000],
-    [107, 'ore', 7, 96000],
-    [108, 'ore', 8, 107000],
-    [109, 'ore', 9, 118000],
-    [110, 'ore', 10, 130000],
-    [201, 'crystal', 1, 35000],
-    [202, 'crystal', 2, 35000],
-    [203, 'crystal', 3, 35000],
-    [204, 'crystal', 4, 35000],
-    [205, 'crystal', 5, 35000],
-    [206, 'crystal', 6, 35000],
-    [207, 'crystal', 7, 35000],
-    [208, 'crystal', 8, 35000],
-    [209, 'crystal', 9, 35000],
-    [210, 'crystal', 10, 35000],
-    [301, 'gas', 1, 15000],
-    [302, 'gas', 2, 13500],
-    [303, 'gas', 3, 12000],
-    [304, 'gas', 4, 11000],
-    [305, 'gas', 5, 10000],
-    [306, 'gas', 6, 9000],
-    [307, 'gas', 7, 8000],
-    [308, 'gas', 8, 7500],
-    [309, 'gas', 9, 6500],
-    [310, 'gas', 10, 6000],
-    [401, 'regolith', 1, 22000],
-    [402, 'regolith', 2, 25000],
-    [403, 'regolith', 3, 28000],
-    [404, 'regolith', 4, 32000],
-    [405, 'regolith', 5, 36000],
-    [406, 'regolith', 6, 40500],
-    [407, 'regolith', 7, 46000],
-    [408, 'regolith', 8, 52000],
-    [409, 'regolith', 9, 58500],
-    [410, 'regolith', 10, 66000],
-    [501, 'biomass', 1, 42000],
-    [502, 'biomass', 2, 37000],
-    [503, 'biomass', 3, 33000],
-    [504, 'biomass', 4, 29000],
-    [505, 'biomass', 5, 26000],
-    [506, 'biomass', 6, 23000],
-    [507, 'biomass', 7, 20000],
-    [508, 'biomass', 8, 18000],
-    [509, 'biomass', 9, 16000],
-    [510, 'biomass', 10, 14000],
+// Resource mass is uniform (1000) since the mass-as-quantity collapse on
+// 2026-05-27. Tier identity now lives in depth gating, per-tier recipes, and
+// stat rolls; the per-category mass curves retired with mass-tiers.md.
+const UNIFORM_RESOURCE_MASS = 1000
+const CATEGORIES: Array<[number, string]> = [
+    [100, 'ore'],
+    [200, 'crystal'],
+    [300, 'gas'],
+    [400, 'regolith'],
+    [500, 'biomass'],
 ]
+const EXPECTED_RESOURCE_MASSES: Array<[number, string, number, number]> = CATEGORIES.flatMap(
+    ([base, category]) =>
+        Array.from(
+            {length: 10},
+            (_, i) =>
+                [base + i + 1, category, i + 1, UNIFORM_RESOURCE_MASS] as [
+                    number,
+                    string,
+                    number,
+                    number,
+                ]
+        )
+)
 
 interface ItemRow {
     id: number

@@ -1,12 +1,11 @@
 [
   {
     "outputItemId": 10001,
-    "outputMass": 420000,
+    "outputMass": 4000,
     "inputs": [
       {
-        "category": "ore",
-        "tier": 1,
-        "quantity": 20
+        "itemId": 101,
+        "quantity": 10
       }
     ],
     "statSlots": [
@@ -31,17 +30,15 @@
   },
   {
     "outputItemId": 10002,
-    "outputMass": 600000,
+    "outputMass": 6000,
     "inputs": [
       {
-        "category": "regolith",
-        "tier": 1,
-        "quantity": 30
+        "itemId": 401,
+        "quantity": 6
       },
       {
-        "category": "biomass",
-        "tier": 1,
-        "quantity": 20
+        "itemId": 501,
+        "quantity": 9
       }
     ],
     "statSlots": [
@@ -66,12 +63,11 @@
   },
   {
     "outputItemId": 10003,
-    "outputMass": 390000,
+    "outputMass": 4000,
     "inputs": [
       {
-        "category": "gas",
-        "tier": 1,
-        "quantity": 65
+        "itemId": 301,
+        "quantity": 10
       }
     ],
     "statSlots": [
@@ -96,17 +92,15 @@
   },
   {
     "outputItemId": 10004,
-    "outputMass": 600000,
+    "outputMass": 6000,
     "inputs": [
       {
-        "category": "crystal",
-        "tier": 1,
-        "quantity": 25
+        "itemId": 201,
+        "quantity": 6
       },
       {
-        "category": "biomass",
-        "tier": 1,
-        "quantity": 15
+        "itemId": 501,
+        "quantity": 9
       }
     ],
     "statSlots": [
@@ -131,17 +125,15 @@
   },
   {
     "outputItemId": 10005,
-    "outputMass": 600000,
+    "outputMass": 6000,
     "inputs": [
       {
-        "category": "ore",
-        "tier": 1,
-        "quantity": 20
+        "itemId": 101,
+        "quantity": 6
       },
       {
-        "category": "gas",
-        "tier": 1,
-        "quantity": 30
+        "itemId": 301,
+        "quantity": 9
       }
     ],
     "statSlots": [
@@ -166,12 +158,11 @@
   },
   {
     "outputItemId": 10006,
-    "outputMass": 420000,
+    "outputMass": 4000,
     "inputs": [
       {
-        "category": "crystal",
-        "tier": 1,
-        "quantity": 30
+        "itemId": 201,
+        "quantity": 10
       }
     ],
     "statSlots": [
@@ -196,12 +187,11 @@
   },
   {
     "outputItemId": 10007,
-    "outputMass": 420000,
+    "outputMass": 4000,
     "inputs": [
       {
-        "category": "biomass",
-        "tier": 1,
-        "quantity": 25
+        "itemId": 501,
+        "quantity": 10
       }
     ],
     "statSlots": [
@@ -226,12 +216,11 @@
   },
   {
     "outputItemId": 10008,
-    "outputMass": 400000,
+    "outputMass": 4000,
     "inputs": [
       {
-        "category": "regolith",
-        "tier": 1,
-        "quantity": 45
+        "itemId": 401,
+        "quantity": 10
       }
     ],
     "statSlots": [
@@ -256,17 +245,15 @@
   },
   {
     "outputItemId": 10009,
-    "outputMass": 590000,
+    "outputMass": 6000,
     "inputs": [
       {
-        "category": "gas",
-        "tier": 1,
-        "quantity": 40
+        "itemId": 301,
+        "quantity": 6
       },
       {
-        "category": "regolith",
-        "tier": 1,
-        "quantity": 40
+        "itemId": 401,
+        "quantity": 9
       }
     ],
     "statSlots": [
@@ -291,17 +278,15 @@
   },
   {
     "outputItemId": 10010,
-    "outputMass": 590000,
+    "outputMass": 6000,
     "inputs": [
       {
-        "category": "crystal",
-        "tier": 1,
-        "quantity": 20
+        "itemId": 201,
+        "quantity": 6
       },
       {
-        "category": "ore",
-        "tier": 1,
-        "quantity": 15
+        "itemId": 101,
+        "quantity": 9
       }
     ],
     "statSlots": [
@@ -326,11 +311,11 @@
   },
   {
     "outputItemId": 10100,
-    "outputMass": 940000,
+    "outputMass": 900000,
     "inputs": [
       {
         "itemId": 10003,
-        "quantity": 6
+        "quantity": 600
       }
     ],
     "statSlots": [
@@ -355,11 +340,11 @@
   },
   {
     "outputItemId": 10101,
-    "outputMass": 1440000,
+    "outputMass": 1400000,
     "inputs": [
       {
         "itemId": 10004,
-        "quantity": 6
+        "quantity": 600
       }
     ],
     "statSlots": [
@@ -384,15 +369,15 @@
   },
   {
     "outputItemId": 10102,
-    "outputMass": 1220000,
+    "outputMass": 1200000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10006,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -433,11 +418,11 @@
   },
   {
     "outputItemId": 10103,
-    "outputMass": 1010000,
+    "outputMass": 1000000,
     "inputs": [
       {
         "itemId": 10007,
-        "quantity": 6
+        "quantity": 600
       }
     ],
     "statSlots": [
@@ -462,15 +447,15 @@
   },
   {
     "outputItemId": 10104,
-    "outputMass": 1190000,
+    "outputMass": 1200000,
     "inputs": [
       {
         "itemId": 10008,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10009,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -495,15 +480,15 @@
   },
   {
     "outputItemId": 10105,
-    "outputMass": 1220000,
+    "outputMass": 1200000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10002,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -544,15 +529,15 @@
   },
   {
     "outputItemId": 10106,
-    "outputMass": 1430000,
+    "outputMass": 1400000,
     "inputs": [
       {
         "itemId": 10004,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10010,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -585,15 +570,15 @@
   },
   {
     "outputItemId": 10107,
-    "outputMass": 1420000,
+    "outputMass": 1400000,
     "inputs": [
       {
         "itemId": 10010,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10009,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -617,15 +602,15 @@
   },
   {
     "outputItemId": 10108,
-    "outputMass": 970000,
+    "outputMass": 1000000,
     "inputs": [
       {
         "itemId": 10003,
-        "quantity": 3
+        "quantity": 300
       },
       {
         "itemId": 10007,
-        "quantity": 3
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -666,15 +651,15 @@
   },
   {
     "outputItemId": 10200,
-    "outputMass": 1490000,
+    "outputMass": 1500000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 6
+        "quantity": 600
       },
       {
         "itemId": 10002,
-        "quantity": 2
+        "quantity": 200
       }
     ],
     "statSlots": [
@@ -719,11 +704,11 @@
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 8
+        "quantity": 800
       },
       {
         "itemId": 10002,
-        "quantity": 4
+        "quantity": 400
       }
     ],
     "statSlots": [
@@ -764,15 +749,15 @@
   },
   {
     "outputItemId": 10202,
-    "outputMass": 5760000,
+    "outputMass": 5800000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 20
+        "quantity": 2000
       },
       {
         "itemId": 10002,
-        "quantity": 10
+        "quantity": 1000
       }
     ],
     "statSlots": [
@@ -813,15 +798,15 @@
   },
   {
     "outputItemId": 10203,
-    "outputMass": 4440000,
+    "outputMass": 4400000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 15
+        "quantity": 1500
       },
       {
         "itemId": 10002,
-        "quantity": 8
+        "quantity": 800
       }
     ],
     "statSlots": [
@@ -862,23 +847,23 @@
   },
   {
     "outputItemId": 10204,
-    "outputMass": 5540000,
+    "outputMass": 5500000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 15
+        "quantity": 1500
       },
       {
         "itemId": 10002,
-        "quantity": 6
+        "quantity": 600
       },
       {
         "itemId": 10008,
-        "quantity": 4
+        "quantity": 400
       },
       {
         "itemId": 10009,
-        "quantity": 4
+        "quantity": 400
       }
     ],
     "statSlots": [
@@ -919,15 +904,14 @@
   },
   {
     "outputItemId": 20001,
-    "outputMass": 50000,
+    "outputMass": 500,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 2
+        "quantity": 200
       },
       {
-        "category": "ore",
-        "tier": 2,
+        "itemId": 102,
         "quantity": 15
       }
     ],
@@ -964,20 +948,18 @@
   },
   {
     "outputItemId": 20002,
-    "outputMass": 30000,
+    "outputMass": 300,
     "inputs": [
       {
         "itemId": 10002,
-        "quantity": 2
+        "quantity": 200
       },
       {
-        "category": "regolith",
-        "tier": 2,
+        "itemId": 402,
         "quantity": 10
       },
       {
-        "category": "biomass",
-        "tier": 2,
+        "itemId": 502,
         "quantity": 20
       }
     ],
@@ -1019,11 +1001,11 @@
     "inputs": [
       {
         "itemId": 20001,
-        "quantity": 6
+        "quantity": 600
       },
       {
         "itemId": 20002,
-        "quantity": 2
+        "quantity": 200
       }
     ],
     "statSlots": [

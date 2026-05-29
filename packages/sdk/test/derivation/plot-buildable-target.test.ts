@@ -53,9 +53,8 @@ describe('PlotManager.buildableTarget', () => {
     })
 
     test('state is "ready" when all recipe inputs are deposited', () => {
-        // TODO: flesh out — warehouse-T1 recipe: 20x PLATE + 10x FRAME
         const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
-        const cargo = [makeCargoRow(101n, ITEM_PLATE, 20), makeCargoRow(101n, ITEM_FRAME, 10)]
+        const cargo = [makeCargoRow(101n, ITEM_PLATE, 2000), makeCargoRow(101n, ITEM_FRAME, 1000)]
 
         const target = manager.buildableTarget(plot, cargo)
 

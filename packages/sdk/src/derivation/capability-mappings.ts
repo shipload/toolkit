@@ -1,11 +1,7 @@
 import {SLOT_FORMULAS, type SlotConsumerKind} from '../data/capability-formulas'
 import {getStatDefinitions, type StatDefinition} from './stats'
-import {
-    getRecipe,
-    type Recipe,
-    type RecipeInput,
-    type RecipeInputCategory,
-} from '../data/recipes-runtime'
+import {getRecipe, type Recipe} from '../data/recipes-runtime'
+import {getItem} from '../data/catalog'
 import {
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1_PACKED,
@@ -41,10 +37,6 @@ export const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
     'container-t2': ITEM_CONTAINER_T2_PACKED,
 }
 
-function isCategoryInput(input: RecipeInput): input is RecipeInputCategory {
-    return 'category' in input
-}
-
 /**
  * Walk a recipe's slot source down to the raw category stat that ultimately
  * lands in that slot. Returns the StatDefinition or undefined if the trace
@@ -60,8 +52,9 @@ function traceToRawCategoryStat(
 ): StatDefinition | undefined {
     const input = recipe.inputs[source.inputIndex]
     if (!input) return undefined
-    if (isCategoryInput(input)) {
-        const defs = getStatDefinitions(input.category)
+    const inputItem = getItem(input.itemId)
+    if (inputItem.type === 'resource' && inputItem.category) {
+        const defs = getStatDefinitions(inputItem.category)
         return defs[source.statIndex]
     }
     if (visited.has(input.itemId)) return undefined

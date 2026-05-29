@@ -45,8 +45,9 @@ export function renderModule(
 
     const capabilityName = group?.capability ?? resolved.name.replace(/\s+T\d+$/i, '')
 
+    const quantity = Number(BigInt(item.quantity.toString()))
     const metaRows = [
-        {label: 'Mass', value: formatMass(resolved.mass)},
+        {label: 'Mass', value: formatMass(resolved.mass * Math.max(quantity, 1))},
         ...(opts?.location ? [{label: 'Location', value: formatLocation(opts.location)}] : []),
     ]
 
@@ -83,7 +84,6 @@ export function renderModule(
 
     const chrome = panel({width: w, height, borderColor: tierBorder(resolved.tier)})
 
-    const quantity = Number(BigInt(item.quantity.toString()))
     const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
 
     const iconColor = group ? capabilityColor(group.capability) : capabilityColor(capabilityName)

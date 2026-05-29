@@ -777,10 +777,6 @@ export namespace Types {
     export class recipe_input extends Struct {
         @Struct.field(UInt16)
         declare item_id: UInt16
-        @Struct.field(UInt8)
-        declare category: UInt8
-        @Struct.field(UInt8)
-        declare tier: UInt8
         @Struct.field(UInt32)
         declare quantity: UInt32
     }

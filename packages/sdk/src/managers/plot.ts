@@ -1,6 +1,6 @@
 import {Name} from '@wharfkit/antelope'
 import {getItem} from '../data/catalog'
-import {getRecipe, resolveRecipeInputItemId} from '../data/recipes-runtime'
+import {getRecipe} from '../data/recipes-runtime'
 import {computeInputMass} from '../derivation/crafting'
 import {calc_craft_duration} from '../capabilities/crafting'
 import {TaskType} from '../types'
@@ -47,7 +47,7 @@ export class PlotManager extends BaseManager {
         }
 
         const rows: PlotProgressInputRow[] = recipe.inputs.map((input) => {
-            const itemId = resolveRecipeInputItemId(input)
+            const itemId = input.itemId
             const required = input.quantity
             const provided = quantityByItemId.get(itemId) ?? 0
             const missing = Math.max(0, required - provided)

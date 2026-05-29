@@ -3,11 +3,11 @@ import {renderDetail, renderList} from '../../../src/commands/query/recipe'
 
 const sample = {
     output_item_id: 10001,
-    output_mass: 400,
-    inputs: [{item_id: 0, category: 0, quantity: 15}],
+    output_mass: 4000,
+    inputs: [{item_id: 101, quantity: 15}],
     stat_slots: [{sources: [{input_index: 0, input_stat_index: 0}]}],
     blend_weights: [],
-    output_item: {id: 10001, mass: 400},
+    output_item: {id: 10001, mass: 4000},
     input_items: [],
 }
 
@@ -27,25 +27,24 @@ test('recipe detail shows output + inputs + stat slots', () => {
     expect(out).toContain('Stat slots')
 })
 
-test('renderList omits tier label when tier is 0 or absent', () => {
+test('renderList never renders a malformed tier label', () => {
     const r = {
         output_item_id: 10001,
-        output_mass: 50000,
-        inputs: [{item_id: 0, category: 0, tier: 0, quantity: 15}],
+        output_mass: 4000,
+        inputs: [{item_id: 101, quantity: 15}],
         stat_slots: [],
         blend_weights: [],
     }
     const out = renderList([r] as any)
     expect(out).not.toContain('TNaN')
-    expect(out).not.toContain('T0')
     expect(out).not.toContain('Tundefined')
 })
 
-test('renderList shows tier label when tier is present and nonzero', () => {
+test('renderList derives tier label from the resolved input item', () => {
     const r = {
         output_item_id: 10100,
         output_mass: 150000,
-        inputs: [{item_id: 10001, category: 0, tier: 0, quantity: 6}],
+        inputs: [{item_id: 10001, quantity: 6}],
         stat_slots: [],
         blend_weights: [],
     }
@@ -56,8 +55,8 @@ test('renderList shows tier label when tier is present and nonzero', () => {
 test('renderList does not repeat id in output item name', () => {
     const r = {
         output_item_id: 10001,
-        output_mass: 50000,
-        inputs: [{item_id: 0, category: 0, tier: 0, quantity: 15}],
+        output_mass: 4000,
+        inputs: [{item_id: 101, quantity: 15}],
         stat_slots: [],
         blend_weights: [],
     }
@@ -68,8 +67,8 @@ test('renderList does not repeat id in output item name', () => {
 test('renderDetail does not repeat id in output line', () => {
     const r = {
         output_item_id: 10001,
-        output_mass: 50000,
-        inputs: [{item_id: 0, category: 0, tier: 0, quantity: 15}],
+        output_mass: 4000,
+        inputs: [{item_id: 101, quantity: 15}],
         stat_slots: [],
         blend_weights: [],
     }
@@ -81,7 +80,7 @@ test('renderDetail shows output mass in tonnes not kg', () => {
     const r = {
         output_item_id: 10001,
         output_mass: 50000,
-        inputs: [{item_id: 0, category: 0, tier: 0, quantity: 15}],
+        inputs: [{item_id: 101, quantity: 15}],
         stat_slots: [],
         blend_weights: [],
     }

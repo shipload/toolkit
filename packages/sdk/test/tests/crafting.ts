@@ -20,7 +20,8 @@ import {
     deriveResourceStats,
     encodeGatheredCargoStats,
     encodeStats,
-    findItemByCategoryAndTier,
+    getItem,
+    ITEM_ORE_T1,
     ITEM_FRAME,
     ITEM_FRAME_T2,
     ITEM_CONTAINER_T1_PACKED,
@@ -630,8 +631,8 @@ describe('Crafting', () => {
         test('component returns positive mass', () => {
             const mass = computeInputMass(ITEM_PLATE)
             assert.isAbove(mass, 0)
-            const oreT1 = findItemByCategoryAndTier('ore', 1)
-            assert.equal(mass, 20 * oreT1.mass)
+            const oreT1 = getItem(ITEM_ORE_T1)
+            assert.equal(mass, 10 * oreT1.mass)
         })
 
         test('module returns positive mass', () => {

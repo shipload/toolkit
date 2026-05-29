@@ -1,8 +1,9 @@
-import type {ResolvedItem, ResourceCategory} from '@shipload/sdk'
+import type {ResolvedItem} from '@shipload/sdk'
 import {
     formatTier,
     getRecipe,
     getStatDefinitions,
+    resolveItemCategory,
     categoryColors,
     displayName,
     formatLocation,
@@ -63,8 +64,9 @@ export function renderComponent(
             const src = slot.sources[0]
             if (!src) return []
             const input = recipe!.inputs[src.inputIndex]
-            if (!input || !('category' in input)) return []
-            const category = input.category as ResourceCategory
+            if (!input) return []
+            const category = resolveItemCategory(input.itemId)
+            if (!category) return []
             const def = getStatDefinitions(category)[src.statIndex]
             if (!def) return []
             return [
@@ -79,9 +81,10 @@ export function renderComponent(
         })
     }
 
+    const quantity = Number(BigInt(item.quantity.toString()))
     const metaRows = [
         {label: 'Type', value: `COMPONENT · ${formatTier(resolved.tier)}`},
-        {label: 'Mass', value: formatMass(resolved.mass)},
+        {label: 'Mass', value: formatMass(resolved.mass * Math.max(quantity, 1))},
         ...(opts?.location ? [{label: 'Location', value: formatLocation(opts.location)}] : []),
     ]
 
@@ -93,7 +96,6 @@ export function renderComponent(
 
     const chrome = panel({width: w, height, borderColor: tierBorder(resolved.tier)})
 
-    const quantity = Number(BigInt(item.quantity.toString()))
     const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity})
 
     const icon = iconHex({

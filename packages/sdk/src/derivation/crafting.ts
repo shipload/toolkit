@@ -1,6 +1,6 @@
 import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {findItemByCategoryAndTier, getRecipe, type Recipe} from '../data/recipes-runtime'
+import {getRecipe, type Recipe} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {getStatDefinitions} from './stats'
 import {deriveResourceStats} from './stratum'
@@ -58,11 +58,8 @@ function keyForStatSlot(
 function keyForRecipeInputStat(recipe: Recipe, inputIndex: number, statIndex: number): string {
     const input = recipe.inputs[inputIndex]
     if (!input) return ''
-    if ('category' in input) {
-        const defs = getStatDefinitions(input.category)
-        return defs[statIndex]?.key ?? ''
-    }
-    // itemId-typed input — its stats follow that item's own statSlots layout.
+    // Every input names an item by id; its stats follow that item's own layout
+    // (resource stat definitions for resources, statSlots for crafted items).
     const innerKeys = getItemStatKeys(input.itemId)
     return innerKeys[statIndex] ?? ''
 }
@@ -117,10 +114,11 @@ export function computeComponentStats(
         const src = slot.sources[0]
         const key = keyForStatSlot(recipe, slot)
         const input = src ? recipe.inputs[src.inputIndex] : undefined
-        if (!input || !('category' in input)) {
+        const inputItem = input ? getItem(input.itemId) : undefined
+        if (!inputItem || inputItem.type !== 'resource' || !inputItem.category) {
             return {key, value: Math.max(1, Math.min(999, 0))}
         }
-        const matching = categoryStacks.find((cs) => cs.category === input.category)
+        const matching = categoryStacks.find((cs) => cs.category === inputItem.category)
         const value = matching ? blendStacks(matching.stacks, key) : 0
         return {key, value: Math.max(1, Math.min(999, value))}
     })
@@ -147,7 +145,7 @@ export function computeEntityStats(
         const key = keyForStatSlot(recipe, slot)
         if (!src) return {key, value: 1}
         const input = recipe.inputs[src.inputIndex]
-        if (!input || 'category' in input) {
+        if (!input) {
             return {key, value: 1}
         }
         const blended = blendedByComponent[input.itemId] ?? {}
@@ -185,12 +183,7 @@ export function computeInputMass(itemId: number): number {
 
     let total = 0
     for (const input of recipe.inputs) {
-        if ('itemId' in input) {
-            total += getItem(input.itemId).mass * input.quantity
-        } else {
-            const item = findItemByCategoryAndTier(input.category, input.tier)
-            total += item.mass * input.quantity
-        }
+        total += getItem(input.itemId).mass * input.quantity
     }
     return total
 }
@@ -305,10 +298,13 @@ export function computeCraftedOutputStats(
             const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
             const input = recipe.inputs[src.inputIndex]
             let value = 0
-            if (input && 'category' in input) {
-                value = blendStacks(decodedByCategory[input.category] ?? [], key)
-            } else if (input) {
-                value = blendedByItem[input.itemId]?.[key] ?? 0
+            if (input) {
+                const inputItem = getItem(input.itemId)
+                if (inputItem.type === 'resource' && inputItem.category) {
+                    value = blendStacks(decodedByCategory[inputItem.category] ?? [], key)
+                } else {
+                    value = blendedByItem[input.itemId]?.[key] ?? 0
+                }
             }
             out.push(Math.max(1, Math.min(999, value)))
         } else {
@@ -319,10 +315,13 @@ export function computeCraftedOutputStats(
                 const input = recipe.inputs[src.inputIndex]
                 const weight = recipe.blendWeights[src.inputIndex] ?? 1
                 let value = 0
-                if (input && 'category' in input) {
-                    value = blendStacks(decodedByCategory[input.category] ?? [], key)
-                } else if (input) {
-                    value = blendedByItem[input.itemId]?.[key] ?? 0
+                if (input) {
+                    const inputItem = getItem(input.itemId)
+                    if (inputItem.type === 'resource' && inputItem.category) {
+                        value = blendStacks(decodedByCategory[inputItem.category] ?? [], key)
+                    } else {
+                        value = blendedByItem[input.itemId]?.[key] ?? 0
+                    }
                 }
                 weightedSum += value * weight
                 totalWeight += weight

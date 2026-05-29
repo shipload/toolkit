@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "e0ab997ecdef489479aa822d71be9ac47c8a3e7ed2d784d4b74be4cd2e41fae1",
-    "generated_at": "2026-05-26T03:40:00.767Z",
+    "catalog_hash": "7ec4cea300f5f0e18e82d168f7a95f35f4f50947f3d7e7a071cd5ca34d64b7d5",
+    "generated_at": "2026-05-29T06:22:14.167Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -9,72 +9,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@
                     "tasks": [
                         {
                             "type": 1,
-                            "duration": 486,
+                            "duration": 568,
                             "cancelable": 1,
                             "coordinates": {
                                 "x": -5,
@@ -104,32 +104,32 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 383,
+                "energy": 335,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -140,72 +140,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -214,7 +214,7 @@
                     "tasks": [
                         {
                             "type": 1,
-                            "duration": 486,
+                            "duration": 568,
                             "cancelable": 1,
                             "coordinates": {
                                 "x": -5,
@@ -235,32 +235,32 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 82,
+                "energy": 6,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -271,72 +271,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 1,
                     "z": 3000
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 340,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 288,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -345,7 +345,7 @@
                     "tasks": [
                         {
                             "type": 2,
-                            "duration": 21,
+                            "duration": 47,
                             "cancelable": 2,
                             "cargo": []
                         }
@@ -362,32 +362,32 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 340,
+                "energy": 288,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -398,72 +398,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 1,
                     "z": 3000
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 340,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 288,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -472,7 +472,7 @@
                     "tasks": [
                         {
                             "type": 2,
-                            "duration": 21,
+                            "duration": 47,
                             "cancelable": 2,
                             "cargo": []
                         }
@@ -489,32 +489,32 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 383,
+                "energy": 335,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -525,72 +525,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -599,7 +599,7 @@
                     "tasks": [
                         {
                             "type": 3,
-                            "duration": 39,
+                            "duration": 18,
                             "cancelable": 2,
                             "cargo": [
                                 {
@@ -627,32 +627,32 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 383,
+                "energy": 335,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -663,72 +663,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": 0,
                     "y": 0,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -737,7 +737,7 @@
                     "tasks": [
                         {
                             "type": 3,
-                            "duration": 39,
+                            "duration": 18,
                             "cancelable": 2,
                             "cargo": [
                                 {
@@ -765,8 +765,8 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 383,
-                "cargomass": 75000,
+                "energy": 335,
+                "cargomass": 5000,
                 "cargo": [
                     {
                         "item_id": 301,
@@ -776,29 +776,29 @@
                         "id": 0
                     }
                 ],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -809,81 +809,81 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": -5,
                     "y": 6,
                     "z": 3000
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 82,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 6,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:08:06.000",
+                    "started": "2024-01-29T00:09:28.000",
                     "tasks": [
                         {
                             "type": 5,
-                            "duration": 22,
+                            "duration": 1,
                             "cancelable": 0,
                             "coordinates": {
                                 "x": -5,
@@ -898,7 +898,7 @@
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 1
+                            "energy_cost": 0
                         }
                     ]
                 },
@@ -913,32 +913,32 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 82,
+                "energy": 6,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -949,81 +949,81 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": -5,
                     "y": 6,
                     "z": 3000
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 82,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 6,
                 "cargomass": 0,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
                 "schedule": {
-                    "started": "2024-01-29T00:08:06.000",
+                    "started": "2024-01-29T00:09:28.000",
                     "tasks": [
                         {
                             "type": 5,
-                            "duration": 22,
+                            "duration": 1,
                             "cancelable": 0,
                             "coordinates": {
                                 "x": -5,
@@ -1038,7 +1038,7 @@
                                     "quantity": 1
                                 }
                             ],
-                            "energy_cost": 1
+                            "energy_cost": 0
                         }
                     ]
                 },
@@ -1053,8 +1053,8 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 81,
-                "cargomass": 22000,
+                "energy": 6,
+                "cargomass": 1000,
                 "cargo": [
                     {
                         "item_id": 401,
@@ -1064,341 +1064,29 @@
                         "id": 0
                     }
                 ],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
-                }
-            }
-        },
-        {
-            "name": "ship-craft-step0",
-            "input": {
-                "id": 1,
-                "owner": "alice",
-                "kind": "ship",
-                "name": "alice's ship",
-                "stats": "537395712500",
-                "coordinates": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 800
-                },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
-                "cargomass": 1040000,
-                "engines": {
-                    "thrust": 775,
-                    "drain": 43
-                },
-                "generator": {
-                    "capacity": 383,
-                    "recharge": 2
-                },
-                "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
-                    "quantity": 1
-                },
-                "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
-                },
-                "crafter": {
-                    "speed": 500,
-                    "drain": 15
-                },
-                "modules": [
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10100,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10101,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10103,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10102,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10104,
-                            "stats": "537395712500"
-                        }
-                    }
-                ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 7,
-                            "duration": 2080,
-                            "cancelable": 2,
-                            "cargo": [
-                                {
-                                    "item_id": 101,
-                                    "stats": 0,
-                                    "modules": [],
-                                    "quantity": 20
-                                },
-                                {
-                                    "item_id": 10001,
-                                    "stats": 1025,
-                                    "modules": [],
-                                    "quantity": 1
-                                }
-                            ],
-                            "energy_cost": 104
-                        }
-                    ]
-                },
-                "item_id": 10201,
-                "cargo": [
-                    {
-                        "item_id": 101,
-                        "stats": "0",
-                        "modules": [],
-                        "quantity": 20
-                    }
-                ]
-            },
-            "task_count": 0,
-            "expected": {
-                "owner": "alice",
-                "coordinates": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 800
-                },
-                "energy": 383,
-                "cargomass": 1040000,
-                "cargo": [
-                    {
-                        "item_id": 101,
-                        "stats": 0,
-                        "modules": [],
-                        "quantity": 20,
-                        "id": 1000000
-                    }
-                ],
-                "hullmass": 5862500,
-                "engines": {
-                    "thrust": 775,
-                    "drain": 43
-                },
-                "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
-                    "quantity": 1
-                },
-                "generator": {
-                    "capacity": 383,
-                    "recharge": 2
-                },
-                "capacity": 15829620,
-                "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
-                },
-                "crafter": {
-                    "speed": 500,
-                    "drain": 15
-                }
-            }
-        },
-        {
-            "name": "ship-craft-step1",
-            "input": {
-                "id": 1,
-                "owner": "alice",
-                "kind": "ship",
-                "name": "alice's ship",
-                "stats": "537395712500",
-                "coordinates": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 800
-                },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
-                "cargomass": 1040000,
-                "engines": {
-                    "thrust": 775,
-                    "drain": 43
-                },
-                "generator": {
-                    "capacity": 383,
-                    "recharge": 2
-                },
-                "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
-                    "quantity": 1
-                },
-                "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
-                },
-                "crafter": {
-                    "speed": 500,
-                    "drain": 15
-                },
-                "modules": [
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10100,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10101,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10103,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10102,
-                            "stats": "537395712500"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10104,
-                            "stats": "537395712500"
-                        }
-                    }
-                ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 7,
-                            "duration": 2080,
-                            "cancelable": 2,
-                            "cargo": [
-                                {
-                                    "item_id": 101,
-                                    "stats": 0,
-                                    "modules": [],
-                                    "quantity": 20
-                                },
-                                {
-                                    "item_id": 10001,
-                                    "stats": 1025,
-                                    "modules": [],
-                                    "quantity": 1
-                                }
-                            ],
-                            "energy_cost": 104
-                        }
-                    ]
-                },
-                "item_id": 10201,
-                "cargo": [
-                    {
-                        "item_id": 101,
-                        "stats": "0",
-                        "modules": [],
-                        "quantity": 20
-                    }
-                ]
-            },
-            "task_count": 1,
-            "expected": {
-                "owner": "alice",
-                "coordinates": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 800
-                },
-                "energy": 279,
-                "cargomass": 420000,
-                "cargo": [
-                    {
-                        "item_id": 10001,
-                        "stats": 1025,
-                        "modules": [],
-                        "quantity": 1,
-                        "id": 0
-                    }
-                ],
-                "hullmass": 5862500,
-                "engines": {
-                    "thrust": 775,
-                    "drain": 43
-                },
-                "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
-                    "quantity": 1
-                },
-                "generator": {
-                    "capacity": 383,
-                    "recharge": 2
-                },
-                "capacity": 15829620,
-                "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
-                },
-                "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -1409,72 +1097,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": -47,
                     "y": -49,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
-                "cargomass": 1490000,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
+                "cargomass": 1500000,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -1520,8 +1208,8 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 383,
-                "cargomass": 1490000,
+                "energy": 335,
+                "cargomass": 1500000,
                 "cargo": [
                     {
                         "item_id": 10200,
@@ -1531,29 +1219,29 @@
                         "id": 1000000
                     }
                 ],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         },
@@ -1564,72 +1252,72 @@
                 "owner": "alice",
                 "kind": "ship",
                 "name": "alice's ship",
-                "stats": "537395712500",
+                "stats": "228930573525",
                 "coordinates": {
                     "x": -47,
                     "y": -49,
                     "z": 800
                 },
-                "hullmass": 5862500,
-                "capacity": 15829620,
-                "energy": 383,
-                "cargomass": 1490000,
+                "hullmass": 5784025,
+                "capacity": 7326256,
+                "energy": 335,
+                "cargomass": 1500000,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 },
                 "modules": [
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10100,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10101,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10103,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10102,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     },
                     {
                         "type": 0,
                         "installed": {
                             "item_id": 10104,
-                            "stats": "537395712500"
+                            "stats": "228930573525"
                         }
                     }
                 ],
@@ -1675,32 +1363,32 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 383,
+                "energy": 335,
                 "cargomass": 0,
                 "cargo": [],
-                "hullmass": 5862500,
+                "hullmass": 5784025,
                 "engines": {
-                    "thrust": 775,
-                    "drain": 43
+                    "thrust": 559,
+                    "drain": 47
                 },
                 "loaders": {
-                    "mass": 1000,
-                    "thrust": 2,
+                    "mass": 1574,
+                    "thrust": 1,
                     "quantity": 1
                 },
                 "generator": {
-                    "capacity": 383,
-                    "recharge": 2
+                    "capacity": 335,
+                    "recharge": 1
                 },
-                "capacity": 15829620,
+                "capacity": 7326256,
                 "gatherer": {
-                    "yield": 700,
-                    "drain": 625,
-                    "depth": 3000
+                    "yield": 413,
+                    "drain": 984,
+                    "depth": 1565
                 },
                 "crafter": {
-                    "speed": 500,
-                    "drain": 15
+                    "speed": 270,
+                    "drain": 24
                 }
             }
         }

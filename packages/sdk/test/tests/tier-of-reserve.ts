@@ -2,25 +2,29 @@ import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {ITEM_ORE_T1, ITEM_GAS_T1, tierOfReserve} from '$lib'
 
+// Resource mass is uniform (1000 kg/t) since the mass-as-quantity collapse on
+// 2026-05-27. Reserve-tier thresholds (RESERVE_TIERS, in kg) are unchanged, so
+// the unit counts that map into each tier scale by 1/1000 relative to a 1000 kg
+// unit: Small floor 3.6 M kg = 3600 t, Medium 24 M–48 M kg, Large 96 M–168 M kg.
 describe('tierOfReserve', () => {
-    test('Ore T1 (mass 52k): 100 units → small (implied 5.2 M kg)', () => {
-        assert.equal(tierOfReserve(100, ITEM_ORE_T1), 'small')
+    test('Ore T1: 5000 t → small (implied 5 M kg)', () => {
+        assert.equal(tierOfReserve(5000, ITEM_ORE_T1), 'small')
     })
 
-    test('Ore T1: 70 units → small (implied 3.64 M kg, just above floor)', () => {
-        assert.equal(tierOfReserve(70, ITEM_ORE_T1), 'small')
+    test('Ore T1: 3700 t → small (implied 3.7 M kg, just above floor)', () => {
+        assert.equal(tierOfReserve(3700, ITEM_ORE_T1), 'small')
     })
 
-    test('Ore T1: 500 units → medium (implied 26 M kg)', () => {
-        assert.equal(tierOfReserve(500, ITEM_ORE_T1), 'medium')
+    test('Ore T1: 30000 t → medium (implied 30 M kg)', () => {
+        assert.equal(tierOfReserve(30000, ITEM_ORE_T1), 'medium')
     })
 
-    test('Ore T1: 3000 units → large (implied 156 M kg)', () => {
-        assert.equal(tierOfReserve(3000, ITEM_ORE_T1), 'large')
+    test('Ore T1: 130000 t → large (implied 130 M kg)', () => {
+        assert.equal(tierOfReserve(130000, ITEM_ORE_T1), 'large')
     })
 
-    test('Gas T1 (mass 15k): 240 units → small (implied 3.6 M kg, lighter resource)', () => {
-        assert.equal(tierOfReserve(240, ITEM_GAS_T1), 'small')
+    test('Gas T1: 5000 t → small (uniform mass, same as Ore)', () => {
+        assert.equal(tierOfReserve(5000, ITEM_GAS_T1), 'small')
     })
 
     test('returns null for zero reserve', () => {
@@ -31,7 +35,7 @@ describe('tierOfReserve', () => {
         assert.isNull(tierOfReserve(-1, ITEM_ORE_T1))
     })
 
-    test('Ore T1: 20 units → null (implied 1.04 M kg, below Small floor)', () => {
-        assert.isNull(tierOfReserve(20, ITEM_ORE_T1))
+    test('Ore T1: 1000 t → null (implied 1 M kg, below Small floor)', () => {
+        assert.isNull(tierOfReserve(1000, ITEM_ORE_T1))
     })
 })

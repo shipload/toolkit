@@ -17,7 +17,6 @@ import {
     ENTITY_CARGO_NOT_LOADED,
 } from '../errors'
 import {getRecipe, type RecipeInput} from '../data/recipes-runtime'
-import {getItem} from '../data/catalog'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
     calcStacksMass,
@@ -344,19 +343,10 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
         let matched = false
         for (let ri = 0; ri < recipe.length; ri++) {
             const req = recipe[ri]
-            if ('itemId' in req) {
-                if (input.item_id.toNumber() === req.itemId) {
-                    groupedInputs[ri].push(input)
-                    matched = true
-                    break
-                }
-            } else {
-                const item = getItem(input.item_id)
-                if (item.category === req.category && item.tier === req.tier) {
-                    groupedInputs[ri].push(input)
-                    matched = true
-                    break
-                }
+            if (input.item_id.toNumber() === req.itemId) {
+                groupedInputs[ri].push(input)
+                matched = true
+                break
             }
         }
         if (!matched) throw new Error(RECIPE_INPUTS_INVALID)

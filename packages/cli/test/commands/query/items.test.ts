@@ -5,8 +5,8 @@ import {renderPretty} from '../../../src/commands/query/items'
 test('items renders list with item name and tonnes mass', () => {
     const out = renderPretty([getItem(501)])
     expect(out).toContain('Biomass')
-    expect(out).toContain('42 t')
-    expect(out).not.toContain('42000')
+    expect(out).toContain('1 t')
+    expect(out).not.toContain('1000')
 })
 
 test('items shows module subtype in Type column', () => {
