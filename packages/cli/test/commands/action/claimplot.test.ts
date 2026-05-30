@@ -29,7 +29,7 @@ test('claimplot encodes target_item_id, coords (z=0), and entity id', async () =
         getLocalShipload()
     )
     const decoded = action.decodeData(ServerTypes.claimplot)
-    expect(decoded.id.toString()).toBe('42')
+    expect(decoded.builder_id.toString()).toBe('42')
     expect(decoded.target_item_id.toString()).toBe('11')
     expect(decoded.coords.x.toString()).toBe('-7')
     expect(decoded.coords.y.toString()).toBe('9')

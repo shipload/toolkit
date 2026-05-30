@@ -25,6 +25,6 @@ test('buildplot encodes entity id and plot id', async () => {
         getLocalShipload()
     )
     const decoded = action.decodeData(ServerTypes.buildplot)
-    expect(decoded.id.toString()).toBe('7')
+    expect(decoded.builder_id.toString()).toBe('7')
     expect(decoded.plot_id.toString()).toBe('123')
 })
