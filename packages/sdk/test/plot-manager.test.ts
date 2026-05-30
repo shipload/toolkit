@@ -25,6 +25,29 @@ function makePlotRow(
     })
 }
 
+function makePlotInfo(
+    itemId: number,
+    cargomass: number,
+    capacity?: number
+): ServerContract.Types.entity_info {
+    return ServerContract.Types.entity_info.from({
+        id: UInt64.from(42),
+        owner: Name.from('alice'),
+        type: Name.from('plot'),
+        entity_name: '',
+        coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
+        cargomass: UInt32.from(cargomass),
+        cargo: [],
+        capacity: capacity !== undefined ? UInt32.from(capacity) : undefined,
+        modules: [],
+        item_id: UInt16.from(itemId),
+        is_idle: true,
+        current_task_elapsed: UInt32.from(0),
+        current_task_remaining: UInt32.from(0),
+        pending_tasks: [],
+    })
+}
+
 function makeCargoRow(
     entityId: bigint,
     itemId: number,
@@ -110,7 +133,7 @@ describe('PlotManager.canBuild', () => {
 
 describe('PlotManager.timeToComplete', () => {
     test('divides capacity by speed, minimum 1', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0, 14400000)
+        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 14400000)
         const crafter = ServerContract.Types.crafter_stats.from({
             speed: UInt16.from(14400),
             drain: UInt16.from(0),
@@ -119,7 +142,7 @@ describe('PlotManager.timeToComplete', () => {
     })
 
     test('minimum result is 1', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0, 1)
+        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 1)
         const crafter = ServerContract.Types.crafter_stats.from({
             speed: UInt16.from(65535),
             drain: UInt16.from(0),

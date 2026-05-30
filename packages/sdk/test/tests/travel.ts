@@ -59,17 +59,19 @@ function createMockShip(
         cargomass: number
     }> = {}
 ) {
-    return ServerContract.Types.entity_row.from({
+    return ServerContract.Types.entity_info.from({
         id: UInt64.from(1),
+        type: 'ship',
         owner: 'testplayer',
-        kind: 'ship',
-        name: 'Test Ship',
-        stats: UInt64.from(0),
+        entity_name: 'Test Ship',
         coordinates: {x: 0, y: 0, z: overrides.locationZ},
+        item_id: 0,
+        cargomass: overrides.cargomass ?? 0,
+        cargo: [],
+        modules: [],
         hullmass: overrides.hullmass ?? 100000,
         capacity: overrides.capacity ?? 500000,
         energy: overrides.energy ?? 500,
-        cargomass: overrides.cargomass ?? 0,
         engines: {
             thrust: overrides.thrust ?? 1000,
             drain: overrides.drain ?? 1,
@@ -83,8 +85,10 @@ function createMockShip(
             mass: overrides.loaderMass ?? 5000,
             thrust: overrides.loaderThrust ?? 100,
         },
-        modules: [],
-        item_id: 0,
+        is_idle: true,
+        current_task_elapsed: 0,
+        current_task_remaining: 0,
+        pending_tasks: [],
     })
 }
 

@@ -30,7 +30,7 @@ export class ConstructionManager extends BaseManager {
 
     eligibleSources(
         target: BuildableTarget,
-        entities: ServerContract.Types.entity_row[],
+        entities: ServerContract.Types.entity_info[],
         cargo: ServerContract.Types.cargo_row[]
     ): SourceEntityRef[] {
         return partitionSources(target, entities, cargo).eligible
@@ -38,7 +38,7 @@ export class ConstructionManager extends BaseManager {
 
     unreachableSources(
         target: BuildableTarget,
-        entities: ServerContract.Types.entity_row[],
+        entities: ServerContract.Types.entity_info[],
         cargo: ServerContract.Types.cargo_row[]
     ): SourceEntityRef[] {
         return partitionSources(target, entities, cargo).unreachable
@@ -46,7 +46,7 @@ export class ConstructionManager extends BaseManager {
 
     partitionSources(
         target: BuildableTarget,
-        entities: ServerContract.Types.entity_row[],
+        entities: ServerContract.Types.entity_info[],
         cargo: ServerContract.Types.cargo_row[]
     ): {eligible: SourceEntityRef[]; unreachable: SourceEntityRef[]} {
         return partitionSources(target, entities, cargo)
@@ -54,7 +54,7 @@ export class ConstructionManager extends BaseManager {
 
     eligibleFinalizers(
         target: BuildableTarget,
-        entities: ServerContract.Types.entity_row[]
+        entities: ServerContract.Types.entity_info[]
     ): FinalizerEntityRef[] {
         const out: FinalizerEntityRef[] = []
         for (const entity of entities) {
@@ -91,7 +91,7 @@ function coordsEqual(
 }
 
 function matchRelevantCargo(
-    entity: ServerContract.Types.entity_row,
+    entity: ServerContract.Types.entity_info,
     target: BuildableTarget,
     cargo: ServerContract.Types.cargo_row[]
 ): SourceCargoStack[] {
@@ -119,7 +119,7 @@ function matchRelevantCargo(
 
 function partitionSources(
     target: BuildableTarget,
-    entities: ServerContract.Types.entity_row[],
+    entities: ServerContract.Types.entity_info[],
     cargo: ServerContract.Types.cargo_row[]
 ): {eligible: SourceEntityRef[]; unreachable: SourceEntityRef[]} {
     const eligible: SourceEntityRef[] = []

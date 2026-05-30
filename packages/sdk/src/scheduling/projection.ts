@@ -16,7 +16,10 @@ import {
     RECIPE_NOT_FOUND,
     ENTITY_CARGO_NOT_LOADED,
 } from '../errors'
-import {getRecipe, type RecipeInput} from '../data/recipes-runtime'
+import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
+import {computeEntityCapabilities} from '../derivation/capabilities'
+import {decodeCraftedItemStats} from '../derivation/crafting'
+import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
 import {distanceBetweenCoordinates, lerp} from '../travel/travel'
 import {
     calcStacksMass,
@@ -62,19 +65,74 @@ export interface Projectable extends ScheduleData {
     cargo: ServerContract.Types.cargo_item[]
     cargomass: UInt32
     owner?: Name
+    stats?: bigint
+    item_id?: number | UInt16
+    modules?: ServerContract.Types.module_entry[] | InstalledModule[]
 }
 
-function getHullMass(entity: Projectable): UInt32 {
-    return UInt32.from(entity.hullmass ?? 0)
+function toInstalledModules(
+    modules: ServerContract.Types.module_entry[] | InstalledModule[]
+): InstalledModule[] {
+    if (modules.length > 0 && 'itemId' in modules[0]) {
+        return modules as InstalledModule[]
+    }
+    return packedModulesToInstalled(modules as ServerContract.Types.module_entry[])
+}
+
+interface ProjectedCaps {
+    hullmass?: UInt32
+    capacity?: UInt32
+    engines?: ServerContract.Types.movement_stats
+    generator?: ServerContract.Types.energy_stats
+    loaders?: ServerContract.Types.loader_stats
+    hauler?: ServerContract.Types.hauler_stats
+}
+
+function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
+    if (
+        entity.item_id === undefined ||
+        entity.modules === undefined ||
+        entity.stats === undefined
+    ) {
+        return undefined
+    }
+
+    const itemId = Number(
+        typeof entity.item_id === 'number' ? entity.item_id : entity.item_id.value
+    )
+    const hullStats = decodeCraftedItemStats(itemId, entity.stats)
+    const layout = getEntityLayout(itemId)?.slots ?? []
+    const installed = toInstalledModules(entity.modules)
+    const caps = computeEntityCapabilities(hullStats, itemId, installed, layout)
+
+    return {
+        hullmass: UInt32.from(caps.hullmass),
+        capacity: UInt32.from(caps.capacity),
+        engines: caps.engines ? ServerContract.Types.movement_stats.from(caps.engines) : undefined,
+        generator: caps.generator
+            ? ServerContract.Types.energy_stats.from(caps.generator)
+            : undefined,
+        loaders: caps.loaders ? ServerContract.Types.loader_stats.from(caps.loaders) : undefined,
+        hauler: caps.hauler ? ServerContract.Types.hauler_stats.from(caps.hauler) : undefined,
+    }
 }
 
 export function createProjectedEntity(entity: Projectable): ProjectedEntity {
-    const shipMass = getHullMass(entity)
-    const loaders = entity.loaders
-    const engines = entity.engines
-    const generator = entity.generator
-    const hauler = entity.hauler
-    const capacity = entity.capacity
+    const needsRecompute =
+        entity.hullmass === undefined ||
+        entity.loaders === undefined ||
+        entity.engines === undefined ||
+        entity.generator === undefined ||
+        entity.hauler === undefined ||
+        entity.capacity === undefined
+    const caps = needsRecompute ? recomputeCaps(entity) : undefined
+
+    const shipMass = UInt32.from(entity.hullmass ?? caps?.hullmass ?? 0)
+    const loaders = entity.loaders ?? caps?.loaders
+    const engines = entity.engines ?? caps?.engines
+    const generator = entity.generator ?? caps?.generator
+    const hauler = entity.hauler ?? caps?.hauler
+    const capacity = entity.capacity ?? caps?.capacity
 
     const cargo: CargoStack[] = entity.cargo.map(cargoItemToStack)
 

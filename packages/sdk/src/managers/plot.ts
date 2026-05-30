@@ -112,7 +112,7 @@ export class PlotManager extends BaseManager {
     }
 
     timeToComplete(
-        plot: ServerContract.Types.entity_row,
+        plot: ServerContract.Types.entity_info,
         crafter: ServerContract.Types.crafter_stats
     ): number {
         const capacity = Number(plot.capacity?.toString() ?? '0')

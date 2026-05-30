@@ -469,6 +469,9 @@ describe('projection — fixture replay', () => {
                     capacity: row.capacity,
                     owner: row.owner,
                     schedule: row.schedule ?? undefined,
+                    stats: BigInt(row.stats.toString()),
+                    item_id: row.item_id,
+                    modules: row.modules,
                 },
                 {upToTaskIndex: c.task_count}
             )

@@ -1,4 +1,5 @@
 import type {EntitySlot} from '../data/recipes-runtime'
+import type {ServerContract} from '../contracts'
 
 export const U16_MAX = 65535
 
@@ -6,6 +7,21 @@ export interface InstalledModule {
     slotIndex: number
     itemId: number
     stats: bigint
+}
+
+export function packedModulesToInstalled(
+    entries: ServerContract.Types.module_entry[]
+): InstalledModule[] {
+    const installed: InstalledModule[] = []
+    entries.forEach((entry, slotIndex) => {
+        if (!entry.installed) return
+        installed.push({
+            slotIndex,
+            itemId: Number(entry.installed.item_id.value),
+            stats: BigInt(entry.installed.stats.toString()),
+        })
+    })
+    return installed
 }
 
 export function clampUint16(value: number): number {

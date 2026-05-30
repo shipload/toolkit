@@ -10,7 +10,7 @@ import {itemMetadata} from '../data/metadata'
 import {getItem} from '../data/catalog'
 import {getModuleCapabilityType, moduleAccepts, moduleSlotTypeToCode} from '../capabilities/modules'
 import {computeEntityCapabilities} from '../derivation/capabilities'
-import type {InstalledModule} from './slot-multiplier'
+import {packedModulesToInstalled} from './slot-multiplier'
 
 export interface PackedModuleInput {
     itemId: number
@@ -69,19 +69,6 @@ function assignModulesToSlots(
     )
 }
 
-function toInstalledModules(entries: ServerContract.Types.module_entry[]): InstalledModule[] {
-    const installed: InstalledModule[] = []
-    entries.forEach((entry, slotIndex) => {
-        if (!entry.installed) return
-        installed.push({
-            slotIndex,
-            itemId: Number(entry.installed.item_id.value),
-            stats: BigInt(entry.installed.stats.toString()),
-        })
-    })
-    return installed
-}
-
 const ZERO_HULL_STATS: Record<string, number> = {
     density: 0,
     strength: 0,
@@ -126,7 +113,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         const moduleEntries = assignModulesToSlots(layout, mods, entityLabel)
         info.modules = moduleEntries
 
-        const installed = toInstalledModules(moduleEntries)
+        const installed = packedModulesToInstalled(moduleEntries)
         const caps = computeEntityCapabilities(ZERO_HULL_STATS, packedItemId, installed, layout)
 
         if (state.hullmass !== undefined) {

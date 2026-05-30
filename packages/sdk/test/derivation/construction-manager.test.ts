@@ -67,20 +67,24 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
     }
 
     function makeShipWithLoader(id: number, owner: Name, coords: ServerContract.Types.coordinates) {
-        return ServerContract.Types.entity_row.from({
+        return ServerContract.Types.entity_info.from({
             id: UInt64.from(id),
-            kind: Name.from('ship'),
+            type: Name.from('ship'),
             item_id: UInt16.from(1000),
             owner,
-            name: '',
-            stats: UInt64.from(0),
+            entity_name: '',
             cargomass: UInt32.from(0),
+            cargo: [],
             coordinates: coords,
             loaders: ServerContract.Types.loader_stats.from({
                 mass: UInt32.from(50_000),
                 thrust: UInt16.from(0),
                 quantity: UInt8.from(1),
             }),
+            is_idle: true,
+            current_task_elapsed: UInt32.from(0),
+            current_task_remaining: UInt32.from(0),
+            pending_tasks: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_LOADER),
@@ -136,16 +140,20 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         const plot = makePlot()
         const target = mgr.getTarget(plot, [])!
 
-        const container = ServerContract.Types.entity_row.from({
+        const container = ServerContract.Types.entity_info.from({
             id: UInt64.from(20),
-            kind: Name.from('container'),
+            type: Name.from('container'),
             item_id: UInt16.from(2000),
             owner: OWNER,
-            name: '',
-            stats: UInt64.from(0),
+            entity_name: '',
             cargomass: UInt32.from(0),
+            cargo: [],
             coordinates: COORDS,
             modules: [],
+            is_idle: true,
+            current_task_elapsed: UInt32.from(0),
+            current_task_remaining: UInt32.from(0),
+            pending_tasks: [],
         })
 
         const cargo20 = makeCargoRow(20, 200, INPUT_ITEM_ID, 30)
@@ -181,19 +189,23 @@ describe('ConstructionManager.eligibleFinalizers', () => {
         coords: ServerContract.Types.coordinates,
         speed: number
     ) {
-        return ServerContract.Types.entity_row.from({
+        return ServerContract.Types.entity_info.from({
             id: UInt64.from(id),
-            kind: Name.from('ship'),
+            type: Name.from('ship'),
             item_id: UInt16.from(1000),
             owner,
-            name: '',
-            stats: UInt64.from(0),
+            entity_name: '',
             cargomass: UInt32.from(0),
+            cargo: [],
             coordinates: coords,
             crafter: ServerContract.Types.crafter_stats.from({
                 speed: UInt16.from(speed),
                 drain: UInt16.from(10),
             }),
+            is_idle: true,
+            current_task_elapsed: UInt32.from(0),
+            current_task_remaining: UInt32.from(0),
+            pending_tasks: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_CRAFTER),
