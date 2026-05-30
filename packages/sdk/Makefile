@@ -66,11 +66,15 @@ clean:
 distclean: clean
 	rm -rf node_modules/
 
+CODEGEN_URL      ?= https://jungle4.greymass.com
+PLATFORM_ACCOUNT ?= nex.shipload
+SERVER_ACCOUNT   ?= eon.shipload
+
 .PHONY: codegen
 codegen: codegen/platform codegen/server
 
 codegen/platform:
-	bunx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/platform.ts platform.gm
+	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/platform.ts $(PLATFORM_ACCOUNT)
 
 codegen/server:
-	bunx @wharfkit/cli generate --url https://jungle4.greymass.com --file ./src/contracts/server.ts shipload.gm
+	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)

@@ -59,8 +59,8 @@ describe('runDebugEntity', () => {
 
         expect(calls[0].url).toBe('https://chain.example/v1/chain/get_table_rows')
         const body = JSON.parse(calls[0].init?.body as string)
-        expect(body.code).toBe('shipload.gm')
-        expect(body.scope).toBe('shipload.gm')
+        expect(body.code).toBe('eon.shipload')
+        expect(body.scope).toBe('eon.shipload')
         expect(body.table).toBe('ship')
         expect(body.lower_bound).toBe(3)
         expect(body.upper_bound).toBe(3)

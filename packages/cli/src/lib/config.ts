@@ -180,8 +180,8 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		indexerUrl: fileData.indexerUrl ?? DEFAULT_JUNGLE4_INDEXER_URL,
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
-		gameContract: fileData.gameContract ?? "shipload.gm",
-		platformContract: fileData.platformContract ?? "platform.gm",
+		gameContract: fileData.gameContract ?? "eon.shipload",
+		platformContract: fileData.platformContract ?? "nex.shipload",
 		track,
 		source,
 	};

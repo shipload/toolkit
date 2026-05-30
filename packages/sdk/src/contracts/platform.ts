@@ -200,7 +200,7 @@ export class Contract extends BaseContract {
         super({
             client: args.client,
             abi: abi,
-            account: args.account || Name.from('platform.gm'),
+            account: args.account || Name.from('nex.shipload'),
         })
     }
     action<T extends ActionNames>(

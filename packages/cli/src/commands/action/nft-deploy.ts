@@ -1,12 +1,12 @@
 import {Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseUint64} from '../../lib/args'
-import {getShipload} from '../../lib/client'
+import {gameContractName, getShipload} from '../../lib/client'
 import {getAccountName, getSession, transact} from '../../lib/session'
 import {TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 const ATOMICASSETS_ACCOUNT = 'atomicassets'
-const SERVER_ACCOUNT = 'shipload.gm'
+const SERVER_ACCOUNT = gameContractName
 
 interface DeployCliOptions {
     wait?: boolean
@@ -18,7 +18,7 @@ export function buildDeployCommand(): Command {
         .description('Deploy a packed-entity NFT directly to a nexus as a live entity')
         .addHelpText(
             'before',
-            'Submits two actions in one transaction: atomicassets::transfer(memo="deploy") + shipload.gm::deploynft.\n' +
+            `Submits two actions in one transaction: atomicassets::transfer(memo="deploy") + ${SERVER_ACCOUNT}::deploynft.\n` +
                 "The NFT is burned, a new entity row is emplaced at the NFT's wrap origin, and TASK_TRAVEL + TASK_RECHARGE\n" +
                 'are queued to deliver the entity to the target nexus and recharge it to full.\n'
         )

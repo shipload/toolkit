@@ -1,6 +1,7 @@
 import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef} from '../../lib/args'
 import {getTableRows} from '../../lib/chain-debug'
+import {gameContractName} from '../../lib/client'
 import {getChainUrl} from '../../lib/config'
 import {jsonStringify} from '../../lib/format'
 
@@ -18,8 +19,8 @@ export async function runDebugEntity(opts: DebugEntityOptions): Promise<void> {
     }
     const res = await getTableRows({
         chainUrl: opts.chainUrl,
-        code: 'shipload.gm',
-        scope: 'shipload.gm',
+        code: gameContractName,
+        scope: gameContractName,
         table: opts.entityType,
         lower_bound: id,
         upper_bound: id,

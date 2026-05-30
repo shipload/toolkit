@@ -66,7 +66,7 @@ test('wrap builds wrap + mintasset action pair', async () => {
     )
     expect(actions.length).toBe(2)
     expect(actions[0].name.toString()).toBe('wrap')
-    expect(actions[0].account.toString()).toBe('shipload.gm')
+    expect(actions[0].account.toString()).toBe('eon.shipload')
     expect(actions[1].name.toString()).toBe('mintasset')
     expect(actions[1].account.toString()).toBe('atomicassets')
 })

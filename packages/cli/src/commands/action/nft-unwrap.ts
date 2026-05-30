@@ -1,12 +1,12 @@
 import {Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseUint64} from '../../lib/args'
-import {getShipload} from '../../lib/client'
+import {gameContractName, getShipload} from '../../lib/client'
 import {getAccountName, getSession, transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 const ATOMICASSETS_ACCOUNT = 'atomicassets'
-const SERVER_ACCOUNT = 'shipload.gm'
+const SERVER_ACCOUNT = gameContractName
 
 interface UnwrapCliOptions {
     wait?: boolean
@@ -18,7 +18,7 @@ export function buildUnwrapCommand(): Command {
         .description("Deposit an NFT into a host entity's cargo")
         .addHelpText(
             'before',
-            'Submits two actions in one transaction: atomicassets::transfer(memo="unwrap") + shipload.gm::unwrapnft.\n' +
+            `Submits two actions in one transaction: atomicassets::transfer(memo="unwrap") + ${SERVER_ACCOUNT}::unwrapnft.\n` +
                 'Requires: caller owns the host entity; host has loaders; capacity headroom for the unwrapped mass.\n'
         )
         .addHelpText(
