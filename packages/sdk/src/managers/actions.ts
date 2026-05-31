@@ -1,8 +1,12 @@
 import {
     type Action,
+    Checksum256,
+    type Checksum256Type,
     Int64,
     Name,
     type NameType,
+    UInt8,
+    type UInt8Type,
     UInt16,
     type UInt16Type,
     UInt32,
@@ -12,7 +16,7 @@ import {
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import type {CoordinatesType} from '../types'
-import {ServerContract} from '../contracts'
+import {type PlatformContract, ServerContract} from '../contracts'
 import {
     buildImmutableData,
     type ImmutableModuleSlot,
@@ -274,7 +278,8 @@ export class ActionsManager extends BaseManager {
         })
 
         return [
-            this.server.action('wrap', {
+            this.platform.action('wrap', {
+                game: this.server.account,
                 owner: Name.from(owner),
                 entity_id: UInt64.from(entityId),
                 nexus_id: UInt64.from(nexusId),
@@ -316,7 +321,9 @@ export class ActionsManager extends BaseManager {
         })
 
         return [
-            this.server.action('wrapentity', {
+            this.platform.action('wrapentity', {
+                game: this.server.account,
+                owner: Name.from(owner),
                 entity_id: entityIdKey,
                 nexus_id: UInt64.from(nexusId),
             }),
@@ -325,21 +332,23 @@ export class ActionsManager extends BaseManager {
     }
 
     deploynft(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.deploynft = {
+        const params: PlatformContract.ActionParams.deploynft = {
+            game: this.server.account,
             owner: Name.from(owner),
             asset_id: UInt64.from(assetId),
             target_nexus_id: UInt64.from(targetNexusId),
         }
-        return this.server.action('deploynft', params)
+        return this.platform.action('deploynft', params)
     }
 
     unwrapnft(owner: NameType, assetId: UInt64Type, hostId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.unwrapnft = {
+        const params: PlatformContract.ActionParams.unwrapnft = {
+            game: this.server.account,
             owner: Name.from(owner),
             asset_id: UInt64.from(assetId),
             host_id: UInt64.from(hostId),
         }
-        return this.server.action('unwrapnft', params)
+        return this.platform.action('unwrapnft', params)
     }
 
     demolish(entityId: UInt64Type): Action {
@@ -350,5 +359,47 @@ export class ActionsManager extends BaseManager {
 
     joinGame(account: NameType, companyName: string): Action[] {
         return [this.foundCompany(account, companyName), this.join(account)]
+    }
+
+    commit(oracleId: NameType, epoch: UInt64Type, commit: Checksum256Type): Action {
+        return this.server.action('commit', {
+            oracle_id: Name.from(oracleId),
+            epoch: UInt64.from(epoch),
+            commit: Checksum256.from(commit),
+        })
+    }
+
+    reveal(oracleId: NameType, epoch: UInt64Type, reveal: Checksum256Type): Action {
+        return this.server.action('reveal', {
+            oracle_id: Name.from(oracleId),
+            epoch: UInt64.from(epoch),
+            reveal: Checksum256.from(reveal),
+        })
+    }
+
+    addoracle(oracleId: NameType, note: string): Action {
+        return this.server.action('addoracle', {
+            oracle_id: Name.from(oracleId),
+            note,
+        })
+    }
+
+    removeoracle(oracleId: NameType): Action {
+        return this.server.action('removeoracle', {
+            oracle_id: Name.from(oracleId),
+        })
+    }
+
+    setthreshold(threshold: UInt8Type): Action {
+        return this.server.action('setthreshold', {
+            threshold: UInt8.from(threshold),
+        })
+    }
+
+    cleanrsvp(epoch: UInt64Type, maxRows: UInt64Type): Action {
+        return this.server.action('cleanrsvp', {
+            epoch: UInt64.from(epoch),
+            max_rows: UInt64.from(maxRows),
+        })
     }
 }

@@ -8,16 +8,12 @@ function createMockStateRow(
         enabled: boolean
         epoch: number
         seed: string
-        salt: number
-        commit: string
     }> = {}
 ) {
     return ServerContract.Types.state_row.from({
         enabled: overrides.enabled ?? true,
-        epoch: UInt64.from(overrides.epoch ?? 5),
+        epoch: UInt32.from(overrides.epoch ?? 5),
         seed: overrides.seed ?? 'abcd'.repeat(16),
-        salt: UInt64.from(overrides.salt ?? 12345),
-        commit: overrides.commit ?? 'ef01'.repeat(16),
     })
 }
 
@@ -126,25 +122,6 @@ describe('GameState', () => {
             const gameState = GameState.from(stateRow)
 
             assert.isFalse(gameState.isEnabled)
-        })
-    })
-
-    describe('currentSalt', () => {
-        test('returns salt value', () => {
-            const stateRow = createMockStateRow({salt: 99999})
-            const gameState = GameState.from(stateRow)
-
-            assert.equal(gameState.currentSalt.toNumber(), 99999)
-        })
-    })
-
-    describe('nextEpochCommit', () => {
-        test('returns commit hash', () => {
-            const commit = 'abcd'.repeat(16)
-            const stateRow = createMockStateRow({commit})
-            const gameState = GameState.from(stateRow)
-
-            assert.isTrue(gameState.nextEpochCommit.equals(Checksum256.from(commit)))
         })
     })
 
@@ -261,7 +238,6 @@ describe('GameState', () => {
             assert.equal(summary.enabled, true)
             assert.equal(summary.epoch, '10')
             assert.isBoolean(summary.hasSeed)
-            assert.isBoolean(summary.hasCommit)
         })
 
         test('hasSeed is false for zero seed', () => {
@@ -269,13 +245,6 @@ describe('GameState', () => {
             const gameState = GameState.from(stateRow)
 
             assert.isFalse(gameState.summary.hasSeed)
-        })
-
-        test('hasCommit is false for zero commit', () => {
-            const stateRow = createMockStateRow({commit: '0'.repeat(64)})
-            const gameState = GameState.from(stateRow)
-
-            assert.isFalse(gameState.summary.hasCommit)
         })
     })
 })

@@ -1,7 +1,7 @@
 import {describe, test, beforeEach} from 'bun:test'
 import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
-import Shipload, {ActionsManager, ServerContract, ServerTypes} from '$lib'
+import Shipload, {ActionsManager, PlatformContract, ServerContract, ServerTypes} from '$lib'
 import {Chains} from '@wharfkit/common'
 import {Int32, Int64, Name, UInt16, UInt64} from '@wharfkit/antelope'
 
@@ -96,7 +96,9 @@ describe('ActionsManager', () => {
 
         function makeStubManager() {
             const realServer = new ServerContract.Contract({client})
+            const realPlatform = new PlatformContract.Contract({client})
             const stubServer = {
+                account: realServer.account,
                 action: realServer.action.bind(realServer),
                 table(name: string) {
                     return {
@@ -112,7 +114,11 @@ describe('ActionsManager', () => {
                     }
                 },
             }
-            const context = {server: stubServer} as any
+            const stubPlatform = {
+                account: realPlatform.account,
+                action: realPlatform.action.bind(realPlatform),
+            }
+            const context = {server: stubServer, platform: stubPlatform} as any
             const manager = new ActionsManager(context)
             const nftLookup = {
                 async getNftConfigForItem(itemId: any) {
@@ -130,7 +136,7 @@ describe('ActionsManager', () => {
             const actions = await makeStubManager().wrap('alice', 42, 7, 99, 5)
             assert.equal(actions.length, 2)
             assert.equal(actions[0].name.toString(), 'wrap')
-            assert.equal(actions[0].account.toString(), 'shipload.gm')
+            assert.equal(actions[0].account.toString(), 'nex.shipload')
             assert.equal(actions[1].name.toString(), 'mintasset')
             assert.equal(actions[1].account.toString(), 'atomicassets')
             assert.isDefined(actions[0].data)
@@ -171,7 +177,9 @@ describe('ActionsManager', () => {
 
         function makeStubManager() {
             const realServer = new ServerContract.Contract({client})
+            const realPlatform = new PlatformContract.Contract({client})
             const stubServer = {
+                account: realServer.account,
                 action: realServer.action.bind(realServer),
                 table(name: string) {
                     return {
@@ -182,8 +190,13 @@ describe('ActionsManager', () => {
                     }
                 },
             }
+            const stubPlatform = {
+                account: realPlatform.account,
+                action: realPlatform.action.bind(realPlatform),
+            }
             const context = {
                 server: stubServer,
+                platform: stubPlatform,
                 nft: {
                     async getNftConfigForItem(itemId: any) {
                         if (Number(UInt16.from(itemId).toString()) === 10200) {
@@ -200,7 +213,7 @@ describe('ActionsManager', () => {
             const actions = await makeStubManager().wrapEntity('alice', 50, 7)
             assert.equal(actions.length, 2)
             assert.equal(actions[0].name.toString(), 'wrapentity')
-            assert.equal(actions[0].account.toString(), 'shipload.gm')
+            assert.equal(actions[0].account.toString(), 'nex.shipload')
             assert.equal(actions[1].name.toString(), 'mintasset')
             assert.equal(actions[1].account.toString(), 'atomicassets')
             assert.isDefined(actions[0].data)
@@ -277,6 +290,19 @@ describe('ActionsManager', () => {
             })
             assert.equal(action.name.toString(), 'rmmodule')
             assert.isDefined(action.data)
+        })
+    })
+
+    describe('cleanrsvp', () => {
+        test('creates cleanrsvp action', () => {
+            const action = shipload.actions.cleanrsvp(5, 100)
+            assert.equal(action.name.toString(), 'cleanrsvp')
+            assert.isDefined(action.data)
+        })
+
+        test('creates cleanrsvp action with UInt64 args', () => {
+            const action = shipload.actions.cleanrsvp(UInt64.from(5), UInt64.from(100))
+            assert.equal(action.name.toString(), 'cleanrsvp')
         })
     })
 })

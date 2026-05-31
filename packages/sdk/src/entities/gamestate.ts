@@ -1,4 +1,4 @@
-import {Checksum256, Int64, type UInt64} from '@wharfkit/antelope'
+import {Checksum256, Int64, UInt64} from '@wharfkit/antelope'
 import {type PlatformContract, ServerContract} from '../contracts'
 import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
 import {hasSystem} from '../utils/system'
@@ -34,7 +34,7 @@ export class GameState extends ServerContract.Types.state_row {
      * Get the current epoch number from the state
      */
     get currentEpoch(): UInt64 {
-        return this.epoch
+        return UInt64.from(this.epoch.toString())
     }
 
     /**
@@ -59,20 +59,6 @@ export class GameState extends ServerContract.Types.state_row {
     }
 
     /**
-     * Get the current salt value (used for random number generation)
-     */
-    get currentSalt(): UInt64 {
-        return this.salt
-    }
-
-    /**
-     * Get the commit hash for the next epoch
-     */
-    get nextEpochCommit(): Checksum256 {
-        return this.commit
-    }
-
-    /**
      * Calculate the current epoch from game config (if game is set)
      * This might differ from state.epoch if the blockchain hasn't advanced yet
      */
@@ -90,7 +76,7 @@ export class GameState extends ServerContract.Types.state_row {
         if (!this._game) {
             return undefined
         }
-        return getEpochInfo(this._game, this.epoch)
+        return getEpochInfo(this._game, this.currentEpoch)
     }
 
     /**
@@ -131,13 +117,11 @@ export class GameState extends ServerContract.Types.state_row {
         enabled: boolean
         epoch: string
         hasSeed: boolean
-        hasCommit: boolean
     } {
         return {
             enabled: this.enabled,
             epoch: this.epoch.toString(),
             hasSeed: !this.seed.equals(Checksum256.from('0'.repeat(64))),
-            hasCommit: !this.commit.equals(Checksum256.from('0'.repeat(64))),
         }
     }
 }

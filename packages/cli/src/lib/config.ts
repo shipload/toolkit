@@ -39,6 +39,21 @@ export interface PlayerConfig {
 	track: TrackConfig;
 }
 
+export interface OracleConfig {
+	/** oracle_id and sub-permission name. */
+	handle: string;
+	/** Key registered under <actor>@<permission>. */
+	privateKey: string;
+	/** Account to sign as; defaults to the game contract. */
+	actor: string;
+	/** Permission to sign with; defaults to the handle. */
+	permission: string;
+	/** Absolute path to the reveal-secret sqlite store. */
+	storePath: string;
+	/** Absolute path of the config file this was loaded from. */
+	source: string;
+}
+
 export interface LoadConfigOptions {
 	/** Override the platform user config dir (used by tests). */
 	userConfigDir?: string;
@@ -75,6 +90,11 @@ interface ParsedSection {
 	trackDefaultSort?: string;
 	trackDefaultTypeFilter?: string;
 	trackDefaultStatusFilter?: string;
+	oracleHandle?: string;
+	oraclePrivateKey?: string;
+	oracleActor?: string;
+	oraclePermission?: string;
+	oracleStorePath?: string;
 }
 
 function parseBool(v: unknown): boolean | undefined {
@@ -95,6 +115,7 @@ function parseIniFile(path: string): ParsedSection {
 	const history = (parsed.history ?? {}) as Record<string, unknown>;
 	const contracts = (parsed.contracts ?? {}) as Record<string, unknown>;
 	const track = (parsed.track ?? {}) as Record<string, unknown>;
+	const oracle = (parsed.oracle ?? {}) as Record<string, unknown>;
 	return {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
@@ -108,10 +129,19 @@ function parseIniFile(path: string): ParsedSection {
 		trackDefaultSort: track.default_sort as string | undefined,
 		trackDefaultTypeFilter: track.default_type_filter as string | undefined,
 		trackDefaultStatusFilter: track.default_status_filter as string | undefined,
+		oracleHandle: oracle.handle as string | undefined,
+		oraclePrivateKey: oracle.private_key as string | undefined,
+		oracleActor: oracle.actor as string | undefined,
+		oraclePermission: oracle.permission as string | undefined,
+		oracleStorePath: oracle.store_path as string | undefined,
 	};
 }
 
-export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
+function findConfigFile(options: LoadConfigOptions = {}): {
+	fileData: ParsedSection;
+	source: string;
+	userConfigDir: string;
+} {
 	const cwd = options.cwd ?? process.cwd();
 	const userConfigDir = options.userConfigDir ?? getUserConfigDir();
 	const cwdPath = resolve(cwd, "config.ini");
@@ -124,36 +154,31 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		);
 	}
 
-	// Search in precedence order. Credentials only come from files — never env vars.
 	const candidates: string[] = [];
 	if (explicitPath) candidates.push(explicitPath);
 	candidates.push(cwdPath);
 	candidates.push(userPath);
 
-	let fileData: ParsedSection | null = null;
-	let source: string | null = null;
 	for (const candidate of candidates) {
 		if (existsSync(candidate)) {
-			fileData = parseIniFile(candidate);
-			source = candidate;
-			break;
+			return {fileData: parseIniFile(candidate), source: candidate, userConfigDir};
 		}
 	}
 
-	if (!fileData || !source) {
-		throw new ConfigError(
-			[
-				"No config.ini found. Searched:",
-				explicitPath
-					? `  - $PLAYER_CONFIG=${explicitPath}`
-					: "  - $PLAYER_CONFIG (not set)",
-				`  - ${cwdPath}`,
-				`  - ${userPath}`,
-				"",
-				"Run `shiploadcli init` to create one at the user config directory.",
-			].join("\n"),
-		);
-	}
+	throw new ConfigError(
+		[
+			"No config.ini found. Searched:",
+			explicitPath ? `  - $PLAYER_CONFIG=${explicitPath}` : "  - $PLAYER_CONFIG (not set)",
+			`  - ${cwdPath}`,
+			`  - ${userPath}`,
+			"",
+			"Run `shiploadcli init` to create one at the user config directory.",
+		].join("\n"),
+	);
+}
+
+export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
+	const {fileData, source} = findConfigFile(options);
 
 	if (!fileData.privateKey) {
 		throw new ConfigError(
@@ -256,4 +281,55 @@ export function getHistoryUrl(): string {
 		);
 	}
 	return cfg.historyUrl;
+}
+
+const HANDLE_RE = /^[a-z1-5][.a-z1-5]{0,11}$/;
+
+function validateHandle(handle: string, source: string): string {
+	if (!HANDLE_RE.test(handle)) {
+		throw new ConfigError(
+			`Invalid [oracle] handle=${handle} in ${source}; must be a valid Antelope name (a-z, 1-5, dots, <=12 chars, no underscores).`,
+		);
+	}
+	return handle;
+}
+
+export function assertOracleHandle(handle: string): void {
+	if (!HANDLE_RE.test(handle)) {
+		throw new ConfigError(
+			`Invalid oracle handle '${handle}'; must be a valid Antelope name (a-z, 1-5, dots, <=12 chars, no underscores).`,
+		);
+	}
+}
+
+export function hasOracleConfig(options: LoadConfigOptions = {}): boolean {
+	try {
+		const {fileData} = findConfigFile(options);
+		return fileData.oracleHandle !== undefined;
+	} catch {
+		return false;
+	}
+}
+
+export function loadOracleConfig(options: LoadConfigOptions = {}): OracleConfig {
+	const {fileData, source, userConfigDir} = findConfigFile(options);
+	if (!fileData.oracleHandle) {
+		throw new ConfigError(
+			`Missing 'handle' in the [oracle] section of ${source}. Add it to run the oracle beacon.`,
+		);
+	}
+	if (!fileData.oraclePrivateKey) {
+		throw new ConfigError(`Missing 'private_key' in the [oracle] section of ${source}.`);
+	}
+	const handle = validateHandle(fileData.oracleHandle, source);
+	const storePath =
+		fileData.oracleStorePath ?? join(userConfigDir, "oracle", `${handle}.sqlite`);
+	return {
+		handle,
+		privateKey: fileData.oraclePrivateKey,
+		actor: fileData.oracleActor ?? fileData.gameContract ?? "eon.shipload",
+		permission: fileData.oraclePermission ?? handle,
+		storePath,
+		source,
+	};
 }

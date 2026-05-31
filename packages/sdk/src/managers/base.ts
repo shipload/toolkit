@@ -19,7 +19,7 @@ export abstract class BaseManager {
         return this.context.getGame()
     }
 
-    protected async getState() {
-        return this.context.getState()
+    protected async getState(reload = false) {
+        return this.context.getState(reload)
     }
 }

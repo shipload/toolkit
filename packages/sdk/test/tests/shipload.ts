@@ -75,7 +75,7 @@ describe('Shipload', () => {
             assert.instanceOf(state, ServerContract.Types.state_row)
             assert.equal(state.enabled, expectedState!.enabled)
             assert.isTrue(state.epoch.equals(expectedState!.epoch))
-            assert.isTrue(state.salt.equals(expectedState!.salt))
+            assert.isTrue(state.seed.equals(expectedState!.seed))
         })
     })
 

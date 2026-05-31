@@ -33,6 +33,15 @@ permission = active
 ; action-history HTTP frontend.
 ; [history]
 ; url = https://history.example.test
+
+; Uncomment to run the multi-oracle commit/reveal beacon as an operator.
+; 'handle' is your oracle_id and sub-permission name (a-z/1-5/dots, <=12, no underscores).
+; The key must be registered under <game contract>@<handle>.
+; store_path defaults to <config dir>/oracle/<handle>.sqlite — losing it strands open commits.
+; [oracle]
+; handle = myhandle
+; private_key = PVT_K1_REPLACE_ME
+; store_path =
 `
 
 export interface InitOptions {
