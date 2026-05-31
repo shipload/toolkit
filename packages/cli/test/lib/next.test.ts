@@ -38,7 +38,7 @@ describe("nextAction", () => {
 		expect(nextAction(state).command).toContain("shiploadcli ship 1 resolve");
 	});
 
-	test("starter ship missing after join → flag a bug", () => {
+	test("joined with no entities → inspect entities", () => {
 		const state: GameState = {
 			player: { company: "Test", in_game: true },
 			entities: [],
@@ -47,6 +47,6 @@ describe("nextAction", () => {
 		// Should NOT be a foundcompany or join suggestion; should tell the user something's wrong
 		expect(r.command).not.toMatch(/^shiploadcli foundcompany/);
 		expect(r.command).not.toBe("shiploadcli join");
-		expect(r.command).toBe("shiploadcli claimstarter");
+		expect(r.command).toBe("shiploadcli entities");
 	});
 });

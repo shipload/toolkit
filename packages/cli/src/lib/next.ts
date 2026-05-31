@@ -28,13 +28,6 @@ const RULES: Rule[] = [
 		s.player && !s.player.in_game
 			? { reason: "Company registered, not joined.", command: "shiploadcli join" }
 			: null,
-	(s) =>
-		s.player?.in_game && s.entities.length === 0
-			? {
-					reason: "Joined but no ship yet (testnet only).",
-					command: "shiploadcli claimstarter",
-				}
-			: null,
 	(s) => {
 		const busy = s.entities.find((e) => e.status === "active");
 		if (busy) {

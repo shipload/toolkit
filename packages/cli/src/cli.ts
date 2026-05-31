@@ -5,7 +5,6 @@ import * as blend from './commands/action/blend'
 import * as buildplot from './commands/action/buildplot'
 import * as cancel from './commands/action/cancel'
 import * as claimplot from './commands/action/claimplot'
-import * as claimstarter from './commands/action/claimstarter'
 import * as craft from './commands/action/craft'
 import * as demolish from './commands/action/demolish'
 import * as deploy from './commands/action/deploy'
@@ -77,7 +76,7 @@ export function build(): Command {
         [
             'Shipload CLI — query state and submit actions.',
             '',
-            'First time?  Run: shiploadcli foundcompany "<name>" && shiploadcli join && shiploadcli claimstarter',
+            'First time?  Run: shiploadcli foundcompany "<name>" && shiploadcli join',
             '',
             'Commands are grouped as: Query (read-only), Action (transacting), Tools (diagnostics).',
             '',
@@ -118,7 +117,6 @@ export function build(): Command {
 
     foundcompany.register(program)
     join.register(program)
-    claimstarter.register(program)
     registerEntitySubcommand(travel.SUBCOMMAND)
     grouptravel.register(program)
     registerEntitySubcommand(warp.SUBCOMMAND)

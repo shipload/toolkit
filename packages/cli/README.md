@@ -54,7 +54,6 @@ First-run bootstrap (create a company, join the game, and — on testnet — cla
 ```bash
 bun run shiploadcli foundcompany "My Company"
 bun run shiploadcli join
-bun run shiploadcli claimstarter     # testnet/debug builds only; skip on mainnet
 ```
 
 Unsure what to do next? Run `bun run shiploadcli next`.
@@ -91,7 +90,6 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 
 - `foundcompany <name>` — create a new company on the platform.
 - `join` — join the Shipload game.
-- `claimstarter [x] [y]` — claim a pre-kitted T1 starter ship at `(x, y)` (defaults to `0 0`). Testnet/debug builds only; fails on mainnet where the action is not in the ABI.
 - `ship <id> travel <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
 - `grouptravel <entities> <x> <y>` — fly multiple entities together (e.g., `ship:1,container:2`).
 - `<entity-type> <id> warp <x> <y>` — instant-transit via the warp module.

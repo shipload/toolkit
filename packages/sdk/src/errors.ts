@@ -16,8 +16,6 @@ export const REQUIRES_POSITIVE_VALUE = 'Value must be greater than zero.'
 export const PLAYER_ALREADY_JOINED = 'Player has already joined the game.'
 export const PLAYER_NOT_JOINED = 'Player has not joined the game.'
 export const PLAYER_NOT_FOUND = 'Cannot find player for given account name.'
-export const STARTER_ALREADY_CLAIMED =
-    'Starter ship already claimed; destroy existing ships to re-claim.'
 export const ENTITY_ALREADY_THERE = 'Entity cannot travel to the location it is already at.'
 export const SHIP_ALREADY_TRAVELING = 'Ship is already traveling.'
 export const SHIP_CANNOT_BUY_TRAVELING = 'Ship cannot buy goods while traveling.'
