@@ -10,7 +10,7 @@ const server = new ServerContract.Contract({client})
 describe('hash', () => {
     test('sha256', async () => {
         const value = 'foo'
-        const game = await platform.table('games').get('shipload.gm')
+        const game = await platform.table('games').get('eon.shipload')
         if (!game) {
             throw new Error('game not found')
         }
@@ -21,7 +21,7 @@ describe('hash', () => {
     })
     test('sha512', async () => {
         const value = 'foo'
-        const game = await platform.table('games').get('shipload.gm')
+        const game = await platform.table('games').get('eon.shipload')
         if (!game) {
             throw new Error('game not found')
         }

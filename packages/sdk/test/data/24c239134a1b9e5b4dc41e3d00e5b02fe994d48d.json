@@ -1,0 +1,17 @@
+{
+    "request": {
+        "path": "https://jungle4.greymass.com/v1/chain/get_table_rows",
+        "params": {
+            "method": "POST",
+            "body": "{\"table\":\"games\",\"code\":\"nex.shipload\",\"scope\":\"nex.shipload\",\"limit\":1,\"lower_bound\":\"shipload.gm\",\"upper_bound\":\"shipload.gm\",\"key_type\":\"name\",\"json\":false}",
+            "headers": {}
+        }
+    },
+    "status": 200,
+    "json": {
+        "rows": [],
+        "more": false,
+        "next_key": ""
+    },
+    "text": "{\"rows\":[],\"more\":false,\"next_key\":\"\"}"
+}

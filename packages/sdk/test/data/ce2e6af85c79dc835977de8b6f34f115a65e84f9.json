@@ -1,0 +1,71 @@
+{
+    "request": {
+        "path": "https://jungle4.greymass.com/v1/chain/send_read_only_transaction",
+        "params": {
+            "method": "POST",
+            "body": "{\"transaction\":{\"signatures\":[],\"compression\":1,\"packed_context_free_data\":\"789c63000000010001\",\"packed_trx\":\"789c636040068c13787aaf9af2a885326c28baf974e5a62406c1091b4fdd3c58eafb9811ac2020f63003001c330e25\"}}",
+            "headers": {}
+        }
+    },
+    "status": 200,
+    "json": {
+        "transaction_id": "81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0",
+        "processed": {
+            "id": "81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0",
+            "block_num": 268849710,
+            "block_time": "2026-06-01T05:58:14.500",
+            "producer_block_id": null,
+            "receipt": {
+                "status": "executed",
+                "cpu_usage_us": 0,
+                "net_usage_words": 0
+            },
+            "elapsed": 67,
+            "net_usage": 80,
+            "scheduled": false,
+            "action_traces": [
+                {
+                    "action_ordinal": 1,
+                    "creator_action_ordinal": 0,
+                    "closest_unnotified_ancestor_action_ordinal": 0,
+                    "receipt": {
+                        "receiver": "eon.shipload",
+                        "act_digest": "39694bc008af96809321809310acd0e6e578659218758565da7c9e6fe308b09a",
+                        "global_sequence": 0,
+                        "recv_sequence": 0,
+                        "auth_sequence": [],
+                        "code_sequence": 4,
+                        "abi_sequence": 4
+                    },
+                    "receiver": "eon.shipload",
+                    "act": {
+                        "account": "eon.shipload",
+                        "name": "getentities",
+                        "authorization": [],
+                        "data": {
+                            "owner": "wharfkittest",
+                            "entity_type": "ship"
+                        },
+                        "hex_data": "90b1cad9c1754de3010000000000505dc3"
+                    },
+                    "context_free": false,
+                    "elapsed": 52,
+                    "console": "",
+                    "trx_id": "81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0",
+                    "block_num": 268849710,
+                    "block_time": "2026-06-01T05:58:14.500",
+                    "producer_block_id": null,
+                    "account_ram_deltas": [],
+                    "except": null,
+                    "error_code": null,
+                    "return_value_hex_data": "00",
+                    "return_value_data": []
+                }
+            ],
+            "account_ram_delta": null,
+            "except": null,
+            "error_code": null
+        }
+    },
+    "text": "{\"transaction_id\":\"81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0\",\"processed\":{\"id\":\"81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0\",\"block_num\":268849710,\"block_time\":\"2026-06-01T05:58:14.500\",\"producer_block_id\":null,\"receipt\":{\"status\":\"executed\",\"cpu_usage_us\":0,\"net_usage_words\":0},\"elapsed\":67,\"net_usage\":80,\"scheduled\":false,\"action_traces\":[{\"action_ordinal\":1,\"creator_action_ordinal\":0,\"closest_unnotified_ancestor_action_ordinal\":0,\"receipt\":{\"receiver\":\"eon.shipload\",\"act_digest\":\"39694bc008af96809321809310acd0e6e578659218758565da7c9e6fe308b09a\",\"global_sequence\":0,\"recv_sequence\":0,\"auth_sequence\":[],\"code_sequence\":4,\"abi_sequence\":4},\"receiver\":\"eon.shipload\",\"act\":{\"account\":\"eon.shipload\",\"name\":\"getentities\",\"authorization\":[],\"data\":{\"owner\":\"wharfkittest\",\"entity_type\":\"ship\"},\"hex_data\":\"90b1cad9c1754de3010000000000505dc3\"},\"context_free\":false,\"elapsed\":52,\"console\":\"\",\"trx_id\":\"81667ca5b6e8980e47b3599e8312783536d8164b9d3d0196a91a07b80cbcf0d0\",\"block_num\":268849710,\"block_time\":\"2026-06-01T05:58:14.500\",\"producer_block_id\":null,\"account_ram_deltas\":[],\"except\":null,\"error_code\":null,\"return_value_hex_data\":\"00\",\"return_value_data\":[]}],\"account_ram_delta\":null,\"except\":null,\"error_code\":null}}"
+}

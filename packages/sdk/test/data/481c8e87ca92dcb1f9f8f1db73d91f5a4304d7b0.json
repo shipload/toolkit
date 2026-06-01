@@ -1,0 +1,70 @@
+{
+    "request": {
+        "path": "https://jungle4.greymass.com/v1/chain/send_read_only_transaction",
+        "params": {
+            "method": "POST",
+            "body": "{\"transaction\":{\"signatures\":[],\"compression\":1,\"packed_context_free_data\":\"789c63000000010001\",\"packed_trx\":\"789c636040068c13787aaf9af2a88502d90e2d97366432b030a7e5e7330000554a06b6\"}}",
+            "headers": {}
+        }
+    },
+    "status": 200,
+    "json": {
+        "transaction_id": "4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337",
+        "processed": {
+            "id": "4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337",
+            "block_num": 268849704,
+            "block_time": "2026-06-01T05:58:11.500",
+            "producer_block_id": null,
+            "receipt": {
+                "status": "executed",
+                "cpu_usage_us": 0,
+                "net_usage_words": 0
+            },
+            "elapsed": 108,
+            "net_usage": 72,
+            "scheduled": false,
+            "action_traces": [
+                {
+                    "action_ordinal": 1,
+                    "creator_action_ordinal": 0,
+                    "closest_unnotified_ancestor_action_ordinal": 0,
+                    "receipt": {
+                        "receiver": "eon.shipload",
+                        "act_digest": "449e8cb2ca01099fb27ba7e3ecd8922df99a122f291bd1ed9ae08d0f1ced0271",
+                        "global_sequence": 0,
+                        "recv_sequence": 0,
+                        "auth_sequence": [],
+                        "code_sequence": 4,
+                        "abi_sequence": 4
+                    },
+                    "receiver": "eon.shipload",
+                    "act": {
+                        "account": "eon.shipload",
+                        "name": "hash512",
+                        "authorization": [],
+                        "data": {
+                            "value": "foo"
+                        },
+                        "hex_data": "03666f6f"
+                    },
+                    "context_free": false,
+                    "elapsed": 94,
+                    "console": "",
+                    "trx_id": "4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337",
+                    "block_num": 268849704,
+                    "block_time": "2026-06-01T05:58:11.500",
+                    "producer_block_id": null,
+                    "account_ram_deltas": [],
+                    "except": null,
+                    "error_code": null,
+                    "return_value_hex_data": "f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916",
+                    "return_value_data": "f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916"
+                }
+            ],
+            "account_ram_delta": null,
+            "except": null,
+            "error_code": null
+        }
+    },
+    "text": "{\"transaction_id\":\"4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337\",\"processed\":{\"id\":\"4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337\",\"block_num\":268849704,\"block_time\":\"2026-06-01T05:58:11.500\",\"producer_block_id\":null,\"receipt\":{\"status\":\"executed\",\"cpu_usage_us\":0,\"net_usage_words\":0},\"elapsed\":108,\"net_usage\":72,\"scheduled\":false,\"action_traces\":[{\"action_ordinal\":1,\"creator_action_ordinal\":0,\"closest_unnotified_ancestor_action_ordinal\":0,\"receipt\":{\"receiver\":\"eon.shipload\",\"act_digest\":\"449e8cb2ca01099fb27ba7e3ecd8922df99a122f291bd1ed9ae08d0f1ced0271\",\"global_sequence\":0,\"recv_sequence\":0,\"auth_sequence\":[],\"code_sequence\":4,\"abi_sequence\":4},\"receiver\":\"eon.shipload\",\"act\":{\"account\":\"eon.shipload\",\"name\":\"hash512\",\"authorization\":[],\"data\":{\"value\":\"foo\"},\"hex_data\":\"03666f6f\"},\"context_free\":false,\"elapsed\":94,\"console\":\"\",\"trx_id\":\"4645a9e092519c5665e8ae7238a546fce196b75137be592f4962ec68f77f7337\",\"block_num\":268849704,\"block_time\":\"2026-06-01T05:58:11.500\",\"producer_block_id\":null,\"account_ram_deltas\":[],\"except\":null,\"error_code\":null,\"return_value_hex_data\":\"f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916\",\"return_value_data\":\"f6feebd40c0079724896de6fa525cb794ef9f044603e6c1af3f84799e74d0e78a1eef0728c5726900ad8724dc55e9f6430451c47628929792b542a3ba837b916\"}],\"account_ram_delta\":null,\"except\":null,\"error_code\":null}}"
+}

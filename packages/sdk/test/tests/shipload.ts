@@ -16,8 +16,8 @@ import {Entity} from 'src/entities/entity'
 import {Contract} from '@wharfkit/contract'
 
 const client = makeClient('https://jungle4.greymass.com')
-const platformContractName = 'platform.gm'
-const serverContractName = 'shipload.gm'
+const platformContractName = 'nex.shipload'
+const serverContractName = 'eon.shipload'
 
 const server = new ServerContract.Contract({client})
 

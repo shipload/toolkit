@@ -1,12 +1,9 @@
 import {Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseUint64} from '../../lib/args'
-import {gameContractName, getShipload} from '../../lib/client'
-import {getAccountName, getSession, transact} from '../../lib/session'
+import {gameContractName, getShipload, platformContractName} from '../../lib/client'
+import {getAccountName, transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
-
-const ATOMICASSETS_ACCOUNT = 'atomicassets'
-const SERVER_ACCOUNT = gameContractName
 
 interface UnwrapCliOptions {
     wait?: boolean
@@ -18,7 +15,7 @@ export function buildUnwrapCommand(): Command {
         .description("Deposit an NFT into a host entity's cargo")
         .addHelpText(
             'before',
-            `Submits two actions in one transaction: atomicassets::transfer(memo="unwrap") + ${SERVER_ACCOUNT}::unwrapnft.\n` +
+            `Submits two actions in one transaction: atomicassets::transfer(to=${platformContractName}, memo="unwrap") + ${gameContractName}::placecargo.\n` +
                 'Requires: caller owns the host entity; host has loaders; capacity headroom for the unwrapped mass.\n'
         )
         .addHelpText(
@@ -35,27 +32,15 @@ Use \`shiploadcli nft\` to list NFTs and \`shiploadcli ship <id>\` / \`shiploadc
         .addOption(TRACK_OPTION)
         .action(async (assetId: bigint, hostId: bigint, opts: UnwrapCliOptions) => {
             const owner = getAccountName()
-            const session = getSession()
             const sl = await getShipload()
 
-            const transferAction = {
-                account: ATOMICASSETS_ACCOUNT,
-                name: 'transfer',
-                authorization: [{actor: session.actor, permission: session.permission}],
-                data: {
-                    from: owner,
-                    to: SERVER_ACCOUNT,
-                    asset_ids: [UInt64.from(assetId)],
-                    memo: 'unwrap',
-                },
-            }
-            const unwrapnftAction = sl.actions.unwrapnft(
+            const actions = sl.actions.unwrapCargoTx(
                 Name.from(owner),
                 UInt64.from(assetId),
                 UInt64.from(hostId)
             )
             const result = await transact(
-                {actions: [transferAction, unwrapnftAction]},
+                {actions},
                 {description: `Unwrapping NFT ${assetId} into host ${hostId}`}
             )
             await maybeAwaitAndPrint(hostId, opts, result)

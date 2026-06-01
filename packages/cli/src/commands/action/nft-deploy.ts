@@ -1,12 +1,9 @@
 import {Name, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {parseUint64} from '../../lib/args'
-import {gameContractName, getShipload} from '../../lib/client'
-import {getAccountName, getSession, transact} from '../../lib/session'
+import {gameContractName, getShipload, platformContractName} from '../../lib/client'
+import {getAccountName, transact} from '../../lib/session'
 import {TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
-
-const ATOMICASSETS_ACCOUNT = 'atomicassets'
-const SERVER_ACCOUNT = gameContractName
 
 interface DeployCliOptions {
     wait?: boolean
@@ -18,7 +15,7 @@ export function buildDeployCommand(): Command {
         .description('Deploy a packed-entity NFT directly to a nexus as a live entity')
         .addHelpText(
             'before',
-            `Submits two actions in one transaction: atomicassets::transfer(memo="deploy") + ${SERVER_ACCOUNT}::deploynft.\n` +
+            `Submits two actions in one transaction: atomicassets::transfer(to=${platformContractName}, memo="unwrap") + ${gameContractName}::placeentity.\n` +
                 "The NFT is burned, a new entity row is emplaced at the NFT's wrap origin, and TASK_TRAVEL + TASK_RECHARGE\n" +
                 'are queued to deliver the entity to the target nexus and recharge it to full.\n'
         )
@@ -36,28 +33,13 @@ Use \`shiploadcli nft\` to list NFTs you own and their asset_ids.`
         .addOption(TRACK_OPTION)
         .action(async (assetId: bigint, nexusId: bigint, _opts: DeployCliOptions) => {
             const owner = getAccountName()
-            const session = getSession()
             const sl = await getShipload()
 
-            const transferAction = {
-                account: ATOMICASSETS_ACCOUNT,
-                name: 'transfer',
-                authorization: [{actor: session.actor, permission: session.permission}],
-                data: {
-                    from: owner,
-                    to: SERVER_ACCOUNT,
-                    asset_ids: [UInt64.from(assetId)],
-                    memo: 'deploy',
-                },
-            }
-            const deploynftAction = sl.actions.deploynft(
+            const actions = sl.actions.unwrapEntityTx(
                 Name.from(owner),
                 UInt64.from(assetId),
                 UInt64.from(nexusId)
             )
-            await transact(
-                {actions: [transferAction, deploynftAction]},
-                {description: `Deploying NFT ${assetId} at nexus ${nexusId}`}
-            )
+            await transact({actions}, {description: `Deploying NFT ${assetId} at nexus ${nexusId}`})
         })
 }

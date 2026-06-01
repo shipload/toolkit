@@ -1,5 +1,5 @@
 import {
-    type Action,
+    Action,
     Checksum256,
     type Checksum256Type,
     Int64,
@@ -16,13 +16,7 @@ import {
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import type {CoordinatesType} from '../types'
-import {type PlatformContract, ServerContract} from '../contracts'
-import {
-    buildImmutableData,
-    type ImmutableModuleSlot,
-    moduleSlotsForImmutable,
-} from '../nft/buildImmutableData'
-import {buildMintAssetAction, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
+import {ServerContract} from '../contracts'
 
 export type EntityRefInput = {
     entityType: NameType
@@ -212,37 +206,6 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    private async buildPairedMintAction(args: {
-        owner: NameType
-        itemId: number
-        quantity: number
-        stats: bigint
-        originX: number
-        originY: number
-        moduleSlots: ImmutableModuleSlot[]
-    }): Promise<Action> {
-        const nftCfg = await this.context.nft.getNftConfigForItem(args.itemId)
-        if (!nftCfg) {
-            throw new Error(`item ${args.itemId} has no nftconfig`)
-        }
-        const immutableData = buildImmutableData(
-            args.itemId,
-            args.quantity,
-            args.stats,
-            args.originX,
-            args.originY,
-            args.moduleSlots
-        )
-        return buildMintAssetAction({
-            authorizedMinter: Name.from(args.owner),
-            collectionName: SHIPLOAD_COLLECTION,
-            schemaName: nftCfg.schemaName,
-            templateId: nftCfg.templateId,
-            newAssetOwner: Name.from(args.owner),
-            immutableData,
-        })
-    }
-
     async wrap(
         owner: NameType,
         entityId: UInt64Type,
@@ -250,43 +213,15 @@ export class ActionsManager extends BaseManager {
         cargoId: UInt64Type,
         quantity: UInt64Type
     ): Promise<Action[]> {
-        const cargoIdKey = UInt64.from(cargoId)
-        const entityIdKey = UInt64.from(entityId)
-        const [cargoRow, entityRow] = (await Promise.all([
-            this.server.table('cargo').get(cargoIdKey),
-            this.server.table('entity').get(entityIdKey),
-        ])) as [
-            ServerContract.Types.cargo_row | undefined,
-            ServerContract.Types.entity_row | undefined,
-        ]
-        if (!cargoRow) {
-            throw new Error(`cargo row ${cargoIdKey} not found`)
-        }
-        if (!entityRow) {
-            throw new Error(`entity ${entityIdKey} not found`)
-        }
-
-        const quantityValue = UInt64.from(quantity)
-        const mintAction = await this.buildPairedMintAction({
-            owner,
-            itemId: Number(cargoRow.item_id.toString()),
-            quantity: Number(quantityValue.toString()),
-            stats: BigInt(cargoRow.stats.toString()),
-            originX: Number(entityRow.coordinates.x.toString()),
-            originY: Number(entityRow.coordinates.y.toString()),
-            moduleSlots: moduleSlotsForImmutable(cargoRow.modules),
-        })
-
         return [
-            this.platform.action('wrap', {
+            this.platform.action('wrapcargo', {
                 game: this.server.account,
                 owner: Name.from(owner),
                 entity_id: UInt64.from(entityId),
                 nexus_id: UInt64.from(nexusId),
-                cargo_id: cargoIdKey,
-                quantity: quantityValue,
+                cargo_id: UInt64.from(cargoId),
+                quantity: UInt64.from(quantity),
             }),
-            mintAction,
         ]
     }
 
@@ -302,53 +237,66 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         nexusId: UInt64Type
     ): Promise<Action[]> {
-        const entityIdKey = UInt64.from(entityId)
-        const entityRow = (await this.server.table('entity').get(entityIdKey)) as
-            | ServerContract.Types.entity_row
-            | undefined
-        if (!entityRow) {
-            throw new Error(`entity ${entityIdKey} not found`)
-        }
-
-        const mintAction = await this.buildPairedMintAction({
-            owner,
-            itemId: Number(entityRow.item_id.toString()),
-            quantity: 1,
-            stats: BigInt(entityRow.stats.toString()),
-            originX: Number(entityRow.coordinates.x.toString()),
-            originY: Number(entityRow.coordinates.y.toString()),
-            moduleSlots: moduleSlotsForImmutable(entityRow.modules),
-        })
-
         return [
             this.platform.action('wrapentity', {
                 game: this.server.account,
                 owner: Name.from(owner),
-                entity_id: entityIdKey,
+                entity_id: UInt64.from(entityId),
                 nexus_id: UInt64.from(nexusId),
             }),
-            mintAction,
         ]
     }
 
-    deploynft(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
-        const params: PlatformContract.ActionParams.deploynft = {
-            game: this.server.account,
+    placecargo(owner: NameType, hostId: UInt64Type, assetId: UInt64Type): Action {
+        return this.server.action('placecargo', {
+            owner: Name.from(owner),
+            host_id: UInt64.from(hostId),
+            asset_id: UInt64.from(assetId),
+        })
+    }
+
+    placeentity(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
+        return this.server.action('placeentity', {
             owner: Name.from(owner),
             asset_id: UInt64.from(assetId),
             target_nexus_id: UInt64.from(targetNexusId),
-        }
-        return this.platform.action('deploynft', params)
+        })
     }
 
-    unwrapnft(owner: NameType, assetId: UInt64Type, hostId: UInt64Type): Action {
-        const params: PlatformContract.ActionParams.unwrapnft = {
-            game: this.server.account,
-            owner: Name.from(owner),
-            asset_id: UInt64.from(assetId),
-            host_id: UInt64.from(hostId),
-        }
-        return this.platform.action('unwrapnft', params)
+    transferForUnwrap(owner: NameType, assetId: UInt64Type): Action {
+        return Action.from({
+            account: 'atomicassets',
+            name: 'transfer',
+            authorization: [{actor: Name.from(owner), permission: 'active'}],
+            data: {
+                from: Name.from(owner),
+                to: this.platform.account,
+                asset_ids: [UInt64.from(assetId)],
+                memo: 'unwrap',
+            },
+        })
+    }
+
+    // Two top-level actions the wallet signs to unwrap an NFT into a host's cargo.
+    unwrapCargoTx(owner: NameType, assetId: UInt64Type, hostId: UInt64Type): Action[] {
+        return [this.transferForUnwrap(owner, assetId), this.placecargo(owner, hostId, assetId)]
+    }
+
+    // Two top-level actions the wallet signs to place an entity NFT at a nexus.
+    unwrapEntityTx(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action[] {
+        return [
+            this.transferForUnwrap(owner, assetId),
+            this.placeentity(owner, assetId, targetNexusId),
+        ]
+    }
+
+    setRamPayer(newPayer: NameType, assetId: UInt64Type): Action {
+        return Action.from({
+            account: 'atomicassets',
+            name: 'setrampayer',
+            authorization: [{actor: Name.from(newPayer), permission: 'active'}],
+            data: {new_payer: Name.from(newPayer), asset_id: UInt64.from(assetId)},
+        })
     }
 
     demolish(entityId: UInt64Type): Action {
