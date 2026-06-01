@@ -377,10 +377,9 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    addoracle(oracleId: NameType, note: string): Action {
+    addoracle(oracleId: NameType): Action {
         return this.server.action('addoracle', {
             oracle_id: Name.from(oracleId),
-            note,
         })
     }
 
