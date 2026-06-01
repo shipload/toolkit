@@ -9,6 +9,7 @@ import {
 } from "@wharfkit/session";
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey";
 import { chain, client } from "./client";
+import { unicoveTransactionUrl } from "./unicove";
 import { loadConfig } from "./config";
 import { extractChainError, printError } from "./errors";
 import {
@@ -17,6 +18,8 @@ import {
 	formatResolveResults,
 } from "./format";
 import { getEntitySnapshot } from "./snapshot";
+import type { ProposeOptions } from "./msig/options";
+import { proposeTransaction } from "./msig/propose";
 
 let cachedSession: Session | null = null;
 let cachedActor: string | null = null;
@@ -185,7 +188,8 @@ export async function performTransact(
 	}
 
 	console.log();
-	console.log(`https://jungle4.unicove.com/en/jungle4/transaction/${txid}`);
+	const url = unicoveTransactionUrl(chain.id.toString(), String(txid));
+	if (url) console.log(url);
 	return { txid: String(txid), snapshots };
 }
 
@@ -194,9 +198,15 @@ export async function transact(
 	options?: TransactOptions & {
 		description?: string;
 		errorHint?: (msg: string) => string | undefined | Promise<string | undefined>;
+		propose?: ProposeOptions | null;
 	},
 ): Promise<TransactResult> {
 	try {
+		if (options?.propose) {
+			if (options.description) console.log(options.description);
+			const result = await proposeTransaction(getSession(), args, options.propose);
+			return { txid: result.txid, snapshots: new Map() };
+		}
 		return await performTransact(getSession(), args, options);
 	} catch (err) {
 		const exitCode = printError(err);

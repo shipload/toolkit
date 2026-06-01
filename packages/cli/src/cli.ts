@@ -52,6 +52,8 @@ import * as debug from './commands/debug'
 import * as tools from './commands/tools'
 import * as update from './commands/update'
 import * as oracle from './commands/oracle'
+import * as msig from './commands/msig'
+import * as admin from './commands/admin'
 import {ALL_ENTITY_TYPES, parseEntityType} from './lib/args'
 import {registerCoordSubcommand} from './lib/coord-scope'
 import {
@@ -145,6 +147,8 @@ export function build(): Command {
     tools.register(program)
     debug.register(program)
     oracle.register(program)
+    msig.register(program)
+    admin.register(program)
 
     return program
 }

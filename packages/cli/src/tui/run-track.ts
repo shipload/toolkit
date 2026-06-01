@@ -1,6 +1,7 @@
-import {getShipload} from '../lib/client'
+import {chain, getShipload} from '../lib/client'
 import type {EntityContext} from '../lib/entity-scope'
 import {transactStrict} from '../lib/session'
+import {unicoveTransactionUrl} from '../lib/unicove'
 import {getEntitySnapshot} from '../lib/snapshot'
 import {streamEntitySnapshot} from '../lib/snapshot-stream'
 import {runApp} from './app'
@@ -12,10 +13,6 @@ export interface RunTrackViewOpts {
 }
 
 const ACTION_TIMEOUT_MS = 30_000
-
-function explorerUrlFor(txid: string): string {
-    return `https://jungle4.unicove.com/en/jungle4/transaction/${txid}`
-}
 
 export async function runTrackView(ctx: EntityContext, opts: RunTrackViewOpts = {}): Promise<void> {
     const initial = await getEntitySnapshot(ctx.entityId)
@@ -45,7 +42,7 @@ export async function runTrackView(ctx: EntityContext, opts: RunTrackViewOpts = 
             if (!dispatch.ok) throw new Error(dispatch.error)
             return {
                 txid: capturedTxid,
-                explorerUrl: explorerUrlFor(capturedTxid),
+                explorerUrl: unicoveTransactionUrl(chain.id.toString(), capturedTxid) ?? '',
             }
         },
     })

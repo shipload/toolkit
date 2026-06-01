@@ -1,8 +1,9 @@
 import type {AnyAction} from '@wharfkit/antelope'
 import {SubscriptionsManager, type ServerTypes} from '@shipload/sdk'
 import type {EntityTypeName} from '../lib/args'
-import {getShipload} from '../lib/client'
+import {chain, getShipload} from '../lib/client'
 import {loadConfig} from '../lib/config'
+import {unicoveTransactionUrl} from '../lib/unicove'
 import {entityInfoToSnapshot, type EntitySnapshot, getEntitiesSnapshot} from '../lib/snapshot'
 import {
     type FleetSubscribeManager,
@@ -26,10 +27,6 @@ export interface RunFleetViewOpts {
 
 const ACTION_TIMEOUT_MS = 30_000
 
-function explorerUrlFor(txid: string): string {
-    return `https://jungle4.unicove.com/en/jungle4/transaction/${txid}`
-}
-
 async function dispatchResolve(
     dispatcher: ActionDispatcher,
     label: string,
@@ -43,7 +40,7 @@ async function dispatchResolve(
         txid = result.txid
     })
     if (!dispatch.ok) throw new Error(dispatch.error)
-    return {txid, explorerUrl: explorerUrlFor(txid)}
+    return {txid, explorerUrl: unicoveTransactionUrl(chain.id.toString(), txid) ?? ''}
 }
 
 function wsUrlFromIndexer(httpUrl: string): string {
