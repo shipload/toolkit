@@ -8,11 +8,12 @@ import {
     type SessionLike,
     type TickResult,
 } from '@shipload/oracle'
-import {Name} from '@wharfkit/antelope'
+import {Name, PrivateKey, type PublicKey} from '@wharfkit/antelope'
 import {Session} from '@wharfkit/session'
 import {WalletPluginPrivateKey} from '@wharfkit/wallet-plugin-privatekey'
 import {chain, client, gameContractName, getShipload} from '../../lib/client'
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
+import {ValidationError} from '../../lib/validate'
 
 export interface OracleContext {
     cfg: OracleConfig
@@ -22,8 +23,43 @@ export interface OracleContext {
     close(): void
 }
 
+async function verifyOraclePermission(cfg: OracleConfig): Promise<void> {
+    let pub: PublicKey
+    try {
+        pub = PrivateKey.from(cfg.privateKey).toPublic()
+    } catch {
+        throw new ValidationError(
+            'The oracle private_key in your config is not a valid Antelope key.',
+            'Regenerate it with `shiploadcli oracle keygen`, or fix the [oracle] private_key value.'
+        )
+    }
+    let account: Awaited<ReturnType<typeof client.v1.chain.get_account>>
+    try {
+        account = await client.v1.chain.get_account(cfg.actor)
+    } catch (err) {
+        console.warn(
+            `${new Date().toISOString()} warning: could not verify ${cfg.actor}@${cfg.permission} (${(err as Error).message}); proceeding`
+        )
+        return
+    }
+    const perm = account.permissions.find((p) => String(p.perm_name) === cfg.permission)
+    if (!perm) {
+        throw new ValidationError(
+            `Permission ${cfg.actor}@${cfg.permission} does not exist on chain.`,
+            'Create the permission and wire your oracle key (updateauth + linkauth the commit/reveal/cleanrsvp actions), then run `shiploadcli oracle status` to confirm.'
+        )
+    }
+    if (!perm.required_auth.keys.some((k) => k.key.equals(pub))) {
+        throw new ValidationError(
+            `Oracle key ${pub} is not wired to ${cfg.actor}@${cfg.permission}.`,
+            'Add the key with updateauth (and linkauth the commit/reveal/cleanrsvp actions), then run `shiploadcli oracle status` to confirm.'
+        )
+    }
+}
+
 export async function buildOracleContext(): Promise<OracleContext> {
     const cfg = loadOracleConfig()
+    await verifyOraclePermission(cfg)
     const shipload = await getShipload()
     const rawSession = new Session(
         {

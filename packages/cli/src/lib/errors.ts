@@ -104,7 +104,17 @@ const HINTS: ChainHint[] = [
 		matches: (m) => m.includes("reached account cpu limit") || m.includes("reached account net limit"),
 		hint: "Your account's staked CPU/NET regenerates over ~24h. Wait 10-30s and retry, stake more EOS, or use a PowerUp to top up temporarily. Batch-submitting many actions back-to-back is the usual trigger.",
 	},
+	{
+		matches: (m) => m.includes("non-existent permission"),
+		hint: "The signing actor@permission isn't set up on chain yet. Create the permission and wire your key (updateauth + linkauth the relevant actions), then check `shiploadcli oracle status`.",
+	},
 ];
+
+export function describeLoopError(err: unknown): string {
+	const msg = extractChainError(err);
+	const hint = HINTS.find((h) => h.matches(msg))?.hint;
+	return hint ? `${msg} — ${hint}` : msg;
+}
 
 export function assertNotBoth(opts: Record<string, unknown>, ...pairs: [string, string][]): void {
 	for (const [a, b] of pairs) {

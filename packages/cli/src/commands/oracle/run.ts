@@ -1,4 +1,5 @@
 import type {Command} from 'commander'
+import {describeLoopError} from '../../lib/errors'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
 import {formatClean, formatTick} from './format'
 
@@ -46,14 +47,14 @@ export function register(parent: Command): void {
                         const result = await tickOnce(ctx)
                         console.log(`${stamp()} ${formatTick(result)}`)
                     } catch (err) {
-                        console.error(`${stamp()} tick failed: ${(err as Error).message}`)
+                        console.error(`${stamp()} tick failed: ${describeLoopError(err)}`)
                     }
                     if (Date.now() - lastCleanAt >= cleanIntervalMs) {
                         try {
                             const cleaned = await cleanOnce(ctx, cleanRows)
                             console.log(`${stamp()} ${formatClean(cleaned)}`)
                         } catch (err) {
-                            console.error(`${stamp()} cleanup failed: ${(err as Error).message}`)
+                            console.error(`${stamp()} cleanup failed: ${describeLoopError(err)}`)
                         }
                         lastCleanAt = Date.now()
                     }
