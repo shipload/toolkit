@@ -7,13 +7,12 @@ import {
     getItem,
     type LocationType,
     type ResourceStats,
-    ServerContract,
 } from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Checksum256} from '@wharfkit/antelope'
 import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
-import {client, getGameSeed, server} from '../../lib/client'
+import {getGameSeed, server} from '../../lib/client'
 import {EXIT} from '../../lib/errors'
 import {jsonStringify} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
@@ -215,8 +214,7 @@ async function resolveSeeds(options: {
     if (options.epochSeed) {
         epochSeed = Checksum256.from(options.epochSeed)
     } else {
-        const srv = new ServerContract.Contract({client})
-        const state = await srv.table('state').get()
+        const state = await server.table('state').get()
         if (!state) throw new Error('Server state row not found on chain')
         epochSeed = Checksum256.from(state.seed)
     }
