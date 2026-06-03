@@ -97,14 +97,21 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         })
     }
 
-    function makeCargoRow(entityId: number, rowId: number, itemId: number, qty: number) {
+    function makeCargoRow(
+        entityId: number,
+        rowId: number,
+        itemId: number,
+        qty: number,
+        stats: bigint | number = 0n,
+        modules: ServerContract.Types.module_entry[] = []
+    ) {
         return ServerContract.Types.cargo_row.from({
             id: UInt64.from(rowId),
             entity_id: UInt64.from(entityId),
             item_id: UInt64.from(itemId),
             quantity: UInt64.from(qty),
-            stats: UInt64.from(0),
-            modules: [],
+            stats: UInt64.from(stats),
+            modules,
         })
     }
 
@@ -161,6 +168,46 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         const unreachable = mgr.unreachableSources(target, [container], [cargo20])
         expect(unreachable.map((s) => s.entityId.toString())).toEqual(['20'])
         expect(unreachable[0].hasLoaders).toBe(false)
+    })
+
+    test('keeps same-item cargo stacks distinct by stats and modules', () => {
+        const mgr = new ConstructionManager({} as any)
+        const plot = makePlot()
+        const target = mgr.getTarget(plot, [])!
+        const hauler = makeShipWithLoader(10, OWNER, COORDS)
+
+        const first = makeCargoRow(10, 100, INPUT_ITEM_ID, 8, 0n)
+        const second = makeCargoRow(10, 101, INPUT_ITEM_ID, 5, 42n)
+
+        const sources = mgr.eligibleSources(target, [hauler], [first, second])
+
+        expect(
+            sources[0].relevantCargo.map((c) => ({
+                key: c.key,
+                itemId: c.itemId,
+                available: c.available,
+                reserved: c.reserved,
+                stats: c.stats.toString(),
+                rowId: c.rowId.toString(),
+            }))
+        ).toEqual([
+            {
+                key: `${INPUT_ITEM_ID}#0#`,
+                itemId: INPUT_ITEM_ID,
+                available: 8,
+                reserved: 0,
+                stats: '0',
+                rowId: '100',
+            },
+            {
+                key: `${INPUT_ITEM_ID}#42#`,
+                itemId: INPUT_ITEM_ID,
+                available: 5,
+                reserved: 0,
+                stats: '42',
+                rowId: '101',
+            },
+        ])
     })
 })
 

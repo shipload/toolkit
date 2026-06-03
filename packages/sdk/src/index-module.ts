@@ -59,6 +59,8 @@ export type {
     SourceCargoStack,
     FinalizerEntityRef,
     FinalizerCapability,
+    InboundTransfer,
+    Reservation,
 } from './managers'
 export type {EntityRefInput} from './managers/actions'
 

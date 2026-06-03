@@ -19,4 +19,6 @@ export type {
     SourceCargoStack,
     FinalizerEntityRef,
     FinalizerCapability,
+    InboundTransfer,
+    Reservation,
 } from './construction-types'

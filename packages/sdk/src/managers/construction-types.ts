@@ -32,10 +32,15 @@ export interface SourceEntityRef {
 }
 
 export interface SourceCargoStack {
+    key: string
+    rowId: UInt64
     itemId: number
     item: Item
+    stats: UInt64
+    modules: ServerContract.Types.module_entry[]
     available: number
     plotNeeds: number
+    reserved: number
 }
 
 export interface FinalizerEntityRef {
@@ -44,4 +49,20 @@ export interface FinalizerEntityRef {
     capability: FinalizerCapability
     crafterSpeed: number
     estimatedDuration: UInt32
+}
+
+export interface InboundTransfer {
+    sourceEntityId: UInt64
+    sourceEntityType: Name
+    sourceName: string
+    itemId: number
+    quantity: number
+    etaSeconds: number
+}
+
+export interface Reservation {
+    targetEntityId: UInt64
+    targetEntityType: Name
+    itemId: number
+    quantity: number
 }
