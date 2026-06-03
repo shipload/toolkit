@@ -1,5 +1,23 @@
 # @shipload/oracle
 
+## 0.0.1-next.11
+
+### Patch Changes
+
+- 93b133b: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Better oracle error handlers
+  - Construction helpers
+- 5609cef: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Better oracle error handlers
+  - Fixing tests
+  - Construction helpers
+
 ## 0.0.1-next.10
 
 ### Patch Changes

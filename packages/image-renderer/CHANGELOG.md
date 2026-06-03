@@ -1,5 +1,27 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.21
+
+### Patch Changes
+
+- 93b133b: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Better oracle error handlers
+  - Construction helpers
+- 5609cef: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Better oracle error handlers
+  - Fixing tests
+  - Construction helpers
+- Updated dependencies [93b133b]
+- Updated dependencies [5609cef]
+  - @shipload/item-renderer@1.0.0-next.21
+  - @shipload/sdk@1.0.0-next.21
+
 ## 1.0.0-next.20
 
 ### Patch Changes
