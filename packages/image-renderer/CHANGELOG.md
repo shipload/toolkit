@@ -1,5 +1,18 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+- a355f3b: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added energy projection + construction fixes
+- Updated dependencies [a355f3b]
+  - @shipload/item-renderer@1.0.0-next.22
+  - @shipload/sdk@1.0.0-next.22
+
 ## 1.0.0-next.21
 
 ### Patch Changes

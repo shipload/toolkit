@@ -1,5 +1,18 @@
 # @shipload/cli
 
+## 1.0.0-next.26
+
+### Patch Changes
+
+- a355f3b: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added energy projection + construction fixes
+- Updated dependencies [a355f3b]
+  - @shipload/oracle@0.0.1-next.12
+  - @shipload/sdk@1.0.0-next.22
+
 ## 1.0.0-next.25
 
 ### Patch Changes
