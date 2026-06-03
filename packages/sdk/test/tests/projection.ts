@@ -138,6 +138,50 @@ describe('projectEntity (stack-aware)', () => {
         })
     })
 
+    describe('TRAVEL energy', () => {
+        test('deducts exactly the stored energy_cost (not a recomputed value)', () => {
+            const ship = makeShipFixture({energy: 1000})
+            ship.schedule = ServerContract.Types.schedule.from({
+                started: '2024-06-04T23:41:09.000',
+                tasks: [makeTask(TaskType.TRAVEL, {coordinates: {x: 50, y: 50}, energy_cost: 10})],
+            })
+            const projected = projectEntity(ship)
+            assert.equal(projected.energy.toNumber(), 990)
+            assert.equal(projected.location.x.toNumber(), 50)
+            assert.equal(projected.location.y.toNumber(), 50)
+        })
+
+        test('floors energy at zero when stored cost exceeds current energy', () => {
+            const ship = makeShipFixture({energy: 5})
+            ship.schedule = ServerContract.Types.schedule.from({
+                started: '2024-06-04T23:41:09.000',
+                tasks: [makeTask(TaskType.TRAVEL, {coordinates: {x: 1, y: 0}, energy_cost: 100})],
+            })
+            const projected = projectEntity(ship)
+            assert.equal(projected.energy.toNumber(), 0)
+        })
+    })
+
+    describe('WARP', () => {
+        test('applies stored energy_cost and moves to destination', () => {
+            const ship = makeShipFixture({energy: 300})
+            ship.schedule = ServerContract.Types.schedule.from({
+                started: '2024-06-04T23:41:09.000',
+                tasks: [
+                    makeTask(TaskType.WARP, {
+                        coordinates: {x: 9, y: 5},
+                        energy_cost: 300,
+                        duration: 0,
+                    }),
+                ],
+            })
+            const projected = projectEntity(ship)
+            assert.equal(projected.energy.toNumber(), 0)
+            assert.equal(projected.location.x.toNumber(), 9)
+            assert.equal(projected.location.y.toNumber(), 5)
+        })
+    })
+
     describe('validateSchedule', () => {
         test('throws ENTITY_CAPACITY_EXCEEDED via validateSchedule', () => {
             const ship = makeShipFixture({capacity: 100})

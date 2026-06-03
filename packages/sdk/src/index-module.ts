@@ -204,6 +204,8 @@ export type {
 export {taskCargoChanges} from './scheduling/task-cargo'
 export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 
+export {energyAtTime} from './scheduling/energy'
+
 export * from './types/capabilities'
 export * from './types/entity'
 export {

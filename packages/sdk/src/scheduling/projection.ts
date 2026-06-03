@@ -1,6 +1,6 @@
 import {Name, TimePoint, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Coordinates, PRECISION, TaskType} from '../types'
+import {Coordinates, TaskType} from '../types'
 import {
     capsHasLoaders,
     capsHasMovement,
@@ -20,7 +20,7 @@ import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runt
 import {computeEntityCapabilities} from '../derivation/capabilities'
 import {decodeCraftedItemStats} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
-import {distanceBetweenCoordinates, lerp} from '../travel/travel'
+import {lerp} from '../travel/travel'
 import {
     calcStacksMass,
     cargoItemToStack,
@@ -217,25 +217,22 @@ function applyFlightTask(
     task: ServerContract.Types.task,
     options: {complete: boolean; progress?: number}
 ): void {
-    if (!task.coordinates || !projected.engines) return
+    if (!task.coordinates) return
 
-    const origin = projected.location
     const destination = Coordinates.from(task.coordinates)
-    const distance = distanceBetweenCoordinates(origin, task.coordinates)
-    const energyUsage = distance.dividing(PRECISION).multiplying(projected.engines.drain)
 
     if (options.complete) {
-        projected.energy = projected.energy.gt(energyUsage)
-            ? UInt16.from(projected.energy.subtracting(energyUsage))
-            : UInt16.from(0)
+        applyEnergyCost(projected, task)
         projected.location = destination
     } else if (options.progress !== undefined) {
-        const interpolated = lerp(origin, destination, options.progress)
+        const interpolated = lerp(projected.location, destination, options.progress)
         projected.location = Coordinates.from({
             x: Math.round(interpolated.x),
             y: Math.round(interpolated.y),
         })
-        const partialEnergy = UInt64.from(Math.floor(Number(energyUsage) * options.progress))
+        const partialEnergy = UInt64.from(
+            Math.floor(Number(task.energy_cost ?? 0) * options.progress)
+        )
         projected.energy = projected.energy.gt(partialEnergy)
             ? UInt16.from(projected.energy.subtracting(partialEnergy))
             : UInt16.from(0)
@@ -305,6 +302,7 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyRechargeTask(projected, task, {complete: true})
             break
         case TaskType.TRAVEL:
+        case TaskType.WARP:
             applyFlightTask(projected, task, {complete: true})
             break
         case TaskType.LOAD:
@@ -479,6 +477,7 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 applyRechargeTask(projected, task, {complete: taskComplete, progress})
                 break
             case TaskType.TRAVEL:
+            case TaskType.WARP:
                 applyFlightTask(projected, task, {complete: taskComplete, progress})
                 break
             case TaskType.LOAD:

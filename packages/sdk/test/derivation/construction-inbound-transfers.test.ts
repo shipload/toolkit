@@ -120,7 +120,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
         expect(result[0].etaSeconds).toBe(72)
     })
 
-    test('clamps etaSeconds to zero rather than negative when the task is already complete', () => {
+    test('excludes a transfer whose projected delivery is already in the past', () => {
         const hauler = makeHauler({
             id: 16,
             scheduleStart: TimePoint.from('2026-06-02T09:50:00.000'),
@@ -133,8 +133,51 @@ describe('ConstructionManager.inboundTransfersTo', () => {
                 }),
             ],
         })
+        expect(mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)).toEqual([])
+    })
+
+    test('keeps a transfer whose projected delivery lands exactly at now (eta 0)', () => {
+        const hauler = makeHauler({
+            id: 161,
+            scheduleStart: TimePoint.from('2026-06-02T09:59:00.000'),
+            tasks: [
+                makeTask({
+                    type: TaskType.LOAD,
+                    duration: 60,
+                    target: plotRef(),
+                    cargo: [{itemId: PLATE, qty: 1}],
+                }),
+            ],
+        })
         const result = mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)
+        expect(result).toHaveLength(1)
         expect(result[0].etaSeconds).toBe(0)
+    })
+
+    test('excludes completed transfers but keeps later still-pending ones in the same schedule', () => {
+        const hauler = makeHauler({
+            id: 162,
+            scheduleStart: TimePoint.from('2026-06-02T09:55:00.000'),
+            tasks: [
+                makeTask({
+                    type: TaskType.LOAD,
+                    duration: 60,
+                    target: plotRef(),
+                    cargo: [{itemId: PLATE, qty: 800}],
+                }),
+                makeTask({type: TaskType.TRAVEL, duration: 600}),
+                makeTask({
+                    type: TaskType.LOAD,
+                    duration: 120,
+                    target: plotRef(),
+                    cargo: [{itemId: FRAME, qty: 4}],
+                }),
+            ],
+        })
+        const result = mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)
+        expect(result).toHaveLength(1)
+        expect(result[0].itemId).toBe(FRAME)
+        expect(result[0].quantity).toBe(4)
     })
 
     test('aggregates multi-item cargo within a single task into separate rows', () => {

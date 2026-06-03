@@ -102,11 +102,10 @@ export class ConstructionManager extends BaseManager {
                 cumulativeSec += task.duration.toNumber()
                 if (!isTransferTask(task)) continue
                 if (!task.entitytarget) continue
+                const projectedEndMs = startedMs + cumulativeSec * 1000
+                if (projectedEndMs < nowMs) continue
                 const targetIdStr = task.entitytarget.entity_id.toString()
-                const etaSeconds = Math.max(
-                    0,
-                    Math.round((startedMs + cumulativeSec * 1000 - nowMs) / 1000)
-                )
+                const etaSeconds = Math.max(0, Math.round((projectedEndMs - nowMs) / 1000))
                 let perTarget = buckets.get(targetIdStr)
                 if (!perTarget) {
                     perTarget = new Map()
