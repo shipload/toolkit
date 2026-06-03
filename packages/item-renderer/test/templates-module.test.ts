@@ -30,7 +30,7 @@ test('Engine values mode renders the capability header + prose narrative', () =>
     expect(svg).toContain('ENGINE')
     expect(svg).toContain('thrust for travel')
     expect(svg).toContain('700')
-    expect(svg).toContain('45')
+    expect(svg).toContain('>90</tspan>')
 })
 
 test('Engine prose highlights numbers in white, never gold', () => {
