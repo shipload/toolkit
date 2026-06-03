@@ -1,6 +1,6 @@
 {
     "catalog_hash": "7ec4cea300f5f0e18e82d168f7a95f35f4f50947f3d7e7a071cd5ca34d64b7d5",
-    "generated_at": "2026-06-03T04:31:49.259Z",
+    "generated_at": "2026-06-03T22:45:46.365Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -16,7 +16,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -67,7 +67,7 @@
                                 "y": 6
                             },
                             "cargo": [],
-                            "energy_cost": 329
+                            "energy_cost": 658
                         }
                     ]
                 },
@@ -81,22 +81,22 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -124,7 +124,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -175,7 +175,7 @@
                                 "y": 6
                             },
                             "cargo": [],
-                            "energy_cost": 329
+                            "energy_cost": 658
                         }
                     ]
                 },
@@ -189,22 +189,22 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 6,
+                "energy": 398,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -232,7 +232,7 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 288,
+                "energy": 962,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -292,22 +292,22 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 288,
+                "energy": 962,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -335,7 +335,7 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 288,
+                "energy": 962,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -395,22 +395,22 @@
                     "y": 1,
                     "z": 3000
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -438,7 +438,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -509,22 +509,22 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -552,7 +552,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -623,7 +623,7 @@
                     "y": 0,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 5000,
                 "cargo": [
                     {
@@ -638,15 +638,15 @@
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -674,7 +674,7 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 6,
+                "energy": 398,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -747,22 +747,22 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 6,
+                "energy": 398,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -790,7 +790,7 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 6,
+                "energy": 398,
                 "cargomass": 0,
                 "modules": [
                     {
@@ -863,7 +863,7 @@
                     "y": 6,
                     "z": 3000
                 },
-                "energy": 6,
+                "energy": 398,
                 "cargomass": 1000,
                 "cargo": [
                     {
@@ -878,15 +878,15 @@
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -914,7 +914,7 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 1500000,
                 "modules": [
                     {
@@ -994,7 +994,7 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 1500000,
                 "cargo": [
                     {
@@ -1009,15 +1009,15 @@
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {
@@ -1045,7 +1045,7 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 1500000,
                 "modules": [
                     {
@@ -1125,22 +1125,22 @@
                     "y": -49,
                     "z": 800
                 },
-                "energy": 335,
+                "energy": 1056,
                 "cargomass": 0,
                 "cargo": [],
                 "hullmass": 5784025,
                 "capacity": 7326256,
                 "engines": {
                     "thrust": 559,
-                    "drain": 47
+                    "drain": 94
                 },
                 "generator": {
-                    "capacity": 335,
-                    "recharge": 1
+                    "capacity": 1056,
+                    "recharge": 2
                 },
                 "gatherer": {
                     "yield": 413,
-                    "drain": 984,
+                    "drain": 1968,
                     "depth": 1565
                 },
                 "loaders": {

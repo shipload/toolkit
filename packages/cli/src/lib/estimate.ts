@@ -19,6 +19,7 @@
  */
 
 import {
+	calc_craft_energy,
 	calc_energyusage,
 	calc_gather_duration,
 	calc_gather_energy,
@@ -633,14 +634,8 @@ export async function estimateCraft(params: {
 		};
 	}
 
-	// Mirrors contract calc_craft_duration + calc_craft_energy.
-	// Also implemented in sdkv2/src/capabilities/crafting.ts but
-	// sdkv2 takes the unpacked primitive shape (speed:number), which is
-	// exactly what we already have in hand, so we stay with primitives to
-	// avoid the double round-trip through UInt16 construction.
-	const CRAFT_ENERGY_DIVISOR = 150000;
 	const duration = Math.max(Math.floor(totalInputMass / speed), 1);
-	const energy = Math.min(Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR), 65535);
+	const energy = calc_craft_energy(drain, totalInputMass).toNumber();
 
 	const recharge = params.recharge ?? false;
 	let rechargeSeconds = 0;

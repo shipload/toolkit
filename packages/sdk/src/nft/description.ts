@@ -48,12 +48,12 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
 }
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
-export const computeEngineDrain = (thm: number): number => Math.max(30, 50 - idiv(thm, 70))
-export const computeGeneratorCap = (com: number): number => 300 + idiv(com, 6)
-export const computeGeneratorRech = (fin: number): number => 1 + idiv(fin * 3, 1000)
+export const computeEngineDrain = (thm: number): number => 2 * Math.max(30, 50 - idiv(thm, 70))
+export const computeGeneratorCap = (com: number): number => 950 + idiv(com, 2)
+export const computeGeneratorRech = (fin: number): number => 2 * (1 + idiv(fin * 3, 1000))
 export const computeGathererYield = (str: number): number => 200 + str
 export const computeGathererDrain = (con: number): number =>
-    Math.max(250, 1250 - idiv(con * 25, 20))
+    2 * Math.max(250, 1250 - idiv(con * 25, 20))
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
 export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)

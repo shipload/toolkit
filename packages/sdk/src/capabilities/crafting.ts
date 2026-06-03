@@ -18,5 +18,5 @@ export function calc_craft_duration(speed: number, totalInputMass: number): UInt
 
 export function calc_craft_energy(drain: number, totalInputMass: number): UInt16 {
     const raw = Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR)
-    return UInt16.from(Math.min(raw, 65535))
+    return UInt16.from(Math.min(Math.max(raw, 1), 65535))
 }

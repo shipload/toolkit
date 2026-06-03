@@ -23,7 +23,7 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
 
     return {
         thrust: 400 + Math.floor((vol * 3) / 4),
-        drain: Math.max(30, 50 - Math.floor(thm / 70)),
+        drain: 2 * Math.max(30, 50 - Math.floor(thm / 70)),
     }
 }
 
@@ -35,8 +35,8 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     const ref = stats.reflectivity
 
     return {
-        capacity: 300 + Math.floor(res / 6),
-        recharge: 1 + Math.floor((ref * 3) / 1000),
+        capacity: 950 + Math.floor(res / 2),
+        recharge: 2 * (1 + Math.floor((ref * 3) / 1000)),
     }
 }
 
@@ -82,7 +82,7 @@ export function computeGathererCapabilities(
 
     return {
         yield: 200 + str,
-        drain: Math.max(250, 1250 - Math.floor((con * 25) / 20)),
+        drain: 2 * Math.max(250, 1250 - Math.floor((con * 25) / 20)),
         depth: gathererDepthForTier(tol, tier),
     }
 }

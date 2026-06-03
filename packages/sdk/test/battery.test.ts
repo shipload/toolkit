@@ -44,7 +44,7 @@ describe('Battery module derivation', () => {
             SHIP_LAYOUT
         )
         expect(result.generator).toBeDefined()
-        expect(result.generator?.capacity).toBe(444)
+        expect(result.generator?.capacity).toBe(1392)
     })
 
     test('two Batteries + Generator: no compounding, each bonus vs original gen_cap_base', () => {
@@ -72,7 +72,7 @@ describe('Battery module derivation', () => {
             SHIP_LAYOUT
         )
         expect(result.generator).toBeDefined()
-        expect(result.generator?.capacity).toBe(509)
+        expect(result.generator?.capacity).toBe(1596)
     })
 
     test('Battery without Generator: no generator field, no bonus applied', () => {
@@ -111,7 +111,7 @@ describe('Battery module derivation', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(result.generator?.capacity).toBe(350)
+        expect(result.generator?.capacity).toBe(1110)
     })
 
     test('max stats fixture: vol/thm/pla/ins=999, gen res/ref=999', () => {
@@ -133,7 +133,7 @@ describe('Battery module derivation', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(result.generator?.capacity).toBe(573)
+        expect(result.generator?.capacity).toBe(1782)
     })
 
     test('Battery + Generator: recharge field unchanged (only capacity gets bonus)', () => {

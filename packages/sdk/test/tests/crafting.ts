@@ -686,9 +686,15 @@ describe('Crafting', () => {
             assert.isAbove(high.toNumber(), low.toNumber())
         })
 
-        test('zero input costs zero energy', () => {
+        test('floors craft energy at 1 (never free)', () => {
+            // 5_000 mass × 24 drain / 150_000 divisor = 0 before flooring
+            const energy = calc_craft_energy(24, 5_000)
+            assert.equal(energy.toNumber(), 1)
+        })
+
+        test('zero input floors to 1 energy', () => {
             const energy = calc_craft_energy(17, 0)
-            assert.equal(energy.toNumber(), 0)
+            assert.equal(energy.toNumber(), 1)
         })
 
         test('scales linearly with batched input mass', () => {
