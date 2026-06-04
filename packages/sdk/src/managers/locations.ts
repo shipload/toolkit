@@ -1,10 +1,10 @@
-import type {UInt16Type} from '@wharfkit/antelope'
+import {BlockTimestamp, type UInt16Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import type {CoordinatesType, Distance} from '../types'
 import {hasSystem} from '../utils/system'
 import {findNearbyPlanets} from '../travel/travel'
 import type {ServerContract} from '../contracts'
-import {type DerivedStratum, deriveStrata} from '../derivation'
+import {type DerivedStratum, deriveStrata, getEffectiveReserve} from '../derivation'
 
 export interface LocationStratum extends DerivedStratum {
     reserveMax: number
@@ -24,7 +24,10 @@ export class LocationsManager extends BaseManager {
         return findNearbyPlanets(game.config.seed, origin, maxDistance)
     }
 
-    async getStrata(coords: CoordinatesType): Promise<LocationStratum[]> {
+    async getStrata(
+        coords: CoordinatesType,
+        now: BlockTimestamp = BlockTimestamp.fromMilliseconds(Date.now())
+    ): Promise<LocationStratum[]> {
         const game = await this.getGame()
         const state = await this.getState()
 
@@ -36,15 +39,26 @@ export class LocationsManager extends BaseManager {
             y: coords.y,
         })) as ServerContract.Types.stratum_remaining[]
 
-        const overrideMap = new Map<number, number>()
+        const epochSeconds = Number(game.config.epochtime)
+        const overrideMap = new Map<number, ServerContract.Types.stratum_remaining>()
         for (const o of overrides) {
-            overrideMap.set(Number(o.stratum), Number(o.remaining))
+            overrideMap.set(Number(o.stratum), o)
         }
 
-        return derived.map((s) => ({
-            ...s,
-            reserveMax: s.reserve,
-            reserve: overrideMap.get(s.index) ?? s.reserve,
-        }))
+        return derived.map((s) => {
+            const override = overrideMap.get(s.index)
+            const reserve = override
+                ? getEffectiveReserve(
+                      {
+                          remaining: override.remaining,
+                          max_reserve: s.reserve,
+                          last_block: override.last_block,
+                      },
+                      now,
+                      epochSeconds
+                  )
+                : s.reserve
+            return {...s, reserveMax: s.reserve, reserve}
+        })
     }
 }

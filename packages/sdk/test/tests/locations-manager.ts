@@ -1,6 +1,6 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
-import {Checksum256} from '@wharfkit/antelope'
+import {BlockTimestamp, Checksum256} from '@wharfkit/antelope'
 import {LocationsManager} from '$lib'
 import type {GameContext} from 'src/managers/context'
 
@@ -15,16 +15,30 @@ const testEpochSeed = Checksum256.from(
 const SYSTEM_COORDS = {x: -10, y: -4}
 const EMPTY_COORDS = {x: 0, y: 0}
 
-function buildManager(reserveOverrides: {stratum: number; remaining: number}[]): LocationsManager {
+// A fixed post-2000 instant (BlockTimestamp slots start at the 2000-01-01 epoch).
+const NOW = BlockTimestamp.fromMilliseconds(Date.UTC(2026, 0, 1))
+const TEST_EPOCHTIME = 60
+
+function secondsBefore(now: BlockTimestamp, seconds: number): BlockTimestamp {
+    return BlockTimestamp.fromMilliseconds(now.toMilliseconds() - seconds * 1000)
+}
+
+interface OverrideFixture {
+    stratum: number
+    remaining: number
+    last_block?: BlockTimestamp
+}
+
+function buildManager(reserveOverrides: OverrideFixture[]): LocationsManager {
     const stubContext = {
-        getGame: async () => ({config: {seed: testGameSeed}}),
+        getGame: async () => ({config: {seed: testGameSeed, epochtime: TEST_EPOCHTIME}}),
         getState: async () => ({epochSeed: testEpochSeed}),
         server: {
             readonly: async (action: string) => {
                 if (action !== 'getreserves') {
                     throw new Error(`unexpected readonly call: ${action}`)
                 }
-                return reserveOverrides
+                return reserveOverrides.map((o) => ({...o, last_block: o.last_block ?? NOW}))
             },
         },
     } as unknown as GameContext
@@ -34,13 +48,13 @@ function buildManager(reserveOverrides: {stratum: number; remaining: number}[]):
 describe('LocationsManager.getStrata', () => {
     test('returns empty array for an empty (non-system) coord', async () => {
         const mgr = buildManager([])
-        const result = await mgr.getStrata(EMPTY_COORDS)
+        const result = await mgr.getStrata(EMPTY_COORDS, NOW)
         assert.deepEqual(result, [])
     })
 
     test('uses derived reserve when no chain override exists', async () => {
         const mgr = buildManager([])
-        const result = await mgr.getStrata(SYSTEM_COORDS)
+        const result = await mgr.getStrata(SYSTEM_COORDS, NOW)
         assert.isAbove(result.length, 0, 'expected at least one stratum')
         for (const s of result) {
             assert.equal(
@@ -51,14 +65,15 @@ describe('LocationsManager.getStrata', () => {
         }
     })
 
-    test('overrides reserve when chain reports a touched stratum', async () => {
-        const baseline = await buildManager([]).getStrata(SYSTEM_COORDS)
+    test('overrides reserve when chain reports a freshly-touched stratum', async () => {
+        const baseline = await buildManager([]).getStrata(SYSTEM_COORDS, NOW)
         assert.isAbove(baseline.length, 0, 'fixture sanity')
         const target = baseline[0]
         const overrideRemaining = Math.max(0, target.reserve - 1)
 
+        // last_block defaults to NOW, so no time has elapsed and no regen applies.
         const mgr = buildManager([{stratum: target.index, remaining: overrideRemaining}])
-        const result = await mgr.getStrata(SYSTEM_COORDS)
+        const result = await mgr.getStrata(SYSTEM_COORDS, NOW)
         const matched = result.find((r) => r.index === target.index)
         assert.isDefined(matched)
         assert.equal(matched!.reserve, overrideRemaining, 'reserve should be the override')
@@ -69,14 +84,33 @@ describe('LocationsManager.getStrata', () => {
         )
     })
 
+    test('regenerates a depleted stratum over elapsed time', async () => {
+        const baseline = await buildManager([]).getStrata(SYSTEM_COORDS, NOW)
+        const target = baseline[0]
+
+        // Depleted to zero half an epoch ago: effective = max * (elapsed / epochtime) = max / 2.
+        const mgr = buildManager([
+            {
+                stratum: target.index,
+                remaining: 0,
+                last_block: secondsBefore(NOW, TEST_EPOCHTIME / 2),
+            },
+        ])
+        const result = await mgr.getStrata(SYSTEM_COORDS, NOW)
+        const matched = result.find((r) => r.index === target.index)
+        assert.isDefined(matched)
+        assert.equal(matched!.reserve, Math.floor(target.reserve / 2), 'should be half-regenerated')
+        assert.equal(matched!.reserveMax, target.reserve)
+    })
+
     test('non-overridden strata pass through unchanged', async () => {
-        const baseline = await buildManager([]).getStrata(SYSTEM_COORDS)
+        const baseline = await buildManager([]).getStrata(SYSTEM_COORDS, NOW)
         assert.isAbove(baseline.length, 1, 'need at least 2 strata for this test')
         const overrideTarget = baseline[0]
         const untouched = baseline[1]
 
         const mgr = buildManager([{stratum: overrideTarget.index, remaining: 0}])
-        const result = await mgr.getStrata(SYSTEM_COORDS)
+        const result = await mgr.getStrata(SYSTEM_COORDS, NOW)
         const matched = result.find((r) => r.index === untouched.index)
         assert.isDefined(matched)
         assert.equal(matched!.reserve, untouched.reserve)
