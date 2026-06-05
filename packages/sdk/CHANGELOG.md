@@ -1,5 +1,17 @@
 # @shipload/sdk
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+- b541649: - Icons
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Balancing energy capacity to allow basic module crafting
+  - Adding time component to getStrata call
+
 ## 1.0.0-next.23
 
 ### Patch Changes
