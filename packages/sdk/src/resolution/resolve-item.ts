@@ -29,13 +29,7 @@ import {
     computeContainerCapabilities,
     computeContainerT2Capabilities,
 } from '../derivation/capabilities'
-import {
-    categoryColors,
-    categoryIcons,
-    componentIcon,
-    itemAbbreviations,
-    moduleIcon,
-} from '../data/colors'
+import {categoryColors, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
 import type {ServerContract} from '../contracts'
 import {
     ITEM_CONTAINER_T1_PACKED,
@@ -111,7 +105,7 @@ function resolveResource(id: number, stats?: UInt64Type): ResolvedItem {
     return {
         itemId: id,
         name: item.name,
-        icon: cat ? categoryIcons[cat] : '⬡',
+        icon: '',
         abbreviation: null,
         category: cat,
         tier: item.tier,

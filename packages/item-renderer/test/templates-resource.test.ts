@@ -43,6 +43,23 @@ test('resource card has no standalone Mass row (tonnage is in the badge)', () =>
     expect(svg).not.toContain('Mass')
 })
 
+test('resource card header uses the detailed resource SVG icon', () => {
+    const item = FIXTURES.oreT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderResource(item, resolved)
+    expect(svg).toContain('data-resource="ore"')
+    expect(svg).not.toContain('>01</text>')
+})
+
+test('resource card uses purple gas icon geometry', () => {
+    const item = FIXTURES.gasT2
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderResource(item, resolved)
+    expect(svg).toContain('data-resource="gas"')
+    expect(svg).toContain('#B877FF')
+    expect(svg).not.toContain('#B8E4A0')
+})
+
 test('matches the committed Crude Ore snapshot', async () => {
     const item = FIXTURES.oreT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)

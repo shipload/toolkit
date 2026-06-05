@@ -23,6 +23,8 @@ describe('resolveItem', () => {
         assert.isDefined(result.name)
         assert.isDefined(result.tier)
         assert.isDefined(result.category)
+        assert.strictEqual(result.icon, '')
+        assert.isNull(result.abbreviation)
         assert.isUndefined(result.stats)
         assert.isUndefined(result.attributes)
     })

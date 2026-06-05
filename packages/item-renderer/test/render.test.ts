@@ -10,6 +10,7 @@ test('renderItem dispatches to resource template for resources', () => {
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderItem(item, resolved)
     expect(svg).toContain('Crude Ore')
+    expect(svg).toContain('data-resource="ore"')
 })
 
 test('renderItem dispatches to packed entity template for entities', () => {

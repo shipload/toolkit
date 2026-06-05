@@ -240,13 +240,10 @@ export * from './capabilities'
 export {
     categoryColors,
     tierColors,
-    categoryIcons,
-    categoryIconShapes,
     componentIcon,
     moduleIcon,
     itemAbbreviations,
 } from './data/colors'
-export type {CategoryIconShape} from './data/colors'
 
 export {itemTier, itemOffset, itemCategory, isRelatedItem, isCraftedItem} from './data/tiers'
 export type {CraftedItemCategory} from './data/tiers'

@@ -29,11 +29,12 @@ test('entity cell renders abbreviation', () => {
     expect(svg).toContain('>SH<')
 })
 
-test('resource cell renders category icon (no abbreviation)', () => {
+test('resource cell renders the detailed resource SVG icon', () => {
     const resolved = resolveItem(101)
     const svg = renderItemCell({resolved, size: 48})
     expect(svg).not.toMatch(/>[A-Z]{2,3}</)
-    expect(svg).toMatch(/<(polygon|circle|rect)\b/)
+    expect(svg).toContain('data-resource="ore"')
+    expect(svg).toContain('#C26D3F')
 })
 
 test('quantity renders as plain bold number when quantity > 1', () => {
@@ -73,11 +74,19 @@ test('abbreviation cell uses proportional font size for different sizes', () => 
     expect(svg80).toContain('font-size="22"')
 })
 
-test('resource icon renders in stroke-only mode', () => {
-    const resolved = resolveItem(101)
+test('resource cell uses the same icon pipeline for gas', () => {
+    const resolved = resolveItem(301)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('fill="none"')
-    expect(svg).toContain('stroke-width="1.5"')
+    expect(svg).toContain('data-resource="gas"')
+    expect(svg).toContain('#B877FF')
+    expect(svg).not.toContain('#B8E4A0')
+})
+
+test('resource cell does not crash when category is missing', () => {
+    const resolved = {...resolveItem(101), category: undefined}
+    const svg = renderItemCell({resolved, size: 48})
+    expect(svg.startsWith('<svg ')).toBe(true)
+    expect(svg).not.toContain('data-resource=')
 })
 
 test('matches golden SVG snapshot per itemType', () => {

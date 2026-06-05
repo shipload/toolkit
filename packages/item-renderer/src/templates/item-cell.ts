@@ -1,8 +1,8 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {tierColors, categoryColors, categoryIconShapes} from '@shipload/sdk'
+import {tierColors} from '@shipload/sdk'
 import {el} from '../primitives/svg.ts'
 import {text} from '../primitives/text.ts'
-import {categoryIconPath} from '../primitives/category-icon.ts'
+import {resourceIcon} from '../primitives/resource-icon.ts'
 import {tokens} from '../tokens/index.ts'
 
 export interface ItemCellProps {
@@ -48,16 +48,11 @@ function cellInner(props: ItemCellProps): string {
             family: tokens.typography.display,
         })
     } else if (props.resolved.category) {
-        const shape = categoryIconShapes[props.resolved.category]
-        const color = categoryColors[props.resolved.category]
-        const iconCy = size * 0.4
-        content = categoryIconPath({
-            shape,
-            cx,
-            cy: iconCy,
-            size: size * 0.32,
-            color,
-            strokeWidth: 1.5,
+        const iconSize = Math.round(size * 0.66)
+        content = resourceIcon(props.resolved.category, {
+            x: (size - iconSize) / 2,
+            y: Math.round(size * 0.12),
+            size: iconSize,
         })
     } else if (props.resolved.icon) {
         content = text({

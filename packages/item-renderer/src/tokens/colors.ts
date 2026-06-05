@@ -1,4 +1,4 @@
-import {tierColors} from '@shipload/sdk'
+import {categoryColors, tierColors} from '@shipload/sdk'
 
 export const colors = {
     surface: {
@@ -18,13 +18,7 @@ export const colors = {
         teal: '#2fd6d1',
         cyan: '#6cb9ff',
     },
-    category: {
-        ore: '#C26D3F',
-        crystal: '#4ADBFF',
-        gas: '#B8E4A0',
-        regolith: '#C4A57B',
-        biomass: '#5A8B3E',
-    },
+    category: categoryColors,
     tier: tierColors,
     accent: {
         component: '#7E93C4',

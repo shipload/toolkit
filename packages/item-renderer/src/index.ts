@@ -32,9 +32,14 @@ export {tokens} from './tokens/index.ts'
 export type {Tokens} from './tokens/index.ts'
 export type {CategoryColorKey, TierColorKey} from './tokens/colors.ts'
 
-// Category icon primitive
-export {categoryIconSvg, categoryIconPath} from './primitives/category-icon.ts'
-export type {CategoryIconPathOpts, CategoryIconSvgOpts} from './primitives/category-icon.ts'
+// Resource icon primitive
+export {
+    resourceIcon,
+    resourceIconBody,
+    resourceIconCategories,
+    resourceIconSvg,
+} from './primitives/resource-icon.ts'
+export type {ResourceIconInlineOpts, ResourceIconSvgOpts} from './primitives/resource-icon.ts'
 
 // Item cell templates
 export {renderItemCell, itemCellGroup} from './templates/item-cell.ts'
@@ -61,4 +66,3 @@ export {
     type ResolvedModuleSlot,
     type ResolvedAttributeGroup,
 } from '@shipload/sdk'
-export type {CategoryIconShape} from '@shipload/sdk'

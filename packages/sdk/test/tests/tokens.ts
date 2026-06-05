@@ -1,8 +1,7 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
-    type CategoryIconShape,
-    categoryIconShapes,
+    categoryColors,
     ITEM_ENGINE_T1,
     ITEM_PLATE,
     ITEM_SHIP_T1_PACKED,
@@ -32,18 +31,13 @@ describe('tokens', () => {
         })
     })
 
-    describe('categoryIconShapes', () => {
-        test('maps each resource category to a shape name', () => {
-            assert.equal(categoryIconShapes.ore, 'hex')
-            assert.equal(categoryIconShapes.crystal, 'diamond')
-            assert.equal(categoryIconShapes.gas, 'circle')
-            assert.equal(categoryIconShapes.regolith, 'square')
-            assert.equal(categoryIconShapes.biomass, 'star')
-        })
-
-        test('CategoryIconShape type accepts the five known values', () => {
-            const shapes: CategoryIconShape[] = ['hex', 'diamond', 'star', 'circle', 'square']
-            assert.equal(shapes.length, 5)
+    describe('categoryColors', () => {
+        test('uses the final resource palette', () => {
+            assert.equal(categoryColors.ore, '#C26D3F')
+            assert.equal(categoryColors.crystal, '#4ADBFF')
+            assert.equal(categoryColors.gas, '#B877FF')
+            assert.equal(categoryColors.regolith, '#C4A57B')
+            assert.equal(categoryColors.biomass, '#5A8B3E')
         })
     })
 

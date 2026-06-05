@@ -2,12 +2,11 @@ import type {ResolvedItem} from '@shipload/sdk'
 import {getStatDefinitions, categoryColors, formatLocation} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
-import {iconHex} from '../primitives/icon-hex.ts'
+import {resourceIcon} from '../primitives/resource-icon.ts'
 import {statBar} from '../primitives/stat-bar.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {tokens} from '../tokens/index.ts'
 import {
-    shortCode,
     formatMass,
     tierBorder,
     metaRowBlock,
@@ -96,12 +95,9 @@ export function renderResource(
         tone: identity,
     })
 
-    const icon = iconHex({
-        x: pad,
-        y: pad + ICON_Y,
-        color: identity,
-        code: shortCode(resolved.itemId),
-    })
+    const icon = resolved.category
+        ? resourceIcon(resolved.category, {x: pad, y: pad + ICON_Y - 2, size: 28})
+        : ''
 
     const name = titleText(pad + 34, pad + 22, resolved)
 

@@ -48,24 +48,24 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     210: {name: 'Crystal', description: '', color: '#4ADBFF'},
 
     // === Resources / Gas ===
-    301: {name: 'Gas', description: 'Raw volatile gas.', color: '#B8E4A0'},
+    301: {name: 'Gas', description: 'Raw volatile gas.', color: '#B877FF'},
     302: {
         name: 'Gas',
         description: 'Refined volatile gas with improved reactivity.',
-        color: '#B8E4A0',
+        color: '#B877FF',
     },
     303: {
         name: 'Gas',
         description: 'High-grade volatile gas with exceptional energy density.',
-        color: '#B8E4A0',
+        color: '#B877FF',
     },
-    304: {name: 'Gas', description: '', color: '#B8E4A0'},
-    305: {name: 'Gas', description: '', color: '#B8E4A0'},
-    306: {name: 'Gas', description: '', color: '#B8E4A0'},
-    307: {name: 'Gas', description: '', color: '#B8E4A0'},
-    308: {name: 'Gas', description: '', color: '#B8E4A0'},
-    309: {name: 'Gas', description: '', color: '#B8E4A0'},
-    310: {name: 'Gas', description: '', color: '#B8E4A0'},
+    304: {name: 'Gas', description: '', color: '#B877FF'},
+    305: {name: 'Gas', description: '', color: '#B877FF'},
+    306: {name: 'Gas', description: '', color: '#B877FF'},
+    307: {name: 'Gas', description: '', color: '#B877FF'},
+    308: {name: 'Gas', description: '', color: '#B877FF'},
+    309: {name: 'Gas', description: '', color: '#B877FF'},
+    310: {name: 'Gas', description: '', color: '#B877FF'},
 
     // === Resources / Regolith ===
     401: {name: 'Regolith', description: 'Crude regolith dust.', color: '#C4A57B'},
@@ -160,7 +160,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         name: 'Reactor',
         description:
             'Gas-pressurized vessel for controlled reactions. Vents heat and contains volatility.',
-        color: '#B8E4A0',
+        color: '#B877FF',
     },
     10010: {
         name: 'Emitter',
@@ -194,7 +194,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         name: 'Crafter',
         description:
             'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
-        color: '#B8E4A0',
+        color: '#B877FF',
     },
     10105: {
         name: 'Storage',
