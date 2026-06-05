@@ -29,6 +29,13 @@ permission = active
 ; [history]
 ; url = https://history.example.test
 
+; Uncomment to override the contract accounts the CLI targets. Defaults:
+; game = eon.shipload, platform = nex.shipload, atomicassets = atomicassets.
+; Set 'atomicassets' to the deployed AtomicAssets account on a testnet, e.g.
+; atomic.gm on Jungle 4, so wrap --claim-ram and unwrap target the right contract.
+; [contracts]
+; atomicassets = atomic.gm
+
 ; Uncomment to run the multi-oracle commit/reveal beacon as an operator.
 ; 'handle' is your oracle_id and sub-permission name (a-z/1-5/dots, <=12, no underscores).
 ; The key must be registered under <game contract>@<handle>.

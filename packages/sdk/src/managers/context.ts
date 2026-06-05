@@ -27,7 +27,8 @@ export class GameContext {
     constructor(
         public readonly client: APIClient,
         public readonly server: Contract,
-        public readonly platform: Contract
+        public readonly platform: Contract,
+        public readonly atomicAssetsAccount: string = 'atomicassets'
     ) {}
 
     get entities(): EntitiesManager {

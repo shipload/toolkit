@@ -2,7 +2,7 @@ import {expect, test} from 'bun:test'
 import {mkdtempSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {ConfigError, hasOracleConfig, loadOracleConfig} from './config'
+import {ConfigError, hasOracleConfig, loadConfig, loadOracleConfig} from './config'
 
 function writeConfig(body: string): string {
     const dir = mkdtempSync(join(tmpdir(), 'oracle-cfg-'))
@@ -79,6 +79,26 @@ test('hasOracleConfig is true when an [oracle] handle is present', () => {
 test('hasOracleConfig is false when there is no [oracle] section', () => {
     const dir = writeConfig(['[default]', 'private_key = PVT_K1_a', 'actor = someplayer'].join('\n'))
     expect(hasOracleConfig(opts(dir))).toBe(false)
+})
+
+test('atomicAssetsContract defaults to atomicassets', () => {
+    const dir = writeConfig(['[default]', 'private_key = PVT_K1_a', 'actor = someplayer'].join('\n'))
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.atomicAssetsContract).toBe('atomicassets')
+})
+
+test('atomicAssetsContract reads [contracts] atomicassets', () => {
+    const dir = writeConfig(
+        [
+            '[default]',
+            'private_key = PVT_K1_a',
+            'actor = someplayer',
+            '[contracts]',
+            'atomicassets = atomic.gm',
+        ].join('\n')
+    )
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.atomicAssetsContract).toBe('atomic.gm')
 })
 
 test('explicit actor and permission override the defaults', () => {

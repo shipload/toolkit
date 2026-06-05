@@ -19,6 +19,7 @@ import {client, server} from '../../lib/client'
 import {formatItem, jsonStringify} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
 import {getAccountName} from '../../lib/session'
+import {buildClaimCommand} from '../action/nft-claim'
 import {buildDeployCommand} from '../action/nft-deploy'
 import {buildUnwrapCommand} from '../action/nft-unwrap'
 
@@ -193,4 +194,5 @@ export function register(program: Command): void {
         )
     nft.addCommand(buildDeployCommand())
     nft.addCommand(buildUnwrapCommand())
+    nft.addCommand(buildClaimCommand())
 }

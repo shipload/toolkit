@@ -11,6 +11,7 @@ import {
 import {deserializeAtomicData, type SchemaField} from './atomicdata'
 import {deserializeAsset, type NFTCargoItem, type NFTModuleSlot} from './deserializers'
 import type {ImmutableEntry} from './buildImmutableData'
+import atomicAssetsAbi from './atomicassets.abi.json'
 
 const PLACEHOLDER_AUTH = PermissionLevel.from({
     actor: '............1',
@@ -19,6 +20,8 @@ const PLACEHOLDER_AUTH = PermissionLevel.from({
 
 export const ATOMICASSETS_ACCOUNT = 'atomicassets'
 export const SHIPLOAD_COLLECTION = 'shipload'
+
+export const ATOMICASSETS_ABI = ABI.from(atomicAssetsAbi as ABIDef)
 
 const ATOMIC_ATTRIBUTE_VARIANT_NAME =
     'variant_int8_int16_int32_int64_uint8_uint16_uint32_uint64_float32_float64_string_INT8_VEC_INT16_VEC_INT32_VEC_INT64_VEC_UINT8_VEC_UINT16_VEC_UINT32_VEC_UINT64_VEC_FLOAT_VEC_DOUBLE_VEC_STRING_VEC'

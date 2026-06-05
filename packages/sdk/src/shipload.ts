@@ -18,6 +18,7 @@ interface ShiploadOptions {
     serverContractName?: string
     client?: APIClient
     subscriptionsUrl?: string
+    atomicAssetsAccount?: string
 }
 
 interface ShiploadConstructorOptions extends ShiploadOptions {
@@ -40,7 +41,12 @@ export class Shipload {
             ? serverContract
             : new ServerContract.Contract({client: apiClient})
 
-        this._context = new GameContext(apiClient, server, platform)
+        this._context = new GameContext(
+            apiClient,
+            server,
+            platform,
+            constructorOptions?.atomicAssetsAccount ?? 'atomicassets'
+        )
 
         if (constructorOptions?.subscriptionsUrl) {
             this._context.setSubscriptionsUrl(constructorOptions.subscriptionsUrl)

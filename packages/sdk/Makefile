@@ -25,6 +25,17 @@ sync-catalog:
 	cp $(CATALOG_SRC)/kind-registry.json src/data/kind-registry.json
 	@echo "Catalog synced from $(CATALOG_SRC)"
 
+ATOMICASSETS_ABI_SRC ?= ../../../atomicassets-contract/atomicassets.abi
+
+.PHONY: sync-abi
+sync-abi:
+	@if [ ! -f "$(ATOMICASSETS_ABI_SRC)" ]; then \
+		echo "Error: $(ATOMICASSETS_ABI_SRC) not found. Build atomicassets-contract first."; \
+		exit 1; \
+	fi
+	cp $(ATOMICASSETS_ABI_SRC) src/nft/atomicassets.abi.json
+	@echo "AtomicAssets ABI synced from $(ATOMICASSETS_ABI_SRC)"
+
 .PHONY: dev
 dev: node_modules
 	@onchange -k -i 'src/**/*.ts' 'config/*' -- ${BIN}/rollup -c && touch lib

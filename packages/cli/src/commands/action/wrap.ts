@@ -15,16 +15,20 @@ export interface WrapOpts {
     nexusId: bigint
     cargoId: bigint
     quantity: bigint
+    claimRam?: boolean
 }
 
 export async function buildAction(opts: WrapOpts, shipload?: Shipload): Promise<Action[]> {
     const sl = shipload ?? (await getShipload())
-    return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, opts.cargoId, opts.quantity)
+    return sl.actions.wrap(opts.owner, opts.entityId, opts.nexusId, opts.cargoId, opts.quantity, {
+        claimRam: opts.claimRam,
+    })
 }
 
 interface WrapCliOptions {
     wait?: boolean
     track?: boolean
+    claimRam?: boolean
 }
 
 export async function runWrap(
@@ -41,6 +45,7 @@ export async function runWrap(
         nexusId,
         cargoId,
         quantity,
+        claimRam: options.claimRam,
     })
     const result = await transact(
         {actions},
@@ -100,6 +105,14 @@ Use \`shiploadcli ship N cargo\` to list cargo rows with their ids.`
             )
             .argument('<cargo-id>', 'cargo row id (primary key from the cargo table)', parseUint64)
             .argument('<quantity>', 'amount to wrap', parseUint64)
+            .option(
+                '--claim-ram',
+                'Force-bundle the atomicassets setlastpayer RAM claim into the wrap (on by default when the configured atomicassets account is non-canonical)'
+            )
+            .option(
+                '--no-claim-ram',
+                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the NFT is consumed or burned'
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(

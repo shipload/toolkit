@@ -211,7 +211,8 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         nexusId: UInt64Type,
         cargoId: UInt64Type,
-        quantity: UInt64Type
+        quantity: UInt64Type,
+        opts: {claimRam?: boolean} = {}
     ): Promise<Action[]> {
         return [
             this.platform.action('wrapcargo', {
@@ -223,6 +224,12 @@ export class ActionsManager extends BaseManager {
                 quantity: UInt64.from(quantity),
             }),
         ]
+        const claimRam =
+            opts.claimRam ?? (this.atomicAssetsAccount ?? 'atomicassets') !== 'atomicassets'
+        if (claimRam) {
+            actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
+        }
+        return actions
     }
 
     undeploy(hostId: UInt64Type, targetId: UInt64Type): Action {
@@ -235,9 +242,10 @@ export class ActionsManager extends BaseManager {
     async wrapEntity(
         owner: NameType,
         entityId: UInt64Type,
-        nexusId: UInt64Type
+        nexusId: UInt64Type,
+        opts: {claimRam?: boolean} = {}
     ): Promise<Action[]> {
-        return [
+        const actions: Action[] = [
             this.platform.action('wrapentity', {
                 game: this.server.account,
                 owner: Name.from(owner),
@@ -245,6 +253,12 @@ export class ActionsManager extends BaseManager {
                 nexus_id: UInt64.from(nexusId),
             }),
         ]
+        const claimRam =
+            opts.claimRam ?? (this.atomicAssetsAccount ?? 'atomicassets') !== 'atomicassets'
+        if (claimRam) {
+            actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
+        }
+        return actions
     }
 
     placecargo(owner: NameType, hostId: UInt64Type, assetId: UInt64Type): Action {
@@ -264,17 +278,20 @@ export class ActionsManager extends BaseManager {
     }
 
     transferForUnwrap(owner: NameType, assetId: UInt64Type): Action {
-        return Action.from({
-            account: 'atomicassets',
-            name: 'transfer',
-            authorization: [{actor: Name.from(owner), permission: 'active'}],
-            data: {
-                from: Name.from(owner),
-                to: this.platform.account,
-                asset_ids: [UInt64.from(assetId)],
-                memo: 'unwrap',
+        return Action.from(
+            {
+                account: this.atomicAssetsAccount,
+                name: 'transfer',
+                authorization: [{actor: Name.from(owner), permission: 'active'}],
+                data: {
+                    from: Name.from(owner),
+                    to: this.platform.account,
+                    asset_ids: [UInt64.from(assetId)],
+                    memo: 'unwrap',
+                },
             },
-        })
+            ATOMICASSETS_ABI
+        )
     }
 
     // Two top-level actions the wallet signs to unwrap an NFT into a host's cargo.
@@ -291,12 +308,27 @@ export class ActionsManager extends BaseManager {
     }
 
     setRamPayer(newPayer: NameType, assetId: UInt64Type): Action {
-        return Action.from({
-            account: 'atomicassets',
-            name: 'setrampayer',
-            authorization: [{actor: Name.from(newPayer), permission: 'active'}],
-            data: {new_payer: Name.from(newPayer), asset_id: UInt64.from(assetId)},
-        })
+        return Action.from(
+            {
+                account: this.atomicAssetsAccount,
+                name: 'setrampayer',
+                authorization: [{actor: Name.from(newPayer), permission: 'active'}],
+                data: {new_payer: Name.from(newPayer), asset_id: UInt64.from(assetId)},
+            },
+            ATOMICASSETS_ABI
+        )
+    }
+
+    setLastPayer(owner: NameType, collectionName: NameType): Action {
+        return Action.from(
+            {
+                account: this.atomicAssetsAccount,
+                name: 'setlastpayer',
+                authorization: [{actor: Name.from(owner), permission: 'active'}],
+                data: {owner: Name.from(owner), collection_name: Name.from(collectionName)},
+            },
+            ATOMICASSETS_ABI
+        )
     }
 
     demolish(entityId: UInt64Type): Action {

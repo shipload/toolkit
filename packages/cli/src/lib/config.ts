@@ -36,6 +36,7 @@ export interface PlayerConfig {
 	historyUrl?: string;
 	gameContract: string;
 	platformContract: string;
+	atomicAssetsContract: string;
 	track: TrackConfig;
 }
 
@@ -87,6 +88,7 @@ interface ParsedSection {
 	historyUrl?: string;
 	gameContract?: string;
 	platformContract?: string;
+	atomicAssets?: string;
 	trackDefaultSort?: string;
 	trackDefaultTypeFilter?: string;
 	trackDefaultStatusFilter?: string;
@@ -126,6 +128,7 @@ function parseIniFile(path: string): ParsedSection {
 		historyUrl: history.url as string | undefined,
 		gameContract: contracts.game as string | undefined,
 		platformContract: contracts.platform as string | undefined,
+		atomicAssets: contracts.atomicassets as string | undefined,
 		trackDefaultSort: track.default_sort as string | undefined,
 		trackDefaultTypeFilter: track.default_type_filter as string | undefined,
 		trackDefaultStatusFilter: track.default_status_filter as string | undefined,
@@ -207,6 +210,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		historyUrl: fileData.historyUrl,
 		gameContract: fileData.gameContract ?? "eon.shipload",
 		platformContract: fileData.platformContract ?? "nex.shipload",
+		atomicAssetsContract: fileData.atomicAssets ?? "atomicassets",
 		track,
 		source,
 	};

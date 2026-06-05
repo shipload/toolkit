@@ -15,6 +15,10 @@ export abstract class BaseManager {
         return this.context.platform
     }
 
+    protected get atomicAssetsAccount() {
+        return this.context.atomicAssetsAccount
+    }
+
     protected async getGame() {
         return this.context.getGame()
     }

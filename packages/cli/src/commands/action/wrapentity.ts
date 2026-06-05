@@ -10,15 +10,17 @@ import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 export async function buildAction(
     ctx: EntityContext,
     owner: string,
-    nexusId: bigint
+    nexusId: bigint,
+    claimRam?: boolean
 ): Promise<Action[]> {
     const shipload = await getShipload()
-    return shipload.actions.wrapEntity(owner, ctx.entityId, nexusId)
+    return shipload.actions.wrapEntity(owner, ctx.entityId, nexusId, {claimRam})
 }
 
 interface WrapEntityCliOptions {
     wait?: boolean
     track?: boolean
+    claimRam?: boolean
 }
 
 export async function runWrapEntity(
@@ -28,7 +30,7 @@ export async function runWrapEntity(
 ): Promise<void> {
     await withValidation(async () => {
         const owner = getAccountName()
-        const actions = await buildAction(ctx, owner, nexusId)
+        const actions = await buildAction(ctx, owner, nexusId, options.claimRam)
         const result = await transact(
             {actions},
             {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into NFT`}
@@ -54,6 +56,14 @@ Example:
 `
             )
             .argument('<nexus-id>', 'nexus id (entity must be at this nexus)', parseUint64)
+            .option(
+                '--claim-ram',
+                'Force-bundle the atomicassets setlastpayer RAM claim (on by default when the configured atomicassets account is non-canonical)'
+            )
+            .option(
+                '--no-claim-ram',
+                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the NFT is consumed or burned'
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(async (nexusId: bigint, opts: WrapEntityCliOptions) => {
