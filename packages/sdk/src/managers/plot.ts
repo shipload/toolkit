@@ -6,7 +6,7 @@ import {calc_craft_duration} from '../capabilities/crafting'
 import {TaskType} from '../types'
 import {BaseManager} from './base'
 import type {ServerContract} from '../contracts'
-import type {BuildableTarget} from './construction-types'
+import type {BuildableTarget, ScheduledBuild} from './construction-types'
 
 export interface PlotProgressInputRow {
     itemId: number
@@ -67,7 +67,8 @@ export class PlotManager extends BaseManager {
     buildableTarget(
         plot: ServerContract.Types.entity_row,
         cargo: ServerContract.Types.cargo_row[],
-        activeTask?: ServerContract.Types.task
+        activeTask?: ServerContract.Types.task,
+        scheduledBuild?: ScheduledBuild
     ): BuildableTarget {
         const progress = this.progress(plot, cargo)
         const targetItemId = Number(plot.item_id.toString())
@@ -79,10 +80,12 @@ export class PlotManager extends BaseManager {
 
         let state: BuildableTarget['state']
         const taskType = activeTask?.type.toNumber()
-        if (taskType === TaskType.CLAIMPLOT) {
-            state = 'initializing'
-        } else if (taskType === TaskType.BUILDPLOT) {
+        if (scheduledBuild?.hasStarted) {
             state = 'finalizing'
+        } else if (scheduledBuild) {
+            state = 'scheduled'
+        } else if (taskType === TaskType.CLAIMPLOT) {
+            state = 'initializing'
         } else if (progress.isComplete) {
             state = 'ready'
         } else {
@@ -101,6 +104,7 @@ export class PlotManager extends BaseManager {
             finalizeAction: Name.from('buildplot'),
             finalizerCapability: 'crafter',
             activeTask,
+            scheduledBuild,
         }
     }
 

@@ -20,5 +20,6 @@ export type {
     FinalizerEntityRef,
     FinalizerCapability,
     InboundTransfer,
+    ScheduledBuild,
     Reservation,
 } from './construction-types'

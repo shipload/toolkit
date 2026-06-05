@@ -10,6 +10,7 @@ import type {
     FinalizerEntityRef,
     InboundTransfer,
     Reservation,
+    ScheduledBuild,
     SourceCargoStack,
     SourceEntityRef,
 } from './construction-types'
@@ -22,11 +23,12 @@ export class ConstructionManager extends BaseManager {
     getTarget(
         entity: ServerContract.Types.entity_row,
         cargo: ServerContract.Types.cargo_row[],
-        activeTask?: ServerContract.Types.task
+        activeTask?: ServerContract.Types.task,
+        scheduledBuild?: ScheduledBuild
     ): BuildableTarget | null {
         const kind = entity.kind.toString()
         if (kind === 'plot') {
-            return this.plot.buildableTarget(entity, cargo, activeTask)
+            return this.plot.buildableTarget(entity, cargo, activeTask, scheduledBuild)
         }
         return null
     }
@@ -138,6 +140,53 @@ export class ConstructionManager extends BaseManager {
             out.set(targetId, Array.from(perTarget.values()))
         }
         return out
+    }
+
+    scheduledBuildFor(
+        plotId: UInt64,
+        entities: ServerContract.Types.entity_info[],
+        now: Date
+    ): ScheduledBuild | null {
+        return this.scheduledBuildsByTarget(entities, now).get(plotId.toString()) ?? null
+    }
+
+    scheduledBuildsByTarget(
+        entities: ServerContract.Types.entity_info[],
+        now: Date
+    ): Map<string, ScheduledBuild> {
+        const nowMs = now.getTime()
+        const best = new Map<string, ScheduledBuild>()
+        for (const entity of entities) {
+            const schedule = entity.schedule
+            if (!schedule) continue
+            const startedMs = schedule.started.toDate().getTime()
+            const tasks = schedule.tasks
+            let cumulativeSec = 0
+            for (let i = 0; i < tasks.length; i++) {
+                const task = tasks[i]
+                const startSec = cumulativeSec
+                cumulativeSec += task.duration.toNumber()
+                if (task.type.toNumber() !== TaskType.BUILDPLOT) continue
+                if (!task.entitytarget) continue
+                const completesAt = startedMs + cumulativeSec * 1000
+                if (completesAt < nowMs) continue
+                const startsAt = startedMs + startSec * 1000
+                const targetId = task.entitytarget.entity_id.toString()
+                const candidate: ScheduledBuild = {
+                    shipId: entity.id,
+                    shipName: entity.entity_name || entity.id.toString(),
+                    hasStarted: startsAt <= nowMs,
+                    startsAt,
+                    completesAt,
+                    trailingCancelCount: tasks.length - 1 - i,
+                }
+                const existing = best.get(targetId)
+                if (!existing || candidate.completesAt < existing.completesAt) {
+                    best.set(targetId, candidate)
+                }
+            }
+        }
+        return best
     }
 
     reservationsFrom(

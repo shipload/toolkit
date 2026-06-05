@@ -17,6 +17,7 @@ import {
 import {BaseManager} from './base'
 import type {CoordinatesType} from '../types'
 import {ServerContract} from '../contracts'
+import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 
 export type EntityRefInput = {
     entityType: NameType
@@ -206,6 +207,18 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    swapmodule(
+        entityId: UInt64Type,
+        moduleIndex: number,
+        moduleRef: ServerContract.ActionParams.Type.cargo_ref
+    ): Action {
+        return this.server.action('swapmodule', {
+            entity_id: UInt64.from(entityId),
+            module_index: moduleIndex,
+            module_ref: moduleRef,
+        })
+    }
+
     async wrap(
         owner: NameType,
         entityId: UInt64Type,
@@ -214,7 +227,7 @@ export class ActionsManager extends BaseManager {
         quantity: UInt64Type,
         opts: {claimRam?: boolean} = {}
     ): Promise<Action[]> {
-        return [
+        const actions: Action[] = [
             this.platform.action('wrapcargo', {
                 game: this.server.account,
                 owner: Name.from(owner),

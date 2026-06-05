@@ -60,6 +60,7 @@ export type {
     FinalizerEntityRef,
     FinalizerCapability,
     InboundTransfer,
+    ScheduledBuild,
     Reservation,
 } from './managers'
 export type {EntityRefInput} from './managers/actions'

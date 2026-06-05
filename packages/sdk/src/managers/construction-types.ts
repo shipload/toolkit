@@ -4,7 +4,7 @@ import type {Item} from '../types'
 import type {Recipe} from '../data/recipes-runtime'
 import type {PlotProgress} from './plot'
 
-export type BuildState = 'initializing' | 'accepting' | 'ready' | 'finalizing'
+export type BuildState = 'initializing' | 'accepting' | 'ready' | 'scheduled' | 'finalizing'
 
 export type FinalizerCapability = 'crafter'
 
@@ -20,6 +20,7 @@ export interface BuildableTarget {
     finalizeAction: Name
     finalizerCapability: FinalizerCapability
     activeTask?: ServerContract.Types.task
+    scheduledBuild?: ScheduledBuild
 }
 
 export interface SourceEntityRef {
@@ -58,6 +59,15 @@ export interface InboundTransfer {
     itemId: number
     quantity: number
     etaSeconds: number
+}
+
+export interface ScheduledBuild {
+    shipId: UInt64
+    shipName: string
+    hasStarted: boolean
+    startsAt: number
+    completesAt: number
+    trailingCancelCount: number
 }
 
 export interface Reservation {
