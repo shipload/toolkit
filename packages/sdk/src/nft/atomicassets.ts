@@ -150,6 +150,7 @@ export interface AtomicSchemaRow {
 export interface FetchAssetsOptions {
     collection?: NameType
     pageSize?: number
+    account?: NameType
 }
 
 export async function fetchAtomicAssetsForOwner(
@@ -159,11 +160,12 @@ export async function fetchAtomicAssetsForOwner(
 ): Promise<AtomicAssetRow[]> {
     const collection = opts.collection ? String(Name.from(opts.collection)) : undefined
     const pageSize = opts.pageSize ?? 1000
+    const account = Name.from(opts.account ?? ATOMICASSETS_ACCOUNT)
     const out: AtomicAssetRow[] = []
     let lower: UInt64 | undefined
     while (true) {
         const res = await client.v1.chain.get_table_rows({
-            code: Name.from(ATOMICASSETS_ACCOUNT),
+            code: account,
             scope: String(Name.from(owner)),
             table: Name.from('assets'),
             limit: pageSize,
@@ -181,13 +183,14 @@ export async function fetchAtomicAssetsForOwner(
 
 export async function fetchAtomicSchemas(
     client: APIClient,
-    collection: NameType
+    collection: NameType,
+    account: NameType = ATOMICASSETS_ACCOUNT
 ): Promise<AtomicSchemaRow[]> {
     const out: AtomicSchemaRow[] = []
     let lower: Name | undefined
     while (true) {
         const res = await client.v1.chain.get_table_rows({
-            code: Name.from(ATOMICASSETS_ACCOUNT),
+            code: Name.from(account),
             scope: String(Name.from(collection)),
             table: Name.from('schemas'),
             limit: 100,

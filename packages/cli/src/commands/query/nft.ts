@@ -15,7 +15,7 @@ import {
 import Table from 'cli-table3'
 import type {Command} from 'commander'
 import {parseUint32} from '../../lib/args'
-import {client, server} from '../../lib/client'
+import {atomicAssetsContractName, client, server} from '../../lib/client'
 import {formatItem, jsonStringify} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
 import {getAccountName} from '../../lib/session'
@@ -70,8 +70,11 @@ function toRow(asset: AtomicAssetRow, schema: AtomicSchemaRow, itemId: number): 
 
 export async function fetchNftRows(owner: string): Promise<NftRow[]> {
     const [assets, schemas, templateMap] = await Promise.all([
-        fetchAtomicAssetsForOwner(client, owner, {collection: SHIPLOAD_COLLECTION}),
-        fetchAtomicSchemas(client, SHIPLOAD_COLLECTION),
+        fetchAtomicAssetsForOwner(client, owner, {
+            collection: SHIPLOAD_COLLECTION,
+            account: atomicAssetsContractName,
+        }),
+        fetchAtomicSchemas(client, SHIPLOAD_COLLECTION, atomicAssetsContractName),
         loadNftConfig(),
     ])
     const schemaByName = indexSchemas(schemas)

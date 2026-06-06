@@ -86,6 +86,10 @@ export class Shipload {
         return this._context.client
     }
 
+    get atomicAssetsAccount(): string {
+        return this._context.atomicAssetsAccount
+    }
+
     get server(): Contract {
         return this._context.server
     }
