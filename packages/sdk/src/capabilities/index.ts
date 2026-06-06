@@ -1,7 +1,6 @@
 export * from './guards'
 export * from './movement'
 export * from './storage'
-export * from './loading'
 export * from './gathering'
 export * from './crafting'
 export * from './modules'
