@@ -60,7 +60,10 @@ export function scheduleRemaining(entity: ScheduleData, now: Date): number {
 }
 
 export function scheduleComplete(entity: ScheduleData, now: Date): boolean {
-    return hasSchedule(entity) && scheduleRemaining(entity, now) === 0
+    if (!hasSchedule(entity)) return false
+    if ((entity.schedule?.tasks ?? []).some((t) => t.type.toNumber() === TaskType.RESERVED))
+        return false
+    return scheduleRemaining(entity, now) === 0
 }
 
 export function currentTaskIndex(entity: ScheduleData, now: Date): number {
@@ -123,6 +126,8 @@ export function getTaskRemaining(entity: ScheduleData, index: number, now: Date)
 
 export function isTaskComplete(entity: ScheduleData, index: number, now: Date): boolean {
     if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return false
+
+    if (entity.schedule.tasks[index].type.toNumber() === TaskType.RESERVED) return false
 
     const taskDuration = entity.schedule.tasks[index].duration.toNumber()
     const taskElapsed = getTaskElapsed(entity, index, now)

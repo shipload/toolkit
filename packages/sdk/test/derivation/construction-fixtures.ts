@@ -25,6 +25,7 @@ export interface MakeTaskOpts {
     duration: number
     target?: EntityRefStruct
     cargo?: Array<{itemId: number; qty: number}>
+    group?: number
 }
 
 export function makeTask(opts: MakeTaskOpts): TaskStruct {
@@ -41,6 +42,7 @@ export function makeTask(opts: MakeTaskOpts): TaskStruct {
             })
         ),
         entitytarget: opts.target,
+        entitygroup: opts.group !== undefined ? UInt64.from(opts.group) : undefined,
     })
 }
 
@@ -59,6 +61,53 @@ export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
         item_id: UInt16.from(1000),
         owner: OWNER,
         entity_name: opts.name ?? `Hauler #${opts.id}`,
+        cargomass: UInt32.from(0),
+        cargo: [],
+        coordinates: COORDS,
+        modules: [],
+        is_idle: tasks.length === 0,
+        current_task_elapsed: UInt32.from(0),
+        current_task_remaining: UInt32.from(0),
+        pending_tasks: [],
+        schedule:
+            tasks.length === 0
+                ? undefined
+                : ServerContract.Types.schedule.from({
+                      started: opts.scheduleStart ?? SCHEDULE_START,
+                      tasks,
+                  }),
+    })
+}
+
+export interface MakePlotOpts {
+    id: number
+    reserved?: {builderId: number; group?: number; duration: number}
+    scheduleStart?: TimePoint
+}
+
+export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
+    const tasks: TaskStruct[] = []
+    if (opts.reserved) {
+        tasks.push(
+            ServerContract.Types.task.from({
+                type: UInt8.from(16),
+                duration: UInt32.from(opts.reserved.duration),
+                cancelable: UInt8.from(2),
+                cargo: [],
+                entitytarget: entityRef('ship', opts.reserved.builderId),
+                entitygroup:
+                    opts.reserved.group !== undefined
+                        ? UInt64.from(opts.reserved.group)
+                        : undefined,
+            })
+        )
+    }
+    return ServerContract.Types.entity_info.from({
+        id: UInt64.from(opts.id),
+        type: Name.from('plot'),
+        item_id: UInt16.from(2000),
+        owner: OWNER,
+        entity_name: `Plot #${opts.id}`,
         cargomass: UInt32.from(0),
         cargo: [],
         coordinates: COORDS,

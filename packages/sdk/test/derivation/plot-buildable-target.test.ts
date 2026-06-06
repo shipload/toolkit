@@ -44,7 +44,8 @@ function scheduledBuild(hasStarted: boolean): ScheduledBuild {
         hasStarted,
         startsAt: 0,
         completesAt: 1,
-        trailingCancelCount: 0,
+        cancelable: true,
+        blockingTaskCount: 0,
     }
 }
 

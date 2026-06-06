@@ -67,7 +67,8 @@ export interface ScheduledBuild {
     hasStarted: boolean
     startsAt: number
     completesAt: number
-    trailingCancelCount: number
+    cancelable: boolean
+    blockingTaskCount: number
 }
 
 export interface Reservation {
