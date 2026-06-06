@@ -55,6 +55,7 @@ export enum TaskType {
     DEMOLISH = 13,
     CLAIMPLOT = 14,
     BUILDPLOT = 15,
+    RESERVED = 16,
 }
 
 export enum LocationType {
