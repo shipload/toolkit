@@ -13,3 +13,8 @@ export function projectedCoords(snap: EntitySnapshot): ProjectedCoords {
 		y: BigInt(projection.location.y.toString()),
 	};
 }
+
+export function projectedCargoMass(snap: EntitySnapshot): bigint {
+	const projection = projectFromCurrentState(snap as unknown as ProjectableSnapshot);
+	return BigInt(projection.cargoMass.toString());
+}

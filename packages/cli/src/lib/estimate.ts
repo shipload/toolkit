@@ -37,7 +37,7 @@ import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
-import { projectedCoords } from "./projection";
+import { projectedCargoMass, projectedCoords } from "./projection";
 import {
 	checkCargoCapacity,
 	checkDestinationIsSystem,
@@ -461,7 +461,6 @@ export async function estimateGather(params: {
 	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
 	const rawSnap = snap as any;
 	const rawCapacity = rawSnap.capacity ?? 0;
-	const rawCargomass = rawSnap.cargomass ?? 0;
 	const rawGen = rawSnap.generator;
 	const rawEnergy = rawSnap.energy;
 
@@ -469,7 +468,7 @@ export async function estimateGather(params: {
 		generatorCapacity: rawGen ? Number(String(rawGen.capacity ?? "0")) : 0,
 		currentEnergy: Number(String(rawEnergy ?? "0")),
 		energyCost: Number(energy),
-		availableCargo: Number(String(rawCapacity)) - Number(String(rawCargomass)),
+		availableCargo: Number(String(rawCapacity)) - Number(projectedCargoMass(snap)),
 		cargoDelta: itemMass * quantity,
 		reserveRemaining: Number(stratumResponse?.stratum?.reserve?.toString() ?? "0"),
 		quantity,
@@ -649,7 +648,6 @@ export async function estimateCraft(params: {
 	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
 	const rawCraftSnap = snap as any;
 	const craftCapacity = rawCraftSnap.capacity ?? 0;
-	const craftCargomass = rawCraftSnap.cargomass ?? 0;
 	const craftGen = rawCraftSnap.generator;
 	const craftEnergy = rawCraftSnap.energy;
 
@@ -663,7 +661,7 @@ export async function estimateCraft(params: {
 		generatorCapacity: craftGen ? Number(String(craftGen.capacity ?? "0")) : 0,
 		currentEnergy: Number(String(craftEnergy ?? "0")),
 		energyCost: energy,
-		availableCargo: Number(String(craftCapacity)) - Number(String(craftCargomass)),
+		availableCargo: Number(String(craftCapacity)) - Number(projectedCargoMass(snap)),
 		cargoDelta,
 		willRechargeFirst: recharge,
 		entity: { entityType: snap.type, entityId },

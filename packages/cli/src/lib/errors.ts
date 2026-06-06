@@ -151,3 +151,21 @@ export async function withValidation<T>(fn: () => Promise<T>): Promise<T> {
 		throw err;
 	}
 }
+
+export type PreflightOutcome =
+	| { kind: "abort"; error: ValidationError }
+	| { kind: "warn"; message: string };
+
+export function resolvePreflightError(err: unknown, force: boolean): PreflightOutcome | null {
+	if (err === undefined || err === null) return null;
+	if (err instanceof ValidationError) {
+		if (force) {
+			return {
+				kind: "warn",
+				message: `Warning: ${err.message} (proceeding due to --force)`,
+			};
+		}
+		return { kind: "abort", error: err };
+	}
+	throw err;
+}

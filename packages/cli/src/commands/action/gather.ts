@@ -12,11 +12,11 @@ import {
 import {decideUseRecharge} from '../../lib/auto-recharge'
 import {getGameSeed, getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {assertNotBoth, withValidation} from '../../lib/errors'
+import {assertNotBoth, printError, resolvePreflightError, withValidation} from '../../lib/errors'
 import {estimateGather} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {formatItem} from '../../lib/format'
-import {projectedCoords} from '../../lib/projection'
+import {projectedCargoMass, projectedCoords} from '../../lib/projection'
 import {resolveReach, shallowestPerItem} from '../../lib/reach'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
@@ -88,7 +88,7 @@ async function preflightGather(opts: GatherOpts): Promise<void> {
     const item = getItem(itemId)
     const itemMass = item.mass
     const capacity = Number((dest.capacity ?? 0).toString())
-    const currentMass = Number(dest.cargomass.toString())
+    const currentMass = Number(projectedCargoMass(dest))
     checkCapacity(capacity, currentMass, itemMass, opts.quantity)
 }
 
@@ -189,9 +189,19 @@ export async function runGather(
         console.log(renderEstimate(est))
         return
     }
-    await withValidation(async () => {
+    let preflightError: unknown
+    try {
         await preflightGather(gatherOpts)
-    })
+    } catch (err) {
+        preflightError = err
+    }
+    const preflight = resolvePreflightError(preflightError, Boolean(options.force))
+    if (preflight?.kind === 'abort') {
+        process.exit(printError(preflight.error))
+    }
+    if (preflight?.kind === 'warn') {
+        console.error(preflight.message)
+    }
     const useRecharge = await decideUseRecharge({
         rechargeRequested,
         autoRecharge: Boolean(options.autoRecharge),

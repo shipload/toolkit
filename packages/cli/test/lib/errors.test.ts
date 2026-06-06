@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { EXIT, extractChainError, printError } from "../../src/lib/errors";
+import { EXIT, extractChainError, printError, resolvePreflightError } from "../../src/lib/errors";
 import { ValidationError } from "../../src/lib/validate";
 
 describe("extractChainError", () => {
@@ -88,5 +88,34 @@ describe("printError", () => {
 		const joined = errSpy.mock.calls.map((c) => String(c[0])).join("\n");
 		expect(joined).toContain("cap exceeded");
 		expect(joined).toContain("--quantity 16");
+	});
+});
+
+describe("resolvePreflightError", () => {
+	test("no error → null", () => {
+		expect(resolvePreflightError(undefined, false)).toBeNull();
+	});
+
+	test("ValidationError without force → abort with the error", () => {
+		const err = new ValidationError("Cargo capacity would be exceeded: 9 > 7");
+		const outcome = resolvePreflightError(err, false);
+		expect(outcome.kind).toBe("abort");
+		expect(outcome).toMatchObject({ kind: "abort", error: err });
+	});
+
+	test("ValidationError with force → warn and proceed", () => {
+		const err = new ValidationError("Cargo capacity would be exceeded: 9 > 7");
+		const outcome = resolvePreflightError(err, true);
+		expect(outcome.kind).toBe("warn");
+		if (outcome.kind === "warn") {
+			expect(outcome.message).toContain("Cargo capacity would be exceeded");
+			expect(outcome.message).toContain("--force");
+		}
+	});
+
+	test("non-ValidationError → rethrows", () => {
+		const boom = new Error("network down");
+		expect(() => resolvePreflightError(boom, true)).toThrow("network down");
+		expect(() => resolvePreflightError(boom, false)).toThrow("network down");
 	});
 });
