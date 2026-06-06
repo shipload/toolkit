@@ -1,5 +1,22 @@
 # @shipload/cli
 
+## 1.0.0-next.29
+
+### Patch Changes
+
+- 26fc4af: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Pass atomicassets contract for queries
+  - Customizable Atomic contract names + helpers
+  - Balancing energy capacity to allow basic module crafting
+  - Add reserve type
+  - Schedule utilities for plot entities
+- Updated dependencies [26fc4af]
+  - @shipload/oracle@0.0.1-next.15
+  - @shipload/sdk@1.0.0-next.25
+
 ## 1.0.0-next.28
 
 ### Patch Changes
