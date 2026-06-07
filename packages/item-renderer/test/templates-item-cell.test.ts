@@ -1,7 +1,7 @@
 import {test, expect} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
 import {ITEM_PLATE, ITEM_ENGINE_T1, ITEM_SHIP_T1_PACKED} from '@shipload/sdk'
-import {renderItemCell, itemCellGroup} from '../src/templates/item-cell.ts'
+import {renderItemCell, itemCellGroup, abbreviateQuantity} from '../src/templates/item-cell.ts'
 
 test('renderItemCell returns a self-contained <svg>', () => {
     const resolved = resolveItem(ITEM_PLATE)
@@ -52,6 +52,34 @@ test('no quantity text when quantity is 1 or omitted', () => {
     expect(svgOne).not.toContain('>1<')
 })
 
+test('abbreviateQuantity compacts large counts', () => {
+    expect(abbreviateQuantity(999)).toBe('999')
+    expect(abbreviateQuantity(1500)).toBe('1.5k')
+    expect(abbreviateQuantity(123456)).toBe('123.5k')
+    expect(abbreviateQuantity(150000)).toBe('150k')
+    expect(abbreviateQuantity(1234567)).toBe('1.2m')
+    expect(abbreviateQuantity(2_000_000)).toBe('2m')
+})
+
+test('large quantity renders abbreviated in the cell', () => {
+    const resolved = resolveItem(ITEM_PLATE)
+    const svg = renderItemCell({resolved, quantity: 150000, size: 48})
+    expect(svg).toContain('>150k<')
+    expect(svg).not.toContain('>150000<')
+})
+
+test('quantityPrefix forces display (even of 1) and prefixes the sign', () => {
+    const resolved = resolveItem(ITEM_PLATE)
+    const svg = renderItemCell({resolved, quantity: 1, quantityPrefix: '+', size: 48})
+    expect(svg).toContain('>+1<')
+})
+
+test('quantityColor tints the quantity text', () => {
+    const resolved = resolveItem(ITEM_PLATE)
+    const svg = renderItemCell({resolved, quantity: 5, quantityColor: '#54d36e', size: 48})
+    expect(svg).toContain('fill="#54d36e"')
+})
+
 test('itemCellGroup returns <g> with translate, no <svg> wrapper', () => {
     const resolved = resolveItem(ITEM_PLATE)
     const g = itemCellGroup({resolved, size: 48, x: 100, y: 200})
@@ -70,8 +98,8 @@ test('abbreviation cell uses proportional font size for different sizes', () => 
     const resolved = resolveItem(ITEM_PLATE)
     const svg28 = renderItemCell({resolved, size: 28})
     const svg80 = renderItemCell({resolved, size: 80})
-    expect(svg28).toContain('font-size="8"')
-    expect(svg80).toContain('font-size="22"')
+    expect(svg28).toContain('font-size="10"')
+    expect(svg80).toContain('font-size="29"')
 })
 
 test('resource cell uses the same icon pipeline for gas', () => {

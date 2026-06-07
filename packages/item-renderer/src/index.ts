@@ -42,7 +42,7 @@ export {
 export type {ResourceIconInlineOpts, ResourceIconSvgOpts} from './primitives/resource-icon.ts'
 
 // Item cell templates
-export {renderItemCell, itemCellGroup} from './templates/item-cell.ts'
+export {renderItemCell, itemCellGroup, abbreviateQuantity} from './templates/item-cell.ts'
 export type {ItemCellProps, ItemCellGroupProps} from './templates/item-cell.ts'
 
 // Social card template (1200x630 OG image)
