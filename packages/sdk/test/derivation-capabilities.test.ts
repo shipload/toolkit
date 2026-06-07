@@ -1,6 +1,10 @@
 import {describe, expect, test} from 'bun:test'
 
-import {computeBaseCapacity} from '../src/derivation/capabilities'
+import {
+    computeBaseCapacity,
+    gathererDepthForTier,
+    GATHERER_DEPTH_TABLE,
+} from '../src/derivation/capabilities'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
@@ -56,5 +60,19 @@ describe('computeBaseCapacity', () => {
 
     test('unknown item IDs return 0 (contract parity)', () => {
         expect(computeBaseCapacity(99999, stats)).toBe(0)
+    })
+})
+
+describe('gathererDepthForTier (T10 depth ceiling)', () => {
+    test('max-tol T10 reaches LOCATION_MAX_DEPTH exactly', () => {
+        expect(gathererDepthForTier(999, 10)).toBe(65535)
+    })
+
+    test('T10 row is {floor: 63537, slope: 2} (guards against drift)', () => {
+        expect(GATHERER_DEPTH_TABLE[9]).toEqual({floor: 63537, slope: 2})
+    })
+
+    test('a generalist (mid-tol) T10 still falls short of the bottom', () => {
+        expect(gathererDepthForTier(500, 10)).toBeLessThan(65535)
     })
 })

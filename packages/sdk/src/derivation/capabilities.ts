@@ -55,7 +55,7 @@ export const GATHERER_DEPTH_TABLE: readonly GathererDepthParams[] = [
     {floor: 46000, slope: 12},
     {floor: 53500, slope: 10},
     {floor: 60000, slope: 5},
-    {floor: 63500, slope: 2},
+    {floor: 63537, slope: 2},
 ]
 
 export const GATHERER_DEPTH_MAX_TIER = 10
