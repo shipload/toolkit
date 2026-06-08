@@ -1,5 +1,26 @@
 # @shipload/cli
 
+## 1.0.0-next.30
+
+### Patch Changes
+
+- bfcb67f: - ItemCell quantity adjustments
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Increase energy values to uint32
+  - Added route planner to cli
+  - Fixed cargo mass projection for gather/craft
+  - Updated generated contracts
+  - Claim action helper
+  - Fixed T10 max depth
+  - Handle plot reservations in schedule
+  - Removed unused loading logic
+- Updated dependencies [bfcb67f]
+  - @shipload/oracle@0.0.1-next.16
+  - @shipload/sdk@1.0.0-next.26
+
 ## 1.0.0-next.29
 
 ### Patch Changes
