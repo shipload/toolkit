@@ -72,6 +72,14 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    retarget(sourceId: UInt64Type, taskIndex: UInt64Type, newDestId: UInt64Type): Action {
+        return this.server.action('retarget', {
+            source_id: UInt64.from(sourceId),
+            task_index: UInt64.from(taskIndex),
+            new_dest_id: UInt64.from(newDestId),
+        })
+    }
+
     recharge(entityId: UInt64Type): Action {
         return this.server.action('recharge', {
             id: UInt64.from(entityId),
