@@ -252,6 +252,12 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    claimStarter(owner: NameType): Action {
+        return this.server.action('claimstarter', {
+            owner: Name.from(owner),
+        })
+    }
+
     async wrapEntity(
         owner: NameType,
         entityId: UInt64Type,
