@@ -139,7 +139,7 @@ function coerceInt64(v: unknown): Int64 {
 function toShipLike(snap: EntitySnapshot): {
 	coordinates: ServerTypes.coordinates;
 	hullmass?: UInt32;
-	energy?: UInt16;
+	energy?: UInt32;
 	engines?: ServerTypes.movement_stats;
 	generator?: ServerTypes.energy_stats;
 	loaders?: ServerTypes.loader_stats;
@@ -158,8 +158,8 @@ function toShipLike(snap: EntitySnapshot): {
 		: undefined;
 	const generator: ServerTypes.energy_stats | undefined = raw.generator
 		? ServerTypes.energy_stats.from({
-				capacity: coerceUInt16(raw.generator.capacity),
-				recharge: coerceUInt16(raw.generator.recharge),
+				capacity: coerceUInt32(raw.generator.capacity),
+				recharge: coerceUInt32(raw.generator.recharge),
 			})
 		: undefined;
 	const loaders: ServerTypes.loader_stats | undefined = raw.loaders
@@ -170,7 +170,7 @@ function toShipLike(snap: EntitySnapshot): {
 			})
 		: undefined;
 	const hullmass = raw.hullmass !== undefined ? coerceUInt32(raw.hullmass) : undefined;
-	const energy = raw.energy !== undefined ? coerceUInt16(raw.energy) : undefined;
+	const energy = raw.energy !== undefined ? coerceUInt32(raw.energy) : undefined;
 
 	return { coordinates, hullmass, energy, engines, generator, loaders };
 }

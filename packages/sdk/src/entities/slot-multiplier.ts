@@ -28,6 +28,8 @@ export function clampUint16(value: number): number {
     return Math.min(value, U16_MAX)
 }
 
+export const clampUint32 = (v: number): number => Math.min(Math.max(Math.floor(v), 0), 4294967295)
+
 export function applySlotMultiplier(value: number, outputPct: number): number {
     return clampUint16(Math.floor((value * outputPct) / 100))
 }

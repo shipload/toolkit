@@ -28,6 +28,7 @@ import {
 	MODULE_LOADER,
 	MODULE_STORAGE,
 	MODULE_WARP,
+	NFT,
 	type ProjectableSnapshot,
 	type ProjectedEntity,
 	projectFromCurrentState,
@@ -171,9 +172,10 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		case MODULE_GATHERER: {
 			const str = decodeStat(stats, 0);
 			const tol = decodeStat(stats, 1);
-			const con = decodeStat(stats, 3);
+			const con = decodeStat(stats, 2);
 			const tier = getItem(itemId).tier;
-			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · ${computeGathererDrain(con)} energy/s`;
+			const drainPerMin = (computeGathererDrain(con) / 10000) * 60;
+			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · ${drainPerMin.toFixed(1)} energy/min`;
 		}
 		case MODULE_LOADER: {
 			const ins = decodeStat(stats, 0);
@@ -183,13 +185,15 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		case MODULE_CRAFTER: {
 			const rea = decodeStat(stats, 0);
 			const fin = decodeStat(stats, 1);
-			return `speed ${computeCrafterSpeed(rea)} · ${computeCrafterDrain(fin)} energy/craft`;
+			const speed = computeCrafterSpeed(rea);
+			const drainPerMin = ((computeCrafterDrain(fin) * speed) / 150000) * 60;
+			return `speed ${speed} · ${drainPerMin.toFixed(1)} energy/min`;
 		}
 		case MODULE_HAULER: {
 			const fin = decodeStat(stats, 0);
 			const con = decodeStat(stats, 1);
 			const com = decodeStat(stats, 2);
-			const drain = Math.max(3, 15 - Math.floor(com / 80));
+			const drain = NFT.computeHaulerDrain(com);
 			return `capacity ${computeHaulerCapacity(fin)} · efficiency ${computeHaulerEfficiency(con)} · ${drain} energy/load`;
 		}
 		case MODULE_WARP: {

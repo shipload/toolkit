@@ -175,6 +175,7 @@ import {decodeCraftedItemStats} from './crafting'
 import {
     applySlotMultiplier,
     clampUint16,
+    clampUint32,
     getSlotAmp,
     type InstalledModule,
 } from '../entities/slot-multiplier'
@@ -346,8 +347,8 @@ export function computeEntityCapabilities(
     }
     if (hasGenerator) {
         result.generator = {
-            capacity: clampUint16(totalGenCapacity),
-            recharge: clampUint16(totalGenRecharge),
+            capacity: clampUint32(totalGenCapacity),
+            recharge: clampUint32(totalGenRecharge),
         }
     }
     if (hasGatherer) {

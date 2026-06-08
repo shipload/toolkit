@@ -703,9 +703,9 @@ describe('Crafting', () => {
             assert.equal(batch.toNumber(), single.toNumber() * 3)
         })
 
-        test('energy clamps to uint16 max on oversized input', () => {
+        test('energy exceeds the old uint16 ceiling on oversized input', () => {
             const energy = calc_craft_energy(30, 450_000_000)
-            assert.equal(energy.toNumber(), 65535)
+            assert.equal(energy.toNumber(), 90000)
         })
     })
 })
