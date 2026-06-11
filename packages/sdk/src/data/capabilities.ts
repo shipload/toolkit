@@ -38,6 +38,11 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Energy', attribute: 'recharge', description: 'Energy regeneration rate'},
     {capability: 'Loader', attribute: 'mass', description: 'Weight of the loader unit itself'},
     {capability: 'Loader', attribute: 'thrust', description: 'Loading speed/force'},
+    {
+        capability: 'Loader',
+        attribute: 'quantity',
+        description: 'Number of cargo items moved per load operation',
+    },
     {capability: 'Gathering', attribute: 'yield', description: 'Mass gathered per second'},
     {capability: 'Gathering', attribute: 'drain', description: 'Energy consumed per gather'},
     {capability: 'Gathering', attribute: 'depth', description: 'Maximum gather depth'},
