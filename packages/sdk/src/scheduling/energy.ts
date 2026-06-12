@@ -1,6 +1,6 @@
 import {TaskType} from '../types'
 import {createProjectedEntity, type Projectable} from './projection'
-import {currentTaskIndex, currentTaskProgressFloat, isTaskComplete} from './schedule'
+import {orderedTasks} from './schedule'
 
 export function energyAtTime(entity: Projectable, now: Date): number {
     const projected = createProjectedEntity(entity)
@@ -13,24 +13,31 @@ export function energyAtTime(entity: Projectable, now: Date): number {
 
     let running = Number(projected.energy)
 
-    const tasks = entity.schedule?.tasks
-    if (!tasks || tasks.length === 0) return clamp(running)
+    const ordered = orderedTasks(entity)
+    if (ordered.length === 0) return clamp(running)
 
-    const activeIndex = currentTaskIndex(entity, now)
-    const activeProgress = currentTaskProgressFloat(entity, now)
+    const nowMs = now.getTime()
 
-    for (let i = 0; i < tasks.length; i++) {
-        const complete = isTaskComplete(entity, i, now)
-        if (!complete && i !== activeIndex) break
+    for (const {task, startsAt} of ordered) {
+        const duration = task.duration.toNumber()
+        const isReserved = task.type.toNumber() === TaskType.RESERVED
+        const elapsed = Math.min(
+            Math.max(0, Math.floor((nowMs - startsAt.getTime()) / 1000)),
+            duration
+        )
+        const complete = !isReserved && elapsed >= duration
+        const inProgress = !complete && elapsed > 0 && elapsed < duration
 
-        const fraction = complete ? 1 : activeProgress
+        if (!complete && !inProgress) continue
 
-        if (tasks[i].type.toNumber() === TaskType.RECHARGE) {
+        const fraction = complete ? 1 : duration === 0 ? 1 : elapsed / duration
+
+        if (task.type.toNumber() === TaskType.RECHARGE) {
             if (capacity !== undefined) {
                 running = complete ? capacity : running + (capacity - running) * fraction
             }
         } else {
-            const cost = Number(tasks[i].energy_cost ?? 0)
+            const cost = Number(task.energy_cost ?? 0)
             running -= cost * fraction
         }
 

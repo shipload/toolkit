@@ -1,6 +1,69 @@
 import {describe, expect, test} from 'bun:test'
-import {ServerContract} from '@shipload/sdk'
-import {entityInfoToSnapshot} from '../../src/lib/snapshot'
+import {ServerContract, schedule as sched} from '@shipload/sdk'
+import {entityInfoToSnapshot, completedCount, snapshotTaskTimes} from '../../src/lib/snapshot'
+
+function workerOnlyInfoArgs(at: Date) {
+	const startedWorker = new Date(at.getTime() - 60_000).toISOString().slice(0, 23);
+	return {
+		type: "ship",
+		id: 43,
+		owner: "alice",
+		entity_name: "Worker",
+		coordinates: { x: 0, y: 0, z: 800 },
+		item_id: 0,
+		cargomass: 0,
+		cargo: [],
+		modules: [],
+		lanes: [
+			{
+				lane_key: 3,
+				schedule: {
+					started: startedWorker,
+					tasks: [{ type: 6, duration: 300, cancelable: 0, cargo: [] }],
+				},
+			},
+		],
+	};
+}
+
+function multiLaneInfoArgs(at: Date) {
+	const startedMobility = new Date(at.getTime() - 120_000).toISOString().slice(0, 23);
+	const startedWorker = new Date(at.getTime() - 60_000).toISOString().slice(0, 23);
+	return {
+		type: "ship",
+		id: 42,
+		owner: "alice",
+		entity_name: "Multi",
+		coordinates: { x: 0, y: 0, z: 800 },
+		item_id: 0,
+		cargomass: 0,
+		cargo: [],
+		modules: [],
+		is_idle: false,
+		current_task_elapsed: 0,
+		current_task_remaining: 0,
+		pending_tasks: [],
+		lanes: [
+			{
+				lane_key: 0,
+				schedule: {
+					started: startedMobility,
+					tasks: [{ type: 1, duration: 60, cancelable: 0, cargo: [] }],
+				},
+			},
+			{
+				lane_key: 3,
+				schedule: {
+					started: startedWorker,
+					tasks: [
+						{ type: 6, duration: 300, cancelable: 0, cargo: [] },
+						{ type: 7, duration: 540, cancelable: 2, cargo: [] },
+					],
+				},
+			},
+		],
+	};
+}
 
 describe('entityInfoToSnapshot', () => {
     test('produces primitive-typed fields', () => {
@@ -18,6 +81,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         const snap = entityInfoToSnapshot(ei)
         expect(typeof snap.type).toBe('string')
@@ -32,8 +96,6 @@ describe('entityInfoToSnapshot', () => {
         expect(typeof snap.coordinates.y).toBe('bigint')
         expect(typeof snap.cargomass).toBe('bigint')
         expect(snap.is_idle).toBe(true)
-        expect(typeof snap.current_task_elapsed).toBe('bigint')
-        expect(typeof snap.current_task_remaining).toBe('bigint')
     })
 
     test('value equality holds for identically-valued names from distinct instances', () => {
@@ -51,6 +113,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         const b = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -66,6 +129,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         // Sanity: distinct Name instances are not === at the wharfkit level.
         expect(a.type === b.type).toBe(false)
@@ -96,6 +160,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         const snap = entityInfoToSnapshot(ei)
         expect(snap.energy).toBe(1000n)
@@ -110,3 +175,32 @@ describe('entityInfoToSnapshot', () => {
         })
     })
 })
+
+describe("entityInfoToSnapshot lanes", () => {
+	test("carries raw lanes from ei.lanes (not ei.schedule)", () => {
+		const at = new Date("2026-06-11T12:00:00.000Z");
+		const ei = ServerContract.Types.entity_info.from(multiLaneInfoArgs(at));
+		const snap = entityInfoToSnapshot(ei);
+		expect(snap.lanes.length).toBe(2);
+		expect(sched.getLanes(snap).map((l) => l.laneKey)).toEqual([0, 3]);
+		expect(sched.mobilityLane(snap)?.schedule.tasks.length).toBe(1);
+	});
+
+	test("completedCount is entity-wide resolveOrder length", () => {
+		const at = new Date("2026-06-11T12:00:00.000Z");
+		const ei = ServerContract.Types.entity_info.from(multiLaneInfoArgs(at));
+		const snap = entityInfoToSnapshot(ei);
+		expect(completedCount(snap, at)).toBe(1);
+	});
+
+	test("derives elapsed/remaining from a non-mobility worker lane", () => {
+		const at = new Date("2026-06-11T12:00:00.000Z");
+		const ei = ServerContract.Types.entity_info.from(workerOnlyInfoArgs(at));
+		const snap = entityInfoToSnapshot(ei, at);
+		expect(snap.is_idle).toBe(false);
+		const times = snapshotTaskTimes(snap, at);
+		expect(times.elapsed_s).toBe(60);
+		expect(times.remaining_s).toBe(240);
+		expect(times.total_s).toBe(300);
+	});
+});

@@ -1,9 +1,11 @@
 import {describe, expect, test} from 'bun:test'
+import {schedule, ServerContract, TaskType} from '@shipload/sdk'
 import type {EntityKey, EntitySnapshot} from '../../../src/lib/snapshot'
 import type {FleetTick} from '../../../src/lib/snapshot-fleet'
 import {type Hotkey, HotkeyRegistry} from '../../../src/tui/hotkeys'
 import type {View} from '../../../src/tui/view'
 import {createFleetView} from '../../../src/tui/views/fleet'
+import {collectText} from '../render-tree'
 
 function makeStubView(): View {
     return {
@@ -15,7 +17,58 @@ function makeStubView(): View {
     }
 }
 
+function makeLane(
+    startedIso: string,
+    tasks: unknown[],
+    laneKey = schedule.LANE_MOBILITY
+): ServerContract.Types.lane {
+    return ServerContract.Types.lane.from({
+        lane_key: laneKey,
+        schedule: {started: startedIso, tasks},
+    })
+}
+
+function startedOffset(secondsFromNow: number): string {
+    return new Date(Date.now() + secondsFromNow * 1000).toISOString().slice(0, 23)
+}
+
+function task(type: TaskType, duration: number): unknown {
+    return {type, duration, cancelable: 0, cargo: []}
+}
+
+function snapWithLanes(type: string, id: number, lanes: EntitySnapshot['lanes']): EntitySnapshot {
+    return {
+        type,
+        id: BigInt(id),
+        owner: 'alice',
+        entity_name: `${type}-${id}`,
+        coordinates: {x: 0, y: 0},
+        cargomass: 0,
+        cargo: [],
+        is_idle: lanes.length === 0,
+        lanes,
+    }
+}
+
+function busyResolvable(id: number): EntitySnapshot {
+    return snapWithLanes('ship', id, [
+        makeLane(startedOffset(-70), [task(TaskType.TRAVEL, 30)]),
+        makeLane(startedOffset(-5), [task(TaskType.GATHER, 60)], 3),
+    ])
+}
+
 function snap(type: string, id: number, isIdle: boolean, completed = 0): EntitySnapshot {
+    let lanes: EntitySnapshot['lanes'] = []
+    if (!isIdle) {
+        const started = new Date(Date.now() - 5000).toISOString().slice(0, 23)
+        lanes = [makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: []}])]
+    } else if (completed > 0) {
+        const started = new Date(Date.now() - (completed * 30 + 10) * 1000)
+            .toISOString()
+            .slice(0, 23)
+        const tasks = new Array(completed).fill({type: 1, duration: 30, cancelable: 0, cargo: []})
+        lanes = [makeLane(started, tasks)]
+    }
     return {
         type,
         id: BigInt(id),
@@ -25,7 +78,7 @@ function snap(type: string, id: number, isIdle: boolean, completed = 0): EntityS
         cargomass: 0,
         cargo: [],
         is_idle: isIdle,
-        schedule: {tasks: new Array(completed).fill({type: 1, duration: 30n})},
+        lanes,
     }
 }
 
@@ -66,6 +119,14 @@ function fakeRenderer() {
         dropLive: () => {},
         __added: added,
     }
+}
+
+function renderedLines(renderer: ReturnType<typeof fakeRenderer>): string[] {
+    return collectText(renderer.__added.at(-1))
+}
+
+function renderedText(renderer: ReturnType<typeof fakeRenderer>): string {
+    return renderedLines(renderer).join('|')
 }
 
 const noopOpts = {
@@ -152,6 +213,19 @@ describe('createFleetView', () => {
 
     test("'r' is enabled when cursor row is idle with completed tasks", () => {
         const t = tickFor([snap('ship', 1, true, 2)])
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            ...noopOpts,
+        })
+        const r = view.keys.all().find((h) => h.key === 'r' && !h.shift)
+        expect(r?.enabled()).toBe(true)
+    })
+
+    test("'r' is enabled when cursor row is busy but has completed tasks", () => {
+        const t = tickFor([busyResolvable(1)])
         const view = createFleetView({
             owner: 'alice',
             initialTick: t,
@@ -341,6 +415,145 @@ describe('createFleetView', () => {
         view.interceptKey?.({name: 'return'} as never)
         await new Promise((r) => setTimeout(r, 5))
         expect(dispatchedCount).toBe(2)
+    })
+
+    test('Shift-R includes busy resolvable entities in the bulk target list', async () => {
+        const t = tickFor([busyResolvable(1), snap('ship', 2, true, 1), snap('ship', 3, false)])
+        let dispatchedKeys: EntityKey[] = []
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            perEntityResolve: async () => ({txid: '', explorerUrl: ''}),
+            bulkResolve: async (rows) => {
+                dispatchedKeys = rows.map((r) => r.key)
+                return {txid: 'multi', explorerUrl: 'http://multi'}
+            },
+            openTrackView: () => makeStubView(),
+        })
+        view.attach(fakeRenderer() as never)
+        view.keys.dispatch('r', true)
+        view.interceptKey?.({name: 'return'} as never)
+        await new Promise((r) => setTimeout(r, 5))
+        expect(dispatchedKeys).toEqual(['ship:1', 'ship:2'])
+    })
+
+    test('rendered row CURRENT shows semantic lane chips in lane order', () => {
+        const t = tickFor([
+            snapWithLanes('ship', 1, [
+                makeLane(startedOffset(-20), [task(TaskType.GATHER, 260)], 3),
+                makeLane(startedOffset(12), [task(TaskType.DEPLOY, 30)], schedule.LANE_BARRIER),
+                makeLane(startedOffset(-90), [task(TaskType.TRAVEL, 30)]),
+            ]),
+        ])
+        const renderer = fakeRenderer()
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            ...noopOpts,
+        })
+
+        view.attach(renderer as never)
+
+        const text = renderedText(renderer)
+        const mob = text.indexOf('mob ready')
+        const worker = text.indexOf('L3 worker Gather')
+        const barrier = text.indexOf('barrier wait')
+        expect(mob).toBeGreaterThanOrEqual(0)
+        expect(worker).toBeGreaterThan(mob)
+        expect(barrier).toBeGreaterThan(worker)
+        expect(text).not.toContain('L255')
+        expect(text).not.toContain('255:worker')
+    })
+
+    test('rendered row CURRENT includes done lane chips with semantic labels', () => {
+        const t = tickFor([
+            snapWithLanes('ship', 1, [
+                makeLane(startedOffset(-60), []),
+                makeLane(startedOffset(-60), [], 3),
+                makeLane(startedOffset(-60), [], schedule.LANE_BARRIER),
+            ]),
+        ])
+        const renderer = fakeRenderer()
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            ...noopOpts,
+        })
+
+        view.attach(renderer as never)
+
+        const text = renderedText(renderer)
+        const mob = text.indexOf('mob done')
+        const worker = text.indexOf('L3 worker done')
+        const barrier = text.indexOf('barrier done')
+        expect(mob).toBeGreaterThanOrEqual(0)
+        expect(worker).toBeGreaterThan(mob)
+        expect(barrier).toBeGreaterThan(worker)
+        expect(text).not.toContain('L255')
+        expect(text).not.toContain('255:worker')
+    })
+
+    test('QUEUE displays queued tail only', () => {
+        const t = tickFor([
+            snapWithLanes('ship', 1, [
+                makeLane(startedOffset(-10), [
+                    task(TaskType.TRAVEL, 60),
+                    task(TaskType.RECHARGE, 30),
+                ]),
+            ]),
+            snapWithLanes('ship', 2, [makeLane(startedOffset(-90), [task(TaskType.TRAVEL, 30)])]),
+        ])
+        const renderer = fakeRenderer()
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            ...noopOpts,
+        })
+
+        view.attach(renderer as never)
+
+        const lines = renderedLines(renderer)
+        const activeQueued = lines.find((line) => line.includes('ship-1'))
+        const completedReady = lines.find((line) => line.includes('ship-2'))
+        expect(activeQueued).toContain('+1')
+        expect(completedReady).toContain('mob ready')
+        expect(completedReady).not.toContain('+')
+    })
+
+    test('row output stays bounded with QUEUE visible', () => {
+        const wide = snapWithLanes('ship', 1, [
+            makeLane(startedOffset(-10), [task(TaskType.TRAVEL, 60), task(TaskType.RECHARGE, 30)]),
+            makeLane(startedOffset(-10), [task(TaskType.GATHER, 120)], 1),
+            makeLane(startedOffset(-10), [task(TaskType.LOAD, 120)], 2),
+            makeLane(startedOffset(-10), [task(TaskType.CRAFT, 120)], 3),
+            makeLane(startedOffset(15), [task(TaskType.DEPLOY, 45)], schedule.LANE_BARRIER),
+        ])
+        wide.entity_name = 'wide-row-name'
+        const t = tickFor([wide])
+        const renderer = fakeRenderer()
+        const view = createFleetView({
+            owner: 'alice',
+            initialTick: t,
+            stream: singleTickStream(t),
+            defaults: {sort: 'type+id', typeFilter: 'all', statusFilter: 'all'},
+            ...noopOpts,
+        })
+
+        view.attach(renderer as never)
+
+        const line = renderedLines(renderer).find((candidate) =>
+            candidate.includes('wide-row-name')
+        )
+        expect(line).toContain('+1')
+        expect(line?.length).toBeLessThanOrEqual(100)
     })
 
     test('bulk resolve caps at 50 entities even when more are resolvable', async () => {

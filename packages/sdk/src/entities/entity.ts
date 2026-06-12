@@ -28,7 +28,7 @@ export class Entity extends ServerContract.Types.entity_info {
     }
 
     get isIdle(): boolean {
-        return this.is_idle
+        return schedule.isIdle(this)
     }
 
     get sched(): ScheduleAccessor {

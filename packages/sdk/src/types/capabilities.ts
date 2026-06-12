@@ -29,6 +29,7 @@ export interface MassCapability {
 }
 
 export interface ScheduleCapability {
+    lanes?: ServerContract.Types.lane[]
     schedule?: ServerContract.Types.schedule
 }
 

@@ -5,7 +5,7 @@ import { renderEntityFull } from "./entity-header";
 import { makeProgressRenderer } from "./progress";
 import { ensureNoPendingResolve } from "./resolve-prompt";
 import type { TransactResult } from "./session";
-import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
+import { type EntitySnapshot, getEntitySnapshot, completedCount } from "./snapshot";
 import {
 	DEFAULT_FETCH_INTERVAL_MS,
 	DEFAULT_RENDER_INTERVAL_MS,
@@ -131,7 +131,7 @@ export async function waitForEntityIdle(opts: WaitOpts): Promise<EntitySnapshot>
 	const deadline = opts.timeoutMs ?? null;
 
 	const maybeAutoResolve = async (s: EntitySnapshot): Promise<EntitySnapshot> => {
-		const completed = s.schedule?.tasks?.length ?? 0;
+		const completed = completedCount(s);
 		if (completed > 0 && opts.autoResolve) {
 			await resolveFn(opts.entityId, completed, true);
 			return await fetchSnapshot(opts.entityId);

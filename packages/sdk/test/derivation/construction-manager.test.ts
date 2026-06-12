@@ -19,6 +19,7 @@ describe('ConstructionManager.getTarget', () => {
             cargomass: UInt32.from(0),
             coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
             modules: [],
+            lanes: [],
         })
 
         const target = mgr.getTarget(plot, [])
@@ -40,6 +41,7 @@ describe('ConstructionManager.getTarget', () => {
             cargomass: UInt32.from(0),
             coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
             modules: [],
+            lanes: [],
         })
 
         expect(mgr.getTarget(ship, [])).toBeNull()
@@ -63,6 +65,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             cargomass: UInt32.from(0),
             coordinates: COORDS,
             modules: [],
+            lanes: [],
         })
     }
 
@@ -85,6 +88,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             current_task_elapsed: UInt32.from(0),
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
+            lanes: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_LOADER),
@@ -161,6 +165,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             current_task_elapsed: UInt32.from(0),
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
+            lanes: [],
         })
 
         const cargo20 = makeCargoRow(20, 200, INPUT_ITEM_ID, 30)
@@ -227,6 +232,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             cargomass: UInt32.from(0),
             coordinates: COORDS,
             modules: [],
+            lanes: [],
         })
     }
 
@@ -253,6 +259,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             current_task_elapsed: UInt32.from(0),
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
+            lanes: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_CRAFTER),

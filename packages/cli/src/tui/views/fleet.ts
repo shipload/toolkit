@@ -46,6 +46,11 @@ export interface FleetViewOpts {
 
 const ROOT_ID = 'fleet-root'
 const BULK_LIMIT = 50
+const TYPE_WIDTH = 9
+const ID_WIDTH = 4
+const NAME_WIDTH = 16
+const CARGO_WIDTH = 8
+const CURRENT_WIDTH = 50
 
 const SORT_CYCLE: SortMode[] = ['type+id', 'status', 'eta', 'name']
 const STATUS_CYCLE: StatusFilter[] = ['all', 'busy', 'resolvable', 'idle']
@@ -165,7 +170,7 @@ export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => E
 
     function openPerEntityResolve(): void {
         const row = cursorRow()
-        if (!row || !row.isIdle || row.completed <= 0) return
+        if (!row || row.completed <= 0) return
         const taskWord = row.completed === 1 ? 'task' : 'tasks'
         openModal({
             title: 'Resolve completed tasks?',
@@ -177,7 +182,7 @@ export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => E
     }
 
     function openBulkResolve(): void {
-        const visibleResolvable = state.lastRows.filter((r) => r.isIdle && r.completed > 0)
+        const visibleResolvable = state.lastRows.filter((r) => r.completed > 0)
         if (visibleResolvable.length === 0) return
         const targets = visibleResolvable.slice(0, BULK_LIMIT)
         const overflow = visibleResolvable.length - targets.length
@@ -315,7 +320,7 @@ export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => E
             enabled: () => {
                 if (!isInteractable()) return false
                 const row = cursorRow()
-                return row !== null && row.isIdle && row.completed > 0
+                return row !== null && row.completed > 0
             },
             action: () => openPerEntityResolve(),
         },
@@ -325,7 +330,7 @@ export function createFleetView(opts: FleetViewOpts): View & {cursorKey: () => E
             label: 'bulk resolve',
             enabled: () => {
                 if (!isInteractable()) return false
-                return state.lastRows.some((r) => r.isIdle && r.completed > 0)
+                return state.lastRows.some((r) => r.completed > 0)
             },
             action: () => openBulkResolve(),
         },
@@ -468,7 +473,7 @@ function layout(state: FleetState, owner: string, keys: HotkeyRegistry<Hotkey>):
     let resolvable = 0
     for (const r of state.lastRows) {
         if (!r.isIdle) busy++
-        else if (r.completed > 0) resolvable++
+        if (r.completed > 0) resolvable++
     }
     const conn = connectionGlyph(state.tick.connection)
     const searchOrSort = state.view.searchMode
@@ -516,23 +521,28 @@ function layout(state: FleetState, owner: string, keys: HotkeyRegistry<Hotkey>):
 }
 
 function headerRow(): VChild {
-    const head = `  ${'TYPE'.padEnd(11)}${'ID'.padStart(4)}  ${'NAME'.padEnd(24)}${'CARGO'.padEnd(20)}${'CURRENT'.padEnd(22)}QUEUE`
+    const head = `  ${'TYPE'.padEnd(TYPE_WIDTH)}${'ID'.padStart(ID_WIDTH)}  ${'NAME'.padEnd(NAME_WIDTH)}${'CARGO'.padEnd(CARGO_WIDTH)}${'CURRENT'.padEnd(CURRENT_WIDTH)}QUEUE`
     return Text({content: head, fg: '#888888'})
 }
 
 function rowLine(row: EntityRow, isCursor: boolean): VChild {
     const prefix = isCursor ? '▶ ' : '  '
-    const type = row.snap.type.padEnd(11)
-    const id = String(row.snap.id).padStart(4)
-    const name = (row.snap.entity_name ?? '').slice(0, 22).padEnd(24)
-    const cargo = cargoCell(row.snap).padEnd(20)
-    const current = currentCell(row).padEnd(22)
+    const type = fixedCell(row.snap.type, TYPE_WIDTH)
+    const id = fixedCell(String(row.snap.id), ID_WIDTH, 'right')
+    const name = fixedCell(row.snap.entity_name ?? '', NAME_WIDTH)
+    const cargo = fixedCell(cargoCell(row.snap), CARGO_WIDTH)
+    const current = fixedCell(currentCell(row), CURRENT_WIDTH)
     const queue = queueCell(row)
     const fg = isCursor ? '#FFFF00' : undefined
     return Text({
         content: `${prefix}${type}${id}  ${name}${cargo}${current}${queue}`,
         fg,
     })
+}
+
+function fixedCell(value: string, width: number, align: 'left' | 'right' = 'left'): string {
+    const clipped = value.length > width ? `${value.slice(0, Math.max(0, width - 3))}...` : value
+    return align === 'right' ? clipped.padStart(width) : clipped.padEnd(width)
 }
 
 function cargoCell(snap: EntityRow['snap']): string {
@@ -542,6 +552,7 @@ function cargoCell(snap: EntityRow['snap']): string {
 }
 
 function currentCell(row: EntityRow): string {
+    if (row.laneChips.length > 0) return packChips(row.laneChips.map(laneChipCell), CURRENT_WIDTH)
     if (!row.isIdle) {
         const label = row.currentTaskType != null ? formatTaskType(row.currentTaskType) : 'busy'
         const dur = formatDuration(Math.max(0, Math.ceil(row.remaining_s)))
@@ -552,11 +563,48 @@ function currentCell(row: EntityRow): string {
 }
 
 function queueCell(row: EntityRow): string {
-    if (row.pendingCount === 0) return ''
-    const word = row.pendingCount === 1 ? 'task' : 'tasks'
-    const pendingDuration = Math.max(0, row.totalRemaining_s - row.remaining_s)
-    const dur = formatDuration(Math.max(0, Math.ceil(pendingDuration)))
-    return `+${row.pendingCount} ${word} (${dur})`
+    if (row.queueTailCount === 0) return ''
+    const dur = Math.max(0, Math.ceil(row.queueTailDuration_s))
+    return dur > 0 ? `+${row.queueTailCount} (${formatDuration(dur)})` : `+${row.queueTailCount}`
+}
+
+function laneChipCell(chip: EntityRow['laneChips'][number]): string {
+    switch (chip.state) {
+        case 'ready':
+            return chip.readyCount > 1
+                ? `${chip.label} ready ${chip.readyCount}`
+                : `${chip.label} ready`
+        case 'done':
+            return `${chip.label} done`
+        case 'waiting':
+            return `${chip.label} wait ${formatDuration(Math.max(0, Math.ceil(chip.startsIn_s)))}`
+        case 'active': {
+            const task = chip.taskType === null ? 'busy' : formatTaskType(chip.taskType)
+            return `${chip.label} ${task} ${formatDuration(Math.max(0, Math.ceil(chip.remaining_s)))}`
+        }
+    }
+}
+
+function packChips(chips: string[], budget: number): string {
+    const shown: string[] = []
+    for (const chip of chips) {
+        const candidate = [...shown, chip].join(' · ')
+        const hidden = chips.length - shown.length - 1
+        const suffix = hidden > 0 ? ` +${hidden}` : ''
+        if (candidate.length + suffix.length <= budget) {
+            shown.push(chip)
+            continue
+        }
+        break
+    }
+
+    const hidden = chips.length - shown.length
+    if (hidden === 0) return shown.join(' · ')
+    const hiddenLabel = `+${hidden}`
+    while (shown.length > 0 && `${shown.join(' · ')} ${hiddenLabel}`.length > budget) {
+        shown.pop()
+    }
+    return shown.length > 0 ? `${shown.join(' · ')} ${hiddenLabel}` : hiddenLabel
 }
 
 function helpOverlay(keys: HotkeyRegistry<Hotkey>): VChild {

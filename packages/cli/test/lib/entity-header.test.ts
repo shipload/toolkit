@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { ServerContract, TaskType } from "@shipload/sdk";
-import { TimePoint, UInt64 } from "@wharfkit/antelope";
+import { UInt64 } from "@wharfkit/antelope";
 import {
 	type HeaderContext,
 	renderEntityFull,
@@ -88,21 +88,30 @@ describe("renderEntityFull live energy", () => {
 	});
 
 	test("busy entity with elapsed task renders live-projected energy with arrow", () => {
-		const out = renderEntityFull({
-			...idleShip,
-			is_idle: false,
+		const started = new Date(Date.now() - 10_000).toISOString().slice(0, 23);
+		const ei = ServerContract.Types.entity_info.from({
+			type: "ship",
+			id: 1,
+			owner: "agent.gm",
+			entity_name: "Test Ship",
+			coordinates: { x: 0, y: 0, z: 800 },
+			item_id: 0,
+			cargomass: 0,
+			cargo: [],
+			modules: [],
 			energy: 200,
 			generator: { capacity: 350, recharge: 10 },
-			current_task: {
-				type: 5,
-				duration: 60,
-				cancelable: 0,
-				cargo: [],
-				energy_cost: 60,
-			},
-			current_task_elapsed: 10,
-			current_task_remaining: 50,
+			lanes: [
+				{
+					lane_key: 0,
+					schedule: {
+						started,
+						tasks: [{ type: 5, duration: 60, cancelable: 0, cargo: [] }],
+					},
+				},
+			],
 		});
+		const out = renderEntityFull(ei);
 		expect(out).toMatch(/Energy:\s+200 → /);
 		expect(out).toContain("/350 (live, recharge: 10/s)");
 	});
@@ -196,18 +205,37 @@ describe("renderEntityHeader", () => {
 	});
 
 	test("includes Task row when busy", () => {
-		const busy = {
-			...idleShip,
-			is_idle: false,
-			current_task: {
-				type: TaskType.TRAVEL,
-				coordinates: { x: 5n, y: 5n },
-				cargo: [],
-			},
-			current_task_remaining: 60,
-		};
+		const started = new Date(Date.now() - 30_000).toISOString().slice(0, 23);
+		const busy = ServerContract.Types.entity_info.from({
+			type: "ship",
+			id: 1,
+			owner: "agent.gm",
+			entity_name: "Test Ship",
+			coordinates: { x: 0, y: 0, z: 800 },
+			item_id: 0,
+			cargomass: 0,
+			cargo: [],
+			modules: [],
+			lanes: [
+				{
+					lane_key: 0,
+					schedule: {
+						started,
+						tasks: [
+							{
+								type: TaskType.TRAVEL,
+								duration: 60,
+								cancelable: 0,
+								coordinates: { x: 5, y: 5, z: 800 },
+								cargo: [],
+							},
+						],
+					},
+				},
+			],
+		});
 		const out = renderEntityHeader(busy);
-		expect(out).toContain("Task:");
+		expect(out).toContain("Task (mobility):");
 		expect(out).toContain("Travel");
 	});
 
@@ -228,6 +256,12 @@ function makeInventoryEntity(opts: {
 	current_task?: ServerContract.Types.task;
 	pending_tasks?: ServerContract.Types.task[];
 }) {
+	const tasks = [
+		...(opts.current_task ? [opts.current_task] : []),
+		...(opts.pending_tasks ?? []),
+	];
+	const started = new Date(Date.now() - 1000).toISOString().slice(0, 23);
+	const lanes = tasks.length > 0 ? [{ lane_key: 0, schedule: { started, tasks } }] : [];
 	return ServerContract.Types.entity_info.from({
 		type: "ship",
 		id: 1,
@@ -248,7 +282,8 @@ function makeInventoryEntity(opts: {
 		current_task: opts.current_task,
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
-		pending_tasks: opts.pending_tasks ?? [],
+		pending_tasks: [],
+		lanes,
 	});
 }
 
@@ -351,11 +386,12 @@ function makeBusyEntity(opts: {
 	pending_tasks?: ServerContract.Types.task[];
 }) {
 	const startedMs = Date.now() - 1000;
-	const totalDurationS = [opts.current_task, ...(opts.pending_tasks ?? [])].reduce(
+	const allTasks = [opts.current_task, ...(opts.pending_tasks ?? [])];
+	const totalDurationS = allTasks.reduce(
 		(sum, t) => sum + Number(t.duration.toString()),
 		0,
 	);
-	const allTasks = [opts.current_task, ...(opts.pending_tasks ?? [])];
+	const started = new Date(startedMs).toISOString().slice(0, 23);
 	return ServerContract.Types.entity_info.from({
 		type: "ship",
 		id: 7,
@@ -377,11 +413,8 @@ function makeBusyEntity(opts: {
 		current_task: opts.current_task,
 		current_task_elapsed: 1,
 		current_task_remaining: Math.max(0, totalDurationS - 1),
-		pending_tasks: opts.pending_tasks ?? [],
-		schedule: {
-			started: TimePoint.fromMilliseconds(startedMs),
-			tasks: allTasks,
-		},
+		pending_tasks: [],
+		lanes: [{ lane_key: 0, schedule: { started, tasks: allTasks } }],
 	});
 }
 
@@ -464,6 +497,41 @@ describe("renderEntityFull whenDoneBlock per-stack diffs", () => {
 		});
 		const out = renderEntityFull(entity);
 		expect(out).not.toMatch(/When done/);
+	});
+});
+
+describe("renderEntityFull worker-lane schedule", () => {
+	test("whenDone + pending reflect worker lanes", () => {
+		const at = new Date();
+		const ei = ServerContract.Types.entity_info.from({
+			type: "ship",
+			id: 9,
+			owner: "alice",
+			entity_name: "Worker",
+			coordinates: { x: 0, y: 0, z: 800 },
+			item_id: 0,
+			cargomass: 0,
+			cargo: [],
+			modules: [],
+			is_idle: false,
+			current_task_elapsed: 0,
+			current_task_remaining: 0,
+			pending_tasks: [],
+			lanes: [
+				{
+					lane_key: 3,
+					schedule: {
+						started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),
+						tasks: [
+							{ type: 5, duration: 300, cancelable: 0, cargo: [] },
+							{ type: 7, duration: 540, cancelable: 2, cargo: [] },
+						],
+					},
+				},
+			],
+		});
+		const out = renderEntityFull(ei);
+		expect(out).toContain("Pending:");
 	});
 });
 

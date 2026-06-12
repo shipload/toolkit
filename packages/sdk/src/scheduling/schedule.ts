@@ -1,198 +1,313 @@
 import type {ServerContract} from '../contracts'
 import {TaskType} from '../types'
+import * as core from './lane-core'
 
 type Schedule = ServerContract.Types.schedule
 type Task = ServerContract.Types.task
+type Lane = ServerContract.Types.lane
+
+export const LANE_MOBILITY = 0
+export const LANE_BARRIER = 255
 
 export interface ScheduleData {
-    schedule?: Schedule
+    lanes?: Lane[]
 }
 
-export interface Scheduleable extends ScheduleData {
-    hasSchedule: boolean
-    isIdle: boolean
-    tasks: Task[]
-    scheduleDuration(): number
-    scheduleElapsed(now: Date): number
-    scheduleRemaining(now: Date): number
-    scheduleComplete(now: Date): boolean
-    currentTaskIndex(now: Date): number
-    currentTask(now: Date): Task | undefined
-    currentTaskType(now: Date): TaskType | undefined
-    getTaskStartTime(index: number): number
-    getTaskElapsed(index: number, now: Date): number
-    getTaskRemaining(index: number, now: Date): number
-    isTaskComplete(index: number, now: Date): boolean
-    isTaskInProgress(index: number, now: Date): boolean
-    currentTaskProgress(now: Date): number
-    scheduleProgress(now: Date): number
+export interface LaneView {
+    laneKey: number
+    schedule: Schedule
+}
+
+export {
+    laneStartsIn,
+    currentTaskIndexForLane,
+    laneTaskComplete,
+    laneTaskInProgress,
+    laneCompletesAt,
+    currentTaskProgressFloatForLane,
+} from './lane-core'
+
+export function getLanes(entity: ScheduleData): LaneView[] {
+    const lanes = entity.lanes
+    if (!lanes || lanes.length === 0) return []
+    return lanes.map((l) => ({laneKey: l.lane_key.toNumber(), schedule: l.schedule}))
+}
+
+export function getLane(entity: ScheduleData, laneKey: number): LaneView | undefined {
+    const lanes = entity.lanes
+    if (!lanes) return undefined
+    for (const l of lanes) {
+        if (l.lane_key.toNumber() === laneKey) return {laneKey, schedule: l.schedule}
+    }
+    return undefined
+}
+
+export function mobilityLane(entity: ScheduleData): LaneView | undefined {
+    return getLane(entity, LANE_MOBILITY)
 }
 
 export function hasSchedule(entity: ScheduleData): boolean {
-    return !!entity.schedule && entity.schedule.tasks.length > 0
+    const lanes = entity.lanes
+    if (!lanes) return false
+    return lanes.some((l) => l.schedule.tasks.length > 0)
 }
 
 export function isIdle(entity: ScheduleData): boolean {
     return !hasSchedule(entity)
 }
 
+export function isEntityIdle(entity: ScheduleData, now: Date): boolean {
+    const lanes = entity.lanes
+    if (!lanes) return true
+    return lanes.every((l) => core.currentTaskIndexForLane(l.schedule, now) < 0)
+}
+
+export function entityIdleAt(entity: ScheduleData, _now: Date): Date | undefined {
+    const lanes = entity.lanes
+    if (!lanes) return undefined
+    let maxMs: number | undefined
+    for (const l of lanes) {
+        if (l.schedule.tasks.length === 0) continue
+        const endMs = l.schedule.started.toDate().getTime() + core.laneDuration(l.schedule) * 1000
+        if (maxMs === undefined || endMs > maxMs) maxMs = endMs
+    }
+    return maxMs === undefined ? undefined : new Date(maxMs)
+}
+
 export function getTasks(entity: ScheduleData): Task[] {
-    return entity.schedule?.tasks || []
+    const lanes = entity.lanes
+    if (!lanes) return []
+    return lanes.flatMap((l) => l.schedule.tasks)
 }
 
 export function scheduleDuration(entity: ScheduleData): number {
-    if (!entity.schedule) return 0
-    return entity.schedule.tasks.reduce((sum, task) => sum + task.duration.toNumber(), 0)
+    let max = 0
+    for (const l of entity.lanes ?? []) max = Math.max(max, core.laneDuration(l.schedule))
+    return max
 }
 
 export function scheduleElapsed(entity: ScheduleData, now: Date): number {
-    if (!entity.schedule) return 0
-    const started = entity.schedule.started.toDate()
-    const elapsed = Math.floor((now.getTime() - started.getTime()) / 1000)
-    return Math.max(0, elapsed)
+    let max = 0
+    for (const l of entity.lanes ?? []) max = Math.max(max, core.laneElapsed(l.schedule, now))
+    return max
 }
 
 export function scheduleRemaining(entity: ScheduleData, now: Date): number {
-    if (!entity.schedule) return 0
-    const duration = scheduleDuration(entity)
-    const elapsed = scheduleElapsed(entity, now)
-    return Math.max(0, duration - elapsed)
+    let remaining = 0
+    for (const l of entity.lanes ?? []) {
+        remaining = Math.max(remaining, core.laneRemaining(l.schedule, now))
+    }
+    return remaining
 }
 
 export function scheduleComplete(entity: ScheduleData, now: Date): boolean {
-    if (!hasSchedule(entity)) return false
-    if ((entity.schedule?.tasks ?? []).some((t) => t.type.toNumber() === TaskType.RESERVED))
-        return false
-    return scheduleRemaining(entity, now) === 0
-}
-
-export function currentTaskIndex(entity: ScheduleData, now: Date): number {
-    if (!entity.schedule || entity.schedule.tasks.length === 0) return -1
-
-    const elapsed = scheduleElapsed(entity, now)
-    let timeAccum = 0
-
-    for (let i = 0; i < entity.schedule.tasks.length; i++) {
-        const taskDuration = entity.schedule.tasks[i].duration.toNumber()
-        if (elapsed < timeAccum + taskDuration) {
-            return i
+    const lanes = entity.lanes
+    if (!lanes) return false
+    let hasAnyTask = false
+    let remaining = 0
+    for (const l of lanes) {
+        const tasks = l.schedule.tasks
+        if (tasks.length > 0) {
+            hasAnyTask = true
+            for (const t of tasks) {
+                if (t.type.toNumber() === TaskType.RESERVED) return false
+            }
         }
-        timeAccum += taskDuration
+        remaining = Math.max(remaining, core.laneRemaining(l.schedule, now))
     }
-
-    return -1
+    if (!hasAnyTask) return false
+    return remaining === 0
 }
 
-export function currentTask(entity: ScheduleData, now: Date): Task | undefined {
-    const index = currentTaskIndex(entity, now)
-    if (index < 0 || !entity.schedule) return undefined
-    return entity.schedule.tasks[index]
-}
-
-export function currentTaskType(entity: ScheduleData, now: Date): TaskType | undefined {
-    const task = currentTask(entity, now)
-    if (!task) return undefined
-    return task.type.toNumber() as TaskType
-}
-
-export function getTaskStartTime(entity: ScheduleData, index: number): number {
-    if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return 0
-    let timeAccum = 0
-    for (let i = 0; i < index; i++) {
-        timeAccum += entity.schedule.tasks[i].duration.toNumber()
+// Mirrors contract lane_front_complete: any lane whose front task is complete and non-reserved.
+export function hasResolvable(entity: ScheduleData, now: Date): boolean {
+    for (const l of entity.lanes ?? []) {
+        if (core.laneTaskComplete(l.schedule, 0, now)) return true
     }
-    return timeAccum
+    return false
 }
 
-export function getTaskElapsed(entity: ScheduleData, index: number, now: Date): number {
-    if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return 0
-
-    const elapsed = scheduleElapsed(entity, now)
-    const taskStart = getTaskStartTime(entity, index)
-    const taskDuration = entity.schedule.tasks[index].duration.toNumber()
-
-    if (elapsed <= taskStart) return 0
-    const elapsedInTask = elapsed - taskStart
-    return Math.min(elapsedInTask, taskDuration)
+export function currentTaskForLane(
+    entity: ScheduleData,
+    laneKey: number,
+    now: Date
+): Task | undefined {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.currentTask(lane.schedule, now) : undefined
 }
 
-export function getTaskRemaining(entity: ScheduleData, index: number, now: Date): number {
-    if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return 0
-
-    const taskDuration = entity.schedule.tasks[index].duration.toNumber()
-    const taskElapsed = getTaskElapsed(entity, index, now)
-    return Math.max(0, taskDuration - taskElapsed)
+export function currentTaskTypeForLane(
+    entity: ScheduleData,
+    laneKey: number,
+    now: Date
+): TaskType | undefined {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.currentTaskType(lane.schedule, now) : undefined
 }
 
-export function isTaskComplete(entity: ScheduleData, index: number, now: Date): boolean {
-    if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return false
-
-    if (entity.schedule.tasks[index].type.toNumber() === TaskType.RESERVED) return false
-
-    const taskDuration = entity.schedule.tasks[index].duration.toNumber()
-    const taskElapsed = getTaskElapsed(entity, index, now)
-    return taskElapsed >= taskDuration
+export function activeTasks(entity: ScheduleData, now: Date): Task[] {
+    const out: Task[] = []
+    for (const l of entity.lanes ?? []) {
+        const idx = core.currentTaskIndexForLane(l.schedule, now)
+        if (idx >= 0) out.push(l.schedule.tasks[idx])
+    }
+    return out
 }
 
-export function isTaskInProgress(entity: ScheduleData, index: number, now: Date): boolean {
-    if (!entity.schedule || index < 0 || index >= entity.schedule.tasks.length) return false
-
-    const taskElapsed = getTaskElapsed(entity, index, now)
-    const taskDuration = entity.schedule.tasks[index].duration.toNumber()
-    return taskElapsed > 0 && taskElapsed < taskDuration
+export interface ResolvedEvent {
+    laneKey: number
+    taskIndex: number
+    task: Task
+    completesAt: Date
 }
 
-export function currentTaskProgress(entity: ScheduleData, now: Date): number {
-    const task = currentTask(entity, now)
-    if (!task) return 0
-    const index = currentTaskIndex(entity, now)
-    const elapsed = getTaskElapsed(entity, index, now)
-    const duration = task.duration.toNumber()
-    if (duration === 0) return 1
-    return Math.min(1, elapsed / duration)
+// Canonical lane-front order (mirrors contract front_precedes): completion, then RECHARGE-last, then lane key.
+function frontPrecedes(
+    a: {completesAt: Date; task: Task; laneKey: number},
+    b: {completesAt: Date; task: Task; laneKey: number}
+): number {
+    if (a.completesAt.getTime() !== b.completesAt.getTime()) {
+        return a.completesAt.getTime() - b.completesAt.getTime()
+    }
+    const aRecharge = a.task.type.toNumber() === TaskType.RECHARGE
+    const bRecharge = b.task.type.toNumber() === TaskType.RECHARGE
+    if (aRecharge !== bRecharge) return aRecharge ? 1 : -1
+    return a.laneKey - b.laneKey
 }
 
-export function currentTaskProgressFloat(entity: ScheduleData, now: Date): number {
-    if (!entity.schedule || entity.schedule.tasks.length === 0) return 0
-    const index = currentTaskIndex(entity, now)
-    if (index < 0) return 0
-    const task = entity.schedule.tasks[index]
-    const durationMs = task.duration.toNumber() * 1000
-    if (durationMs === 0) return 1
-    const startedMs = entity.schedule.started.toDate().getTime()
-    const taskStartMs = startedMs + getTaskStartTime(entity, index) * 1000
-    const elapsedMs = now.getTime() - taskStartMs
-    if (elapsedMs <= 0) return 0
-    return Math.min(1, elapsedMs / durationMs)
+// Completed lane-fronts in canonical order (mirrors contract front_precedes).
+export function resolveOrder(entity: ScheduleData, now: Date): ResolvedEvent[] {
+    const events: ResolvedEvent[] = []
+    for (const l of entity.lanes ?? []) {
+        const laneKey = l.lane_key.toNumber()
+        const startedMs = l.schedule.started.toDate().getTime()
+        let endSec = 0
+        for (let i = 0; i < l.schedule.tasks.length; i++) {
+            const task = l.schedule.tasks[i]
+            endSec += task.duration.toNumber()
+            const completesAt = new Date(startedMs + endSec * 1000)
+            if (task.type.toNumber() === TaskType.RESERVED) break
+            if (completesAt.getTime() > now.getTime()) break
+            events.push({laneKey, taskIndex: i, task, completesAt})
+        }
+    }
+    events.sort(frontPrecedes)
+    return events
 }
 
-export function scheduleProgress(entity: ScheduleData, now: Date): number {
-    const duration = scheduleDuration(entity)
-    if (duration === 0) return hasSchedule(entity) ? 1 : 0
-    const elapsed = scheduleElapsed(entity, now)
-    return Math.min(1, elapsed / duration)
+export interface OrderedTask {
+    laneKey: number
+    taskIndex: number
+    task: Task
+    startsAt: Date
+    completesAt: Date
 }
 
-export function isTaskType(entity: ScheduleData, taskType: TaskType, now: Date): boolean {
-    return currentTaskType(entity, now) === taskType
+// Every task across all lanes in canonical order (mirrors contract front_precedes).
+export function orderedTasks(entity: ScheduleData): OrderedTask[] {
+    const out: OrderedTask[] = []
+    for (const l of entity.lanes ?? []) {
+        const laneKey = l.lane_key.toNumber()
+        const startedMs = l.schedule.started.toDate().getTime()
+        let endSec = 0
+        for (let i = 0; i < l.schedule.tasks.length; i++) {
+            const task = l.schedule.tasks[i]
+            const startsAt = new Date(startedMs + endSec * 1000)
+            endSec += task.duration.toNumber()
+            const completesAt = new Date(startedMs + endSec * 1000)
+            out.push({laneKey, taskIndex: i, task, startsAt, completesAt})
+        }
+    }
+    out.sort(frontPrecedes)
+    return out
+}
+
+export function laneRemainingOf(entity: ScheduleData, laneKey: number, now: Date): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneRemaining(lane.schedule, now) : 0
+}
+
+export function laneStartsInOf(entity: ScheduleData, laneKey: number, now: Date): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneStartsIn(lane.schedule, now) : 0
+}
+
+export function laneCompleteOf(entity: ScheduleData, laneKey: number, now: Date): boolean {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneComplete(lane.schedule, now) : false
+}
+
+export function laneProgressOf(entity: ScheduleData, laneKey: number, now: Date): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneProgress(lane.schedule, now) : 0
+}
+
+export function laneTaskElapsedOf(
+    entity: ScheduleData,
+    laneKey: number,
+    index: number,
+    now: Date
+): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneTaskElapsed(lane.schedule, index, now) : 0
+}
+
+export function laneTaskRemainingOf(
+    entity: ScheduleData,
+    laneKey: number,
+    index: number,
+    now: Date
+): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneTaskRemaining(lane.schedule, index, now) : 0
+}
+
+export function laneTaskCompleteOf(
+    entity: ScheduleData,
+    laneKey: number,
+    index: number,
+    now: Date
+): boolean {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneTaskComplete(lane.schedule, index, now) : false
+}
+
+export function laneTaskInProgressOf(
+    entity: ScheduleData,
+    laneKey: number,
+    index: number,
+    now: Date
+): boolean {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.laneTaskInProgress(lane.schedule, index, now) : false
+}
+
+export function currentTaskIndexOf(entity: ScheduleData, laneKey: number, now: Date): number {
+    const lane = getLane(entity, laneKey)
+    return lane ? core.currentTaskIndexForLane(lane.schedule, now) : -1
+}
+
+function entityDoesTaskType(entity: ScheduleData, taskType: TaskType, now: Date): boolean {
+    return activeTasks(entity, now).some((t) => t.type.toNumber() === taskType)
 }
 
 export function isInFlight(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.TRAVEL, now)
+    const lane = mobilityLane(entity)
+    return lane ? core.currentTaskType(lane.schedule, now) === TaskType.TRAVEL : false
 }
 
 export function isRecharging(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.RECHARGE, now)
+    return entityDoesTaskType(entity, TaskType.RECHARGE, now)
 }
 
 export function isLoading(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.LOAD, now)
+    return entityDoesTaskType(entity, TaskType.LOAD, now)
 }
 
 export function isUnloading(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.UNLOAD, now)
+    return entityDoesTaskType(entity, TaskType.UNLOAD, now)
 }
 
 export function isGathering(entity: ScheduleData, now: Date): boolean {
-    return isTaskType(entity, TaskType.GATHER, now)
+    return entityDoesTaskType(entity, TaskType.GATHER, now)
 }

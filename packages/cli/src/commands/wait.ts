@@ -5,7 +5,12 @@ import {renderEntityFull} from '../lib/entity-header'
 import {renderSummaries} from './query/entities'
 import {parseEntityType, type EntityTypeName} from '../lib/args'
 import {loadConfig} from '../lib/config'
-import {entityInfoToSnapshot, getEntitySnapshot} from '../lib/snapshot'
+import {
+    entityInfoToSnapshot,
+    getEntitySnapshot,
+    completedCount,
+    pendingTaskCount,
+} from '../lib/snapshot'
 import {ensureNoPendingResolve} from '../lib/resolve-prompt'
 import {streamFleetSnapshots, type FleetSubscribeManager} from '../lib/snapshot-fleet'
 import {getAccountName} from '../lib/session'
@@ -21,13 +26,14 @@ export function renderWaitText(owner: string, result: WaitFleetResult): string {
         return `${header}\n${body}`
     }
     const header = `All ${result.matched.length} entities ready (${owner})`
+    const now = new Date()
     const summaryRows = result.matched.map((s) => ({
         type: String(s.type),
         id: BigInt(s.id.toString()),
         entity_name: s.entity_name,
         is_idle: s.is_idle,
-        resolved_count: s.schedule?.tasks.length ?? 0,
-        pending_count: s.pending_tasks?.length ?? 0,
+        resolved_count: completedCount(s),
+        pending_count: pendingTaskCount(s, now),
     }))
     return `${header}\n${renderSummaries(owner, summaryRows as never)}`
 }

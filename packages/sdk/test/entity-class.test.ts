@@ -23,7 +23,18 @@ function bareEntityInfo(
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
+        lanes: [],
         ...overrides,
+    })
+}
+
+function laneWithTask(laneKey: number) {
+    return ServerContract.Types.lane.from({
+        lane_key: laneKey,
+        schedule: {
+            started: '2026-06-02T10:00:00.000',
+            tasks: [{type: 1, duration: 60, cancelable: 0, cargo: []}],
+        },
     })
 }
 
@@ -33,9 +44,11 @@ describe('Entity universal accessors', () => {
         expect(e.name).toBe('Beachcomber')
     })
 
-    test('isIdle reflects is_idle', () => {
-        expect(new Entity(bareEntityInfo({is_idle: true})).isIdle).toBeTrue()
-        expect(new Entity(bareEntityInfo({is_idle: false})).isIdle).toBeFalse()
+    test('isIdle derives from scheduled work across all lanes', () => {
+        expect(new Entity(bareEntityInfo()).isIdle).toBeTrue()
+        expect(
+            new Entity(bareEntityInfo({is_idle: true, lanes: [laneWithTask(4)]})).isIdle
+        ).toBeFalse()
     })
 
     test('location wraps coordinates', () => {

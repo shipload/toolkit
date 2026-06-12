@@ -3,23 +3,25 @@ import type {Command} from 'commander'
 import {transactStrict} from '../../lib/session'
 import {manifestFromJSON} from '../../lib/snapshot-manifest'
 
+function shiftTimestamp(value: string, seconds: number): string {
+    const ms = new Date(`${value}Z`).getTime() + seconds * 1000
+    return new Date(ms).toISOString().replace('Z', '').split('.')[0]
+}
+
 function shiftScheduleTimestamps(rawSchedule: unknown, seconds: number): unknown {
     if (!rawSchedule || typeof rawSchedule !== 'object' || seconds === 0) return rawSchedule
-    const sched = rawSchedule as {tasks?: Array<Record<string, unknown>>}
+    const sched = rawSchedule as {started?: string; tasks?: Array<Record<string, unknown>>}
     if (!Array.isArray(sched.tasks)) return rawSchedule
-    return {
-        ...sched,
-        tasks: sched.tasks.map((task) => {
-            const out: Record<string, unknown> = {...task}
-            for (const key of ['started_at', 'ends_at'] as const) {
-                if (typeof out[key] === 'string') {
-                    const ms = new Date(out[key] as string).getTime() + seconds * 1000
-                    out[key] = new Date(ms).toISOString().replace('Z', '').split('.')[0]
-                }
-            }
-            return out
-        }),
-    }
+    const out: Record<string, unknown> = {...sched}
+    if (typeof sched.started === 'string') out.started = shiftTimestamp(sched.started, seconds)
+    out.tasks = sched.tasks.map((task) => {
+        const t: Record<string, unknown> = {...task}
+        for (const key of ['started_at', 'ends_at'] as const) {
+            if (typeof t[key] === 'string') t[key] = shiftTimestamp(t[key] as string, seconds)
+        }
+        return t
+    })
+    return out
 }
 
 const BATCH_SIZE = 50
@@ -210,18 +212,16 @@ export function registerSubcommand(tools: Command): void {
                     console.log(`Step 5: importentity × ${manifest.entities.length}`)
                     await pushBatched(
                         target,
-                        manifest.entities.map((e) => ({
-                            name: 'importentity',
-                            data: {
-                                row: {
-                                    ...e,
-                                    schedule: shiftScheduleTimestamps(
-                                        (e as Record<string, unknown>).schedule,
-                                        offset
-                                    ),
-                                },
-                            },
-                        }))
+                        manifest.entities.map((e) => {
+                            const row = e as Record<string, unknown>
+                            const lanes = Array.isArray(row.lanes)
+                                ? (row.lanes as Array<Record<string, unknown>>).map((l) => ({
+                                      ...l,
+                                      schedule: shiftScheduleTimestamps(l.schedule, offset),
+                                  }))
+                                : row.lanes
+                            return {name: 'importentity', data: {row: {...e, lanes}}}
+                        })
                     )
                 }
 

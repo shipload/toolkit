@@ -89,6 +89,7 @@ function createMockShip(
         current_task_elapsed: 0,
         current_task_remaining: 0,
         pending_tasks: [],
+        lanes: [],
     })
 }
 
@@ -614,10 +615,11 @@ describe('interpolateFlightPosition', () => {
 })
 
 describe('getInterpolatedPosition', () => {
+    const mobilityLane = (tasks: any[]) => [{lane_key: {toNumber: () => 0}, schedule: {tasks}}]
     test('no schedule → returns entity coordinates as floats', () => {
         const entity = {
             coordinates: {x: 7, y: -3},
-            schedule: undefined,
+            lanes: [],
         } as any
         const p = getInterpolatedPosition(entity, 0, 0)
         assert.strictEqual(p.x, 7)
@@ -626,15 +628,13 @@ describe('getInterpolatedPosition', () => {
     test('TRAVEL task at progress 0 → origin', () => {
         const entity = {
             coordinates: {x: 0, y: 0},
-            schedule: {
-                tasks: [
-                    {
-                        type: {equals: (t: any) => t === 1},
-                        coordinates: {x: 10, y: 0},
-                        duration: {toNumber: () => 100},
-                    },
-                ],
-            },
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 1},
+                    coordinates: {x: 10, y: 0},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
         } as any
         const p = getInterpolatedPosition(entity, 0, 0)
         assert.strictEqual(p.x, 0)
@@ -642,15 +642,13 @@ describe('getInterpolatedPosition', () => {
     test('TRAVEL task at progress 1 → destination', () => {
         const entity = {
             coordinates: {x: 0, y: 0},
-            schedule: {
-                tasks: [
-                    {
-                        type: {equals: (t: any) => t === 1},
-                        coordinates: {x: 10, y: 4},
-                        duration: {toNumber: () => 100},
-                    },
-                ],
-            },
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 1},
+                    coordinates: {x: 10, y: 4},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
         } as any
         const p = getInterpolatedPosition(entity, 0, 1)
         assert.strictEqual(p.x, 10)
@@ -659,15 +657,13 @@ describe('getInterpolatedPosition', () => {
     test('TRAVEL task at progress 0.5 → eased midpoint (no rounding)', () => {
         const entity = {
             coordinates: {x: 0, y: 0},
-            schedule: {
-                tasks: [
-                    {
-                        type: {equals: (t: any) => t === 1},
-                        coordinates: {x: 7, y: 3},
-                        duration: {toNumber: () => 100},
-                    },
-                ],
-            },
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 1},
+                    coordinates: {x: 7, y: 3},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
         } as any
         const p = getInterpolatedPosition(entity, 0, 0.3)
         assert.notStrictEqual(p.x, Math.round(p.x))
@@ -677,9 +673,7 @@ describe('getInterpolatedPosition', () => {
     test('non-TRAVEL task → returns getFlightOrigin(taskIndex), no throw', () => {
         const entity = {
             coordinates: {x: 5, y: -2},
-            schedule: {
-                tasks: [{type: {equals: () => false}, duration: {toNumber: () => 100}}],
-            },
+            lanes: mobilityLane([{type: {equals: () => false}, duration: {toNumber: () => 100}}]),
         } as any
         const p = getInterpolatedPosition(entity, 0, 0.5)
         assert.strictEqual(p.x, 5)
@@ -689,20 +683,18 @@ describe('getInterpolatedPosition', () => {
     test('schedule complete (taskIndex < 0) → final TRAVEL destination, not chain origin', () => {
         const entity = {
             coordinates: {x: 0, y: 0},
-            schedule: {
-                tasks: [
-                    {
-                        type: {equals: (t: any) => t === 1},
-                        coordinates: {x: 5, y: -2},
-                        duration: {toNumber: () => 100},
-                    },
-                    {
-                        type: {equals: (t: any) => t === 1},
-                        coordinates: {x: 8, y: 4},
-                        duration: {toNumber: () => 100},
-                    },
-                ],
-            },
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 1},
+                    coordinates: {x: 5, y: -2},
+                    duration: {toNumber: () => 100},
+                },
+                {
+                    type: {equals: (t: any) => t === 1},
+                    coordinates: {x: 8, y: 4},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
         } as any
         const p = getInterpolatedPosition(entity, -1, 0)
         assert.strictEqual(p.x, 8)
@@ -712,7 +704,7 @@ describe('getInterpolatedPosition', () => {
     test('no schedule and taskIndex < 0 → falls back to chain coordinates', () => {
         const entity = {
             coordinates: {x: 3, y: 9},
-            schedule: undefined,
+            lanes: [],
         } as any
         const p = getInterpolatedPosition(entity, -1, 0)
         assert.strictEqual(p.x, 3)

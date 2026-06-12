@@ -11,6 +11,7 @@ import {getItem} from '../data/catalog'
 import {getModuleCapabilityType, moduleAccepts, moduleSlotTypeToCode} from '../capabilities/modules'
 import {computeEntityCapabilities} from '../derivation/capabilities'
 import {packedModulesToInstalled} from './slot-multiplier'
+import {LANE_MOBILITY} from '../scheduling/schedule'
 
 export interface PackedModuleInput {
     itemId: number
@@ -29,6 +30,7 @@ export interface EntityStateInput {
     energy?: number
     modules?: PackedModuleInput[]
     schedule?: ServerContract.Types.schedule
+    lanes?: ServerContract.Types.lane[]
     cargo?: ServerContract.Types.cargo_item[]
 }
 
@@ -86,6 +88,17 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
     const layout = getEntityLayout(packedItemId)?.slots ?? []
     const mods = state.modules ?? []
 
+    const lanes =
+        state.lanes ??
+        (state.schedule
+            ? [
+                  ServerContract.Types.lane.from({
+                      lane_key: UInt8.from(LANE_MOBILITY),
+                      schedule: state.schedule,
+                  }),
+              ]
+            : [])
+
     const info: Record<string, unknown> = {
         type: template.kind,
         id: UInt64.from(state.id),
@@ -95,14 +108,10 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         item_id: UInt16.from(state.itemId ?? template.itemId),
         cargomass: UInt32.from(state.cargomass ?? 0),
         cargo: state.cargo || [],
-        is_idle: !state.schedule,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
+        lanes,
     }
 
     if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
-    if (state.schedule) info.schedule = state.schedule
 
     if (kind === 'container') {
         info.modules = []

@@ -4,6 +4,7 @@ import type {ServerContract} from '../contracts'
 import {PlotManager} from './plot'
 import {getItem} from '../data/catalog'
 import {calc_craft_duration} from '../capabilities/crafting'
+import {getLanes, getTasks} from '../scheduling/schedule'
 import {TaskType} from '../types'
 import type {
     BuildableTarget,
@@ -94,43 +95,43 @@ export class ConstructionManager extends BaseManager {
         const buckets = new Map<string, Map<string, InboundTransfer>>()
         const nowMs = now.getTime()
         for (const entity of entities) {
-            const schedule = entity.schedule
-            if (!schedule) continue
             const entityIdStr = entity.id.toString()
             const sourceName = entity.entity_name || entityIdStr
-            const startedMs = schedule.started.toDate().getTime()
-            let cumulativeSec = 0
-            for (const task of schedule.tasks) {
-                cumulativeSec += task.duration.toNumber()
-                if (!isTransferTask(task)) continue
-                if (!task.entitytarget) continue
-                const projectedEndMs = startedMs + cumulativeSec * 1000
-                if (projectedEndMs < nowMs) continue
-                const targetIdStr = task.entitytarget.entity_id.toString()
-                const etaSeconds = Math.max(0, Math.round((projectedEndMs - nowMs) / 1000))
-                let perTarget = buckets.get(targetIdStr)
-                if (!perTarget) {
-                    perTarget = new Map()
-                    buckets.set(targetIdStr, perTarget)
-                }
-                for (const c of task.cargo) {
-                    const itemId = c.item_id.toNumber()
-                    const quantity = c.quantity.toNumber()
-                    if (quantity === 0) continue
-                    const key = `${entityIdStr}#${itemId}`
-                    const existing = perTarget.get(key)
-                    if (existing) {
-                        existing.quantity += quantity
-                        existing.etaSeconds = Math.min(existing.etaSeconds, etaSeconds)
-                    } else {
-                        perTarget.set(key, {
-                            sourceEntityId: entity.id,
-                            sourceEntityType: entity.type,
-                            sourceName,
-                            itemId,
-                            quantity,
-                            etaSeconds,
-                        })
+            for (const lane of getLanes(entity)) {
+                const startedMs = lane.schedule.started.toDate().getTime()
+                let cumulativeSec = 0
+                for (const task of lane.schedule.tasks) {
+                    cumulativeSec += task.duration.toNumber()
+                    if (!isTransferTask(task)) continue
+                    if (!task.entitytarget) continue
+                    const projectedEndMs = startedMs + cumulativeSec * 1000
+                    if (projectedEndMs < nowMs) continue
+                    const targetIdStr = task.entitytarget.entity_id.toString()
+                    const etaSeconds = Math.max(0, Math.round((projectedEndMs - nowMs) / 1000))
+                    let perTarget = buckets.get(targetIdStr)
+                    if (!perTarget) {
+                        perTarget = new Map()
+                        buckets.set(targetIdStr, perTarget)
+                    }
+                    for (const c of task.cargo) {
+                        const itemId = c.item_id.toNumber()
+                        const quantity = c.quantity.toNumber()
+                        if (quantity === 0) continue
+                        const key = `${entityIdStr}#${itemId}`
+                        const existing = perTarget.get(key)
+                        if (existing) {
+                            existing.quantity += quantity
+                            existing.etaSeconds = Math.min(existing.etaSeconds, etaSeconds)
+                        } else {
+                            perTarget.set(key, {
+                                sourceEntityId: entity.id,
+                                sourceEntityType: entity.type,
+                                sourceName,
+                                itemId,
+                                quantity,
+                                etaSeconds,
+                            })
+                        }
                     }
                 }
             }
@@ -152,25 +153,24 @@ export class ConstructionManager extends BaseManager {
         completesAt: number
         hasStarted: boolean
     } | null {
-        const schedule = plot.schedule
-        if (!schedule) return null
-        const tasks = schedule.tasks
-        const startedMs = schedule.started.toDate().getTime()
-        let startSec = 0
-        for (const task of tasks) {
-            if (task.type.toNumber() === TaskType.RESERVED) {
-                if (!task.entitytarget) return null
-                const startsAt = startedMs + startSec * 1000
-                const completesAt = startsAt + task.duration.toNumber() * 1000
-                return {
-                    builderId: task.entitytarget.entity_id,
-                    group: task.entitygroup ?? undefined,
-                    startsAt,
-                    completesAt,
-                    hasStarted: startsAt <= now.getTime(),
+        for (const lane of getLanes(plot)) {
+            const startedMs = lane.schedule.started.toDate().getTime()
+            let startSec = 0
+            for (const task of lane.schedule.tasks) {
+                if (task.type.toNumber() === TaskType.RESERVED) {
+                    if (!task.entitytarget) return null
+                    const startsAt = startedMs + startSec * 1000
+                    const completesAt = startsAt + task.duration.toNumber() * 1000
+                    return {
+                        builderId: task.entitytarget.entity_id,
+                        group: task.entitygroup ?? undefined,
+                        startsAt,
+                        completesAt,
+                        hasStarted: startsAt <= now.getTime(),
+                    }
                 }
+                startSec += task.duration.toNumber()
             }
-            startSec += task.duration.toNumber()
         }
         return null
     }
@@ -179,19 +179,22 @@ export class ConstructionManager extends BaseManager {
         builder: ServerContract.Types.entity_info | undefined,
         group: UInt64 | undefined
     ): {cancelable: boolean; blockingTaskCount: number} {
-        if (!builder?.schedule || group === undefined) {
+        if (!builder || group === undefined) {
             return {cancelable: false, blockingTaskCount: 0}
         }
-        const tasks = builder.schedule.tasks
-        const buildIdx = tasks.findIndex(
-            (t) =>
-                t.type.toNumber() === TaskType.BUILDPLOT &&
-                t.entitygroup !== undefined &&
-                t.entitygroup.equals(group)
-        )
-        if (buildIdx < 0) return {cancelable: false, blockingTaskCount: 0}
-        const trailing = tasks.length - 1 - buildIdx
-        return {cancelable: trailing === 0, blockingTaskCount: trailing}
+        for (const lane of getLanes(builder)) {
+            const tasks = lane.schedule.tasks
+            const buildIdx = tasks.findIndex(
+                (t) =>
+                    t.type.toNumber() === TaskType.BUILDPLOT &&
+                    t.entitygroup !== undefined &&
+                    t.entitygroup.equals(group)
+            )
+            if (buildIdx < 0) continue
+            const trailing = tasks.length - 1 - buildIdx
+            return {cancelable: trailing === 0, blockingTaskCount: trailing}
+        }
+        return {cancelable: false, blockingTaskCount: 0}
     }
 
     private buildFromReservation(
@@ -357,9 +360,8 @@ function isTransferTask(task: ServerContract.Types.task): boolean {
 }
 
 function reservationsOf(source: ServerContract.Types.entity_info): Reservation[] {
-    if (!source.schedule) return []
     const out = new Map<string, Reservation>()
-    for (const task of source.schedule.tasks) {
+    for (const task of getTasks(source)) {
         if (!isTransferTask(task)) continue
         if (!task.entitytarget) continue
         const targetType = task.entitytarget.entity_type

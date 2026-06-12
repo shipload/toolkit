@@ -35,6 +35,8 @@ import {
 } from '../types'
 import {getItem} from '../data/catalog'
 import {hasSystem} from '../utils/system'
+import * as scheduleModel from '../scheduling/schedule'
+import type {ScheduleData} from '../scheduling/schedule'
 
 export function calc_orbital_altitude(mass: number): number {
     if (mass <= BASE_ORBITAL_MASS) {
@@ -112,14 +114,15 @@ export function getInterpolatedPosition(
     taskIndex: number,
     taskProgress: number
 ): FloatPosition {
-    if (!entity.schedule || entity.schedule.tasks.length === 0) {
+    const tasks = mobilityTasks(entity)
+    if (tasks.length === 0) {
         return {x: Number(entity.coordinates.x), y: Number(entity.coordinates.y)}
     }
     if (taskIndex < 0) {
-        const settled = getFlightOrigin(entity, entity.schedule.tasks.length)
+        const settled = getFlightOrigin(entity, tasks.length)
         return {x: Number(settled.x), y: Number(settled.y)}
     }
-    const task = entity.schedule.tasks[taskIndex]
+    const task = tasks[taskIndex]
     if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
         const origin = getFlightOrigin(entity, taskIndex)
         return {x: Number(origin.x), y: Number(origin.y)}
@@ -427,20 +430,22 @@ export interface TransferEntity {
     }
 }
 
-export interface HasScheduleAndLocation {
+export interface HasScheduleAndLocation extends ScheduleData {
     coordinates: ServerContract.ActionParams.Type.coordinates
-    schedule?: ServerContract.Types.schedule
+}
+
+function mobilityTasks(entity: HasScheduleAndLocation): ServerContract.Types.task[] {
+    return scheduleModel.mobilityLane(entity)?.schedule.tasks ?? []
 }
 
 export function getFlightOrigin(
     entity: HasScheduleAndLocation,
     flightTaskIndex: number
 ): ServerContract.ActionParams.Type.coordinates {
-    if (!entity.schedule) return entity.coordinates
-
+    const tasks = mobilityTasks(entity)
     let origin = entity.coordinates
-    for (let i = 0; i < flightTaskIndex && i < entity.schedule.tasks.length; i++) {
-        const task = entity.schedule.tasks[i]
+    for (let i = 0; i < flightTaskIndex && i < tasks.length; i++) {
+        const task = tasks[i]
         if (task.type.equals(TaskType.TRAVEL) && task.coordinates) {
             origin = task.coordinates
         }
@@ -451,10 +456,9 @@ export function getFlightOrigin(
 export function getDestinationLocation(
     entity: HasScheduleAndLocation
 ): ServerContract.ActionParams.Type.coordinates | undefined {
-    if (!entity.schedule) return undefined
-
-    for (let i = entity.schedule.tasks.length - 1; i >= 0; i--) {
-        const task = entity.schedule.tasks[i]
+    const tasks = mobilityTasks(entity)
+    for (let i = tasks.length - 1; i >= 0; i--) {
+        const task = tasks[i]
         if (task.type.equals(TaskType.TRAVEL) && task.coordinates) {
             return task.coordinates
         }
@@ -468,14 +472,15 @@ export function getPositionAt(
     taskIndex: number,
     taskProgress: number
 ): ServerContract.ActionParams.Type.coordinates {
-    if (!entity.schedule || entity.schedule.tasks.length === 0) {
+    const tasks = mobilityTasks(entity)
+    if (tasks.length === 0) {
         return entity.coordinates
     }
     if (taskIndex < 0) {
-        return getFlightOrigin(entity, entity.schedule.tasks.length)
+        return getFlightOrigin(entity, tasks.length)
     }
 
-    const task = entity.schedule.tasks[taskIndex]
+    const task = tasks[taskIndex]
 
     if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
         return getFlightOrigin(entity, taskIndex)

@@ -1,4 +1,4 @@
-import {CAP_MODULES, kindCan} from '@shipload/sdk'
+import {CAP_MODULES, kindCan, schedule} from '@shipload/sdk'
 import type {EntityTypeName} from './args'
 import {
 	completedTaskCount,
@@ -15,7 +15,7 @@ export function isActionCapable(snap: EntitySnapshot): boolean {
 
 export function isAvailable(snap: EntitySnapshot): boolean {
 	if (!snap.is_idle) return false
-	return (snap.schedule?.tasks.length ?? 0) === 0
+	return !schedule.hasSchedule(snap)
 }
 
 export function detectCohort(

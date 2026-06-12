@@ -1,5 +1,7 @@
-import type { ServerTypes } from "@shipload/sdk";
+import { type ServerTypes, schedule } from "@shipload/sdk";
+import { UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
+import type { LaneTaskView } from "./cancel-compute";
 import { server } from "./client";
 
 export interface EntitySnapshot {
@@ -30,22 +32,13 @@ export interface EntitySnapshot {
 	warp?: { range: bigint };
 	loaders?: { mass: bigint; thrust: bigint; quantity: bigint };
 	is_idle: boolean;
-	current_task?: ServerTypes.task;
-	current_task_elapsed?: bigint;
-	current_task_remaining?: bigint;
-	pending_tasks?: ServerTypes.task[];
 	modules?: ServerTypes.module_entry[];
-	schedule?: {
-		started?: { toMilliseconds(): number } | string | Date;
-		tasks: unknown[];
-	};
+	lanes: ServerTypes.lane[];
 }
 
-// Task fields (current_task, pending_tasks, schedule.tasks) and cargo[i].modules
-// are passed through with wharfkit types intact; downstream rendering tolerates
-// them via toString. If task-comparison logic is added later, expand the converter.
 export function entityInfoToSnapshot(
 	ei: ServerTypes.entity_info,
+	now: Date = new Date(),
 ): EntitySnapshot {
 	const snap: EntitySnapshot = {
 		type: ei.type.toString(),
@@ -64,12 +57,9 @@ export function entityInfoToSnapshot(
 			modules: c.modules,
 			id: BigInt(c.id.toString()),
 		})),
-		is_idle: ei.is_idle,
-		current_task: ei.current_task,
-		current_task_elapsed: BigInt(ei.current_task_elapsed.toString()),
-		current_task_remaining: BigInt(ei.current_task_remaining.toString()),
-		pending_tasks: ei.pending_tasks,
+		is_idle: schedule.isEntityIdle(ei, now),
 		modules: ei.modules,
+		lanes: ei.lanes,
 	};
 	if (ei.capacity != null) snap.capacity = BigInt(ei.capacity.toString());
 	if (ei.energy != null) snap.energy = BigInt(ei.energy.toString());
@@ -116,12 +106,6 @@ export function entityInfoToSnapshot(
 			quantity: BigInt(ei.loaders.quantity.toString()),
 		};
 	}
-	if (ei.schedule != null) {
-		snap.schedule = {
-			started: ei.schedule.started,
-			tasks: ei.schedule.tasks,
-		};
-	}
 	return snap;
 }
 
@@ -150,21 +134,123 @@ export async function getEntitiesSnapshot(
 	if (entityType) params.entity_type = entityType;
 	const data = await server.readonly("getentities", params as never);
 	const arr = data as unknown as ServerTypes.entity_info[];
-	return arr.map(entityInfoToSnapshot);
+	return arr.map((ei) => entityInfoToSnapshot(ei));
 }
 
-export function completedTaskCount(snap: EntitySnapshot): number {
-	if (!snap.is_idle) return 0;
-	return snap.schedule?.tasks.length ?? 0;
+export function mobilitySchedule(
+	snap: Pick<EntitySnapshot, "lanes">,
+): ServerTypes.lane["schedule"] | undefined {
+	return schedule.mobilityLane(snap)?.schedule;
 }
 
-export function completedCount(snap: {
-	is_idle: boolean;
-	schedule?: { tasks?: readonly unknown[] } | null;
-	pending_tasks?: readonly unknown[];
-}): number {
-	if (snap.is_idle) return snap.schedule?.tasks?.length ?? 0;
-	const all = snap.schedule?.tasks?.length ?? 0;
-	const pending = snap.pending_tasks?.length ?? 0;
-	return Math.max(0, all - pending - 1);
+export interface SnapshotTaskTimes {
+	elapsed_s: number;
+	remaining_s: number;
+	total_s: number;
+}
+
+// The in-progress task on the tracked lane: mobility for ships, else the first
+// active lane in canonical order. Drives single-entity progress display.
+export function activeLaneTask(
+	snap: Pick<EntitySnapshot, "lanes">,
+	now: Date = new Date(),
+): schedule.OrderedTask | undefined {
+	const inProgress = schedule
+		.orderedTasks(snap)
+		.filter((t) => schedule.currentTaskIndexOf(snap, t.laneKey, now) === t.taskIndex);
+	if (inProgress.length === 0) return undefined;
+	const mobility = inProgress.find(
+		(t) => t.laneKey === schedule.LANE_MOBILITY,
+	);
+	return mobility ?? inProgress[0];
+}
+
+export function snapshotTaskTimes(
+	snap: Pick<EntitySnapshot, "lanes">,
+	now: Date = new Date(),
+): SnapshotTaskTimes {
+	const task = activeLaneTask(snap, now);
+	if (!task) return { elapsed_s: 0, remaining_s: 0, total_s: 0 };
+	const elapsed_s = schedule.laneTaskElapsedOf(
+		snap,
+		task.laneKey,
+		task.taskIndex,
+		now,
+	);
+	const remaining_s = schedule.laneTaskRemainingOf(
+		snap,
+		task.laneKey,
+		task.taskIndex,
+		now,
+	);
+	return { elapsed_s, remaining_s, total_s: elapsed_s + remaining_s };
+}
+
+// Entity-wide completed task-fronts in canonical order (what one resolve drains).
+export function completedCount(
+	snap: Pick<EntitySnapshot, "lanes">,
+	now: Date = new Date(),
+): number {
+	return schedule.resolveOrder(snap, now).length;
+}
+
+export function completedTaskCount(snap: EntitySnapshot, now: Date = new Date()): number {
+	return completedCount(snap, now);
+}
+
+// Queued tasks across all lanes: neither complete nor in progress.
+export function pendingTaskCount(
+	snap: Pick<EntitySnapshot, "lanes">,
+	now: Date = new Date(),
+): number {
+	return schedule
+		.orderedTasks(snap)
+		.filter(
+			(ot) =>
+				!schedule.laneTaskCompleteOf(snap, ot.laneKey, ot.taskIndex, now) &&
+				!schedule.laneTaskInProgressOf(snap, ot.laneKey, ot.taskIndex, now),
+		).length;
+}
+
+export async function getEntityRow(
+	entityId: bigint | number,
+): Promise<ServerTypes.entity_row> {
+	const row = await server.table("entity").get(UInt64.from(entityId));
+	if (!row) throw new Error(`entity ${entityId} not found`);
+	return row;
+}
+
+export interface LaneSnapshotView {
+	laneKey: number;
+	pending: number;
+}
+
+export function lanesWithPendingTasks(
+	row: ServerTypes.entity_row,
+	now: Date,
+): LaneSnapshotView[] {
+	return schedule
+		.getLanes(row)
+		.filter((l) => l.schedule.tasks.length > 0)
+		.map((l) => {
+			const current = schedule.currentTaskIndexForLane(l.schedule, now);
+			const pending =
+				current < 0 ? 0 : l.schedule.tasks.length - current;
+			return { laneKey: l.laneKey, pending };
+		})
+		.filter((l) => l.pending > 0);
+}
+
+export function laneSnapshot(
+	row: ServerTypes.entity_row,
+	laneKey: number,
+	now: Date,
+): LaneTaskView {
+	const lane = schedule.getLane(row, laneKey);
+	const tasks = (lane?.schedule.tasks ?? []) as ServerTypes.task[];
+	const active = lane ? schedule.currentTaskIndexForLane(lane.schedule, now) : -1;
+	const isIdle = active < 0;
+	const completed = isIdle ? tasks.length : active;
+	const pending = isIdle ? [] : tasks.slice(active + 1);
+	return {tasks, pending, completed, isIdle};
 }

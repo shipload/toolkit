@@ -1,4 +1,4 @@
-import {taskCargoChanges, type ServerTypes, type TaskCargoChange} from '@shipload/sdk'
+import {schedule, taskCargoChanges, type ServerTypes, type TaskCargoChange} from '@shipload/sdk'
 import Table from 'cli-table3'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES} from '../../lib/args'
@@ -14,26 +14,107 @@ import {
     formatTimeUTC,
     reltime,
 } from '../../lib/format'
-import {completedCount} from '../../lib/snapshot'
+import {
+    laneFront,
+    laneLabel,
+    laneSectionStatus,
+    sortLaneKeysSemantic,
+    type LaneFrontState,
+    type LaneSectionStatus,
+} from '../../lib/lane-presentation'
 
-interface Task {
-    type: number
-    duration: number
-    cancelable: number
-    entitygroup?: number | null
-    coordinates?: {x: number; y: number; z: number | null} | null
-    energy_cost?: number | null
+interface TaskRow {
+    displayIndex: number
+    laneKey: number
+    laneLabel: string
+    localIndex: number
+    task: ServerTypes.task
+    status: 'done' | 'active' | 'pending'
+    endsAt: Date
+}
+
+interface TaskSection {
+    laneKey: number
+    laneLabel: string
+    status: LaneSectionStatus
+    front: LaneFrontState
+    rows: TaskRow[]
 }
 
 interface TasksView {
     entity: ServerTypes.entity_info
-    schedule: {started: Date; tasks: Task[]} | null
-    pending: Task[]
-    cargoChanges: TaskCargoChange[][]
+    rows: TaskRow[]
+    sections: TaskSection[]
     now: Date
 }
 
-function fmtCoords(c: {x: number; y: number; z: number | null} | null | undefined): string {
+function pendingTasksOf(entity: ServerTypes.entity_info, now: Date): ServerTypes.task[] {
+    return schedule
+        .orderedTasks(entity)
+        .filter(
+            (ot) =>
+                !schedule.laneTaskCompleteOf(entity, ot.laneKey, ot.taskIndex, now) &&
+                !schedule.laneTaskInProgressOf(entity, ot.laneKey, ot.taskIndex, now)
+        )
+        .map((ot) => ot.task)
+}
+
+function buildTaskRowAt(
+    entity: ServerTypes.entity_info,
+    laneKey: number,
+    localIndex: number,
+    task: ServerTypes.task,
+    endsAt: Date,
+    displayIndex: number,
+    now: Date
+): TaskRow {
+    const done = schedule.laneTaskCompleteOf(entity, laneKey, localIndex, now)
+    const active = schedule.laneTaskInProgressOf(entity, laneKey, localIndex, now)
+    return {
+        displayIndex,
+        laneKey,
+        laneLabel: laneLabel(entity, laneKey),
+        localIndex,
+        task,
+        status: done ? 'done' : active ? 'active' : 'pending',
+        endsAt,
+    }
+}
+
+export function buildTasksView(entity: ServerTypes.entity_info, now: Date): TasksView {
+    const rows: TaskRow[] = schedule
+        .orderedTasks(entity)
+        .map((ot, i) =>
+            buildTaskRowAt(entity, ot.laneKey, ot.taskIndex, ot.task, ot.completesAt, i, now)
+        )
+    const lanes = schedule.getLanes(entity)
+    const lanesByKey = new Map(lanes.map((lane) => [lane.laneKey, lane]))
+    const sections: TaskSection[] = sortLaneKeysSemantic(lanes.map((lane) => lane.laneKey)).map(
+        (laneKey) => {
+            const lane = lanesByKey.get(laneKey)!
+            return {
+                laneKey,
+                laneLabel: laneLabel(entity, laneKey),
+                status: laneSectionStatus(lane, now),
+                front: laneFront(lane.schedule, now),
+                rows: lane.schedule.tasks.map((task, localIndex) =>
+                    buildTaskRowAt(
+                        entity,
+                        laneKey,
+                        localIndex,
+                        task,
+                        schedule.laneCompletesAt(lane.schedule, localIndex),
+                        localIndex,
+                        now
+                    )
+                ),
+            }
+        }
+    )
+    return {entity, rows, sections, now}
+}
+
+function fmtCoords(c: {x: unknown; y: unknown} | null | undefined): string {
     if (!c) return '—'
     return `(${c.x}, ${c.y})`
 }
@@ -48,16 +129,18 @@ function fmtCargoCell(changes: TaskCargoChange[] | undefined): string {
     return changes.map(fmtChange).join('\n')
 }
 
-export function render(view: TasksView): string {
-    const header = `${renderEntityHeader(view.entity)}\n  ${formatTimeUTC(view.now)}`
+function formatSectionHeader(section: TaskSection): string {
+    const suffix =
+        section.front.status === 'waiting'
+            ? ` · starts in ${formatDuration(section.front.startsIn_s)}`
+            : section.front.status === 'active'
+              ? ` · ${formatDuration(section.front.remaining_s)} remaining`
+              : ''
+    return `${section.laneLabel} · ${section.status}${suffix}`
+}
 
-    if (!view.schedule || view.schedule.tasks.length === 0) {
-        return [header, '', '  No scheduled tasks.'].join('\n')
-    }
-
-    const showCargo = view.cargoChanges.some((c) => c.length > 0)
-
-    const head = ['#', 'dest', 'type', 'status', 'duration', 'ends']
+function taskTable(rows: TaskRow[], now: Date, showCargo: boolean): string {
+    const head = ['idx', 'dest', 'type', 'status', 'duration', 'ends']
     const colAligns: ('left' | 'right')[] = ['left', 'left', 'left', 'left', 'left', 'left']
     if (showCargo) {
         head.push('cargo')
@@ -87,32 +170,75 @@ export function render(view: TasksView): string {
         colAligns,
     })
 
-    const totalTasks = view.schedule.tasks.length
-    const completed = completedCount({
-        is_idle: view.entity.is_idle,
-        schedule: {tasks: view.schedule.tasks},
-        pending_tasks: view.pending,
-    })
-    let cursor = view.schedule.started.getTime()
-    for (let i = 0; i < totalTasks; i++) {
-        const t = view.schedule.tasks[i]
-        const end = new Date(cursor + t.duration * 1000)
-        cursor = end.getTime()
-        const status = i < completed ? 'done' : i === completed ? 'active' : 'pending'
-        const endsLabel = reltime(end, view.now)
-        const row: string[] = [
-            String(i),
-            fmtCoords(t.coordinates),
-            formatTaskType(t.type),
-            status,
-            formatDuration(t.duration),
-            endsLabel,
+    for (const row of rows) {
+        const r: string[] = [
+            String(row.localIndex),
+            fmtCoords(row.task.coordinates),
+            formatTaskType(Number(row.task.type)),
+            row.status,
+            formatDuration(Number(row.task.duration)),
+            reltime(row.endsAt, now),
         ]
-        if (showCargo) row.push(fmtCargoCell(view.cargoChanges[i]))
-        table.push(row)
+        if (showCargo) r.push(fmtCargoCell(taskCargoChanges(row.task)))
+        table.push(r)
     }
 
-    const out = [header, '', table.toString()]
+    return table.toString()
+}
+
+function frontToJson(front: LaneFrontState): Record<string, unknown> {
+    return {
+        status: front.status,
+        active_index: front.activeIndex,
+        starts_in_s: front.startsIn_s,
+        remaining_s: front.remaining_s,
+        total_remaining_s: front.totalRemaining_s,
+        progress: front.progress,
+    }
+}
+
+function rowToJson(r: TaskRow): Record<string, unknown> {
+    return {
+        lane_key: r.laneKey,
+        idx: r.localIndex,
+        type: Number(r.task.type.toString()),
+        status: r.status,
+        ends: r.endsAt.toISOString(),
+    }
+}
+
+function changeToJson(c: TaskCargoChange): Record<string, unknown> {
+    return {
+        direction: c.direction,
+        item_id: c.item_id,
+        item_name: safeItemName(c.item_id),
+        quantity: c.quantity,
+        stack_id: c.stats.toString(),
+    }
+}
+
+function startedToIso(started: {toDate(): Date}): string {
+    return started.toDate().toISOString()
+}
+
+export function render(view: TasksView): string {
+    const header = `${renderEntityHeader(view.entity)}\n  ${formatTimeUTC(view.now)}`
+
+    if (view.rows.length === 0) {
+        return [header, '', '  No scheduled tasks.'].join('\n')
+    }
+
+    const showCargo = view.rows.some((r) => taskCargoChanges(r.task).length > 0)
+
+    const completed = schedule.resolveOrder(view.entity, view.now).length
+    const out = [header]
+    for (const section of view.sections) {
+        out.push(
+            '',
+            `  ${formatSectionHeader(section)}`,
+            taskTable(section.rows, view.now, showCargo)
+        )
+    }
     if (completed > 0) {
         out.push(
             '',
@@ -126,28 +252,31 @@ export function render(view: TasksView): string {
     return out.join('\n')
 }
 
-function changeToJson(c: TaskCargoChange): Record<string, unknown> {
-    return {
-        direction: c.direction,
-        item_id: c.item_id,
-        item_name: safeItemName(c.item_id),
-        quantity: c.quantity,
-        stack_id: c.stats.toString(),
-    }
-}
-
-function viewToJson(view: TasksView): Record<string, unknown> {
+export function viewToJson(view: TasksView): Record<string, unknown> {
+    const mobility = schedule.mobilityLane(view.entity)
     return {
         type: String(view.entity.type),
         id: BigInt(view.entity.id.toString()),
-        schedule: view.schedule
-            ? {
-                  started: view.schedule.started.toISOString(),
-                  tasks: view.schedule.tasks,
-              }
+        schedule: mobility
+            ? {started: startedToIso(mobility.schedule.started), tasks: mobility.schedule.tasks}
             : null,
-        pending: view.pending,
-        cargo_changes: view.cargoChanges.map((c) => c.map(changeToJson)),
+        pending: pendingTasksOf(view.entity, view.now),
+        cargo_changes: mobility
+            ? mobility.schedule.tasks.map((task) => taskCargoChanges(task).map(changeToJson))
+            : [],
+        lanes: schedule.getLanes(view.entity).map((l) => ({
+            lane_key: l.laneKey,
+            started: startedToIso(l.schedule.started),
+            tasks: l.schedule.tasks,
+        })),
+        rows: view.rows.map(rowToJson),
+        sections: view.sections.map((section) => ({
+            lane_key: section.laneKey,
+            lane_label: section.laneLabel,
+            status: section.status,
+            front: frontToJson(section.front),
+            rows: section.rows.map(rowToJson),
+        })),
         now: view.now.toISOString(),
     }
 }
@@ -155,24 +284,8 @@ function viewToJson(view: TasksView): Record<string, unknown> {
 export async function runTasks(ctx: EntityContext, opts: {json?: boolean}): Promise<void> {
     const info = (await server.readonly('getentity', {
         entity_id: ctx.entityId,
-    })) as unknown as ServerTypes.entity_info & {
-        schedule?: {started: {toMilliseconds(): number}; tasks: Task[]}
-        pending_tasks?: Task[]
-    }
-    const rawTasks = (info.schedule?.tasks ?? []) as unknown as ServerTypes.task[]
-    const cargoChanges = rawTasks.map(taskCargoChanges)
-    const view: TasksView = {
-        entity: info,
-        schedule: info.schedule
-            ? {
-                  started: new Date(info.schedule.started.toMilliseconds()),
-                  tasks: info.schedule.tasks ?? [],
-              }
-            : null,
-        pending: info.pending_tasks ?? [],
-        cargoChanges,
-        now: new Date(),
-    }
+    })) as unknown as ServerTypes.entity_info
+    const view = buildTasksView(info, new Date())
     if (opts.json) {
         console.log(formatOutput(viewToJson(view), {json: true}, () => ''))
     } else {

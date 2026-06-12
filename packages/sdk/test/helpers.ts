@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {type AnyInt, Int64, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {type AnyInt, Int64, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     Coordinates,
     encodeStats,
@@ -73,7 +73,7 @@ export function makeShipFixture(
     })
 
     const seed = encodeStats([500, 500, 500, 500])
-    return makeEntity(ITEM_SHIP_T1_PACKED, {
+    const ship = makeEntity(ITEM_SHIP_T1_PACKED, {
         id: UInt64.from(1),
         owner: 'teamgreymass',
         name: 'Test Ship',
@@ -88,6 +88,25 @@ export function makeShipFixture(
         ],
         cargo: cargoItems,
     })
+    return withScheduleShim(ship)
+}
+
+// Test shim: lets fixtures keep `ship.schedule = …` after the entity_info struct went lane-only.
+function withScheduleShim<T extends object>(
+    ship: T
+): T & {schedule?: ServerContract.Types.schedule} {
+    Object.defineProperty(ship, 'schedule', {
+        configurable: true,
+        get(this: {lanes: ServerContract.Types.lane[]}) {
+            return this.lanes.find((l) => l.lane_key.toNumber() === 0)?.schedule
+        },
+        set(this: {lanes: ServerContract.Types.lane[]}, sched: ServerContract.Types.schedule) {
+            this.lanes = [
+                ServerContract.Types.lane.from({lane_key: UInt8.from(0), schedule: sched}),
+            ]
+        },
+    })
+    return ship as T & {schedule?: ServerContract.Types.schedule}
 }
 
 export function makeTask(

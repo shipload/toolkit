@@ -1,4 +1,4 @@
-import { ServerTypes, TaskType } from "@shipload/sdk";
+import { ServerTypes, TaskType, schedule } from "@shipload/sdk";
 import type { EntitySnapshot } from "./snapshot";
 
 export interface ProjectedCargoStack {
@@ -164,12 +164,15 @@ export function snapshotToStacks(snap: EntitySnapshot): ProjectedCargoStack[] {
 	}));
 }
 
-export function projectCargoFromSnapshot(snap: EntitySnapshot): ProjectedCargoStack[] {
+export function projectCargoFromSnapshot(
+	snap: EntitySnapshot,
+	now: Date = new Date(),
+): ProjectedCargoStack[] {
 	const stacks = snapshotToStacks(snap);
-
-	if (snap.current_task) applyTaskToCargo(stacks, snap.current_task);
-	if (snap.pending_tasks) {
-		for (const task of snap.pending_tasks) applyTaskToCargo(stacks, task);
+	// Apply every not-yet-complete task across all lanes, in canonical completion order.
+	for (const ot of schedule.orderedTasks(snap)) {
+		if (schedule.laneTaskCompleteOf(snap, ot.laneKey, ot.taskIndex, now)) continue;
+		applyTaskToCargo(stacks, ot.task);
 	}
 	return stacks;
 }

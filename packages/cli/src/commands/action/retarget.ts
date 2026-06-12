@@ -1,4 +1,4 @@
-import type {Shipload} from '@shipload/sdk'
+import {schedule, type ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint64} from '../../lib/args'
@@ -19,6 +19,25 @@ export async function buildAction(opts: RetargetOpts, shipload?: Shipload): Prom
     return sl.actions.retarget(opts.sourceId, opts.taskIndex, opts.newDestId)
 }
 
+const TASK_UNLOAD = 4
+
+export function findRetargetableLane(
+    snap: {lanes: ServerTypes.lane[]},
+    localIndex: number,
+    now: Date
+): {laneKey: number; task: ServerTypes.task} | null {
+    for (const l of schedule.getLanes(snap)) {
+        const task = l.schedule.tasks[localIndex] as ServerTypes.task | undefined
+        if (!task) continue
+        if (Number(task.type.toString()) !== TASK_UNLOAD) continue
+        if (!task.entitytarget) continue
+        if (schedule.laneTaskCompleteOf(snap, l.laneKey, localIndex, now)) continue
+        if (schedule.laneTaskInProgressOf(snap, l.laneKey, localIndex, now)) continue
+        return {laneKey: l.laneKey, task}
+    }
+    return null
+}
+
 export async function runRetarget(
     ctx: EntityContext,
     taskIndex: bigint,
@@ -26,10 +45,9 @@ export async function runRetarget(
     destId: bigint
 ): Promise<void> {
     const snap = await getEntitySnapshot(ctx.entityId)
-    const tasks = snap.schedule?.tasks ?? []
     const idx = Number(taskIndex)
-    const task = tasks[idx] as {type: {toString(): string}; entitytarget?: unknown} | undefined
-    if (!task || Number(task.type.toString()) !== 4 || !task.entitytarget) {
+    const hit = findRetargetableLane(snap, idx, new Date())
+    if (!hit) {
         throw new ValidationError(
             `task #${idx} on ${ctx.entityType} ${ctx.entityId} is not a pending outgoing transfer`,
             `review with: shiploadcli ${ctx.entityType} ${ctx.entityId} tasks`

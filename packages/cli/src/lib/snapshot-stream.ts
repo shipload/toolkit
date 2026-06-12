@@ -1,4 +1,4 @@
-import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
+import { type EntitySnapshot, getEntitySnapshot, snapshotTaskTimes } from "./snapshot";
 
 export type FetchSnapshotFn = (
 	entityId: bigint | number,
@@ -46,8 +46,9 @@ export async function* streamEntitySnapshot(
 	let snap = opts.initialSnapshot ?? (await fetchSnapshot(opts.entityId));
 	let snapAtModel = modelNow;
 	let lastFetchAtModel = modelNow;
-	let elapsedAtFetch = snap.is_idle ? 0 : toNumber(snap.current_task_elapsed);
-	let remainingAtFetch = snap.is_idle ? 0 : toNumber(snap.current_task_remaining);
+	const initialTimes = snapshotTaskTimes(snap);
+	let elapsedAtFetch = snap.is_idle ? 0 : initialTimes.elapsed_s;
+	let remainingAtFetch = snap.is_idle ? 0 : initialTimes.remaining_s;
 	let totalAtFetch = elapsedAtFetch + remainingAtFetch;
 	let attempt = 0;
 
@@ -100,8 +101,9 @@ export async function* streamEntitySnapshot(
 			continue;
 		}
 
-		const newElapsed = toNumber(snap.current_task_elapsed);
-		const newRemaining = toNumber(snap.current_task_remaining);
+		const refetchedTimes = snapshotTaskTimes(snap);
+		const newElapsed = refetchedTimes.elapsed_s;
+		const newRemaining = refetchedTimes.remaining_s;
 		const newTotal = newElapsed + newRemaining;
 		const sameTask = wasBusy && Math.abs(newTotal - oldTotal) <= SMOOTH_TOLERANCE_S;
 		const closeToInterpolation =

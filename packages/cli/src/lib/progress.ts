@@ -1,10 +1,10 @@
 import type { ServerTypes } from "@shipload/sdk";
+import { schedule } from "@shipload/sdk";
 import {
 	formatCargoUsage,
 	formatCoordinatePair,
 	formatDuration,
 	formatTaskShort,
-	formatTimeUTC,
 	projectEnergy,
 } from "./format";
 import type { EntitySnapshot } from "./snapshot";
@@ -95,7 +95,7 @@ export function makeProgressRenderer(out: NodeJS.WriteStream = process.stderr): 
 	return { tick, done };
 }
 
-function composeBlock(t: ProgressTick): string[] {
+export function composeBlock(t: ProgressTick): string[] {
 	const lines = [headerLine(t.snap)];
 	const stats = statsLine(t);
 	if (stats) lines.push(stats);
@@ -139,7 +139,7 @@ function cargoSummary(snap: EntitySnapshot): string | null {
 }
 
 function idleBody(t: ProgressTick): string[] {
-	const completed = t.snap.schedule?.tasks?.length ?? 0;
+	const completed = schedule.resolveOrder(t.snap, new Date()).length;
 	const refreshIn = Math.max(0, Math.ceil(t.fetchInterval_s - t.sinceLastFetch_s));
 	const parts = ["◌ idle"];
 	if (completed > 0) parts.push(`${completed} task(s) awaiting resolve`);
@@ -147,38 +147,26 @@ function idleBody(t: ProgressTick): string[] {
 	return [`  ${parts.join("  ·  ")}`];
 }
 
+function laneTag(key: number): string {
+	return key === schedule.LANE_MOBILITY ? "mob" : `L${key}`;
+}
+
 function busyBody(t: ProgressTick): string[] {
-	const all = (t.snap.schedule?.tasks ?? []) as ServerTypes.task[];
-	const pendingCount = (t.snap.pending_tasks ?? []).length;
-	const activeIdx = Math.max(0, all.length - pendingCount - 1);
-	const done = all.slice(0, activeIdx);
-	const active = all[activeIdx] ?? t.snap.current_task;
-	const pending = all.slice(activeIdx + 1);
-
+	const now = new Date();
+	const ordered = schedule.orderedTasks(t.snap);
 	const lines: string[] = [];
-	for (const task of done) lines.push(taskRow("  ✓ ", task, "done"));
-	if (active) lines.push(taskRow("  ▶ ", active, formatDuration(Number(active.duration ?? 0))));
-
+	for (const ot of ordered) {
+		const done = schedule.laneTaskCompleteOf(t.snap, ot.laneKey, ot.taskIndex, now);
+		const active = schedule.laneTaskInProgressOf(t.snap, ot.laneKey, ot.taskIndex, now);
+		const prefix = done ? "  ✓ " : active ? "  ▶ " : "    ";
+		const suffix = done ? "done" : formatDuration(Number(ot.task.duration ?? 0));
+		lines.push(taskRow(prefix, ot.task, `${laneTag(ot.laneKey)}  ${suffix}`));
+	}
 	const remainingLabel = formatDuration(Math.max(0, Math.ceil(t.remaining_s)));
 	const ratio = t.total_s > 0 ? Math.min(1, Math.max(0, t.elapsed_s / t.total_s)) : 0;
 	const filled = Math.round(ratio * BAR_WIDTH);
 	const bar = "█".repeat(filled) + "░".repeat(BAR_WIDTH - filled);
 	lines.push(`  [${bar}] ${remainingLabel} remaining`);
-
-	if (pending.length > 0) {
-		lines.push("  Queued:");
-		for (const task of pending) {
-			lines.push(taskRow("    ", task, formatDuration(Number(task.duration ?? 0))));
-		}
-		const totalRemaining_s =
-			Math.max(0, t.remaining_s) +
-			pending.reduce((acc, p) => acc + Number(p.duration ?? 0), 0);
-		const finishesAt = new Date(Date.now() + totalRemaining_s * 1000);
-		lines.push(
-			`  ETA: ${formatDuration(Math.ceil(totalRemaining_s))} · finishes at ${formatTimeUTC(finishesAt)}`,
-		);
-	}
-
 	return lines;
 }
 

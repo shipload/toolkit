@@ -1,8 +1,4 @@
-import {
-    type ProjectableSnapshot,
-    type ProjectedEntity,
-    projectFromCurrentState,
-} from '@shipload/sdk'
+import {type ProjectedEntity, schedule} from '@shipload/sdk'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, parseUint32} from '../../lib/args'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -15,6 +11,7 @@ import {
 } from '../../lib/gatherable-render'
 import {computeStratumGatherMetrics, type GathererCaps} from '../../lib/gatherable'
 import {loadLocationStrata} from '../../lib/location-loader'
+import {projectRemainingSnapshotAt} from '../../lib/projection'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 
@@ -65,11 +62,9 @@ function resolveState(
     let energy = Number(raw.energy?.toString() ?? '0')
     let cargoFreeKg = cargoCapacityKg - Number(raw.cargomass?.toString() ?? '0')
 
-    if (useProjected && snap.schedule && snap.schedule.tasks?.length > 0) {
+    if (useProjected && schedule.hasSchedule(snap)) {
         try {
-            const projection: ProjectedEntity = projectFromCurrentState(
-                snap as unknown as ProjectableSnapshot
-            )
+            const projection: ProjectedEntity = projectRemainingSnapshotAt(snap, new Date())
             coords = {
                 x: BigInt(projection.location.x.toString()),
                 y: BigInt(projection.location.y.toString()),

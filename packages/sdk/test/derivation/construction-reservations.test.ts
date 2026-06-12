@@ -115,6 +115,7 @@ describe('partitionSources netting against reservations', () => {
             cargomass: UInt32.from(0),
             coordinates: COORDS,
             modules: [],
+            lanes: [],
         })
     }
 
@@ -136,12 +137,10 @@ describe('partitionSources netting against reservations', () => {
                 thrust: UInt16.from(0),
                 quantity: UInt8.from(1),
             }),
-            is_idle: !schedule,
-            current_task_elapsed: UInt32.from(0),
-            current_task_remaining: UInt32.from(0),
-            pending_tasks: [],
             modules: [],
-            schedule,
+            lanes: schedule
+                ? [ServerContract.Types.lane.from({lane_key: UInt8.from(0), schedule})]
+                : [],
         })
     }
 

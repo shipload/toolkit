@@ -22,6 +22,7 @@ function makePlotRow(
         capacity: capacity !== undefined ? UInt32.from(capacity) : undefined,
         modules: [],
         item_id: UInt16.from(itemId),
+        lanes: [],
     })
 }
 
@@ -45,6 +46,7 @@ function makePlotInfo(
         current_task_elapsed: UInt32.from(0),
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
+        lanes: [],
     })
 }
 

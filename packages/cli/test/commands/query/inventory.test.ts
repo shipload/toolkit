@@ -12,6 +12,9 @@ function makeEntity(opts: {
     current_task?: ServerContract.Types.task
     pending_tasks?: ServerContract.Types.task[]
 }) {
+    const tasks = [...(opts.current_task ? [opts.current_task] : []), ...(opts.pending_tasks ?? [])]
+    const started = new Date(Date.now() - 1000).toISOString().slice(0, 23)
+    const lanes = tasks.length > 0 ? [{lane_key: 0, schedule: {started, tasks}}] : []
     return ServerContract.Types.entity_info.from({
         type: 'ship',
         id: 1,
@@ -32,7 +35,8 @@ function makeEntity(opts: {
         current_task: opts.current_task,
         current_task_elapsed: 0,
         current_task_remaining: 0,
-        pending_tasks: opts.pending_tasks ?? [],
+        pending_tasks: [],
+        lanes,
     })
 }
 

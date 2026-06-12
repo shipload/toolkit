@@ -9,8 +9,7 @@ import {
     ITEM_PLATE,
     ITEM_PLASMA_CELL,
     projectEntity,
-    projectFromCurrentState,
-    projectFromCurrentStateAt,
+    projectRemainingAt,
     RECIPE_INPUTS_EXCESS,
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
@@ -354,97 +353,97 @@ describe('projectEntity (stack-aware)', () => {
     // assertProjectionEquals. See `make -C contracts build/projection-fixtures`.
 })
 
-describe('projectFromCurrentState', () => {
-    test('skips completed tasks lingering in schedule.tasks (regression)', () => {
-        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
-        ship.schedule = ServerContract.Types.schedule.from({
-            started: '2024-06-04T23:41:09.000',
-            tasks: [
-                makeTask(TaskType.CRAFT, {
-                    cargo: [
-                        {item_id: 5, quantity: 10, stats: 0},
-                        {item_id: 99, quantity: 1, stats: 0},
-                    ],
+describe('projectRemainingAt', () => {
+    test('drains energy for an in-progress worker-lane gather (ADR 0020)', () => {
+        // Gather runs on a parallel worker lane, absent from current_task/pending_tasks/schedule.
+        const ship = makeShipFixture({energy: 1000})
+        const gather = makeTask(TaskType.GATHER, {duration: 1000, energy_cost: 600})
+        ship.lanes = [
+            ServerContract.Types.lane.from({
+                lane_key: 3,
+                schedule: ServerContract.Types.schedule.from({
+                    started: TimePoint.fromMilliseconds(Date.now() - 200_000),
+                    tasks: [gather],
                 }),
-            ],
-        })
-        ship.is_idle = true
-        const projected = projectFromCurrentState(ship)
-        assert.equal(projected.cargo.length, 1, 'cargo unchanged when no remaining work')
-        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
-    })
-
-    test('projects current_task + pending_tasks against current cargo', () => {
-        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 100, stats: 0}]})
-        ship.schedule = ServerContract.Types.schedule.from({
-            started: '2024-06-04T23:41:09.000',
-            tasks: [makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 30, stats: 0}]})],
-        })
-        ship.is_idle = false
-        ship.current_task = makeTask(TaskType.UNLOAD, {
-            cargo: [{item_id: 5, quantity: 30, stats: 0}],
-        })
-        ship.pending_tasks = [
-            makeTask(TaskType.UNLOAD, {cargo: [{item_id: 5, quantity: 20, stats: 0}]}),
+            }),
         ]
-        const projected = projectFromCurrentState(ship)
-        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 50)
+        ship.is_idle = false
+        const projected = projectRemainingAt(ship, new Date())
+        assert.equal(
+            projected.energy.toNumber(),
+            400,
+            'in-progress worker-lane gather draw applies'
+        )
     })
 
-    test('returns current state when no schedule', () => {
+    test('drains energy for a completed-but-unresolved worker-lane gather', () => {
+        // Resolve is lazy/entity-global: a completed draw is unsettled until resolve, so replay it.
+        const ship = makeShipFixture({energy: 1000})
+        const gather = makeTask(TaskType.GATHER, {duration: 60, energy_cost: 600})
+        ship.lanes = [
+            ServerContract.Types.lane.from({
+                lane_key: 3,
+                schedule: ServerContract.Types.schedule.from({
+                    started: TimePoint.fromMilliseconds(Date.now() - 600_000),
+                    tasks: [gather],
+                }),
+            }),
+        ]
+        ship.is_idle = false
+        const projected = projectRemainingAt(ship, new Date())
+        assert.equal(
+            projected.energy.toNumber(),
+            400,
+            'completed gather draw applies before resolve'
+        )
+    })
+
+    test('moves to destination for a completed-but-unresolved travel', () => {
+        const ship = makeShipFixture({energy: 1000})
+        const travel = makeTask(TaskType.TRAVEL, {
+            coordinates: {x: 50, y: 50},
+            energy_cost: 10,
+            duration: 60,
+        })
+        ship.lanes = [
+            ServerContract.Types.lane.from({
+                lane_key: 0,
+                schedule: ServerContract.Types.schedule.from({
+                    started: TimePoint.fromMilliseconds(Date.now() - 600_000),
+                    tasks: [travel],
+                }),
+            }),
+        ]
+        ship.is_idle = false
+        const projected = projectRemainingAt(ship, new Date())
+        assert.equal(projected.location.x.toNumber(), 50, 'completed travel reaches destination')
+        assert.equal(projected.location.y.toNumber(), 50)
+        assert.equal(projected.energy.toNumber(), 990, 'completed travel draw applies')
+    })
+
+    test('replays completed-but-unresolved lane tasks', () => {
         const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 10, stats: 0}]})
-        const projected = projectFromCurrentState(ship)
-        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 10)
-    })
-})
-
-describe('projectFromCurrentStateAt', () => {
-    test('skips completed tasks lingering in schedule.tasks (regression)', () => {
-        // Idle snapshot with a completed CRAFT task lingering in schedule.tasks.
-        // Without the snapshot-aware variant, projectEntityAt would re-apply the CRAFT
-        // and throw INSUFFICIENT_ITEM_QUANTITY.
-        const ship = makeShipFixture({cargo: [{item_id: 5, quantity: 5, stats: 0}]})
-        ship.schedule = ServerContract.Types.schedule.from({
-            started: TimePoint.fromMilliseconds(Date.now() - 120_000),
+        const completed = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(Date.now() - 600_000),
             tasks: [
                 makeTask(TaskType.CRAFT, {
                     cargo: [
                         {item_id: 5, quantity: 10, stats: 0},
                         {item_id: 99, quantity: 1, stats: 0},
                     ],
+                    duration: 60,
                 }),
             ],
         })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 0, schedule: completed})]
         ship.is_idle = true
-        const projected = projectFromCurrentStateAt(ship, new Date())
-        assert.equal(getStack(projected.cargo, 5)?.quantity.toNumber(), 5)
-    })
-
-    test('applies in-progress current_task partially', () => {
-        // Snapshot mid-flight: ship at origin, current_task is a TRAVEL to (100, 0).
-        // At the halfway point, projection.location should interpolate to ~(50, 0).
-        const ship = makeShipFixture({})
-        const taskDuration = 100
-        const elapsed = 50
-        ship.schedule = ServerContract.Types.schedule.from({
-            started: TimePoint.fromMilliseconds(Date.now() - elapsed * 1000),
-            tasks: [
-                makeTask(TaskType.TRAVEL, {
-                    coordinates: {x: 100, y: 0},
-                    duration: taskDuration,
-                }),
-            ],
-        })
-        ship.is_idle = false
-        ship.current_task = makeTask(TaskType.TRAVEL, {
-            coordinates: {x: 100, y: 0},
-            duration: taskDuration,
-        })
-        const projected = projectFromCurrentStateAt(ship, new Date())
-        // Halfway through a 0→100 travel, interpolated x should be near 50.
-        const x = projected.location.x.toNumber()
-        assert.isAtLeast(x, 40)
-        assert.isAtMost(x, 60)
+        const projected = projectRemainingAt(ship, new Date())
+        assert.isUndefined(getStack(projected.cargo, 5), 'completed CRAFT consumes input')
+        assert.equal(
+            getStack(projected.cargo, 99)?.quantity.toNumber(),
+            1,
+            'completed CRAFT produces output'
+        )
     })
 })
 
@@ -488,8 +487,12 @@ describe('projection — fixture replay', () => {
         test(c.name, () => {
             const inputObj = c.input as Record<string, unknown>
             const cargoJson = (inputObj.cargo as Array<Record<string, unknown>>) ?? []
-            const rowJson = {...inputObj, cargo: undefined}
+            const scheduleJson = inputObj.schedule as Record<string, unknown> | undefined
+            const rowJson = {...inputObj, cargo: undefined, schedule: undefined}
             delete rowJson.cargo
+            delete rowJson.schedule
+            rowJson.lanes =
+                inputObj.lanes ?? (scheduleJson ? [{lane_key: 0, schedule: scheduleJson}] : [])
             const row = ServerContract.Types.entity_row.from(rowJson)
             const cargo = cargoJson.map((item) =>
                 ServerContract.Types.cargo_item.from({
@@ -512,7 +515,7 @@ describe('projection — fixture replay', () => {
                     hauler: row.hauler,
                     capacity: row.capacity,
                     owner: row.owner,
-                    schedule: row.schedule ?? undefined,
+                    lanes: row.lanes,
                     stats: BigInt(row.stats.toString()),
                     item_id: row.item_id,
                     modules: row.modules,

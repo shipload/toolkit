@@ -98,7 +98,7 @@ async function formatTaskAddition(
 		const snap = await getEntitySnapshot(entityId);
 		snapshots.set(String(entityId), snap);
 		const projectable = snap as unknown as Projectable;
-		const totalTasks = projectable.schedule?.tasks?.length ?? 0;
+		const totalTasks = schedule.orderedTasks(projectable).length;
 		const totalWord = totalTasks === 1 ? "task" : "tasks";
 		const remaining = schedule.scheduleRemaining(projectable, new Date());
 		const tail = remaining > 0 ? ` · ends in ${formatDuration(remaining)}` : "";

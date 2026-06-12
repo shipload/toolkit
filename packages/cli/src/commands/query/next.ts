@@ -1,4 +1,5 @@
 import type {Command} from 'commander'
+import {schedule} from '@shipload/sdk'
 import {server} from '../../lib/client'
 import {type GameState, nextAction} from '../../lib/next'
 import {getAccountName} from '../../lib/session'
@@ -14,12 +15,12 @@ async function buildState(): Promise<GameState> {
         ? entitiesRes
         : (entitiesRes?.entities ?? [])
 
+    const now = new Date()
     const entities = rawEntities.map((raw) => {
         // biome-ignore lint/suspicious/noExplicitAny: readonly responses are loosely typed here
         const e = raw as any
-        const isIdle = Boolean(e.is_idle)
-        const scheduleTasks = e.schedule?.tasks?.length ?? 0
-        const completedTasks = isIdle && scheduleTasks > 0 ? Number(scheduleTasks) : 0
+        const isIdle = schedule.isEntityIdle(e, now)
+        const completedTasks = isIdle && schedule.hasSchedule(e) ? 1 : 0
         return {
             type: String(e.type ?? e.entity_type ?? 'unknown'),
             id: Number(e.id?.toString?.() ?? e.id ?? 0),

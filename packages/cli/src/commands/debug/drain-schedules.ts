@@ -1,4 +1,5 @@
 import type {Command} from 'commander'
+import {schedule} from '@shipload/sdk'
 import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
 import {getShipload, server} from '../../lib/client'
 import {transact} from '../../lib/session'
@@ -10,9 +11,8 @@ interface DrainOptions {
 interface ScheduledRow {
     id: {toString(): string}
     kind?: {toString(): string}
-    schedule?: {
-        tasks?: unknown[]
-    }
+    lanes?: unknown[]
+    schedule?: {tasks?: unknown[]}
 }
 
 export async function runDrainSchedules(options: DrainOptions): Promise<void> {
@@ -34,12 +34,19 @@ export async function runDrainSchedules(options: DrainOptions): Promise<void> {
         }))
 
         for (const {row, type} of allRows) {
-            const tasks = row.schedule?.tasks
-            if (!tasks || tasks.length === 0) continue
+            const lanes = schedule.getLanes(row as Parameters<typeof schedule.getLanes>[0])
+            const taskCount = lanes.reduce((n, l) => n + l.schedule.tasks.length, 0)
+            if (taskCount === 0) continue
             totalOpenSchedules++
             const id = BigInt(row.id.toString())
             if (options.dryRun) {
-                console.log(`  ${type}:${id} has ${tasks.length} task(s)`)
+                for (const l of lanes) {
+                    if (l.schedule.tasks.length > 0) {
+                        console.log(
+                            `  ${type}:${id} lane ${l.laneKey} has ${l.schedule.tasks.length} task(s)`
+                        )
+                    }
+                }
                 continue
             }
             try {

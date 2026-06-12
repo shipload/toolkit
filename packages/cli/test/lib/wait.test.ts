@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ServerContract } from "@shipload/sdk";
 import { type SnapshotTick, streamEntitySnapshot } from "../../src/lib/snapshot-stream";
 import { nextInterval, waitForEntityIdle } from "../../src/lib/wait";
 
@@ -14,16 +15,57 @@ describe("nextInterval", () => {
 	});
 });
 
-function makeSnapshot(opts: { is_idle: boolean; remaining?: number; tasks?: number }) {
+function makeSnapshot(opts: {
+	is_idle: boolean;
+	remaining?: number;
+	tasks?: number;
+	total?: number;
+}) {
+	let lanes: ServerContract.Types.lane[] = [];
+	if (opts.is_idle) {
+		// Completed (lingering) tasks: all in the past, none in progress.
+		const count = opts.tasks ?? 0;
+		if (count > 0) {
+			const started = new Date(Date.now() - (count * 10 + 60) * 1000)
+				.toISOString()
+				.slice(0, 23);
+			lanes = [
+				ServerContract.Types.lane.from({
+					lane_key: 0,
+					schedule: {
+						started,
+						tasks: new Array(count).fill({
+							type: 0,
+							duration: 10,
+							cancelable: 0,
+							cargo: [],
+						}),
+					},
+				}),
+			];
+		}
+	} else {
+		// Busy: one in-progress task whose remaining matches opts.remaining.
+		const remaining = opts.remaining ?? 0;
+		const total = opts.total ?? remaining + 1;
+		const started = new Date(Date.now() - (total - remaining) * 1000)
+			.toISOString()
+			.slice(0, 23);
+		lanes = [
+			ServerContract.Types.lane.from({
+				lane_key: 0,
+				schedule: {
+					started,
+					tasks: [{ type: 1, duration: total, cancelable: 0, cargo: [] }],
+				},
+			}),
+		];
+	}
 	return {
 		type: "ship",
 		id: 1n,
 		is_idle: opts.is_idle,
-		current_task_remaining: opts.remaining ?? 0,
-		schedule:
-			(opts.tasks ?? 0) > 0
-				? { started: new Date(), tasks: new Array(opts.tasks).fill({ duration: 10 }) }
-				: undefined,
+		lanes,
 	};
 }
 
@@ -133,9 +175,9 @@ describe("streamEntitySnapshot", () => {
 		// vs wall-clock skew). Stream should keep counting down smoothly without
 		// jumping back up.
 		const responses = [
-			{ ...makeSnapshot({ is_idle: false, remaining: 10 }), current_task_elapsed: 0 },
-			{ ...makeSnapshot({ is_idle: false, remaining: 6 }), current_task_elapsed: 4 },
-			{ ...makeSnapshot({ is_idle: false, remaining: 2 }), current_task_elapsed: 8 },
+			makeSnapshot({ is_idle: false, remaining: 10, total: 11 }),
+			makeSnapshot({ is_idle: false, remaining: 6, total: 11 }),
+			makeSnapshot({ is_idle: false, remaining: 2, total: 11 }),
 		];
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];
@@ -156,9 +198,9 @@ describe("streamEntitySnapshot", () => {
 
 	test("snaps when chain value diverges (new task)", async () => {
 		const responses = [
-			{ ...makeSnapshot({ is_idle: false, remaining: 10 }), current_task_elapsed: 0 },
+			makeSnapshot({ is_idle: false, remaining: 10, total: 11 }),
 			// New task starts: total duration changes drastically
-			{ ...makeSnapshot({ is_idle: false, remaining: 100 }), current_task_elapsed: 0 },
+			makeSnapshot({ is_idle: false, remaining: 100, total: 101 }),
 		];
 		let calls = 0;
 		const ticks: SnapshotTick[] = [];

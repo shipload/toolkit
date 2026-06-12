@@ -29,15 +29,13 @@ import {
 	distanceBetweenPoints,
 	getItem,
 	hasSystem,
-	type ProjectableSnapshot,
-	projectFromCurrentState,
 	ServerTypes,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
-import { projectedCargoMass, projectedCoords } from "./projection";
+import { projectedCargoMass, projectedCoords, projectRemainingSnapshotAt } from "./projection";
 import {
 	checkCargoCapacity,
 	checkDestinationIsSystem,
@@ -309,6 +307,7 @@ export async function estimateTravel(params: {
 	target: { x: number | bigint; y: number | bigint };
 	recharge?: boolean;
 	snapshot?: EntitySnapshot;
+	hasSystemAtDestination?: boolean;
 }): Promise<EstimateResult> {
 	const { entityId, target } = params;
 	const recharge = params.recharge ?? false;
@@ -325,7 +324,7 @@ export async function estimateTravel(params: {
 		};
 	}
 
-	const projection = projectFromCurrentState(snap as unknown as ProjectableSnapshot);
+	const projection = projectRemainingSnapshotAt(snap, new Date());
 	const currentX = Number(snap.coordinates.x.toString());
 	const currentY = Number(snap.coordinates.y.toString());
 	const originX = Number(projection.location.x.toString());
@@ -352,8 +351,9 @@ export async function estimateTravel(params: {
 	const startEnergyIsProjected = projectedAfterPending !== snapshotEnergy;
 	const endEnergy = Math.max(0, startEnergy - energyUsage);
 
-	const gameSeed = await getGameSeed();
-	const hasSystemAtDestination = hasSystem(gameSeed, { x: targetX, y: targetY });
+	const hasSystemAtDestination =
+		params.hasSystemAtDestination ??
+		hasSystem(await getGameSeed(), { x: targetX, y: targetY });
 
 	const issues = populateTravelFeasibility({
 		generatorCapacity,
@@ -410,7 +410,8 @@ export async function estimateGather(params: {
 		};
 	}
 
-	const { x, y } = projectedCoords(snap);
+	const now = new Date();
+	const { x, y } = projectedCoords(snap, now);
 
 	const stratumResponse = (await server.readonly("getstratum", {
 		x,
@@ -468,7 +469,7 @@ export async function estimateGather(params: {
 		generatorCapacity: rawGen ? Number(String(rawGen.capacity ?? "0")) : 0,
 		currentEnergy: Number(String(rawEnergy ?? "0")),
 		energyCost: Number(energy),
-		availableCargo: Number(String(rawCapacity)) - Number(projectedCargoMass(snap)),
+		availableCargo: Number(String(rawCapacity)) - Number(projectedCargoMass(snap, now)),
 		cargoDelta: itemMass * quantity,
 		reserveRemaining: Number(stratumResponse?.stratum?.reserve?.toString() ?? "0"),
 		quantity,
@@ -511,7 +512,8 @@ export async function estimateGroupTravel(params: {
 		params.entities.map((e) => getEntitySnapshot(e.entityId)),
 	);
 
-	const groupOrigin = projectedCoords(snapshots[0]);
+	const now = new Date();
+	const groupOrigin = projectedCoords(snapshots[0], now);
 	const originX = Number(groupOrigin.x);
 	const originY = Number(groupOrigin.y);
 	const targetX = typeof params.target.x === "bigint" ? Number(params.target.x) : params.target.x;
@@ -656,12 +658,13 @@ export async function estimateCraft(params: {
 		outputItemMass = getItem(outputItemId).mass;
 	}
 	const cargoDelta = outputItemMass * quantity - totalInputMass;
+	const now = new Date();
 
 	const craftIssues = populateCraftFeasibility({
 		generatorCapacity: craftGen ? Number(String(craftGen.capacity ?? "0")) : 0,
 		currentEnergy: Number(String(craftEnergy ?? "0")),
 		energyCost: energy,
-		availableCargo: Number(String(craftCapacity)) - Number(projectedCargoMass(snap)),
+		availableCargo: Number(String(craftCapacity)) - Number(projectedCargoMass(snap, now)),
 		cargoDelta,
 		willRechargeFirst: recharge,
 		entity: { entityType: snap.type, entityId },

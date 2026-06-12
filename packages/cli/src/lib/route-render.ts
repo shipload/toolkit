@@ -59,9 +59,7 @@ export function buildHypotheticalSnapshot<T extends {coordinates: {x: bigint; y:
         coordinates: {x: BigInt(at.x), y: BigInt(at.y)},
         energy: startEnergy,
         is_idle: true,
-        current_task: undefined,
-        pending_tasks: [],
-        schedule: undefined,
+        lanes: [],
     }
 }
 

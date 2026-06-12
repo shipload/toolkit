@@ -13,6 +13,14 @@ function makeShip(opts: {
 	current_task?: ServerContract.Types.task;
 	pending_tasks?: ServerContract.Types.task[];
 }) {
+	const tasks = [
+		...(opts.current_task ? [opts.current_task] : []),
+		...(opts.pending_tasks ?? []),
+	];
+	const started = new Date(Date.now() - 1000).toISOString().slice(0, 23);
+	const lanes = tasks.length > 0
+		? [{ lane_key: 0, schedule: { started, tasks } }]
+		: [];
 	const ei = ServerContract.Types.entity_info.from({
 		type: "ship",
 		id: 1,
@@ -30,10 +38,10 @@ function makeShip(opts: {
 		})),
 		modules: [],
 		is_idle: !opts.current_task,
-		current_task: opts.current_task,
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
-		pending_tasks: opts.pending_tasks ?? [],
+		pending_tasks: [],
+		lanes,
 	});
 	return entityInfoToSnapshot(ei);
 }
@@ -157,6 +165,30 @@ function stack(
 ): ProjectedCargoStack {
 	return { item_id, stats, quantity, modules, id };
 }
+
+function gatherOnWorkerLane(at: Date) {
+	const started = new Date(at.getTime() - 60_000).toISOString().slice(0, 23);
+	return {
+		type: "ship", id: 7, owner: "alice", entity_name: "Gatherer",
+		coordinates: { x: 0, y: 0, z: 800 }, item_id: 0, cargomass: 0, cargo: [],
+		modules: [], is_idle: false, current_task_elapsed: 0, current_task_remaining: 0,
+		pending_tasks: [],
+		lanes: [
+			{ lane_key: 3, schedule: { started, tasks: [
+				{ type: 5, duration: 300, cancelable: 0,
+				  cargo: [{ item_id: 101, quantity: 25, stats: 0, modules: [], id: 0 }] },
+			] } },
+		],
+	};
+}
+
+test("projects worker-lane gather cargo, not just mobility", () => {
+	const at = new Date("2026-06-11T12:00:00.000Z");
+	const snap = entityInfoToSnapshot(ServerContract.Types.entity_info.from(gatherOnWorkerLane(at)));
+	const stacks = projectCargoFromSnapshot(snap, at);
+	const ore = stacks.find((s) => s.item_id === 101n);
+	expect(ore?.quantity).toBe(25n);
+});
 
 describe("diffStacks", () => {
 	test("empty current and empty projected yields empty map", () => {

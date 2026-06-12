@@ -29,9 +29,7 @@ import {
 	MODULE_STORAGE,
 	MODULE_WARP,
 	NFT,
-	type ProjectableSnapshot,
 	type ProjectedEntity,
-	projectFromCurrentState,
 	resolveItem,
 	schedule,
 	type ServerTypes,
@@ -57,6 +55,8 @@ import {
 	kvTable,
 	projectEnergy,
 } from "./format";
+import { laneLabel } from "./lane-presentation";
+import { projectRemainingSnapshotAt } from "./projection";
 import { entityInfoToSnapshot } from "./snapshot";
 
 export interface HeaderContext {
@@ -74,17 +74,25 @@ function entityIdentityLine(entity: ServerTypes.entity_info): string {
 
 function entityStatusRows(
 	entity: ServerTypes.entity_info,
-	_ctx: HeaderContext = {},
+	ctx: HeaderContext = {},
 ): [string, string][] {
+	const now = ctx.now ?? new Date();
 	const rows: [string, string][] = [];
-	const statusStr = entity.is_idle ? "idle" : "busy";
+	const idle = schedule.isEntityIdle(entity, now);
+	const statusStr = idle ? "idle" : "busy";
 	rows.push(["Status:", `${statusStr}  ·  ${formatCoordinatePair(entity.coordinates)}`]);
-	if (!entity.is_idle && entity.current_task) {
-		const remaining = formatDuration(Number(entity.current_task_remaining));
-		rows.push([
-			"Task:",
-			`${formatTaskShort(entity.current_task)}  ·  ${remaining} remaining`,
-		]);
+	for (const ot of schedule.orderedTasks(entity)) {
+		if (!schedule.laneTaskInProgressOf(entity, ot.laneKey, ot.taskIndex, now)) continue;
+		const remaining = formatDuration(
+			Math.max(
+				0,
+				Math.floor(
+					schedule.laneTaskRemainingOf(entity, ot.laneKey, ot.taskIndex, now),
+				),
+			),
+		);
+		const label = `Task (${laneLabel(entity, ot.laneKey)}):`;
+		rows.push([label, `${formatTaskShort(ot.task)}  ·  ${remaining} remaining`]);
 	}
 	return rows;
 }
@@ -108,8 +116,16 @@ function entityEnergyValue(
 		return `${stored}/${capacity} (recharge: ${recharge}/s)`;
 	}
 
-	if (!entity.is_idle && entity.current_task_elapsed != null) {
-		const elapsed_s = Number(entity.current_task_elapsed);
+	const now = ctx.now ?? new Date();
+	if (!schedule.isEntityIdle(entity, now)) {
+		const active = schedule
+			.orderedTasks(entity)
+			.find((ot) =>
+				schedule.laneTaskInProgressOf(entity, ot.laneKey, ot.taskIndex, now),
+			);
+		const elapsed_s = active
+			? schedule.laneTaskElapsedOf(entity, active.laneKey, active.taskIndex, now)
+			: 0;
 		if (elapsed_s > 0) {
 			const proj = projectEnergy(stored, capacity, recharge, 0, elapsed_s);
 			if (proj !== stored) {
@@ -275,12 +291,11 @@ function entityCargoSection(
 	return null;
 }
 
-function whenDoneBlock(entity: ServerTypes.entity_info): string | null {
-	if (!entity.schedule || entity.schedule.tasks.length === 0) return null;
-	const snap = entity as unknown as ProjectableSnapshot;
+function whenDoneBlock(entity: ServerTypes.entity_info, now: Date): string | null {
+	if (!schedule.hasSchedule(entity)) return null;
 	let projection: ProjectedEntity;
 	try {
-		projection = projectFromCurrentState(snap);
+		projection = projectRemainingSnapshotAt(entity, now);
 	} catch {
 		return null;
 	}
@@ -301,7 +316,7 @@ function whenDoneBlock(entity: ServerTypes.entity_info): string | null {
 
 	if (!positionChanged && !energyChanged && !cargoChanged) return null;
 
-	const remaining = schedule.scheduleRemaining(snap, new Date());
+	const remaining = schedule.scheduleRemaining(entity, now);
 	const header =
 		remaining > 0 ? `When done (${formatDuration(remaining)}):` : "When done:";
 
@@ -326,7 +341,7 @@ function whenDoneBlock(entity: ServerTypes.entity_info): string | null {
 	if (cargoChanged) {
 		const cargoSnap = entityInfoToSnapshot(entity);
 		const current = snapshotToStacks(cargoSnap);
-		const projected = projectCargoFromSnapshot(cargoSnap);
+		const projected = projectCargoFromSnapshot(cargoSnap, now);
 		const deltas = diffStacks(current, projected);
 		const stackLines = formatStackDeltaLines(current, projected, deltas);
 		if (stackLines.length > 0) parts.push(stackLines.join("\n"));
@@ -398,25 +413,32 @@ function entityScheduleSection(
 	ctx: HeaderContext = {},
 ): string | null {
 	const sections: string[] = [];
+	const now = new Date();
 
-	if ((entity.pending_tasks?.length ?? 0) > 0) {
-		sections.push(
-			kvTable([["Pending:", entity.pending_tasks.map(formatTaskShort).join(", ")]]),
-		);
+	const pending = schedule
+		.orderedTasks(entity)
+		.filter(
+			(ot) =>
+				!schedule.laneTaskCompleteOf(entity, ot.laneKey, ot.taskIndex, now) &&
+				!schedule.laneTaskInProgressOf(entity, ot.laneKey, ot.taskIndex, now),
+		)
+		.map((ot) => ot.task);
+	if (pending.length > 0) {
+		sections.push(kvTable([["Pending:", pending.map(formatTaskShort).join(", ")]]));
 	}
 
 	const callerHasWhenDone =
 		ctx.projectionLabel === "when done" && ctx.projected != null;
 	if (!callerHasWhenDone && !ctx.suppressWhenDone) {
-		const block = whenDoneBlock(entity);
+		const block = whenDoneBlock(entity, now);
 		if (block) sections.push(block);
 	}
 
 	const entityType = String(entity.type);
 	const entityId = BigInt(entity.id.toString());
-	const scheduleTasks = entity.schedule?.tasks.length ?? 0;
-	if (entity.is_idle && scheduleTasks > 0) {
-		sections.push(formatResolveHint(entityType, entityId, scheduleTasks));
+	const completed = schedule.resolveOrder(entity, now).length;
+	if (completed > 0) {
+		sections.push(formatResolveHint(entityType, entityId, completed));
 	}
 
 	return sections.length > 0 ? sections.join("\n\n") : null;
@@ -485,11 +507,14 @@ export function renderInventoryView(
 	const header = renderEntityHeader(entity);
 	const columns = opts.columns ?? INVENTORY_DEFAULT_COLUMNS;
 
-	const hasCurrent = entity.current_task != null;
-	const pendingCount = entity.pending_tasks?.length ?? 0;
-	const shouldProject =
-		opts.current !== true && (hasCurrent || pendingCount > 0);
-	const tasksConsidered = shouldProject ? (hasCurrent ? 1 : 0) + pendingCount : 0;
+	const now = new Date();
+	const incompleteCount = schedule
+		.orderedTasks(entity)
+		.filter(
+			(ot) => !schedule.laneTaskCompleteOf(entity, ot.laneKey, ot.taskIndex, now),
+		).length;
+	const shouldProject = opts.current !== true && incompleteCount > 0;
+	const tasksConsidered = shouldProject ? incompleteCount : 0;
 
 	let cargoArr: unknown[];
 	let deltas: ReturnType<typeof diffStacks> | undefined;
@@ -498,7 +523,7 @@ export function renderInventoryView(
 	if (shouldProject) {
 		const snap = entityInfoToSnapshot(entity);
 		const current = snapshotToStacks(snap);
-		const projected = projectCargoFromSnapshot(snap);
+		const projected = projectCargoFromSnapshot(snap, now);
 		const computedDeltas = diffStacks(current, projected);
 
 		const currentById = new Map<string, bigint>();

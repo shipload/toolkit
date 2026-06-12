@@ -28,6 +28,7 @@ export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
 export type loader_stats = ServerContract.Types.loader_stats
 export type schedule = ServerContract.Types.schedule
+export type lane = ServerContract.Types.lane
 export type task = ServerContract.Types.task
 export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
@@ -177,7 +178,19 @@ export type {
 } from './travel/travel'
 
 export * as schedule from './scheduling/schedule'
-export type {Scheduleable, ScheduleData} from './scheduling/schedule'
+export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'
+export type {
+    ScheduleData,
+    LaneView,
+    OrderedTask,
+    ResolvedEvent,
+} from './scheduling/schedule'
+export {
+    candidateLaneCompletesAt,
+    laneKeyForModule,
+    rawScheduleEnd,
+    workerLaneKey,
+} from './scheduling/lanes'
 export {ScheduleAccessor, createScheduleAccessor} from './scheduling/accessor'
 export {InventoryAccessor, createInventoryAccessor} from './entities/inventory-accessor'
 export type {HasCargo} from './entities/inventory-accessor'
@@ -191,19 +204,26 @@ export {
     createProjectedEntity,
     projectEntity,
     projectEntityAt,
-    projectFromCurrentState,
-    projectFromCurrentStateAt,
+    projectRemainingAt,
     validateSchedule,
 } from './scheduling/projection'
 export type {
     Projectable,
-    ProjectableSnapshot,
     ProjectedEntity,
     ProjectionOptions,
 } from './scheduling/projection'
 
 export {taskCargoChanges} from './scheduling/task-cargo'
 export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
+
+export {
+    projectedCargoAvailableAt,
+    availableForItem,
+    cargoReadyAt,
+    taskCargoEffect,
+} from './scheduling/availability'
+
+export {maxCraftable} from './capabilities/craftable'
 
 export {energyAtTime} from './scheduling/energy'
 

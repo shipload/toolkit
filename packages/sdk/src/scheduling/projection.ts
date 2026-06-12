@@ -1,4 +1,4 @@
-import {Name, TimePoint, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, TaskType} from '../types'
 import {
@@ -333,50 +333,27 @@ export interface ProjectionOptions {
 
 export function projectEntity(entity: Projectable, options?: ProjectionOptions): ProjectedEntity {
     const projected = createProjectedEntity(entity)
-    if (!entity.schedule || entity.schedule.tasks.length === 0) return projected
+    const ordered = schedule.orderedTasks(entity)
+    if (ordered.length === 0) return projected
 
-    const tasks = entity.schedule.tasks
     const taskCount =
         options?.upToTaskIndex !== undefined
-            ? Math.max(0, Math.min(options.upToTaskIndex, tasks.length))
-            : tasks.length
+            ? Math.max(0, Math.min(options.upToTaskIndex, ordered.length))
+            : ordered.length
 
     for (let i = 0; i < taskCount; i++) {
-        applyTask(projected, tasks[i])
+        applyTask(projected, ordered[i].task)
     }
     return projected
 }
 
-export interface ProjectableSnapshot extends Projectable {
-    current_task?: ServerContract.Types.task
-    pending_tasks?: ServerContract.Types.task[]
-}
-
-function buildRemainingProjectable(snapshot: ProjectableSnapshot): Projectable | null {
-    if (!snapshot.schedule) return null
-    const remainingTasks: ServerContract.Types.task[] = []
-    if (snapshot.current_task) remainingTasks.push(snapshot.current_task)
-    if (snapshot.pending_tasks?.length) remainingTasks.push(...snapshot.pending_tasks)
-    if (remainingTasks.length === 0) return null
-
-    const completedCount = snapshot.schedule.tasks.length - remainingTasks.length
-    let startedMs = snapshot.schedule.started.toMilliseconds()
-    for (let i = 0; i < completedCount; i++) {
-        startedMs += snapshot.schedule.tasks[i].duration.toNumber() * 1000
+export function projectRemainingAt(entity: Projectable, _now: Date): ProjectedEntity {
+    // Resolve is lazy/entity-global: completed tasks are unsettled until resolve, so replay all.
+    const projected = createProjectedEntity(entity)
+    for (const {task} of schedule.orderedTasks(entity)) {
+        applyTask(projected, task)
     }
-
-    return {
-        ...snapshot,
-        schedule: ServerContract.Types.schedule.from({
-            started: TimePoint.fromMilliseconds(startedMs),
-            tasks: remainingTasks,
-        }),
-    }
-}
-
-export function projectFromCurrentState(snapshot: ProjectableSnapshot): ProjectedEntity {
-    const projectable = buildRemainingProjectable(snapshot)
-    return projectable ? projectEntity(projectable) : createProjectedEntity(snapshot)
+    return projected
 }
 
 function getRecipeInputsForOutput(outputItemId: number): RecipeInput[] | undefined {
@@ -438,10 +415,11 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
 }
 
 export function validateSchedule(entity: Projectable): void {
-    if (!entity.schedule || entity.schedule.tasks.length === 0) return
+    const ordered = schedule.orderedTasks(entity)
+    if (ordered.length === 0) return
 
     const projected = createProjectedEntity(entity)
-    for (const task of entity.schedule.tasks) {
+    for (const {task} of ordered) {
         if (task.type.toNumber() === TaskType.CRAFT) {
             validateCraftTask(task, projected)
         }
@@ -455,22 +433,28 @@ export function validateSchedule(entity: Projectable): void {
 export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity {
     const projected = createProjectedEntity(entity)
 
-    if (!entity.schedule || entity.schedule.tasks.length === 0) {
+    const ordered = schedule.orderedTasks(entity)
+    if (ordered.length === 0) {
         return projected
     }
 
-    for (let i = 0; i < entity.schedule.tasks.length; i++) {
-        const task = entity.schedule.tasks[i]
-        const taskComplete = schedule.isTaskComplete(entity, i, now)
-        const taskInProgress = schedule.isTaskInProgress(entity, i, now)
+    const nowMs = now.getTime()
+
+    for (const {task, startsAt} of ordered) {
+        const duration = task.duration.toNumber()
+        const isReserved = task.type.toNumber() === TaskType.RESERVED
+        const elapsed = Math.min(
+            Math.max(0, Math.floor((nowMs - startsAt.getTime()) / 1000)),
+            duration
+        )
+        const taskComplete = !isReserved && elapsed >= duration
+        const taskInProgress = elapsed > 0 && elapsed < duration
 
         if (!taskComplete && !taskInProgress) {
-            break
+            continue
         }
 
-        const progress = taskInProgress
-            ? schedule.getTaskElapsed(entity, i, now) / task.duration.toNumber()
-            : undefined
+        const progress = taskInProgress ? elapsed / duration : undefined
 
         switch (task.type.toNumber()) {
             case TaskType.RECHARGE:
@@ -503,12 +487,4 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
     }
 
     return projected
-}
-
-export function projectFromCurrentStateAt(
-    snapshot: ProjectableSnapshot,
-    now: Date
-): ProjectedEntity {
-    const projectable = buildRemainingProjectable(snapshot)
-    return projectable ? projectEntityAt(projectable, now) : createProjectedEntity(snapshot)
 }

@@ -22,6 +22,8 @@ function makeShip(opts: {
 	const tasks: ServerContract.Types.task[] = [];
 	if (opts.current_task) tasks.push(opts.current_task);
 	if (opts.pending_tasks) tasks.push(...opts.pending_tasks);
+	const started = new Date(Date.now() - 1000).toISOString().slice(0, 23);
+	const lanes = tasks.length > 0 ? [{ lane_key: 0, schedule: { started, tasks } }] : [];
 	const ei = ServerContract.Types.entity_info.from({
 		type: "ship",
 		id: 1,
@@ -37,14 +39,11 @@ function makeShip(opts: {
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
 		pending_tasks: opts.pending_tasks ?? [],
+		lanes,
 		hullmass: 100,
 		energy: 1000,
 		engines: { thrust: 500, drain: 1 },
 		generator: { capacity: 1000, recharge: 10 },
-		schedule:
-			tasks.length > 0
-				? { started: "1970-01-01T00:00:00", tasks }
-				: undefined,
 	});
 	return entityInfoToSnapshot(ei);
 }
@@ -115,6 +114,8 @@ function makeShipWithCargo(opts: {
 	const tasks: ServerContract.Types.task[] = [];
 	if (opts.current_task) tasks.push(opts.current_task);
 	if (opts.pending_tasks) tasks.push(...opts.pending_tasks);
+	const started = new Date(Date.now() - 1000).toISOString().slice(0, 23);
+	const lanes = tasks.length > 0 ? [{ lane_key: 0, schedule: { started, tasks } }] : [];
 	const ei = ServerContract.Types.entity_info.from({
 		type: "ship",
 		id: 1,
@@ -130,15 +131,12 @@ function makeShipWithCargo(opts: {
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
 		pending_tasks: opts.pending_tasks ?? [],
+		lanes,
 		hullmass: 100,
 		capacity: 10_000_000,
 		energy: 1000,
 		engines: { thrust: 500, drain: 1 },
 		generator: { capacity: 1000, recharge: 10 },
-		schedule:
-			tasks.length > 0
-				? { started: "1970-01-01T00:00:00", tasks }
-				: undefined,
 	});
 	return entityInfoToSnapshot(ei);
 }

@@ -1,6 +1,12 @@
 import type {EntityTypeName} from './args'
-import {type EntitySnapshot, type EntityKey, entityKeyOf, getEntitiesSnapshot} from './snapshot'
-import {SMOOTH_TOLERANCE_S, type SnapshotTick, toNumber} from './snapshot-stream'
+import {
+    type EntitySnapshot,
+    type EntityKey,
+    entityKeyOf,
+    getEntitiesSnapshot,
+    snapshotTaskTimes,
+} from './snapshot'
+import {SMOOTH_TOLERANCE_S, type SnapshotTick} from './snapshot-stream'
 
 export type ConnectionState = 'connecting' | 'live' | 'reconnecting'
 
@@ -64,8 +70,9 @@ function makeEntityState(
             totalAtFetch: 0,
         }
     }
-    const newElapsed = toNumber(snap.current_task_elapsed)
-    const newRemaining = toNumber(snap.current_task_remaining)
+    const times = snapshotTaskTimes(snap)
+    const newElapsed = times.elapsed_s
+    const newRemaining = times.remaining_s
     const newTotal = newElapsed + newRemaining
     if (prev && !prev.snap.is_idle) {
         const dt = (modelNow - prev.snapAtModel) / 1000

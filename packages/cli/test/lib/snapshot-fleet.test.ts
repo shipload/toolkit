@@ -1,4 +1,5 @@
 import {describe, expect, test} from 'bun:test'
+import {ServerContract} from '@shipload/sdk'
 import type {EntityKey, EntitySnapshot} from '../../src/lib/snapshot'
 import {
     projectEntityStream,
@@ -9,18 +10,21 @@ import {
 } from '../../src/lib/snapshot-fleet'
 
 function busy(id: bigint, remaining: number, total = 60): EntitySnapshot {
+    const started = new Date(Date.now() - (total - remaining) * 1000).toISOString().slice(0, 23)
+    const lane = ServerContract.Types.lane.from({
+        lane_key: 0,
+        schedule: {started, tasks: [{type: 1, duration: total, cancelable: 0, cargo: []}]},
+    })
     return {
         type: 'ship',
         id,
         owner: 'alice',
         entity_name: `S${id}`,
-        coordinates: {x: 0, y: 0},
-        cargomass: 0,
+        coordinates: {x: 0n, y: 0n},
+        cargomass: 0n,
         cargo: [],
         is_idle: false,
-        current_task_elapsed: total - remaining,
-        current_task_remaining: remaining,
-        schedule: {tasks: [{type: 1, duration: BigInt(total)} as never]},
+        lanes: [lane],
     }
 }
 
@@ -95,7 +99,7 @@ describe('streamFleetSnapshots', () => {
         const gen = streamFleetSnapshots({owner: 'alice', renderIntervalMs: 1000}, deps)
         fake.handlers.onSnapshot?.([busy(1n, 30)])
         await gen.next()
-        fake.handlers.onUpdate?.(busy(1n, 100))
+        fake.handlers.onUpdate?.(busy(1n, 100, 120))
         const next = await gen.next()
         const t1 = next.value?.ticks.get('ship:1')
         if (!t1) throw new Error('no tick')

@@ -65,9 +65,10 @@ export class ActionsManager extends BaseManager {
         return this.server.action('resolve', params)
     }
 
-    cancel(entityId: UInt64Type, count: UInt64Type): Action {
+    cancel(entityId: UInt64Type, laneKey: number, count: UInt64Type): Action {
         return this.server.action('cancel', {
             id: UInt64.from(entityId),
+            lane_key: UInt8.from(laneKey),
             count: UInt64.from(count),
         })
     }

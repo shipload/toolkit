@@ -1,4 +1,5 @@
 import {describe, expect, test} from 'bun:test'
+import {schedule, ServerContract, TaskType} from '@shipload/sdk'
 import type {EntityKey, EntitySnapshot} from '../../../src/lib/snapshot'
 import type {FleetTick} from '../../../src/lib/snapshot-fleet'
 import {
@@ -7,7 +8,51 @@ import {
     type FleetViewState,
 } from '../../../src/tui/views/fleet-derive'
 
+function makeLane(
+    startedIso: string,
+    tasks: unknown[],
+    laneKey = schedule.LANE_MOBILITY
+): ServerContract.Types.lane {
+    return ServerContract.Types.lane.from({
+        lane_key: laneKey,
+        schedule: {started: startedIso, tasks},
+    })
+}
+
+function startedOffset(secondsFromNow: number): string {
+    return new Date(Date.now() + secondsFromNow * 1000).toISOString().slice(0, 23)
+}
+
+function task(type: TaskType, duration: number): unknown {
+    return {type, duration, cancelable: 0, cargo: []}
+}
+
+function snapWithLanes(type: string, id: number, lanes: EntitySnapshot['lanes']): EntitySnapshot {
+    return {
+        type,
+        id: BigInt(id),
+        owner: 'alice',
+        entity_name: `${type}-${id}`,
+        coordinates: {x: 0, y: 0},
+        cargomass: 0,
+        cargo: [],
+        is_idle: lanes.length === 0,
+        lanes,
+    }
+}
+
 function snap(type: string, id: number, isIdle: boolean, completed = 0, name = ''): EntitySnapshot {
+    let lanes: EntitySnapshot['lanes'] = []
+    if (!isIdle) {
+        const started = new Date(Date.now() - 5000).toISOString().slice(0, 23)
+        lanes = [makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: []}])]
+    } else if (completed > 0) {
+        const started = new Date(Date.now() - (completed * 30 + 10) * 1000)
+            .toISOString()
+            .slice(0, 23)
+        const tasks = new Array(completed).fill({type: 1, duration: 30, cancelable: 0, cargo: []})
+        lanes = [makeLane(started, tasks)]
+    }
     return {
         type,
         id: BigInt(id),
@@ -17,7 +62,7 @@ function snap(type: string, id: number, isIdle: boolean, completed = 0, name = '
         cargomass: 0,
         cargo: [],
         is_idle: isIdle,
-        schedule: {tasks: new Array(completed).fill({type: 1, duration: 30n})},
+        lanes,
     }
 }
 
@@ -72,14 +117,18 @@ describe('deriveVisible — filters', () => {
         expect(rows.map((r) => r.key)).toEqual(['ship:1'])
     })
 
-    test('statusFilter "resolvable" keeps only idle entities with completed tasks', () => {
-        const tick = makeTick([
-            snap('ship', 1, true, 0),
-            snap('ship', 2, true, 3),
-            snap('ship', 3, false),
+    test('statusFilter "resolvable" keeps entities with completed tasks even when busy', () => {
+        const busyResolvable = snapWithLanes('ship', 3, [
+            makeLane(startedOffset(-70), [task(TaskType.TRAVEL, 30)]),
+            makeLane(startedOffset(-5), [task(TaskType.GATHER, 60)], 3),
         ])
+        const tick = makeTick([snap('ship', 1, true, 0), snap('ship', 2, true, 3), busyResolvable])
         const rows = deriveVisible(tick, {...baseState, statusFilter: 'resolvable'})
-        expect(rows.map((r) => r.key)).toEqual(['ship:2'])
+        expect(rows.map((r) => r.key)).toEqual(['ship:2', 'ship:3'])
+        expect(rows.find((r) => r.key === 'ship:3')).toMatchObject({
+            completed: 1,
+            isIdle: false,
+        })
     })
 
     test('statusFilter "idle" keeps only idle entities (resolvable or not)', () => {
@@ -136,6 +185,20 @@ describe('deriveVisible — sort modes', () => {
         expect(rows.map((r) => r.key)).toEqual(['ship:2', 'ship:1'])
     })
 
+    test('sortMode "eta" uses lane-derived ETA when tick ETA is zero', () => {
+        const tick = makeTick([
+            snapWithLanes('ship', 1, [makeLane(startedOffset(-10), [task(TaskType.TRAVEL, 180)])]),
+            snapWithLanes('ship', 2, [makeLane(startedOffset(-10), [task(TaskType.TRAVEL, 60)])]),
+        ])
+
+        tick.ticks.get('ship:1' as EntityKey)!.remaining_s = 0
+        tick.ticks.get('ship:2' as EntityKey)!.remaining_s = 0
+
+        const rows = deriveVisible(tick, {...baseState, sortMode: 'eta'})
+
+        expect(rows.map((r) => r.key)).toEqual(['ship:2', 'ship:1'])
+    })
+
     test('sortMode "name" orders by entity_name case-insensitively', () => {
         const tick = makeTick([
             snap('ship', 1, false, 0, 'beta'),
@@ -143,6 +206,49 @@ describe('deriveVisible — sort modes', () => {
         ])
         const rows = deriveVisible(tick, {...baseState, sortMode: 'name'})
         expect(rows.map((r) => r.key)).toEqual(['ship:2', 'ship:1'])
+    })
+})
+
+describe('deriveVisible — lane summaries', () => {
+    test('exposes queued-tail counts that exclude completed fronts and the current task', () => {
+        const tick = makeTick([
+            snapWithLanes('ship', 1, [
+                makeLane(startedOffset(-10), [
+                    task(TaskType.TRAVEL, 60),
+                    task(TaskType.RECHARGE, 30),
+                ]),
+                makeLane(startedOffset(-90), [task(TaskType.GATHER, 30)], 3),
+            ]),
+        ])
+
+        const [row] = deriveVisible(tick, baseState)
+
+        expect(row.queueTailCount).toBe(1)
+        expect(row.queueTailDuration_s).toBe(30)
+        expect(row.laneChips.map((chip) => [chip.label, chip.state, chip.queuedCount])).toEqual([
+            ['mob', 'active', 1],
+            ['L3 worker', 'ready', 0],
+        ])
+        expect(row.completed).toBe(1)
+    })
+
+    test('preserves done lane chips in semantic lane order', () => {
+        const tick = makeTick([
+            snapWithLanes('ship', 1, [
+                makeLane(startedOffset(-60), []),
+                makeLane(startedOffset(-60), [], 3),
+                makeLane(startedOffset(-60), [], schedule.LANE_BARRIER),
+            ]),
+        ])
+
+        const [row] = deriveVisible(tick, baseState)
+
+        expect(row.queueTailCount).toBe(0)
+        expect(row.laneChips.map((chip) => [chip.label, chip.state, chip.queuedCount])).toEqual([
+            ['mob', 'done', 0],
+            ['L3 worker', 'done', 0],
+            ['barrier', 'done', 0],
+        ])
     })
 })
 

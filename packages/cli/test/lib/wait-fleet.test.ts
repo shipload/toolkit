@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
-import {entityKeyOf, type EntitySnapshot} from '../../src/lib/snapshot'
+import {ServerContract, schedule as sched} from '@shipload/sdk'
+import {entityKeyOf, entityInfoToSnapshot, type EntitySnapshot} from '../../src/lib/snapshot'
 import type {FleetTick} from '../../src/lib/snapshot-fleet'
 import {
 	detectCohort,
@@ -19,11 +20,20 @@ function snap(over: Partial<EntitySnapshot> = {}): EntitySnapshot {
 		cargo: [],
 		is_idle: true,
 		modules: [],
-		pending_tasks: [],
-		current_task_elapsed: 0n,
-		current_task_remaining: 0n,
+		lanes: [],
 		...over,
 	} as EntitySnapshot
+}
+
+function laneWith(tasks: Array<{type: number; duration: number}>): ServerContract.Types.lane {
+	const started = new Date(Date.now() - 600_000).toISOString().slice(0, 23)
+	return ServerContract.Types.lane.from({
+		lane_key: 0,
+		schedule: {
+			started,
+			tasks: tasks.map((t) => ({type: t.type, duration: t.duration, cancelable: 0, cargo: []})),
+		},
+	})
 }
 
 describe('isActionCapable', () => {
@@ -53,22 +63,15 @@ describe('isActionCapable', () => {
 })
 
 describe('isAvailable', () => {
-	test('idle with no schedule → true', () => {
-		expect(isAvailable(snap({is_idle: true, schedule: undefined}))).toBe(true)
+	test('idle with no lanes → true', () => {
+		expect(isAvailable(snap({is_idle: true, lanes: []}))).toBe(true)
 	})
-	test('idle with empty tasks list → true', () => {
-		expect(
-			isAvailable(snap({is_idle: true, schedule: {started: new Date(), tasks: []}})),
-		).toBe(true)
+	test('idle with empty-task lane → true', () => {
+		expect(isAvailable(snap({is_idle: true, lanes: [laneWith([])]}))).toBe(true)
 	})
 	test('idle with completed (unresolved) tasks → false', () => {
 		expect(
-			isAvailable(
-				snap({
-					is_idle: true,
-					schedule: {started: new Date(), tasks: [{} as never]},
-				}),
-			),
+			isAvailable(snap({is_idle: true, lanes: [laneWith([{type: 1, duration: 60}])]})),
 		).toBe(false)
 	})
 	test('busy → false', () => {
@@ -172,12 +175,19 @@ describe('waitForFleetAvailable — first-match', () => {
 	})
 
 	test('runs auto-resolve when first idle entity has completed tasks', async () => {
+		const completedLane = ServerContract.Types.lane.from({
+			lane_key: 0,
+			schedule: {
+				started: new Date(Date.now() - 120_000).toISOString().slice(0, 23),
+				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: []}],
+			},
+		})
 		const idleWithCompleted = snap({
 			type: 'ship',
 			id: 1n,
 			modules: [{} as never],
 			is_idle: true,
-			schedule: {started: new Date(), tasks: [{} as never]},
+			lanes: [completedLane],
 		})
 		const stream = fromTicks([tickOf([idleWithCompleted])])
 		const resolveCalls: Array<
@@ -207,12 +217,19 @@ describe('waitForFleetAvailable — first-match', () => {
 	})
 
 	test('with no-auto-resolve, idle-with-completed does NOT match', async () => {
+		const completedLane2 = ServerContract.Types.lane.from({
+			lane_key: 0,
+			schedule: {
+				started: new Date(Date.now() - 120_000).toISOString().slice(0, 23),
+				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: []}],
+			},
+		})
 		const idleWithCompleted = snap({
 			type: 'ship',
 			id: 1n,
 			modules: [{} as never],
 			is_idle: true,
-			schedule: {started: new Date(), tasks: [{} as never]},
+			lanes: [completedLane2],
 		})
 		const idleClean = snap({type: 'ship', id: 1n, modules: [{} as never], is_idle: true})
 		const stream = fromTicks([tickOf([idleWithCompleted]), tickOf([idleClean])])
@@ -282,4 +299,22 @@ describe('waitForFleetAvailable — errors', () => {
 			}),
 		).rejects.toThrow(/no action-capable entities found for alice/)
 	})
+})
+
+test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
+	const at = new Date('2026-06-11T12:00:00.000Z')
+	const ei = ServerContract.Types.entity_info.from({
+		type: 'ship', id: 9, owner: 'alice', entity_name: 'Worker',
+		coordinates: {x: 0, y: 0, z: 800}, item_id: 0, cargomass: 0, cargo: [],
+		modules: [], is_idle: true, current_task_elapsed: 0, current_task_remaining: 0,
+		pending_tasks: [],
+		lanes: [
+			{lane_key: 3, schedule: {
+				started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),
+				tasks: [{type: 5, duration: 300, cancelable: 0, cargo: []}]}},
+		],
+	})
+	const snap = entityInfoToSnapshot(ei)
+	expect(sched.hasSchedule(snap)).toBe(true)
+	expect(isAvailable(snap)).toBe(false)
 })

@@ -363,6 +363,7 @@ describe("estimateTravel projection", () => {
 			entityId: 1n,
 			target: { x: 100, y: 100 },
 			snapshot: snap,
+			hasSystemAtDestination: true,
 		});
 		expect(est.travel?.origin).toEqual({ x: 0, y: 0 });
 	});

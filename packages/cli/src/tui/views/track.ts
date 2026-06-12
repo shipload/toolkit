@@ -1,9 +1,17 @@
 import {Box, type CliRenderer, type KeyEvent, Text, type VChild} from '@opentui/core'
-import type {ServerTypes} from '@shipload/sdk'
+import {schedule, ServerContract, type ServerTypes} from '@shipload/sdk'
+import {TimePoint} from '@wharfkit/antelope'
 import {formatDuration, formatTimeUTC} from '../../lib/format'
-import {completedCount, type EntitySnapshot} from '../../lib/snapshot'
+import {
+    laneFront,
+    laneLabel,
+    laneSectionStatus,
+    sortLaneKeysSemantic,
+    type LaneFrontState,
+    type LaneSectionStatus,
+} from '../../lib/lane-presentation'
+import {type EntitySnapshot, snapshotTaskTimes} from '../../lib/snapshot'
 import type {SnapshotTick} from '../../lib/snapshot-stream'
-import {computeTaskCompletionTimes} from '../../lib/task-times'
 import {type Hotkey, HotkeyRegistry} from '../hotkeys'
 import {renderEntitySummary} from '../primitives/entity-summary'
 import {type FooterStatus, renderFooter} from '../primitives/footer'
@@ -11,6 +19,26 @@ import {renderProgressBar} from '../primitives/progress-bar'
 import {createResolveModal, type ResolveModalHandle} from '../primitives/resolve-modal'
 import {GUTTER_WIDTH, renderTaskRow} from '../primitives/task-row'
 import type {View} from '../view'
+
+export interface TrackRow {
+    laneKey: number
+    task: ServerTypes.task
+    status: 'done' | 'active' | 'pending'
+    completesAt: Date
+}
+
+export function trackRows(snap: EntitySnapshot, now: Date): TrackRow[] {
+    return schedule.orderedTasks(snap).map((ot) => ({
+        laneKey: ot.laneKey,
+        task: ot.task,
+        status: schedule.laneTaskCompleteOf(snap, ot.laneKey, ot.taskIndex, now)
+            ? 'done'
+            : schedule.laneTaskInProgressOf(snap, ot.laneKey, ot.taskIndex, now)
+              ? 'active'
+              : 'pending',
+        completesAt: ot.completesAt,
+    }))
+}
 
 export interface TrackViewCtx {
     entityType: string
@@ -39,9 +67,30 @@ export interface TrackViewOpts {
 
 const ROOT_ID = 'track-root'
 const PENDING_RESOLVE_TIMEOUT_MS = 8_000
+const TIMEZONE_SUFFIX_RE = /(?:Z|[+-]\d{2}:?\d{2})$/i
+
+interface ResolveEvent {
+    laneKey: number
+    taskIndex: number
+}
+
+interface TaskFingerprint {
+    laneKey: number
+    taskIndex: number
+    type: string
+    duration: string
+    coordinates: string
+    cargoLength: number
+}
+
+interface ResolvePlan {
+    events: ResolveEvent[]
+    fingerprints: TaskFingerprint[]
+}
 
 interface PendingResolve {
-    count: number
+    events: ResolveEvent[]
+    fingerprints: TaskFingerprint[]
     appliedAt: number
     baseTaskCount: number
 }
@@ -52,23 +101,172 @@ interface ViewState {
     helpOpen: boolean
     modal: ResolveModalHandle | null
     pendingResolve: PendingResolve | null
+    laneFilter: number | null
 }
 
-function applyOptimisticResolve(snap: EntitySnapshot, count: number): EntitySnapshot {
-    const tasks = snap.schedule?.tasks ?? []
-    const remaining = tasks.slice(count)
+interface TrackSection {
+    laneKey: number
+    label: string
+    status: LaneSectionStatus
+    front: LaneFrontState
+    rows: TrackRow[]
+}
+
+function asNumber(value: unknown): number {
+    if (value === undefined || value === null) return 0
+    if (typeof value === 'number') return value
+    if (typeof value === 'bigint') return Number(value)
+    if (typeof value === 'string') return Number(value)
+    if (typeof value === 'object' && 'toNumber' in value && typeof value.toNumber === 'function') {
+        return value.toNumber()
+    }
+    return Number(value)
+}
+
+function taskDuration_s(task: ServerTypes.task): number {
+    const raw = task as {duration?: unknown; duration_s?: unknown}
+    return Math.max(0, asNumber(raw.duration_s ?? raw.duration))
+}
+
+function valueSignature(value: unknown): string {
+    if (value === undefined || value === null) return ''
+    return String(value)
+}
+
+function coordinatesSignature(value: unknown): string {
+    if (!value || typeof value !== 'object') return ''
+    const coords = value as {x?: unknown; y?: unknown; z?: unknown}
+    return [coords.x, coords.y, coords.z].map(valueSignature).join(',')
+}
+
+function taskFingerprint(
+    laneKey: number,
+    taskIndex: number,
+    task: ServerTypes.task
+): TaskFingerprint {
+    const raw = task as {
+        type?: unknown
+        duration?: unknown
+        duration_s?: unknown
+        coordinates?: unknown
+        cargo?: unknown[]
+    }
     return {
-        ...snap,
-        schedule: snap.schedule ? {...snap.schedule, tasks: remaining} : snap.schedule,
+        laneKey,
+        taskIndex,
+        type: valueSignature(raw.type),
+        duration: valueSignature(raw.duration_s ?? raw.duration),
+        coordinates: coordinatesSignature(raw.coordinates),
+        cargoLength: Array.isArray(raw.cargo) ? raw.cargo.length : 0,
     }
 }
 
+function startedMs(started: unknown): number | null {
+    if (started instanceof Date) return started.getTime()
+    if (typeof started === 'string') {
+        const timestamp =
+            started.includes('T') && !TIMEZONE_SUFFIX_RE.test(started) ? `${started}Z` : started
+        const parsed = Date.parse(timestamp)
+        return Number.isFinite(parsed) ? parsed : null
+    }
+    if (typeof started === 'number') return started
+    if (!started || typeof started !== 'object') return null
+    if ('toDate' in started && typeof started.toDate === 'function') {
+        return started.toDate().getTime()
+    }
+    if ('toMilliseconds' in started && typeof started.toMilliseconds === 'function') {
+        return Number(started.toMilliseconds())
+    }
+    return null
+}
+
+function shiftedStarted(started: unknown, droppedDuration_s: number): unknown {
+    if (droppedDuration_s <= 0) return started
+    const ms = startedMs(started)
+    if (ms === null) return started
+    return TimePoint.fromMilliseconds(ms + droppedDuration_s * 1000)
+}
+
+function dropCounts(events: ResolveEvent[]): Map<number, number> {
+    const dropByLane = new Map<number, number>()
+    for (const ev of events) {
+        dropByLane.set(ev.laneKey, Math.max(dropByLane.get(ev.laneKey) ?? 0, ev.taskIndex + 1))
+    }
+    return dropByLane
+}
+
+function captureResolvePlan(snap: EntitySnapshot, now: Date = new Date()): ResolvePlan {
+    const events = schedule.resolveOrder(snap, now).map((ev) => ({
+        laneKey: ev.laneKey,
+        taskIndex: ev.taskIndex,
+    }))
+    const dropByLane = dropCounts(events)
+    const fingerprints: TaskFingerprint[] = []
+    for (const lane of schedule.getLanes(snap)) {
+        const drop = dropByLane.get(lane.laneKey) ?? 0
+        for (let taskIndex = 0; taskIndex < drop; taskIndex++) {
+            const task = lane.schedule.tasks[taskIndex]
+            if (task) fingerprints.push(taskFingerprint(lane.laneKey, taskIndex, task))
+        }
+    }
+    return {events, fingerprints}
+}
+
+function fingerprintsMatch(snap: EntitySnapshot, fingerprints: TaskFingerprint[]): boolean {
+    const lanesByKey = new Map(schedule.getLanes(snap).map((lane) => [lane.laneKey, lane]))
+    return fingerprints.every((expected) => {
+        const task = lanesByKey.get(expected.laneKey)?.schedule.tasks[expected.taskIndex]
+        return (
+            task !== undefined &&
+            sameFingerprint(taskFingerprint(expected.laneKey, expected.taskIndex, task), expected)
+        )
+    })
+}
+
+function sameFingerprint(actual: TaskFingerprint, expected: TaskFingerprint): boolean {
+    return (
+        actual.laneKey === expected.laneKey &&
+        actual.taskIndex === expected.taskIndex &&
+        actual.type === expected.type &&
+        actual.duration === expected.duration &&
+        actual.coordinates === expected.coordinates &&
+        actual.cargoLength === expected.cargoLength
+    )
+}
+
+function canApplyPendingResolve(snap: EntitySnapshot, pending: PendingResolve): boolean {
+    return (
+        schedule.orderedTasks(snap).length === pending.baseTaskCount &&
+        fingerprintsMatch(snap, pending.fingerprints)
+    )
+}
+
+function applyOptimisticResolve(snap: EntitySnapshot, events: ResolveEvent[]): EntitySnapshot {
+    const dropByLane = dropCounts(events)
+    const lanes = schedule.getLanes(snap).flatMap((l) => {
+        const drop = dropByLane.get(l.laneKey) ?? 0
+        const droppedDuration_s = l.schedule.tasks
+            .slice(0, drop)
+            .reduce((sum, task) => sum + taskDuration_s(task), 0)
+        const tasks = l.schedule.tasks.slice(drop)
+        if (tasks.length === 0) return []
+        return [
+            ServerContract.Types.lane.from({
+                lane_key: l.laneKey,
+                schedule: {started: shiftedStarted(l.schedule.started, droppedDuration_s), tasks},
+            }),
+        ]
+    })
+    return {...snap, lanes}
+}
+
 function initialTick(snap: EntitySnapshot): SnapshotTick {
+    const times = snapshotTaskTimes(snap)
     return {
         snap,
-        elapsed_s: snap.is_idle ? 0 : Number(snap.current_task_elapsed ?? 0),
-        remaining_s: snap.is_idle ? 0 : Number(snap.current_task_remaining ?? 0),
-        total_s: Number(snap.current_task_elapsed ?? 0) + Number(snap.current_task_remaining ?? 0),
+        elapsed_s: snap.is_idle ? 0 : times.elapsed_s,
+        remaining_s: snap.is_idle ? 0 : times.remaining_s,
+        total_s: times.total_s,
         attempt: 0,
         sinceLastFetch_s: 0,
         fetchInterval_s: 5,
@@ -82,6 +280,7 @@ export function createTrackView(opts: TrackViewOpts): View {
         helpOpen: false,
         modal: null,
         pendingResolve: null,
+        laneFilter: null,
     }
     let resolveExit!: () => void
     const onExit = new Promise<void>((r) => {
@@ -95,13 +294,11 @@ export function createTrackView(opts: TrackViewOpts): View {
             state.pendingResolve = null
             return tick
         }
-        const incoming = tick.snap.schedule?.tasks?.length ?? 0
-        if (incoming !== pending.baseTaskCount) {
-            // Chain returned post-resolve data; trust it.
+        if (!canApplyPendingResolve(tick.snap, pending)) {
             state.pendingResolve = null
             return tick
         }
-        return {...tick, snap: applyOptimisticResolve(tick.snap, pending.count)}
+        return {...tick, snap: applyOptimisticResolve(tick.snap, pending.events)}
     }
 
     const embed = opts.embed
@@ -109,15 +306,18 @@ export function createTrackView(opts: TrackViewOpts): View {
         {
             key: 'r',
             label: 'resolve',
-            enabled: () => completedCount(state.tick.snap) > 0 && state.modal === null,
+            enabled: () => resolvableCount(state.tick.snap) > 0 && state.modal === null,
             action: () => {
-                const count = completedCount(state.tick.snap)
+                const plan = captureResolvePlan(state.tick.snap)
+                const events = plan.events
+                const count = events.length
                 if (count === 0) return
+                const baseTaskCount = schedule.orderedTasks(state.tick.snap).length
                 const taskWord = count === 1 ? 'task' : 'tasks'
                 const ctx = opts.ctx
                 state.modal = createResolveModal({
                     title: 'Resolve completed tasks?',
-                    body: `This submits an on-chain transaction resolving ${count} ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
+                    body: `This submits an on-chain transaction resolving ${count} completed ${taskWord} for ${ctx.entityType} ${ctx.entityId}.`,
                     confirmLabel: 'OK',
                     cancelLabel: 'Cancel',
                     submittingLabel: `Resolving ${count} ${taskWord}`,
@@ -126,15 +326,20 @@ export function createTrackView(opts: TrackViewOpts): View {
                     onCopyToClipboard: (text) => renderer?.copyToClipboardOSC52?.(text),
                     onConfirm: async () => {
                         const result = await opts.resolveAction(count)
-                        const baseTaskCount = state.tick.snap.schedule?.tasks?.length ?? 0
-                        state.pendingResolve = {
-                            count,
+                        const pending: PendingResolve = {
+                            events,
+                            fingerprints: plan.fingerprints,
                             appliedAt: Date.now(),
                             baseTaskCount,
                         }
-                        state.tick = {
-                            ...state.tick,
-                            snap: applyOptimisticResolve(state.tick.snap, count),
+                        if (canApplyPendingResolve(state.tick.snap, pending)) {
+                            state.pendingResolve = pending
+                            state.tick = {
+                                ...state.tick,
+                                snap: applyOptimisticResolve(state.tick.snap, events),
+                            }
+                        } else {
+                            state.pendingResolve = null
                         }
                         return result
                     },
@@ -144,6 +349,24 @@ export function createTrackView(opts: TrackViewOpts): View {
                     },
                 })
                 state.modal.onChange(render)
+                render()
+            },
+        },
+        {
+            key: 'l',
+            label: 'lane',
+            enabled: () => state.modal === null && semanticLaneKeys(state.tick.snap).length > 0,
+            action: () => {
+                state.laneFilter = nextLaneFilter(state.tick.snap, state.laneFilter)
+                render()
+            },
+        },
+        {
+            key: 'a',
+            label: 'all',
+            enabled: () => state.modal === null,
+            action: () => {
+                state.laneFilter = null
                 render()
             },
         },
@@ -284,10 +507,7 @@ function layout(
         }),
         ...headerExtra,
         Text({content: ''}),
-        Box(
-            {flexDirection: 'column'},
-            ...(state.tick.snap.is_idle ? idleBody(state.tick) : busyBody(state.tick))
-        ),
+        Box({flexDirection: 'column'}, ...laneBody(state.tick, state.laneFilter)),
     ]
     const panel = Box(
         {
@@ -316,104 +536,127 @@ function layout(
     )
 }
 
-function busyBody(t: SnapshotTick): VChild[] {
-    const all = (t.snap.schedule?.tasks ?? []) as ServerTypes.task[]
-    const pendingCount = (t.snap.pending_tasks ?? []).length
-    const activeIdx = Math.max(0, all.length - pendingCount - 1)
-    const done = all.slice(0, activeIdx)
-    const active = all[activeIdx] ?? t.snap.current_task
-    const pending = all.slice(activeIdx + 1)
-
-    const now = new Date()
-    const completionTimes = t.snap.schedule
-        ? computeTaskCompletionTimes(t.snap.schedule, {
-              now,
-              activeIndex: activeIdx,
-              remainingS: Math.max(0, Math.ceil(t.remaining_s)),
-          })
-        : []
-
-    const lines: VChild[] = []
-    for (let i = 0; i < done.length; i++) {
-        lines.push(
-            renderTaskRow({
-                prefix: '  ✓ ',
-                task: done[i],
-                duration: 'done',
-                completionTime: completionTimes[i] ? formatTimeUTC(completionTimes[i]) : '',
-                fg: '#00FF66',
-            })
-        )
-    }
-    if (active) {
-        lines.push(
-            renderTaskRow({
-                prefix: '  ▶ ',
-                task: active,
-                duration: formatDuration(Number(active.duration ?? 0)),
-                completionTime: completionTimes[activeIdx]
-                    ? formatTimeUTC(completionTimes[activeIdx])
-                    : '',
-            })
-        )
-    }
-    const remainingLabel = formatDuration(Math.max(0, Math.ceil(t.remaining_s)))
-    const ratio = t.total_s > 0 ? t.elapsed_s / t.total_s : 0
-    const barIndent = ' '.repeat(GUTTER_WIDTH + 2)
-    lines.push(
-        Text({
-            content: `${barIndent}${renderProgressBar(ratio, 28)} ${remainingLabel} remaining`,
-        })
-    )
-
-    if (pending.length > 0) {
-        lines.push(Text({content: ''}))
-        lines.push(Text({content: '  Queued', fg: '#888888'}))
-        for (let i = 0; i < pending.length; i++) {
-            const task = pending[i]
-            const absoluteIndex = activeIdx + 1 + i
-            lines.push(
-                renderTaskRow({
-                    prefix: '    ',
-                    task,
-                    duration: formatDuration(Number(task.duration ?? 0)),
-                    completionTime: completionTimes[absoluteIndex]
-                        ? formatTimeUTC(completionTimes[absoluteIndex])
-                        : '',
-                    fg: '#888888',
-                })
-            )
-        }
-        const totalRemaining_s =
-            Math.max(0, t.remaining_s) +
-            pending.reduce((acc, p) => acc + Number(p.duration ?? 0), 0)
-        const finishesAt = new Date(Date.now() + totalRemaining_s * 1000)
-        lines.push(
-            Text({
-                content: `  ETA: ${formatDuration(Math.ceil(totalRemaining_s))} · finishes at ${formatTimeUTC(finishesAt)}`,
-                fg: '#888888',
-            })
-        )
-    }
-    return lines
+function resolvableCount(snap: EntitySnapshot, now: Date = new Date()): number {
+    return captureResolvePlan(snap, now).events.length
 }
 
-function idleBody(t: SnapshotTick): VChild[] {
-    const completed = t.snap.schedule?.tasks?.length ?? 0
-    const refreshIn = Math.max(0, Math.ceil(t.fetchInterval_s - t.sinceLastFetch_s))
-    const lines: VChild[] = [Text({content: '  ◌ idle'})]
+function semanticLaneKeys(snap: EntitySnapshot): number[] {
+    return sortLaneKeysSemantic(schedule.getLanes(snap).map((lane) => lane.laneKey))
+}
+
+function nextLaneFilter(snap: EntitySnapshot, current: number | null): number | null {
+    const keys = semanticLaneKeys(snap)
+    if (keys.length === 0) return null
+    if (current === null) return keys[0] ?? null
+    const currentIndex = keys.indexOf(current)
+    if (currentIndex < 0) return keys[0] ?? null
+    return currentIndex === keys.length - 1 ? null : (keys[currentIndex + 1] ?? null)
+}
+
+function laneSections(snap: EntitySnapshot, now: Date, laneFilter: number | null): TrackSection[] {
+    const lanes = schedule.getLanes(snap)
+    const lanesByKey = new Map(lanes.map((lane) => [lane.laneKey, lane]))
+    const keys = semanticLaneKeys(snap)
+    const visibleKeys = laneFilter !== null && keys.includes(laneFilter) ? [laneFilter] : keys
+    return visibleKeys.map((laneKey) => {
+        const lane = lanesByKey.get(laneKey)!
+        return {
+            laneKey,
+            label: laneLabel(snap, laneKey, {compact: true}),
+            status: laneSectionStatus(lane, now),
+            front: laneFront(lane.schedule, now),
+            rows: lane.schedule.tasks.map((task, taskIndex) => ({
+                laneKey,
+                task,
+                status: schedule.laneTaskCompleteOf(snap, laneKey, taskIndex, now)
+                    ? 'done'
+                    : schedule.laneTaskInProgressOf(snap, laneKey, taskIndex, now)
+                      ? 'active'
+                      : 'pending',
+                completesAt: schedule.laneCompletesAt(lane.schedule, taskIndex),
+            })),
+        }
+    })
+}
+
+function laneBody(t: SnapshotTick, laneFilter: number | null): VChild[] {
+    const now = new Date()
+    const sections = laneSections(t.snap, now, laneFilter)
+    const lines: VChild[] = []
+
+    if (sections.length === 0) {
+        lines.push(Text({content: '  no lane schedules', fg: '#888888'}))
+    }
+
+    for (const section of sections) {
+        if (lines.length > 0) lines.push(Text({content: ''}))
+        lines.push(sectionHeader(section))
+        lines.push(...sectionProgress(section))
+        if (section.rows.length === 0) {
+            lines.push(Text({content: '  no queued tasks', fg: '#888888'}))
+            continue
+        }
+        for (const row of section.rows) {
+            lines.push(renderLaneTask(section.label, row))
+        }
+    }
+
+    const completed = resolvableCount(t.snap, now)
     if (completed > 0) {
         lines.push(Text({content: ''}))
         lines.push(
             Text({
-                content: `  ${completed} task(s) awaiting resolve.   Press [r] to resolve.`,
+                content: `  ${completed} task(s) ready to resolve for ${t.snap.type} ${t.snap.id}.`,
                 fg: '#FFCC00',
             })
         )
     }
+
+    const refreshIn = Math.max(0, Math.ceil(t.fetchInterval_s - t.sinceLastFetch_s))
     lines.push(Text({content: ''}))
     lines.push(Text({content: `  Refresh in ${refreshIn}s.`, fg: '#888888'}))
     return lines
+}
+
+function sectionHeader(section: TrackSection): VChild {
+    const suffix =
+        section.front.status === 'waiting'
+            ? ` · starts in ${formatDuration(section.front.startsIn_s)}`
+            : section.front.status === 'active'
+              ? ` · ${formatDuration(section.front.remaining_s)} remaining`
+              : ''
+    const fg =
+        section.status === 'ready to resolve'
+            ? '#FFCC00'
+            : section.status === 'waiting'
+              ? '#888888'
+              : undefined
+    return Text({content: `  ${section.label} · ${section.status}${suffix}`, fg})
+}
+
+function sectionProgress(section: TrackSection): VChild[] {
+    if (section.front.status !== 'active') return []
+    const remainingLabel = formatDuration(section.front.remaining_s)
+    const barIndent = ' '.repeat(GUTTER_WIDTH + 2)
+    return [
+        Text({
+            content: `${barIndent}${renderProgressBar(section.front.progress, 28)} ${remainingLabel} remaining`,
+        }),
+    ]
+}
+
+function renderLaneTask(laneTag: string, row: TrackRow): VChild {
+    const duration =
+        row.status === 'done'
+            ? `${laneTag}  done`
+            : `${laneTag}  ${formatDuration(Number(row.task.duration ?? 0))}`
+    return renderTaskRow({
+        prefix: row.status === 'done' ? '  ✓ ' : row.status === 'active' ? '  ▶ ' : '    ',
+        task: row.task,
+        duration,
+        completionTime: formatTimeUTC(row.completesAt),
+        fg: row.status === 'done' ? '#00FF66' : row.status === 'pending' ? '#888888' : undefined,
+    })
 }
 
 function helpOverlay(keys: HotkeyRegistry<Hotkey>): VChild {

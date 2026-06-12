@@ -23,6 +23,7 @@ describe('subscriptions/mappers', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
     })
@@ -42,6 +43,7 @@ describe('subscriptions/mappers', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
     })
@@ -61,6 +63,7 @@ describe('subscriptions/mappers', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
     })
@@ -80,6 +83,7 @@ describe('subscriptions/mappers', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            lanes: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
     })
@@ -138,6 +142,7 @@ describe('SubscriptionsManager', () => {
                     current_task_elapsed: 0,
                     current_task_remaining: 0,
                     pending_tasks: [],
+                    lanes: [],
                 },
             ],
             truncated: false,

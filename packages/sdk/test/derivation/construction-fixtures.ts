@@ -53,6 +53,19 @@ export interface MakeHaulerOpts {
     name?: string
 }
 
+function mobilityLanes(tasks: TaskStruct[], scheduleStart?: TimePoint) {
+    if (tasks.length === 0) return []
+    return [
+        ServerContract.Types.lane.from({
+            lane_key: UInt8.from(0),
+            schedule: ServerContract.Types.schedule.from({
+                started: scheduleStart ?? SCHEDULE_START,
+                tasks,
+            }),
+        }),
+    ]
+}
+
 export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
     const tasks = opts.tasks ?? []
     return ServerContract.Types.entity_info.from({
@@ -65,17 +78,7 @@ export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
         cargo: [],
         coordinates: COORDS,
         modules: [],
-        is_idle: tasks.length === 0,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-        schedule:
-            tasks.length === 0
-                ? undefined
-                : ServerContract.Types.schedule.from({
-                      started: opts.scheduleStart ?? SCHEDULE_START,
-                      tasks,
-                  }),
+        lanes: mobilityLanes(tasks, opts.scheduleStart),
     })
 }
 
@@ -112,16 +115,6 @@ export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
         cargo: [],
         coordinates: COORDS,
         modules: [],
-        is_idle: tasks.length === 0,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-        schedule:
-            tasks.length === 0
-                ? undefined
-                : ServerContract.Types.schedule.from({
-                      started: opts.scheduleStart ?? SCHEDULE_START,
-                      tasks,
-                  }),
+        lanes: mobilityLanes(tasks, opts.scheduleStart),
     })
 }
