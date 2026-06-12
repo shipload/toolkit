@@ -1,5 +1,17 @@
 # @shipload/oracle
 
+## 0.0.1-next.17
+
+### Patch Changes
+
+- ef41843: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added support for multi-lane schedules
+  - Add retarget action
+  - Add Loader quantity capability attribute
+
 ## 0.0.1-next.16
 
 ### Patch Changes

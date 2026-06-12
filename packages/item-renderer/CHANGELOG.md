@@ -1,5 +1,19 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.27
+
+### Patch Changes
+
+- ef41843: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added support for multi-lane schedules
+  - Add retarget action
+  - Add Loader quantity capability attribute
+- Updated dependencies [ef41843]
+  - @shipload/sdk@1.0.0-next.27
+
 ## 1.0.0-next.26
 
 ### Patch Changes
