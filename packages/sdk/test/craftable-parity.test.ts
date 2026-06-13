@@ -14,10 +14,10 @@ const CRAFTER_SPEED = 270
 const NOW = new Date('2026-06-11T17:06:40.000Z')
 
 const CARGO = [
-    {item_id: 501, quantity: 46, stats: 131408152, modules: []},
-    {item_id: 501, quantity: 23, stats: 512775321, modules: []},
-    {item_id: 501, quantity: 1900, stats: 458292414, modules: []},
-    {item_id: 501, quantity: 1400, stats: 227964179, modules: []},
+    {item_id: 101, quantity: 46, stats: 131408152, modules: []},
+    {item_id: 101, quantity: 23, stats: 512775321, modules: []},
+    {item_id: 101, quantity: 1900, stats: 458292414, modules: []},
+    {item_id: 101, quantity: 1400, stats: 227964179, modules: []},
     {item_id: 201, quantity: 3600, stats: 316058715, modules: []},
 ]
 
@@ -33,7 +33,7 @@ const PENDING_CRAFT_LANE = {
                 coordinates: null,
                 cargo: [
                     {item_id: 201, stats: 316058715, modules: [], quantity: 6, entity_id: null},
-                    {item_id: 501, stats: 458292414, modules: [], quantity: 9, entity_id: null},
+                    {item_id: 101, stats: 458292414, modules: [], quantity: 9, entity_id: null},
                     {
                         item_id: ITEM_RESONATOR,
                         stats: 308651,
@@ -83,14 +83,14 @@ describe('maxCraftable', () => {
         expect(maxCraftable(fixture(true), recipe, CRAFTER_SPEED, NOW)).toBe(373)
     })
 
-    test('counts completed-but-unsettled crafts as already spent (cargo drained to 3x 501)', () => {
+    test('counts completed-but-unsettled crafts as already spent (cargo drained to 3x 101)', () => {
         const recipe = getRecipe(ITEM_RESONATOR)!
         expect(maxCraftable(factory12(), recipe, FACTORY_12_CRAFTER_SPEED, FACTORY_12_NOW)).toBe(0)
     })
 
     test('credits an in-transit load by delaying the craft until inputs are ready', () => {
         const recipe = getRecipe(ITEM_RESONATOR)!
-        // 1824 incoming 501 + 3 on hand = 1827; 1827 / 9 = 203 (crystal headroom is higher).
+        // 1824 incoming 101 + 3 on hand = 1827; 1827 / 9 = 203 (crystal headroom is higher).
         expect(
             maxCraftable(
                 factory12({incomingLoad: true}),

@@ -163,10 +163,10 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#B877FF',
     },
     10010: {
-        name: 'Emitter',
+        name: 'Resin',
         description:
-            'Precision-formed crystal emitter array. Routes energy efficiently to a target lock.',
-        color: '#4ADBFF',
+            'Saturated organic binder cured from biomass. A pliable matrix for haulage and field components.',
+        color: '#5A8B3E',
     },
 
     // === Modules (T1) ===

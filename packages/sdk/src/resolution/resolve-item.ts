@@ -222,8 +222,8 @@ function computeCapabilityGroup(
             const str = stats.strength
             const den = stats.density
             const hrd = stats.hardness
-            const sat = stats.saturation
-            const statSum = str + den + hrd + sat
+            const com = stats.cohesion
+            const statSum = str + den + hrd + com
             const pct = 10 + Math.floor((statSum * 10) / 2997)
             return {capability: 'Storage', attributes: [{label: 'Capacity Bonus', value: pct}]}
         }

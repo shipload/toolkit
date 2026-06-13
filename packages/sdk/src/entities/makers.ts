@@ -75,7 +75,7 @@ const ZERO_HULL_STATS: Record<string, number> = {
     density: 0,
     strength: 0,
     hardness: 0,
-    saturation: 0,
+    cohesion: 0,
 }
 
 export function makeEntity(packedItemId: number, state: EntityStateInput): Entity {

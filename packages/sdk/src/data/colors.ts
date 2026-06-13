@@ -34,7 +34,7 @@ export const itemAbbreviations: Record<number, string> = {
     10007: 'PM',
     10008: 'CR',
     10009: 'RX',
-    10010: 'EM',
+    10010: 'RE',
     10100: 'EN',
     10101: 'GN',
     10102: 'EX',

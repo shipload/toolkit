@@ -160,27 +160,27 @@ describe('projectedCargoAvailableAt', () => {
     test('subtracts completed-but-unsettled craft inputs (the unsettled cargo base)', () => {
         const avail = projectedCargoAvailableAt(factory12(), FACTORY_12_AT)
         expect(availableForItem(avail, 201)).toBe(1356n)
-        expect(availableForItem(avail, 501)).toBe(3n)
+        expect(availableForItem(avail, 101)).toBe(3n)
         expect(availableForItem(avail, 10004)).toBe(374n)
     })
 
     test('credits an in-transit load once the craft completes after it lands', () => {
         const entity = factory12({incomingLoad: true})
-        // The 1824 Biomass load lands at 23:02:57.
+        // The 1824 Ore load lands at 23:02:57.
         const beforeLoad = new Date('2026-06-11T23:00:00.000Z')
         const afterLoad = new Date('2026-06-11T23:05:00.000Z')
-        expect(availableForItem(projectedCargoAvailableAt(entity, beforeLoad), 501)).toBe(3n)
-        expect(availableForItem(projectedCargoAvailableAt(entity, afterLoad), 501)).toBe(1827n)
+        expect(availableForItem(projectedCargoAvailableAt(entity, beforeLoad), 101)).toBe(3n)
+        expect(availableForItem(projectedCargoAvailableAt(entity, afterLoad), 101)).toBe(1827n)
     })
 })
 
 describe('cargoReadyAt', () => {
     test('returns epoch when no scheduled task produces the inputs', () => {
-        expect(cargoReadyAt(factory12(), [201, 501]).getTime()).toBe(0)
+        expect(cargoReadyAt(factory12(), [201, 101]).getTime()).toBe(0)
     })
 
     test('returns the latest completion of a task producing a required input', () => {
-        const ready = cargoReadyAt(factory12({incomingLoad: true}), [201, 501])
+        const ready = cargoReadyAt(factory12({incomingLoad: true}), [201, 101])
         expect(ready.toISOString()).toBe('2026-06-11T23:02:57.000Z')
     })
 })

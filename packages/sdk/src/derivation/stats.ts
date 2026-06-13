@@ -73,10 +73,11 @@ const GAS_STATS: StatDefinition[] = [
 
 const REGOLITH_STATS: StatDefinition[] = [
     {
-        key: 'composition',
-        label: 'Composition',
-        abbreviation: 'COM',
-        purpose: 'Mineral/metal mix — drives sensor, chip, and optic crafting quality',
+        key: 'cohesion',
+        label: 'Cohesion',
+        abbreviation: 'COH',
+        purpose:
+            'Binding strength of the loose aggregate; higher cohesion yields more rigid frames and hulls',
     },
     {
         key: 'hardness',

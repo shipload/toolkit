@@ -15,7 +15,7 @@ import {
 } from '$lib'
 
 describe('resolveItem - entity capacity dispatch', () => {
-    const defaultStatInputs = {strength: 500, density: 500, hardness: 500, saturation: 500}
+    const defaultStatInputs = {strength: 500, density: 500, hardness: 500, cohesion: 500}
     const defaultPackedStats = encodeStats([500, 500, 500, 500])
 
     function findCapacityAttr(attributes: any[] | undefined): number | undefined {
@@ -45,7 +45,7 @@ describe('resolveItem - entity capacity dispatch', () => {
 
     test('container-t2 uses computeContainerT2Capabilities', () => {
         const resolved = resolveItem(ITEM_CONTAINER_T2_PACKED, defaultPackedStats)
-        const decodedInputs = {strength: 500, density: 500, hardness: 500, saturation: 500}
+        const decodedInputs = {strength: 500, density: 500, hardness: 500, cohesion: 500}
         const expected = computeContainerT2Capabilities(decodedInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })

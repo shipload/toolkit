@@ -6,7 +6,7 @@ export function computeShipHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const statSum = stats.strength + stats.hardness + stats.saturation
+    const statSum = stats.strength + stats.hardness + stats.cohesion
     const exponent = statSum / 2997.0
     return {
         hullmass: computeBaseHullmass(stats),
@@ -121,12 +121,12 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     drain: number
 } {
     const resonance = stats.resonance
-    const conductivity = stats.conductivity
+    const plasticity = stats.plasticity
     const reflectivity = stats.reflectivity
 
     return {
         capacity: Math.max(1, 1 + Math.floor(resonance / 400)),
-        efficiency: 2000 + conductivity * 6,
+        efficiency: 2000 + plasticity * 6,
         drain: Math.max(3, 15 - Math.floor(reflectivity / 80)),
     }
 }
@@ -140,9 +140,9 @@ export function computeStorageCapabilities(
     const strength = stats.strength
     const density = stats.density
     const hardness = stats.hardness
-    const saturation = stats.saturation
+    const cohesion = stats.cohesion
 
-    const statSum = strength + density + hardness + saturation
+    const statSum = strength + density + hardness + cohesion
     const capacityBonus = Math.floor(
         (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
     )
@@ -201,15 +201,15 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
 export function computeWarpCapabilities(stats: Record<string, number>): {
     range: number
 } {
-    const res = stats.resonance
-    return {range: 100 + res * 3}
+    const resonance = stats.resonance
+    return {range: 100 + resonance * 3}
 }
 
 export function computeWarehouseHullCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const statSum = stats.strength + stats.hardness + stats.saturation
+    const statSum = stats.strength + stats.hardness + stats.cohesion
     const exponent = statSum / 2997.0
     return {
         hullmass: computeBaseHullmass(stats),
@@ -388,7 +388,7 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
     hullmass: number
     capacity: number
 } {
-    const statSum = stats.strength + stats.hardness + stats.saturation
+    const statSum = stats.strength + stats.hardness + stats.cohesion
     const exponent = statSum / 2997.0
     return {
         hullmass: computeBaseHullmass(stats),
@@ -403,11 +403,11 @@ export function computeContainerT2Capabilities(stats: Record<string, number>): {
     const strength = stats.strength
     const density = stats.density
     const hardness = stats.hardness
-    const saturation = stats.saturation
+    const cohesion = stats.cohesion
 
     const hullmass = 70000 - 50 * density
 
-    const statSum = strength + hardness + saturation
+    const statSum = strength + hardness + cohesion
     const exponent = statSum / 2947
     const capacity = Math.floor(24000000 * 6 ** exponent)
 

@@ -162,9 +162,9 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         }
         case MODULE_HAULER: {
             const res = decodeStat(stats, 0)
-            const con = decodeStat(stats, 1)
+            const pla = decodeStat(stats, 1)
             const ref = decodeStat(stats, 2)
-            out += `  Capacity ${computeHaulerCapacity(res)}  Efficiency ${computeHaulerEfficiency(con)}  Drain ${computeHaulerDrain(ref)}`
+            out += `  Capacity ${computeHaulerCapacity(res)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${computeHaulerDrain(ref)}`
             break
         }
         case MODULE_WARP: {

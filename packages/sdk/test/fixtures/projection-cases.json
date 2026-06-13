@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "7ec4cea300f5f0e18e82d168f7a95f35f4f50947f3d7e7a071cd5ca34d64b7d5",
-    "generated_at": "2026-06-03T22:45:46.365Z",
+    "catalog_hash": "a5d38b1ef11cffbcfb76ddca0254158ba3d20fa8f23be13e6b10aee5432fa96c",
+    "generated_at": "2026-06-13T03:25:36.843Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -55,22 +55,27 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 1,
-                            "duration": 568,
-                            "cancelable": 1,
-                            "coordinates": {
-                                "x": -5,
-                                "y": 6
-                            },
-                            "cargo": [],
-                            "energy_cost": 658
+                "lanes": [
+                    {
+                        "lane_key": 0,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
+                                {
+                                    "type": 1,
+                                    "duration": 568,
+                                    "cancelable": 1,
+                                    "coordinates": {
+                                        "x": -5,
+                                        "y": 6
+                                    },
+                                    "cargo": [],
+                                    "energy_cost": 658
+                                }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 0,
@@ -163,22 +168,27 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 1,
-                            "duration": 568,
-                            "cancelable": 1,
-                            "coordinates": {
-                                "x": -5,
-                                "y": 6
-                            },
-                            "cargo": [],
-                            "energy_cost": 658
+                "lanes": [
+                    {
+                        "lane_key": 0,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
+                                {
+                                    "type": 1,
+                                    "duration": 568,
+                                    "cancelable": 1,
+                                    "coordinates": {
+                                        "x": -5,
+                                        "y": 6
+                                    },
+                                    "cargo": [],
+                                    "energy_cost": 658
+                                }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 1,
@@ -271,17 +281,22 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:10:00.000",
-                    "tasks": [
-                        {
-                            "type": 2,
-                            "duration": 47,
-                            "cancelable": 2,
-                            "cargo": []
+                "lanes": [
+                    {
+                        "lane_key": 255,
+                        "schedule": {
+                            "started": "2024-01-29T00:10:00.000",
+                            "tasks": [
+                                {
+                                    "type": 2,
+                                    "duration": 47,
+                                    "cancelable": 2,
+                                    "cargo": []
+                                }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 0,
@@ -374,17 +389,22 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:10:00.000",
-                    "tasks": [
-                        {
-                            "type": 2,
-                            "duration": 47,
-                            "cancelable": 2,
-                            "cargo": []
+                "lanes": [
+                    {
+                        "lane_key": 255,
+                        "schedule": {
+                            "started": "2024-01-29T00:10:00.000",
+                            "tasks": [
+                                {
+                                    "type": 2,
+                                    "duration": 47,
+                                    "cancelable": 2,
+                                    "cargo": []
+                                }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 1,
@@ -477,28 +497,33 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 3,
-                            "duration": 18,
-                            "cancelable": 2,
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 3,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
                                 {
-                                    "item_id": 301,
-                                    "stats": 0,
-                                    "modules": [],
-                                    "quantity": 5
+                                    "type": 3,
+                                    "duration": 18,
+                                    "cancelable": 2,
+                                    "cargo": [
+                                        {
+                                            "item_id": 301,
+                                            "stats": 0,
+                                            "modules": [],
+                                            "quantity": 5
+                                        }
+                                    ],
+                                    "entitytarget": {
+                                        "entity_type": "warehouse",
+                                        "entity_id": 2
+                                    }
                                 }
-                            ],
-                            "entitytarget": {
-                                "entity_type": "warehouse",
-                                "entity_id": 2
-                            }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 0,
@@ -591,28 +616,33 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 3,
-                            "duration": 18,
-                            "cancelable": 2,
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 3,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
                                 {
-                                    "item_id": 301,
-                                    "stats": 0,
-                                    "modules": [],
-                                    "quantity": 5
+                                    "type": 3,
+                                    "duration": 18,
+                                    "cancelable": 2,
+                                    "cargo": [
+                                        {
+                                            "item_id": 301,
+                                            "stats": 0,
+                                            "modules": [],
+                                            "quantity": 5
+                                        }
+                                    ],
+                                    "entitytarget": {
+                                        "entity_type": "warehouse",
+                                        "entity_id": 2
+                                    }
                                 }
-                            ],
-                            "entitytarget": {
-                                "entity_type": "warehouse",
-                                "entity_id": 2
-                            }
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 1,
@@ -713,30 +743,35 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:09:28.000",
-                    "tasks": [
-                        {
-                            "type": 5,
-                            "duration": 1,
-                            "cancelable": 0,
-                            "coordinates": {
-                                "x": -5,
-                                "y": 6,
-                                "z": 3000
-                            },
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 4,
+                        "schedule": {
+                            "started": "2024-01-29T00:09:28.000",
+                            "tasks": [
                                 {
-                                    "item_id": 401,
-                                    "stats": 335874213,
-                                    "modules": [],
-                                    "quantity": 1
+                                    "type": 5,
+                                    "duration": 1,
+                                    "cancelable": 0,
+                                    "coordinates": {
+                                        "x": -5,
+                                        "y": 6,
+                                        "z": 3000
+                                    },
+                                    "cargo": [
+                                        {
+                                            "item_id": 401,
+                                            "stats": 335874213,
+                                            "modules": [],
+                                            "quantity": 1
+                                        }
+                                    ],
+                                    "energy_cost": 0
                                 }
-                            ],
-                            "energy_cost": 0
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 0,
@@ -829,30 +864,35 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:09:28.000",
-                    "tasks": [
-                        {
-                            "type": 5,
-                            "duration": 1,
-                            "cancelable": 0,
-                            "coordinates": {
-                                "x": -5,
-                                "y": 6,
-                                "z": 3000
-                            },
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 4,
+                        "schedule": {
+                            "started": "2024-01-29T00:09:28.000",
+                            "tasks": [
                                 {
-                                    "item_id": 401,
-                                    "stats": 335874213,
-                                    "modules": [],
-                                    "quantity": 1
+                                    "type": 5,
+                                    "duration": 1,
+                                    "cancelable": 0,
+                                    "coordinates": {
+                                        "x": -5,
+                                        "y": 6,
+                                        "z": 3000
+                                    },
+                                    "cargo": [
+                                        {
+                                            "item_id": 401,
+                                            "stats": 335874213,
+                                            "modules": [],
+                                            "quantity": 1
+                                        }
+                                    ],
+                                    "energy_cost": 0
                                 }
-                            ],
-                            "energy_cost": 0
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": []
             },
             "task_count": 1,
@@ -953,30 +993,35 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 8,
-                            "duration": 60,
-                            "cancelable": 2,
-                            "coordinates": {
-                                "x": -47,
-                                "y": -49,
-                                "z": 800
-                            },
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 0,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
                                 {
-                                    "item_id": 10200,
-                                    "stats": 11111,
-                                    "modules": [],
-                                    "quantity": 1
+                                    "type": 8,
+                                    "duration": 60,
+                                    "cancelable": 2,
+                                    "coordinates": {
+                                        "x": -47,
+                                        "y": -49,
+                                        "z": 800
+                                    },
+                                    "cargo": [
+                                        {
+                                            "item_id": 10200,
+                                            "stats": 11111,
+                                            "modules": [],
+                                            "quantity": 1
+                                        }
+                                    ],
+                                    "energy_cost": 0
                                 }
-                            ],
-                            "energy_cost": 0
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": [
                     {
                         "item_id": 10200,
@@ -1084,30 +1129,35 @@
                         }
                     }
                 ],
-                "schedule": {
-                    "started": "2024-01-29T00:00:00.000",
-                    "tasks": [
-                        {
-                            "type": 8,
-                            "duration": 60,
-                            "cancelable": 2,
-                            "coordinates": {
-                                "x": -47,
-                                "y": -49,
-                                "z": 800
-                            },
-                            "cargo": [
+                "lanes": [
+                    {
+                        "lane_key": 0,
+                        "schedule": {
+                            "started": "2024-01-29T00:00:00.000",
+                            "tasks": [
                                 {
-                                    "item_id": 10200,
-                                    "stats": 11111,
-                                    "modules": [],
-                                    "quantity": 1
+                                    "type": 8,
+                                    "duration": 60,
+                                    "cancelable": 2,
+                                    "coordinates": {
+                                        "x": -47,
+                                        "y": -49,
+                                        "z": 800
+                                    },
+                                    "cargo": [
+                                        {
+                                            "item_id": 10200,
+                                            "stats": 11111,
+                                            "modules": [],
+                                            "quantity": 1
+                                        }
+                                    ],
+                                    "energy_cost": 0
                                 }
-                            ],
-                            "energy_cost": 0
+                            ]
                         }
-                    ]
-                },
+                    }
+                ],
                 "cargo": [
                     {
                         "item_id": 10200,

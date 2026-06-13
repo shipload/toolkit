@@ -15,7 +15,7 @@ import {
 } from '../src/data/item-ids'
 
 describe('computeBaseCapacity', () => {
-    const stats = {strength: 100, hardness: 100, saturation: 100, density: 100}
+    const stats = {strength: 100, hardness: 100, cohesion: 100, density: 100}
 
     test('ship returns positive capacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
@@ -52,7 +52,7 @@ describe('computeBaseCapacity', () => {
             computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, {
                 strength: 100,
                 hardness: 100,
-                saturation: 100,
+                cohesion: 100,
                 density: 100,
             })
         ).toBe(expected)

@@ -26,7 +26,7 @@ import {
     ITEM_FRAME_T2,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
-    ITEM_EMITTER,
+    ITEM_RESIN,
     ITEM_HAULER_T1,
     ITEM_PLATE,
     ITEM_PLATE_T2,
@@ -104,38 +104,38 @@ describe('Crafting', () => {
             assert.equal(den!.value, 262)
         })
 
-        test('focusing array from crystal stacks blends weighted average', () => {
-            const stats = computeComponentStats(ITEM_EMITTER, [
+        test('resin from biomass stacks blends weighted average', () => {
+            const stats = computeComponentStats(ITEM_RESIN, [
                 {
-                    category: 'crystal',
+                    category: 'biomass',
                     stacks: [
                         {
                             quantity: 10,
-                            stats: {conductivity: 200, resonance: 200, reflectivity: 200},
+                            stats: {plasticity: 200, insulation: 200, saturation: 200},
                         },
                         {
                             quantity: 15,
-                            stats: {conductivity: 800, resonance: 800, reflectivity: 800},
+                            stats: {plasticity: 800, insulation: 800, saturation: 800},
                         },
                     ],
                 },
             ])
             assert.equal(stats.length, 2)
-            const cond = stats.find((s) => s.key === 'conductivity')
-            const res = stats.find((s) => s.key === 'resonance')
-            assert.equal(cond!.value, 560)
-            assert.equal(res!.value, 560)
+            const sat = stats.find((s) => s.key === 'saturation')
+            const pla = stats.find((s) => s.key === 'plasticity')
+            assert.equal(sat!.value, 560)
+            assert.equal(pla!.value, 560)
         })
 
-        test('frame from regolith + biomass', () => {
-            // Recipe 10002 statSlots: [regolith stat 1 (hardness), biomass stat 2 (saturation)].
+        test('frame from regolith (single-source)', () => {
+            // Recipe 10002 statSlots: [regolith stat 1 (hardness), regolith stat 0 (cohesion)].
             const stats = computeComponentStats(ITEM_FRAME, [
                 {
                     category: 'regolith',
                     stacks: [
                         {
                             quantity: 10,
-                            stats: {composition: 500, hardness: 200, fineness: 700},
+                            stats: {cohesion: 500, hardness: 200, fineness: 700},
                         },
                     ],
                 },
@@ -148,9 +148,9 @@ describe('Crafting', () => {
             ])
             assert.equal(stats.length, 2)
             const hard = stats.find((s) => s.key === 'hardness')
-            const sat = stats.find((s) => s.key === 'saturation')
+            const comp = stats.find((s) => s.key === 'cohesion')
             assert.equal(hard!.value, 200)
-            assert.equal(sat!.value, 800)
+            assert.equal(comp!.value, 500)
         })
     })
 
@@ -161,7 +161,7 @@ describe('Crafting', () => {
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 400, density: 200}},
                 ],
-                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, saturation: 700}}],
+                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, cohesion: 700}}],
             })
             assert.equal(stats.length, 4)
             const str = stats.find((s) => s.key === 'strength')
@@ -179,22 +179,22 @@ describe('Crafting', () => {
 
         test('decode container packed seed', () => {
             // Container T1 statSlots derive from Plate (strength, density)
-            // and Frame (hardness, saturation), so decode keys are those four.
+            // and Frame (hardness, cohesion), so decode keys are those four.
             const seed = encodeStats([500, 300, 600, 700])
             const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
             assert.equal(stats['density'], 300)
             assert.equal(stats['hardness'], 600)
-            assert.equal(stats['saturation'], 700)
+            assert.equal(stats['cohesion'], 700)
         })
 
         test('decoded hauler stats use input stat key names', () => {
             const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'resonance')
-            assert.property(decoded, 'conductivity')
+            assert.property(decoded, 'saturation')
             assert.property(decoded, 'reflectivity')
-            assert.notProperty(decoded, 'composition')
+            assert.notProperty(decoded, 'cohesion')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')
@@ -321,7 +321,7 @@ describe('Crafting', () => {
                         {
                             quantity: 10,
                             stats: {
-                                composition: rawR.stat1,
+                                cohesion: rawR.stat1,
                                 hardness: rawR.stat2,
                                 fineness: rawR.stat3,
                             },
@@ -344,16 +344,16 @@ describe('Crafting', () => {
             ])
             const decoded = decodeCraftedItemStats(ITEM_FRAME, BigInt(outputStats.toString()))
             const hard = expectedStats.find((s) => s.key === 'hardness')!.value
-            const sat = expectedStats.find((s) => s.key === 'saturation')!.value
+            const comp = expectedStats.find((s) => s.key === 'cohesion')!.value
             assert.equal(decoded['hardness'], hard)
-            assert.equal(decoded['saturation'], sat)
+            assert.equal(decoded['cohesion'], comp)
             assert.equal(decoded['hardness'], rawR.stat2)
-            assert.equal(decoded['saturation'], rawB.stat3)
+            assert.equal(decoded['cohesion'], rawR.stat1)
         })
 
         test('entity recipe (Container packed from plate + frame)', () => {
             // Plate packs (strength, density); Frame packs
-            // (hardness, saturation) per the new contract recipes.
+            // (hardness, cohesion) per the new contract recipes.
             const hullSeedA = encodeStats([500, 300])
             const hullSeedB = encodeStats([700, 400])
             const liningSeed = encodeStats([600, 800])
@@ -380,7 +380,7 @@ describe('Crafting', () => {
                     {quantity: 4, stats: {strength: 500, density: 300}},
                     {quantity: 2, stats: {strength: 700, density: 400}},
                 ],
-                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, saturation: 800}}],
+                [ITEM_FRAME]: [{quantity: 2, stats: {hardness: 600, cohesion: 800}}],
             })
             const decoded = decodeCraftedItemStats(
                 ITEM_CONTAINER_T1_PACKED,
@@ -392,7 +392,7 @@ describe('Crafting', () => {
             assert.equal(decoded['strength'], 566)
             assert.equal(decoded['density'], 333)
             assert.equal(decoded['hardness'], 600)
-            assert.equal(decoded['saturation'], 800)
+            assert.equal(decoded['cohesion'], 800)
         })
 
         test('throws for unknown output item id', () => {
@@ -464,7 +464,7 @@ describe('Crafting', () => {
             const decoded = decodeCraftedItemStats(ITEM_FRAME_T2, BigInt(output.toString()))
 
             assert.equal(decoded['hardness'], 500)
-            assert.equal(decoded['saturation'], 750)
+            assert.equal(decoded['cohesion'], 750)
         })
     })
 
@@ -474,7 +474,7 @@ describe('Crafting', () => {
                 strength: 500,
                 density: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             assert.equal(caps.hullmass, 100000 - 75 * 500)
             assert.equal(caps.capacity, Math.floor(22000000 * 6 ** (1500 / 2997)))
@@ -486,7 +486,7 @@ describe('Crafting', () => {
                 strength: 1,
                 density: 1,
                 hardness: 1,
-                saturation: 1,
+                cohesion: 1,
             })
             assert.equal(caps.hullmass, 99925)
             assert.isAtLeast(caps.hullmass, 99000)
@@ -500,7 +500,7 @@ describe('Crafting', () => {
                 strength: 999,
                 density: 999,
                 hardness: 999,
-                saturation: 999,
+                cohesion: 999,
             })
             assert.equal(caps.hullmass, 100000 - 75 * 999)
             assert.isAtLeast(caps.hullmass, 25000)
@@ -514,13 +514,13 @@ describe('Crafting', () => {
                 density: 1,
                 strength: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             const lightest = computeContainerCapabilities({
                 density: 999,
                 strength: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             assert.isAtMost(heaviest.hullmass, 100000)
             assert.isAtLeast(lightest.hullmass, 25000)
@@ -530,13 +530,13 @@ describe('Crafting', () => {
             const min = computeContainerCapabilities({
                 strength: 1,
                 hardness: 1,
-                saturation: 1,
+                cohesion: 1,
                 density: 500,
             })
             const max = computeContainerCapabilities({
                 strength: 999,
                 hardness: 999,
-                saturation: 999,
+                cohesion: 999,
                 density: 500,
             })
             assert.isAtLeast(min.capacity, 20000000)
@@ -548,13 +548,13 @@ describe('Crafting', () => {
                 density: 100,
                 strength: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             const high = computeContainerCapabilities({
                 density: 900,
                 strength: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             assert.isAbove(low.hullmass, high.hullmass)
         })
@@ -566,13 +566,13 @@ describe('Crafting', () => {
                 strength: 500,
                 density: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             assert.isBelow(t2.hullmass, t1.hullmass)
         })
@@ -582,19 +582,19 @@ describe('Crafting', () => {
                 strength: 500,
                 density: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             const t2 = computeContainerT2Capabilities({
                 strength: 500,
                 density: 500,
                 hardness: 500,
-                saturation: 500,
+                cohesion: 500,
             })
             assert.isAbove(t2.capacity, t1.capacity)
         })
 
         test('T2 container formulas match contract', () => {
-            const stats = {strength: 400, density: 300, hardness: 600, saturation: 200}
+            const stats = {strength: 400, density: 300, hardness: 600, cohesion: 200}
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 70000 - 50 * 300)
             const statSum = 400 + 600 + 200

@@ -224,21 +224,23 @@ export function buildModuleImmutable(
         }
         case MODULE_CRAFTER: {
             const rea = decodeStat(stats, 0)
-            const com = decodeStat(stats, 1)
+            const fin = decodeStat(stats, 1)
             base.push({first: 'reactivity', second: ['uint16', rea]})
-            base.push({first: 'composition', second: ['uint16', com]})
+            base.push({first: 'fineness', second: ['uint16', fin]})
             base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(rea)]})
-            base.push({first: 'drain', second: ['uint16', computeCrafterDrain(com)]})
+            base.push({first: 'drain', second: ['uint16', computeCrafterDrain(fin)]})
             break
         }
         case MODULE_STORAGE: {
             const str = decodeStat(stats, 0)
-            const fin = decodeStat(stats, 1)
-            const sat = decodeStat(stats, 2)
-            const sum = str + fin + sat
+            const den = decodeStat(stats, 1)
+            const hrd = decodeStat(stats, 2)
+            const com = decodeStat(stats, 3)
+            const sum = str + den + hrd + com
             base.push({first: 'strength', second: ['uint16', str]})
-            base.push({first: 'fineness', second: ['uint16', fin]})
-            base.push({first: 'saturation', second: ['uint16', sat]})
+            base.push({first: 'density', second: ['uint16', den]})
+            base.push({first: 'hardness', second: ['uint16', hrd]})
+            base.push({first: 'cohesion', second: ['uint16', com]})
             base.push({
                 first: 'capacity_bonus_pct',
                 second: ['uint16', 10 + Math.floor((sum * 10) / 2997)],
@@ -247,13 +249,13 @@ export function buildModuleImmutable(
         }
         case MODULE_HAULER: {
             const res = decodeStat(stats, 0)
-            const con = decodeStat(stats, 1)
+            const pla = decodeStat(stats, 1)
             const ref = decodeStat(stats, 2)
             base.push({first: 'resonance', second: ['uint16', res]})
-            base.push({first: 'conductivity', second: ['uint16', con]})
+            base.push({first: 'plasticity', second: ['uint16', pla]})
             base.push({first: 'reflectivity', second: ['uint16', ref]})
             base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res)]})
-            base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(con)]})
+            base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(pla)]})
             base.push({first: 'drain', second: ['uint16', computeHaulerDrain(ref)]})
             break
         }

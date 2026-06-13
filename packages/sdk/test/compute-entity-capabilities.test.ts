@@ -24,7 +24,7 @@ const SHIP_LAYOUT: EntitySlot[] = [
 
 const ZERO_STATS = 0n
 
-const SAMPLE_STATS_RECORD = {strength: 100, density: 100, hardness: 100, saturation: 100}
+const SAMPLE_STATS_RECORD = {strength: 100, density: 100, hardness: 100, cohesion: 100}
 
 describe('computeEntityCapabilities', () => {
     test('returns hullmass and capacity for ship with no modules', () => {

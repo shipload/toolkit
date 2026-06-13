@@ -2,11 +2,11 @@ import {ITEM_CRAFTER_T1, ITEM_GENERATOR_T1, ServerContract, TaskType} from '../.
 
 // Live factory:12 mid-batch capture: four elapsed-but-unsettled crafts plus a 163-unit craft in progress.
 const CARGO = [
-    {item_id: 501, quantity: 46, stats: 131408152, modules: []},
-    {item_id: 501, quantity: 23, stats: 512775321, modules: []},
-    {item_id: 501, quantity: 1900, stats: 458292414, modules: []},
+    {item_id: 101, quantity: 46, stats: 131408152, modules: []},
+    {item_id: 101, quantity: 23, stats: 512775321, modules: []},
+    {item_id: 101, quantity: 1900, stats: 458292414, modules: []},
     {item_id: 201, quantity: 3600, stats: 316058715, modules: []},
-    {item_id: 501, quantity: 1400, stats: 227964179, modules: []},
+    {item_id: 101, quantity: 1400, stats: 227964179, modules: []},
 ]
 
 function craftTask(duration: number, cargo: {item_id: number; stats: number; quantity: number}[]) {
@@ -31,30 +31,30 @@ const CRAFTER_LANE = {
         tasks: [
             craftTask(55, [
                 {item_id: 201, stats: 316058715, quantity: 6},
-                {item_id: 501, stats: 458292414, quantity: 9},
+                {item_id: 101, stats: 458292414, quantity: 9},
                 {...RESONATOR, quantity: 1},
             ]),
             craftTask(55, [
                 {item_id: 201, stats: 316058715, quantity: 6},
-                {item_id: 501, stats: 458292414, quantity: 9},
+                {item_id: 101, stats: 458292414, quantity: 9},
                 {...RESONATOR, quantity: 1},
             ]),
             craftTask(55, [
                 {item_id: 201, stats: 316058715, quantity: 6},
-                {item_id: 501, stats: 458292414, quantity: 9},
+                {item_id: 101, stats: 458292414, quantity: 9},
                 {...RESONATOR, quantity: 1},
             ]),
             craftTask(11555, [
                 {item_id: 201, stats: 316058715, quantity: 1248},
-                {item_id: 501, stats: 458292414, quantity: 1872},
+                {item_id: 101, stats: 458292414, quantity: 1872},
                 {...RESONATOR, quantity: 208},
             ]),
             craftTask(9055, [
                 {item_id: 201, stats: 316058715, quantity: 978},
-                {item_id: 501, stats: 458292414, quantity: 1},
-                {item_id: 501, stats: 227964179, quantity: 1400},
-                {item_id: 501, stats: 131408152, quantity: 46},
-                {item_id: 501, stats: 512775321, quantity: 20},
+                {item_id: 101, stats: 458292414, quantity: 1},
+                {item_id: 101, stats: 227964179, quantity: 1400},
+                {item_id: 101, stats: 131408152, quantity: 46},
+                {item_id: 101, stats: 512775321, quantity: 20},
                 {...RESONATOR, quantity: 163},
             ]),
         ],
@@ -80,7 +80,7 @@ const BARRIER_LANE = {
     },
 }
 
-// Incoming 1824 Biomass: idle until the carrier docks, then load — lands 23:02:57, after the crafter frees.
+// Incoming 1824 Ore: idle until the carrier docks, then load — lands 23:02:57, after the crafter frees.
 const INCOMING_LOAD_LANE = {
     lane_key: 0,
     schedule: {
@@ -102,7 +102,7 @@ const INCOMING_LOAD_LANE = {
                 cancelable: 2,
                 coordinates: null,
                 cargo: [
-                    {item_id: 501, stats: 458292414, modules: [], quantity: 1824, entity_id: null},
+                    {item_id: 101, stats: 458292414, modules: [], quantity: 1824, entity_id: null},
                 ],
                 entitytarget: null,
                 entitygroup: null,
