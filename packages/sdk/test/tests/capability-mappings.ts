@@ -61,7 +61,7 @@ describe('stat coverage', () => {
         Tolerance: ['Gathering.depth'],
         Density: ['Hull.mass', 'Storage.bonus'],
         Conductivity: ['Gathering.drain'],
-        Resonance: ['Energy.capacity', 'Hauler.capacity'],
+        Resonance: ['Energy.capacity', 'Hauler.capacity', 'Warp.range'],
         Reflectivity: ['Energy.recharge', 'Hauler.drain'],
         Volatility: ['Battery.bonus', 'Movement.thrust'],
         Reactivity: ['Crafter.speed'],
@@ -69,9 +69,9 @@ describe('stat coverage', () => {
         Hardness: ['Storage.bonus', 'Storage.capacity'],
         Cohesion: ['Storage.bonus', 'Storage.capacity'],
         Fineness: ['Crafter.drain'],
-        Plasticity: ['Battery.bonus', 'Loader.thrust', 'Warp.range'],
+        Plasticity: ['Battery.bonus', 'Hauler.efficiency', 'Loader.thrust'],
         Insulation: ['Battery.bonus', 'Loader.mass'],
-        Saturation: ['Hauler.efficiency'],
+        Saturation: [],
     }
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {

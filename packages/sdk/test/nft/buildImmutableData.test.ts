@@ -178,7 +178,7 @@ describe('buildImmutableData', () => {
             'deposit_token',
             'deposit_symbol',
             'resonance',
-            'conductivity',
+            'plasticity',
             'reflectivity',
             'capacity',
             'efficiency',

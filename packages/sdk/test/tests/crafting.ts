@@ -192,7 +192,7 @@ describe('Crafting', () => {
             const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'resonance')
-            assert.property(decoded, 'saturation')
+            assert.property(decoded, 'plasticity')
             assert.property(decoded, 'reflectivity')
             assert.notProperty(decoded, 'cohesion')
             assert.notProperty(decoded, 'capacity')
