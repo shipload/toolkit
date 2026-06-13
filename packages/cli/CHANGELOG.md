@@ -1,5 +1,19 @@
 # @shipload/cli
 
+## 1.0.0-next.33
+
+### Patch Changes
+
+- 0e659af: - Title additions to SVGs
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Subtraction helper
+- Updated dependencies [0e659af]
+  - @shipload/oracle@0.0.1-next.19
+  - @shipload/sdk@1.0.0-next.29
+
 ## 1.0.0-next.32
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.29
+
+### Patch Changes
+
+- 0e659af: - Title additions to SVGs
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Subtraction helper
+- Updated dependencies [0e659af]
+  - @shipload/sdk@1.0.0-next.29
+
 ## 1.0.0-next.28
 
 ### Patch Changes

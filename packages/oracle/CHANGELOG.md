@@ -1,5 +1,16 @@
 # @shipload/oracle
 
+## 0.0.1-next.19
+
+### Patch Changes
+
+- 0e659af: - Title additions to SVGs
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Subtraction helper
+
 ## 0.0.1-next.18
 
 ### Patch Changes
