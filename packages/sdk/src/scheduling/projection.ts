@@ -26,7 +26,7 @@ import {
     cargoItemToStack,
     type CargoStack,
     mergeStacks,
-    removeFromStacks,
+    subtractFromStacks,
     stackToCargoItem,
 } from '../capabilities/storage'
 import * as schedule from './schedule'
@@ -244,7 +244,7 @@ function addCargoItem(projected: ProjectedEntity, item: ServerContract.Types.car
 }
 
 function removeCargoItem(projected: ProjectedEntity, item: ServerContract.Types.cargo_item): void {
-    projected.cargo = removeFromStacks(projected.cargo, cargoItemToStack(item))
+    projected.cargo = subtractFromStacks(projected.cargo, cargoItemToStack(item))
 }
 
 function applyAddCargoTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {

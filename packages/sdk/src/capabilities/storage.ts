@@ -157,3 +157,18 @@ export function removeFromStacks(stacks: CargoStack[], remove: CargoStack): Carg
     result[idx] = {...target, quantity: remaining}
     return result
 }
+
+// Tolerant subtraction mirroring the contract's subtract_cargo (projection replay): missing or oversized removal clamps to zero, never throws.
+export function subtractFromStacks(stacks: CargoStack[], remove: CargoStack): CargoStack[] {
+    const idx = stacks.findIndex((s) => stackIdentityEqual(s, remove))
+    if (idx === -1) {
+        return stacks
+    }
+    const target = stacks[idx]
+    if (target.quantity.lte(remove.quantity)) {
+        return [...stacks.slice(0, idx), ...stacks.slice(idx + 1)]
+    }
+    const result = stacks.slice()
+    result[idx] = {...target, quantity: UInt32.from(target.quantity.subtracting(remove.quantity))}
+    return result
+}
