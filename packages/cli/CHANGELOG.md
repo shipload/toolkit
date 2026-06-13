@@ -1,5 +1,21 @@
 # @shipload/cli
 
+## 1.0.0-next.32
+
+### Patch Changes
+
+- 376e450: - Stat ratings on image/item SDKs
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating mappings/tests
+  - Mirrored stat rename + rebalance from contract
+  - Stat ratings for stat rolls
+- Updated dependencies [376e450]
+  - @shipload/oracle@0.0.1-next.18
+  - @shipload/sdk@1.0.0-next.28
+
 ## 1.0.0-next.31
 
 ### Patch Changes

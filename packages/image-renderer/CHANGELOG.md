@@ -1,5 +1,21 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.28
+
+### Patch Changes
+
+- 376e450: - Stat ratings on image/item SDKs
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating mappings/tests
+  - Mirrored stat rename + rebalance from contract
+  - Stat ratings for stat rolls
+- Updated dependencies [376e450]
+  - @shipload/item-renderer@1.0.0-next.28
+  - @shipload/sdk@1.0.0-next.28
+
 ## 1.0.0-next.27
 
 ### Patch Changes
