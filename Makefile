@@ -75,13 +75,14 @@ release-status:
 
 release:
 	@./scripts/preflight-release.sh
+	bun install --frozen-lockfile
 	$(MAKE) check
 	$(MAKE) test
 	$(MAKE) build
 	bun changeset version
-	bun update
-	bun biome format packages/*/package.json --write
-	@git add .; \
+	bun install
+	bun biome check packages/*/package.json package.json
+	@git add packages/*/package.json packages/*/CHANGELOG.md .changeset bun.lock; \
 	if git diff --cached --quiet; then \
 		echo "▸ No version changes to commit — changesets already consumed."; \
 		echo "▸ If you intended to publish, run 'make publish' next."; \
@@ -107,6 +108,9 @@ release:
 	@echo "    make release/cli"
 
 publish:
+	bun install --frozen-lockfile
+	$(MAKE) check
+	$(MAKE) build
 	@TAG_FLAG=$$(test -f .changeset/pre.json && echo "--tag next" || echo ""); \
 	for pkg in packages/*/package.json; do \
 		DIR=$$(dirname $$pkg); \
@@ -128,6 +132,7 @@ publish:
 	git push --follow-tags
 
 release/cli:
+	bun install --frozen-lockfile
 	@if [ -n "$(VERSION)" ] || [ -n "$(BUMP)" ]; then \
 		$(MAKE) -C packages/cli release; \
 	else \
