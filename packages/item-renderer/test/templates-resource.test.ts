@@ -131,3 +131,19 @@ test('matches snapshot when location is provided', () => {
     const svg = renderResource(item, resolved, {location: {x: -64, y: -10}})
     expect(svg).toMatchSnapshot('resource-ore-t1-with-location.svg')
 })
+
+test('values mode draws per-stat star glyphs', () => {
+    const item = FIXTURES.oreT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderResource(item, resolved)
+    // 3 resource stats × 3 star slots each = 9 glyphs
+    expect((svg.match(/<path/g) ?? []).length).toBeGreaterThanOrEqual(9)
+    expect(svg).toContain('#ffce5c')
+})
+
+test('ranges mode draws no star glyphs', () => {
+    const item = FIXTURES.oreT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderResource(item, resolved, {mode: 'ranges'})
+    expect(svg).not.toContain('#ffce5c')
+})

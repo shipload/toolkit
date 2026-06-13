@@ -1,5 +1,5 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {getStatDefinitions, categoryColors, formatLocation} from '@shipload/sdk'
+import {getStatDefinitions, categoryColors, formatLocation, starsForStat} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {resourceIcon} from '../primitives/resource-icon.ts'
@@ -112,6 +112,7 @@ export function renderResource(
                 value: row.value,
                 color: row.color,
                 inverted: row.inverted,
+                stars: row.value !== null ? starsForStat(row.value) : undefined,
             })
         )
         .join('')

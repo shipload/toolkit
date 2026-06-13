@@ -1,6 +1,7 @@
 import {el} from './svg.ts'
 import {text} from './text.ts'
 import {tokens} from '../tokens/index.ts'
+import {statStars, STAR_BLOCK_WIDTH} from './stat-stars.ts'
 
 export interface StatBarProps {
     x: number
@@ -11,6 +12,7 @@ export interface StatBarProps {
     value: number | null // 0..1023, or null for ranges mode (no value text, no fill)
     color: string
     inverted?: boolean
+    stars?: number // 0..3 per-stat rating; only drawn in values mode
 }
 
 export function statBar({
@@ -22,6 +24,7 @@ export function statBar({
     value,
     color,
     inverted,
+    stars,
 }: StatBarProps): string {
     const h = tokens.spacing.statBarHeight
 
@@ -59,6 +62,8 @@ export function statBar({
         const displayFraction = inverted ? 1 - clamped / 1023 : clamped / 1023
         const filled = Math.floor(width * displayFraction)
 
+        const VALUE_COL_W = 34 // room for up to 4 mono digits at size 14, anchored end
+
         // value text = primary; identity color = bar + code + chrome
         labelOut += text({
             x: x + width,
@@ -70,6 +75,15 @@ export function statBar({
             color: tokens.colors.text.primary,
             anchor: 'end',
         })
+
+        // stars sit immediately left of the reserved value column
+        if (stars !== undefined) {
+            labelOut += statStars({
+                x: x + width - VALUE_COL_W - STAR_BLOCK_WIDTH,
+                y: y - 6,
+                n: stars,
+            })
+        }
 
         const bar = el('rect', {
             x,

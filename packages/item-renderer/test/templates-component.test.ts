@@ -67,3 +67,10 @@ test('omits Location row when location is absent', () => {
     const svg = renderComponent(item, resolved)
     expect(svg).not.toContain('Location')
 })
+
+test('component stat rows do not draw star glyphs (resource-only gate)', () => {
+    const item = FIXTURES.plate
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderComponent(item, resolved)
+    expect(svg).not.toContain('#ffce5c')
+})
