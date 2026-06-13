@@ -133,6 +133,15 @@ export type {EffectiveReserveInput} from './derivation'
 export {getStatDefinitions, getStatName, resolveStats} from './derivation'
 export type {StatDefinition, NamedStats} from './derivation'
 
+export {
+    STAR_STEP,
+    MAX_STARS_PER_STAT,
+    MAX_STAR_RATING,
+    starsForStat,
+    starRating,
+    statMagnitude,
+} from './derivation'
+
 export {hash, hash512} from './utils/hash'
 
 export {

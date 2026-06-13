@@ -36,3 +36,12 @@ export type {EffectiveReserveInput} from './reserve-regen'
 
 export * from './stats'
 export * from './crafting'
+
+export {
+    STAR_STEP,
+    MAX_STARS_PER_STAT,
+    MAX_STAR_RATING,
+    starsForStat,
+    starRating,
+    statMagnitude,
+} from './stars'
