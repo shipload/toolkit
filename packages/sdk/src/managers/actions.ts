@@ -87,6 +87,13 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    rename(entityId: UInt64Type, name: string): Action {
+        return this.server.action('rename', {
+            id: UInt64.from(entityId),
+            name,
+        })
+    }
+
     refrshentity(entityId: UInt64Type): Action {
         return this.server.action('refrshentity', {
             entity_id: UInt64.from(entityId),

@@ -143,6 +143,8 @@ export {
 } from './derivation'
 
 export {hash, hash512} from './utils/hash'
+export {validateDisplayName, normalizeDisplayName} from './utils/display-name'
+export type {DisplayNameResult} from './utils/display-name'
 
 export {
     distanceBetweenCoordinates,
