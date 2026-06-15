@@ -22,7 +22,8 @@ export const MAX_ORBITAL_ALTITUDE = 3000
 
 export const BASE_ORBITAL_MASS = 100000
 
-export const MIN_TRANSFER_DISTANCE = 100
+export const MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE = 100
+export const MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL = 300
 
 export interface ShipLike {
     coordinates: ServerContract.Types.coordinates

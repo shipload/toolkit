@@ -19,8 +19,7 @@ function isLoneSurrogate(codePoint: number): boolean {
 
 function isBidiControl(codePoint: number): boolean {
     return (
-        (codePoint >= 0x202a && codePoint <= 0x202e) ||
-        (codePoint >= 0x2066 && codePoint <= 0x2069)
+        (codePoint >= 0x202a && codePoint <= 0x202e) || (codePoint >= 0x2066 && codePoint <= 0x2069)
     )
 }
 

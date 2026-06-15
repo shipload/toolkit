@@ -54,7 +54,7 @@ export class HotkeyRegistry<T extends Hotkey = Hotkey> {
     dispatch(keyName: string, shift = false): boolean {
         const entry = this.byKey.get(keyName)
         const hk = entry ? (shift ? entry.shift : entry.plain) : undefined
-        if (!hk || !hk.enabled()) return false
+        if (!hk?.enabled()) return false
         void hk.action()
         return true
     }

@@ -28,11 +28,13 @@ import {
     type Distance,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
-    MIN_TRANSFER_DISTANCE,
+    MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL,
+    MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE,
     PRECISION,
     type ShipLike,
     TaskType,
 } from '../types'
+import {EntityClass} from '../data/kind-registry'
 import {getItem} from '../data/catalog'
 import {hasSystem} from '../utils/system'
 import * as scheduleModel from '../scheduling/schedule'
@@ -423,6 +425,7 @@ export function hasEnergyForDistance(ship: ShipLike, distance: UInt64Type): bool
 
 export interface TransferEntity {
     location: {z?: {toNumber(): number} | number}
+    entityClass: EntityClass
     loaders?: {
         thrust: {toNumber(): number} | number
         mass: {toNumber(): number} | number
@@ -496,6 +499,12 @@ export function getPositionAt(
     }
 }
 
+export function minTransferDistance(entityClass: EntityClass): number {
+    return entityClass === EntityClass.OrbitalVessel
+        ? MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL
+        : MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE
+}
+
 export function calc_transfer_duration(
     source: TransferEntity,
     dest: TransferEntity,
@@ -554,7 +563,11 @@ export function calc_transfer_duration(
     const destZ =
         typeof dest.location.z === 'number' ? dest.location.z : (dest.location.z?.toNumber() ?? 0)
     const rawDistance = Math.abs(sourceZ - destZ)
-    const distance = rawDistance < MIN_TRANSFER_DISTANCE ? MIN_TRANSFER_DISTANCE : rawDistance
+    const minDistance = Math.max(
+        minTransferDistance(source.entityClass),
+        minTransferDistance(dest.entityClass)
+    )
+    const distance = rawDistance < minDistance ? minDistance : rawDistance
 
     const totalMass = cargoMass + totalLoaderMass
     const acceleration = calc_acceleration(totalThrust, totalMass)
