@@ -33,6 +33,25 @@ describe('validateDisplayName', () => {
         expect(validateDisplayName('   ')).toEqual({valid: false, reason: 'empty', name: ''})
     })
 
+    test('accepts empty and whitespace-only names when allowEmpty is set', () => {
+        expect(validateDisplayName('', {allowEmpty: true})).toEqual({valid: true, name: ''})
+        expect(validateDisplayName('   ', {allowEmpty: true})).toEqual({valid: true, name: ''})
+    })
+
+    test('allowEmpty still rejects non-empty names that break other rules', () => {
+        const zeroWidth = `zero${String.fromCharCode(0x200b)}width`
+        expect(validateDisplayName('x'.repeat(33), {allowEmpty: true})).toEqual({
+            valid: false,
+            reason: 'too_long',
+            name: 'x'.repeat(33),
+        })
+        expect(validateDisplayName(zeroWidth, {allowEmpty: true})).toEqual({
+            valid: false,
+            reason: 'invalid_char',
+            name: zeroWidth,
+        })
+    })
+
     test('rejects names over 32 UTF-8 bytes', () => {
         expect(validateDisplayName('x'.repeat(33))).toEqual({
             valid: false,

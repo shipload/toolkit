@@ -42,10 +42,19 @@ export function normalizeDisplayName(input: string): string {
     return input.slice(start, end)
 }
 
-export function validateDisplayName(input: string): DisplayNameResult {
+export interface ValidateDisplayNameOptions {
+    allowEmpty?: boolean
+}
+
+export function validateDisplayName(
+    input: string,
+    opts: ValidateDisplayNameOptions = {}
+): DisplayNameResult {
     const name = normalizeDisplayName(input)
 
-    if (name.length === 0) return {valid: false, reason: 'empty', name}
+    if (name.length === 0) {
+        return opts.allowEmpty ? {valid: true, name} : {valid: false, reason: 'empty', name}
+    }
     if (textEncoder.encode(name).length > MAX_DISPLAY_NAME_BYTES) {
         return {valid: false, reason: 'too_long', name}
     }
