@@ -1,5 +1,19 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.30
+
+### Patch Changes
+
+- 9f79eb3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating distances and formatting
+  - Support for new rename action
+- Updated dependencies [9f79eb3]
+  - @shipload/item-renderer@1.0.0-next.30
+  - @shipload/sdk@1.0.0-next.30
+
 ## 1.0.0-next.29
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # @shipload/cli
 
+## 1.0.0-next.34
+
+### Patch Changes
+
+- 9f79eb3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating distances and formatting
+  - Support for new rename action
+- Updated dependencies [9f79eb3]
+  - @shipload/oracle@0.0.1-next.20
+  - @shipload/sdk@1.0.0-next.30
+
 ## 1.0.0-next.33
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @shipload/sdk
 
+## 1.0.0-next.30
+
+### Patch Changes
+
+- 9f79eb3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating distances and formatting
+  - Support for new rename action
+
 ## 1.0.0-next.29
 
 ### Patch Changes
