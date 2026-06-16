@@ -55,6 +55,16 @@ export type {
     ComponentIconSvgOpts,
 } from './primitives/component-icon.ts'
 
+// Entity icon primitive
+export {
+    entityIcon,
+    entityIconBody,
+    entityIconSlugs,
+    entityIconSlugForName,
+    entityIconSvg,
+} from './primitives/entity-icon.ts'
+export type {EntityIconInlineOpts, EntityIconSlug, EntityIconSvgOpts} from './primitives/entity-icon.ts'
+
 // Item cell templates
 export {renderItemCell, itemCellGroup, abbreviateQuantity} from './templates/item-cell.ts'
 export type {ItemCellProps, ItemCellGroupProps} from './templates/item-cell.ts'

@@ -2,6 +2,7 @@ import type {TextSpan} from '@shipload/sdk'
 import {formatLocation, formatMassScaled} from '@shipload/sdk'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
+import {entityIcon, entityIconSlugForName} from '../primitives/entity-icon.ts'
 import {moduleSlot} from '../primitives/module-slot.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {wrapText} from '../primitives/wrap.ts'
@@ -44,6 +45,16 @@ function formatHullValue(label: string, value: number): string {
 }
 
 const MODULE_LABEL_PREFIX = (capability: string) => `${capability}: `
+
+function fallbackEntityCode(name: string): string {
+    const words = name
+        .replace(/\s+T\d+\s*$/i, '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+    if (words.length >= 2) return words.map((word) => word[0]).join('').slice(0, 2).toUpperCase()
+    return (words[0] ?? 'EN').slice(0, 2).toUpperCase().padEnd(2, 'N')
+}
 
 function lineCountFor(slot: ShipPanelSlot): number {
     const desc = slot.description
@@ -118,12 +129,15 @@ export function renderShipPanel(props: ShipPanelProps): string {
 
     const chrome = panel({width: w, height, borderColor: tierBorder(props.tier)})
 
-    const icon = iconHex({
-        x: pad,
-        y: pad + ICON_Y,
-        color: ENTITY_COLOR,
-        code: 'SH',
-    })
+    const entitySlug = entityIconSlugForName(props.name)
+    const icon = entitySlug
+        ? entityIcon(entitySlug, {x: pad, y: pad + ICON_Y - 2, size: 28})
+        : iconHex({
+              x: pad,
+              y: pad + ICON_Y,
+              color: ENTITY_COLOR,
+              code: fallbackEntityCode(props.name),
+          })
 
     const name = titleParts(pad + 34, pad + 22, props.name, props.tier)
 

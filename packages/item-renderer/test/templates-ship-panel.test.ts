@@ -89,7 +89,7 @@ test('renderShipPanel renders installed slots as capability-colored prose', () =
     expect(svg).toContain(tokens.colors.text.primary)
 })
 
-test('renderShipPanel uses the entity identity (cyan) for badge + hex chip', () => {
+test('renderShipPanel uses the detailed entity icon and cyan badge identity', () => {
     const svg = renderShipPanel({
         name: 'Ship',
         tier: 1,
@@ -97,7 +97,7 @@ test('renderShipPanel uses the entity identity (cyan) for badge + hex chip', () 
         attributes: [{capability: 'Hull', attributes: [{label: 'Mass', value: 100}]}],
         slots: [{installed: false}],
     })
-    expect(svg).toContain('SH')
+    expect(svg).toContain('data-entity="ship"')
     expect(svg).toContain('×3')
     expect(svg).toContain(tokens.colors.brand.cyan)
 })

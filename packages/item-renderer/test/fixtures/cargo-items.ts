@@ -9,6 +9,7 @@ export const ITEM_LOADER_T1 = 10103
 export const ITEM_MANUFACTURING_T1 = 10104
 export const ITEM_STORAGE_T1 = 10105
 export const ITEM_HAULER_T1 = 10106
+export const ITEM_CONTAINER_T1_PACKED = 10200
 export const ITEM_SHIP_T1_PACKED = 10201
 
 export const MODULE_ENGINE = 1
@@ -111,6 +112,12 @@ export const FIXTURES = {
     }),
     shipT1NoModules: ServerContract.Types.cargo_item.from({
         item_id: ITEM_SHIP_T1_PACKED,
+        quantity: 1,
+        stats: '0',
+        modules: [],
+    }),
+    containerT1: ServerContract.Types.cargo_item.from({
+        item_id: ITEM_CONTAINER_T1_PACKED,
         quantity: 1,
         stats: '0',
         modules: [],

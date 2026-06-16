@@ -1,6 +1,12 @@
 import {test, expect} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
-import {ITEM_PLATE, ITEM_ENGINE_T1, ITEM_SHIP_T1_PACKED} from '@shipload/sdk'
+import {
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_ENGINE_T1,
+    ITEM_PLATE,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+} from '@shipload/sdk'
 import {renderItemCell, itemCellGroup, abbreviateQuantity} from '../src/templates/item-cell.ts'
 
 test('renderItemCell returns a self-contained <svg>', () => {
@@ -25,10 +31,26 @@ test('module cell renders abbreviation', () => {
     expect(svg).toContain('>EN<')
 })
 
-test('entity cell renders abbreviation', () => {
+test('ship entity cell renders the detailed entity SVG icon', () => {
     const resolved = resolveItem(ITEM_SHIP_T1_PACKED)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('>SH<')
+    expect(svg).not.toContain('>SH<')
+    expect(svg).toContain('data-entity="ship"')
+    expect(svg).toContain('viewBox="0 0 952 1267"')
+})
+
+test('container entity cell renders the detailed entity SVG icon', () => {
+    const resolved = resolveItem(ITEM_CONTAINER_T1_PACKED)
+    const svg = renderItemCell({resolved, size: 48})
+    expect(svg).not.toContain('>CT<')
+    expect(svg).toContain('data-entity="container"')
+    expect(svg).toContain('viewBox="0 0 1024 1024"')
+})
+
+test('entity cell without a premade icon renders abbreviation', () => {
+    const resolved = resolveItem(ITEM_WAREHOUSE_T1_PACKED)
+    const svg = renderItemCell({resolved, size: 48})
+    expect(svg).toContain('>WH<')
 })
 
 test('resource cell renders the detailed resource SVG icon', () => {

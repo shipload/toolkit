@@ -3,6 +3,7 @@ import {tierColors} from '@shipload/sdk'
 import {el} from '../primitives/svg.ts'
 import {text} from '../primitives/text.ts'
 import {componentIcon, componentIconSlugForName} from '../primitives/component-icon.ts'
+import {entityIcon, entityIconSlugForName} from '../primitives/entity-icon.ts'
 import {resourceIcon} from '../primitives/resource-icon.ts'
 import {tokens} from '../tokens/index.ts'
 
@@ -61,11 +62,23 @@ function cellInner(props: ItemCellProps): string {
         props.resolved.itemType === 'component'
             ? componentIconSlugForName(props.resolved.name)
             : null
+    const entitySlug =
+        props.resolved.itemType === 'entity'
+            ? entityIconSlugForName(props.resolved.name)
+            : null
 
     if (componentSlug) {
         const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
         const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
         content = componentIcon(componentSlug, {
+            x: (size - iconSize) / 2,
+            y: iconY,
+            size: iconSize,
+        })
+    } else if (entitySlug) {
+        const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
+        const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
+        content = entityIcon(entitySlug, {
             x: (size - iconSize) / 2,
             y: iconY,
             size: iconSize,

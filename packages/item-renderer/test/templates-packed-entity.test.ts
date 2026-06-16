@@ -24,6 +24,23 @@ test('renders empty-module rows when slots are unfilled', () => {
     expect(svg.match(/Empty module/g)?.length ?? 0).toBeGreaterThanOrEqual(1)
 })
 
+test('packed entity header uses detailed entity SVG icons when available', () => {
+    const ship = FIXTURES.shipT1NoModules
+    const shipSvg = renderPackedEntity(ship, resolveItem(ship.item_id, ship.stats, ship.modules))
+    expect(shipSvg).toContain('data-entity="ship"')
+    expect(shipSvg).toContain('viewBox="0 0 952 1267"')
+    expect(shipSvg).not.toContain('>SH</text>')
+
+    const container = FIXTURES.containerT1
+    const containerSvg = renderPackedEntity(
+        container,
+        resolveItem(container.item_id, container.stats, container.modules)
+    )
+    expect(containerSvg).toContain('data-entity="container"')
+    expect(containerSvg).toContain('viewBox="0 0 1024 1024"')
+    expect(containerSvg).not.toContain('>SH</text>')
+})
+
 test('matches the committed Ship T1 (two modules) snapshot', async () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
