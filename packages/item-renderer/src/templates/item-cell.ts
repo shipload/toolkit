@@ -2,6 +2,7 @@ import type {ResolvedItem} from '@shipload/sdk'
 import {tierColors} from '@shipload/sdk'
 import {el} from '../primitives/svg.ts'
 import {text} from '../primitives/text.ts'
+import {componentIcon, componentIconSlugForName} from '../primitives/component-icon.ts'
 import {resourceIcon} from '../primitives/resource-icon.ts'
 import {tokens} from '../tokens/index.ts'
 
@@ -56,7 +57,20 @@ function cellInner(props: ItemCellProps): string {
     const showQuantity = props.quantityPrefix ? qty >= 1 : qty > 1
 
     let content = ''
-    if (props.resolved.abbreviation) {
+    const componentSlug =
+        props.resolved.itemType === 'component'
+            ? componentIconSlugForName(props.resolved.name)
+            : null
+
+    if (componentSlug) {
+        const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
+        const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
+        content = componentIcon(componentSlug, {
+            x: (size - iconSize) / 2,
+            y: iconY,
+            size: iconSize,
+        })
+    } else if (props.resolved.abbreviation) {
         content = showQuantity
             ? text({
                   x: cx,

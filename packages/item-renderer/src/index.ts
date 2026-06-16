@@ -41,6 +41,20 @@ export {
 } from './primitives/resource-icon.ts'
 export type {ResourceIconInlineOpts, ResourceIconSvgOpts} from './primitives/resource-icon.ts'
 
+// Component icon primitive
+export {
+    componentIcon,
+    componentIconBody,
+    componentIconSlugs,
+    componentIconSlugForName,
+    componentIconSvg,
+} from './primitives/component-icon.ts'
+export type {
+    ComponentIconInlineOpts,
+    ComponentIconSlug,
+    ComponentIconSvgOpts,
+} from './primitives/component-icon.ts'
+
 // Item cell templates
 export {renderItemCell, itemCellGroup, abbreviateQuantity} from './templates/item-cell.ts'
 export type {ItemCellProps, ItemCellGroupProps} from './templates/item-cell.ts'

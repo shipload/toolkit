@@ -11,10 +11,12 @@ test('renderItemCell returns a self-contained <svg>', () => {
     expect(svg.endsWith('</svg>')).toBe(true)
 })
 
-test('component cell renders abbreviation', () => {
+test('component cell renders the detailed component SVG icon', () => {
     const resolved = resolveItem(ITEM_PLATE)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('>PL<')
+    expect(svg).not.toContain('>PL<')
+    expect(svg).toContain('data-component="plate"')
+    expect(svg).toContain('#7f95a9')
 })
 
 test('module cell renders abbreviation', () => {
@@ -94,8 +96,8 @@ test('tier border uses SDK tierColors for the resolved tier', () => {
     expect(svg).toContain('#8b8b8b')
 })
 
-test('abbreviation cell uses proportional font size for different sizes', () => {
-    const resolved = resolveItem(ITEM_PLATE)
+test('module abbreviation cell uses proportional font size for different sizes', () => {
+    const resolved = resolveItem(ITEM_ENGINE_T1)
     const svg28 = renderItemCell({resolved, size: 28})
     const svg80 = renderItemCell({resolved, size: 80})
     expect(svg28).toContain('font-size="10"')
