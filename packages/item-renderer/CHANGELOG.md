@@ -1,5 +1,18 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.32
+
+### Patch Changes
+
+- d5d36b3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirroring contract changes, transfer removal, holds/load/unload added
+  - Updating distances and formatting
+- Updated dependencies [d5d36b3]
+  - @shipload/sdk@1.0.0-next.32
+
 ## 1.0.0-next.31
 
 ### Patch Changes

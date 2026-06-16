@@ -1,5 +1,16 @@
 # @shipload/oracle
 
+## 0.0.1-next.22
+
+### Patch Changes
+
+- d5d36b3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirroring contract changes, transfer removal, holds/load/unload added
+  - Updating distances and formatting
+
 ## 0.0.1-next.21
 
 ### Patch Changes
