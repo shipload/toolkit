@@ -1,5 +1,22 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.31
+
+### Patch Changes
+
+- 686b51b: - Formatting
+  - Basic entity icons
+  - Added placeholder/concept component icons
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating distances and formatting
+  - Allowing empty names by flag (for foundcompany)
+- Updated dependencies [686b51b]
+  - @shipload/item-renderer@1.0.0-next.31
+  - @shipload/sdk@1.0.0-next.31
+
 ## 1.0.0-next.30
 
 ### Patch Changes

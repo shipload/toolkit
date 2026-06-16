@@ -1,5 +1,19 @@
 # @shipload/oracle
 
+## 0.0.1-next.21
+
+### Patch Changes
+
+- 686b51b: - Formatting
+  - Basic entity icons
+  - Added placeholder/concept component icons
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Updating distances and formatting
+  - Allowing empty names by flag (for foundcompany)
+
 ## 0.0.1-next.20
 
 ### Patch Changes
