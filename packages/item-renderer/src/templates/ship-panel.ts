@@ -52,7 +52,12 @@ function fallbackEntityCode(name: string): string {
         .trim()
         .split(/\s+/)
         .filter(Boolean)
-    if (words.length >= 2) return words.map((word) => word[0]).join('').slice(0, 2).toUpperCase()
+    if (words.length >= 2)
+        return words
+            .map((word) => word[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase()
     return (words[0] ?? 'EN').slice(0, 2).toUpperCase().padEnd(2, 'N')
 }
 

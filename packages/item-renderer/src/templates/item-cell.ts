@@ -63,9 +63,7 @@ function cellInner(props: ItemCellProps): string {
             ? componentIconSlugForName(props.resolved.name)
             : null
     const entitySlug =
-        props.resolved.itemType === 'entity'
-            ? entityIconSlugForName(props.resolved.name)
-            : null
+        props.resolved.itemType === 'entity' ? entityIconSlugForName(props.resolved.name) : null
 
     if (componentSlug) {
         const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
