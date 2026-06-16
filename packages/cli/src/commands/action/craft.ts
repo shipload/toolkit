@@ -7,6 +7,7 @@ import {
     type EntityTypeName,
     parseUint16,
     parseUint32,
+    parseUint64,
 } from '../../lib/args'
 import {decideUseRecharge} from '../../lib/auto-recharge'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
@@ -40,6 +41,7 @@ export interface CraftOpts {
     recipeId: number
     quantity: number
     inputs: ResolvedCargoInput[]
+    target?: bigint
 }
 
 export async function buildAction(opts: CraftOpts, shipload?: Shipload): Promise<Action> {
@@ -52,7 +54,7 @@ export async function buildAction(opts: CraftOpts, shipload?: Shipload): Promise
             modules: [],
         })
     )
-    return sl.actions.craft(opts.entityId, opts.recipeId, opts.quantity, cargoInputs)
+    return sl.actions.craft(opts.entityId, opts.recipeId, opts.quantity, cargoInputs, opts.target)
 }
 
 type CraftCliOptions = WaitableOptions & {
@@ -60,6 +62,7 @@ type CraftCliOptions = WaitableOptions & {
     force?: boolean
     recharge?: boolean
     autoRecharge?: boolean
+    target?: bigint
 }
 
 async function validateRecipeSlotTotals(
@@ -140,6 +143,7 @@ export async function runCraft(
             recipeId,
             quantity,
             inputs: resolved,
+            target: options.target,
         })
         const craftErrorHint = (): string => {
             const recipe = getRecipe(recipeId)
@@ -202,6 +206,9 @@ Examples:
   # Same recipe, drawing from two Gas stacks (11 + 149 = 160)
   shiploadcli ship 1 craft 10003 5 301:214202522:11 301:888888888:149
 
+  # Cross-craft: ship 1 crafts, output lands in co-located warehouse 2
+  shiploadcli ship 1 craft 10003 1 301:214202522:32 --target 2
+
 Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
             )
             .argument('<recipe-id>', 'output item id from the recipe command', parseUint16)
@@ -212,6 +219,11 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 accumulateCargoInputs
             )
             .option('--estimate', 'print duration/energy/cargo estimate without submitting')
+            .option(
+                '--target <entity-id>',
+                'cross-craft: deposit the output into a co-located entity you own instead of this one',
+                parseUint64
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .addOption(AUTO_RESOLVE_OPTION)

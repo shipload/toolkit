@@ -20,6 +20,7 @@ describe('ConstructionManager.getTarget', () => {
             coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
             modules: [],
             lanes: [],
+            holds: [],
         })
 
         const target = mgr.getTarget(plot, [])
@@ -42,6 +43,7 @@ describe('ConstructionManager.getTarget', () => {
             coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
             modules: [],
             lanes: [],
+            holds: [],
         })
 
         expect(mgr.getTarget(ship, [])).toBeNull()
@@ -66,6 +68,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             coordinates: COORDS,
             modules: [],
             lanes: [],
+            holds: [],
         })
     }
 
@@ -89,6 +92,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            holds: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_LOADER),
@@ -166,6 +170,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            holds: [],
         })
 
         const cargo20 = makeCargoRow(20, 200, INPUT_ITEM_ID, 30)
@@ -233,6 +238,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             coordinates: COORDS,
             modules: [],
             lanes: [],
+            holds: [],
         })
     }
 
@@ -260,6 +266,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            holds: [],
             modules: [
                 ServerContract.Types.module_entry.from({
                     type: UInt8.from(MODULE_CRAFTER),

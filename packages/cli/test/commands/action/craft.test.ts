@@ -53,3 +53,23 @@ test('craft SUBCOMMAND exposes --recharge and --auto-recharge', () => {
     expect(longs).toContain('--recharge')
     expect(longs).toContain('--auto-recharge')
 })
+
+test('craft SUBCOMMAND exposes --target for cross-craft', () => {
+    const cmd = SUBCOMMAND.build({entityType: 'ship', entityId: 1n})
+    expect(cmd.options.map((o) => o.long)).toContain('--target')
+})
+
+test('craft buildAction with target builds a cross-craft action', async () => {
+    const action = await buildAction(
+        {
+            entityType: 'ship',
+            entityId: 1n,
+            recipeId: 10003,
+            quantity: 1,
+            inputs: [{itemId: 301, quantity: 32, stackId: 0n}],
+            target: 2n,
+        },
+        getLocalShipload()
+    )
+    expect(action.name.toString()).toBe('craft')
+})

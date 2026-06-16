@@ -118,21 +118,31 @@ describe('ActionsManager', () => {
         })
     })
 
-    describe('transfer', () => {
-        test('creates transfer action with single item', () => {
-            const action = shipload.actions.transfer(1, 2, [
+    describe('load', () => {
+        test('creates load action with single item', () => {
+            const action = shipload.actions.load(1, 2, [
                 {item_id: 101, stats: 0n, modules: [], quantity: 10},
             ])
-            assert.equal(action.name.toString(), 'transfer')
+            assert.equal(action.name.toString(), 'load')
             assert.isDefined(action.data)
         })
 
-        test('creates transfer action with multiple items', () => {
-            const action = shipload.actions.transfer(1, 2, [
+        test('creates load action with multiple items', () => {
+            const action = shipload.actions.load(1, 2, [
                 {item_id: 101, stats: 0n, modules: [], quantity: 10},
                 {item_id: 201, stats: 1n, modules: [], quantity: 5},
             ])
-            assert.equal(action.name.toString(), 'transfer')
+            assert.equal(action.name.toString(), 'load')
+            assert.isDefined(action.data)
+        })
+    })
+
+    describe('unload', () => {
+        test('creates unload action with single item', () => {
+            const action = shipload.actions.unload(1, 2, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+            ])
+            assert.equal(action.name.toString(), 'unload')
             assert.isDefined(action.data)
         })
     })

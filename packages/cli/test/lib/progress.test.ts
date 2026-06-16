@@ -41,6 +41,7 @@ function busyTick(remaining_s: number, elapsed_s: number): ProgressTick {
 				},
 			},
 		],
+		holds: [],
 	});
 	const snap = entityInfoToSnapshot(ei);
 	return {
@@ -82,6 +83,7 @@ function idleTick(completedTasks: number): ProgressTick {
 		lanes: completedTasks > 0
 			? [{ lane_key: 0, schedule: { started, tasks } }]
 			: [],
+		holds: [],
 	});
 	const snap = entityInfoToSnapshot(ei);
 	return {
@@ -157,6 +159,7 @@ describe("composeBlock multi-lane", () => {
 					},
 				},
 			],
+			holds: [],
 		});
 		const snap = entityInfoToSnapshot(ei);
 		const tick: ProgressTick = {

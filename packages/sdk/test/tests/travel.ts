@@ -91,6 +91,7 @@ function createMockShip(
         current_task_remaining: 0,
         pending_tasks: [],
         lanes: [],
+        holds: [],
     })
 }
 

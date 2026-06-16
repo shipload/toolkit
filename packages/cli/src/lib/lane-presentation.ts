@@ -1,4 +1,4 @@
-import {getItem, schedule, TaskType, type ServerTypes} from '@shipload/sdk'
+import {getItem, schedule, type ServerTypes} from '@shipload/sdk'
 
 export type LaneKind = 'mobility' | 'worker' | 'barrier'
 export type LaneSectionStatus = 'active' | 'waiting' | 'ready to resolve' | 'done' | 'queued'
@@ -61,10 +61,6 @@ function startedDate(started: StartedLike): Date {
 
 function taskDuration_s(task: LaneTaskLike): number {
     return Math.max(0, asNumber(task.duration_s ?? task.duration))
-}
-
-function taskType(task: LaneTaskLike): number {
-    return asNumber(task.type)
 }
 
 function clampProgress(value: number): number {
@@ -191,11 +187,8 @@ export function laneSectionStatus(lane: LaneLike, now: Date): LaneSectionStatus 
 
     const tasks = lane.schedule.tasks ?? []
     const completedTaskCount = front.status === 'active' ? front.activeIndex : tasks.length
-    const hasCompletedResolvableTask = tasks
-        .slice(0, completedTaskCount)
-        .some((task) => taskType(task) !== TaskType.RESERVED)
 
-    if (hasCompletedResolvableTask) {
+    if (completedTaskCount > 0) {
         return 'ready to resolve'
     }
     if (front.status === 'active') return front.status

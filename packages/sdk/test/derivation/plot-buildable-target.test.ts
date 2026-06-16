@@ -20,6 +20,7 @@ function makePlotRow(itemId: number): ServerContract.Types.entity_row {
         modules: [],
         item_id: UInt16.from(itemId),
         lanes: [],
+        holds: [],
     })
 }
 

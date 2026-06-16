@@ -36,6 +36,15 @@ function coords(d: Record<string, unknown>): string {
 	return "(legacy)";
 }
 
+function summarizeCargo(items: unknown): string {
+	if (!Array.isArray(items) || items.length === 0) return "cargo";
+	if (items.length === 1) {
+		const it = items[0] as Record<string, unknown>;
+		return `${s(it, "quantity")}× ${formatItemRef(toNumber(it.item_id))}`;
+	}
+	return `${items.length} stacks`;
+}
+
 export function summarizeEvent(rec: EventRecord): string {
 	const d = rec.data;
 	switch (rec.type) {
@@ -51,6 +60,10 @@ export function summarizeEvent(rec: EventRecord): string {
 			const dest = `${String(d.dest_type ?? "?")} #${toNumber(d.dest_id)}`;
 			return `transfer ${s(d, "quantity")}× ${formatItemRef(toNumber(d.item_id))} → ${dest}`;
 		}
+		case "load":
+			return `load ${summarizeCargo(d.items)} from #${toNumber(d.from_id)}`;
+		case "unload":
+			return `unload ${summarizeCargo(d.items)} → #${toNumber(d.to_id)}`;
 		case "resolve":
 			return `resolved ${d.count ?? "all"} tasks`;
 		case "cancel":
@@ -72,8 +85,12 @@ export function summarizeEvent(rec: EventRecord): string {
 			}
 			return base;
 		}
-		case "craft_started":
-			return `craft started: ${s(d, "quantity")}× ${formatRecipeOutputRef(toNumber(d.recipe_id))}`;
+		case "craft_started": {
+			const base = `craft started: ${s(d, "quantity")}× ${formatRecipeOutputRef(toNumber(d.recipe_id))}`;
+			const target = toNumber(d.target);
+			if (target !== 0 && target !== toNumber(d.id)) return `${base} → #${target}`;
+			return base;
+		}
 		case "entity_deployed":
 			return "deployed";
 		case "warp_started":

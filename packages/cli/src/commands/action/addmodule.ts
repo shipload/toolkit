@@ -20,7 +20,7 @@ import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
+import {bundleWithIdleResolve} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {type EntitySnapshot, getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
@@ -125,18 +125,18 @@ export async function runAddModule(
         targetModules:
             options.target !== undefined ? parseModulesJson(options.targetModules) : undefined,
     }
-    await withValidation(async () => {
+    const actions = await withValidation(async () => {
         validateTargetTriple({
             targetItemId: addOpts.targetItemId,
             targetStats: addOpts.targetStats,
             targetModules: options.targetModules,
         })
-        await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
         await preflightAddModule(addOpts)
+        const action = await buildAction(addOpts)
+        return bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve))
     })
-    const action = await buildAction(addOpts)
     await transact(
-        {action},
+        {actions},
         {
             description: `Adding module item ${moduleRef.itemId} stats ${moduleRef.stackId} to ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}`,
             errorHint: () => {

@@ -493,6 +493,7 @@ describe('projection — fixture replay', () => {
             delete rowJson.schedule
             rowJson.lanes =
                 inputObj.lanes ?? (scheduleJson ? [{lane_key: 0, schedule: scheduleJson}] : [])
+            rowJson.holds = inputObj.holds ?? []
             const row = ServerContract.Types.entity_row.from(rowJson)
             const cargo = cargoJson.map((item) =>
                 ServerContract.Types.cargo_item.from({

@@ -25,7 +25,6 @@ export interface MakeTaskOpts {
     duration: number
     target?: EntityRefStruct
     cargo?: Array<{itemId: number; qty: number}>
-    group?: number
 }
 
 export function makeTask(opts: MakeTaskOpts): TaskStruct {
@@ -42,7 +41,6 @@ export function makeTask(opts: MakeTaskOpts): TaskStruct {
             })
         ),
         entitytarget: opts.target,
-        entitygroup: opts.group !== undefined ? UInt64.from(opts.group) : undefined,
     })
 }
 
@@ -79,32 +77,33 @@ export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
         coordinates: COORDS,
         modules: [],
         lanes: mobilityLanes(tasks, opts.scheduleStart),
+        holds: [],
     })
 }
 
 export interface MakePlotOpts {
     id: number
-    reserved?: {builderId: number; group?: number; duration: number}
-    scheduleStart?: TimePoint
+    build?: {builderId: number; completesAt: TimePoint}
+}
+
+export function makeBuildHold(opts: {
+    id?: number
+    builderId: number
+    completesAt: TimePoint
+}): InstanceType<typeof ServerContract.Types.hold> {
+    return ServerContract.Types.hold.from({
+        id: UInt64.from(opts.id ?? 1),
+        kind: UInt8.from(4),
+        counterpart: entityRef('ship', opts.builderId),
+        until: opts.completesAt,
+        incoming_mass: UInt32.from(0),
+    })
 }
 
 export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
-    const tasks: TaskStruct[] = []
-    if (opts.reserved) {
-        tasks.push(
-            ServerContract.Types.task.from({
-                type: UInt8.from(16),
-                duration: UInt32.from(opts.reserved.duration),
-                cancelable: UInt8.from(2),
-                cargo: [],
-                entitytarget: entityRef('ship', opts.reserved.builderId),
-                entitygroup:
-                    opts.reserved.group !== undefined
-                        ? UInt64.from(opts.reserved.group)
-                        : undefined,
-            })
-        )
-    }
+    const holds = opts.build
+        ? [makeBuildHold({builderId: opts.build.builderId, completesAt: opts.build.completesAt})]
+        : []
     return ServerContract.Types.entity_info.from({
         id: UInt64.from(opts.id),
         type: Name.from('plot'),
@@ -115,6 +114,7 @@ export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
         cargo: [],
         coordinates: COORDS,
         modules: [],
-        lanes: mobilityLanes(tasks, opts.scheduleStart),
+        lanes: [],
+        holds,
     })
 }

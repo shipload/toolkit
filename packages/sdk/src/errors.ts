@@ -45,7 +45,6 @@ export const WAREHOUSE_ALREADY_AT_LOCATION = 'Warehouse already exists at this l
 export const CONTAINER_NOT_FOUND = 'Cannot find container for given id.'
 export const DESTINATION_CAPACITY_EXCEEDED =
     'Destination entity does not have enough capacity for the gather.'
-export const CANCEL_PAIRED_HAS_PENDING = 'Cannot cancel transfer, paired entity has pending tasks.'
 export const GROUP_EMPTY = 'Group travel requires at least one entity.'
 export const GROUP_NO_THRUST = 'Group travel requires at least one entity with engines.'
 export const GROUP_NOT_SAME_LOCATION = 'All entities must be at the same location for group travel.'

@@ -5,12 +5,14 @@ import * as core from './lane-core'
 type Schedule = ServerContract.Types.schedule
 type Task = ServerContract.Types.task
 type Lane = ServerContract.Types.lane
+type Hold = ServerContract.Types.hold
 
 export const LANE_MOBILITY = 0
 export const LANE_BARRIER = 255
 
 export interface ScheduleData {
     lanes?: Lane[]
+    holds?: Hold[]
 }
 
 export interface LaneView {
@@ -52,11 +54,17 @@ export function hasSchedule(entity: ScheduleData): boolean {
     return lanes.some((l) => l.schedule.tasks.length > 0)
 }
 
+export function hasHolds(entity: ScheduleData): boolean {
+    const holds = entity.holds
+    return !!holds && holds.length > 0
+}
+
 export function isIdle(entity: ScheduleData): boolean {
-    return !hasSchedule(entity)
+    return !hasSchedule(entity) && !hasHolds(entity)
 }
 
 export function isEntityIdle(entity: ScheduleData, now: Date): boolean {
+    if (hasHolds(entity)) return false
     const lanes = entity.lanes
     if (!lanes) return true
     return lanes.every((l) => core.currentTaskIndexForLane(l.schedule, now) < 0)
@@ -106,13 +114,7 @@ export function scheduleComplete(entity: ScheduleData, now: Date): boolean {
     let hasAnyTask = false
     let remaining = 0
     for (const l of lanes) {
-        const tasks = l.schedule.tasks
-        if (tasks.length > 0) {
-            hasAnyTask = true
-            for (const t of tasks) {
-                if (t.type.toNumber() === TaskType.RESERVED) return false
-            }
-        }
+        if (l.schedule.tasks.length > 0) hasAnyTask = true
         remaining = Math.max(remaining, core.laneRemaining(l.schedule, now))
     }
     if (!hasAnyTask) return false
@@ -186,7 +188,6 @@ export function resolveOrder(entity: ScheduleData, now: Date): ResolvedEvent[] {
             const task = l.schedule.tasks[i]
             endSec += task.duration.toNumber()
             const completesAt = new Date(startedMs + endSec * 1000)
-            if (task.type.toNumber() === TaskType.RESERVED) break
             if (completesAt.getTime() > now.getTime()) break
             events.push({laneKey, taskIndex: i, task, completesAt})
         }

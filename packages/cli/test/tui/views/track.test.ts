@@ -175,6 +175,7 @@ function multiLane(at: Date): ServerContract.Types.entity_info {
                 },
             },
         ],
+        holds: [],
     })
 }
 

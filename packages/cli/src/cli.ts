@@ -12,16 +12,16 @@ import * as foundcompany from './commands/action/foundcompany'
 import * as gather from './commands/action/gather'
 import * as grouptravel from './commands/action/grouptravel'
 import * as join from './commands/action/join'
+import * as load from './commands/action/load'
 import * as recharge from './commands/action/recharge'
-import * as retarget from './commands/action/retarget'
 import * as refrshentity from './commands/action/refrshentity'
 import * as resolve from './commands/action/resolve'
 import * as rmmodule from './commands/action/rmmodule'
 import * as route from './commands/route'
 import * as track from './commands/action/track'
-import * as transfer from './commands/action/transfer'
 import * as travel from './commands/action/travel'
 import * as undeploy from './commands/action/undeploy'
+import * as unload from './commands/action/unload'
 import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
@@ -127,7 +127,8 @@ export function build(): Command {
     route.register(program)
     registerEntitySubcommand(warp.SUBCOMMAND)
     registerEntitySubcommand(gather.SUBCOMMAND)
-    registerEntitySubcommand(transfer.SUBCOMMAND)
+    registerEntitySubcommand(load.SUBCOMMAND)
+    registerEntitySubcommand(unload.SUBCOMMAND)
     registerEntitySubcommand(recharge.SUBCOMMAND)
     registerEntitySubcommand(craft.SUBCOMMAND)
     registerEntitySubcommand(blend.SUBCOMMAND)
@@ -144,7 +145,6 @@ export function build(): Command {
     registerEntitySubcommand(refrshentity.SUBCOMMAND_REFRESHENTITY_ALIAS)
     registerEntitySubcommand(resolve.SUBCOMMAND)
     registerEntitySubcommand(cancel.SUBCOMMAND)
-    registerEntitySubcommand(retarget.SUBCOMMAND)
     registerEntitySubcommand(wait.SUBCOMMAND)
     registerEntitySubcommand(track.SUBCOMMAND)
 

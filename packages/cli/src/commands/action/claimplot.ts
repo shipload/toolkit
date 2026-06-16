@@ -72,7 +72,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'Requires: this entity has a Crafter module installed, is at <x> <y>, ' +
                     'and <x> <y> is a planet.\n' +
                     'On resolve, a new Plot entity is created at <x> <y> with capacity = sum of recipe input masses. ' +
-                    'Then transfer recipe inputs into the Plot and run `buildplot` on the same entity.\n'
+                    'Then unload recipe inputs into the Plot and run `buildplot` on the same entity.\n'
             )
             .addHelpText(
                 'after',
@@ -82,7 +82,7 @@ Examples:
   shiploadcli ship 1 claimplot 11 -7 9
 
   # Then deposit inputs (cargo refs are <item-id>:<stack-id>:<qty>) and build:
-  shiploadcli ship 1 transfer plot 42 101:0:100000
+  shiploadcli ship 1 unload plot 42 101:0:100000
   shiploadcli ship 1 buildplot 42
 
 Find target item ids via \`shiploadcli recipe <item-id>\` or by browsing \`shiploadcli items\`.`

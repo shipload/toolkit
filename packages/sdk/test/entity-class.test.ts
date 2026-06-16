@@ -24,6 +24,7 @@ function bareEntityInfo(
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
         lanes: [],
+        holds: [],
         ...overrides,
     })
 }

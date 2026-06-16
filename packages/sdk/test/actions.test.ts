@@ -1,9 +1,59 @@
 import {expect, test} from 'bun:test'
 import {Chains} from '@wharfkit/common'
 import {Shipload} from '../src'
+import {ServerContract} from '../src/contracts'
 import {ATOMICASSETS_ABI} from '../src/nft/atomicassets'
 
 const sl = new Shipload(Chains.Jungle4)
+
+const cargo = (itemId: number, quantity: number) =>
+    ServerContract.Types.cargo_item.from({
+        item_id: itemId,
+        stats: 0,
+        modules: [],
+        quantity,
+    })
+
+test('load builds an eon.shipload::load action that pulls items from a giver', () => {
+    const action = sl.actions.load(1, 2, [cargo(10201, 3)])
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('load')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.id)).toBe('1')
+    expect(String(data.from_id)).toBe('2')
+    expect(data.items.length).toBe(1)
+    expect(Number(data.items[0].item_id)).toBe(10201)
+    expect(Number(data.items[0].quantity)).toBe(3)
+})
+
+test('unload builds an eon.shipload::unload action that pushes items to a target', () => {
+    const action = sl.actions.unload(1, 2, [cargo(10201, 3)])
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('unload')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.id)).toBe('1')
+    expect(String(data.to_id)).toBe('2')
+    expect(data.items.length).toBe(1)
+    expect(Number(data.items[0].item_id)).toBe(10201)
+    expect(Number(data.items[0].quantity)).toBe(3)
+})
+
+test('craft without a target self-crafts and omits the target field', () => {
+    const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)])
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('craft')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.id)).toBe('1')
+    expect(Number(data.recipe_id)).toBe(10001)
+    expect(data.target).toBeNull()
+})
+
+test('craft with a target cross-crafts onto the target entity', () => {
+    const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)], 7)
+    expect(String(action.name)).toBe('craft')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.target)).toBe('7')
+})
 
 test('setLastPayer builds an atomicassets::setlastpayer action authed by the owner', () => {
     const action = sl.actions.setLastPayer('alice', 'shipload')

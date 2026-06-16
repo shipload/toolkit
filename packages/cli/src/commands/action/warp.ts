@@ -5,7 +5,7 @@ import {ALL_ENTITY_TYPES, type EntityTypeName, parseInt64} from '../../lib/args'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
+import {bundleWithIdleResolve} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
@@ -33,15 +33,17 @@ export async function runWarp(
     y: bigint,
     options: WarpCliOptions
 ): Promise<void> {
-    await withValidation(() => checkResolveEntity(ctx.entityId, Boolean(options.autoResolve)))
     const action = await buildAction({
         entityType: ctx.entityType,
         entityId: ctx.entityId,
         x,
         y,
     })
+    const actions = await withValidation(() =>
+        bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve))
+    )
     const result = await transact(
-        {action},
+        {actions},
         {
             description: `Warping ${ctx.entityType} ${ctx.entityId} to (${x}, ${y})`,
         }

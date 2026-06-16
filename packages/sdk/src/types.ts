@@ -56,7 +56,13 @@ export enum TaskType {
     DEMOLISH = 13,
     CLAIMPLOT = 14,
     BUILDPLOT = 15,
-    RESERVED = 16,
+}
+
+export enum HoldKind {
+    PULL = 1,
+    PUSH = 2,
+    GATHER = 3,
+    BUILD = 4,
 }
 
 export enum LocationType {

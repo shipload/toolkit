@@ -313,6 +313,7 @@ test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
 				started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),
 				tasks: [{type: 5, duration: 300, cancelable: 0, cargo: []}]}},
 		],
+		holds: [],
 	})
 	const snap = entityInfoToSnapshot(ei)
 	expect(sched.hasSchedule(snap)).toBe(true)

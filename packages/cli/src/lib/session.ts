@@ -60,7 +60,8 @@ export function getPublicKey(): PublicKey {
 const TASK_RESULT_ACTIONS = [
 	"travel",
 	"grouptravel",
-	"transfer",
+	"load",
+	"unload",
 	"recharge",
 	"gather",
 	"craft",

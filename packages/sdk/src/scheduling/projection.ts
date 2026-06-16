@@ -442,12 +442,11 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
 
     for (const {task, startsAt} of ordered) {
         const duration = task.duration.toNumber()
-        const isReserved = task.type.toNumber() === TaskType.RESERVED
         const elapsed = Math.min(
             Math.max(0, Math.floor((nowMs - startsAt.getTime()) / 1000)),
             duration
         )
-        const taskComplete = !isReserved && elapsed >= duration
+        const taskComplete = elapsed >= duration
         const taskInProgress = elapsed > 0 && elapsed < duration
 
         if (!taskComplete && !taskInProgress) {

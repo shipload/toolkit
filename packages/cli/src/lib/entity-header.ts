@@ -18,6 +18,7 @@ import {
 	formatMass,
 	getItem,
 	getModuleCapabilityType,
+	HoldKind,
 	MODULE_ANY,
 	MODULE_CRAFTER,
 	MODULE_ENGINE,
@@ -50,6 +51,7 @@ import {
 import {
 	formatCoordinatePair,
 	formatDuration,
+	formatEntityRefShort,
 	formatResolveHint,
 	formatTaskShort,
 	kvTable,
@@ -408,6 +410,37 @@ function formatStackDeltaLines(
 	return entries.map((e) => e.text);
 }
 
+function describeHoldKind(kind: number): { label: string; preposition: string } {
+	switch (kind) {
+		case HoldKind.PUSH:
+			return { label: "Incoming transfer", preposition: "from" };
+		case HoldKind.PULL:
+			return { label: "Outgoing reservation", preposition: "to" };
+		case HoldKind.GATHER:
+			return { label: "Gather incoming", preposition: "from" };
+		case HoldKind.BUILD:
+			return { label: "Under construction", preposition: "by" };
+		default:
+			return { label: "Reserved", preposition: "with" };
+	}
+}
+
+function entityHoldsSection(entity: ServerTypes.entity_info): string | null {
+	const holds = entity.holds ?? [];
+	if (holds.length === 0) return null;
+	const now = Date.now();
+	const rows: [string, string][] = holds.map((h) => {
+		const { label, preposition } = describeHoldKind(Number(h.kind));
+		const parts = [`${preposition} ${formatEntityRefShort(h.counterpart)}`];
+		const mass = Number(h.incoming_mass);
+		if (mass > 0) parts.push(formatMass(mass));
+		const eta = Math.max(0, Math.round((h.until.toDate().getTime() - now) / 1000));
+		if (eta > 0) parts.push(`ETA ${formatDuration(eta)}`);
+		return [`${label}:`, parts.join(" · ")];
+	});
+	return kvTable(rows);
+}
+
 function entityScheduleSection(
 	entity: ServerTypes.entity_info,
 	ctx: HeaderContext = {},
@@ -464,6 +497,9 @@ export function renderEntityFull(
 
 	const scheduleSection = entityScheduleSection(entity, ctx);
 	if (scheduleSection) sections.push(scheduleSection);
+
+	const holdsSection = entityHoldsSection(entity);
+	if (holdsSection) sections.push(holdsSection);
 
 	return sections.join("\n\n");
 }

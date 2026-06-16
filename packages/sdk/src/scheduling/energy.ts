@@ -20,12 +20,11 @@ export function energyAtTime(entity: Projectable, now: Date): number {
 
     for (const {task, startsAt} of ordered) {
         const duration = task.duration.toNumber()
-        const isReserved = task.type.toNumber() === TaskType.RESERVED
         const elapsed = Math.min(
             Math.max(0, Math.floor((nowMs - startsAt.getTime()) / 1000)),
             duration
         )
-        const complete = !isReserved && elapsed >= duration
+        const complete = elapsed >= duration
         const inProgress = !complete && elapsed > 0 && elapsed < duration
 
         if (!complete && !inProgress) continue

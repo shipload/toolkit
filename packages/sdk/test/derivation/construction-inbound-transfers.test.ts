@@ -19,12 +19,12 @@ describe('ConstructionManager.inboundTransfersTo', () => {
         expect(mgr.inboundTransfersTo(PLOT_ID, [idle], NOW)).toEqual([])
     })
 
-    test('aggregates a single LOAD task targeting the plot', () => {
+    test('aggregates a single UNLOAD (push) task targeting the plot', () => {
         const hauler = makeHauler({
             id: 10,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 132,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 5}],
@@ -44,22 +44,19 @@ describe('ConstructionManager.inboundTransfersTo', () => {
         ])
     })
 
-    test('aggregates UNLOAD tasks the same as LOAD', () => {
+    test('ignores a LOAD (pull) targeting the plot (cargo flows to the loader, not the plot)', () => {
         const hauler = makeHauler({
             id: 11,
             tasks: [
                 makeTask({
-                    type: TaskType.UNLOAD,
+                    type: TaskType.LOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [{itemId: FRAME, qty: 3}],
                 }),
             ],
         })
-        const result = mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)
-        expect(result[0].itemId).toBe(FRAME)
-        expect(result[0].quantity).toBe(3)
-        expect(result[0].etaSeconds).toBe(60)
+        expect(mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)).toEqual([])
     })
 
     test('ignores tasks targeting a different plot', () => {
@@ -67,7 +64,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             id: 12,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(UInt64.from(9999)),
                     cargo: [{itemId: PLATE, qty: 7}],
@@ -77,7 +74,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
         expect(mgr.inboundTransfersTo(PLOT_ID, [hauler], NOW)).toEqual([])
     })
 
-    test('ignores non-LOAD/UNLOAD tasks even when targeted at the plot', () => {
+    test('ignores non-push tasks even when targeted at the plot', () => {
         const hauler = makeHauler({
             id: 13,
             tasks: [makeTask({type: TaskType.TRAVEL, duration: 60, target: plotRef()})],
@@ -92,7 +89,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
                 makeTask({type: TaskType.TRAVEL, duration: 90}),
                 makeTask({type: TaskType.RECHARGE, duration: 30}),
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 4}],
@@ -109,7 +106,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             scheduleStart: TimePoint.from('2026-06-02T09:59:00.000'),
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 132,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 2}],
@@ -126,7 +123,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             scheduleStart: TimePoint.from('2026-06-02T09:50:00.000'),
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 1}],
@@ -142,7 +139,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             scheduleStart: TimePoint.from('2026-06-02T09:59:00.000'),
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 1}],
@@ -160,14 +157,14 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             scheduleStart: TimePoint.from('2026-06-02T09:55:00.000'),
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 800}],
                 }),
                 makeTask({type: TaskType.TRAVEL, duration: 600}),
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 120,
                     target: plotRef(),
                     cargo: [{itemId: FRAME, qty: 4}],
@@ -185,7 +182,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             id: 17,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [
@@ -208,7 +205,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             id: 18,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: plotRef(),
                     cargo: [
@@ -229,7 +226,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             name: 'Hauler A',
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 100,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 5}],
@@ -241,7 +238,7 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             name: 'Hauler B',
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 200,
                     target: plotRef(),
                     cargo: [{itemId: PLATE, qty: 3}],

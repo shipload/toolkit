@@ -23,6 +23,7 @@ function workerOnlyInfoArgs(at: Date) {
 				},
 			},
 		],
+		holds: [],
 	};
 }
 
@@ -62,6 +63,7 @@ function multiLaneInfoArgs(at: Date) {
 				},
 			},
 		],
+		holds: [],
 	};
 }
 
@@ -82,6 +84,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            holds: [],
         })
         const snap = entityInfoToSnapshot(ei)
         expect(typeof snap.type).toBe('string')
@@ -114,6 +117,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            holds: [],
         })
         const b = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -130,6 +134,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            holds: [],
         })
         // Sanity: distinct Name instances are not === at the wharfkit level.
         expect(a.type === b.type).toBe(false)
@@ -161,6 +166,7 @@ describe('entityInfoToSnapshot', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            holds: [],
         })
         const snap = entityInfoToSnapshot(ei)
         expect(snap.energy).toBe(1000n)

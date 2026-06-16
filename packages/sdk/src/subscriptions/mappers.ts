@@ -19,5 +19,7 @@ export function parseWireEntity(raw: WireEntity): ServerContract.Types.entity_in
     }
     delete shaped.name
 
+    if (shaped.holds === undefined) shaped.holds = []
+
     return ServerContract.Types.entity_info.from(shaped)
 }

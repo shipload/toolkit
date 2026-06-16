@@ -1,3 +1,5 @@
+import { composeIdleResolve } from "@shipload/sdk";
+import { type Action, UInt64 } from "@wharfkit/antelope";
 import type { EntityRef } from "./args";
 import { getShipload } from "./client";
 import { transact } from "./session";
@@ -21,13 +23,20 @@ export async function ensureNoPendingResolve(
 	);
 }
 
-export async function checkResolveEntity(
+export async function bundleWithIdleResolve(
 	entityId: bigint | number,
+	action: Action,
 	autoResolve: boolean,
-): Promise<void> {
+): Promise<Action[]> {
+	if (!autoResolve) return [action];
 	const snap = await getEntitySnapshot(entityId);
-	const completed = completedTaskCount(snap);
-	await ensureNoPendingResolve(entityId, completed, autoResolve);
+	const sl = await getShipload();
+	return composeIdleResolve(
+		{ id: UInt64.from(snap.id), lanes: snap.lanes },
+		action,
+		sl.actions,
+		new Date(),
+	);
 }
 
 export async function resolveGroupCompleted(entities: EntityRef[]): Promise<void> {

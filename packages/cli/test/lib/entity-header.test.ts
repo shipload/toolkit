@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ServerContract, TaskType } from "@shipload/sdk";
+import { HoldKind, ServerContract, TaskType } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import {
 	type HeaderContext,
@@ -110,10 +110,74 @@ describe("renderEntityFull live energy", () => {
 					},
 				},
 			],
+			holds: [],
 		});
 		const out = renderEntityFull(ei);
 		expect(out).toMatch(/Energy:\s+200 → /);
 		expect(out).toContain("/350 (live, recharge: 10/s)");
+	});
+});
+
+describe("renderEntityFull holds", () => {
+	const base = {
+		type: "warehouse",
+		id: 2,
+		owner: "agent.gm",
+		entity_name: "Depot",
+		coordinates: { x: 0, y: 0, z: 0 },
+		item_id: 0,
+		cargomass: 0,
+		cargo: [],
+		modules: [],
+		lanes: [],
+	};
+
+	test("incoming push hold renders a player-facing incoming transfer line", () => {
+		const until = new Date(Date.now() + 30_000).toISOString().slice(0, 23);
+		const ei = ServerContract.Types.entity_info.from({
+			...base,
+			holds: [
+				{
+					id: 1,
+					kind: HoldKind.PUSH,
+					counterpart: { entity_type: "ship", entity_id: 1 },
+					until,
+					incoming_mass: 5000,
+				},
+			],
+		});
+		const out = renderEntityFull(ei);
+		expect(out).toContain("Incoming transfer:");
+		expect(out).toContain("from ship 1");
+		expect(out).not.toContain("hold");
+		expect(out).not.toContain("counterpart");
+	});
+
+	test("build hold renders under construction with the builder", () => {
+		const until = new Date(Date.now() + 120_000).toISOString().slice(0, 23);
+		const ei = ServerContract.Types.entity_info.from({
+			...base,
+			type: "plot",
+			holds: [
+				{
+					id: 1,
+					kind: HoldKind.BUILD,
+					counterpart: { entity_type: "ship", entity_id: 1 },
+					until,
+					incoming_mass: 0,
+				},
+			],
+		});
+		const out = renderEntityFull(ei);
+		expect(out).toContain("Under construction:");
+		expect(out).toContain("by ship 1");
+	});
+
+	test("no holds renders no reservation lines", () => {
+		const ei = ServerContract.Types.entity_info.from({ ...base, holds: [] });
+		const out = renderEntityFull(ei);
+		expect(out).not.toContain("Incoming transfer:");
+		expect(out).not.toContain("Under construction:");
 	});
 });
 
@@ -233,6 +297,7 @@ describe("renderEntityHeader", () => {
 					},
 				},
 			],
+			holds: [],
 		});
 		const out = renderEntityHeader(busy);
 		expect(out).toContain("Task (mobility):");
@@ -284,6 +349,7 @@ function makeInventoryEntity(opts: {
 		current_task_remaining: 0,
 		pending_tasks: [],
 		lanes,
+		holds: [],
 	});
 }
 
@@ -415,6 +481,7 @@ function makeBusyEntity(opts: {
 		current_task_remaining: Math.max(0, totalDurationS - 1),
 		pending_tasks: [],
 		lanes: [{ lane_key: 0, schedule: { started, tasks: allTasks } }],
+		holds: [],
 	});
 }
 
@@ -529,6 +596,7 @@ describe("renderEntityFull worker-lane schedule", () => {
 					},
 				},
 			],
+			holds: [],
 		});
 		const out = renderEntityFull(ei);
 		expect(out).toContain("Pending:");

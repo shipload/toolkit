@@ -109,6 +109,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         cargomass: UInt32.from(state.cargomass ?? 0),
         cargo: state.cargo || [],
         lanes,
+        holds: [],
     }
 
     if (state.energy !== undefined) info.energy = UInt16.from(state.energy)

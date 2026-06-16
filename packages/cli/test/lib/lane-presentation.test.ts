@@ -193,16 +193,10 @@ describe('laneSectionStatus', () => {
         ).toBe('ready to resolve')
     })
 
-    test('marks empty or reserved-only completed lanes done', () => {
+    test('marks empty completed lanes done', () => {
         expect(
             laneSectionStatus(
                 lane('2026-05-10T22:00:00.000', []),
-                new Date(Date.UTC(2026, 4, 10, 22, 2, 0))
-            )
-        ).toBe('done')
-        expect(
-            laneSectionStatus(
-                lane('2026-05-10T22:00:00.000', [60], TaskType.RESERVED),
                 new Date(Date.UTC(2026, 4, 10, 22, 2, 0))
             )
         ).toBe('done')

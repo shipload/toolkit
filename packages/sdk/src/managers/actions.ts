@@ -73,14 +73,6 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    retarget(sourceId: UInt64Type, taskIndex: UInt64Type, newDestId: UInt64Type): Action {
-        return this.server.action('retarget', {
-            source_id: UInt64.from(sourceId),
-            task_index: UInt64.from(taskIndex),
-            new_dest_id: UInt64.from(newDestId),
-        })
-    }
-
     recharge(entityId: UInt64Type): Action {
         return this.server.action('recharge', {
             id: UInt64.from(entityId),
@@ -100,14 +92,26 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    transfer(
-        sourceId: UInt64Type,
-        destId: UInt64Type,
+    load(
+        id: UInt64Type,
+        fromId: UInt64Type,
         items: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        return this.server.action('transfer', {
-            source_id: UInt64.from(sourceId),
-            dest_id: UInt64.from(destId),
+        return this.server.action('load', {
+            id: UInt64.from(id),
+            from_id: UInt64.from(fromId),
+            items,
+        })
+    }
+
+    unload(
+        id: UInt64Type,
+        toId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('unload', {
+            id: UInt64.from(id),
+            to_id: UInt64.from(toId),
             items,
         })
     }
@@ -154,14 +158,19 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         recipeId: number,
         quantity: number,
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
+        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        target?: UInt64Type
     ): Action {
-        return this.server.action('craft', {
+        const params: ServerContract.ActionParams.craft = {
             id: UInt64.from(entityId),
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
             inputs,
-        })
+        }
+        if (target !== undefined) {
+            params.target = UInt64.from(target)
+        }
+        return this.server.action('craft', params)
     }
 
     blend(entityId: UInt64Type, inputs: ServerContract.ActionParams.Type.cargo_item[]): Action {

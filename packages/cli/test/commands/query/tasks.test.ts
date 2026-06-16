@@ -40,6 +40,7 @@ function makeShip(opts: {
         cargo: [],
         modules: [],
         lanes: opts.lanes ?? [],
+        holds: [],
     })
     return entity
 }
@@ -146,6 +147,7 @@ function multiLaneInfoArgs(at: Date) {
                 },
             },
         ],
+        holds: [],
     }
 }
 

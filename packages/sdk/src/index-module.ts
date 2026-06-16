@@ -227,6 +227,9 @@ export type {
 export {taskCargoChanges} from './scheduling/task-cargo'
 export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 
+export {composeIdleResolve} from './scheduling/idle-resolve'
+export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'
+
 export {
     projectedCargoAvailableAt,
     availableForItem,

@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {TimePoint, UInt8} from '@wharfkit/antelope'
+import {TimePoint, UInt8, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract, TaskType, getInterpolatedPosition, schedule} from '$lib'
 import {makeTask} from './helpers'
 
@@ -160,6 +160,22 @@ describe('multi-lane scheduling', () => {
         expect(schedule.isIdle(entity)).toBeTrue()
         expect(schedule.hasSchedule(entity)).toBeFalse()
     })
+
+    test('entity with a live hold and empty lanes is NOT idle', () => {
+        const hold = ServerContract.Types.hold.from({
+            id: UInt64.from(1),
+            kind: UInt8.from(4),
+            counterpart: ServerContract.Types.entity_ref.from({
+                entity_type: 'ship',
+                entity_id: UInt64.from(7),
+            }),
+            until: TimePoint.from('2026-06-02T10:00:00.000'),
+            incoming_mass: UInt32.from(0),
+        })
+        const entity = {coordinates: {x: 0, y: 0}, lanes: [], holds: [hold]}
+        expect(schedule.isIdle(entity)).toBeFalse()
+        expect(schedule.isEntityIdle(entity, new Date('2026-06-02T11:00:00.000Z'))).toBeFalse()
+    })
 })
 
 describe('hasResolvable', () => {
@@ -178,16 +194,16 @@ describe('hasResolvable', () => {
             lane(1, STARTED, [gather(30)]),
         ],
     }
-    const reservedOnly = {
+    const futureLaneStart = new Date(new Date(STARTED).getTime() + 120_000)
+        .toISOString()
+        .replace('Z', '')
+    const notYetStartedOnly = {
         coordinates: {x: 0, y: 0},
-        lanes: [lane(1, STARTED, [makeTask(TaskType.RESERVED, {duration: 30})])],
+        lanes: [lane(1, futureLaneStart, [gather(30)])],
     }
-    const reservedPlusDone = {
+    const notYetStartedPlusDone = {
         coordinates: {x: 0, y: 0},
-        lanes: [
-            lane(1, STARTED, [makeTask(TaskType.RESERVED, {duration: 30})]),
-            lane(2, STARTED, [gather(30)]),
-        ],
+        lanes: [lane(1, futureLaneStart, [gather(30)]), lane(2, STARTED, [gather(30)])],
     }
     const futureStarted = {
         coordinates: {x: 0, y: 0},
@@ -207,11 +223,11 @@ describe('hasResolvable', () => {
     test('multi-lane: one lane running, another lane front complete → true', () => {
         expect(schedule.hasResolvable(oneRunningOneDone, at(60))).toBeTrue()
     })
-    test('lane with only a RESERVED front → false', () => {
-        expect(schedule.hasResolvable(reservedOnly, at(60))).toBeFalse()
+    test('lane with only a not-yet-started front → false', () => {
+        expect(schedule.hasResolvable(notYetStartedOnly, at(60))).toBeFalse()
     })
-    test('RESERVED front in one lane + completed front in another → true', () => {
-        expect(schedule.hasResolvable(reservedPlusDone, at(60))).toBeTrue()
+    test('not-yet-started front in one lane + completed front in another → true', () => {
+        expect(schedule.hasResolvable(notYetStartedPlusDone, at(60))).toBeTrue()
     })
     test('future-started lane (not yet begun) → false', () => {
         expect(schedule.hasResolvable(futureStarted, at(60))).toBeFalse()
@@ -223,8 +239,8 @@ describe('hasResolvable', () => {
         for (const entity of [
             singleDoneFront,
             oneRunningOneDone,
-            reservedOnly,
-            reservedPlusDone,
+            notYetStartedOnly,
+            notYetStartedPlusDone,
             futureStarted,
             empty,
         ]) {

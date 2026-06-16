@@ -5,7 +5,7 @@ import {PlotManager} from './plot'
 import {getItem} from '../data/catalog'
 import {calc_craft_duration} from '../capabilities/crafting'
 import {getLanes, getTasks} from '../scheduling/schedule'
-import {TaskType} from '../types'
+import {HoldKind, TaskType} from '../types'
 import type {
     BuildableTarget,
     FinalizerEntityRef,
@@ -102,7 +102,7 @@ export class ConstructionManager extends BaseManager {
                 let cumulativeSec = 0
                 for (const task of lane.schedule.tasks) {
                     cumulativeSec += task.duration.toNumber()
-                    if (!isTransferTask(task)) continue
+                    if (!isPushTask(task)) continue
                     if (!task.entitytarget) continue
                     const projectedEndMs = startedMs + cumulativeSec * 1000
                     if (projectedEndMs < nowMs) continue
@@ -145,51 +145,53 @@ export class ConstructionManager extends BaseManager {
 
     private plotReservation(
         plot: ServerContract.Types.entity_info,
+        builder: ServerContract.Types.entity_info | undefined,
         now: Date
     ): {
         builderId: UInt64
-        group?: UInt64
         startsAt: number
         completesAt: number
         hasStarted: boolean
     } | null {
-        for (const lane of getLanes(plot)) {
+        const hold = plot.holds.find((h) => h.kind.toNumber() === HoldKind.BUILD)
+        if (!hold) return null
+        const builderId = hold.counterpart.entity_id
+        const completesAt = hold.until.toDate().getTime()
+        const startsAt = this.builderBuildStart(builder, plot.id) ?? completesAt
+        return {
+            builderId,
+            startsAt,
+            completesAt,
+            hasStarted: startsAt <= now.getTime(),
+        }
+    }
+
+    private builderBuildStart(
+        builder: ServerContract.Types.entity_info | undefined,
+        plotId: UInt64
+    ): number | undefined {
+        if (!builder) return undefined
+        for (const lane of getLanes(builder)) {
             const startedMs = lane.schedule.started.toDate().getTime()
             let startSec = 0
             for (const task of lane.schedule.tasks) {
-                if (task.type.toNumber() === TaskType.RESERVED) {
-                    if (!task.entitytarget) return null
-                    const startsAt = startedMs + startSec * 1000
-                    const completesAt = startsAt + task.duration.toNumber() * 1000
-                    return {
-                        builderId: task.entitytarget.entity_id,
-                        group: task.entitygroup ?? undefined,
-                        startsAt,
-                        completesAt,
-                        hasStarted: startsAt <= now.getTime(),
-                    }
-                }
+                if (isBuildOfPlot(task, plotId)) return startedMs + startSec * 1000
                 startSec += task.duration.toNumber()
             }
         }
-        return null
+        return undefined
     }
 
     private builderCancelability(
         builder: ServerContract.Types.entity_info | undefined,
-        group: UInt64 | undefined
+        plotId: UInt64
     ): {cancelable: boolean; blockingTaskCount: number} {
-        if (!builder || group === undefined) {
+        if (!builder) {
             return {cancelable: false, blockingTaskCount: 0}
         }
         for (const lane of getLanes(builder)) {
             const tasks = lane.schedule.tasks
-            const buildIdx = tasks.findIndex(
-                (t) =>
-                    t.type.toNumber() === TaskType.BUILDPLOT &&
-                    t.entitygroup !== undefined &&
-                    t.entitygroup.equals(group)
-            )
+            const buildIdx = tasks.findIndex((t) => isBuildOfPlot(t, plotId))
             if (buildIdx < 0) continue
             const trailing = tasks.length - 1 - buildIdx
             return {cancelable: trailing === 0, blockingTaskCount: trailing}
@@ -200,14 +202,14 @@ export class ConstructionManager extends BaseManager {
     private buildFromReservation(
         res: {
             builderId: UInt64
-            group?: UInt64
             startsAt: number
             completesAt: number
             hasStarted: boolean
         },
+        plotId: UInt64,
         builder: ServerContract.Types.entity_info | undefined
     ): ScheduledBuild {
-        const {cancelable, blockingTaskCount} = this.builderCancelability(builder, res.group)
+        const {cancelable, blockingTaskCount} = this.builderCancelability(builder, plotId)
         return {
             shipId: res.builderId,
             shipName: builder?.entity_name || res.builderId.toString(),
@@ -224,10 +226,12 @@ export class ConstructionManager extends BaseManager {
         entities: ServerContract.Types.entity_info[],
         now: Date
     ): ScheduledBuild | null {
-        const res = this.plotReservation(plot, now)
+        const hold = plot.holds.find((h) => h.kind.toNumber() === HoldKind.BUILD)
+        if (!hold) return null
+        const builder = entities.find((e) => e.id.equals(hold.counterpart.entity_id))
+        const res = this.plotReservation(plot, builder, now)
         if (!res) return null
-        const builder = entities.find((e) => e.id.equals(res.builderId))
-        return this.buildFromReservation(res, builder)
+        return this.buildFromReservation(res, plot.id, builder)
     }
 
     scheduledBuildsByTarget(
@@ -238,10 +242,12 @@ export class ConstructionManager extends BaseManager {
         const out = new Map<string, ScheduledBuild>()
         for (const entity of entities) {
             if (entity.type.toString() !== 'plot') continue
-            const res = this.plotReservation(entity, now)
+            const hold = entity.holds.find((h) => h.kind.toNumber() === HoldKind.BUILD)
+            if (!hold) continue
+            const builder = byId.get(hold.counterpart.entity_id.toString())
+            const res = this.plotReservation(entity, builder, now)
             if (!res) continue
-            const builder = byId.get(res.builderId.toString())
-            out.set(entity.id.toString(), this.buildFromReservation(res, builder))
+            out.set(entity.id.toString(), this.buildFromReservation(res, entity.id, builder))
         }
         return out
     }
@@ -354,15 +360,22 @@ function partitionSources(
     return {eligible, unreachable}
 }
 
-function isTransferTask(task: ServerContract.Types.task): boolean {
-    const type = task.type.toNumber()
-    return type === TaskType.LOAD || type === TaskType.UNLOAD
+function isPushTask(task: ServerContract.Types.task): boolean {
+    return task.type.toNumber() === TaskType.UNLOAD
+}
+
+function isBuildOfPlot(task: ServerContract.Types.task, plotId: UInt64): boolean {
+    return (
+        task.type.toNumber() === TaskType.BUILDPLOT &&
+        task.entitytarget !== undefined &&
+        task.entitytarget.entity_id.equals(plotId)
+    )
 }
 
 function reservationsOf(source: ServerContract.Types.entity_info): Reservation[] {
     const out = new Map<string, Reservation>()
     for (const task of getTasks(source)) {
-        if (!isTransferTask(task)) continue
+        if (!isPushTask(task)) continue
         if (!task.entitytarget) continue
         const targetType = task.entitytarget.entity_type
         const targetId = task.entitytarget.entity_id

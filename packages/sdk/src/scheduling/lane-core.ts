@@ -1,5 +1,5 @@
 import type {ServerContract} from '../contracts'
-import {TaskType} from '../types'
+import type {TaskType} from '../types'
 
 type Schedule = ServerContract.Types.schedule
 type Task = ServerContract.Types.task
@@ -27,7 +27,6 @@ export function laneRemaining(schedule: Schedule, now: Date): number {
 
 export function laneComplete(schedule: Schedule, now: Date): boolean {
     if (schedule.tasks.length === 0) return false
-    if (schedule.tasks.some((t) => t.type.toNumber() === TaskType.RESERVED)) return false
     return laneRemaining(schedule, now) === 0
 }
 
@@ -87,7 +86,6 @@ export function laneTaskRemaining(schedule: Schedule, index: number, now: Date):
 
 export function laneTaskComplete(schedule: Schedule, index: number, now: Date): boolean {
     if (index < 0 || index >= schedule.tasks.length) return false
-    if (schedule.tasks[index].type.toNumber() === TaskType.RESERVED) return false
     const taskDuration = schedule.tasks[index].duration.toNumber()
     return laneTaskElapsed(schedule, index, now) >= taskDuration
 }

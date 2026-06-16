@@ -96,7 +96,7 @@ function formatItemList(cargo: ServerTypes.task["cargo"]): string {
 	return `${head}, +${cargo.length - 2} more`;
 }
 
-function formatEntityRefShort(ref: ServerTypes.entity_ref): string {
+export function formatEntityRefShort(ref: ServerTypes.entity_ref): string {
 	return `${String(ref.entity_type)} ${String(ref.entity_id)}`;
 }
 

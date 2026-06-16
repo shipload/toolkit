@@ -23,6 +23,7 @@ function makePlotRow(
         modules: [],
         item_id: UInt16.from(itemId),
         lanes: [],
+        holds: [],
     })
 }
 
@@ -47,6 +48,7 @@ function makePlotInfo(
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
         lanes: [],
+        holds: [],
     })
 }
 

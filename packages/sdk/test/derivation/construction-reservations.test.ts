@@ -24,18 +24,18 @@ describe('ConstructionManager.reservationsFrom', () => {
         expect(mgr.reservationsFrom(UInt64.from(10), [hauler])).toEqual([])
     })
 
-    test('returns LOAD/UNLOAD tasks owned by the source entity', () => {
+    test('reserves outgoing UNLOAD (push) cargo per-item', () => {
         const hauler = makeHauler({
             id: 10,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
                     cargo: [{itemId: PLATE, qty: 5}],
                 }),
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1102),
                     cargo: [{itemId: FRAME, qty: 3}],
@@ -49,13 +49,28 @@ describe('ConstructionManager.reservationsFrom', () => {
         ])
     })
 
+    test('does not reserve incoming LOAD (pull) cargo', () => {
+        const hauler = makeHauler({
+            id: 10,
+            tasks: [
+                makeTask({
+                    type: TaskType.LOAD,
+                    duration: 60,
+                    target: entityRef('plot', 1101),
+                    cargo: [{itemId: PLATE, qty: 5}],
+                }),
+            ],
+        })
+        expect(mgr.reservationsFrom(UInt64.from(10), [hauler])).toEqual([])
+    })
+
     test('ignores tasks owned by other entities', () => {
         const a = makeHauler({id: 10})
         const b = makeHauler({
             id: 11,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
                     cargo: [{itemId: PLATE, qty: 5}],
@@ -70,13 +85,13 @@ describe('ConstructionManager.reservationsFrom', () => {
             id: 10,
             tasks: [
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
                     cargo: [{itemId: PLATE, qty: 3}],
                 }),
                 makeTask({
-                    type: TaskType.LOAD,
+                    type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
                     cargo: [{itemId: PLATE, qty: 4}],
@@ -88,7 +103,7 @@ describe('ConstructionManager.reservationsFrom', () => {
         expect(result[0].quantity).toBe(7)
     })
 
-    test('ignores non-LOAD/UNLOAD tasks', () => {
+    test('ignores non-UNLOAD tasks', () => {
         const hauler = makeHauler({
             id: 10,
             tasks: [
@@ -116,6 +131,7 @@ describe('partitionSources netting against reservations', () => {
             coordinates: COORDS,
             modules: [],
             lanes: [],
+            holds: [],
         })
     }
 
@@ -141,6 +157,7 @@ describe('partitionSources netting against reservations', () => {
             lanes: schedule
                 ? [ServerContract.Types.lane.from({lane_key: UInt8.from(0), schedule})]
                 : [],
+            holds: [],
         })
     }
 
@@ -166,7 +183,31 @@ describe('partitionSources netting against reservations', () => {
         expect(sources[0].relevantCargo[0].reserved).toBe(0)
     })
 
-    test('available is net of reservations targeting other plots', () => {
+    test('available is net of UNLOAD reservations targeting other plots', () => {
+        const plot = makePlot()
+        const target = mgr.getTarget(plot, [])!
+        const ship = makeLoaderShip(
+            10,
+            ServerContract.Types.schedule.from({
+                started: SCHEDULE_START,
+                tasks: [
+                    makeTask({
+                        type: TaskType.UNLOAD,
+                        duration: 60,
+                        target: entityRef('plot', 9999),
+                        cargo: [{itemId: PLATE, qty: 30}],
+                    }),
+                ],
+            })
+        )
+        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+
+        const sources = mgr.eligibleSources(target, [ship], cargo)
+        expect(sources[0].relevantCargo[0].available).toBe(50)
+        expect(sources[0].relevantCargo[0].reserved).toBe(30)
+    })
+
+    test('a pending LOAD does not reserve the source rows', () => {
         const plot = makePlot()
         const target = mgr.getTarget(plot, [])!
         const ship = makeLoaderShip(
@@ -186,11 +227,11 @@ describe('partitionSources netting against reservations', () => {
         const cargo = [makeCargoRow(10, 100, PLATE, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
-        expect(sources[0].relevantCargo[0].available).toBe(50)
-        expect(sources[0].relevantCargo[0].reserved).toBe(30)
+        expect(sources[0].relevantCargo[0].available).toBe(80)
+        expect(sources[0].relevantCargo[0].reserved).toBe(0)
     })
 
-    test('drops a source whose cargo is fully reserved elsewhere', () => {
+    test('drops a source whose cargo is fully reserved by an UNLOAD elsewhere', () => {
         const plot = makePlot()
         const target = mgr.getTarget(plot, [])!
         const ship = makeLoaderShip(
@@ -199,7 +240,7 @@ describe('partitionSources netting against reservations', () => {
                 started: SCHEDULE_START,
                 tasks: [
                     makeTask({
-                        type: TaskType.LOAD,
+                        type: TaskType.UNLOAD,
                         duration: 60,
                         target: entityRef('plot', 9999),
                         cargo: [{itemId: PLATE, qty: 80}],

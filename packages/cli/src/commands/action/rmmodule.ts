@@ -13,7 +13,7 @@ import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {checkResolveEntity} from '../../lib/resolve-prompt'
+import {bundleWithIdleResolve} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
 
 export interface RmModuleOpts {
@@ -51,25 +51,25 @@ export async function runRmModule(
 ): Promise<void> {
     const targetItemId = options.target !== undefined ? BigInt(options.target.itemId) : undefined
     const targetStats = options.target?.stackId
-    await withValidation(async () => {
+    const actions = await withValidation(async () => {
         validateTargetTriple({
             targetItemId,
             targetStats,
             targetModules: options.targetModules,
         })
-        await checkResolveEntity(ctx.entityId, Boolean(options.autoResolve))
-    })
-    const action = await buildAction({
-        entityType: ctx.entityType,
-        entityId: ctx.entityId,
-        moduleIndex,
-        targetItemId,
-        targetStats,
-        targetModules:
-            targetItemId !== undefined ? parseModulesJson(options.targetModules) : undefined,
+        const action = await buildAction({
+            entityType: ctx.entityType,
+            entityId: ctx.entityId,
+            moduleIndex,
+            targetItemId,
+            targetStats,
+            targetModules:
+                targetItemId !== undefined ? parseModulesJson(options.targetModules) : undefined,
+        })
+        return bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve))
     })
     await transact(
-        {action},
+        {actions},
         {
             description:
                 `Removing module from ${ctx.entityType}:${ctx.entityId} slot ${moduleIndex}` +

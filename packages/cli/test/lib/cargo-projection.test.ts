@@ -42,6 +42,7 @@ function makeShip(opts: {
 		current_task_remaining: 0,
 		pending_tasks: [],
 		lanes,
+		holds: [],
 	});
 	return entityInfoToSnapshot(ei);
 }
@@ -179,6 +180,7 @@ function gatherOnWorkerLane(at: Date) {
 				  cargo: [{ item_id: 101, quantity: 25, stats: 0, modules: [], id: 0 }] },
 			] } },
 		],
+		holds: [],
 	};
 }
 
