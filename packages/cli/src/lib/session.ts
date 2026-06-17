@@ -66,12 +66,12 @@ const TASK_RESULT_ACTIONS = [
 	"gather",
 	"craft",
 	"blend",
-	"deploy",
 	"warp",
 	"wrap",
 	"addmodule",
 	"rmmodule",
 ];
+const DEPLOY_ACTIONS = ["deploy"];
 const RESOLVE_ACTIONS = ["resolve"];
 const CANCEL_ACTIONS = ["cancel"];
 
@@ -125,6 +125,13 @@ async function formatActionResult(
 					snapshots,
 				),
 			),
+		);
+		return lines.length > 0 ? lines.join("\n") : null;
+	}
+	if (DEPLOY_ACTIONS.includes(actionName)) {
+		const results = ServerTypes.task_results.from(returnData);
+		const lines = results.entities.map(
+			(e) => `Deployed ${e.entity_type.toString()} ${e.entity_id.toString()}.`,
 		);
 		return lines.length > 0 ? lines.join("\n") : null;
 	}

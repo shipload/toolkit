@@ -17,14 +17,11 @@ import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {getGameSeed, getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
-import {assertNotBoth, withValidation} from '../../lib/errors'
-import {estimateDeploy} from '../../lib/estimate'
+import {withValidation} from '../../lib/errors'
 import {projectedCoords} from '../../lib/projection'
-import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
-import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export interface DeployOpts {
     entityType: EntityTypeName
@@ -47,9 +44,6 @@ export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promis
 }
 
 interface DeployCliOptions extends Record<string, unknown> {
-    wait?: boolean
-    track?: boolean
-    estimate?: boolean
     modules?: string
 }
 
@@ -58,7 +52,6 @@ export async function runDeploy(
     input: ParsedCargoInput,
     options: DeployCliOptions
 ): Promise<void> {
-    assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     await withValidation(async () => {
         if (input.quantity !== 1) {
             throw new ValidationError(
@@ -87,16 +80,6 @@ export async function runDeploy(
                     `Install a loader module first.`
             )
         }
-        if (options.estimate) {
-            const est = await estimateDeploy({
-                entityId: ctx.entityId,
-                packedItemId: input.itemId,
-                stackId: input.stackId,
-                snapshot: snap,
-            })
-            console.log(renderEstimate(est))
-            return
-        }
         const [resolved] = resolveCargoInputs(
             [input],
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
@@ -108,11 +91,7 @@ export async function runDeploy(
             stackId: resolved.stackId,
             modules: parseModulesJson(options.modules),
         })
-        const result = await transact(
-            {action},
-            {description: `Deploying from ${ctx.entityType}:${ctx.entityId}`}
-        )
-        await maybeAwaitAndPrint(ctx.entityId, options, result)
+        await transact({action}, {description: `Deploying from ${ctx.entityType}:${ctx.entityId}`})
     })
 }
 
@@ -142,15 +121,12 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                 '<packed-item-id>:<stack-id>:1 — packed entity to deploy from cargo.',
                 parseCargoInput
             )
-            .option('--estimate', 'print cargo delta and validate inputs without submitting')
             .addOption(
                 new Option(
                     '--modules <json>',
                     'modules vector for the packed entity (JSON array, default [])'
                 )
             )
-            .addOption(WAIT_OPTION)
-            .addOption(TRACK_OPTION)
             .action(async (input: ParsedCargoInput, opts: DeployCliOptions) => {
                 await runDeploy(ctx, input, opts)
             }),
