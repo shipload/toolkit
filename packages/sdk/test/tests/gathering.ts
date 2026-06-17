@@ -266,9 +266,28 @@ describe('gathering', () => {
                 depth: UInt16.from(1000),
             })
             const rate = calc_gather_rate(rateGatherer, 10000, 5000, 500)
-            assert.equal(rate.secPerUnit, 35)
-            assert.equal(rate.unitsPerSec, 1 / 35)
-            assert.equal(rate.unitsPerMin, 60 / 35)
+            const expectedSecPerUnit =
+                ((10000 / 228) * 100 * (1 + 5000 / 5000)) / (500 * (500 / 1000))
+            assert.closeTo(rate.secPerUnit, expectedSecPerUnit, 1e-9)
+            assert.closeTo(rate.unitsPerSec, 1 / expectedSecPerUnit, 1e-12)
+            assert.closeTo(rate.unitsPerMin, 60 / expectedSecPerUnit, 1e-9)
+        })
+
+        test('calc_gather_rate does not floor per-unit time to whole seconds', () => {
+            // 1.40s/unit used to floor to 1s, reporting a flat 1.00/s for every (1,2)s deposit.
+            const gathererT1 = ServerContract.Types.gatherer_stats.from({
+                yield: UInt16.from(700),
+                drain: UInt16.from(25),
+                depth: UInt16.from(950),
+            })
+            const rate = calc_gather_rate(gathererT1, 1000, 600, 500)
+            const expectedSecPerUnit =
+                ((1000 / 228) * 100 * (1 + 600 / 5000)) / (700 * (500 / 1000))
+            assert.isAbove(expectedSecPerUnit, 1)
+            assert.isBelow(expectedSecPerUnit, 2)
+            assert.closeTo(rate.secPerUnit, expectedSecPerUnit, 1e-9)
+            assert.notEqual(rate.unitsPerSec, 1)
+            assert.closeTo(rate.unitsPerSec, 1 / expectedSecPerUnit, 1e-12)
         })
     })
 
