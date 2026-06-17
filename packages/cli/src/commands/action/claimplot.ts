@@ -69,10 +69,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             )
             .addHelpText(
                 'before',
-                'Requires: this entity has a Crafter module installed, is at <x> <y>, ' +
+                'Requires: this entity has a Crafter module installed, is idle, is at <x> <y>, ' +
                     'and <x> <y> is a planet.\n' +
-                    'On resolve, a new Plot entity is created at <x> <y> with capacity = sum of recipe input masses. ' +
-                    'Then unload recipe inputs into the Plot and run `buildplot` on the same entity.\n'
+                    'Creates a new Plot entity immediately at <x> <y> (capacity = sum of recipe input masses) ' +
+                    'and prints its id. Then unload recipe inputs into the Plot and run `buildplot` on the same entity.\n'
             )
             .addHelpText(
                 'after',

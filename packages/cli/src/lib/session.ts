@@ -72,6 +72,7 @@ const TASK_RESULT_ACTIONS = [
 	"rmmodule",
 ];
 const DEPLOY_ACTIONS = ["deploy"];
+const CLAIM_ACTIONS = ["claimplot"];
 const RESOLVE_ACTIONS = ["resolve"];
 const CANCEL_ACTIONS = ["cancel"];
 
@@ -132,6 +133,13 @@ async function formatActionResult(
 		const results = ServerTypes.task_results.from(returnData);
 		const lines = results.entities.map(
 			(e) => `Deployed ${e.entity_type.toString()} ${e.entity_id.toString()}.`,
+		);
+		return lines.length > 0 ? lines.join("\n") : null;
+	}
+	if (CLAIM_ACTIONS.includes(actionName)) {
+		const results = ServerTypes.task_results.from(returnData);
+		const lines = results.entities.map(
+			(e) => `Claimed ${e.entity_type.toString()} ${e.entity_id.toString()}.`,
 		);
 		return lines.length > 0 ? lines.join("\n") : null;
 	}

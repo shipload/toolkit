@@ -79,13 +79,10 @@ export class PlotManager extends BaseManager {
         }
 
         let state: BuildableTarget['state']
-        const taskType = activeTask?.type.toNumber()
         if (scheduledBuild?.hasStarted) {
             state = 'finalizing'
         } else if (scheduledBuild) {
             state = 'scheduled'
-        } else if (taskType === TaskType.CLAIMPLOT) {
-            state = 'initializing'
         } else if (progress.isComplete) {
             state = 'ready'
         } else {
