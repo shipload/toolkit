@@ -1,6 +1,6 @@
 {
     "catalog_hash": "ecd381a68bfe85da15e24d832c2390cc7a5baa719b22175ad2eb89bdea21ff5f",
-    "generated_at": "2026-06-13T06:21:57.138Z",
+    "generated_at": "2026-06-17T16:27:09.015Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -76,6 +76,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 0,
@@ -106,7 +107,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -189,6 +190,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 1,
@@ -219,7 +221,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -297,6 +299,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 0,
@@ -327,7 +330,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -405,6 +408,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 1,
@@ -435,7 +439,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -505,7 +509,7 @@
                             "tasks": [
                                 {
                                     "type": 3,
-                                    "duration": 18,
+                                    "duration": 20,
                                     "cancelable": 2,
                                     "cargo": [
                                         {
@@ -518,12 +522,14 @@
                                     "entitytarget": {
                                         "entity_type": "warehouse",
                                         "entity_id": 2
-                                    }
+                                    },
+                                    "hold": 1
                                 }
                             ]
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 0,
@@ -554,7 +560,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -624,7 +630,7 @@
                             "tasks": [
                                 {
                                     "type": 3,
-                                    "duration": 18,
+                                    "duration": 20,
                                     "cancelable": 2,
                                     "cargo": [
                                         {
@@ -637,12 +643,14 @@
                                     "entitytarget": {
                                         "entity_type": "warehouse",
                                         "entity_id": 2
-                                    }
+                                    },
+                                    "hold": 1
                                 }
                             ]
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 1,
@@ -681,7 +689,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -772,6 +780,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 0,
@@ -802,7 +811,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -893,6 +902,7 @@
                         }
                     }
                 ],
+                "holds": [],
                 "cargo": []
             },
             "task_count": 1,
@@ -931,7 +941,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {
@@ -955,7 +965,7 @@
                     "z": 800
                 },
                 "energy": 1056,
-                "cargomass": 1500000,
+                "cargomass": 0,
                 "modules": [
                     {
                         "type": 0,
@@ -993,181 +1003,11 @@
                         }
                     }
                 ],
-                "lanes": [
-                    {
-                        "lane_key": 0,
-                        "schedule": {
-                            "started": "2024-01-29T00:00:00.000",
-                            "tasks": [
-                                {
-                                    "type": 8,
-                                    "duration": 60,
-                                    "cancelable": 2,
-                                    "coordinates": {
-                                        "x": -47,
-                                        "y": -49,
-                                        "z": 800
-                                    },
-                                    "cargo": [
-                                        {
-                                            "item_id": 10200,
-                                            "stats": 11111,
-                                            "modules": [],
-                                            "quantity": 1
-                                        }
-                                    ],
-                                    "energy_cost": 0
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "cargo": [
-                    {
-                        "item_id": 10200,
-                        "stats": "11111",
-                        "modules": [],
-                        "quantity": 1
-                    }
-                ]
+                "lanes": [],
+                "holds": [],
+                "cargo": []
             },
             "task_count": 0,
-            "expected": {
-                "owner": "alice",
-                "coordinates": {
-                    "x": -47,
-                    "y": -49,
-                    "z": 800
-                },
-                "energy": 1056,
-                "cargomass": 1500000,
-                "cargo": [
-                    {
-                        "item_id": 10200,
-                        "stats": 11111,
-                        "modules": [],
-                        "quantity": 1,
-                        "id": 1000000
-                    }
-                ],
-                "hullmass": 5784025,
-                "capacity": 7326256,
-                "engines": {
-                    "thrust": 559,
-                    "drain": 94
-                },
-                "generator": {
-                    "capacity": 1056,
-                    "recharge": 2
-                },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 1,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
-            }
-        },
-        {
-            "name": "ship-deploy-step1",
-            "input": {
-                "id": 1,
-                "owner": "alice",
-                "kind": "ship",
-                "item_id": 10201,
-                "name": "alice's ship",
-                "stats": "228930573525",
-                "coordinates": {
-                    "x": -47,
-                    "y": -49,
-                    "z": 800
-                },
-                "energy": 1056,
-                "cargomass": 1500000,
-                "modules": [
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10100,
-                            "stats": "228930573525"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10101,
-                            "stats": "228930573525"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10103,
-                            "stats": "228930573525"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10102,
-                            "stats": "228930573525"
-                        }
-                    },
-                    {
-                        "type": 0,
-                        "installed": {
-                            "item_id": 10104,
-                            "stats": "228930573525"
-                        }
-                    }
-                ],
-                "lanes": [
-                    {
-                        "lane_key": 0,
-                        "schedule": {
-                            "started": "2024-01-29T00:00:00.000",
-                            "tasks": [
-                                {
-                                    "type": 8,
-                                    "duration": 60,
-                                    "cancelable": 2,
-                                    "coordinates": {
-                                        "x": -47,
-                                        "y": -49,
-                                        "z": 800
-                                    },
-                                    "cargo": [
-                                        {
-                                            "item_id": 10200,
-                                            "stats": 11111,
-                                            "modules": [],
-                                            "quantity": 1
-                                        }
-                                    ],
-                                    "energy_cost": 0
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "cargo": [
-                    {
-                        "item_id": 10200,
-                        "stats": "11111",
-                        "modules": [],
-                        "quantity": 1
-                    }
-                ]
-            },
-            "task_count": 1,
             "expected": {
                 "owner": "alice",
                 "coordinates": {
@@ -1195,7 +1035,7 @@
                 },
                 "loaders": {
                     "mass": 1574,
-                    "thrust": 1,
+                    "thrust": 5,
                     "quantity": 1
                 },
                 "crafter": {

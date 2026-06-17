@@ -97,7 +97,7 @@ export function computeLoaderCapabilities(stats: Record<string, number>): {
 
     return {
         mass: Math.max(200, 2000 - Math.floor(insulation * 2)),
-        thrust: 1 + Math.floor(plasticity / 500),
+        thrust: 1 + Math.floor((plasticity * plasticity) / 10000),
         quantity: 1,
     }
 }

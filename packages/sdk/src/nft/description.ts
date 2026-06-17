@@ -57,7 +57,7 @@ export const computeGathererDrain = (con: number): number =>
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
 export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
-export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla, 500)
+export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla * pla, 10000)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (fin: number): number => Math.max(5, 30 - idiv(fin, 33))
 export const computeHaulerCapacity = (fin: number): number => Math.max(1, 1 + idiv(fin, 400))
