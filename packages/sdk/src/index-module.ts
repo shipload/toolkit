@@ -65,6 +65,8 @@ export type {
     Reservation,
 } from './managers'
 export type {EntityRefInput} from './managers/actions'
+export type {WrapDeposit} from './managers/nft'
+export {resolveLockedAmount} from './managers/nft'
 
 export {
     getItem,
