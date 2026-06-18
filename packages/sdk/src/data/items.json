@@ -357,7 +357,7 @@
   },
   {
     "id": 10002,
-    "mass": 6000,
+    "mass": 4000,
     "type": "component",
     "tier": 1
   },
@@ -369,13 +369,13 @@
   },
   {
     "id": 10004,
-    "mass": 6000,
+    "mass": 4000,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10005,
-    "mass": 6000,
+    "mass": 4000,
     "type": "component",
     "tier": 1
   },
@@ -399,106 +399,106 @@
   },
   {
     "id": 10009,
-    "mass": 6000,
+    "mass": 4000,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10010,
-    "mass": 6000,
+    "mass": 4000,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10100,
-    "mass": 900000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "engine"
   },
   {
     "id": 10101,
-    "mass": 1400000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "generator"
   },
   {
     "id": 10102,
-    "mass": 1200000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "gatherer"
   },
   {
     "id": 10103,
-    "mass": 1000000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "loader"
   },
   {
     "id": 10104,
-    "mass": 1200000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "crafter"
   },
   {
     "id": 10105,
-    "mass": 1200000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "storage"
   },
   {
     "id": 10106,
-    "mass": 1400000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "hauler"
   },
   {
     "id": 10107,
-    "mass": 1400000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "warp"
   },
   {
     "id": 10108,
-    "mass": 1000000,
+    "mass": 960000,
     "type": "module",
     "tier": 1,
     "subtype": "battery"
   },
   {
     "id": 10200,
-    "mass": 1500000,
+    "mass": 1300000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10201,
-    "mass": 2300000,
+    "mass": 1900000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10202,
-    "mass": 5800000,
+    "mass": 4800000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10203,
-    "mass": 4400000,
+    "mass": 3700000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10204,
-    "mass": 5500000,
+    "mass": 4600000,
     "type": "entity",
     "tier": 1
   },
