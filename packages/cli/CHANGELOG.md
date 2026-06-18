@@ -1,5 +1,24 @@
 # @shipload/cli
 
+## 1.0.0-next.37
+
+### Patch Changes
+
+- cb148e2: - Test fixes
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirrored instant claimplot from contract
+  - Updates for entity deploy
+  - Simplifying T1 dual-input recipes
+  - NFT Entity Wrap
+  - Rebalanced load/unload mechanics (mirror from contract)
+  - Fix gathering rate calculation
+- Updated dependencies [cb148e2]
+  - @shipload/oracle@0.0.1-next.23
+  - @shipload/sdk@1.0.0-next.33
+
 ## 1.0.0-next.36
 
 ### Patch Changes
