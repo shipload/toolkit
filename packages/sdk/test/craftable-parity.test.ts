@@ -79,8 +79,8 @@ describe('maxCraftable', () => {
     test('matches factory-12 craftable capacity with and without a pending craft', () => {
         const recipe = getRecipe(ITEM_RESONATOR)!
 
-        expect(maxCraftable(fixture(false), recipe, CRAFTER_SPEED, NOW)).toBe(374)
-        expect(maxCraftable(fixture(true), recipe, CRAFTER_SPEED, NOW)).toBe(373)
+        expect(maxCraftable(fixture(false), recipe, CRAFTER_SPEED, NOW)).toBe(673)
+        expect(maxCraftable(fixture(true), recipe, CRAFTER_SPEED, NOW)).toBe(672)
     })
 
     test('counts completed-but-unsettled crafts as already spent (cargo drained to 3x 101)', () => {
@@ -90,7 +90,7 @@ describe('maxCraftable', () => {
 
     test('credits an in-transit load by delaying the craft until inputs are ready', () => {
         const recipe = getRecipe(ITEM_RESONATOR)!
-        // 1824 incoming 101 + 3 on hand = 1827; 1827 / 9 = 203 (crystal headroom is higher).
+        // Symmetric 5+5 recipe makes crystal (201) the binding input here: 271 craftable.
         expect(
             maxCraftable(
                 factory12({incomingLoad: true}),
@@ -98,6 +98,6 @@ describe('maxCraftable', () => {
                 FACTORY_12_CRAFTER_SPEED,
                 FACTORY_12_NOW
             )
-        ).toBe(203)
+        ).toBe(271)
     })
 })
