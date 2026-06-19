@@ -31,13 +31,14 @@ export function composeIdleResolve(
         add(blocker.id)
     }
 
-    for (const hold of blocker.holds ?? []) {
-        const counterpartId = hold.counterpart.entity_id
-        if (lookupCounterpart) {
+    // Without a lookup we cannot confirm the counterpart has a completed task, so skip it.
+    if (lookupCounterpart) {
+        for (const hold of blocker.holds ?? []) {
+            const counterpartId = hold.counterpart.entity_id
             const counterpart = lookupCounterpart(counterpartId)
             if (!counterpart || !hasResolvable(counterpart, now)) continue
+            add(counterpartId)
         }
-        add(counterpartId)
     }
 
     return [...ids.map((id) => actions.resolve(id)), action]

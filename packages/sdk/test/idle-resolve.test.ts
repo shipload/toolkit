@@ -90,7 +90,9 @@ describe('composeIdleResolve', () => {
 
     test('giver of a pull resolves the COUNTERPART, not the blocker', () => {
         const blocker = entity(5, {holds: [holdOn(7)]})
-        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW)
+        const counterpart = entity(7, {lanes: [lane(60, PAST)]})
+        const lookup = (cid: UInt64) => (cid.equals(UInt64.from(7)) ? counterpart : undefined)
+        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW, lookup)
 
         expect(resolvedIds(result)).toEqual(['7'])
         expect(resolvedIds(result)).not.toContain('5')
@@ -99,7 +101,9 @@ describe('composeIdleResolve', () => {
 
     test('own resolvable task plus a hold on a different counterpart emits both, deduped, action last', () => {
         const blocker = entity(5, {lanes: [lane(60, PAST)], holds: [holdOn(7)]})
-        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW)
+        const counterpart = entity(7, {lanes: [lane(60, PAST)]})
+        const lookup = (cid: UInt64) => (cid.equals(UInt64.from(7)) ? counterpart : undefined)
+        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW, lookup)
 
         expect(result.length).toBe(3)
         expect(resolvedIds(result).sort()).toEqual(['5', '7'])
@@ -129,9 +133,19 @@ describe('composeIdleResolve', () => {
         expect(resolvedIds(result)).toEqual(['7'])
     })
 
+    test('without lookupCounterpart, a hold counterpart is not resolved (it may be in-flight)', () => {
+        const blocker = entity(5, {holds: [holdOn(7)]})
+        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW)
+
+        expect(resolvedIds(result)).toEqual([])
+        expect(result.length).toBe(1)
+        expect(result[0]).toBe(ACTION)
+    })
+
     test('dedup: blocker self-resolvable AND a hold whose counterpart IS the blocker → single resolve', () => {
         const blocker = entity(5, {lanes: [lane(60, PAST)], holds: [holdOn(5)]})
-        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW)
+        const lookup = (cid: UInt64) => (cid.equals(UInt64.from(5)) ? blocker : undefined)
+        const result = composeIdleResolve(blocker, ACTION, sl.actions, NOW, lookup)
 
         expect(resolvedIds(result)).toEqual(['5'])
         expect(result.length).toBe(2)
