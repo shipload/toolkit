@@ -15,6 +15,7 @@ import { extractChainError, printError } from "./errors";
 import {
 	formatCancelResults,
 	formatDuration,
+	formatResolveAllResults,
 	formatResolveResults,
 } from "./format";
 import { getEntitySnapshot } from "./snapshot";
@@ -74,6 +75,7 @@ const TASK_RESULT_ACTIONS = [
 const DEPLOY_ACTIONS = ["deploy"];
 const CLAIM_ACTIONS = ["claimplot"];
 const RESOLVE_ACTIONS = ["resolve"];
+const RESOLVEALL_ACTIONS = ["resolveall"];
 const CANCEL_ACTIONS = ["cancel"];
 
 function getActions(args: TransactArgs): (Action | AnyAction)[] {
@@ -146,6 +148,10 @@ async function formatActionResult(
 	if (RESOLVE_ACTIONS.includes(actionName)) {
 		const results = ServerTypes.resolve_results.from(returnData);
 		return formatResolveResults(results);
+	}
+	if (RESOLVEALL_ACTIONS.includes(actionName)) {
+		const results = ServerTypes.resolveall_results.from(returnData);
+		return formatResolveAllResults(results);
 	}
 	if (CANCEL_ACTIONS.includes(actionName)) {
 		const results = ServerTypes.cancel_results.from(returnData);

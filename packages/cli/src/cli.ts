@@ -16,6 +16,7 @@ import * as load from './commands/action/load'
 import * as recharge from './commands/action/recharge'
 import * as refrshentity from './commands/action/refrshentity'
 import * as resolve from './commands/action/resolve'
+import * as resolveall from './commands/action/resolveall'
 import * as rmmodule from './commands/action/rmmodule'
 import * as route from './commands/route'
 import * as track from './commands/action/track'
@@ -125,6 +126,7 @@ export function build(): Command {
     registerEntitySubcommand(travel.SUBCOMMAND)
     grouptravel.register(program)
     route.register(program)
+    resolveall.register(program)
     registerEntitySubcommand(warp.SUBCOMMAND)
     registerEntitySubcommand(gather.SUBCOMMAND)
     registerEntitySubcommand(load.SUBCOMMAND)

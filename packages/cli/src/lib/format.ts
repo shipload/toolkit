@@ -463,6 +463,18 @@ export function formatResolveResults(results:ServerTypes.resolve_results): strin
 	return lines.join("\n");
 }
 
+export function formatResolveAllResults(results: ServerTypes.resolveall_results): string {
+	const scanned = Number(results.scanned);
+	const resolved = Number(results.resolved);
+	if (resolved === 0) {
+		return scanned === 0
+			? "No entities owned to resolve"
+			: `No entities resolved (scanned ${scanned})`;
+	}
+	const word = resolved === 1 ? "entity" : "entities";
+	return `Resolved ${resolved} ${word} (scanned ${scanned})`;
+}
+
 export function formatCancelResults(results:ServerTypes.cancel_results): string {
 	if (Number(results.cancelled_count) === 0) return "No tasks cancelled";
 	const lines = [
