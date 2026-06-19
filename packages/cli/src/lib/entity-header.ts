@@ -415,7 +415,7 @@ function describeHoldKind(kind: number): { label: string; preposition: string } 
 		case HoldKind.PUSH:
 			return { label: "Incoming transfer", preposition: "from" };
 		case HoldKind.PULL:
-			return { label: "Outgoing reservation", preposition: "to" };
+			return { label: "Outgoing transfer", preposition: "to" };
 		case HoldKind.GATHER:
 			return { label: "Gather incoming", preposition: "from" };
 		case HoldKind.BUILD:
@@ -438,7 +438,12 @@ function entityHoldsSection(entity: ServerTypes.entity_info): string | null {
 		if (eta > 0) parts.push(`ETA ${formatDuration(eta)}`);
 		return [`${label}:`, parts.join(" · ")];
 	});
-	return kvTable(rows);
+	const table = kvTable(rows);
+	const hasOutgoing = holds.some((h) => Number(h.kind) === HoldKind.PULL);
+	if (!hasOutgoing) return table;
+	const note =
+		"  Outgoing transfer cargo is already debited; it rides in the receiver's incoming task until resolve.";
+	return [table, note].join("\n");
 }
 
 function entityScheduleSection(

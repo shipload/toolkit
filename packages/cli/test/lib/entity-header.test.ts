@@ -153,6 +153,27 @@ describe("renderEntityFull holds", () => {
 		expect(out).not.toContain("counterpart");
 	});
 
+	test("outgoing pull hold renders an outgoing transfer line with an in-flight note", () => {
+		const until = new Date(Date.now() + 30_000).toISOString().slice(0, 23);
+		const ei = ServerContract.Types.entity_info.from({
+			...base,
+			holds: [
+				{
+					id: 1,
+					kind: HoldKind.PULL,
+					counterpart: { entity_type: "ship", entity_id: 14 },
+					until,
+					incoming_mass: 0,
+				},
+			],
+		});
+		const out = renderEntityFull(ei);
+		expect(out).toContain("Outgoing transfer:");
+		expect(out).toContain("to ship 14");
+		expect(out).toContain("already debited");
+		expect(out).not.toContain("Outgoing reservation");
+	});
+
 	test("build hold renders under construction with the builder", () => {
 		const until = new Date(Date.now() + 120_000).toISOString().slice(0, 23);
 		const ei = ServerContract.Types.entity_info.from({
