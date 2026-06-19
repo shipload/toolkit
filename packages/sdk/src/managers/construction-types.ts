@@ -46,6 +46,7 @@ export interface SourceCargoStack {
 
 export interface FinalizerEntityRef {
     entityId: UInt64
+    entityType: Name
     name: string
     capability: FinalizerCapability
     crafterSpeed: number

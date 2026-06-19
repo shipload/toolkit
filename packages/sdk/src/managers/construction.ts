@@ -71,7 +71,8 @@ export class ConstructionManager extends BaseManager {
             if (speed === undefined) continue
             out.push({
                 entityId: entity.id,
-                name: entity.id.toString(),
+                entityType: entity.type,
+                name: entity.entity_name,
                 capability: 'crafter',
                 crafterSpeed: speed,
                 estimatedDuration: this.estimateFinalizeDuration(target, speed),
