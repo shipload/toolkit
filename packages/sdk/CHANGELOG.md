@@ -1,5 +1,22 @@
 # @shipload/sdk
 
+## 1.0.0-next.34
+
+### Patch Changes
+
+- fdc5896: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - added cli command for resolveall
+  - Mirrored instant claimplot from contract
+  - Updates for entity deploy
+  - Show builder type and name in finalizer picker
+  - Support live entity subscriptions
+  - Only resolve hold counterparts a lookup confirms are resolvable
+  - Support for resolveall action
+- 2cc3067: composeIdleResolve no longer emits a resolve for a hold counterpart unless a lookupCounterpart confirms it has a completed task. Without the lookup the counterpart may be in-flight, which produced spurious "No completed tasks to resolve." failures on transfers.
+
 ## 1.0.0-next.33
 
 ### Patch Changes

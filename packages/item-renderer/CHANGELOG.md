@@ -1,5 +1,24 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.34
+
+### Patch Changes
+
+- fdc5896: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - added cli command for resolveall
+  - Mirrored instant claimplot from contract
+  - Updates for entity deploy
+  - Show builder type and name in finalizer picker
+  - Support live entity subscriptions
+  - Only resolve hold counterparts a lookup confirms are resolvable
+  - Support for resolveall action
+- Updated dependencies [fdc5896]
+- Updated dependencies [2cc3067]
+  - @shipload/sdk@1.0.0-next.34
+
 ## 1.0.0-next.33
 
 ### Patch Changes
