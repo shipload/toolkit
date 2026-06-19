@@ -65,6 +65,12 @@ export class ActionsManager extends BaseManager {
         return this.server.action('resolve', params)
     }
 
+    resolveall(owner: NameType): Action {
+        return this.server.action('resolveall', {
+            owner: Name.from(owner),
+        })
+    }
+
     cancel(entityId: UInt64Type, laneKey: number, count: UInt64Type): Action {
         return this.server.action('cancel', {
             id: UInt64.from(entityId),

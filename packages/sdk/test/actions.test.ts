@@ -150,3 +150,11 @@ test('wrapEntity bundles setlastpayer by default when the atomicAssets account i
     expect(actions.length).toBe(2)
     expect(String(actions[1].name)).toBe('setlastpayer')
 })
+
+test('resolveall builds an eon.shipload::resolveall action for the owner', () => {
+    const action = sl.actions.resolveall('alice')
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('resolveall')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.owner)).toBe('alice')
+})

@@ -89,3 +89,8 @@ codegen/platform:
 
 codegen/server:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
+
+SERVER_ABI_LOCAL ?= ../../../contracts/src/server/build/server.abi
+
+codegen/server/local:
+	bunx @wharfkit/cli generate --json $(SERVER_ABI_LOCAL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
