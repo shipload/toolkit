@@ -39,7 +39,6 @@ export type UnsubscribeMessage = {
 export type SubscribeEntityMessage = {
     type: 'subscribe_entity'
     sub_id: string
-    entity_type: 'ship' | 'warehouse' | 'container' | 'nexus'
     entity_id: string
 }
 
@@ -79,8 +78,8 @@ export type AckMessage = {
 }
 
 export type WireEntity = Record<string, unknown> & {
-    type: number
-    type_name: 'ship' | 'warehouse' | 'container' | 'nexus'
+    type: number | string
+    type_name?: string
     id: string | number
     owner: string
     coordinates: WireCoordinates
@@ -112,6 +111,13 @@ export type BoundsDeltaMessage = {
     truncated?: boolean
 }
 
+export type EntityDeletedMessage = {
+    type: 'entity_deleted'
+    sub_id: string
+    entity_id: number
+    seq: number
+}
+
 export type EventMessage = {
     type: 'event'
     sub_id: string
@@ -138,6 +144,7 @@ export type ServerMessage =
     | SnapshotMessage
     | UpdateMessage
     | BoundsDeltaMessage
+    | EntityDeletedMessage
     | EventMessage
     | EventCatchupCompleteMessage
     | PongMessage
