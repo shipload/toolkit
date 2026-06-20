@@ -482,6 +482,7 @@ export {
 } from './data/tiers'
 
 export {formatMass, formatMassDelta, formatMassScaled, formatLocation} from './format'
+export * from './coordinates'
 
 export {displayName, baseName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
