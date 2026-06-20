@@ -37,6 +37,7 @@ import {
 import {EntityClass} from '../data/kind-registry'
 import {getItem} from '../data/catalog'
 import {hasSystem} from '../utils/system'
+import {WH} from '../derivation/wormhole'
 import * as scheduleModel from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
 
@@ -196,6 +197,12 @@ export function calc_ship_rechargetime(ship: ShipLike): UInt32 {
 
 export function calc_flighttime(distance: UInt64Type, acceleration: number): UInt32 {
     return UInt32.from(2 * Math.sqrt(Number(distance) / acceleration))
+}
+
+export function calc_transit_duration(ax: number, ay: number, bx: number, by: number): UInt32 {
+    const distance = distanceBetweenPoints(ax, ay, bx, by)
+    const full = calc_flighttime(distance, WH.TRANSIT_REFERENCE_ACCEL).toNumber()
+    return UInt32.from(Math.floor((full * WH.TRANSIT_DISCOUNT_MILLI) / 1000))
 }
 
 export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: number): UInt32 {

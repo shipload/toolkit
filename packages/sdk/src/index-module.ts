@@ -87,6 +87,7 @@ export type {EpochInfo} from './scheduling/epoch'
 export {
     getSystemName,
     hasSystem,
+    getLocationKind,
     getLocationType,
     getLocationTypeName,
     isGatherableLocation,
@@ -164,6 +165,7 @@ export {
     calc_ship_mass,
     calc_ship_rechargetime,
     calc_transfer_duration,
+    calc_transit_duration,
     calculateFlightTime,
     calculateLoadTimeBreakdown,
     calculateRefuelingTime,
@@ -355,6 +357,17 @@ export {
     gathererDepthForTier,
 } from './derivation/capabilities'
 export type {GathererDepthParams, ComputedCapabilities} from './derivation/capabilities'
+
+export {
+    WH,
+    feistel,
+    feistelInv,
+    regionOf,
+    partnerRegion,
+    wormholeAt,
+    wormholeAtRegionEndpoint,
+    isValidWormholePair,
+} from './derivation/wormhole'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {

@@ -3,6 +3,7 @@ import {hash512} from './hash'
 import {Coordinates, type CoordinatesType, LocationType} from '../types'
 import {ServerContract} from '../contracts'
 import {deriveLocationSize} from '../derivation/location-size'
+import {wormholeAt} from '../derivation/wormhole'
 import syllables from '../data/syllables.json'
 import nebulaAdjectives from '../data/nebula-adjectives.json'
 import nebulaNouns from '../data/nebula-nouns.json'
@@ -108,6 +109,16 @@ export function getSystemName(gameSeed: Checksum256Type, location: CoordinatesTy
 
 export function hasSystem(gameSeed: Checksum256Type, coordinates: CoordinatesType): boolean {
     return getLocationType(gameSeed, coordinates) !== LocationType.EMPTY
+}
+
+export function getLocationKind(
+    gameSeed: Checksum256Type,
+    x: number,
+    y: number
+): 'wormhole' | 'system' | 'empty' {
+    if (wormholeAt(gameSeed, x, y)) return 'wormhole'
+    if (hasSystem(gameSeed, {x, y})) return 'system'
+    return 'empty'
 }
 
 export function deriveLocationStatic(

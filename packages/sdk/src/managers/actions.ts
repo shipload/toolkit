@@ -3,6 +3,7 @@ import {
     Checksum256,
     type Checksum256Type,
     Int64,
+    type Int64Type,
     Name,
     type NameType,
     UInt8,
@@ -53,6 +54,20 @@ export class ActionsManager extends BaseManager {
             y,
             recharge,
         })
+    }
+
+    transit(shipId: UInt64Type, entrance: CoordinatesType, exit: CoordinatesType): Action {
+        return this.server.action('transit', {
+            id: UInt64.from(shipId),
+            ax: Int64.from(entrance.x),
+            ay: Int64.from(entrance.y),
+            bx: Int64.from(exit.x),
+            by: Int64.from(exit.y),
+        })
+    }
+
+    getwormhole(x: Int64Type, y: Int64Type): Action {
+        return this.server.action('getwormhole', {x: Int64.from(x), y: Int64.from(y)})
     }
 
     resolve(entityId: UInt64Type, count?: UInt64Type): Action {

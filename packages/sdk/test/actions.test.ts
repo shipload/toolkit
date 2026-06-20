@@ -158,3 +158,24 @@ test('resolveall builds an eon.shipload::resolveall action for the owner', () =>
     const data = action.decodeData(ServerContract.abi)
     expect(String(data.owner)).toBe('alice')
 })
+
+test('transit builds an eon.shipload::transit action with entrance and exit coords', () => {
+    const action = sl.actions.transit(1, {x: 10, y: 20}, {x: 99999, y: -88888})
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('transit')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.id)).toBe('1')
+    expect(Number(data.ax)).toBe(10)
+    expect(Number(data.ay)).toBe(20)
+    expect(Number(data.bx)).toBe(99999)
+    expect(Number(data.by)).toBe(-88888)
+})
+
+test('getwormhole builds an eon.shipload::getwormhole read-only action', () => {
+    const action = sl.actions.getwormhole(10, 20)
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('getwormhole')
+    const data = action.decodeData(ServerContract.abi)
+    expect(Number(data.x)).toBe(10)
+    expect(Number(data.y)).toBe(20)
+})
