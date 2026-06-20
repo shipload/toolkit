@@ -294,7 +294,9 @@ function entityDoesTaskType(entity: ScheduleData, taskType: TaskType, now: Date)
 
 export function isInFlight(entity: ScheduleData, now: Date): boolean {
     const lane = mobilityLane(entity)
-    return lane ? core.currentTaskType(lane.schedule, now) === TaskType.TRAVEL : false
+    if (!lane) return false
+    const t = core.currentTaskType(lane.schedule, now)
+    return t === TaskType.TRAVEL || t === TaskType.TRANSIT
 }
 
 export function isRecharging(entity: ScheduleData, now: Date): boolean {

@@ -26,6 +26,7 @@ import {
     distanceBetweenPoints,
     easeFlightProgress,
     flightSpeedFactor,
+    getDestinationLocation,
     getInterpolatedPosition,
     interpolateFlightPosition,
     lerp,
@@ -832,5 +833,38 @@ describe('getInterpolatedPosition', () => {
         const p = getInterpolatedPosition(entity, -1, 0)
         assert.strictEqual(p.x, 3)
         assert.strictEqual(p.y, 9)
+    })
+
+    test('TRANSIT task at progress 0.5 → interpolates entrance to exit (not origin)', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 9},
+                    coordinates: {x: 1000, y: 0},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
+        } as any
+        const p = getInterpolatedPosition(entity, 0, 0.5)
+        assert.isAbove(p.x, 400)
+        assert.isBelow(p.x, 600)
+    })
+
+    test('getDestinationLocation returns TRANSIT exit coordinates', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            lanes: mobilityLane([
+                {
+                    type: {equals: (t: any) => t === 9},
+                    coordinates: {x: 1000, y: 0},
+                    duration: {toNumber: () => 100},
+                },
+            ]),
+        } as any
+        const dest = getDestinationLocation(entity)
+        assert.isDefined(dest)
+        assert.strictEqual(dest!.x, 1000)
+        assert.strictEqual(dest!.y, 0)
     })
 })

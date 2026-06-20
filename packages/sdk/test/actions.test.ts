@@ -171,6 +171,26 @@ test('transit builds an eon.shipload::transit action with entrance and exit coor
     expect(Number(data.by)).toBe(-88888)
 })
 
+test('grouptransit builds an eon.shipload::grouptransit action with entities and endpoints', () => {
+    const action = sl.actions.grouptransit(
+        [
+            {entityType: 'ship', entityId: 1},
+            {entityType: 'container', entityId: 2},
+        ],
+        {x: 10, y: 20},
+        {x: 999000, y: 20}
+    )
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('grouptransit')
+    const data = action.decodeData(ServerContract.abi)
+    expect(data.entities.length).toBe(2)
+    expect(String(data.entities[0].entity_type)).toBe('ship')
+    expect(String(data.entities[0].entity_id)).toBe('1')
+    expect(String(data.entities[1].entity_type)).toBe('container')
+    expect(Number(data.ax)).toBe(10)
+    expect(Number(data.bx)).toBe(999000)
+})
+
 test('getwormhole builds an eon.shipload::getwormhole read-only action', () => {
     const action = sl.actions.getwormhole(10, 20)
     expect(String(action.account)).toBe('eon.shipload')

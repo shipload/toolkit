@@ -303,6 +303,7 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             break
         case TaskType.TRAVEL:
         case TaskType.WARP:
+        case TaskType.TRANSIT:
             applyFlightTask(projected, task, {complete: true})
             break
         case TaskType.LOAD:
@@ -461,6 +462,7 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 break
             case TaskType.TRAVEL:
             case TaskType.WARP:
+            case TaskType.TRANSIT:
                 applyFlightTask(projected, task, {complete: taskComplete, progress})
                 break
             case TaskType.LOAD:

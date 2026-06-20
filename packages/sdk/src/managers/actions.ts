@@ -38,13 +38,17 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    grouptravel(entities: EntityRefInput[], destination: CoordinatesType, recharge = true): Action {
-        const entityRefs = entities.map((e) =>
+    private entityRefs(entities: EntityRefInput[]) {
+        return entities.map((e) =>
             ServerContract.Types.entity_ref.from({
                 entity_type: e.entityType,
                 entity_id: UInt64.from(e.entityId),
             })
         )
+    }
+
+    grouptravel(entities: EntityRefInput[], destination: CoordinatesType, recharge = true): Action {
+        const entityRefs = this.entityRefs(entities)
         const x = Int64.from(destination.x)
         const y = Int64.from(destination.y)
 
@@ -59,6 +63,21 @@ export class ActionsManager extends BaseManager {
     transit(shipId: UInt64Type, entrance: CoordinatesType, exit: CoordinatesType): Action {
         return this.server.action('transit', {
             id: UInt64.from(shipId),
+            ax: Int64.from(entrance.x),
+            ay: Int64.from(entrance.y),
+            bx: Int64.from(exit.x),
+            by: Int64.from(exit.y),
+        })
+    }
+
+    grouptransit(
+        entities: EntityRefInput[],
+        entrance: CoordinatesType,
+        exit: CoordinatesType
+    ): Action {
+        const entityRefs = this.entityRefs(entities)
+        return this.server.action('grouptransit', {
+            entities: entityRefs,
             ax: Int64.from(entrance.x),
             ay: Int64.from(entrance.y),
             bx: Int64.from(exit.x),

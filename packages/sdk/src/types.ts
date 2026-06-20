@@ -51,6 +51,7 @@ export enum TaskType {
     WARP = 6,
     CRAFT = 7,
     DEPLOY = 8,
+    TRANSIT = 9,
     UNWRAP = 10,
     UNDEPLOY = 11,
     DEMOLISH = 13,

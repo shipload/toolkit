@@ -6,8 +6,7 @@ export const WH = {
     ZONE: 16384,
     THRESHOLD: 8192,
     MIN_REACH: 50000,
-    TRANSIT_DISCOUNT_MILLI: 150,
-    TRANSIT_REFERENCE_ACCEL: 100,
+    TRANSIT_SPEED: 500,
 } as const
 
 const HALF = Math.round(Math.log2(WH.ZONE))

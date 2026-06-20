@@ -181,6 +181,24 @@ describe('projectEntity (stack-aware)', () => {
         })
     })
 
+    describe('TRANSIT', () => {
+        test('completed transit task projects entity to exit coordinates', () => {
+            const ship = makeShipFixture({energy: 500})
+            ship.schedule = ServerContract.Types.schedule.from({
+                started: '2024-06-04T23:41:09.000',
+                tasks: [
+                    makeTask(TaskType.TRANSIT, {
+                        coordinates: {x: 42, y: 7},
+                        duration: 120,
+                    }),
+                ],
+            })
+            const projected = projectEntity(ship)
+            assert.equal(projected.location.x.toNumber(), 42)
+            assert.equal(projected.location.y.toNumber(), 7)
+        })
+    })
+
     describe('validateSchedule', () => {
         test('throws ENTITY_CAPACITY_EXCEEDED via validateSchedule', () => {
             const ship = makeShipFixture({capacity: 100})

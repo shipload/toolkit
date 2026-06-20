@@ -41,6 +41,10 @@ import {WH} from '../derivation/wormhole'
 import * as scheduleModel from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
 
+function isPositionalTask(task: ServerContract.Types.task): boolean {
+    return task.type.equals(TaskType.TRAVEL) || task.type.equals(TaskType.TRANSIT)
+}
+
 export function calc_orbital_altitude(mass: number): number {
     if (mass <= BASE_ORBITAL_MASS) {
         return MIN_ORBITAL_ALTITUDE
@@ -126,7 +130,7 @@ export function getInterpolatedPosition(
         return {x: Number(settled.x), y: Number(settled.y)}
     }
     const task = tasks[taskIndex]
-    if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
+    if (!isPositionalTask(task) || !task.coordinates) {
         const origin = getFlightOrigin(entity, taskIndex)
         return {x: Number(origin.x), y: Number(origin.y)}
     }
@@ -201,8 +205,7 @@ export function calc_flighttime(distance: UInt64Type, acceleration: number): UIn
 
 export function calc_transit_duration(ax: number, ay: number, bx: number, by: number): UInt32 {
     const distance = distanceBetweenPoints(ax, ay, bx, by)
-    const full = calc_flighttime(distance, WH.TRANSIT_REFERENCE_ACCEL).toNumber()
-    return UInt32.from(Math.floor((full * WH.TRANSIT_DISCOUNT_MILLI) / 1000))
+    return UInt32.from(Math.floor(distance.toNumber() / (PRECISION * WH.TRANSIT_SPEED)))
 }
 
 export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: number): UInt32 {
@@ -456,7 +459,7 @@ export function getFlightOrigin(
     let origin = entity.coordinates
     for (let i = 0; i < flightTaskIndex && i < tasks.length; i++) {
         const task = tasks[i]
-        if (task.type.equals(TaskType.TRAVEL) && task.coordinates) {
+        if (isPositionalTask(task) && task.coordinates) {
             origin = task.coordinates
         }
     }
@@ -469,7 +472,7 @@ export function getDestinationLocation(
     const tasks = mobilityTasks(entity)
     for (let i = tasks.length - 1; i >= 0; i--) {
         const task = tasks[i]
-        if (task.type.equals(TaskType.TRAVEL) && task.coordinates) {
+        if (isPositionalTask(task) && task.coordinates) {
             return task.coordinates
         }
     }
@@ -492,7 +495,7 @@ export function getPositionAt(
 
     const task = tasks[taskIndex]
 
-    if (!task.type.equals(TaskType.TRAVEL) || !task.coordinates) {
+    if (!isPositionalTask(task) || !task.coordinates) {
         return getFlightOrigin(entity, taskIndex)
     }
 

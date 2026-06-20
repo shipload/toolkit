@@ -176,6 +176,21 @@ describe('multi-lane scheduling', () => {
         expect(schedule.isIdle(entity)).toBeFalse()
         expect(schedule.isEntityIdle(entity, new Date('2026-06-02T11:00:00.000Z'))).toBeFalse()
     })
+
+    test('entity whose current mobility task is TRANSIT reads as in-flight', () => {
+        const entity = {
+            coordinates: {x: 0, y: 0},
+            lanes: [
+                lane(schedule.LANE_MOBILITY, STARTED, [
+                    makeTask(TaskType.TRANSIT, {duration: 100, coordinates: {x: 10, y: 0}}),
+                ]),
+            ],
+        }
+
+        const now = new Date(new Date(STARTED).getTime() + 50_000)
+
+        expect(schedule.isInFlight(entity, now)).toBeTrue()
+    })
 })
 
 describe('hasResolvable', () => {

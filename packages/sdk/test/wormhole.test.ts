@@ -10,6 +10,7 @@ import {
 } from '../src/derivation/wormhole'
 import {getLocationKind} from '../src/utils/system'
 import {calc_transit_duration} from '../src/travel/travel'
+import {PRECISION} from '../src/types'
 
 const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
 
@@ -27,8 +28,7 @@ describe('constants', () => {
             ZONE: 16384,
             THRESHOLD: 8192,
             MIN_REACH: 50000,
-            TRANSIT_DISCOUNT_MILLI: 150,
-            TRANSIT_REFERENCE_ACCEL: 100,
+            TRANSIT_SPEED: 500,
         })
     })
 })
@@ -82,5 +82,10 @@ describe('location kind + transit duration', () => {
 
     test('transit duration is positive and discounted', () => {
         expect(calc_transit_duration(0, 0, 100000, 0).toNumber()).toBeGreaterThan(0)
+    })
+
+    test('transit duration is fixed-velocity: distance / (PRECISION * WH.TRANSIT_SPEED)', () => {
+        expect(calc_transit_duration(0, 0, 300000, 0).toNumber()).toBe(600)
+        expect(WH.TRANSIT_SPEED).toBe(500)
     })
 })
