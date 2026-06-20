@@ -70,6 +70,15 @@ export class ActionsManager extends BaseManager {
         return this.server.action('getwormhole', {x: Int64.from(x), y: Int64.from(y)})
     }
 
+    getdistance(origin: CoordinatesType, destination: CoordinatesType): Action {
+        return this.server.action('getdistance', {
+            ax: Int64.from(origin.x),
+            ay: Int64.from(origin.y),
+            bx: Int64.from(destination.x),
+            by: Int64.from(destination.y),
+        })
+    }
+
     resolve(entityId: UInt64Type, count?: UInt64Type): Action {
         const params: ServerContract.ActionParams.resolve = {
             id: UInt64.from(entityId),
