@@ -36,7 +36,7 @@ export function taskCargoEffect(task: Task): CargoEffect {
     }
 }
 
-function cargoKey(item: CargoItem): string {
+export function cargoKey(item: CargoItem): string {
     const base = `${item.item_id.toNumber()}:${item.stats.toString()}`
     const modules = item.modules ?? []
     const entityId = item.entity_id?.toString()

@@ -234,6 +234,15 @@ export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 export {composeIdleResolve} from './scheduling/idle-resolve'
 export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'
 
+export {cancelEligibility, CancelBlockReason} from './scheduling/cancel'
+export type {
+    CancelPlan,
+    CancelEffects,
+    CancelRefund,
+    CancelReleasedHold,
+    CancelEligibilityInput,
+} from './scheduling/cancel'
+
 export {
     projectedCargoAvailableAt,
     availableForItem,

@@ -56,6 +56,8 @@ export const GROUP_HAUL_CAPACITY_EXCEEDED =
     'Group travel requires sufficient hauler capacity for all non-self-propelled entities.'
 export const CANCEL_CONTAINS_GROUPED_TASK =
     'Cannot cancel range containing grouped task - cancel non-grouped tasks first.'
+export const WOULD_STRAND = 'Cancelling this would leave a later task without the cargo it needs.'
+export const WOULD_OVERFILL = 'Cancelling this would overfill the other entity with returned cargo.'
 export const WARP_NO_CAPABILITY = 'Entity does not have warp capability.'
 export const WARP_HAS_SCHEDULE = 'Entity must be idle to warp.'
 export const WARP_HAS_CARGO = 'Entity must have no cargo to warp.'
