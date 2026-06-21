@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {Checksum256} from '@wharfkit/antelope'
 import {wormholeAt} from '../../src'
+import {getLocationKind, hasSystem} from '../../src/utils/system'
 import {computeCatalogHash, CATALOG_FILES_REL} from '../../src/testing'
 
 const FIXTURE_PATH = resolve(__dirname, '../fixtures/wormhole-cases.json')
@@ -55,4 +56,12 @@ describe('wormhole parity — fixture replay', () => {
             }
         })
     }
+
+    // A coordinate carrying both a raw system and a wormhole must resolve as a wormhole (contract getlocation precedence).
+    const SUPPRESSED = {x: -11234, y: -4942}
+    test('wormhole precedence suppresses a raw system', () => {
+        assert.isTrue(hasSystem(seed, SUPPRESSED))
+        assert.isNotNull(wormholeAt(seed, SUPPRESSED.x, SUPPRESSED.y))
+        assert.equal(getLocationKind(seed, SUPPRESSED.x, SUPPRESSED.y), 'wormhole')
+    })
 })
