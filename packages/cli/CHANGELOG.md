@@ -1,5 +1,23 @@
 # @shipload/cli
 
+## 1.0.0-next.39
+
+### Patch Changes
+
+- 0adee83: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Clarify outgoing transfers text
+  - Add TaskType.TRANSIT and grouptransit builder
+  - Add getdistance action helper
+  - Add coordinate addressing
+  - Add cancelEligibility helper for task cancellation
+  - add deterministic two-way wormholes
+- Updated dependencies [0adee83]
+  - @shipload/oracle@0.0.1-next.25
+  - @shipload/sdk@1.0.0-next.35
+
 ## 1.0.0-next.38
 
 ### Patch Changes
