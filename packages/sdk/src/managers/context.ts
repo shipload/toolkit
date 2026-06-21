@@ -6,6 +6,7 @@ import {GameState} from '../entities/gamestate'
 import {EntitiesManager} from './entities'
 import {PlayersManager} from './players'
 import {LocationsManager} from './locations'
+import {CoordinatesManager} from './coordinates'
 import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
 import {NftManager} from './nft'
@@ -15,6 +16,7 @@ export class GameContext {
     private _entities?: EntitiesManager
     private _players?: PlayersManager
     private _locations?: LocationsManager
+    private _coordinates?: CoordinatesManager
     private _epochs?: EpochsManager
     private _actions?: ActionsManager
     private _nft?: NftManager
@@ -50,6 +52,13 @@ export class GameContext {
             this._locations = new LocationsManager(this)
         }
         return this._locations
+    }
+
+    get coordinates(): CoordinatesManager {
+        if (!this._coordinates) {
+            this._coordinates = new CoordinatesManager(this)
+        }
+        return this._coordinates
     }
 
     get epochs(): EpochsManager {

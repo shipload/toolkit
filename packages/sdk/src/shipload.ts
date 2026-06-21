@@ -7,6 +7,7 @@ import {GameContext} from './managers/context'
 import type {EntitiesManager} from './managers/entities'
 import type {PlayersManager} from './managers/players'
 import type {LocationsManager} from './managers/locations'
+import type {CoordinatesManager} from './managers/coordinates'
 import type {EpochsManager} from './managers/epochs'
 import type {ActionsManager} from './managers/actions'
 import type {NftManager} from './managers/nft'
@@ -108,6 +109,10 @@ export class Shipload {
 
     get locations(): LocationsManager {
         return this._context.locations
+    }
+
+    get coordinates(): CoordinatesManager {
+        return this._context.coordinates
     }
 
     get epochs(): EpochsManager {
