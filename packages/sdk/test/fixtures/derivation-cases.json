@@ -1,0 +1,187 @@
+{
+    "catalog_hash": "8d3971c0e207f9d738bf74d94d0d311f02971fc51f27c3376b0762e682d98580",
+    "epoch_seed": "0202020202020202020202020202020202020202020202020202020202020202",
+    "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
+    "generated_at": "2026-06-21T04:02:14.721Z",
+    "stratum": [
+        {
+            "name": "asteroid: known yielding stratum",
+            "x": -49,
+            "y": 50,
+            "stratum": 8,
+            "expected": {
+                "item_id": 201,
+                "reserve": 134454,
+                "richness": 604,
+                "seed": "18298824793260127225"
+            }
+        },
+        {
+            "name": "nebula: known yielding stratum",
+            "x": -48,
+            "y": -7,
+            "stratum": 1107,
+            "expected": {
+                "item_id": 301,
+                "reserve": 11274,
+                "richness": 785,
+                "seed": "1104081681788411781"
+            }
+        },
+        {
+            "name": "gas giant: known yielding stratum",
+            "x": 0,
+            "y": 14,
+            "stratum": 99,
+            "expected": {
+                "item_id": 201,
+                "reserve": 11802,
+                "richness": 501,
+                "seed": "4600428321081920569"
+            }
+        },
+        {
+            "name": "rocky planet: known yielding stratum",
+            "x": -5,
+            "y": 6,
+            "stratum": 48,
+            "expected": {
+                "item_id": 401,
+                "reserve": 6709,
+                "richness": 608,
+                "seed": "9526419344518841836"
+            }
+        },
+        {
+            "name": "terrestrial: known yielding stratum",
+            "x": -47,
+            "y": -49,
+            "stratum": 95,
+            "expected": {
+                "item_id": 101,
+                "reserve": 6316,
+                "richness": 467,
+                "seed": "16397561610218869316"
+            }
+        },
+        {
+            "name": "icy planet: known yielding stratum",
+            "x": 4,
+            "y": 3,
+            "stratum": 90,
+            "expected": {
+                "item_id": 401,
+                "reserve": 31522,
+                "richness": 682,
+                "seed": "9586363057827563467"
+            }
+        },
+        {
+            "name": "asteroid stratum 1: shallow tier sample",
+            "x": -49,
+            "y": 50,
+            "stratum": 1,
+            "expected": {
+                "item_id": 0,
+                "reserve": 0,
+                "richness": 0,
+                "seed": "0"
+            }
+        },
+        {
+            "name": "gas giant stratum 200: deeper tier sample",
+            "x": 0,
+            "y": 14,
+            "stratum": 200,
+            "expected": {
+                "item_id": 0,
+                "reserve": 0,
+                "richness": 0,
+                "seed": "0"
+            }
+        }
+    ],
+    "eligible": [
+        {
+            "name": "asteroid",
+            "x": -49,
+            "y": 50,
+            "stratum": 60000,
+            "locType": 2,
+            "subtype": 141,
+            "expected": [101, 102, 103, 104, 105, 201, 202, 203, 204, 205]
+        },
+        {
+            "name": "nebula",
+            "x": -48,
+            "y": -7,
+            "stratum": 60000,
+            "locType": 3,
+            "subtype": 152,
+            "expected": [301, 302, 303, 304, 305, 401, 402, 403, 404, 405]
+        },
+        {
+            "name": "ice field",
+            "x": -48,
+            "y": -1,
+            "stratum": 60000,
+            "locType": 4,
+            "subtype": 239,
+            "expected": [301, 302, 303, 304, 305, 501, 502, 503, 504, 505]
+        },
+        {
+            "name": "planet/gas giant",
+            "x": 0,
+            "y": 14,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 0,
+            "expected": [201, 202, 203, 301, 302, 303, 304, 305, 306, 307, 308, 309]
+        },
+        {
+            "name": "planet/rocky",
+            "x": -5,
+            "y": 6,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 1,
+            "expected": [101, 102, 103, 401, 402, 403, 404, 405, 406, 407, 408, 409]
+        },
+        {
+            "name": "planet/terrestrial",
+            "x": -47,
+            "y": -49,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 2,
+            "expected": [101, 102, 103, 104, 105, 106, 107, 108, 109, 501, 502, 503]
+        },
+        {
+            "name": "planet/icy",
+            "x": 4,
+            "y": 3,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 3,
+            "expected": [201, 202, 203, 204, 205, 206, 207, 208, 209, 401, 402, 403]
+        },
+        {
+            "name": "planet/ocean",
+            "x": 15,
+            "y": 8,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 4,
+            "expected": [301, 302, 303, 501, 502, 503, 504, 505, 506, 507, 508, 509]
+        },
+        {
+            "name": "planet/industrial",
+            "x": 30,
+            "y": 12,
+            "stratum": 60000,
+            "locType": 1,
+            "subtype": 5,
+            "expected": [101, 102, 103, 201, 202, 203, 401, 402, 403, 501, 502, 503]
+        }
+    ]
+}
