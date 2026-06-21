@@ -3,7 +3,9 @@ import {
     COORD_MAX,
     COORD_MIN,
     COORD_OFFSET,
+    LOCAL_HALF,
     LOCAL_MAX,
+    LOCAL_MIN,
     REGION_DIV,
     REGION_PER_AXIS,
     SECTOR_DIV,
@@ -32,7 +34,7 @@ function sliceAxis(coord: number): AxisSlices {
     return {
         sector: Math.floor(u / SECTOR_DIV),
         region: Math.floor(u / REGION_DIV) % REGION_PER_AXIS,
-        local: u % REGION_DIV,
+        local: (u % REGION_DIV) - LOCAL_HALF,
     }
 }
 
@@ -54,17 +56,19 @@ export function decodeAddress(
     if (
         !Number.isInteger(addr.localX) ||
         !Number.isInteger(addr.localY) ||
-        addr.localX < 0 ||
+        addr.localX < LOCAL_MIN ||
         addr.localX > LOCAL_MAX ||
-        addr.localY < 0 ||
+        addr.localY < LOCAL_MIN ||
         addr.localY > LOCAL_MAX
     ) {
         throw new RangeError(`local position out of range: ${addr.localX}, ${addr.localY}`)
     }
     const sector = decodeSector(seed, addr.sector)
     const region = decodeRegion(seed, addr.region)
-    const x = sector.sx * SECTOR_DIV + region.rx * REGION_DIV + addr.localX - COORD_OFFSET
-    const y = sector.sy * SECTOR_DIV + region.ry * REGION_DIV + addr.localY - COORD_OFFSET
+    const x =
+        sector.sx * SECTOR_DIV + region.rx * REGION_DIV + (addr.localX + LOCAL_HALF) - COORD_OFFSET
+    const y =
+        sector.sy * SECTOR_DIV + region.ry * REGION_DIV + (addr.localY + LOCAL_HALF) - COORD_OFFSET
     if (x < COORD_MIN || x > COORD_MAX || y < COORD_MIN || y > COORD_MAX) {
         throw new RangeError(`address decodes outside the coordinate range: ${x}, ${y}`)
     }

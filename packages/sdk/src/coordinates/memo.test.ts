@@ -26,4 +26,22 @@ describe('encodeAddressMemo', () => {
         const addr = encodeAddressMemo(SEED, -5, 7)
         expect(decodeAddress(SEED, addr)).toEqual({x: -5, y: 7})
     })
+
+    test('origin is centered: raw (0,0) is local (0,0)', () => {
+        const addr = encodeAddressMemo(SEED, 0, 0)
+        expect([addr.localX, addr.localY]).toEqual([0, 0])
+    })
+
+    test('origin neighbors share the origin region', () => {
+        const origin = encodeAddressMemo(SEED, 0, 0)
+        for (const [x, y] of [
+            [-1, -1],
+            [4999, 4999],
+            [-5000, -5000],
+        ] as const) {
+            expect(encodeAddressMemo(SEED, x, y).region).toBe(origin.region)
+        }
+        // first tile outside the origin region on each axis falls into a different region
+        expect(encodeAddressMemo(SEED, 5000, 0).region).not.toBe(origin.region)
+    })
 })
