@@ -13,6 +13,7 @@ import {
     isWarehouse,
 } from '../src/data/kind-registry'
 import {Entity} from '../src/entities/entity'
+import {rollupCrafter, rollupGatherer, rollupLoaders} from '../src/derivation/rollups'
 import {ServerContract} from '../src/contracts'
 import {makeEntity} from '../src/entities/makers'
 import {
@@ -149,8 +150,9 @@ describe('Entity unification — registry-driven', () => {
                 }),
                 Entity.prototype
             ) as Entity
-            expect(Number(e.loaders!.thrust)).toBe(65535)
-            expect(Number(e.loaders!.quantity)).toBe(2)
+            const loaders = rollupLoaders(e.loader_lanes)!
+            expect(Number(loaders.thrust)).toBe(65535)
+            expect(Number(loaders.quantity)).toBe(2)
         })
 
         test('crafter.speed clamps when two lanes sum past 65535', () => {
@@ -163,7 +165,7 @@ describe('Entity unification — registry-driven', () => {
                 }),
                 Entity.prototype
             ) as Entity
-            expect(Number(e.crafter!.speed)).toBe(65535)
+            expect(Number(rollupCrafter(e.crafter_lanes)!.speed)).toBe(65535)
         })
 
         test('gatherer.yield clamps when two lanes sum past 65535', () => {
@@ -176,8 +178,9 @@ describe('Entity unification — registry-driven', () => {
                 }),
                 Entity.prototype
             ) as Entity
-            expect(Number(e.gatherer!.yield)).toBe(65535)
-            expect(Number(e.gatherer!.depth)).toBe(900)
+            const gatherer = rollupGatherer(e.gatherer_lanes)!
+            expect(Number(gatherer.yield)).toBe(65535)
+            expect(Number(gatherer.depth)).toBe(900)
         })
     })
 })

@@ -1,11 +1,8 @@
-import { type ServerTypes, schedule } from "@shipload/sdk";
+import { type ServerTypes, schedule, rollupGatherer, rollupCrafter, rollupLoaders } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
 import type { LaneTaskView } from "./cancel-compute";
 import { server } from "./client";
-
-const UINT16_MAX = 65535n;
-const clampU16 = (value: bigint): bigint => (value > UINT16_MAX ? UINT16_MAX : value);
 
 export interface EntitySnapshot {
 	type: string;
@@ -85,17 +82,8 @@ export function entityInfoToSnapshot(
 			recharge: BigInt(ei.generator.recharge.toString()),
 		};
 	}
-	const gathererLanes = ei.gatherer_lanes ?? []
-	if (gathererLanes.length > 0) {
-		let totalYield = 0n, totalDrain = 0n, maxDepth = 0n
-		for (const l of gathererLanes) {
-			totalYield += BigInt(l.yield.toString())
-			totalDrain += BigInt(l.drain.toString())
-			const d = BigInt(l.depth.toString())
-			if (d > maxDepth) maxDepth = d
-		}
-		snap.gatherer = {yield: clampU16(totalYield), drain: totalDrain, depth: maxDepth}
-	}
+	const g = rollupGatherer(ei.gatherer_lanes ?? []);
+	if (g) snap.gatherer = {yield: BigInt(g.yield.toString()), drain: BigInt(g.drain.toString()), depth: BigInt(g.depth.toString())};
 	if (ei.hauler != null) {
 		snap.hauler = {
 			capacity: BigInt(ei.hauler.capacity.toString()),
@@ -103,32 +91,13 @@ export function entityInfoToSnapshot(
 			drain: BigInt(ei.hauler.drain.toString()),
 		};
 	}
-	const crafterLanes = ei.crafter_lanes ?? []
-	if (crafterLanes.length > 0) {
-		let totalSpeed = 0n, totalDrain = 0n
-		for (const l of crafterLanes) {
-			totalSpeed += BigInt(l.speed.toString())
-			totalDrain += BigInt(l.drain.toString())
-		}
-		snap.crafter = {speed: clampU16(totalSpeed), drain: totalDrain}
-	}
+	const c = rollupCrafter(ei.crafter_lanes ?? []);
+	if (c) snap.crafter = {speed: BigInt(c.speed.toString()), drain: BigInt(c.drain.toString())};
 	if (ei.warp != null) {
 		snap.warp = {range: BigInt(ei.warp.range.toString())};
 	}
-	const loaderLanes = ei.loader_lanes ?? []
-	if (loaderLanes.length > 0) {
-		const count = BigInt(loaderLanes.length)
-		let totalMass = 0n, totalThrust = 0n
-		for (const l of loaderLanes) {
-			totalMass += BigInt(l.mass.toString())
-			totalThrust += BigInt(l.thrust.toString())
-		}
-		snap.loaders = {
-			mass: totalMass / count,
-			thrust: clampU16(totalThrust),
-			quantity: count,
-		}
-	}
+	const l = rollupLoaders(ei.loader_lanes ?? []);
+	if (l) snap.loaders = {mass: BigInt(l.mass.toString()), thrust: BigInt(l.thrust.toString()), quantity: BigInt(l.quantity.toString())};
 	return snap;
 }
 

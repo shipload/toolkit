@@ -386,6 +386,8 @@ export {
     isValidWormholePair,
 } from './derivation/wormhole'
 
+export {rollupGatherer, rollupCrafter, rollupLoaders} from './derivation/rollups'
+
 export {resolveItem} from './resolution/resolve-item'
 export type {
     ResolvedItem,
