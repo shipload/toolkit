@@ -15,6 +15,7 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_FACTORY_T1_PACKED,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
@@ -38,13 +39,18 @@ export function computeBaseHullmass(stats: bigint): number {
 }
 
 export function computeBaseCapacityShip(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
-    return Math.floor(5_000_000 * 6 ** (s / 2997))
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(5_000_000 * 6 ** (s / 1998))
+}
+
+export function computeBaseCapacityContainer(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(22_000_000 * 6 ** (s / 1998))
 }
 
 export function computeBaseCapacityWarehouse(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2) + decodeStat(stats, 3)
-    return Math.floor(100_000_000 * 6 ** (s / 2997))
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(100_000_000 * 6 ** (s / 1998))
 }
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
@@ -188,8 +194,8 @@ export function buildEntityDescription(
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)
-    } else if (itemId === ITEM_EXTRACTOR_T1_PACKED) {
-        baseCapacity = computeBaseCapacityShip(hullStats)
+    } else if (itemId === ITEM_EXTRACTOR_T1_PACKED || itemId === ITEM_FACTORY_T1_PACKED) {
+        baseCapacity = computeBaseCapacityContainer(hullStats)
     }
 
     let out = entityDisplayName(itemId)

@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test'
 
 import {
     computeBaseCapacity,
+    computeShipHullCapabilities,
     gathererDepthForTier,
     GATHERER_DEPTH_TABLE,
 } from '../src/derivation/capabilities'
@@ -60,6 +61,19 @@ describe('computeBaseCapacity', () => {
 
     test('unknown item IDs return 0 (contract parity)', () => {
         expect(computeBaseCapacity(99999, stats)).toBe(0)
+    })
+})
+
+describe('computeShipHullCapabilities (hull capacity formula)', () => {
+    test('asymmetric stats: capacity uses strength+hardness / 1998, not (strength+hardness+cohesion) / 2997', () => {
+        const result = computeShipHullCapabilities({
+            strength: 500,
+            hardness: 200,
+            cohesion: 400,
+            density: 100,
+        })
+        const expected = Math.floor(5_000_000 * 6 ** (700 / 1998))
+        expect(result.capacity).toBe(expected)
     })
 })
 

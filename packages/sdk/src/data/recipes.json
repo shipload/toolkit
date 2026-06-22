@@ -651,15 +651,15 @@
   },
   {
     "outputItemId": 10200,
-    "outputMass": 1300000,
+    "outputMass": 1900000,
     "inputs": [
       {
         "itemId": 10001,
         "quantity": 600
       },
       {
-        "itemId": 10002,
-        "quantity": 200
+        "itemId": 10008,
+        "quantity": 600
       }
     ],
     "statSlots": [
@@ -700,15 +700,27 @@
   },
   {
     "outputItemId": 10201,
-    "outputMass": 1900000,
+    "outputMass": 2400000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 800
+        "quantity": 300
       },
       {
-        "itemId": 10002,
-        "quantity": 400
+        "itemId": 10008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10003,
+        "quantity": 300
+      },
+      {
+        "itemId": 10006,
+        "quantity": 300
       }
     ],
     "statSlots": [
@@ -729,34 +741,24 @@
         ]
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 0
-          }
-        ]
+        "sources": []
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
+        "sources": []
       }
     ],
     "blendWeights": []
   },
   {
     "outputItemId": 10202,
-    "outputMass": 4800000,
+    "outputMass": 3200000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 2000
+        "quantity": 1000
       },
       {
-        "itemId": 10002,
+        "itemId": 10008,
         "quantity": 1000
       }
     ],
@@ -798,25 +800,20 @@
   },
   {
     "outputItemId": 10203,
-    "outputMass": 3700000,
+    "outputMass": 1900000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 1500
+        "itemId": 10008,
+        "quantity": 600
       },
       {
-        "itemId": 10002,
-        "quantity": 800
+        "itemId": 10006,
+        "quantity": 600
       }
     ],
     "statSlots": [
       {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
+        "sources": []
       },
       {
         "sources": [
@@ -829,51 +826,33 @@
       {
         "sources": [
           {
-            "inputIndex": 1,
+            "inputIndex": 0,
             "statIndex": 0
           }
         ]
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
+        "sources": []
       }
     ],
     "blendWeights": []
   },
   {
     "outputItemId": 10204,
-    "outputMass": 4600000,
+    "outputMass": 1900000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 1500
-      },
-      {
-        "itemId": 10002,
+        "itemId": 10008,
         "quantity": 600
       },
       {
-        "itemId": 10008,
-        "quantity": 400
-      },
-      {
-        "itemId": 10009,
-        "quantity": 400
+        "itemId": 10007,
+        "quantity": 600
       }
     ],
     "statSlots": [
       {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
+        "sources": []
       },
       {
         "sources": [
@@ -886,18 +865,13 @@
       {
         "sources": [
           {
-            "inputIndex": 1,
+            "inputIndex": 0,
             "statIndex": 0
           }
         ]
       },
       {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
+        "sources": []
       }
     ],
     "blendWeights": []

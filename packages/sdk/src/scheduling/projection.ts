@@ -17,7 +17,7 @@ import {
 } from '../errors'
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {computeEntityCapabilities} from '../derivation/capabilities'
-import {decodeCraftedItemStats} from '../derivation/crafting'
+import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
 import {lerp} from '../travel/travel'
 import {
@@ -106,6 +106,8 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         typeof entity.item_id === 'number' ? entity.item_id : entity.item_id.value
     )
     const hullStats = decodeCraftedItemStats(itemId, entity.stats)
+    if (hullStats.strength === undefined) hullStats.strength = decodeStat(entity.stats, 0)
+    if (hullStats.hardness === undefined) hullStats.hardness = decodeStat(entity.stats, 2)
     const layout = getEntityLayout(itemId)?.slots ?? []
     const installed = toInstalledModules(entity.modules)
     const caps = computeEntityCapabilities(hullStats, itemId, installed, layout)

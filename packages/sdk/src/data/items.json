@@ -474,31 +474,31 @@
   },
   {
     "id": 10200,
-    "mass": 1300000,
-    "type": "entity",
-    "tier": 1
-  },
-  {
-    "id": 10201,
     "mass": 1900000,
     "type": "entity",
     "tier": 1
   },
   {
+    "id": 10201,
+    "mass": 2400000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
     "id": 10202,
-    "mass": 4800000,
+    "mass": 3200000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10203,
-    "mass": 3700000,
+    "mass": 1900000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10204,
-    "mass": 4600000,
+    "mass": 1900000,
     "type": "entity",
     "tier": 1
   },

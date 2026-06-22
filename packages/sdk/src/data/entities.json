@@ -58,11 +58,11 @@
     "slots": [
       {
         "type": "generator",
-        "outputPct": 100
+        "outputPct": 200
       },
       {
         "type": "gatherer",
-        "outputPct": 100
+        "outputPct": 200
       }
     ]
   },
@@ -71,11 +71,11 @@
     "slots": [
       {
         "type": "generator",
-        "outputPct": 100
+        "outputPct": 200
       },
       {
         "type": "crafter",
-        "outputPct": 100
+        "outputPct": 200
       }
     ]
   },
