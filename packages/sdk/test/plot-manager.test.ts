@@ -3,7 +3,7 @@ import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import type {CrafterStats} from '../src/types/capabilities'
 import {ServerContract} from '../src/contracts'
 import {PlotManager} from '../src/managers/plot'
-import {ITEM_PLATE, ITEM_FRAME, ITEM_WAREHOUSE_T1_PACKED} from '../src/data/item-ids'
+import {ITEM_PLATE, ITEM_CERAMIC, ITEM_WAREHOUSE_T1_PACKED} from '../src/data/item-ids'
 
 let cargoIdSeq = 1
 
@@ -81,12 +81,12 @@ describe('PlotManager.progress', () => {
         expect(result.rows).toHaveLength(2)
         expect(result.rows[0]).toMatchObject({
             itemId: ITEM_PLATE,
-            required: 2000,
+            required: 1000,
             provided: 0,
-            missing: 2000,
+            missing: 1000,
         })
         expect(result.rows[1]).toMatchObject({
-            itemId: ITEM_FRAME,
+            itemId: ITEM_CERAMIC,
             required: 1000,
             provided: 0,
             missing: 1000,
@@ -96,16 +96,16 @@ describe('PlotManager.progress', () => {
 
     test('partial deposit — some missing', () => {
         const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 1000)]
+        const cargo = [makeCargoRow(42n, ITEM_PLATE, 500)]
         const result = manager.progress(plot, cargo)
-        expect(result.rows[0]).toMatchObject({required: 2000, provided: 1000, missing: 1000})
+        expect(result.rows[0]).toMatchObject({required: 1000, provided: 500, missing: 500})
         expect(result.rows[1]).toMatchObject({required: 1000, provided: 0, missing: 1000})
         expect(result.isComplete).toBeFalse()
     })
 
     test('fully loaded plot — isComplete', () => {
         const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 2000), makeCargoRow(42n, ITEM_FRAME, 1000)]
+        const cargo = [makeCargoRow(42n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
         const result = manager.progress(plot, cargo)
         expect(result.rows.every((r) => r.missing === 0)).toBeTrue()
         expect(result.isComplete).toBeTrue()
@@ -113,7 +113,7 @@ describe('PlotManager.progress', () => {
 
     test('cargo from other entities is ignored', () => {
         const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(99n, ITEM_PLATE, 2000), makeCargoRow(42n, ITEM_FRAME, 1000)]
+        const cargo = [makeCargoRow(99n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
         const result = manager.progress(plot, cargo)
         expect(result.rows[0].provided).toBe(0)
         expect(result.rows[1].provided).toBe(1000)
@@ -134,7 +134,7 @@ describe('PlotManager.canBuild', () => {
 
     test('true when fully loaded', () => {
         const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 2000), makeCargoRow(42n, ITEM_FRAME, 1000)]
+        const cargo = [makeCargoRow(42n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
         expect(manager.canBuild(plot, cargo)).toBeTrue()
     })
 })

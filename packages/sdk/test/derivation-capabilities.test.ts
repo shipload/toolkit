@@ -22,10 +22,10 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
     })
 
-    test('extractor and factory reuse the ship formula', () => {
-        const ship = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
-        expect(computeBaseCapacity(ITEM_EXTRACTOR_T1_PACKED, stats)).toBe(ship)
-        expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(ship)
+    test('extractor and factory use the container formula', () => {
+        const container = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
+        expect(computeBaseCapacity(ITEM_EXTRACTOR_T1_PACKED, stats)).toBe(container)
+        expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
     })
 
     test('warehouse formula is 20x the ship formula (same stat curve)', () => {
@@ -34,7 +34,7 @@ describe('computeBaseCapacity', () => {
         expect(Math.abs(wh - 20 * ship)).toBeLessThanOrEqual(20)
     })
 
-    test('container T1 is 4.4x the ship formula (22M base, /2997 divisor)', () => {
+    test('container T1 is 4.4x the ship formula (22M base, /1998 divisor)', () => {
         const ship = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
         const c1 = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
         expect(Math.abs(c1 - 4.4 * ship)).toBeLessThanOrEqual(5)
@@ -47,8 +47,8 @@ describe('computeBaseCapacity', () => {
         expect(t2).toBeGreaterThan(0)
     })
 
-    test('container T2 formula at stats=100,100,100 = floor(24e6 * 6^(300/2947))', () => {
-        const expected = Math.floor(24000000 * 6 ** (300 / 2947))
+    test('container T2 formula at stats=100,100,100 = floor(24e6 * 6^(200/2947))', () => {
+        const expected = Math.floor(24000000 * 6 ** (200 / 2947))
         expect(
             computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, {
                 strength: 100,

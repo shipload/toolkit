@@ -9,7 +9,7 @@ import {getEntityLayout} from '../src/data/recipes-runtime'
 
 describe('projectEntity (lean row recompute)', () => {
     test('recomputes capabilities from stats + item_id + modules when cap fields absent', () => {
-        const seed = encodeStats([500, 500, 500, 500])
+        const seed = encodeStats([500, 500, 0, 0])
         const modules = [{slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: seed}]
         const lean: Projectable = {
             coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
