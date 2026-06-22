@@ -23,7 +23,6 @@ const ENTITY_HULL_SLOTS: Record<number, SlotConsumer> = {
     0: {capability: 'Storage', attribute: 'capacity'},
     1: {capability: 'Hull', attribute: 'mass'},
     2: {capability: 'Storage', attribute: 'capacity'},
-    3: {capability: 'Storage', attribute: 'capacity'},
 }
 
 export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer>> = {

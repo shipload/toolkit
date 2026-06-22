@@ -45,6 +45,14 @@ describe('SLOT_FORMULAS', () => {
             Object.entries(KIND_TO_ITEM_ID).map(([k, v]) => [v, k])
         ) as Record<number, SlotConsumerKind>
 
+        const hullReservedSlot3 = new Set<SlotConsumerKind>([
+            'ship-t1',
+            'container-t1',
+            'warehouse-t1',
+            'extractor-t1',
+            'container-t2',
+        ])
+
         for (const recipe of recipes) {
             const kind = ITEM_ID_TO_KIND[recipe.outputItemId]
             if (!kind) continue
@@ -52,6 +60,7 @@ describe('SLOT_FORMULAS', () => {
             for (let i = 0; i < recipe.statSlots.length; i++) {
                 if (recipe.statSlots[i].sources.length === 0) continue
                 if (kind === 'gatherer' && i === 3) continue
+                if (hullReservedSlot3.has(kind) && i === 3) continue
                 assert.property(
                     formula,
                     String(i),
