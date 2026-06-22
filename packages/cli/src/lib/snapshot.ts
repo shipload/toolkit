@@ -4,6 +4,9 @@ import type { EntityTypeName } from "./args";
 import type { LaneTaskView } from "./cancel-compute";
 import { server } from "./client";
 
+const UINT16_MAX = 65535n;
+const clampU16 = (value: bigint): bigint => (value > UINT16_MAX ? UINT16_MAX : value);
+
 export interface EntitySnapshot {
 	type: string;
 	id: bigint;
@@ -91,7 +94,7 @@ export function entityInfoToSnapshot(
 			const d = BigInt(l.depth.toString())
 			if (d > maxDepth) maxDepth = d
 		}
-		snap.gatherer = {yield: totalYield, drain: totalDrain, depth: maxDepth}
+		snap.gatherer = {yield: clampU16(totalYield), drain: totalDrain, depth: maxDepth}
 	}
 	if (ei.hauler != null) {
 		snap.hauler = {
@@ -107,7 +110,7 @@ export function entityInfoToSnapshot(
 			totalSpeed += BigInt(l.speed.toString())
 			totalDrain += BigInt(l.drain.toString())
 		}
-		snap.crafter = {speed: totalSpeed, drain: totalDrain}
+		snap.crafter = {speed: clampU16(totalSpeed), drain: totalDrain}
 	}
 	if (ei.warp != null) {
 		snap.warp = {range: BigInt(ei.warp.range.toString())};
@@ -122,7 +125,7 @@ export function entityInfoToSnapshot(
 		}
 		snap.loaders = {
 			mass: totalMass / count,
-			thrust: totalThrust,
+			thrust: clampU16(totalThrust),
 			quantity: count,
 		}
 	}

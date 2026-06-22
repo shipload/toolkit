@@ -1,4 +1,4 @@
-import {UInt16, UInt32} from '@wharfkit/antelope'
+import {UInt32} from '@wharfkit/antelope'
 import type {GathererStats} from '../types/capabilities'
 import {PRECISION} from '../types'
 
@@ -47,7 +47,7 @@ export function calc_gather_rate(
     return {unitsPerSec, unitsPerMin: unitsPerSec * 60, secPerUnit}
 }
 
-export function calc_gather_energy(gatherer: GathererStats, duration: number): UInt16 {
+export function calc_gather_energy(gatherer: GathererStats, duration: number): UInt32 {
     const energy = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
-    return UInt16.from(energy)
+    return UInt32.from(energy)
 }

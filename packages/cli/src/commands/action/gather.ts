@@ -92,7 +92,46 @@ async function preflightGather(opts: GatherOpts): Promise<void> {
     checkCapacity(capacity, currentMass, itemMass, opts.quantity)
 }
 
-async function enrichGatherError(err: unknown, ctx: GatherErrorContext): Promise<string> {
+async function enrichDepthError(ctx: GatherErrorContext, headline: string): Promise<string> {
+    try {
+        const [reach, gameSeed, stateRaw] = await Promise.all([
+            resolveReach({entityType: ctx.sourceType, entityId: ctx.sourceId}),
+            getGameSeed(),
+            server.table('state').get(),
+        ])
+        const depth = reach.gatherer.depth
+        const coord = {x: Number(reach.coords.x), y: Number(reach.coords.y)}
+        // biome-ignore lint/suspicious/noExplicitAny: state row shape varies by contract version
+        const state = stateRaw as any
+        const epochSeed = state?.seed ? Checksum256.from(state.seed) : undefined
+
+        const lines = [headline, `   ${ctx.sourceType}:${ctx.sourceId} gatherer depth: ${depth}`]
+
+        if (epochSeed) {
+            const leads = shallowestPerItem(gameSeed, epochSeed, coord)
+            const reachable = leads.filter((l) => l.index <= depth)
+            if (reachable.length > 0) {
+                const top = reachable[0]
+                lines.push(
+                    `   Shallowest reachable at (${coord.x}, ${coord.y}): [${top.index}] ${formatItem(top.itemId)}, reserve ${top.reserve} — use that instead`
+                )
+            } else if (leads.length > 0) {
+                const top = leads[0]
+                lines.push(
+                    `   Shallowest at (${coord.x}, ${coord.y}): [${top.index}] ${formatItem(top.itemId)}, reserve ${top.reserve}  (still out of depth)`
+                )
+            } else {
+                lines.push(`   No resources present at (${coord.x}, ${coord.y}).`)
+            }
+        }
+
+        return lines.join('\n')
+    } catch {
+        return headline
+    }
+}
+
+export function gatherDepthHeadline(err: unknown, ctx: GatherErrorContext): string | undefined {
     const msg = err instanceof Error ? err.message : String(err)
     const raw = String(err)
 
@@ -100,45 +139,26 @@ async function enrichGatherError(err: unknown, ctx: GatherErrorContext): Promise
         msg.includes('stratum exceeds gatherer depth') ||
         raw.includes('stratum exceeds gatherer depth')
     ) {
-        try {
-            const [reach, gameSeed, stateRaw] = await Promise.all([
-                resolveReach({entityType: ctx.sourceType, entityId: ctx.sourceId}),
-                getGameSeed(),
-                server.table('state').get(),
-            ])
-            const depth = reach.gatherer.depth
-            const coord = {x: Number(reach.coords.x), y: Number(reach.coords.y)}
-            // biome-ignore lint/suspicious/noExplicitAny: state row shape varies by contract version
-            const state = stateRaw as any
-            const epochSeed = state?.seed ? Checksum256.from(state.seed) : undefined
+        return `✗ Cannot gather: stratum ${ctx.stratum} is out of depth.`
+    }
 
-            const lines = [
-                `✗ Cannot gather: stratum ${ctx.stratum} is out of depth.`,
-                `   ${ctx.sourceType}:${ctx.sourceId} gatherer depth: ${depth}`,
-            ]
+    if (
+        msg.includes('no gatherer reaches this stratum') ||
+        raw.includes('no gatherer reaches this stratum')
+    ) {
+        return `✗ Cannot gather: no gatherer reaches stratum ${ctx.stratum}.`
+    }
 
-            if (epochSeed) {
-                const leads = shallowestPerItem(gameSeed, epochSeed, coord)
-                const reachable = leads.filter((l) => l.index <= depth)
-                if (reachable.length > 0) {
-                    const top = reachable[0]
-                    lines.push(
-                        `   Shallowest reachable at (${coord.x}, ${coord.y}): [${top.index}] ${formatItem(top.itemId)}, reserve ${top.reserve} — use that instead`
-                    )
-                } else if (leads.length > 0) {
-                    const top = leads[0]
-                    lines.push(
-                        `   Shallowest at (${coord.x}, ${coord.y}): [${top.index}] ${formatItem(top.itemId)}, reserve ${top.reserve}  (still out of depth)`
-                    )
-                } else {
-                    lines.push(`   No resources present at (${coord.x}, ${coord.y}).`)
-                }
-            }
+    return undefined
+}
 
-            return lines.join('\n')
-        } catch {
-            return msg
-        }
+async function enrichGatherError(err: unknown, ctx: GatherErrorContext): Promise<string> {
+    const msg = err instanceof Error ? err.message : String(err)
+    const raw = String(err)
+
+    const depthHeadline = gatherDepthHeadline(err, ctx)
+    if (depthHeadline) {
+        return enrichDepthError(ctx, depthHeadline)
     }
 
     if (msg.includes('insufficient energy') || raw.includes('insufficient energy')) {
