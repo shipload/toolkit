@@ -77,6 +77,9 @@ export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
         coordinates: COORDS,
         modules: [],
         lanes: mobilityLanes(tasks, opts.scheduleStart),
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds: [],
     })
 }
@@ -115,6 +118,9 @@ export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
         coordinates: COORDS,
         modules: [],
         lanes: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds,
     })
 }

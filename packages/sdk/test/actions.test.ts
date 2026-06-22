@@ -199,3 +199,68 @@ test('getwormhole builds an eon.shipload::getwormhole read-only action', () => {
     expect(Number(data.x)).toBe(10)
     expect(Number(data.y)).toBe(20)
 })
+
+test('gather without slot omits the slot field', () => {
+    const action = sl.actions.gather(1, 2, 3, 20)
+    expect(String(action.name)).toBe('gather')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.source_id)).toBe('1')
+    expect(String(data.destination_id)).toBe('2')
+    expect(Number(data.stratum)).toBe(3)
+    expect(Number(data.quantity)).toBe(20)
+    expect(data.slot).toBeNull()
+})
+
+test('gather with slot includes slot as the trailing param', () => {
+    const action = sl.actions.gather(1, 2, 3, 20, 2)
+    expect(String(action.name)).toBe('gather')
+    const data = action.decodeData(ServerContract.abi)
+    expect(Number(data.slot)).toBe(2)
+})
+
+test('gather with slot 0 includes the falsy lane index', () => {
+    const action = sl.actions.gather(1, 2, 3, 20, 0)
+    const data = action.decodeData(ServerContract.abi)
+    expect(Number(data.slot)).toBe(0)
+})
+
+test('craft without slot omits slot', () => {
+    const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)])
+    const data = action.decodeData(ServerContract.abi)
+    expect(data.slot).toBeNull()
+})
+
+test('craft with slot includes slot after target', () => {
+    const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)], undefined, 0)
+    const data = action.decodeData(ServerContract.abi)
+    expect(data.target).toBeNull()
+    expect(Number(data.slot)).toBe(0)
+})
+
+test('craft with both target and slot includes both', () => {
+    const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)], 7, 1)
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.target)).toBe('7')
+    expect(Number(data.slot)).toBe(1)
+})
+
+test('bundleGather packs N gather actions into one ordered Transaction', () => {
+    const gathers = [
+        {sourceId: 11, destinationId: 2, stratum: 3, quantity: 10, slot: 0},
+        {sourceId: 22, destinationId: 2, stratum: 3, quantity: 10, slot: 1},
+        {sourceId: 33, destinationId: 2, stratum: 3, quantity: 5},
+    ]
+    const tx = sl.actions.bundleGather(gathers)
+    expect(tx.actions.length).toBe(3)
+    expect(tx.actions.every((a) => String(a.name) === 'gather')).toBe(true)
+    const d0 = tx.actions[0].decodeData(ServerContract.abi)
+    const d1 = tx.actions[1].decodeData(ServerContract.abi)
+    const d2 = tx.actions[2].decodeData(ServerContract.abi)
+    // distinct source_id values anchor ordering — a reversed array would fail here
+    expect(String(d0.source_id)).toBe('11')
+    expect(String(d1.source_id)).toBe('22')
+    expect(String(d2.source_id)).toBe('33')
+    expect(Number(d0.slot)).toBe(0)
+    expect(Number(d1.slot)).toBe(1)
+    expect(d2.slot).toBeNull()
+})

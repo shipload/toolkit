@@ -17,7 +17,7 @@ import {estimateGather} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {formatItem} from '../../lib/format'
 import {projectedCargoMass, projectedCoords} from '../../lib/projection'
-import {resolveReach, shallowestPerItem} from '../../lib/reach'
+import {reachDepth, resolveReach, shallowestPerItem} from '../../lib/reach'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
@@ -56,7 +56,7 @@ interface GatherErrorContext {
 
 async function preflightGather(opts: GatherOpts): Promise<void> {
     const src = await getEntitySnapshot(opts.source.entityId)
-    const depth = src.gatherer ? Number(src.gatherer.depth.toString()) : 0
+    const depth = reachDepth(src.gatherer_lanes ?? [])
     checkDepth(depth, opts.stratum)
 
     const coords = projectedCoords(src)

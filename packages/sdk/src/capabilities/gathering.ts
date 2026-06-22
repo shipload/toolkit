@@ -1,13 +1,13 @@
 import {UInt16, UInt32} from '@wharfkit/antelope'
-import type {ServerContract} from '../contracts'
+import type {GathererStats} from '../types/capabilities'
 import {PRECISION} from '../types'
 
 const GATHER_TIME_SCALE = 100
-const GATHER_MASS_DIVISOR = 228
+export const GATHER_MASS_DIVISOR = 228
 const DEPTH_PENALTY_DIVISOR = 5000
 
 function gather_duration_raw(
-    gatherer: ServerContract.Types.gatherer_stats,
+    gatherer: GathererStats,
     itemMass: number,
     quantity: number,
     stratum: number,
@@ -24,7 +24,7 @@ function gather_duration_raw(
 }
 
 export function calc_gather_duration(
-    gatherer: ServerContract.Types.gatherer_stats,
+    gatherer: GathererStats,
     itemMass: number,
     quantity: number,
     stratum: number,
@@ -36,7 +36,7 @@ export function calc_gather_duration(
 }
 
 export function calc_gather_rate(
-    gatherer: ServerContract.Types.gatherer_stats,
+    gatherer: GathererStats,
     itemMass: number,
     stratum: number,
     richness: number
@@ -47,10 +47,7 @@ export function calc_gather_rate(
     return {unitsPerSec, unitsPerMin: unitsPerSec * 60, secPerUnit}
 }
 
-export function calc_gather_energy(
-    gatherer: ServerContract.Types.gatherer_stats,
-    duration: number
-): UInt16 {
+export function calc_gather_energy(gatherer: GathererStats, duration: number): UInt16 {
     const energy = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
     return UInt16.from(energy)
 }

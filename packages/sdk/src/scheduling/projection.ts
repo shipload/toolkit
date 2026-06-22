@@ -2,7 +2,6 @@ import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, TaskType} from '../types'
 import {
-    capsHasLoaders,
     capsHasMovement,
     capsHasStorage,
     type EntityCapabilities,
@@ -39,11 +38,13 @@ export interface ProjectedEntity {
     shipMass: UInt32
     capacity?: UInt64
     engines?: ServerContract.Types.movement_stats
-    loaders?: ServerContract.Types.loader_stats
+    loaderLanes: ServerContract.Types.loader_lane[]
     generator?: ServerContract.Types.energy_stats
     hauler?: ServerContract.Types.hauler_stats
     readonly cargoMass: UInt64
     readonly totalMass: UInt64
+    readonly gathererLanes: ServerContract.Types.gatherer_lane[]
+    readonly crafterLanes: ServerContract.Types.crafter_lane[]
 
     hasMovement(): boolean
     hasStorage(): boolean
@@ -59,7 +60,9 @@ export interface Projectable extends ScheduleData {
     hullmass?: UInt32
     generator?: ServerContract.Types.energy_stats
     engines?: ServerContract.Types.movement_stats
-    loaders?: ServerContract.Types.loader_stats
+    loader_lanes?: ServerContract.Types.loader_lane[]
+    gatherer_lanes?: ServerContract.Types.gatherer_lane[]
+    crafter_lanes?: ServerContract.Types.crafter_lane[]
     hauler?: ServerContract.Types.hauler_stats
     capacity?: UInt32
     cargo: ServerContract.Types.cargo_item[]
@@ -84,7 +87,9 @@ interface ProjectedCaps {
     capacity?: UInt32
     engines?: ServerContract.Types.movement_stats
     generator?: ServerContract.Types.energy_stats
-    loaders?: ServerContract.Types.loader_stats
+    loaderLanes: ServerContract.Types.loader_lane[]
+    gathererLanes: ServerContract.Types.gatherer_lane[]
+    crafterLanes: ServerContract.Types.crafter_lane[]
     hauler?: ServerContract.Types.hauler_stats
 }
 
@@ -105,6 +110,47 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
     const installed = toInstalledModules(entity.modules)
     const caps = computeEntityCapabilities(hullStats, itemId, installed, layout)
 
+    const toLoaderLane = (l: {
+        slotIndex: number
+        mass: number
+        thrust: number
+        outputPct: number
+    }): ServerContract.Types.loader_lane =>
+        ServerContract.Types.loader_lane.from({
+            slot_index: l.slotIndex,
+            mass: l.mass,
+            thrust: l.thrust,
+            output_pct: l.outputPct,
+        })
+
+    const toGathererLane = (l: {
+        slotIndex: number
+        yield: number
+        drain: number
+        depth: number
+        outputPct: number
+    }): ServerContract.Types.gatherer_lane =>
+        ServerContract.Types.gatherer_lane.from({
+            slot_index: l.slotIndex,
+            yield: l.yield,
+            drain: l.drain,
+            depth: l.depth,
+            output_pct: l.outputPct,
+        })
+
+    const toCrafterLane = (l: {
+        slotIndex: number
+        speed: number
+        drain: number
+        outputPct: number
+    }): ServerContract.Types.crafter_lane =>
+        ServerContract.Types.crafter_lane.from({
+            slot_index: l.slotIndex,
+            speed: l.speed,
+            drain: l.drain,
+            output_pct: l.outputPct,
+        })
+
     return {
         hullmass: UInt32.from(caps.hullmass),
         capacity: UInt32.from(caps.capacity),
@@ -112,15 +158,23 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         generator: caps.generator
             ? ServerContract.Types.energy_stats.from(caps.generator)
             : undefined,
-        loaders: caps.loaders ? ServerContract.Types.loader_stats.from(caps.loaders) : undefined,
+        loaderLanes: (caps.loaderLanes ?? []).map(toLoaderLane),
+        gathererLanes: (caps.gathererLanes ?? []).map(toGathererLane),
+        crafterLanes: (caps.crafterLanes ?? []).map(toCrafterLane),
         hauler: caps.hauler ? ServerContract.Types.hauler_stats.from(caps.hauler) : undefined,
     }
+}
+
+function loaderLanesTotalMass(lanes: ServerContract.Types.loader_lane[]): UInt64 {
+    let total = 0
+    for (const l of lanes) total += Number(l.mass)
+    return UInt64.from(total)
 }
 
 export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const needsRecompute =
         entity.hullmass === undefined ||
-        entity.loaders === undefined ||
+        entity.loader_lanes === undefined ||
         entity.engines === undefined ||
         entity.generator === undefined ||
         entity.hauler === undefined ||
@@ -128,7 +182,9 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const caps = needsRecompute ? recomputeCaps(entity) : undefined
 
     const shipMass = UInt32.from(entity.hullmass ?? caps?.hullmass ?? 0)
-    const loaders = entity.loaders ?? caps?.loaders
+    const loaderLanes = entity.loader_lanes ?? caps?.loaderLanes ?? []
+    const gathererLanes = entity.gatherer_lanes ?? caps?.gathererLanes ?? []
+    const crafterLanes = entity.crafter_lanes ?? caps?.crafterLanes ?? []
     const engines = entity.engines ?? caps?.engines
     const generator = entity.generator ?? caps?.generator
     const hauler = entity.hauler ?? caps?.hauler
@@ -145,18 +201,18 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         engines,
         generator,
         hauler,
-        loaders,
+        loaderLanes,
+        gathererLanes,
+        crafterLanes,
 
         get cargoMass() {
             return calcStacksMass(this.cargo)
         },
 
         get totalMass() {
-            let mass = UInt64.from(this.shipMass).adding(this.cargoMass)
-            if (this.loaders) {
-                mass = mass.adding(this.loaders.mass.multiplying(this.loaders.quantity))
-            }
-            return mass
+            return UInt64.from(this.shipMass)
+                .adding(this.cargoMass)
+                .adding(loaderLanesTotalMass(this.loaderLanes))
         },
 
         hasMovement() {
@@ -168,7 +224,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         },
 
         hasLoaders() {
-            return capsHasLoaders(this.capabilities())
+            return this.loaderLanes.length > 0
         },
 
         capabilities(): EntityCapabilities {
@@ -177,7 +233,6 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
                 capacity: this.capacity ? UInt32.from(this.capacity) : undefined,
                 engines: this.engines,
                 generator: this.generator,
-                loaders: this.loaders,
             }
         },
 

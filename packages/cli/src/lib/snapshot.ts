@@ -31,6 +31,9 @@ export interface EntitySnapshot {
 	crafter?: { speed: bigint; drain: bigint };
 	warp?: { range: bigint };
 	loaders?: { mass: bigint; thrust: bigint; quantity: bigint };
+	gatherer_lanes: ServerTypes.gatherer_lane[];
+	crafter_lanes: ServerTypes.crafter_lane[];
+	loader_lanes: ServerTypes.loader_lane[];
 	is_idle: boolean;
 	modules?: ServerTypes.module_entry[];
 	lanes: ServerTypes.lane[];
@@ -57,6 +60,9 @@ export function entityInfoToSnapshot(
 			modules: c.modules,
 			id: BigInt(c.id.toString()),
 		})),
+		gatherer_lanes: ei.gatherer_lanes ?? [],
+		crafter_lanes: ei.crafter_lanes ?? [],
+		loader_lanes: ei.loader_lanes ?? [],
 		is_idle: schedule.isEntityIdle(ei, now),
 		modules: ei.modules,
 		lanes: ei.lanes,
@@ -76,12 +82,16 @@ export function entityInfoToSnapshot(
 			recharge: BigInt(ei.generator.recharge.toString()),
 		};
 	}
-	if (ei.gatherer != null) {
-		snap.gatherer = {
-			yield: BigInt(ei.gatherer.yield.toString()),
-			drain: BigInt(ei.gatherer.drain.toString()),
-			depth: BigInt(ei.gatherer.depth.toString()),
-		};
+	const gathererLanes = ei.gatherer_lanes ?? []
+	if (gathererLanes.length > 0) {
+		let totalYield = 0n, totalDrain = 0n, maxDepth = 0n
+		for (const l of gathererLanes) {
+			totalYield += BigInt(l.yield.toString())
+			totalDrain += BigInt(l.drain.toString())
+			const d = BigInt(l.depth.toString())
+			if (d > maxDepth) maxDepth = d
+		}
+		snap.gatherer = {yield: totalYield, drain: totalDrain, depth: maxDepth}
 	}
 	if (ei.hauler != null) {
 		snap.hauler = {
@@ -90,21 +100,31 @@ export function entityInfoToSnapshot(
 			drain: BigInt(ei.hauler.drain.toString()),
 		};
 	}
-	if (ei.crafter != null) {
-		snap.crafter = {
-			speed: BigInt(ei.crafter.speed.toString()),
-			drain: BigInt(ei.crafter.drain.toString()),
-		};
+	const crafterLanes = ei.crafter_lanes ?? []
+	if (crafterLanes.length > 0) {
+		let totalSpeed = 0n, totalDrain = 0n
+		for (const l of crafterLanes) {
+			totalSpeed += BigInt(l.speed.toString())
+			totalDrain += BigInt(l.drain.toString())
+		}
+		snap.crafter = {speed: totalSpeed, drain: totalDrain}
 	}
 	if (ei.warp != null) {
 		snap.warp = {range: BigInt(ei.warp.range.toString())};
 	}
-	if (ei.loaders != null) {
+	const loaderLanes = ei.loader_lanes ?? []
+	if (loaderLanes.length > 0) {
+		const count = BigInt(loaderLanes.length)
+		let totalMass = 0n, totalThrust = 0n
+		for (const l of loaderLanes) {
+			totalMass += BigInt(l.mass.toString())
+			totalThrust += BigInt(l.thrust.toString())
+		}
 		snap.loaders = {
-			mass: BigInt(ei.loaders.mass.toString()),
-			thrust: BigInt(ei.loaders.thrust.toString()),
-			quantity: BigInt(ei.loaders.quantity.toString()),
-		};
+			mass: totalMass / count,
+			thrust: totalThrust,
+			quantity: count,
+		}
 	}
 	return snap;
 }

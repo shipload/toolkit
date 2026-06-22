@@ -1,5 +1,22 @@
-import type {Name, UInt16, UInt32} from '@wharfkit/antelope'
+import type {Name, UInt16, UInt32, UInt8} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
+
+export interface LoaderStats {
+    mass: {toNumber(): number; multiplying(v: unknown): {toNumber(): number}}
+    thrust: {toNumber(): number}
+    quantity: {toNumber(): number; gt(v: unknown): boolean}
+}
+
+export interface GathererStats {
+    yield: {toNumber(): number}
+    drain: {toNumber(): number}
+    depth: {toNumber(): number; toString(): string}
+}
+
+export interface CrafterStats {
+    speed: {toNumber(): number}
+    drain: {toNumber(): number}
+}
 
 export interface MovementCapability {
     engines: ServerContract.Types.movement_stats
@@ -17,11 +34,11 @@ export interface StorageCapability {
 }
 
 export interface LoaderCapability {
-    loaders: ServerContract.Types.loader_stats
+    loaders: LoaderStats
 }
 
 export interface GathererCapability {
-    gatherer: ServerContract.Types.gatherer_stats
+    gatherer: GathererStats
 }
 
 export interface MassCapability {
@@ -38,9 +55,9 @@ export interface EntityCapabilities {
     capacity?: UInt32
     engines?: ServerContract.Types.movement_stats
     generator?: ServerContract.Types.energy_stats
-    loaders?: ServerContract.Types.loader_stats
-    gatherer?: ServerContract.Types.gatherer_stats
-    crafter?: ServerContract.Types.crafter_stats
+    loaders?: LoaderStats
+    gatherer?: GathererStats
+    crafter?: CrafterStats
     hauler?: ServerContract.Types.hauler_stats
 }
 

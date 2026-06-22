@@ -14,6 +14,9 @@ function workerOnlyInfoArgs(at: Date) {
 		cargomass: 0,
 		cargo: [],
 		modules: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: [
 			{
 				lane_key: 3,
@@ -44,6 +47,9 @@ function multiLaneInfoArgs(at: Date) {
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: [
 			{
 				lane_key: 0,
@@ -83,6 +89,9 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             lanes: [],
             holds: [],
         })
@@ -116,6 +125,9 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             lanes: [],
             holds: [],
         })
@@ -133,6 +145,9 @@ describe('entityInfoToSnapshot', () => {
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             lanes: [],
             holds: [],
         })
@@ -160,11 +175,13 @@ describe('entityInfoToSnapshot', () => {
             energy: 1000,
             capacity: 5000,
             generator: {capacity: 200, recharge: 50},
-            gatherer: {yield: 1, drain: 1, depth: 4},
             is_idle: true,
             current_task_elapsed: 0,
             current_task_remaining: 0,
             pending_tasks: [],
+            gatherer_lanes: [{slot_index: 0, yield: 1, drain: 1, depth: 4, output_pct: 100}],
+            crafter_lanes: [],
+            loader_lanes: [],
             lanes: [],
             holds: [],
         })

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { TaskType } from "@shipload/sdk";
+import { TaskType, laneKeyForModule } from "@shipload/sdk";
 import {
 	computeCraftCargoDelta,
 	computeFlightDurationSeconds,
@@ -314,6 +314,68 @@ describe("populateCraftFeasibility — willRechargeFirst", () => {
 			willRechargeFirst: true,
 		});
 		expect(issues.find((i) => i.code === "insufficient_energy")).toBeUndefined();
+	});
+});
+
+import { pickGathererLane, type GathererLaneInput } from "../../src/lib/estimate";
+
+describe("pickGathererLane — depth-aware auto-selection", () => {
+	const makeLane = (depth: number, slotIndex: number = 0): GathererLaneInput => ({
+		slotIndex,
+		yield: 300,
+		drain: 500,
+		depth,
+		outputPct: 100,
+	});
+
+	test("picks the single reaching lane", () => {
+		const result = pickGathererLane([makeLane(510, 0)], [], 0);
+		expect(result.slotIndex).toBe(0);
+	});
+
+	test("picks the first free lane that reaches stratum among multiple", () => {
+		const lanes = [makeLane(510, 0), makeLane(2000, 1), makeLane(510, 2)];
+		const result = pickGathererLane(lanes, [], 1000);
+		expect(result.slotIndex).toBe(1);
+	});
+
+	test("picks a higher-slot reaching lane when the lower-slot lane is too shallow", () => {
+		// slot 0 is shallow (510 < 1500), slot 1 reaches (2000 >= 1500).
+		const lanes = [makeLane(510, 0), makeLane(2000, 1)];
+		const result = pickGathererLane(lanes, [], 1500);
+		expect(result.slotIndex).toBe(1);
+		expect(result.depth).toBe(2000);
+	});
+
+	test("skips a busy reaching lane and returns a later free reaching lane", () => {
+		// both reach 1500; slot 0 (lane_key 1) is busy, slot 1 (lane_key 2) is free.
+		const lanes = [makeLane(2000, 0), makeLane(2000, 1)];
+		const busyLaneKeys = [laneKeyForModule(0)];
+		const result = pickGathererLane(lanes, busyLaneKeys, 1500);
+		expect(result.slotIndex).toBe(1);
+	});
+
+	test("is insensitive to input array order (sorts by slotIndex)", () => {
+		// Lanes supplied out of slot order; lower slot is busy, higher is free.
+		const lanes = [makeLane(2000, 2), makeLane(2000, 0), makeLane(2000, 1)];
+		const busyLaneKeys = [laneKeyForModule(0)];
+		// First free reaching lane in slot order is slot 1.
+		const result = pickGathererLane(lanes, busyLaneKeys, 1500);
+		expect(result.slotIndex).toBe(1);
+	});
+
+	test("falls back to the lowest-slot reaching lane when all reaching lanes are busy", () => {
+		// Supplied out of order; all reaching lanes busy → lowest slot index reaching wins.
+		const lanes = [makeLane(2000, 2), makeLane(2000, 0), makeLane(2000, 1)];
+		const busyLaneKeys = [laneKeyForModule(0), laneKeyForModule(1), laneKeyForModule(2)];
+		const result = pickGathererLane(lanes, busyLaneKeys, 1500);
+		expect(result.slotIndex).toBe(0);
+	});
+
+	test("throws 'no gatherer reaches this stratum' when depth < stratum on all lanes", () => {
+		expect(() =>
+			pickGathererLane([makeLane(510, 0)], [], 9999),
+		).toThrow("no gatherer reaches this stratum");
 	});
 });
 

@@ -24,6 +24,9 @@ function bareEntityInfo(
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
         lanes: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds: [],
         ...overrides,
     })

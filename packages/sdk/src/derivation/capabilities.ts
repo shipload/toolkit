@@ -217,14 +217,39 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     }
 }
 
+export interface GathererLaneEntry {
+    slotIndex: number
+    yield: number
+    drain: number
+    depth: number
+    outputPct: number
+}
+
+export interface CrafterLaneEntry {
+    slotIndex: number
+    speed: number
+    drain: number
+    outputPct: number
+}
+
+export interface LoaderLaneEntry {
+    slotIndex: number
+    mass: number
+    thrust: number
+    outputPct: number
+}
+
 export interface ComputedCapabilities {
     hullmass: number
     capacity: number
     engines?: {thrust: number; drain: number}
     generator?: {capacity: number; recharge: number}
     gatherer?: {yield: number; drain: number; depth: number}
+    gathererLanes?: GathererLaneEntry[]
     loaders?: {mass: number; thrust: number; quantity: number}
+    loaderLanes?: LoaderLaneEntry[]
     crafter?: {speed: number; drain: number}
+    crafterLanes?: CrafterLaneEntry[]
     hauler?: {capacity: number; efficiency: number; drain: number}
     warp?: {range: number}
 }
@@ -272,6 +297,10 @@ export function computeEntityCapabilities(
     let totalBatteryStatSum = 0
     let batteryCount = 0
 
+    const gathererLanes: GathererLaneEntry[] = []
+    const crafterLanes: CrafterLaneEntry[] = []
+    const loaderLanes: LoaderLaneEntry[] = []
+
     for (const mod of modules) {
         const item = getItem(mod.itemId)
         const modType = getModuleCapabilityType(mod.itemId)
@@ -293,23 +322,44 @@ export function computeEntityCapabilities(
             hasGatherer = true
             const tier = item.tier
             const caps = computeGathererCapabilities(decodedStats, tier)
-            totalGathYield += applySlotMultiplier(caps.yield, amp)
+            const scaledYield = applySlotMultiplier(caps.yield, amp)
+            totalGathYield += scaledYield
             totalGathDrain += caps.drain
             if (caps.depth > maxGathDepth) maxGathDepth = caps.depth
+            gathererLanes.push({
+                slotIndex: mod.slotIndex,
+                yield: scaledYield,
+                drain: caps.drain,
+                depth: caps.depth,
+                outputPct: amp,
+            })
         } else if (modType === MODULE_LOADER) {
             hasLoader = true
             const caps = computeLoaderCapabilities(decodedStats)
             totalLoaderMass += caps.mass
             totalLoaderThrust += applySlotMultiplier(caps.thrust, amp)
             totalLoaderQuantity += caps.quantity
+            loaderLanes.push({
+                slotIndex: mod.slotIndex,
+                mass: caps.mass,
+                thrust: applySlotMultiplier(caps.thrust, amp),
+                outputPct: amp,
+            })
         } else if (modType === MODULE_STORAGE) {
             const caps = computeStorageCapabilities(decodedStats, baseCapacity)
             totalStorageBonus += caps.capacityBonus
         } else if (modType === MODULE_CRAFTER) {
             hasCrafter = true
             const caps = computeCrafterCapabilities(decodedStats)
-            totalCrafterSpeed += applySlotMultiplier(caps.speed, amp)
+            const scaledSpeed = applySlotMultiplier(caps.speed, amp)
+            totalCrafterSpeed += scaledSpeed
             totalCrafterDrain += caps.drain
+            crafterLanes.push({
+                slotIndex: mod.slotIndex,
+                speed: scaledSpeed,
+                drain: caps.drain,
+                outputPct: amp,
+            })
         } else if (modType === MODULE_HAULER) {
             hasHauler = true
             const caps = computeHaulerCapabilities(decodedStats)
@@ -357,6 +407,7 @@ export function computeEntityCapabilities(
             drain: totalGathDrain,
             depth: maxGathDepth,
         }
+        result.gathererLanes = gathererLanes
     }
     if (hasLoader) {
         result.loaders = {
@@ -364,9 +415,11 @@ export function computeEntityCapabilities(
             thrust: clampUint16(totalLoaderThrust),
             quantity: totalLoaderQuantity,
         }
+        result.loaderLanes = loaderLanes
     }
     if (hasCrafter) {
         result.crafter = {speed: clampUint16(totalCrafterSpeed), drain: totalCrafterDrain}
+        result.crafterLanes = crafterLanes
     }
     if (hasHauler) {
         const efficiency =

@@ -3,6 +3,7 @@ import {
 	deriveLocationStatic,
 	deriveStratum,
 	type LocationType,
+	type ServerTypes,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import type { EntityRef } from "./args";
@@ -15,9 +16,18 @@ export interface GathererStats {
 	drain: number;
 }
 
+export interface GathererLaneStats {
+	slotIndex: number;
+	depth: number;
+	yield: number;
+	drain: number;
+	outputPct: number;
+}
+
 export interface Reach {
 	coords: { x: bigint; y: bigint };
 	gatherer: GathererStats;
+	gathererLanes: GathererLaneStats[];
 }
 
 export interface StratumLead {
@@ -34,20 +44,35 @@ export function reachLegend(reachable: number, total: number, depth: number): st
 	return `${reachable} reachable of ${total} · gatherer depth ${depth}`;
 }
 
+export function reachDepth(lanes: Pick<ServerTypes.gatherer_lane, "depth">[]): number {
+	if (lanes.length === 0) return 0;
+	return Math.max(...lanes.map((l) => Number(l.depth.toString())));
+}
+
 export async function resolveReach(ref: EntityRef): Promise<Reach> {
 	const snap = await getEntitySnapshot(ref.entityId);
-	if (!snap.gatherer) {
+	const gLanes = snap.gatherer_lanes ?? [];
+	if (gLanes.length === 0) {
 		throw new Error(
 			`${ref.entityType}:${ref.entityId} has no gatherer module; cannot filter by depth`,
 		);
 	}
+	const maxDepth = reachDepth(gLanes);
+	const gathererLanes: GathererLaneStats[] = gLanes.map((l) => ({
+		slotIndex: Number(l.slot_index.toString()),
+		depth: Number(l.depth.toString()),
+		yield: Number(l.yield.toString()),
+		drain: Number(l.drain.toString()),
+		outputPct: Number(l.output_pct.toString()),
+	}));
 	return {
 		coords: projectedCoords(snap),
 		gatherer: {
-			depth: Number(snap.gatherer.depth.toString()),
-			yield: Number(snap.gatherer.yield.toString()),
-			drain: Number(snap.gatherer.drain.toString()),
+			depth: maxDepth,
+			yield: gathererLanes[0]?.yield ?? 0,
+			drain: gathererLanes[0]?.drain ?? 0,
 		},
+		gathererLanes,
 	};
 }
 

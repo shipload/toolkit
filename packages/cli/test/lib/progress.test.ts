@@ -32,6 +32,9 @@ function busyTick(remaining_s: number, elapsed_s: number): ProgressTick {
 		current_task_elapsed: elapsed_s,
 		current_task_remaining: remaining_s,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: [
 			{
 				lane_key: 0,
@@ -80,6 +83,9 @@ function idleTick(completedTasks: number): ProgressTick {
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: completedTasks > 0
 			? [{ lane_key: 0, schedule: { started, tasks } }]
 			: [],
@@ -140,6 +146,9 @@ describe("composeBlock multi-lane", () => {
 			current_task_elapsed: 0,
 			current_task_remaining: 0,
 			pending_tasks: [],
+			gatherer_lanes: [],
+			crafter_lanes: [],
+			loader_lanes: [],
 			lanes: [
 				{
 					lane_key: 0,

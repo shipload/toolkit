@@ -3,9 +3,9 @@ import {
 	calc_gather_duration,
 	calc_gather_energy,
 	type LocationStratum,
-	ServerTypes,
+	type GathererStats,
 } from "@shipload/sdk";
-import { UInt16 } from "@wharfkit/antelope";
+import { UInt16, UInt32 } from "@wharfkit/antelope";
 import {
 	computeStratumGatherMetrics,
 	type GathererCaps,
@@ -14,11 +14,11 @@ import {
 
 const caps: GathererCaps = { yield: 700, depth: 950, drain: 25 };
 
-const gathererStats = ServerTypes.gatherer_stats.from({
+const gathererStats: GathererStats = {
 	yield: UInt16.from(caps.yield),
-	drain: UInt16.from(caps.drain),
+	drain: UInt32.from(caps.drain),
 	depth: UInt16.from(caps.depth),
-});
+};
 
 function makeStratum(overrides: Partial<LocationStratum> = {}): LocationStratum {
 	return {
@@ -73,11 +73,11 @@ describe("solveMaxGatherQuantity", () => {
 		expect(result.bound).toBe("energy");
 		expect(result.maxQuantity).toBeGreaterThan(0);
 		// Verify by recomputing — must satisfy the contract formulas.
-		const tightStats = ServerTypes.gatherer_stats.from({
+		const tightStats: GathererStats = {
 			yield: UInt16.from(tightCaps.yield),
-			drain: UInt16.from(tightCaps.drain),
+			drain: UInt32.from(tightCaps.drain),
 			depth: UInt16.from(tightCaps.depth),
-		});
+		};
 		const dur = Number(
 			calc_gather_duration(tightStats, 15_000, result.maxQuantity, 600, 500),
 		);

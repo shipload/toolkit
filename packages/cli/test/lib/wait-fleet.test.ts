@@ -308,6 +308,9 @@ test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
 		coordinates: {x: 0, y: 0, z: 800}, item_id: 0, cargomass: 0, cargo: [],
 		modules: [], is_idle: true, current_task_elapsed: 0, current_task_remaining: 0,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: [
 			{lane_key: 3, schedule: {
 				started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),

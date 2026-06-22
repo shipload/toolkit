@@ -208,15 +208,26 @@ export function calc_transit_duration(ax: number, ay: number, bx: number, by: nu
     return UInt32.from(Math.floor(distance.toNumber() / (PRECISION * WH.TRANSIT_SPEED)))
 }
 
+// The active entity's chosen loader lane (lowest slot), mirroring cargo.cpp lane selection.
+export function shipLoaderLane(ship: ShipLike): {thrust: number; mass: number} | undefined {
+    const lanes = ship.loader_lanes ?? []
+    if (lanes.length === 0) return undefined
+    let lowest = lanes[0]
+    for (const lane of lanes) {
+        if (Number(lane.slot_index) < Number(lowest.slot_index)) lowest = lane
+    }
+    return {thrust: Number(lowest.thrust), mass: Number(lowest.mass)}
+}
+
 export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: number): UInt32 {
     const z = altitude ?? ship.coordinates.z?.toNumber() ?? calc_orbital_altitude(Number(mass))
     return calc_flighttime(z, calc_loader_acceleration(ship, mass))
 }
 
 export function calc_loader_acceleration(ship: ShipLike, mass: UInt64): number {
-    const thrust = ship.loaders ? Number(ship.loaders.thrust) : 0
-    const loaderMass = ship.loaders ? Number(ship.loaders.mass) : 0
-    return calc_acceleration(thrust, Number(mass) + loaderMass)
+    const lane = shipLoaderLane(ship)
+    const thrust = lane ? lane.thrust : 0
+    return calc_acceleration(thrust, Number(mass))
 }
 
 export function calc_ship_flighttime(ship: ShipLike, mass: UInt64, distance: UInt64): UInt32 {
@@ -238,8 +249,10 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
 
     mass.add(ship.hullmass)
 
-    if (ship.loaders && ship.loaders.quantity.gt(UInt32.zero)) {
-        mass.add(ship.loaders.mass.multiplying(ship.loaders.quantity))
+    if (ship.loader_lanes && ship.loader_lanes.length > 0) {
+        for (const l of ship.loader_lanes) {
+            mass.add(UInt64.from(l.mass))
+        }
     }
 
     for (const cargo of cargos) {
@@ -274,10 +287,10 @@ export function calculateTransferTime(
         return UInt32.from(0)
     }
 
-    if (!ship.loaders) return UInt32.from(0)
-    mass = UInt64.from(mass).adding(ship.loaders.mass)
-    const transfer_time = calc_loader_flighttime(ship, mass)
-    return transfer_time.dividing(ship.loaders.quantity)
+    const lane = shipLoaderLane(ship)
+    if (!lane) return UInt32.from(0)
+    mass = UInt64.from(mass).adding(UInt64.from(lane.mass))
+    return calc_loader_flighttime(ship, mass)
 }
 
 export function calculateRefuelingTime(ship: ShipLike): UInt32 {
@@ -332,25 +345,22 @@ export function calculateLoadTimeBreakdown(
     let unloadTime = 0
     let loadTime = 0
 
-    if (mass_unload.gt(UInt64.zero) && ship.loaders) {
-        const totalMass = UInt64.from(mass_unload).adding(ship.loaders.mass)
+    const lane = shipLoaderLane(ship)
+
+    if (mass_unload.gt(UInt64.zero) && lane) {
+        const totalMass = UInt64.from(mass_unload).adding(UInt64.from(lane.mass))
         unloadTime = Number(calc_loader_flighttime(ship, totalMass))
     }
 
-    if (mass_load.gt(UInt64.zero) && ship.loaders) {
-        const totalMass = UInt64.from(mass_load).adding(ship.loaders.mass)
+    if (mass_load.gt(UInt64.zero) && lane) {
+        const totalMass = UInt64.from(mass_load).adding(UInt64.from(lane.mass))
         loadTime = Number(calc_loader_flighttime(ship, totalMass))
     }
 
-    const numLoaders = ship.loaders ? Number(ship.loaders.quantity) : 0
-    const totalTime = numLoaders > 0 ? (unloadTime + loadTime) / numLoaders : 0
-    const unloadTimePerLoader = numLoaders > 0 ? unloadTime / numLoaders : 0
-    const loadTimePerLoader = numLoaders > 0 ? loadTime / numLoaders : 0
-
     return {
-        unloadTime: unloadTimePerLoader,
-        loadTime: loadTimePerLoader,
-        totalTime,
+        unloadTime,
+        loadTime,
+        totalTime: unloadTime + loadTime,
         unloadMass: Number(mass_unload),
         loadMass: Number(mass_load),
     }
@@ -384,24 +394,16 @@ export function estimateTravelTime(
     let loadTime = UInt32.zero
     let unloadTime = UInt32.zero
 
-    if (
-        loadMass &&
-        UInt32.from(loadMass).gt(UInt32.zero) &&
-        ship.loaders &&
-        ship.loaders.quantity.gt(UInt32.zero)
-    ) {
-        const totalMass = UInt64.from(loadMass).adding(ship.loaders.mass)
-        loadTime = calc_loader_flighttime(ship, totalMass).dividing(ship.loaders.quantity)
+    const lane = shipLoaderLane(ship)
+
+    if (loadMass && UInt32.from(loadMass).gt(UInt32.zero) && lane) {
+        const totalMass = UInt64.from(loadMass).adding(UInt64.from(lane.mass))
+        loadTime = calc_loader_flighttime(ship, totalMass)
     }
 
-    if (
-        unloadMass &&
-        UInt32.from(unloadMass).gt(UInt32.zero) &&
-        ship.loaders &&
-        ship.loaders.quantity.gt(UInt32.zero)
-    ) {
-        const totalMass = UInt64.from(unloadMass).adding(ship.loaders.mass)
-        unloadTime = calc_loader_flighttime(ship, totalMass).dividing(ship.loaders.quantity)
+    if (unloadMass && UInt32.from(unloadMass).gt(UInt32.zero) && lane) {
+        const totalMass = UInt64.from(unloadMass).adding(UInt64.from(lane.mass))
+        unloadTime = calc_loader_flighttime(ship, totalMass)
     }
 
     return {
@@ -433,14 +435,32 @@ export function hasEnergyForDistance(ship: ShipLike, distance: UInt64Type): bool
     return UInt64.from(ship.energy ?? 0).gte(energyNeeded)
 }
 
+export interface TransferLoaderLane {
+    slot_index?: {toNumber(): number} | number
+    thrust: {toNumber(): number} | number
+    mass: {toNumber(): number} | number
+}
+
 export interface TransferEntity {
     location: {z?: {toNumber(): number} | number}
     entityClass: EntityClass
-    loaders?: {
-        thrust: {toNumber(): number} | number
-        mass: {toNumber(): number} | number
-        quantity: {toNumber(): number} | number
+    loaderLanes?: TransferLoaderLane[]
+}
+
+function toNum(v: {toNumber(): number} | number | undefined): number {
+    if (v === undefined) return 0
+    return typeof v === 'number' ? v : v.toNumber()
+}
+
+// Mirrors cargo.cpp worker_lane_key_or_mobility: lowest-slot loader lane (display has no busy context).
+function chosenLoaderLane(entity: TransferEntity): TransferLoaderLane | undefined {
+    const lanes = entity.loaderLanes ?? []
+    if (lanes.length === 0) return undefined
+    let lowest = lanes[0]
+    for (const lane of lanes) {
+        if (toNum(lane.slot_index) < toNum(lowest.slot_index)) lowest = lane
     }
+    return lowest
 }
 
 export interface HasScheduleAndLocation extends ScheduleData {
@@ -515,73 +535,54 @@ export function minTransferDistance(entityClass: EntityClass): number {
         : MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE
 }
 
+// Mirrors cargo.cpp calc_onesided_duration: single active loader's thrust + mass, no ÷quantity.
+export function calc_onesided_duration(
+    loaderThrust: number,
+    loaderMass: number,
+    activeZ: number,
+    counterpartZ: number,
+    activeEntityClass: EntityClass,
+    counterpartEntityClass: EntityClass,
+    cargoMass: number
+): number {
+    if (cargoMass === 0 || loaderThrust === 0) {
+        return 0
+    }
+    const rawDistance = Math.abs(activeZ - counterpartZ)
+    const minDistance = Math.max(
+        minTransferDistance(activeEntityClass),
+        minTransferDistance(counterpartEntityClass)
+    )
+    const distance = rawDistance < minDistance ? minDistance : rawDistance
+    const totalMass = cargoMass + loaderMass
+    const acceleration = calc_acceleration(loaderThrust, totalMass)
+    const flightTime = Math.floor(2 * Math.sqrt(distance / acceleration))
+    return flightTime === 0 ? 1 : flightTime
+}
+
+// Mirrors cargo.cpp: the active (loader-bearing) entity's chosen loader lane drives the duration.
 export function calc_transfer_duration(
     source: TransferEntity,
     dest: TransferEntity,
     cargoMass: number
 ): number {
-    if (cargoMass === 0) {
+    const active = chosenLoaderLane(source) ? source : dest
+    const counterpart = active === source ? dest : source
+    const lane = chosenLoaderLane(active)
+    if (!lane) {
         return 0
     }
 
-    let totalThrust = 0
-    let totalLoaderMass = 0
-    let totalQuantity = 0
+    const activeZ = toNum(active.location.z)
+    const counterpartZ = toNum(counterpart.location.z)
 
-    if (source.loaders) {
-        const thrust =
-            typeof source.loaders.thrust === 'number'
-                ? source.loaders.thrust
-                : source.loaders.thrust.toNumber()
-        const mass =
-            typeof source.loaders.mass === 'number'
-                ? source.loaders.mass
-                : source.loaders.mass.toNumber()
-        const qty =
-            typeof source.loaders.quantity === 'number'
-                ? source.loaders.quantity
-                : source.loaders.quantity.toNumber()
-        totalThrust += thrust * qty
-        totalLoaderMass += mass * qty
-        totalQuantity += qty
-    }
-
-    if (dest.loaders) {
-        const thrust =
-            typeof dest.loaders.thrust === 'number'
-                ? dest.loaders.thrust
-                : dest.loaders.thrust.toNumber()
-        const mass =
-            typeof dest.loaders.mass === 'number' ? dest.loaders.mass : dest.loaders.mass.toNumber()
-        const qty =
-            typeof dest.loaders.quantity === 'number'
-                ? dest.loaders.quantity
-                : dest.loaders.quantity.toNumber()
-        totalThrust += thrust * qty
-        totalLoaderMass += mass * qty
-        totalQuantity += qty
-    }
-
-    if (totalThrust === 0 || totalQuantity === 0) {
-        return 0
-    }
-
-    const sourceZ =
-        typeof source.location.z === 'number'
-            ? source.location.z
-            : (source.location.z?.toNumber() ?? 0)
-    const destZ =
-        typeof dest.location.z === 'number' ? dest.location.z : (dest.location.z?.toNumber() ?? 0)
-    const rawDistance = Math.abs(sourceZ - destZ)
-    const minDistance = Math.max(
-        minTransferDistance(source.entityClass),
-        minTransferDistance(dest.entityClass)
+    return calc_onesided_duration(
+        toNum(lane.thrust),
+        toNum(lane.mass),
+        activeZ,
+        counterpartZ,
+        active.entityClass,
+        counterpart.entityClass,
+        cargoMass
     )
-    const distance = rawDistance < minDistance ? minDistance : rawDistance
-
-    const totalMass = cargoMass + totalLoaderMass
-    const acceleration = calc_acceleration(totalThrust, totalMass)
-    const flightTime = 2 * Math.sqrt(distance / acceleration)
-
-    return Math.floor(flightTime / totalQuantity)
 }

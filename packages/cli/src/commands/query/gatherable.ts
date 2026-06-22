@@ -12,6 +12,7 @@ import {
 import {computeStratumGatherMetrics, type GathererCaps} from '../../lib/gatherable'
 import {loadLocationStrata} from '../../lib/location-loader'
 import {projectRemainingSnapshotAt} from '../../lib/projection'
+import {reachDepth} from '../../lib/reach'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 
@@ -38,7 +39,8 @@ function resolveState(
     useProjected: boolean,
     ctx: EntityContext
 ): ResolvedEntityState {
-    if (!snap.gatherer) {
+    const gLanes = snap.gatherer_lanes ?? []
+    if (gLanes.length === 0) {
         throw new ValidationError(
             `${ctx.entityType} ${ctx.entityId} has no gatherer module installed.`,
             `install one with: shiploadcli ${ctx.entityType} ${ctx.entityId} addmodule <slot> <gatherer-item-id>`
@@ -46,10 +48,13 @@ function resolveState(
     }
     // biome-ignore lint/suspicious/noExplicitAny: getentity readonly return is dynamic
     const raw = snap as any
+    const deepest = gLanes.reduce((best, l) =>
+        Number(l.depth.toString()) > Number(best.depth.toString()) ? l : best
+    )
     const caps: GathererCaps = {
-        yield: Number(raw.gatherer.yield?.toString() ?? '0'),
-        depth: Number(raw.gatherer.depth?.toString() ?? '0'),
-        drain: Number(raw.gatherer.drain?.toString() ?? '0'),
+        yield: Number(deepest.yield.toString()),
+        depth: reachDepth(gLanes),
+        drain: Number(deepest.drain.toString()),
     }
 
     const energyCapacity = Number(raw.generator?.capacity?.toString() ?? '0')

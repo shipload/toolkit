@@ -30,6 +30,8 @@ import {
 	getItem,
 	hasSystem,
 	ServerTypes,
+	laneKeyForModule,
+	type GathererStats,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
@@ -123,6 +125,31 @@ export function computeCraftCargoDelta(
 	return delta;
 }
 
+export interface GathererLaneInput {
+	slotIndex: number;
+	yield: number;
+	drain: number;
+	depth: number;
+	outputPct: number;
+}
+
+export function pickGathererLane(
+	lanes: GathererLaneInput[],
+	busyLaneKeys: number[],
+	stratum: number,
+): GathererLaneInput {
+	const ordered = [...lanes].sort((a, b) => a.slotIndex - b.slotIndex);
+	let lowestReaching: GathererLaneInput | undefined;
+	for (const lane of ordered) {
+		if (lane.depth < stratum) continue;
+		const laneKey = laneKeyForModule(lane.slotIndex);
+		if (lowestReaching === undefined) lowestReaching = lane;
+		if (!busyLaneKeys.includes(laneKey)) return lane;
+	}
+	if (lowestReaching !== undefined) return lowestReaching;
+	throw new Error("no gatherer reaches this stratum");
+}
+
 function coerceUInt16(v: unknown): UInt16 {
 	return UInt16.from(Number(String(v ?? "0")));
 }
@@ -140,7 +167,7 @@ function toShipLike(snap: EntitySnapshot): {
 	energy?: UInt32;
 	engines?: ServerTypes.movement_stats;
 	generator?: ServerTypes.energy_stats;
-	loaders?: ServerTypes.loader_stats;
+	loader_lanes: ServerTypes.loader_lane[];
 } {
 	const coordinates = ServerTypes.coordinates.from({
 		x: coerceInt64(snap.coordinates.x),
@@ -160,17 +187,10 @@ function toShipLike(snap: EntitySnapshot): {
 				recharge: coerceUInt32(raw.generator.recharge),
 			})
 		: undefined;
-	const loaders: ServerTypes.loader_stats | undefined = raw.loaders
-		? ServerTypes.loader_stats.from({
-				mass: coerceUInt32(raw.loaders.mass),
-				thrust: coerceUInt16(raw.loaders.thrust),
-				quantity: coerceUInt32(raw.loaders.quantity),
-			})
-		: undefined;
 	const hullmass = raw.hullmass !== undefined ? coerceUInt32(raw.hullmass) : undefined;
 	const energy = raw.energy !== undefined ? coerceUInt32(raw.energy) : undefined;
 
-	return { coordinates, hullmass, energy, engines, generator, loaders };
+	return { coordinates, hullmass, energy, engines, generator, loader_lanes: snap.loader_lanes ?? [] };
 }
 
 export function populateTravelFeasibility(params: {
@@ -400,7 +420,8 @@ export async function estimateGather(params: {
 	const { entityId, stratum, quantity } = params;
 	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
-	if (!snap.gatherer) {
+	const gLanes = snap.gatherer_lanes ?? [];
+	if (gLanes.length === 0) {
 		return {
 			duration_s: 0,
 			energy_cost: 0,
@@ -439,13 +460,22 @@ export async function estimateGather(params: {
 
 	const itemMass = getItem(itemId).mass;
 
-	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
-	const rawGatherer = snap.gatherer as any;
-	const gatherer = ServerTypes.gatherer_stats.from({
-		yield: coerceUInt16(rawGatherer.yield),
-		drain: coerceUInt16(rawGatherer.drain),
-		depth: coerceUInt16(rawGatherer.depth),
-	});
+	const busyLaneKeys = snap.lanes
+		.filter((l) => l.schedule.tasks.length > 0)
+		.map((l) => Number(l.lane_key.toString()));
+	const laneInputs: GathererLaneInput[] = gLanes.map((l) => ({
+		slotIndex: Number(l.slot_index.toString()),
+		yield: Number(l.yield.toString()),
+		drain: Number(l.drain.toString()),
+		depth: Number(l.depth.toString()),
+		outputPct: Number(l.output_pct.toString()),
+	}));
+	const pickedLane = pickGathererLane(laneInputs, busyLaneKeys, stratum);
+	const gatherer: GathererStats = {
+		yield: coerceUInt16(pickedLane.yield),
+		drain: UInt32.from(pickedLane.drain),
+		depth: coerceUInt16(pickedLane.depth),
+	};
 
 	const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness);
 	const energy = calc_gather_energy(gatherer, Number(duration));
@@ -591,8 +621,8 @@ export async function estimateCraft(params: {
 	const { entityId, recipeId, quantity, inputs } = params;
 	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
-	type CrafterSnap = { speed?: { toString(): string }; drain?: { toString(): string } };
-	const crafter = (snap as unknown as { crafter?: CrafterSnap }).crafter;
+	// craft is single-lane
+	const crafter = (snap.crafter_lanes ?? [])[0];
 	if (!crafter) {
 		return {
 			duration_s: 0,

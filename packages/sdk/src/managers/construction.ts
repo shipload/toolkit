@@ -67,8 +67,9 @@ export class ConstructionManager extends BaseManager {
             if (!entity.owner.equals(target.ownerName)) continue
             if (entity.id.equals(target.entityId)) continue
             if (!coordsEqual(entity.coordinates, target.coordinates)) continue
-            const speed = entity.crafter?.speed.toNumber()
-            if (speed === undefined) continue
+            const crafterLanes = entity.crafter_lanes ?? []
+            if (crafterLanes.length === 0) continue
+            const speed = crafterLanes.reduce((s, l) => s + Number(l.speed), 0)
             out.push({
                 entityId: entity.id,
                 entityType: entity.type,
@@ -345,8 +346,9 @@ function partitionSources(
         const reserved = reservedByItemFor(entity)
         const relevant = matchRelevantCargo(entity, target, cargo, reserved)
         if (relevant.length === 0) continue
-        const loaderCount = entity.loaders?.quantity.toNumber() ?? 0
-        const loaderTotalMass = entity.loaders?.mass.toNumber() ?? 0
+        const loaderLanes = entity.loader_lanes ?? []
+        const loaderCount = loaderLanes.length
+        const loaderTotalMass = loaderLanes.reduce((s, l) => s + Number(l.mass), 0)
         const ref: SourceEntityRef = {
             entityId: entity.id,
             name: entity.id.toString(),

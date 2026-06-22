@@ -5,6 +5,7 @@ import {computeInputMass} from '../derivation/crafting'
 import {calc_craft_duration} from '../capabilities/crafting'
 import {TaskType} from '../types'
 import {BaseManager} from './base'
+import type {CrafterStats} from '../types/capabilities'
 import type {ServerContract} from '../contracts'
 import type {BuildableTarget, ScheduledBuild} from './construction-types'
 
@@ -112,10 +113,7 @@ export class PlotManager extends BaseManager {
         return this.progress(plot, cargo).isComplete
     }
 
-    timeToComplete(
-        plot: ServerContract.Types.entity_info,
-        crafter: ServerContract.Types.crafter_stats
-    ): number {
+    timeToComplete(plot: ServerContract.Types.entity_info, crafter: CrafterStats): number {
         const capacity = Number(plot.capacity?.toString() ?? '0')
         const speed = Number(crafter.speed.toString())
         if (speed === 0) return 0

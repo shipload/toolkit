@@ -1,0 +1,133 @@
+import {expect, test} from 'bun:test'
+import {
+    computeEntityCapabilities,
+    computeGathererCapabilities,
+    computeCrafterCapabilities,
+    computeLoaderCapabilities,
+} from './capabilities'
+import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
+import {encodeStats} from './crafting'
+import {
+    ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_GATHERER_T1,
+    ITEM_CRAFTER_T1,
+    ITEM_LOADER_T1,
+} from '../data/item-ids'
+import type {InstalledModule} from '../entities/slot-multiplier'
+import type {EntitySlot} from '../data/recipes-runtime'
+
+function makeGathererStats(strength: number, tolerance: number, conductivity: number): bigint {
+    return encodeStats([strength, tolerance, conductivity, 0])
+}
+
+function makeCrafterStats(reactivity: number, fineness: number): bigint {
+    return encodeStats([reactivity, fineness])
+}
+
+function makeLoaderStats(insulation: number, plasticity: number): bigint {
+    return encodeStats([insulation, plasticity])
+}
+
+test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer sum', () => {
+    // Two gatherers with distinct stats in separate slots, amp=100 for both
+    const gathStats1 = makeGathererStats(300, 200, 400)
+    const gathStats2 = makeGathererStats(500, 100, 300)
+
+    const modules: InstalledModule[] = [
+        {slotIndex: 0, itemId: ITEM_GATHERER_T1, stats: gathStats1},
+        {slotIndex: 1, itemId: ITEM_GATHERER_T1, stats: gathStats2},
+    ]
+
+    const layout: EntitySlot[] = [
+        {type: 'gatherer', outputPct: 100},
+        {type: 'gatherer', outputPct: 100},
+    ]
+
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+
+    // Lane lists must exist
+    expect(result.gathererLanes).toBeDefined()
+    expect(result.gathererLanes!.length).toBe(2)
+
+    // Each lane has the right slotIndex
+    expect(result.gathererLanes![0].slotIndex).toBe(0)
+    expect(result.gathererLanes![1].slotIndex).toBe(1)
+
+    // Yields are amp-scaled and distinct
+    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, conductivity: 400}, 1)
+    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, conductivity: 300}, 1)
+    const expectedYield1 = applySlotMultiplier(caps1.yield, 100)
+    const expectedYield2 = applySlotMultiplier(caps2.yield, 100)
+    expect(result.gathererLanes![0].yield).toBe(expectedYield1)
+    expect(result.gathererLanes![1].yield).toBe(expectedYield2)
+    expect(result.gathererLanes![0].yield).not.toBe(result.gathererLanes![1].yield)
+
+    // Unscaled per-module drain and depth carried verbatim from the compute helper
+    expect(result.gathererLanes![0].drain).toBe(caps1.drain)
+    expect(result.gathererLanes![1].drain).toBe(caps2.drain)
+    expect(result.gathererLanes![0].depth).toBe(caps1.depth)
+    expect(result.gathererLanes![1].depth).toBe(caps2.depth)
+
+    // outputPct reflects the slot amp
+    expect(result.gathererLanes![0].outputPct).toBe(100)
+    expect(result.gathererLanes![1].outputPct).toBe(100)
+
+    // Legacy sum still equals sum of both lane yields
+    expect(result.gatherer).toBeDefined()
+    expect(result.gatherer!.yield).toBe(expectedYield1 + expectedYield2)
+})
+
+test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum', () => {
+    const crafterStats = makeCrafterStats(400, 300)
+
+    const modules: InstalledModule[] = [
+        {slotIndex: 0, itemId: ITEM_CRAFTER_T1, stats: crafterStats},
+    ]
+
+    const layout: EntitySlot[] = [{type: 'crafter', outputPct: 120}]
+
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+
+    expect(result.crafterLanes).toBeDefined()
+    expect(result.crafterLanes!.length).toBe(1)
+    expect(result.crafterLanes![0].slotIndex).toBe(0)
+
+    const caps = computeCrafterCapabilities({reactivity: 400, fineness: 300})
+    const expectedSpeed = applySlotMultiplier(caps.speed, 120)
+    expect(result.crafterLanes![0].speed).toBe(expectedSpeed)
+    expect(result.crafterLanes![0].drain).toBe(caps.drain)
+    expect(result.crafterLanes![0].outputPct).toBe(120)
+
+    // Legacy crafter speed equals single-lane speed
+    expect(result.crafter).toBeDefined()
+    expect(result.crafter!.speed).toBe(expectedSpeed)
+})
+
+test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum', () => {
+    const loaderStats = makeLoaderStats(600, 500)
+
+    const modules: InstalledModule[] = [{slotIndex: 0, itemId: ITEM_LOADER_T1, stats: loaderStats}]
+
+    const layout: EntitySlot[] = [{type: 'loader', outputPct: 80}]
+
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+
+    expect(result.loaderLanes).toBeDefined()
+    expect(result.loaderLanes!.length).toBe(1)
+    expect(result.loaderLanes![0].slotIndex).toBe(0)
+
+    const caps = computeLoaderCapabilities({insulation: 600, plasticity: 500})
+    // mass is unscaled (raw); thrust is amp-scaled
+    expect(result.loaderLanes![0].mass).toBe(caps.mass)
+    expect(result.loaderLanes![0].thrust).toBe(applySlotMultiplier(caps.thrust, 80))
+    expect(result.loaderLanes![0].outputPct).toBe(80)
+
+    // Legacy loaders.mass is total (same as single-lane raw mass here)
+    expect(result.loaders).toBeDefined()
+    expect(result.loaders!.mass).toBe(caps.mass)
+})
+
+test('per-lane amp-scaled stats clamp to UInt16, matching the contract clamp_to_uint16', () => {
+    expect(applySlotMultiplier(60000, 200)).toBe(U16_MAX)
+    expect(applySlotMultiplier(1000, 150)).toBe(1500)
+})

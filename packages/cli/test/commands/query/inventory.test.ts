@@ -36,6 +36,9 @@ function makeEntity(opts: {
         current_task_elapsed: 0,
         current_task_remaining: 0,
         pending_tasks: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         lanes,
         holds: [],
     })

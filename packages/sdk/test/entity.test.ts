@@ -13,6 +13,7 @@ import {
     isWarehouse,
 } from '../src/data/kind-registry'
 import {Entity} from '../src/entities/entity'
+import {ServerContract} from '../src/contracts'
 import {makeEntity} from '../src/entities/makers'
 import {
     ITEM_CONTAINER_T1_PACKED,
@@ -107,6 +108,76 @@ describe('Entity unification — registry-driven', () => {
                     `EntityTypeName missing for ${k.kind}`
                 ).toBeDefined()
             }
+        })
+    })
+
+    describe('derived capability getters clamp at uint16 max', () => {
+        function shipWithLanes(lanes: {
+            loaders?: {slot_index: number; mass: number; thrust: number}[]
+            crafters?: {slot_index: number; speed: number; drain: number}[]
+            gatherers?: {slot_index: number; yield: number; drain: number; depth: number}[]
+        }) {
+            return ServerContract.Types.entity_info.from({
+                id: 1n,
+                type: 'ship',
+                item_id: 1000,
+                owner: 'alice',
+                entity_name: '',
+                cargomass: 0,
+                cargo: [],
+                coordinates: {x: 0, y: 0},
+                is_idle: true,
+                current_task_elapsed: 0,
+                current_task_remaining: 0,
+                pending_tasks: [],
+                lanes: [],
+                gatherer_lanes: (lanes.gatherers ?? []).map((l) => ({...l, output_pct: 100})),
+                crafter_lanes: (lanes.crafters ?? []).map((l) => ({...l, output_pct: 100})),
+                loader_lanes: (lanes.loaders ?? []).map((l) => ({...l, output_pct: 100})),
+                holds: [],
+                modules: [],
+            }) as unknown as Entity
+        }
+
+        test('loaders.thrust clamps when two lanes sum past 65535', () => {
+            const e = Object.setPrototypeOf(
+                shipWithLanes({
+                    loaders: [
+                        {slot_index: 0, mass: 1000, thrust: 40000},
+                        {slot_index: 1, mass: 1000, thrust: 40000},
+                    ],
+                }),
+                Entity.prototype
+            ) as Entity
+            expect(Number(e.loaders!.thrust)).toBe(65535)
+            expect(Number(e.loaders!.quantity)).toBe(2)
+        })
+
+        test('crafter.speed clamps when two lanes sum past 65535', () => {
+            const e = Object.setPrototypeOf(
+                shipWithLanes({
+                    crafters: [
+                        {slot_index: 0, speed: 40000, drain: 10},
+                        {slot_index: 1, speed: 40000, drain: 10},
+                    ],
+                }),
+                Entity.prototype
+            ) as Entity
+            expect(Number(e.crafter!.speed)).toBe(65535)
+        })
+
+        test('gatherer.yield clamps when two lanes sum past 65535', () => {
+            const e = Object.setPrototypeOf(
+                shipWithLanes({
+                    gatherers: [
+                        {slot_index: 0, yield: 40000, drain: 10, depth: 500},
+                        {slot_index: 1, yield: 40000, drain: 10, depth: 900},
+                    ],
+                }),
+                Entity.prototype
+            ) as Entity
+            expect(Number(e.gatherer!.yield)).toBe(65535)
+            expect(Number(e.gatherer!.depth)).toBe(900)
         })
     })
 })

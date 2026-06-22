@@ -12,9 +12,11 @@ export interface ContractProjectedState {
     hullmass?: UInt32
     capacity?: UInt32
     engines?: ServerContract.Types.movement_stats
-    loaders?: ServerContract.Types.loader_stats
     generator?: ServerContract.Types.energy_stats
     hauler?: ServerContract.Types.hauler_stats
+    gatherer_lanes: ServerContract.Types.gatherer_lane[]
+    crafter_lanes: ServerContract.Types.crafter_lane[]
+    loader_lanes: ServerContract.Types.loader_lane[]
 }
 
 export interface ProjectionComparisonOptions {
@@ -55,9 +57,31 @@ export function assertProjectionEquals(
     record('capacity', toNum(contract.capacity), sdk.capacity ? Number(sdk.capacity) : undefined)
 
     recordStatBlock('engines', contract.engines, sdk.engines)
-    recordStatBlock('loaders', contract.loaders, sdk.loaders)
     recordStatBlock('generator', contract.generator, sdk.generator)
     recordStatBlock('hauler', contract.hauler, sdk.hauler)
+
+    const normLane = (l: {slot_index?: unknown; [k: string]: unknown}) =>
+        Object.fromEntries(
+            Object.entries(l)
+                .filter(([k]) => k !== 'slot_index')
+                .map(([k, v]) => [k, toNum(v) ?? 0])
+        )
+
+    const compareLanes = (name: string, cLanes: unknown[], sLanes: unknown[]) => {
+        if (cLanes.length !== sLanes.length) {
+            mismatches.push(`  ${name}.length: contract=${cLanes.length} sdk=${sLanes.length}`)
+            return
+        }
+        for (let i = 0; i < cLanes.length; i++) {
+            const cn = JSON.stringify(normLane(cLanes[i] as Record<string, unknown>))
+            const sn = JSON.stringify(normLane(sLanes[i] as Record<string, unknown>))
+            if (cn !== sn) mismatches.push(`  ${name}[${i}]: contract=${cn} sdk=${sn}`)
+        }
+    }
+
+    compareLanes('gatherer_lanes', contract.gatherer_lanes as unknown[], sdk.gathererLanes ?? [])
+    compareLanes('crafter_lanes', contract.crafter_lanes as unknown[], sdk.crafterLanes ?? [])
+    compareLanes('loader_lanes', contract.loader_lanes as unknown[], sdk.loaderLanes ?? [])
 
     if (contract.cargo.length > 0 || sdk.cargo.length > 0) {
         const contractCargo = normaliseCargo(mergeContractCargo(contract.cargo))

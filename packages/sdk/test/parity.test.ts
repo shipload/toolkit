@@ -1,11 +1,11 @@
 import {describe, test, expect} from 'bun:test'
-import {UInt16} from '@wharfkit/antelope'
+import {UInt16, UInt32} from '@wharfkit/antelope'
 import {calc_gather_duration} from '../src/capabilities/gathering'
 import {calc_craft_duration} from '../src/capabilities/crafting'
 import {computeInputMass} from '../src/derivation/crafting'
 import {ITEM_ORE_T1, ITEM_PLATE} from '../src/data/item-ids'
 import {getItem} from '../src/data/catalog'
-import {ServerContract} from '../src/contracts'
+import type {GathererStats} from '../src/types/capabilities'
 
 const GATHER_MASS_DIVISOR = 228
 const GATHER_TIME_SCALE = 100
@@ -25,11 +25,11 @@ describe('gather duration parity matrix', () => {
             const oreT1 = getItem(ITEM_ORE_T1)
             expect(oreT1.mass).toBe(1000)
 
-            const gatherer = ServerContract.Types.gatherer_stats.from({
+            const gatherer: GathererStats = {
                 yield: UInt16.from(c.yield),
-                drain: UInt16.from(100),
+                drain: UInt32.from(100),
                 depth: UInt16.from(65535),
-            })
+            }
             const duration = calc_gather_duration(
                 gatherer,
                 oreT1.mass,

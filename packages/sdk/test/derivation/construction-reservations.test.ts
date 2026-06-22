@@ -148,15 +148,20 @@ describe('partitionSources netting against reservations', () => {
             cargomass: UInt32.from(0),
             cargo: [],
             coordinates: COORDS,
-            loaders: ServerContract.Types.loader_stats.from({
-                mass: UInt32.from(50_000),
-                thrust: UInt16.from(0),
-                quantity: UInt8.from(1),
-            }),
             modules: [],
             lanes: schedule
                 ? [ServerContract.Types.lane.from({lane_key: UInt8.from(0), schedule})]
                 : [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [
+                ServerContract.Types.loader_lane.from({
+                    slot_index: UInt8.from(0),
+                    mass: UInt32.from(50_000),
+                    thrust: UInt16.from(0),
+                    output_pct: UInt16.from(100),
+                }),
+            ],
             holds: [],
         })
     }

@@ -3,6 +3,7 @@ import type {ServerContract} from '../contracts'
 import type {Coordinates} from '../types'
 import type {
     EnergyCapability,
+    GathererCapability,
     LoaderCapability,
     MassCapability,
     MovementCapability,
@@ -24,9 +25,8 @@ export type ShipEntity = Entity &
     StorageCapability &
     Partial<LoaderCapability> &
     MassCapability &
-    ScheduleCapability & {
-        gatherer?: ServerContract.Types.gatherer_stats
-    }
+    ScheduleCapability &
+    Partial<GathererCapability>
 
 export type WarehouseEntity = Entity &
     StorageCapability &

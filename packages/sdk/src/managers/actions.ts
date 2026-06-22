@@ -6,6 +6,7 @@ import {
     type Int64Type,
     Name,
     type NameType,
+    Transaction,
     UInt8,
     type UInt8Type,
     UInt16,
@@ -182,13 +183,39 @@ export class ActionsManager extends BaseManager {
         sourceId: UInt64Type,
         destinationId: UInt64Type,
         stratum: UInt16Type,
-        quantity: UInt32Type
+        quantity: UInt32Type,
+        slot?: UInt8Type
     ): Action {
-        return this.server.action('gather', {
+        const params: ServerContract.ActionParams.gather = {
             source_id: UInt64.from(sourceId),
             destination_id: UInt64.from(destinationId),
             stratum: UInt16.from(stratum),
             quantity: UInt32.from(quantity),
+        }
+        if (slot !== undefined) {
+            params.slot = UInt8.from(slot)
+        }
+        return this.server.action('gather', params)
+    }
+
+    // Packs N gather actions into one Transaction; the wallet/session fills in TAPoS at sign time.
+    bundleGather(
+        gathers: {
+            sourceId: UInt64Type
+            destinationId: UInt64Type
+            stratum: UInt16Type
+            quantity: UInt32Type
+            slot?: UInt8Type
+        }[]
+    ): Transaction {
+        const actions = gathers.map(({sourceId, destinationId, stratum, quantity, slot}) =>
+            this.gather(sourceId, destinationId, stratum, quantity, slot)
+        )
+        return Transaction.from({
+            expiration: 0,
+            ref_block_num: 0,
+            ref_block_prefix: 0,
+            actions,
         })
     }
 
@@ -208,7 +235,8 @@ export class ActionsManager extends BaseManager {
         recipeId: number,
         quantity: number,
         inputs: ServerContract.ActionParams.Type.cargo_item[],
-        target?: UInt64Type
+        target?: UInt64Type,
+        slot?: UInt8Type
     ): Action {
         const params: ServerContract.ActionParams.craft = {
             id: UInt64.from(entityId),
@@ -218,6 +246,9 @@ export class ActionsManager extends BaseManager {
         }
         if (target !== undefined) {
             params.target = UInt64.from(target)
+        }
+        if (slot !== undefined) {
+            params.slot = UInt8.from(slot)
         }
         return this.server.action('craft', params)
     }

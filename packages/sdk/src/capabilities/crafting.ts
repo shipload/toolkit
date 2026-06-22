@@ -1,10 +1,9 @@
 import {UInt32} from '@wharfkit/antelope'
 import {CRAFT_ENERGY_DIVISOR} from '../types'
-import type {EntityCapabilities} from '../types/capabilities'
-import type {ServerContract} from '../contracts'
+import type {CrafterStats, EntityCapabilities} from '../types/capabilities'
 
 export interface CrafterCapability {
-    crafter: ServerContract.Types.crafter_stats
+    crafter: CrafterStats
 }
 
 export function capsHasCrafter(caps: EntityCapabilities): boolean {

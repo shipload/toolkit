@@ -26,13 +26,11 @@ export type {InstalledModule} from './entities/slot-multiplier'
 
 export type movement_stats = ServerContract.Types.movement_stats
 export type energy_stats = ServerContract.Types.energy_stats
-export type loader_stats = ServerContract.Types.loader_stats
 export type schedule = ServerContract.Types.schedule
 export type lane = ServerContract.Types.lane
 export type task = ServerContract.Types.task
 export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
-export type gatherer_stats = ServerContract.Types.gatherer_stats
 
 export type location_static = ServerContract.Types.location_static
 export type location_derived = ServerContract.Types.location_derived
@@ -158,6 +156,7 @@ export {
     calc_flighttime,
     calc_loader_acceleration,
     calc_loader_flighttime,
+    calc_onesided_duration,
     calc_orbital_altitude,
     calc_rechargetime,
     calc_ship_acceleration,
@@ -204,7 +203,16 @@ export {
     candidateLaneCompletesAt,
     laneKeyForModule,
     rawScheduleEnd,
+    resolveLaneGatherer,
+    resolveLaneCrafter,
+    resolveLaneLoader,
+    selectGatherLane,
     workerLaneKey,
+} from './scheduling/lanes'
+export type {
+    ResolvedGathererLane,
+    ResolvedCrafterLane,
+    ResolvedLoaderLane,
 } from './scheduling/lanes'
 export {ScheduleAccessor, createScheduleAccessor} from './scheduling/accessor'
 export {InventoryAccessor, createInventoryAccessor} from './entities/inventory-accessor'
@@ -488,3 +496,6 @@ export {displayName, baseName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
 
 export * from './subscriptions'
+
+export {planParallelGather, planParallelTransfer} from './planner'
+export type {LanePlanEntry, PlanTarget, GatherPlanEntity} from './planner'

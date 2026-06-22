@@ -74,7 +74,7 @@ export async function runDeploy(
                 )
             }
         }
-        if (!snap.loaders) {
+        if ((snap.loader_lanes ?? []).length === 0) {
             throw new ValidationError(
                 `Cannot deploy from ${ctx.entityType}:${ctx.entityId}: host has no loaders installed. ` +
                     `Install a loader module first.`

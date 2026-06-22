@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import type {CrafterStats} from '../src/types/capabilities'
 import {ServerContract} from '../src/contracts'
 import {PlotManager} from '../src/managers/plot'
 import {ITEM_PLATE, ITEM_FRAME, ITEM_WAREHOUSE_T1_PACKED} from '../src/data/item-ids'
@@ -48,6 +49,9 @@ function makePlotInfo(
         current_task_remaining: UInt32.from(0),
         pending_tasks: [],
         lanes: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds: [],
     })
 }
@@ -138,19 +142,19 @@ describe('PlotManager.canBuild', () => {
 describe('PlotManager.timeToComplete', () => {
     test('divides capacity by speed, minimum 1', () => {
         const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 14400000)
-        const crafter = ServerContract.Types.crafter_stats.from({
+        const crafter: CrafterStats = {
             speed: UInt16.from(14400),
-            drain: UInt16.from(0),
-        })
+            drain: UInt32.from(0),
+        }
         expect(manager.timeToComplete(plot, crafter)).toBe(1000)
     })
 
     test('minimum result is 1', () => {
         const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 1)
-        const crafter = ServerContract.Types.crafter_stats.from({
+        const crafter: CrafterStats = {
             speed: UInt16.from(65535),
-            drain: UInt16.from(0),
-        })
+            drain: UInt32.from(0),
+        }
         expect(manager.timeToComplete(plot, crafter)).toBe(1)
     })
 })

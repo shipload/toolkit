@@ -23,7 +23,29 @@ describe("reachLegend", () => {
 });
 
 import { Checksum256 } from "@wharfkit/antelope";
-import { shallowestPerItem } from "../../src/lib/reach";
+import { reachDepth, shallowestPerItem } from "../../src/lib/reach";
+
+describe("reachDepth — max depth over per-lane gatherers", () => {
+	const mkDepth = (n: number) => ({ toString: () => String(n) });
+
+	test("returns max depth across multiple gatherer lanes", () => {
+		const lanes = [
+			{ depth: mkDepth(510) },
+			{ depth: mkDepth(2000) },
+			{ depth: mkDepth(750) },
+		] as any[];
+		expect(reachDepth(lanes)).toBe(2000);
+	});
+
+	test("returns single lane depth for one-lane entity", () => {
+		const lanes = [{ depth: mkDepth(510) }] as any[];
+		expect(reachDepth(lanes)).toBe(510);
+	});
+
+	test("returns 0 for empty lane list (no gatherer)", () => {
+		expect(reachDepth([])).toBe(0);
+	});
+});
 
 describe("shallowestPerItem", () => {
 	const gameSeed = Checksum256.from(

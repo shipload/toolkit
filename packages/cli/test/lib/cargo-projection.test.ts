@@ -41,6 +41,9 @@ function makeShip(opts: {
 		current_task_elapsed: 0,
 		current_task_remaining: 0,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes,
 		holds: [],
 	});
@@ -174,6 +177,9 @@ function gatherOnWorkerLane(at: Date) {
 		coordinates: { x: 0, y: 0, z: 800 }, item_id: 0, cargomass: 0, cargo: [],
 		modules: [], is_idle: false, current_task_elapsed: 0, current_task_remaining: 0,
 		pending_tasks: [],
+		gatherer_lanes: [],
+		crafter_lanes: [],
+		loader_lanes: [],
 		lanes: [
 			{ lane_key: 3, schedule: { started, tasks: [
 				{ type: 5, duration: 300, cancelable: 0,

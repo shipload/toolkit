@@ -140,12 +140,39 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
 
         if (caps.engines) info.engines = caps.engines
         if (caps.generator) info.generator = caps.generator
-        if (caps.gatherer) info.gatherer = caps.gatherer
-        if (caps.loaders) info.loaders = caps.loaders
-        if (caps.crafter) info.crafter = caps.crafter
         if (caps.hauler) info.hauler = caps.hauler
         if (caps.warp) info.warp = caps.warp
+
+        info.gatherer_lanes = (caps.gathererLanes ?? []).map((l) =>
+            ServerContract.Types.gatherer_lane.from({
+                slot_index: l.slotIndex,
+                yield: l.yield,
+                drain: l.drain,
+                depth: l.depth,
+                output_pct: l.outputPct,
+            })
+        )
+        info.crafter_lanes = (caps.crafterLanes ?? []).map((l) =>
+            ServerContract.Types.crafter_lane.from({
+                slot_index: l.slotIndex,
+                speed: l.speed,
+                drain: l.drain,
+                output_pct: l.outputPct,
+            })
+        )
+        info.loader_lanes = (caps.loaderLanes ?? []).map((l) =>
+            ServerContract.Types.loader_lane.from({
+                slot_index: l.slotIndex,
+                mass: l.mass,
+                thrust: l.thrust,
+                output_pct: l.outputPct,
+            })
+        )
     }
+
+    if (!info.gatherer_lanes) info.gatherer_lanes = []
+    if (!info.crafter_lanes) info.crafter_lanes = []
+    if (!info.loader_lanes) info.loader_lanes = []
 
     const entityInfo = ServerContract.Types.entity_info.from(info)
     return new Entity(entityInfo)

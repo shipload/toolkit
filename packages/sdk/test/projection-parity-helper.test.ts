@@ -16,10 +16,12 @@ function makeContractState(
         cargo: [],
         hullmass: UInt32.from(50),
         engines: undefined,
-        loaders: undefined,
         generator: undefined,
         capacity: undefined,
         hauler: undefined,
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         ...overrides,
     } as ContractProjectedState
 }

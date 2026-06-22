@@ -82,16 +82,21 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             cargomass: UInt32.from(0),
             cargo: [],
             coordinates: coords,
-            loaders: ServerContract.Types.loader_stats.from({
-                mass: UInt32.from(50_000),
-                thrust: UInt16.from(0),
-                quantity: UInt8.from(1),
-            }),
             is_idle: true,
             current_task_elapsed: UInt32.from(0),
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [
+                ServerContract.Types.loader_lane.from({
+                    slot_index: UInt8.from(0),
+                    mass: UInt32.from(50_000),
+                    thrust: UInt16.from(0),
+                    output_pct: UInt16.from(100),
+                }),
+            ],
             holds: [],
             modules: [
                 ServerContract.Types.module_entry.from({
@@ -170,6 +175,9 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
 
@@ -257,15 +265,21 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             cargomass: UInt32.from(0),
             cargo: [],
             coordinates: coords,
-            crafter: ServerContract.Types.crafter_stats.from({
-                speed: UInt16.from(speed),
-                drain: UInt16.from(10),
-            }),
             is_idle: true,
             current_task_elapsed: UInt32.from(0),
             current_task_remaining: UInt32.from(0),
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [
+                ServerContract.Types.crafter_lane.from({
+                    slot_index: UInt8.from(0),
+                    speed: UInt16.from(speed),
+                    drain: UInt32.from(10),
+                    output_pct: UInt16.from(100),
+                }),
+            ],
+            loader_lanes: [],
             holds: [],
             modules: [
                 ServerContract.Types.module_entry.from({

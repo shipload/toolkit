@@ -36,6 +36,9 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
@@ -57,6 +60,9 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
@@ -78,6 +84,9 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)
@@ -99,6 +108,9 @@ describe('subscriptions/mappers', () => {
             current_task_remaining: 0,
             pending_tasks: [],
             lanes: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         assert.instanceOf(mapEntity(ei), Entity)

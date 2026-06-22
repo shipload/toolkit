@@ -14,6 +14,7 @@ import {
     calc_loader_acceleration,
     calc_loader_flighttime,
     calc_orbital_altitude,
+    calc_onesided_duration,
     calc_rechargetime,
     calc_ship_acceleration,
     calc_ship_flighttime,
@@ -92,6 +93,14 @@ function createMockShip(
         current_task_remaining: 0,
         pending_tasks: [],
         lanes: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: Array.from({length: overrides.loaderQuantity ?? 1}, (_, i) => ({
+            slot_index: i,
+            mass: overrides.loaderMass ?? 5000,
+            thrust: overrides.loaderThrust ?? 100,
+            output_pct: 100,
+        })),
         holds: [],
     })
 }
@@ -419,20 +428,19 @@ describe('travel', () => {
             assert.isAbove(breakdown.loadMass, 0, 'Should have load mass')
         })
 
-        test('divides time by number of loaders', () => {
+        test('per-lane (ADR 0029): a single load action is NOT divided by loader count', () => {
             const ship1 = createMockShip({loaderQuantity: 1})
             const ship2 = createMockShip({loaderQuantity: 2})
-            const cargos = [createMockCargo(1, 100)]
-            const loadMap = new Map([[1, 20]])
+            const cargos = [createMockCargo(301, 100)]
+            const loadMap = new Map([[301, 20]])
 
             const breakdown1 = calculateLoadTimeBreakdown(ship1, cargos, loadMap)
             const breakdown2 = calculateLoadTimeBreakdown(ship2, cargos, loadMap)
 
-            assert.approximately(
+            assert.equal(
                 breakdown1.totalTime,
-                breakdown2.totalTime * 2,
-                0.01,
-                '1 loader should take twice as long as 2 loaders'
+                breakdown2.totalTime,
+                'one load action uses one lane; count does not divide its duration'
             )
         })
     })
@@ -463,47 +471,72 @@ describe('travel', () => {
         })
     })
 
-    describe('calc_transfer_duration', () => {
+    describe('calc_transfer_duration (ADR 0029 per-lane, T8 consumed path)', () => {
+        const lane = (thrust: number, mass: number, slot = 0) => ({
+            slot_index: slot,
+            thrust,
+            mass,
+        })
+        const oneLoader = [lane(100, 5000)]
+
         test('returns 0 when cargo mass is 0', () => {
             const source = {
                 location: {z: 1000},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const dest = {
                 location: {z: 1200},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const duration = calc_transfer_duration(source, dest, 0)
             assert.equal(duration, 0)
         })
 
-        test('floors duration when source and dest share orbital altitude', () => {
-            const source = {
+        test('multi-loader entity: returns the chosen lane value, NOT summed÷count', () => {
+            // BEFORE old summed÷count = 2; AFTER per-lane lowest-slot (thrust=100,mass=50000) = 6
+            const sender = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 1, mass: 1450, quantity: 1},
+                loaderLanes: [lane(100, 50000, 0), lane(300, 80000, 1)],
             }
-            const dest = {
+            const receiver = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 1, mass: 1450, quantity: 1},
             }
-            const duration = calc_transfer_duration(source, dest, 52000)
-            assert.isAbove(duration, 0)
+            const duration = calc_transfer_duration(sender, receiver, 10000)
+            assert.equal(duration, 6)
+        })
+
+        test('lane selection uses lowest slot regardless of array order', () => {
+            const senderOrdered = {
+                location: {z: 800},
+                entityClass: EntityClass.OrbitalVessel,
+                loaderLanes: [lane(100, 50000, 0), lane(300, 80000, 1)],
+            }
+            const senderReversed = {
+                location: {z: 800},
+                entityClass: EntityClass.OrbitalVessel,
+                loaderLanes: [lane(300, 80000, 1), lane(100, 50000, 0)],
+            }
+            const receiver = {location: {z: 800}, entityClass: EntityClass.OrbitalVessel}
+            assert.equal(
+                calc_transfer_duration(senderOrdered, receiver, 10000),
+                calc_transfer_duration(senderReversed, receiver, 10000)
+            )
         })
 
         test('calculates duration based on z-distance', () => {
             const source = {
                 location: {z: 1000},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const dest = {
                 location: {z: 1500},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
@@ -516,44 +549,16 @@ describe('travel', () => {
             assert.equal(duration, 0)
         })
 
-        test('decreases with more loaders', () => {
-            const source1 = {
-                location: {z: 1000},
-                entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
-            }
-            const dest1 = {
-                location: {z: 1500},
-                entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
-            }
-            const source2 = {
-                location: {z: 1000},
-                entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 2},
-            }
-            const dest2 = {
-                location: {z: 1500},
-                entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 2},
-            }
-
-            const duration1 = calc_transfer_duration(source1, dest1, 10000)
-            const duration2 = calc_transfer_duration(source2, dest2, 10000)
-
-            assert.isAbove(duration1, duration2)
-        })
-
         test('works with numeric z values', () => {
             const source = {
                 location: {z: 1000},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const dest = {
                 location: {z: 1200},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
@@ -563,97 +568,154 @@ describe('travel', () => {
             const source = {
                 location: {z: {toNumber: () => 1000}},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const dest = {
                 location: {z: {toNumber: () => 1200}},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 1},
+                loaderLanes: oneLoader,
             }
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
         })
 
-        test('handles only source having loaders', () => {
+        test('handles only source having loaders (source is active)', () => {
             const source = {
                 location: {z: 1000},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 2},
+                loaderLanes: oneLoader,
             }
             const dest = {location: {z: 1200}, entityClass: EntityClass.OrbitalVessel}
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
         })
 
-        test('handles only dest having loaders', () => {
+        test('handles only dest having loaders (dest is active)', () => {
             const source = {location: {z: 1000}, entityClass: EntityClass.OrbitalVessel}
             const dest = {
                 location: {z: 1200},
                 entityClass: EntityClass.OrbitalVessel,
-                loaders: {thrust: 100, mass: 5000, quantity: 2},
+                loaderLanes: oneLoader,
             }
             const duration = calc_transfer_duration(source, dest, 10000)
             assert.isAbove(duration, 0)
         })
 
-        test('orbital floor (300) exceeds planetary floor (100) for co-located transfers', () => {
-            const loaders = {thrust: 100, mass: 5000, quantity: 1}
+        test('orbital floor exceeds planetary floor for co-located transfers', () => {
             const orbital0 = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 1000000
             )
             const planetary0 = calc_transfer_duration(
-                {location: {z: 0}, entityClass: EntityClass.PlanetaryStructure, loaders},
-                {location: {z: 0}, entityClass: EntityClass.PlanetaryStructure, loaders},
+                {
+                    location: {z: 0},
+                    entityClass: EntityClass.PlanetaryStructure,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 0},
+                    entityClass: EntityClass.PlanetaryStructure,
+                    loaderLanes: oneLoader,
+                },
                 1000000
             )
             assert.isAbove(orbital0, planetary0)
         })
 
-        test('orbital floor is flat across the sub-300 altitude band', () => {
-            const loaders = {thrust: 100, mass: 5000, quantity: 1}
+        test('orbital floor is flat across the sub-floor altitude band', () => {
             const gap0 = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
             const gap150 = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 950}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 950},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
-            // Both floored to 300 (raw gaps 0 and 150 are below the orbital floor).
             assert.equal(gap150, gap0)
         })
 
         test('orbital transfers above the band use the raw z-gap', () => {
-            const loaders = {thrust: 100, mass: 5000, quantity: 1}
             const gap0 = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
             const gap600 = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 1400}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 1400},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
-            // raw gap 600 > floor 300 → uses 600 → larger than the floored case.
             assert.isAbove(gap600, gap0)
         })
 
         test('mixed-class transfer (surface↔ship) is never floored', () => {
-            const loaders = {thrust: 100, mass: 5000, quantity: 1}
-            // raw gap 800 ≥ max(100, 300) → unfloored, uses raw 800.
             const mixed = calc_transfer_duration(
-                {location: {z: 0}, entityClass: EntityClass.PlanetaryStructure, loaders},
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 0},
+                    entityClass: EntityClass.PlanetaryStructure,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
             const orbitalFloored = calc_transfer_duration(
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
-                {location: {z: 800}, entityClass: EntityClass.OrbitalVessel, loaders},
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
+                {
+                    location: {z: 800},
+                    entityClass: EntityClass.OrbitalVessel,
+                    loaderLanes: oneLoader,
+                },
                 10000
             )
             assert.isAbove(mixed, orbitalFloored)
@@ -866,5 +928,83 @@ describe('getInterpolatedPosition', () => {
         assert.isDefined(dest)
         assert.strictEqual(dest!.x, 1000)
         assert.strictEqual(dest!.y, 0)
+    })
+})
+
+describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
+    // BEFORE=3 (old summed÷count), AFTER=6 (per-lane single-module thrust, no ÷qty)
+    const LOADER_THRUST = 100
+    const LOADER_MASS = 50000
+    const CARGO_MASS = 10000
+    const ACTIVE_Z = 800
+    const COUNTERPART_Z = 800
+
+    const BEFORE_DURATION = 3
+    const AFTER_DURATION = 6
+
+    test('old summed-÷count arithmetic yields BEFORE value (proves fixture distinguishes)', () => {
+        // Reproduce the removed summed÷count formula for one loader on each side:
+        const totalThrust = LOADER_THRUST + LOADER_THRUST
+        const totalLoaderMass = LOADER_MASS + LOADER_MASS
+        const totalQuantity = 2
+        const distance = 200
+        const totalMass = CARGO_MASS + totalLoaderMass
+        const accel = (totalThrust / totalMass) * 10000
+        const old = Math.floor((2 * Math.sqrt(distance / accel)) / totalQuantity)
+        assert.equal(old, BEFORE_DURATION)
+        assert.notEqual(old, AFTER_DURATION)
+    })
+
+    test('calc_onesided_duration returns AFTER value matching contract calc_onesided_duration', () => {
+        const result = calc_onesided_duration(
+            LOADER_THRUST,
+            LOADER_MASS,
+            ACTIVE_Z,
+            COUNTERPART_Z,
+            EntityClass.OrbitalVessel,
+            EntityClass.OrbitalVessel,
+            CARGO_MASS
+        )
+        assert.equal(result, AFTER_DURATION)
+    })
+
+    test('zero cargo mass → 0 (mirrors contract early-return)', () => {
+        const result = calc_onesided_duration(
+            LOADER_THRUST,
+            LOADER_MASS,
+            ACTIVE_Z,
+            COUNTERPART_Z,
+            EntityClass.OrbitalVessel,
+            EntityClass.OrbitalVessel,
+            0
+        )
+        assert.equal(result, 0)
+    })
+
+    test('zero loader thrust → 0 (no-loader / LANE_MOBILITY case)', () => {
+        const result = calc_onesided_duration(
+            0,
+            0,
+            ACTIVE_Z,
+            COUNTERPART_Z,
+            EntityClass.OrbitalVessel,
+            EntityClass.OrbitalVessel,
+            CARGO_MASS
+        )
+        assert.equal(result, 0)
+    })
+
+    test('non-zero flightTime that rounds to 0 is clamped to 1 (mirrors contract)', () => {
+        // Very high thrust + tiny cargo → flightTime near 0 but > 0 → should return 1 not 0.
+        const result = calc_onesided_duration(
+            65535,
+            1,
+            ACTIVE_Z,
+            COUNTERPART_Z,
+            EntityClass.OrbitalVessel,
+            EntityClass.OrbitalVessel,
+            1
+        )
+        assert.equal(result, 1)
     })
 })

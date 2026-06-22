@@ -63,6 +63,9 @@ function entity(
         modules: [],
         item_id: UInt16.from(0),
         lanes: opts.lanes ?? [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds: opts.holds ?? [],
     })
 }

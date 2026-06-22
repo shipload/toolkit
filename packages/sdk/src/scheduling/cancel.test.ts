@@ -26,6 +26,9 @@ function entity(tasks: ReturnType<typeof task>[], startedISO = T0) {
         cargo: [],
         modules: [],
         lanes: [{lane_key: 0, schedule: {started: startedISO, tasks}}],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         holds: [],
     })
 }
@@ -147,6 +150,9 @@ describe('cancelEligibility — effects', () => {
             cargo: [],
             modules: [],
             lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [
                 {
                     id: 1,
@@ -176,6 +182,9 @@ describe('cancelEligibility — effects', () => {
             cargo: [],
             modules: [],
             lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [
                 {
                     id: 1,
@@ -205,6 +214,9 @@ describe('cancelEligibility — effects', () => {
             cargo: [],
             modules: [],
             lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         const plan = cancelEligibility(e, 0, 0, {now: upcoming})
@@ -251,6 +263,9 @@ describe('cancelEligibility — feasibility', () => {
                     schedule: {started: '2026-06-19T00:00:00', tasks: [consumer]},
                 },
             ],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         expect(cancelEligibility(e, 1, 0, {now: upcoming}).blockedReason).toBe(
@@ -285,6 +300,9 @@ describe('cancelEligibility — feasibility', () => {
                 {lane_key: 1, schedule: {started: '2026-06-19T00:00:00', tasks: [producer]}},
                 {lane_key: 2, schedule: {started: '2026-06-19T00:00:00', tasks: [independent]}},
             ],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         expect(cancelEligibility(e, 2, 0, {now: upcoming}).ok).toBe(true)
@@ -318,6 +336,9 @@ describe('cancelEligibility — feasibility', () => {
                 {lane_key: 1, schedule: {started: '2026-06-19T00:00:00', tasks: [producer]}},
                 {lane_key: 2, schedule: {started: '2026-06-19T00:00:00', tasks: [consumer]}},
             ],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
             holds: [],
         })
         expect(cancelEligibility(e, 1, 0, {now: upcoming}).blockedReason).toBe(

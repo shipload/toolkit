@@ -148,6 +148,9 @@ function multiLane(at: Date): ServerContract.Types.entity_info {
         cargo: [],
         modules: [],
         is_idle: false,
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        loader_lanes: [],
         lanes: [
             {
                 lane_key: 0,

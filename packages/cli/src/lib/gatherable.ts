@@ -12,10 +12,10 @@ import {
 	calc_gather_energy,
 	getItem,
 	type LocationStratum,
+	type GathererStats,
 	PRECISION,
-	ServerTypes,
 } from "@shipload/sdk";
-import { UInt16 } from "@wharfkit/antelope";
+import { UInt16, UInt32 } from "@wharfkit/antelope";
 
 const GATHER_MASS_DIVISOR = 228;
 
@@ -41,12 +41,12 @@ export interface StratumGatherMetrics {
 	gatherable: boolean;
 }
 
-function gathererStats(caps: GathererCaps): ServerTypes.gatherer_stats {
-	return ServerTypes.gatherer_stats.from({
+function gathererStats(caps: GathererCaps): GathererStats {
+	return {
 		yield: UInt16.from(caps.yield),
-		drain: UInt16.from(caps.drain),
+		drain: UInt32.from(caps.drain),
 		depth: UInt16.from(caps.depth),
-	});
+	};
 }
 
 function durationAndEnergy(
