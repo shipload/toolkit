@@ -26,8 +26,7 @@ describe('resolveItem - entity capacity dispatch', () => {
 
     test('ship-t1 uses computeShipHullCapabilities', () => {
         const resolved = resolveItem(ITEM_SHIP_T1_PACKED, defaultPackedStats)
-        // Ship stats decode to {strength, density} only (no hardness slot), so capacity tracks strength alone.
-        const expected = computeShipHullCapabilities({strength: 500, density: 500}).capacity
+        const expected = computeShipHullCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 

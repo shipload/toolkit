@@ -287,7 +287,10 @@ function resolveEntity(
     let moduleSlots: ResolvedModuleSlot[] | undefined
 
     if (stats !== undefined) {
-        const decoded = decodeCraftedItemStats(id, toBigStats(stats))
+        const bigStats = toBigStats(stats)
+        const decoded = decodeCraftedItemStats(id, bigStats)
+        if (decoded.strength === undefined) decoded.strength = decodeStat(bigStats, 0)
+        if (decoded.hardness === undefined) decoded.hardness = decodeStat(bigStats, 2)
         const hullCaps = hullCapsForEntity(id, decoded)
         attributes = [
             {
