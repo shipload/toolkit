@@ -8,6 +8,7 @@ import {renderIssues} from '../../lib/feasibility'
 import {planRoute, sdkSystemGraph, type Coord} from '../../lib/route-planner'
 import {
     buildHypotheticalSnapshot,
+    computeGroupPerLegReach,
     computePerLegReach,
     renderRoutePlan,
     routePlanToJson,
@@ -64,18 +65,25 @@ export function register(program: Command): void {
             const entityLabels = entities.map((e) => `${e.entityType}:${e.entityId}`)
             const dest: Coord = {x: Number(x), y: Number(y)}
 
-            const [seed, leadSnapshot] = await Promise.all([
+            const [seed, snapshots] = await Promise.all([
                 getGameSeed(),
-                getEntitySnapshot(lead.entityId),
+                Promise.all(entities.map((e) => getEntitySnapshot(e.entityId))),
             ])
+            const leadSnapshot = snapshots[0]
             const origin: Coord = {
                 x: Number(leadSnapshot.coordinates.x),
                 y: Number(leadSnapshot.coordinates.y),
             }
 
+            const haulCount = isGroup
+                ? snapshots.filter((s) => s.engines === undefined || s.engines.drain === 0n).length
+                : 0
+
             let perLegReach: number
             try {
-                perLegReach = computePerLegReach(leadSnapshot)
+                perLegReach = isGroup
+                    ? computeGroupPerLegReach(snapshots, haulCount)
+                    : computePerLegReach(leadSnapshot)
             } catch (e) {
                 console.error((e as Error).message)
                 process.exit(1)

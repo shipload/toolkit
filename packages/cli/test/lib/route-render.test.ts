@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {
     buildHypotheticalSnapshot,
+    computeGroupPerLegReach,
     computePerLegReach,
     renderRoutePlan,
     routePlanToJson,
@@ -39,6 +40,52 @@ describe('computePerLegReach', () => {
     test('throws when the entity has no engine or generator', () => {
         expect(() => computePerLegReach({})).toThrow()
         expect(() => computePerLegReach({generator: {capacity: 1056n}, engines: {drain: 0n}})).toThrow()
+    })
+
+    test('a hauler adds drain per hauled entity, shrinking reach', () => {
+        // reach = capacity / (engine.drain + hauler.drain * haul_count) = 1056 / (94 + 13) ≈ 9.87
+        const reach = computePerLegReach(
+            {generator: {capacity: 1056n}, engines: {drain: 94n}, hauler: {drain: 13n}},
+            1,
+        )
+        expect(reach).toBeCloseTo(9.87, 2)
+    })
+
+    test('hauler drain is ignored when nothing is being hauled', () => {
+        const reach = computePerLegReach(
+            {generator: {capacity: 1056n}, engines: {drain: 94n}, hauler: {drain: 13n}},
+            0,
+        )
+        expect(reach).toBeCloseTo(11.23, 2)
+    })
+
+    test('a non-hauling mover is unaffected by haul count', () => {
+        const reach = computePerLegReach({generator: {capacity: 1056n}, engines: {drain: 94n}}, 2)
+        expect(reach).toBeCloseTo(11.23, 2)
+    })
+})
+
+describe('computeGroupPerLegReach', () => {
+    test('reach is bounded by the most constrained mover, excluding hauled cargo', () => {
+        const haulingShip = {generator: {capacity: 1056n}, engines: {drain: 94n}, hauler: {drain: 13n}}
+        const escort = {generator: {capacity: 2000n}, engines: {drain: 100n}}
+        const container = {generator: {capacity: 0n}} // no engines: hauled, not a mover
+        // haul_count = 1 (the container). Hauling ship reach 9.87 < escort reach 20.
+        const reach = computeGroupPerLegReach([haulingShip, escort, container], 1)
+        expect(reach).toBeCloseTo(9.87, 2)
+    })
+
+    test('regression: ship+container legs must be planned shorter than the bare-engine reach', () => {
+        // chain rejected 10.8-tile legs: hauler surcharge put energy_cost (1155) over capacity (1056)
+        const haulingShip = {generator: {capacity: 1056n}, engines: {drain: 94n}, hauler: {drain: 13n}}
+        const container = {generator: {capacity: 0n}}
+        const reach = computeGroupPerLegReach([haulingShip, container], 1)
+        expect(reach).toBeLessThan(10.8)
+        expect(reach).toBeCloseTo(9.87, 2)
+    })
+
+    test('throws when the group has no moving entity', () => {
+        expect(() => computeGroupPerLegReach([{generator: {capacity: 0n}}], 1)).toThrow()
     })
 })
 
