@@ -48,6 +48,11 @@ export function computeBaseCapacityContainer(stats: bigint): number {
     return Math.floor(22_000_000 * 6 ** (s / 1998))
 }
 
+export function computeBaseCapacityContainerT2(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(24_000_000 * 6 ** (s / 2947))
+}
+
 export function computeBaseCapacityWarehouse(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
     return Math.floor(100_000_000 * 6 ** (s / 1998))
@@ -79,6 +84,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:
             return 'Extractor'
+        case ITEM_FACTORY_T1_PACKED:
+            return 'Factory'
         case ITEM_CONTAINER_T1_PACKED:
             return 'Container'
         case ITEM_CONTAINER_T2_PACKED:
@@ -194,8 +201,14 @@ export function buildEntityDescription(
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)
-    } else if (itemId === ITEM_EXTRACTOR_T1_PACKED || itemId === ITEM_FACTORY_T1_PACKED) {
+    } else if (
+        itemId === ITEM_EXTRACTOR_T1_PACKED ||
+        itemId === ITEM_FACTORY_T1_PACKED ||
+        itemId === ITEM_CONTAINER_T1_PACKED
+    ) {
         baseCapacity = computeBaseCapacityContainer(hullStats)
+    } else if (itemId === ITEM_CONTAINER_T2_PACKED) {
+        baseCapacity = computeBaseCapacityContainerT2(hullStats)
     }
 
     let out = entityDisplayName(itemId)
