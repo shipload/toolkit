@@ -9,13 +9,13 @@ const JUNGLE4_SEED = Checksum256.from(
 
 const ORIGIN: CoordinateAddress = {
     sector: 'Coral Fathom',
-    region: 'Gemnikkix',
+    region: 'Mestatner',
     localX: 0,
     localY: 0,
 }
 const SAMPLE: CoordinateAddress = {
     sector: 'Azure Crest',
-    region: 'Pulpirsun',
+    region: 'Punnantex',
     localX: 4901,
     localY: 1214,
 }

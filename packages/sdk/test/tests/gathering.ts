@@ -27,6 +27,16 @@ function makeShip(state: Parameters<typeof makeEntity>[1]) {
     return makeEntity(ITEM_SHIP_T1_PACKED, state)
 }
 
+function makeGatherer(s: {yield: UInt16; drain: UInt16; depth: UInt16}) {
+    return ServerContract.Types.gatherer_lane.from({
+        slot_index: 0,
+        yield: s.yield,
+        drain: s.drain,
+        depth: s.depth,
+        output_pct: 100,
+    })
+}
+
 const seed = encodeStats([500, 500, 500, 500])
 
 describe('gathering', () => {
@@ -182,7 +192,7 @@ describe('gathering', () => {
     })
 
     describe('calc_gather_duration', () => {
-        const gatherer = ServerContract.Types.gatherer_stats.from({
+        const gatherer = makeGatherer({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
@@ -213,7 +223,7 @@ describe('gathering', () => {
         })
 
         test('returns 0 for zero yield', () => {
-            const zeroYield = ServerContract.Types.gatherer_stats.from({
+            const zeroYield = makeGatherer({
                 yield: UInt16.from(0),
                 drain: UInt16.from(25),
                 depth: UInt16.from(950),
@@ -249,7 +259,7 @@ describe('gathering', () => {
         })
 
         test('is linear by quantity after setup removal', () => {
-            const linearGatherer = ServerContract.Types.gatherer_stats.from({
+            const linearGatherer = makeGatherer({
                 yield: UInt16.from(500),
                 drain: UInt16.from(25),
                 depth: UInt16.from(1000),
@@ -260,7 +270,7 @@ describe('gathering', () => {
         })
 
         test('calc_gather_rate reports contextual units per time', () => {
-            const rateGatherer = ServerContract.Types.gatherer_stats.from({
+            const rateGatherer = makeGatherer({
                 yield: UInt16.from(500),
                 drain: UInt16.from(25),
                 depth: UInt16.from(1000),
@@ -275,7 +285,7 @@ describe('gathering', () => {
 
         test('calc_gather_rate does not floor per-unit time to whole seconds', () => {
             // 1.40s/unit used to floor to 1s, reporting a flat 1.00/s for every (1,2)s deposit.
-            const gathererT1 = ServerContract.Types.gatherer_stats.from({
+            const gathererT1 = makeGatherer({
                 yield: UInt16.from(700),
                 drain: UInt16.from(25),
                 depth: UInt16.from(950),
@@ -292,7 +302,7 @@ describe('gathering', () => {
     })
 
     describe('calc_gather_energy', () => {
-        const gatherer = ServerContract.Types.gatherer_stats.from({
+        const gatherer = makeGatherer({
             yield: UInt16.from(700),
             drain: UInt16.from(25),
             depth: UInt16.from(950),
@@ -315,12 +325,12 @@ describe('gathering', () => {
         })
 
         test('energy scales with drain rate', () => {
-            const lowDrain = ServerContract.Types.gatherer_stats.from({
+            const lowDrain = makeGatherer({
                 yield: UInt16.from(700),
                 drain: UInt16.from(10),
                 depth: UInt16.from(950),
             })
-            const highDrain = ServerContract.Types.gatherer_stats.from({
+            const highDrain = makeGatherer({
                 yield: UInt16.from(700),
                 drain: UInt16.from(50),
                 depth: UInt16.from(950),

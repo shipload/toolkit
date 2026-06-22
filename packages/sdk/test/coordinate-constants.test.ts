@@ -6,6 +6,8 @@ import {
     COORD_MAX,
     COORD_MIN,
     COORD_OFFSET,
+    LOCAL_HALF,
+    LOCAL_MIN,
     LOCAL_MAX,
     REGION_COUNT,
     REGION_DIV,
@@ -22,7 +24,7 @@ const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
 test('constants cover the full int32 axis range', () => {
     expect(COORD_MIN).toBe(-2_147_483_648)
     expect(COORD_MAX).toBe(2_147_483_647)
-    expect(COORD_OFFSET).toBe(2_147_490_000)
+    expect(COORD_OFFSET).toBe(2_147_485_000)
     expect(AXIS_SPAN).toBe(4_294_967_296)
     expect(COORD_MIN + COORD_OFFSET).toBeGreaterThanOrEqual(0)
     const maxU =
@@ -31,12 +33,12 @@ test('constants cover the full int32 axis range', () => {
 })
 
 test('offset aligns the origin to local (0,0)', () => {
-    expect(COORD_OFFSET % REGION_DIV).toBe(0)
+    expect(COORD_OFFSET % REGION_DIV).toBe(LOCAL_HALF)
 })
 
 test('tier slicing constants compose', () => {
     expect(SECTOR_DIV).toBe(REGION_DIV * REGION_PER_AXIS)
-    expect(REGION_DIV).toBe(LOCAL_MAX + 1)
+    expect(REGION_DIV).toBe(LOCAL_MAX - LOCAL_MIN + 1)
     expect(SECTORS_PER_AXIS).toBe(43)
     expect(SECTOR_COUNT).toBe(SECTORS_PER_AXIS * SECTORS_PER_AXIS)
     expect(REGION_COUNT).toBe(REGION_PER_AXIS * REGION_PER_AXIS)

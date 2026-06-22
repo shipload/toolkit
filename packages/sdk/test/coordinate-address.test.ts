@@ -1,6 +1,6 @@
 import {Bytes, Checksum256} from '@wharfkit/antelope'
 import {expect, test} from 'bun:test'
-import {COORD_MAX, COORD_MIN} from '../src/coordinates/constants'
+import {COORD_MAX, COORD_MIN, LOCAL_MAX, LOCAL_MIN} from '../src/coordinates/constants'
 import {addressFromCoordinates, decodeAddress, encodeAddress} from '../src/coordinates/address'
 
 const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
@@ -18,8 +18,8 @@ test('coordinates round-trip through the address', () => {
     ]
     for (const [x, y] of coords) {
         const addr = encodeAddress(SEED, x, y)
-        expect(addr.localX).toBeGreaterThanOrEqual(0)
-        expect(addr.localX).toBeLessThanOrEqual(9999)
+        expect(addr.localX).toBeGreaterThanOrEqual(LOCAL_MIN)
+        expect(addr.localX).toBeLessThanOrEqual(LOCAL_MAX)
         expect(decodeAddress(SEED, addr)).toEqual({x, y})
     }
 })

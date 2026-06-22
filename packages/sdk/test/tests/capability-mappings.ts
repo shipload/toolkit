@@ -68,7 +68,7 @@ describe('stat coverage', () => {
         Thermal: ['Battery.bonus', 'Movement.drain', 'Warp.range'],
         Hardness: ['Storage.bonus', 'Storage.capacity'],
         Cohesion: ['Storage.bonus', 'Storage.capacity'],
-        Fineness: ['Crafter.drain'],
+        Fineness: ['Crafter.drain', 'Hull.mass', 'Storage.capacity'],
         Plasticity: ['Battery.bonus', 'Hauler.efficiency', 'Loader.thrust'],
         Insulation: ['Battery.bonus', 'Loader.mass'],
         Saturation: [],

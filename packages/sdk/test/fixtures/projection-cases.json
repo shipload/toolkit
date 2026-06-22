@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "8d3971c0e207f9d738bf74d94d0d311f02971fc51f27c3376b0762e682d98580",
-    "generated_at": "2026-06-21T04:02:14.389Z",
+    "catalog_hash": "a842afe73eec8767d7d01e659ec9159887fb26842e506ca6198f47c5c8597b01",
+    "generated_at": "2026-06-22T21:28:28.190Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -100,20 +100,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -214,20 +225,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -323,20 +345,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -432,20 +465,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -553,20 +597,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -682,20 +737,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -804,20 +870,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -934,20 +1011,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -1072,20 +1160,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -1210,20 +1309,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         },
         {
@@ -1304,20 +1414,31 @@
                     "capacity": 1056,
                     "recharge": 2
                 },
-                "gatherer": {
-                    "yield": 413,
-                    "drain": 1968,
-                    "depth": 1565
-                },
-                "loaders": {
-                    "mass": 1574,
-                    "thrust": 5,
-                    "quantity": 1
-                },
-                "crafter": {
-                    "speed": 270,
-                    "drain": 24
-                }
+                "gatherer_lanes": [
+                    {
+                        "slot_index": 3,
+                        "yield": 413,
+                        "drain": 1968,
+                        "depth": 1565,
+                        "output_pct": 100
+                    }
+                ],
+                "crafter_lanes": [
+                    {
+                        "slot_index": 4,
+                        "speed": 270,
+                        "drain": 24,
+                        "output_pct": 100
+                    }
+                ],
+                "loader_lanes": [
+                    {
+                        "slot_index": 2,
+                        "mass": 1574,
+                        "thrust": 5,
+                        "output_pct": 100
+                    }
+                ]
             }
         }
     ]

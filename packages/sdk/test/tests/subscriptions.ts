@@ -174,6 +174,9 @@ describe('SubscriptionsManager', () => {
                     current_task_remaining: 0,
                     pending_tasks: [],
                     lanes: [],
+                    gatherer_lanes: [],
+                    crafter_lanes: [],
+                    loader_lanes: [],
                 },
             ],
             truncated: false,
@@ -320,6 +323,9 @@ describe('SubscriptionsManager', () => {
                 current_task_remaining: 0,
                 pending_tasks: [],
                 lanes: [],
+                gatherer_lanes: [],
+                crafter_lanes: [],
+                loader_lanes: [],
             },
         })
         await new Promise((r) => setTimeout(r, 10))

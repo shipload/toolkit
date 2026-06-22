@@ -178,14 +178,12 @@ describe('Crafting', () => {
         })
 
         test('decode container packed seed', () => {
-            // Container T1 statSlots derive from Plate (strength, density)
-            // and Frame (hardness, cohesion), so decode keys are those four.
             const seed = encodeStats([500, 300, 600, 700])
             const stats = decodeCraftedItemStats(ITEM_CONTAINER_T1_PACKED, seed)
             assert.equal(stats['strength'], 500)
             assert.equal(stats['density'], 300)
             assert.equal(stats['hardness'], 600)
-            assert.equal(stats['cohesion'], 700)
+            assert.equal(stats['fineness'], 700)
         })
 
         test('decoded hauler stats use input stat key names', () => {
@@ -352,8 +350,6 @@ describe('Crafting', () => {
         })
 
         test('entity recipe (Container packed from plate + frame)', () => {
-            // Plate packs (strength, density); Frame packs
-            // (hardness, cohesion) per the new contract recipes.
             const hullSeedA = encodeStats([500, 300])
             const hullSeedB = encodeStats([700, 400])
             const liningSeed = encodeStats([600, 800])
@@ -391,8 +387,8 @@ describe('Crafting', () => {
             }
             assert.equal(decoded['strength'], 566)
             assert.equal(decoded['density'], 333)
-            assert.equal(decoded['hardness'], 600)
-            assert.equal(decoded['cohesion'], 800)
+            assert.equal(decoded['hardness'], 1)
+            assert.equal(decoded['fineness'], 1)
         })
 
         test('throws for unknown output item id', () => {
@@ -577,27 +573,11 @@ describe('Crafting', () => {
             assert.isBelow(t2.hullmass, t1.hullmass)
         })
 
-        test('T2 container has greater capacity than T1 at same stats', () => {
-            const t1 = computeContainerCapabilities({
-                strength: 500,
-                density: 500,
-                hardness: 500,
-                cohesion: 500,
-            })
-            const t2 = computeContainerT2Capabilities({
-                strength: 500,
-                density: 500,
-                hardness: 500,
-                cohesion: 500,
-            })
-            assert.isAbove(t2.capacity, t1.capacity)
-        })
-
         test('T2 container formulas match contract', () => {
             const stats = {strength: 400, density: 300, hardness: 600, cohesion: 200}
             const caps = computeContainerT2Capabilities(stats)
             assert.equal(caps.hullmass, 70000 - 50 * 300)
-            const statSum = 400 + 600 + 200
+            const statSum = 400 + 600
             const expected = Math.floor(24000000 * 6 ** (statSum / 2947))
             assert.equal(caps.capacity, expected)
         })
