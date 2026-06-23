@@ -5,7 +5,7 @@ import {parseEntityRefList, parseInt64} from '../../lib/args'
 import {getGameSeed, getShipload} from '../../lib/client'
 import {estimateGroupTravel, estimateTravel} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
-import {planRoute, sdkSystemGraph, type Coord} from '../../lib/route-planner'
+import {planRoute, sdkSystemGraph, type Coord} from '@shipload/sdk'
 import {
     buildHypotheticalSnapshot,
     computeGroupPerLegReach,

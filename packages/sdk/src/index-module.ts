@@ -191,6 +191,21 @@ export type {
     HasScheduleAndLocation,
 } from './travel/travel'
 
+export {planRoute, sdkSystemGraph} from './travel/route-planner'
+export type {
+    Coord,
+    Neighbor,
+    SystemGraph,
+    RoutePlan,
+    RouteFailure,
+    RouteResult,
+    RouteFailureReason,
+    PlanRouteParams,
+} from './travel/route-planner'
+
+export {computePerLegReach, computeGroupPerLegReach} from './travel/reach'
+export type {ReachStats} from './travel/reach'
+
 export * as schedule from './scheduling/schedule'
 export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'
 export type {

@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {planRoute, type Coord, type SystemGraph} from '../../src/lib/route-planner'
+import {planRoute, type Coord, type SystemGraph} from '../../src/travel/route-planner'
 
 function gridGraph(systems: Coord[]): SystemGraph {
     const set = new Set(systems.map((s) => `${s.x},${s.y}`))
@@ -66,7 +66,9 @@ describe('planRoute', () => {
         expect(result.waypoints[result.waypoints.length - 1]).toEqual({x: 20, y: 0})
         const chain = [{x: 0, y: 0}, ...result.waypoints]
         for (let i = 1; i < chain.length; i++) {
-            expect(Math.hypot(chain[i].x - chain[i - 1].x, chain[i].y - chain[i - 1].y)).toBeLessThanOrEqual(11)
+            expect(
+                Math.hypot(chain[i].x - chain[i - 1].x, chain[i].y - chain[i - 1].y)
+            ).toBeLessThanOrEqual(11)
         }
     })
 
