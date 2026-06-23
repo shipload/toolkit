@@ -1,5 +1,17 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.37
+
+### Patch Changes
+
+- 140c1ed: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Abstracted route planner for webapp to use
+- Updated dependencies [140c1ed]
+  - @shipload/sdk@1.0.0-next.37
+
 ## 1.0.0-next.36
 
 ### Patch Changes

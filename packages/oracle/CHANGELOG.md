@@ -1,5 +1,15 @@
 # @shipload/oracle
 
+## 0.0.1-next.27
+
+### Patch Changes
+
+- 140c1ed: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Abstracted route planner for webapp to use
+
 ## 0.0.1-next.26
 
 ### Patch Changes
