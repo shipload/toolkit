@@ -450,11 +450,11 @@
     "outputMass": 960000,
     "inputs": [
       {
-        "itemId": 10008,
+        "itemId": 10009,
         "quantity": 300
       },
       {
-        "itemId": 10009,
+        "itemId": 10006,
         "quantity": 300
       }
     ],
@@ -462,7 +462,7 @@
       {
         "sources": [
           {
-            "inputIndex": 1,
+            "inputIndex": 0,
             "statIndex": 0
           }
         ]
@@ -470,8 +470,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           }
         ]
       }

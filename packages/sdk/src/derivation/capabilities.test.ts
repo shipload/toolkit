@@ -20,8 +20,8 @@ function makeGathererStats(strength: number, tolerance: number, conductivity: nu
     return encodeStats([strength, tolerance, conductivity, 0])
 }
 
-function makeCrafterStats(reactivity: number, fineness: number): bigint {
-    return encodeStats([reactivity, fineness])
+function makeCrafterStats(reactivity: number, conductivity: number): bigint {
+    return encodeStats([reactivity, conductivity])
 }
 
 function makeLoaderStats(insulation: number, plasticity: number): bigint {
@@ -92,7 +92,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     expect(result.crafterLanes!.length).toBe(1)
     expect(result.crafterLanes![0].slotIndex).toBe(0)
 
-    const caps = computeCrafterCapabilities({reactivity: 400, fineness: 300})
+    const caps = computeCrafterCapabilities({reactivity: 400, conductivity: 300})
     const expectedSpeed = applySlotMultiplier(caps.speed, 120)
     expect(result.crafterLanes![0].speed).toBe(expectedSpeed)
     expect(result.crafterLanes![0].drain).toBe(caps.drain)

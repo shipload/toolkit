@@ -227,11 +227,11 @@ export function buildModuleImmutable(
         }
         case MODULE_CRAFTER: {
             const rea = decodeStat(stats, 0)
-            const fin = decodeStat(stats, 1)
+            const con = decodeStat(stats, 1)
             base.push({first: 'reactivity', second: ['uint16', rea]})
-            base.push({first: 'fineness', second: ['uint16', fin]})
+            base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(rea)]})
-            base.push({first: 'drain', second: ['uint16', computeCrafterDrain(fin)]})
+            base.push({first: 'drain', second: ['uint16', computeCrafterDrain(con)]})
             break
         }
         case MODULE_STORAGE: {

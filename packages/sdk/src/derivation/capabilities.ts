@@ -107,11 +107,11 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
     drain: number
 } {
     const rea = stats.reactivity
-    const fin = stats.fineness
+    const con = stats.conductivity
 
     return {
         speed: 100 + Math.floor((rea * 4) / 5),
-        drain: Math.max(5, 30 - Math.floor(fin / 33)),
+        drain: Math.max(5, 30 - Math.floor(con / 33)),
     }
 }
 
@@ -131,9 +131,7 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     }
 }
 
-export function computeStorageCapabilities(
-    stats: Record<string, number>
-): {
+export function computeStorageCapabilities(stats: Record<string, number>): {
     capacity: number
 } {
     const strength = stats.strength ?? 0
@@ -145,9 +143,7 @@ export function computeStorageCapabilities(
     return {capacity: 10_000_000 + Math.floor((statSum * 50_000_000) / 3996)}
 }
 
-export function computeBatteryCapabilities(
-    stats: Record<string, number>
-): {
+export function computeBatteryCapabilities(stats: Record<string, number>): {
     capacity: number
 } {
     const volatility = stats.volatility ?? 0

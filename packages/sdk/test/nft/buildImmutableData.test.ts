@@ -5,6 +5,7 @@ import {
     buildImmutableData,
     buildModuleImmutable,
     buildResourceImmutable,
+    computeCrafterDrain,
     computeEngineDrain,
     computeEngineThrust,
     computeGathererDepth,
@@ -22,6 +23,7 @@ const ITEM_CRUDE_ORE = 101
 const ITEM_COMPONENT_ORE_BASED = 10001
 const ITEM_ENGINE_T1 = 10100
 const ITEM_GATHERER_T1 = 10102
+const ITEM_CRAFTER_T1 = 10104
 const ITEM_STORAGE_T1 = 10105
 const ITEM_HAULER_T1 = 10106
 const ITEM_BATTERY_T1 = 10108
@@ -161,6 +163,19 @@ describe('buildImmutableData', () => {
             'uint16',
             computeGathererDepth(tol, 1),
         ])
+    })
+
+    test('crafter immutable data uses conductivity, not fineness', () => {
+        const rea = 400
+        const con = 250
+        const stats = encodeStats([rea, con])
+        const entries = buildModuleImmutable(ITEM_CRAFTER_T1, 1, stats, 0, 0)
+        const names = entries.map((e) => e.first)
+        expect(names).toContain('reactivity')
+        expect(names).toContain('conductivity')
+        expect(names).not.toContain('fineness')
+        expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
+        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeCrafterDrain(con)])
     })
 
     test('module (hauler) emits 3 stats + 3 computed capabilities', () => {

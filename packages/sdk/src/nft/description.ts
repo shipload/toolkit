@@ -176,8 +176,8 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         }
         case MODULE_CRAFTER: {
             const rea = decodeStat(stats, 0)
-            const com = decodeStat(stats, 1)
-            out += `  Speed ${computeCrafterSpeed(rea)}  Drain ${computeCrafterDrain(com)}`
+            const con = decodeStat(stats, 1)
+            out += `  Speed ${computeCrafterSpeed(rea)}  Drain ${computeCrafterDrain(con)}`
             break
         }
         case MODULE_STORAGE: {
