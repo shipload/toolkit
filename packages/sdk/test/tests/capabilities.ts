@@ -15,8 +15,8 @@ import {
 } from '$lib'
 
 describe('Capabilities', () => {
-    test('capabilityNames has 11 entries', () => {
-        assert.equal(capabilityNames.length, 11)
+    test('capabilityNames has 10 entries', () => {
+        assert.equal(capabilityNames.length, 10)
     })
 
     test('getCapabilityAttributes returns all attributes', () => {

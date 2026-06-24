@@ -20,11 +20,10 @@ describe('deriveStatMappings', () => {
         }
     })
 
-    test('Strength drives Gathering.yield, Storage.bonus, and entity Storage.capacity', () => {
+    test('Strength drives Gathering.yield and Storage.capacity', () => {
         const mappings = getStatMappingsForStat('Strength')
         const tuples = mappings.map((m) => `${m.capability}.${m.attribute}`).sort()
         assert.deepInclude(tuples, 'Gathering.yield')
-        assert.deepInclude(tuples, 'Storage.bonus')
         assert.deepInclude(tuples, 'Storage.capacity')
     })
 
@@ -57,20 +56,20 @@ describe('deriveStatMappings', () => {
 
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
-        Strength: ['Gathering.yield', 'Storage.bonus', 'Storage.capacity'],
+        Strength: ['Gathering.yield', 'Storage.capacity'],
         Tolerance: ['Gathering.depth'],
-        Density: ['Hull.mass', 'Storage.bonus'],
+        Density: ['Hull.mass', 'Storage.capacity'],
         Conductivity: ['Gathering.drain'],
         Resonance: ['Energy.capacity', 'Hauler.capacity', 'Warp.range'],
         Reflectivity: ['Energy.recharge', 'Hauler.drain'],
-        Volatility: ['Battery.bonus', 'Movement.thrust'],
+        Volatility: ['Energy.capacity', 'Movement.thrust'],
         Reactivity: ['Crafter.speed'],
-        Thermal: ['Battery.bonus', 'Movement.drain', 'Warp.range'],
-        Hardness: ['Storage.bonus', 'Storage.capacity'],
-        Cohesion: ['Storage.bonus'],
+        Thermal: ['Energy.capacity', 'Movement.drain', 'Warp.range'],
+        Hardness: ['Storage.capacity'],
+        Cohesion: ['Storage.capacity'],
         Fineness: ['Crafter.drain', 'Hull.mass'],
-        Plasticity: ['Battery.bonus', 'Hauler.efficiency', 'Loader.thrust'],
-        Insulation: ['Battery.bonus', 'Loader.mass'],
+        Plasticity: ['Energy.capacity', 'Hauler.efficiency', 'Loader.thrust'],
+        Insulation: ['Energy.capacity', 'Loader.mass'],
         Saturation: [],
     }
 

@@ -93,15 +93,26 @@ describe('describeModule', () => {
         expect(desc?.highlightKeys).toEqual(['speed', 'drain'])
     })
 
-    test('Storage produces the expected description', () => {
+    test('Storage capability produces the Cargo Bay capacity description', () => {
         const desc = describeModule({
             capability: 'Storage',
-            attributes: [{label: 'Capacity Bonus', value: 17}],
+            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
         })
         expect(desc?.id).toBe('module.storage.description')
-        expect(desc?.template).toBe('boosts cargo capacity by {bonus}%')
-        expect(desc?.params).toEqual({bonus: 17})
-        expect(desc?.highlightKeys).toEqual(['bonus'])
+        expect(desc?.template).toBe('adds {capacity} cargo capacity')
+        expect(desc?.params).toEqual({capacity: 60_000_000})
+        expect(desc?.highlightKeys).toEqual(['capacity'])
+    })
+
+    test('Energy capability with only Energy Capacity produces the Battery Bank description', () => {
+        const desc = describeModule({
+            capability: 'Energy',
+            attributes: [{label: 'Energy Capacity', value: 10_000}],
+        })
+        expect(desc?.id).toBe('module.energy-capacity.description')
+        expect(desc?.template).toBe('adds {capacity} energy capacity')
+        expect(desc?.params).toEqual({capacity: 10_000})
+        expect(desc?.highlightKeys).toEqual(['capacity'])
     })
 
     test('Hauler produces the expected description', () => {
@@ -239,6 +250,21 @@ describe('describeModuleForSlot', () => {
                 {label: 'Thrust', value: 598},
                 {label: 'Drain', value: 47},
             ],
+        })
+        expect(viaSlot).toEqual(viaDirect)
+    })
+
+    test('describeModuleForSlot uses capability when installed module name differs', () => {
+        const slot = {
+            installed: true,
+            name: 'Cargo Bay',
+            capability: 'Storage',
+            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
+        } as unknown as ResolvedModuleSlot
+        const viaSlot = describeModuleForSlot(slot)
+        const viaDirect = describeModule({
+            capability: 'Storage',
+            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
         })
         expect(viaSlot).toEqual(viaDirect)
     })

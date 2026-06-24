@@ -197,8 +197,8 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#B877FF',
     },
     10105: {
-        name: 'Storage',
-        description: 'Expands cargo capacity based on hull material quality.',
+        name: 'Cargo Bay',
+        description: 'Expanded cargo storage with reinforced internal holds.',
         color: '#8B7355',
     },
     10106: {
@@ -214,9 +214,8 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#9be4ff',
     },
     10108: {
-        name: 'Battery',
-        description:
-            'Extends energy capacity. Stores additional charge produced by generators, letting builds chain more high-drain actions between recharges.',
+        name: 'Battery Bank',
+        description: 'Stores additional charge produced by generators.',
         color: '#4ADBFF',
     },
 

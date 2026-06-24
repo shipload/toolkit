@@ -23,8 +23,16 @@ function generatorStats(resonance: number, reflectivity: number): bigint {
     return encodeStats([resonance, reflectivity])
 }
 
-describe('Battery module derivation', () => {
-    test('single Battery + Generator: bonus applied per C++ formula (mid stats)', () => {
+function batteryBankCapacity(vol: number, thm: number, pla: number, ins: number): number {
+    return 2500 + Math.floor(((vol + thm + pla + ins) * 7500) / 3996)
+}
+
+function generatorCapacity(resonance: number): number {
+    return 950 + Math.floor(resonance / 2)
+}
+
+describe('Battery Bank module derivation', () => {
+    test('single Battery Bank + Generator adds raw reserve capacity', () => {
         const modules: InstalledModule[] = [
             {
                 slotIndex: 0,
@@ -44,10 +52,12 @@ describe('Battery module derivation', () => {
             SHIP_LAYOUT
         )
         expect(result.generator).toBeDefined()
-        expect(result.generator?.capacity).toBe(1392)
+        expect(result.generator?.capacity).toBe(
+            generatorCapacity(500) + batteryBankCapacity(500, 500, 500, 500)
+        )
     })
 
-    test('two Batteries + Generator: no compounding, each bonus vs original gen_cap_base', () => {
+    test('two Battery Banks stack by adding each raw reserve', () => {
         const modules: InstalledModule[] = [
             {
                 slotIndex: 0,
@@ -62,7 +72,7 @@ describe('Battery module derivation', () => {
             {
                 slotIndex: 2,
                 itemId: ITEM_BATTERY_T1,
-                stats: batteryStats(500, 500, 500, 500),
+                stats: batteryStats(999, 999, 999, 999),
             },
         ]
         const result = computeEntityCapabilities(
@@ -72,10 +82,14 @@ describe('Battery module derivation', () => {
             SHIP_LAYOUT
         )
         expect(result.generator).toBeDefined()
-        expect(result.generator?.capacity).toBe(1596)
+        expect(result.generator?.capacity).toBe(
+            generatorCapacity(500) +
+                batteryBankCapacity(500, 500, 500, 500) +
+                batteryBankCapacity(999, 999, 999, 999)
+        )
     })
 
-    test('Battery without Generator: no generator field, no bonus applied', () => {
+    test('Battery Bank without Generator remains inert', () => {
         const modules: InstalledModule[] = [
             {
                 slotIndex: 0,
@@ -90,6 +104,25 @@ describe('Battery module derivation', () => {
             SHIP_LAYOUT
         )
         expect(result.generator).toBeUndefined()
+    })
+
+    test('Battery Bank respects slot output percentage', () => {
+        const halfOutputLayout: EntitySlot[] = [
+            {type: 'any', outputPct: 100},
+            {type: 'any', outputPct: 50},
+        ]
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [
+                {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: generatorStats(500, 500)},
+                {slotIndex: 1, itemId: ITEM_BATTERY_T1, stats: batteryStats(500, 500, 500, 500)},
+            ],
+            halfOutputLayout
+        )
+        expect(result.generator?.capacity).toBe(
+            generatorCapacity(500) + Math.floor(batteryBankCapacity(500, 500, 500, 500) / 2)
+        )
     })
 
     test('low stats fixture: vol/thm/pla/ins=100, gen res/ref=100', () => {
@@ -111,7 +144,9 @@ describe('Battery module derivation', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(result.generator?.capacity).toBe(1110)
+        expect(result.generator?.capacity).toBe(
+            generatorCapacity(100) + batteryBankCapacity(100, 100, 100, 100)
+        )
     })
 
     test('max stats fixture: vol/thm/pla/ins=999, gen res/ref=999', () => {
@@ -133,10 +168,12 @@ describe('Battery module derivation', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(result.generator?.capacity).toBe(1782)
+        expect(result.generator?.capacity).toBe(
+            generatorCapacity(999) + batteryBankCapacity(999, 999, 999, 999)
+        )
     })
 
-    test('Battery + Generator: recharge field unchanged (only capacity gets bonus)', () => {
+    test('Battery Bank does not change recharge', () => {
         const noBattery = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,

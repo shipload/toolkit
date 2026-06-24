@@ -22,7 +22,9 @@ const ITEM_CRUDE_ORE = 101
 const ITEM_COMPONENT_ORE_BASED = 10001
 const ITEM_ENGINE_T1 = 10100
 const ITEM_GATHERER_T1 = 10102
+const ITEM_STORAGE_T1 = 10105
 const ITEM_HAULER_T1 = 10106
+const ITEM_BATTERY_T1 = 10108
 const ITEM_SHIP_T1_PACKED = 10201
 
 function encodeStats(values: number[]): bigint {
@@ -197,6 +199,32 @@ describe('buildImmutableData', () => {
             'uint16',
             moduleComputeHaulerDrain(ref),
         ])
+    })
+
+    test('module (storage/Cargo Bay) emits raw capacity as uint32', () => {
+        const stats = encodeStats([999, 999, 999, 999])
+        const entries = buildModuleImmutable(ITEM_STORAGE_T1, 1, stats, 0, 0)
+
+        expect(keys(entries)).toContain('capacity')
+        expect(keys(entries)).not.toContain('capacity_bonus_pct')
+        expect(findEntry(entries, 'strength')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'hardness')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'cohesion')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 60_000_000])
+    })
+
+    test('module (battery/Battery Bank) emits raw capacity as uint32', () => {
+        const stats = encodeStats([999, 999, 999, 999])
+        const entries = buildModuleImmutable(ITEM_BATTERY_T1, 1, stats, 0, 0)
+
+        expect(keys(entries)).toContain('capacity')
+        expect(keys(entries)).not.toContain('capacity_bonus_pct')
+        expect(findEntry(entries, 'volatility')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'thermal')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'plasticity')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'insulation')!.second).toEqual(['uint16', 999])
+        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 10_000])
     })
 
     test('entity (ship) emits module vectors and description; pads empty slots with 0', () => {

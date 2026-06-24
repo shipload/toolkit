@@ -4,6 +4,7 @@ import {
     MODULE_ENGINE,
     MODULE_GATHERER,
     MODULE_GENERATOR,
+    MODULE_BATTERY,
     MODULE_HAULER,
     MODULE_LOADER,
     MODULE_STORAGE,
@@ -19,6 +20,7 @@ import {
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
+    ITEM_BATTERY_T1,
     ITEM_LOADER_T1,
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
@@ -75,6 +77,18 @@ export const computeHaulerCapacity = (fin: number): number => Math.max(1, 1 + id
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
 export const computeHaulerDrain = (com: number): number => Math.max(3, 15 - idiv(com, 80))
 export const computeWarpRange = (stat: number): number => 100 + stat * 3
+export const computeCargoBayCapacity = (
+    strength: number,
+    density: number,
+    hardness: number,
+    cohesion: number
+): number => 10_000_000 + idiv((strength + density + hardness + cohesion) * 50_000_000, 3996)
+export const computeBatteryBankCapacity = (
+    volatility: number,
+    thermal: number,
+    plasticity: number,
+    insulation: number
+): number => 2_500 + idiv((volatility + thermal + plasticity + insulation) * 7_500, 3996)
 
 export function entityDisplayName(itemId: number): string {
     switch (itemId) {
@@ -108,11 +122,13 @@ export function moduleDisplayName(itemId: number): string {
         case ITEM_CRAFTER_T1:
             return 'Crafter'
         case ITEM_STORAGE_T1:
-            return 'Storage'
+            return 'Cargo Bay'
         case ITEM_HAULER_T1:
             return 'Hauler'
         case ITEM_WARP_T1:
             return 'Warp'
+        case ITEM_BATTERY_T1:
+            return 'Battery Bank'
         default:
             return 'Module'
     }
@@ -166,11 +182,10 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         }
         case MODULE_STORAGE: {
             const str = decodeStat(stats, 0)
-            const fin = decodeStat(stats, 2)
-            const sat = decodeStat(stats, 3)
-            const sum = str + fin + sat
-            const pct = 10 + idiv(sum * 10, 2997)
-            out += `  +${pct}% capacity`
+            const den = decodeStat(stats, 1)
+            const hrd = decodeStat(stats, 2)
+            const com = decodeStat(stats, 3)
+            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd, com)}`
             break
         }
         case MODULE_HAULER: {
@@ -183,6 +198,14 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         case MODULE_WARP: {
             const stat = decodeStat(stats, 0)
             out += `  Range ${computeWarpRange(stat)}`
+            break
+        }
+        case MODULE_BATTERY: {
+            const vol = decodeStat(stats, 0)
+            const thm = decodeStat(stats, 1)
+            const pla = decodeStat(stats, 2)
+            const ins = decodeStat(stats, 3)
+            out += `  Energy Capacity ${computeBatteryBankCapacity(vol, thm, pla, ins)}`
             break
         }
     }

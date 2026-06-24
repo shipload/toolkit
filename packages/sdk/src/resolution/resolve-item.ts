@@ -9,6 +9,7 @@ import {
     isModuleItem,
     MODULE_CRAFTER,
     MODULE_ENGINE,
+    MODULE_BATTERY,
     MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_HAULER,
@@ -19,6 +20,7 @@ import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeCrafterCapabilities,
+    computeBatteryCapabilities,
     computeEngineCapabilities,
     computeGathererCapabilities,
     computeGeneratorCapabilities,
@@ -28,7 +30,9 @@ import {
     computeWarehouseHullCapabilities,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
+    computeStorageCapabilities,
 } from '../derivation/capabilities'
+import {applySlotMultiplierUint32} from '../entities/slot-multiplier'
 import {categoryColors, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
 import type {ServerContract} from '../contracts'
 import {
@@ -58,6 +62,7 @@ export type ResolvedItemType = 'resource' | 'component' | 'module' | 'entity'
 
 export interface ResolvedModuleSlot {
     name?: string
+    capability?: string
     installed: boolean
     attributes?: {label: string; value: number}[]
 }
@@ -152,7 +157,8 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
 function computeCapabilityGroup(
     moduleType: number,
     stats: Record<string, number>,
-    tier: number
+    tier: number,
+    outputPct = 100
 ): ResolvedAttributeGroup | undefined {
     switch (moduleType) {
         case MODULE_ENGINE: {
@@ -219,13 +225,28 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_STORAGE: {
-            const str = stats.strength
-            const den = stats.density
-            const hrd = stats.hardness
-            const com = stats.cohesion
-            const statSum = str + den + hrd + com
-            const pct = 10 + Math.floor((statSum * 10) / 2997)
-            return {capability: 'Storage', attributes: [{label: 'Capacity Bonus', value: pct}]}
+            const caps = computeStorageCapabilities(stats)
+            return {
+                capability: 'Storage',
+                attributes: [
+                    {
+                        label: 'Cargo Capacity',
+                        value: applySlotMultiplierUint32(caps.capacity, outputPct),
+                    },
+                ],
+            }
+        }
+        case MODULE_BATTERY: {
+            const caps = computeBatteryCapabilities(stats)
+            return {
+                capability: 'Energy',
+                attributes: [
+                    {
+                        label: 'Energy Capacity',
+                        value: applySlotMultiplierUint32(caps.capacity, outputPct),
+                    },
+                ],
+            }
         }
         default:
             return undefined
@@ -321,9 +342,10 @@ function resolveEntity(
                 } catch {
                     modName = itemMetadata[modItemId]?.name ?? 'Module'
                 }
-                const group = computeCapabilityGroup(modType, decodedStats, modTier)
+                const group = computeCapabilityGroup(modType, decodedStats, modTier, slot.outputPct)
                 return {
                     name: modName,
+                    capability: group?.capability,
                     installed: true,
                     attributes: group?.attributes,
                 }

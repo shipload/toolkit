@@ -81,9 +81,15 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     },
     storage: {
         id: 'module.storage.description',
-        template: 'boosts cargo capacity by {bonus}%',
-        params: [['bonus', 'Capacity Bonus']],
-        highlightKeys: ['bonus'],
+        template: 'adds {capacity} cargo capacity',
+        params: [['capacity', 'Cargo Capacity']],
+        highlightKeys: ['capacity'],
+    },
+    energy: {
+        id: 'module.energy-capacity.description',
+        template: 'adds {capacity} energy capacity',
+        params: [['capacity', 'Energy Capacity']],
+        highlightKeys: ['capacity'],
     },
     hauler: {
         id: 'module.hauler.description',
@@ -124,8 +130,10 @@ export function describeModuleForItem(resolved: ResolvedItem): ModuleDescription
 }
 
 export function describeModuleForSlot(slot: ResolvedModuleSlot): ModuleDescription | null {
-    if (!slot.installed || !slot.name || !slot.attributes) return null
-    return describeModule({capability: slot.name, attributes: slot.attributes})
+    if (!slot.installed || !slot.attributes) return null
+    const capability = slot.capability ?? slot.name
+    if (!capability) return null
+    return describeModule({capability, attributes: slot.attributes})
 }
 
 export function renderDescription(

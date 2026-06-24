@@ -34,6 +34,10 @@ export function applySlotMultiplier(value: number, outputPct: number): number {
     return clampUint16(Math.floor((value * outputPct) / 100))
 }
 
+export function applySlotMultiplierUint32(value: number, outputPct: number): number {
+    return clampUint32(Math.floor((value * outputPct) / 100))
+}
+
 export function getSlotAmp(layout: EntitySlot[], slotIndex: number): number {
     return layout[slotIndex]?.outputPct ?? 100
 }

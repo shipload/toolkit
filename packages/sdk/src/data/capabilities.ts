@@ -21,20 +21,22 @@ export const capabilityNames: string[] = [
     'Crafter',
     'Launch',
     'Hauler',
-    'Battery',
 ]
 
 export const capabilityAttributes: CapabilityAttribute[] = [
     {capability: 'Hull', attribute: 'mass', description: 'Total mass of the hull'},
-    {capability: 'Storage', attribute: 'capacity', description: 'Maximum mass that can be stored'},
     {
         capability: 'Storage',
-        attribute: 'bonus',
-        description: 'Capacity bonus added by an installed Storage module',
+        attribute: 'capacity',
+        description: 'Cargo capacity added by hulls and installed Cargo Bay modules',
     },
     {capability: 'Movement', attribute: 'thrust', description: 'Propulsion force'},
     {capability: 'Movement', attribute: 'drain', description: 'Energy consumed per movement'},
-    {capability: 'Energy', attribute: 'capacity', description: 'Maximum energy storage'},
+    {
+        capability: 'Energy',
+        attribute: 'capacity',
+        description: 'Energy capacity from Generators and installed Battery Bank modules',
+    },
     {capability: 'Energy', attribute: 'recharge', description: 'Energy regeneration rate'},
     {capability: 'Loader', attribute: 'mass', description: 'Weight of the loader unit itself'},
     {capability: 'Loader', attribute: 'thrust', description: 'Loading speed/force'},
@@ -71,11 +73,6 @@ export const capabilityAttributes: CapabilityAttribute[] = [
         capability: 'Hauler',
         attribute: 'drain',
         description: 'Energy consumed per target during haul-beam operation',
-    },
-    {
-        capability: 'Battery',
-        attribute: 'bonus',
-        description: 'Energy capacity bonus added by an installed Battery module',
     },
 ]
 

@@ -2,6 +2,7 @@ import {Serializer} from '@wharfkit/antelope'
 import {getItem} from '../data/catalog'
 import {
     getModuleCapabilityType,
+    MODULE_BATTERY,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
@@ -26,6 +27,8 @@ import {
     computeGathererYield,
     computeGeneratorCap,
     computeGeneratorRech,
+    computeCargoBayCapacity,
+    computeBatteryBankCapacity,
     computeHaulerCapacity,
     computeHaulerDrain,
     computeHaulerEfficiency,
@@ -236,14 +239,28 @@ export function buildModuleImmutable(
             const den = decodeStat(stats, 1)
             const hrd = decodeStat(stats, 2)
             const com = decodeStat(stats, 3)
-            const sum = str + den + hrd + com
             base.push({first: 'strength', second: ['uint16', str]})
             base.push({first: 'density', second: ['uint16', den]})
             base.push({first: 'hardness', second: ['uint16', hrd]})
             base.push({first: 'cohesion', second: ['uint16', com]})
             base.push({
-                first: 'capacity_bonus_pct',
-                second: ['uint16', 10 + Math.floor((sum * 10) / 2997)],
+                first: 'capacity',
+                second: ['uint32', computeCargoBayCapacity(str, den, hrd, com)],
+            })
+            break
+        }
+        case MODULE_BATTERY: {
+            const vol = decodeStat(stats, 0)
+            const thm = decodeStat(stats, 1)
+            const pla = decodeStat(stats, 2)
+            const ins = decodeStat(stats, 3)
+            base.push({first: 'volatility', second: ['uint16', vol]})
+            base.push({first: 'thermal', second: ['uint16', thm]})
+            base.push({first: 'plasticity', second: ['uint16', pla]})
+            base.push({first: 'insulation', second: ['uint16', ins]})
+            base.push({
+                first: 'capacity',
+                second: ['uint32', computeBatteryBankCapacity(vol, thm, pla, ins)],
             })
             break
         }

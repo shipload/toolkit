@@ -379,6 +379,7 @@ export {
     computeCrafterCapabilities,
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
+    computeBatteryCapabilities,
     computeContainerCapabilities,
     computeContainerT2Capabilities,
     computeWarpCapabilities,

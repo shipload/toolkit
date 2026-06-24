@@ -26,6 +26,18 @@ const ZERO_STATS = 0n
 
 const SAMPLE_STATS_RECORD = {strength: 100, density: 100, hardness: 100, cohesion: 100}
 
+function cargoBayStats(str: number, den: number, hrd: number, coh: number): bigint {
+    let result = 0n
+    for (const [i, value] of [str, den, hrd, coh].entries()) {
+        result |= (BigInt(value) & 0x3ffn) << BigInt(i * 10)
+    }
+    return result
+}
+
+function cargoBayCapacity(str: number, den: number, hrd: number, coh: number): number {
+    return 10_000_000 + Math.floor(((str + den + hrd + coh) * 50_000_000) / 3996)
+}
+
 describe('computeEntityCapabilities', () => {
     test('returns hullmass and capacity for ship with no modules', () => {
         const result = computeEntityCapabilities(
@@ -84,21 +96,56 @@ describe('computeEntityCapabilities', () => {
         expect(result.warp).toBeDefined()
     })
 
-    test('storage module increases capacity but has no storage field', () => {
+    test('Cargo Bay adds raw cargo capacity but has no storage field', () => {
         const base = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
             [],
             SHIP_LAYOUT
         )
-        const withStorage = computeEntityCapabilities(
+        const withCargoBay = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
-            [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: ZERO_STATS}],
+            [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: cargoBayStats(0, 0, 0, 0)}],
             SHIP_LAYOUT
         )
-        expect(withStorage.capacity).toBeGreaterThan(base.capacity)
-        expect((withStorage as any).storage).toBeUndefined()
+        expect(withCargoBay.capacity).toBe(base.capacity + 10_000_000)
+        expect((withCargoBay as any).storage).toBeUndefined()
+    })
+
+    test('excellent Cargo Bay adds 60,000,000 raw cargo capacity', () => {
+        const base = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [],
+            SHIP_LAYOUT
+        )
+        const withCargoBay = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: cargoBayStats(999, 999, 999, 999)}],
+            SHIP_LAYOUT
+        )
+        expect(withCargoBay.capacity).toBe(base.capacity + 60_000_000)
+    })
+
+    test('Cargo Bay respects slot output percentage', () => {
+        const halfOutputLayout: EntitySlot[] = [{type: 'any', outputPct: 50}]
+        const base = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [],
+            halfOutputLayout
+        )
+        const withCargoBay = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: cargoBayStats(500, 500, 500, 500)}],
+            halfOutputLayout
+        )
+        expect(withCargoBay.capacity).toBe(
+            base.capacity + Math.floor(cargoBayCapacity(500, 500, 500, 500) / 2)
+        )
     })
 
     test('hullmass increases with each installed module (mass accumulates)', () => {

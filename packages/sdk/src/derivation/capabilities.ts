@@ -132,22 +132,31 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
 }
 
 export function computeStorageCapabilities(
-    stats: Record<string, number>,
-    baseCapacity: number
+    stats: Record<string, number>
 ): {
-    capacityBonus: number
+    capacity: number
 } {
-    const strength = stats.strength
-    const density = stats.density
-    const hardness = stats.hardness
-    const cohesion = stats.cohesion
+    const strength = stats.strength ?? 0
+    const density = stats.density ?? 0
+    const hardness = stats.hardness ?? 0
+    const cohesion = stats.cohesion ?? 0
 
     const statSum = strength + density + hardness + cohesion
-    const capacityBonus = Math.floor(
-        (baseCapacity * (10 + Math.floor((statSum * 10) / 2997))) / 100
-    )
+    return {capacity: 10_000_000 + Math.floor((statSum * 50_000_000) / 3996)}
+}
 
-    return {capacityBonus}
+export function computeBatteryCapabilities(
+    stats: Record<string, number>
+): {
+    capacity: number
+} {
+    const volatility = stats.volatility ?? 0
+    const thermal = stats.thermal ?? 0
+    const plasticity = stats.plasticity ?? 0
+    const insulation = stats.insulation ?? 0
+
+    const statSum = volatility + thermal + plasticity + insulation
+    return {capacity: 2_500 + Math.floor((statSum * 7_500) / 3996)}
 }
 
 import {
@@ -174,6 +183,7 @@ import {getItem} from '../data/catalog'
 import {decodeCraftedItemStats} from './crafting'
 import {
     applySlotMultiplier,
+    applySlotMultiplierUint32,
     clampUint16,
     clampUint32,
     getSlotAmp,
@@ -278,7 +288,7 @@ export function computeEntityCapabilities(
     let maxGathDepth = 0
     let hasGatherer = false
 
-    let totalStorageBonus = 0
+    let totalStorageCapacity = 0
     const baseCapacity = computeBaseCapacity(itemId, stats)
     let installedModuleMass = 0
 
@@ -294,8 +304,7 @@ export function computeEntityCapabilities(
     let totalWarpRange = 0
     let hasWarp = false
 
-    let totalBatteryStatSum = 0
-    let batteryCount = 0
+    let totalBatteryCapacity = 0
 
     const gathererLanes: GathererLaneEntry[] = []
     const crafterLanes: CrafterLaneEntry[] = []
@@ -346,8 +355,8 @@ export function computeEntityCapabilities(
                 outputPct: amp,
             })
         } else if (modType === MODULE_STORAGE) {
-            const caps = computeStorageCapabilities(decodedStats, baseCapacity)
-            totalStorageBonus += caps.capacityBonus
+            const caps = computeStorageCapabilities(decodedStats)
+            totalStorageCapacity += applySlotMultiplierUint32(caps.capacity, amp)
         } else if (modType === MODULE_CRAFTER) {
             hasCrafter = true
             const caps = computeCrafterCapabilities(decodedStats)
@@ -372,24 +381,18 @@ export function computeEntityCapabilities(
             const caps = computeWarpCapabilities(decodedStats)
             totalWarpRange += applySlotMultiplier(caps.range, amp)
         } else if (modType === MODULE_BATTERY) {
-            batteryCount++
-            const vol = decodedStats.volatility ?? 0
-            const thm = decodedStats.thermal ?? 0
-            const pla = decodedStats.plasticity ?? 0
-            const ins = decodedStats.insulation ?? 0
-            totalBatteryStatSum += vol + thm + pla + ins
+            const caps = computeBatteryCapabilities(decodedStats)
+            totalBatteryCapacity += applySlotMultiplierUint32(caps.capacity, amp)
         }
     }
 
-    if (hasGenerator && batteryCount > 0) {
-        const genCapBase = totalGenCapacity
-        const bonusPctNum = 10 * batteryCount + Math.floor((totalBatteryStatSum * 10) / 2997)
-        totalGenCapacity += Math.floor((genCapBase * bonusPctNum) / 100)
+    if (hasGenerator && totalBatteryCapacity > 0) {
+        totalGenCapacity += totalBatteryCapacity
     }
 
     const result: ComputedCapabilities = {
         hullmass: computeBaseHullmass(stats) + installedModuleMass,
-        capacity: baseCapacity + totalStorageBonus,
+        capacity: clampUint32(baseCapacity + totalStorageCapacity),
     }
 
     if (hasEngine) {
