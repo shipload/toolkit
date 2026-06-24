@@ -191,7 +191,7 @@ export type {
     HasScheduleAndLocation,
 } from './travel/travel'
 
-export {planRoute, sdkSystemGraph} from './travel/route-planner'
+export {planRoute, sdkSystemGraph, MAX_LEGS} from './travel/route-planner'
 export type {
     Coord,
     Neighbor,

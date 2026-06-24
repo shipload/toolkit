@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {planRoute, type Coord, type SystemGraph} from '../../src/travel/route-planner'
+import {MAX_LEGS, planRoute, type Coord, type SystemGraph} from '../../src/travel/route-planner'
 
 function gridGraph(systems: Coord[]): SystemGraph {
     const set = new Set(systems.map((s) => `${s.x},${s.y}`))
@@ -137,5 +137,41 @@ describe('planRoute', () => {
         expect(result.ok).toBe(false)
         if (result.ok) return
         expect(result.reason).toBe('max-legs')
+    })
+})
+
+describe('planRoute partial path on failure', () => {
+    test('a no-path failure carries a partial path to the furthest reachable system', () => {
+        // (3,0) is reachable from origin and within the corridor, but cannot bridge the gap to (40,0).
+        const graph = gridGraph([
+            {x: 3, y: 0},
+            {x: 40, y: 0},
+        ])
+        const result = planRoute({origin: {x: 0, y: 0}, dest: {x: 40, y: 0}, perLegReach: 3, graph})
+        expect(result.ok).toBe(false)
+        if (result.ok) return
+        expect(result.partialWaypoints?.length ?? 0).toBeGreaterThan(0)
+        // the partial path ends at furthest, a real system
+        const last = result.partialWaypoints![result.partialWaypoints!.length - 1]
+        expect(graph.hasSystem(last)).toBe(true)
+    })
+
+    test('no progress yields an empty partial path', () => {
+        const graph = gridGraph([{x: 100, y: 100}]) // nothing within reach of origin
+        const result = planRoute({
+            origin: {x: 0, y: 0},
+            dest: {x: 100, y: 100},
+            perLegReach: 3,
+            graph,
+        })
+        expect(result.ok).toBe(false)
+        if (result.ok) return
+        expect(result.partialWaypoints?.length ?? 0).toBe(0)
+    })
+})
+
+describe('MAX_LEGS', () => {
+    test('is the single-trip hop cap of 12', () => {
+        expect(MAX_LEGS).toBe(12)
     })
 })

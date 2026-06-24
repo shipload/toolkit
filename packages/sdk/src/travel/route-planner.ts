@@ -32,6 +32,7 @@ export interface RouteFailure {
     reason: RouteFailureReason
     furthest?: Coord
     legsNeeded?: number
+    partialWaypoints?: Coord[]
 }
 
 export type RouteResult = RoutePlan | RouteFailure
@@ -50,11 +51,13 @@ const key = (c: Coord): string => `${c.x},${c.y}`
 const sameCoord = (a: Coord, b: Coord): boolean => a.x === b.x && a.y === b.y
 const dist = (a: Coord, b: Coord): number => Math.hypot(a.x - b.x, a.y - b.y)
 
+export const MAX_LEGS = 12
+
 export function planRoute(params: PlanRouteParams): RouteResult {
     const {origin, dest, perLegReach, graph} = params
     const corridorSlack = params.corridorSlack ?? perLegReach
     const nodeBudget = params.nodeBudget ?? 5000
-    const maxLegs = params.maxLegs ?? 12
+    const maxLegs = params.maxLegs ?? MAX_LEGS
 
     if (!graph.hasSystem(dest)) {
         return {ok: false, reason: 'empty-destination'}
@@ -122,9 +125,32 @@ export function planRoute(params: PlanRouteParams): RouteResult {
     }
 
     if (cappedByMaxLegs) {
-        return {ok: false, reason: 'max-legs', furthest}
+        return {
+            ok: false,
+            reason: 'max-legs',
+            furthest,
+            partialWaypoints: reconstructWaypoints(cameFrom, origin, furthest),
+        }
     }
-    return {ok: false, reason: 'no-path', furthest}
+    return {
+        ok: false,
+        reason: 'no-path',
+        furthest,
+        partialWaypoints: reconstructWaypoints(cameFrom, origin, furthest),
+    }
+}
+
+function reconstructWaypoints(cameFrom: Map<string, Coord>, origin: Coord, target: Coord): Coord[] {
+    if (sameCoord(target, origin)) return []
+    const path: Coord[] = [target]
+    let cur = target
+    while (!sameCoord(cur, origin)) {
+        const prev = cameFrom.get(key(cur))
+        if (!prev) break
+        path.unshift(prev)
+        cur = prev
+    }
+    return path.slice(1)
 }
 
 function reconstruct(cameFrom: Map<string, Coord>, origin: Coord, dest: Coord): RoutePlan {
