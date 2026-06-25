@@ -1,5 +1,18 @@
 # @shipload/sdk
 
+## 1.0.0-next.38
+
+### Patch Changes
+
+- 90149b1: - Fixed snapshots
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirror crafter conductivity re-key in SDK
+  - Battery and Cargo Bay module reworks
+  - Export MAX_LEGS as the shared route-planner hop cap
+
 ## 1.0.0-next.37
 
 ### Patch Changes
