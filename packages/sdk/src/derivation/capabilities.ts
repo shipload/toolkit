@@ -200,6 +200,7 @@ import {
     type InstalledModule,
 } from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
+import {computeTravelDrain} from '../nft/description'
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
     switch (itemId) {
@@ -284,7 +285,8 @@ export function computeEntityCapabilities(
     layout: EntitySlot[]
 ): ComputedCapabilities {
     let totalThrust = 0
-    let totalEngineDrain = 0
+    let totalEngineThm = 0
+    let engineCount = 0
     let hasEngine = false
 
     let totalGenCapacity = 0
@@ -339,7 +341,8 @@ export function computeEntityCapabilities(
             hasEngine = true
             const caps = computeEngineCapabilities(decodedStats)
             totalThrust += applySlotMultiplier(caps.thrust, amp)
-            totalEngineDrain += caps.drain
+            totalEngineThm += decodedStats.thermal ?? 0
+            engineCount += 1
         } else if (modType === MODULE_GENERATOR) {
             hasGenerator = true
             const caps = computeGeneratorCapabilities(decodedStats)
@@ -427,7 +430,8 @@ export function computeEntityCapabilities(
     }
 
     if (hasEngine) {
-        result.engines = {thrust: totalThrust, drain: totalEngineDrain}
+        const avgThm = engineCount > 0 ? Math.trunc(totalEngineThm / engineCount) : 0
+        result.engines = {thrust: totalThrust, drain: computeTravelDrain(totalThrust, avgThm)}
     }
     if (hasGenerator) {
         result.generator = {

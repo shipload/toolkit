@@ -212,4 +212,48 @@ describe('computeEntityCapabilities', () => {
 
         expect(result.launcher).toEqual({chargeRate: 1000, velocity: 600, drain: 20})
     })
+
+    test('single average engine yields power-to-weight drain 118', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+            {slotIndex: 1, itemId: ITEM_GENERATOR_T1, stats: 0n},
+        ]
+        const r = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        expect(r.engines!.thrust).toBe(775)
+        expect(r.engines!.drain).toBe(118)
+    })
+
+    test('two average engines yield drain 59', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+            {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+        ]
+        const r = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        expect(r.engines!.thrust).toBe(1550)
+        expect(r.engines!.drain).toBe(59)
+    })
+
+    test('mixed thm averages: thm 300 + thm 700 behaves like thm 500', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 300])},
+            {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 700])},
+        ]
+        const r = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        expect(r.engines!.drain).toBe(59)
+    })
 })

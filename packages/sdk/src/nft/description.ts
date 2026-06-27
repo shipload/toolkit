@@ -62,6 +62,16 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
 export const computeEngineDrain = (thm: number): number => 2 * Math.max(30, 50 - idiv(thm, 70))
+export const ENGINE_DRAIN_BASE = 118
+export const ENGINE_DRAIN_REF_THRUST = 775
+export const ENGINE_DRAIN_REF_THM = 500
+
+export const computeTravelDrain = (totalThrust: number, avgThm: number): number => {
+    if (totalThrust <= 0) return 0
+    const num = ENGINE_DRAIN_BASE * ENGINE_DRAIN_REF_THRUST * computeEngineDrain(avgThm)
+    const den = totalThrust * computeEngineDrain(ENGINE_DRAIN_REF_THM)
+    return idiv(num, den)
+}
 export const computeGeneratorCap = (com: number): number => 950 + idiv(com, 2)
 export const computeGeneratorRech = (fin: number): number => 2 * (1 + idiv(fin * 3, 1000))
 export const computeGathererYield = (str: number): number => 200 + str
