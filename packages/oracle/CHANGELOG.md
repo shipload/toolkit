@@ -1,5 +1,17 @@
 # @shipload/oracle
 
+## 0.0.1-next.29
+
+### Patch Changes
+
+- 0b170aa: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added mass driver/catcher support
+  - Fixed test data
+  - Rebalancing engine stats
+
 ## 0.0.1-next.28
 
 ### Patch Changes

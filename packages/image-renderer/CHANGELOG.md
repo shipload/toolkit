@@ -1,5 +1,20 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.39
+
+### Patch Changes
+
+- 0b170aa: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added mass driver/catcher support
+  - Fixed test data
+  - Rebalancing engine stats
+- Updated dependencies [0b170aa]
+  - @shipload/item-renderer@1.0.0-next.39
+  - @shipload/sdk@1.0.0-next.39
+
 ## 1.0.0-next.38
 
 ### Patch Changes
