@@ -131,6 +131,17 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     }
 }
 
+export function computeLauncherCapabilities(
+    stats: {charge_rate: number; velocity: number; drain: number},
+    amp = 100
+): {chargeRate: number; velocity: number; drain: number} {
+    return {
+        chargeRate: Math.floor((stats.charge_rate * amp) / 100),
+        velocity: Math.floor((stats.velocity * amp) / 100),
+        drain: stats.drain,
+    }
+}
+
 export function computeStorageCapabilities(stats: Record<string, number>): {
     capacity: number
 } {
@@ -160,6 +171,8 @@ import {
     ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_MASS_CATCHER_T1_PACKED,
+    ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
@@ -174,9 +187,10 @@ import {
     MODULE_CRAFTER,
     MODULE_HAULER,
     MODULE_WARP,
+    MODULE_LAUNCHER,
 } from '../capabilities/modules'
 import {getItem} from '../data/catalog'
-import {decodeCraftedItemStats} from './crafting'
+import {decodeCraftedItemStats, decodeStat} from './crafting'
 import {
     applySlotMultiplier,
     applySlotMultiplierUint32,
@@ -193,6 +207,8 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
             return computeShipHullCapabilities(stats).capacity
         case ITEM_EXTRACTOR_T1_PACKED:
         case ITEM_FACTORY_T1_PACKED:
+        case ITEM_MASS_DRIVER_T1_PACKED:
+        case ITEM_MASS_CATCHER_T1_PACKED:
         case ITEM_CONTAINER_T1_PACKED:
             return computeContainerCapabilities(stats).capacity
         case ITEM_WAREHOUSE_T1_PACKED:
@@ -258,6 +274,7 @@ export interface ComputedCapabilities {
     crafterLanes?: CrafterLaneEntry[]
     hauler?: {capacity: number; efficiency: number; drain: number}
     warp?: {range: number}
+    launcher?: {chargeRate: number; velocity: number; drain: number}
 }
 
 export function computeEntityCapabilities(
@@ -299,6 +316,11 @@ export function computeEntityCapabilities(
 
     let totalWarpRange = 0
     let hasWarp = false
+
+    let totalLauncherChargeRate = 0
+    let totalLauncherVelocity = 0
+    let totalLauncherDrain = 0
+    let hasLauncher = false
 
     let totalBatteryCapacity = 0
 
@@ -376,6 +398,19 @@ export function computeEntityCapabilities(
             hasWarp = true
             const caps = computeWarpCapabilities(decodedStats)
             totalWarpRange += applySlotMultiplier(caps.range, amp)
+        } else if (modType === MODULE_LAUNCHER) {
+            hasLauncher = true
+            const caps = computeLauncherCapabilities(
+                {
+                    charge_rate: decodedStats.charge_rate ?? decodeStat(mod.stats, 0),
+                    velocity: decodedStats.velocity ?? decodeStat(mod.stats, 1),
+                    drain: decodedStats.drain ?? decodeStat(mod.stats, 2),
+                },
+                amp
+            )
+            totalLauncherChargeRate = clampUint16(totalLauncherChargeRate + caps.chargeRate)
+            totalLauncherVelocity = clampUint16(totalLauncherVelocity + caps.velocity)
+            totalLauncherDrain = clampUint16(totalLauncherDrain + caps.drain)
         } else if (modType === MODULE_BATTERY) {
             const caps = computeBatteryCapabilities(decodedStats)
             totalBatteryCapacity += applySlotMultiplierUint32(caps.capacity, amp)
@@ -431,6 +466,13 @@ export function computeEntityCapabilities(
     }
     if (hasWarp) {
         result.warp = {range: totalWarpRange}
+    }
+    if (hasLauncher) {
+        result.launcher = {
+            chargeRate: totalLauncherChargeRate,
+            velocity: totalLauncherVelocity,
+            drain: totalLauncherDrain,
+        }
     }
 
     return result

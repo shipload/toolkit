@@ -17,9 +17,144 @@ import {
     type UInt64Type,
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import type {CoordinatesType} from '../types'
+import {Coordinates, PRECISION, type CoordinatesType} from '../types'
 import {ServerContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
+import {getItem} from '../data/catalog'
+
+const CHARGE_K = 1n
+const ENERGY_DIVISOR = 1_000_000n
+const UINT32_MAX = 4_294_967_295
+const UINT32_MAX_BIGINT = 4_294_967_295n
+const UINT32_MOD = 4_294_967_296n
+const UINT64_MAX = 18_446_744_073_709_551_615n
+const PRECISION_BIGINT = BigInt(PRECISION)
+
+export type LaunchNumericInput =
+    | number
+    | bigint
+    | string
+    | {toNumber(): number}
+    | {toString(): string}
+
+export interface LaunchStatsInput {
+    charge_rate?: LaunchNumericInput
+    chargeRate?: LaunchNumericInput
+    velocity: LaunchNumericInput
+    drain: LaunchNumericInput
+}
+
+export interface LaunchQuoteLauncher {
+    coordinates: CoordinatesType
+    launcher: LaunchStatsInput
+    generator?: {capacity: LaunchNumericInput}
+}
+
+export interface LaunchQuoteCatcher {
+    coordinates: CoordinatesType
+}
+
+export interface LaunchQuote {
+    chargeTime: number
+    flightTime: number
+    arrival: Date
+    energyCost: number
+    maxReach: bigint
+}
+
+function toNumber(value: LaunchNumericInput): number {
+    if (typeof value === 'number') return Math.trunc(value)
+    if (typeof value === 'bigint') return Number(value)
+    if (typeof value === 'string') return Number(value)
+    if ('toNumber' in value && typeof value.toNumber === 'function') return value.toNumber()
+    return Number(value.toString())
+}
+
+function requiredNumber(value: LaunchNumericInput | undefined, label: string): number {
+    if (value === undefined) throw new Error(`launch quote requires ${label}`)
+    return toNumber(value)
+}
+
+function toBigInt(value: LaunchNumericInput | undefined): bigint {
+    if (value === undefined) return 0n
+    if (typeof value === 'bigint') return value
+    if (typeof value === 'number') return BigInt(Math.trunc(value))
+    if (typeof value === 'string') return BigInt(value)
+    return BigInt(value.toString())
+}
+
+function saturatingMul(lhs: bigint, rhs: bigint): bigint {
+    if (lhs !== 0n && rhs > UINT64_MAX / lhs) {
+        return UINT64_MAX
+    }
+    return lhs * rhs
+}
+
+function clampLaunchResult(value: bigint): number {
+    if (value < 1n) return 1
+    if (value > UINT32_MAX_BIGINT) return UINT32_MAX
+    return Number(value)
+}
+
+function toUint32(value: bigint): bigint {
+    return value % UINT32_MOD
+}
+
+function calcDistance(origin: CoordinatesType, destination: CoordinatesType): bigint {
+    const a = Coordinates.from(origin)
+    const b = Coordinates.from(destination)
+    const dx = toNumber(a.x) - toNumber(b.x)
+    const dy = toNumber(a.y) - toNumber(b.y)
+    return BigInt(Math.trunc(Math.sqrt(dx * dx + dy * dy) * PRECISION))
+}
+
+function calcCargoItemMassUint32(item: ServerContract.ActionParams.Type.cargo_item): bigint {
+    let mass = toUint32(BigInt(getItem(item.item_id).mass) * toUint32(toBigInt(item.quantity)))
+
+    for (const mod of item.modules) {
+        if (mod.installed) {
+            mass = toUint32(mass + BigInt(getItem(mod.installed.item_id).mass))
+        }
+    }
+
+    return mass
+}
+
+function calcPayloadMass(items: ServerContract.ActionParams.Type.cargo_item[]): bigint {
+    let mass = 0n
+    for (const item of items) {
+        mass = toUint32(mass + calcCargoItemMassUint32(item))
+    }
+    return mass
+}
+
+function calcChargeTime(chargeRate: number, mass: bigint): number {
+    const rate = BigInt(chargeRate || 1)
+    return clampLaunchResult((mass * CHARGE_K) / rate)
+}
+
+function calcFlightTime(velocity: number, distance: bigint): number {
+    const v = BigInt(velocity || 1)
+    return clampLaunchResult(distance / (v * PRECISION_BIGINT))
+}
+
+function calcLaunchEnergy(drain: number, mass: bigint, distance: bigint): number {
+    const e =
+        saturatingMul(saturatingMul(mass, distance / PRECISION_BIGINT), BigInt(drain)) /
+        ENERGY_DIVISOR
+    return clampLaunchResult(e)
+}
+
+function calcMaxReach(energyBudget: bigint, mass: bigint, drain: number): bigint {
+    if (energyBudget < 1n) return 0n
+    if (energyBudget >= UINT32_MAX_BIGINT || mass === 0n || drain === 0) return UINT64_MAX
+
+    const numerator = (energyBudget + 1n) * ENERGY_DIVISOR - 1n
+    const denominator = mass * BigInt(drain)
+    const distanceUnits = numerator / denominator
+    const maxDistance = distanceUnits * PRECISION_BIGINT + (PRECISION_BIGINT - 1n)
+    return maxDistance > UINT64_MAX ? UINT64_MAX : maxDistance
+}
 
 export type EntityRefInput = {
     entityType: NameType
@@ -164,6 +299,46 @@ export class ActionsManager extends BaseManager {
             to_id: UInt64.from(toId),
             items,
         })
+    }
+
+    launch(
+        launcherId: UInt64Type,
+        catcherId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('launch', {
+            launcher_id: UInt64.from(launcherId),
+            catcher_id: UInt64.from(catcherId),
+            items,
+        })
+    }
+
+    getLaunchQuote(
+        launcher: LaunchQuoteLauncher,
+        catcher: LaunchQuoteCatcher,
+        items: ServerContract.ActionParams.Type.cargo_item[],
+        start = new Date()
+    ): LaunchQuote {
+        const chargeRate = requiredNumber(
+            launcher.launcher.charge_rate ?? launcher.launcher.chargeRate,
+            'launcher charge rate'
+        )
+        const velocity = requiredNumber(launcher.launcher.velocity, 'launcher velocity')
+        const drain = requiredNumber(launcher.launcher.drain, 'launcher drain')
+        const mass = calcPayloadMass(items)
+        const distance = calcDistance(launcher.coordinates, catcher.coordinates)
+        const chargeTime = calcChargeTime(chargeRate, mass)
+        const flightTime = calcFlightTime(velocity, distance)
+        const energyCost = calcLaunchEnergy(drain, mass, distance)
+        const maxReach = calcMaxReach(toBigInt(launcher.generator?.capacity), mass, drain)
+
+        return {
+            chargeTime,
+            flightTime,
+            arrival: new Date(start.getTime() + (chargeTime + flightTime) * 1000),
+            energyCost,
+            maxReach,
+        }
     }
 
     foundCompany(account: NameType, name: string): Action {

@@ -129,6 +129,7 @@ export type ModuleType =
     | 'storage'
     | 'hauler'
     | 'battery'
+    | 'catcher'
 
 export const RESOURCE_TIER_ADJECTIVES: Record<number, string> = {
     1: 'Crude',

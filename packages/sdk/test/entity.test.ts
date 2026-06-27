@@ -7,6 +7,8 @@ import {
     isContainer,
     isExtractor,
     isFactory,
+    isMassCatcher,
+    isMassDriver,
     isNexus,
     isPlot,
     isShip,
@@ -32,6 +34,8 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     container: isContainer,
     nexus: isNexus,
     plot: isPlot,
+    mdriver: isMassDriver,
+    mcatcher: isMassCatcher,
 }
 
 const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {

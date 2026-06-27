@@ -130,6 +130,8 @@ const PLURAL: Record<EntityTypeName, string> = {
     warehouse: 'warehouses',
     extractor: 'extractors',
     factory: 'factories',
+    mdriver: 'massdrivers',
+    mcatcher: 'masscatchers',
     nexus: 'nexuses',
     plot: 'plots',
 }

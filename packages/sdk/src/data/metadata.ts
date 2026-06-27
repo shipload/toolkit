@@ -218,6 +218,11 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Stores additional charge produced by generators.',
         color: '#4ADBFF',
     },
+    10109: {
+        name: 'Drive Coil',
+        description: 'Accelerates and launches cargo payloads toward a remote mass catcher.',
+        color: '#E86344',
+    },
 
     // === Entities (packed, T1) ===
     10200: {
@@ -246,6 +251,17 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Planetary fabrication facility with generator and crafter module slots.',
         color: '#7BA7D4',
     },
+    10205: {
+        name: 'Mass Driver',
+        description: 'Planetary launch platform with generator and drive coil module slots.',
+        color: '#E86344',
+    },
+    10206: {
+        name: 'Mass Catcher',
+        description:
+            'Planetary receiving platform with storage module slots; catches launched payloads.',
+        color: '#4AE898',
+    },
 
     // === Components (T2) ===
     20001: {
@@ -273,6 +289,8 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10202: {moduleSlotLabels: ['Loader', 'Storage', 'Storage', 'Storage', 'Storage']},
     10203: {moduleSlotLabels: ['Generator', 'Gatherer']},
     10204: {moduleSlotLabels: ['Generator', 'Crafter']},
+    10205: {moduleSlotLabels: ['Generator', 'Drive Coil']},
+    10206: {moduleSlotLabels: ['Storage', 'Storage', 'Storage']},
 }
 
 for (const item of items as Array<{id: number}>) {

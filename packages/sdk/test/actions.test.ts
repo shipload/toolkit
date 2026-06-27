@@ -38,6 +38,18 @@ test('unload builds an eon.shipload::unload action that pushes items to a target
     expect(Number(data.items[0].quantity)).toBe(3)
 })
 
+test('launch builds an eon.shipload::launch action with launcher, catcher, and cargo', () => {
+    const action = sl.actions.launch(10, 20, [cargo(101, 7)])
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('launch')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.launcher_id)).toBe('10')
+    expect(String(data.catcher_id)).toBe('20')
+    expect(data.items.length).toBe(1)
+    expect(Number(data.items[0].item_id)).toBe(101)
+    expect(Number(data.items[0].quantity)).toBe(7)
+})
+
 test('craft without a target self-crafts and omits the target field', () => {
     const action = sl.actions.craft(1, 10001, 1, [cargo(10201, 1)])
     expect(String(action.account)).toBe('eon.shipload')
@@ -263,4 +275,82 @@ test('bundleGather packs N gather actions into one ordered Transaction', () => {
     expect(Number(d0.slot)).toBe(0)
     expect(Number(d1.slot)).toBe(1)
     expect(d2.slot).toBeNull()
+})
+
+test('getLaunchQuote mirrors contract launch formulas for a deterministic route', () => {
+    const start = new Date('2026-06-26T00:00:00.000Z')
+    const quote = sl.actions.getLaunchQuote(
+        {
+            coordinates: {x: 0, y: 0},
+            launcher: {charge_rate: 500, velocity: 250, drain: 20},
+            generator: {capacity: 1000},
+        },
+        {coordinates: {x: 3, y: 4}},
+        [cargo(101, 1000)],
+        start
+    )
+
+    expect(quote.chargeTime).toBe(2000)
+    expect(quote.flightTime).toBe(1)
+    expect(quote.energyCost).toBe(100)
+    expect(quote.arrival.toISOString()).toBe('2026-06-26T00:33:21.000Z')
+    expect(quote.maxReach).toBe(509999n)
+})
+
+test('getLaunchQuote increases charge, flight, and energy with heavier and farther launches', () => {
+    const launcher = {
+        coordinates: {x: 0, y: 0},
+        launcher: {charge_rate: 1000, velocity: 100, drain: 25},
+        generator: {capacity: 2000},
+    }
+
+    const lightNear = sl.actions.getLaunchQuote(launcher, {coordinates: {x: 10, y: 0}}, [
+        cargo(101, 1),
+    ])
+    const heavyNear = sl.actions.getLaunchQuote(launcher, {coordinates: {x: 10, y: 0}}, [
+        cargo(101, 100),
+    ])
+    const heavyFar = sl.actions.getLaunchQuote(launcher, {coordinates: {x: 1000, y: 0}}, [
+        cargo(101, 100),
+    ])
+
+    expect(heavyNear.chargeTime).toBeGreaterThan(lightNear.chargeTime)
+    expect(heavyFar.flightTime).toBeGreaterThan(heavyNear.flightTime)
+    expect(heavyFar.energyCost).toBeGreaterThan(heavyNear.energyCost)
+})
+
+test('getLaunchQuote clamps saturated energy to uint32 max', () => {
+    const quote = sl.actions.getLaunchQuote(
+        {
+            coordinates: {x: 0, y: 0},
+            launcher: {charge_rate: 1, velocity: 1, drain: 65535},
+            generator: {capacity: 4294967295},
+        },
+        {coordinates: {x: 1_000_000_000_000, y: 0}},
+        [cargo(101, 4_000_000)]
+    )
+
+    expect(quote.energyCost).toBe(4294967295)
+    expect(quote.maxReach).toBe(18446744073709551615n)
+})
+
+test('getLaunchQuote mirrors uint32 payload mass wrapping at item and total boundaries', () => {
+    const wrappedItem = {
+        item_id: 101,
+        stats: 0n,
+        modules: [{type: 0, installed: {item_id: 10109, stats: 0n}}],
+        quantity: 4_294_967,
+    }
+
+    const quote = sl.actions.getLaunchQuote(
+        {
+            coordinates: {x: 0, y: 0},
+            launcher: {charge_rate: 1, velocity: 1, drain: 1},
+            generator: {capacity: 1000},
+        },
+        {coordinates: {x: 1, y: 0}},
+        [wrappedItem, cargo(101, 4_294_967)]
+    )
+
+    expect(quote.chargeTime).toBe(999408)
 })

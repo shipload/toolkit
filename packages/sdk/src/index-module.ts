@@ -62,7 +62,14 @@ export type {
     ScheduledBuild,
     Reservation,
 } from './managers'
-export type {EntityRefInput} from './managers/actions'
+export type {
+    EntityRefInput,
+    LaunchNumericInput,
+    LaunchQuote,
+    LaunchQuoteCatcher,
+    LaunchQuoteLauncher,
+    LaunchStatsInput,
+} from './managers/actions'
 export type {WrapDeposit} from './managers/nft'
 export {resolveLockedAmount} from './managers/nft'
 
@@ -383,6 +390,7 @@ export {
     computeContainerCapabilities,
     computeContainerT2Capabilities,
     computeWarpCapabilities,
+    computeLauncherCapabilities,
     computeBaseCapacity,
     computeEntityCapabilities,
     GATHERER_DEPTH_TABLE,

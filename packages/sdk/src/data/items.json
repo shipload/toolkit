@@ -473,6 +473,13 @@
     "subtype": "battery"
   },
   {
+    "id": 10109,
+    "mass": 1000000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "launcher"
+  },
+  {
     "id": 10200,
     "mass": 1900000,
     "type": "entity",
@@ -499,6 +506,18 @@
   {
     "id": 10204,
     "mass": 1900000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 10205,
+    "mass": 8000000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 10206,
+    "mass": 8000000,
     "type": "entity",
     "tier": 1
   },

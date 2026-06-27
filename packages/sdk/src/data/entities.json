@@ -80,6 +80,36 @@
     ]
   },
   {
+    "entityItemId": 10205,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 200
+      },
+      {
+        "type": "launcher",
+        "outputPct": 200
+      }
+    ]
+  },
+  {
+    "entityItemId": 10206,
+    "slots": [
+      {
+        "type": "storage",
+        "outputPct": 100
+      },
+      {
+        "type": "storage",
+        "outputPct": 100
+      },
+      {
+        "type": "storage",
+        "outputPct": 100
+      }
+    ]
+  },
+  {
     "entityItemId": 20200,
     "slots": []
   }

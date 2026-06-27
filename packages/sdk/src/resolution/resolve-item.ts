@@ -39,6 +39,9 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_FACTORY_T1_PACKED,
+    ITEM_MASS_CATCHER_T1_PACKED,
+    ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
@@ -287,7 +290,9 @@ function hullCapsForEntity(
         case ITEM_WAREHOUSE_T1_PACKED:
             return computeWarehouseHullCapabilities(decoded)
         case ITEM_EXTRACTOR_T1_PACKED:
-            return computeShipHullCapabilities(decoded)
+        case ITEM_FACTORY_T1_PACKED:
+        case ITEM_MASS_DRIVER_T1_PACKED:
+        case ITEM_MASS_CATCHER_T1_PACKED:
         case ITEM_CONTAINER_T1_PACKED:
             return computeContainerCapabilities(decoded)
         case ITEM_CONTAINER_T2_PACKED:

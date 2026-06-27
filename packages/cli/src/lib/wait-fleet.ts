@@ -83,9 +83,11 @@ const TYPE_RANK: Record<EntityTypeName, number> = {
 	factory: 1,
 	extractor: 2,
 	warehouse: 3,
-	container: 4,
-	nexus: 5,
-	plot: 6,
+	mdriver: 4,
+	mcatcher: 5,
+	container: 6,
+	nexus: 7,
+	plot: 8,
 }
 
 function rankType(t: EntitySnapshot['type']): number {

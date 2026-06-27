@@ -4,6 +4,7 @@ import kindRegistryJson from './kind-registry.json'
 export const CAP_WRAP = 0x01
 export const CAP_UNDEPLOY = 0x02
 export const CAP_DEMOLISH = 0x04
+export const CAP_CATCH = 0x08
 export const CAP_MODULES = 0x10
 
 export enum EntityClass {
@@ -26,6 +27,8 @@ export type EntityTypeName =
     | 'container'
     | 'nexus'
     | 'plot'
+    | 'mdriver'
+    | 'mcatcher'
 
 export interface KindMeta {
     kind: Name
@@ -113,6 +116,10 @@ export function kindCan(kind: NameType | EntityTypeName, cap: number): boolean {
     return m !== undefined && (m.capabilityFlags & cap) !== 0
 }
 
+export function canCatch(kind: NameType | EntityTypeName): boolean {
+    return kindCan(kind, CAP_CATCH)
+}
+
 export function getEntityClass(kind: NameType | EntityTypeName): EntityClass {
     const m = KIND_META.get(nameKey(kind))
     if (!m) throw new Error(`Entity type has no class: ${nameKey(kind)}`)
@@ -126,6 +133,8 @@ export const ENTITY_FACTORY = Name.from('factory')
 export const ENTITY_CONTAINER = Name.from('container')
 export const ENTITY_NEXUS = Name.from('nexus')
 export const ENTITY_PLOT = Name.from('plot')
+export const ENTITY_MASS_DRIVER = Name.from('mdriver')
+export const ENTITY_MASS_CATCHER = Name.from('mcatcher')
 
 export function isShip(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_SHIP) ?? false
@@ -147,4 +156,10 @@ export function isNexus(entity: {type?: Name}): boolean {
 }
 export function isPlot(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_PLOT) ?? false
+}
+export function isMassDriver(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_MASS_DRIVER) ?? false
+}
+export function isMassCatcher(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_MASS_CATCHER) ?? false
 }

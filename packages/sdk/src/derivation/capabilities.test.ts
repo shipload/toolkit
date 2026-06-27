@@ -4,11 +4,16 @@ import {
     computeGathererCapabilities,
     computeCrafterCapabilities,
     computeLoaderCapabilities,
+    computeBaseCapacity,
+    computeContainerCapabilities,
 } from './capabilities'
 import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
 import {encodeStats} from './crafting'
 import {
     ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_FACTORY_T1_PACKED,
+    ITEM_MASS_DRIVER_T1_PACKED,
+    ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_LOADER_T1,
@@ -27,6 +32,19 @@ function makeCrafterStats(reactivity: number, conductivity: number): bigint {
 function makeLoaderStats(insulation: number, plasticity: number): bigint {
     return encodeStats([insulation, plasticity])
 }
+
+test('computeBaseCapacity uses container formula for all container-class entities', () => {
+    const stats = {strength: 300, hardness: 400, density: 100}
+    const expected = computeContainerCapabilities(stats).capacity
+    for (const itemId of [
+        ITEM_EXTRACTOR_T1_PACKED,
+        ITEM_FACTORY_T1_PACKED,
+        ITEM_MASS_DRIVER_T1_PACKED,
+        ITEM_MASS_CATCHER_T1_PACKED,
+    ]) {
+        expect(computeBaseCapacity(itemId, stats)).toBe(expected)
+    }
+})
 
 test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer sum', () => {
     // Two gatherers with distinct stats in separate slots, amp=100 for both

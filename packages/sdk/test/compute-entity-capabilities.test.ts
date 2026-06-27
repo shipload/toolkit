@@ -1,5 +1,8 @@
 import {describe, expect, test} from 'bun:test'
-import {computeEntityCapabilities} from '../src/derivation/capabilities'
+import {
+    computeEntityCapabilities,
+    computeLauncherCapabilities,
+} from '../src/derivation/capabilities'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {
     ITEM_SHIP_T1_PACKED,
@@ -11,8 +14,11 @@ import {
     ITEM_LOADER_T1,
     ITEM_CRAFTER_T1,
     ITEM_GATHERER_T1,
+    ITEM_MASS_DRIVER_T1_PACKED,
+    ITEM_LAUNCHER_T1,
 } from '../src/data/item-ids'
 import type {EntitySlot} from '../src/data/recipes-runtime'
+import {encodeStats} from '../src/derivation/crafting'
 
 const SHIP_LAYOUT: EntitySlot[] = [
     {type: 'any', outputPct: 100},
@@ -39,6 +45,11 @@ function cargoBayCapacity(str: number, den: number, hrd: number, coh: number): n
 }
 
 describe('computeEntityCapabilities', () => {
+    test('computeLauncherCapabilities applies slot amp to rate and velocity only', () => {
+        const caps = computeLauncherCapabilities({charge_rate: 500, velocity: 300, drain: 20}, 200)
+        expect(caps).toEqual({chargeRate: 1000, velocity: 600, drain: 20})
+    })
+
     test('returns hullmass and capacity for ship with no modules', () => {
         const result = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
@@ -177,5 +188,28 @@ describe('computeEntityCapabilities', () => {
         expect(result.loaders).toBeDefined()
         expect(result.loaders?.quantity).toBeGreaterThan(0)
         expect(result.loaders?.mass).toBeGreaterThan(0)
+    })
+
+    test('launcher modules aggregate charge and velocity with slot amp and flat drain', () => {
+        const layout: EntitySlot[] = [
+            {type: 'generator', outputPct: 200},
+            {type: 'launcher', outputPct: 200},
+        ]
+        const modules: InstalledModule[] = [
+            {
+                slotIndex: 1,
+                itemId: ITEM_LAUNCHER_T1,
+                stats: encodeStats([500, 300, 20]),
+            },
+        ]
+
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_MASS_DRIVER_T1_PACKED,
+            modules,
+            layout
+        )
+
+        expect(result.launcher).toEqual({chargeRate: 1000, velocity: 600, drain: 20})
     })
 })

@@ -41,6 +41,7 @@ export interface ProjectedEntity {
     loaderLanes: ServerContract.Types.loader_lane[]
     generator?: ServerContract.Types.energy_stats
     hauler?: ServerContract.Types.hauler_stats
+    launcher?: ServerContract.Types.launcher_stats
     readonly cargoMass: UInt64
     readonly totalMass: UInt64
     readonly gathererLanes: ServerContract.Types.gatherer_lane[]
@@ -49,6 +50,7 @@ export interface ProjectedEntity {
     hasMovement(): boolean
     hasStorage(): boolean
     hasLoaders(): boolean
+    hasLauncher(): boolean
 
     capabilities(): EntityCapabilities
     state(): EntityState
@@ -64,6 +66,7 @@ export interface Projectable extends ScheduleData {
     gatherer_lanes?: ServerContract.Types.gatherer_lane[]
     crafter_lanes?: ServerContract.Types.crafter_lane[]
     hauler?: ServerContract.Types.hauler_stats
+    launcher?: ServerContract.Types.launcher_stats
     capacity?: UInt32
     cargo: ServerContract.Types.cargo_item[]
     cargomass: UInt32
@@ -91,6 +94,7 @@ interface ProjectedCaps {
     gathererLanes: ServerContract.Types.gatherer_lane[]
     crafterLanes: ServerContract.Types.crafter_lane[]
     hauler?: ServerContract.Types.hauler_stats
+    launcher?: ServerContract.Types.launcher_stats
 }
 
 function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
@@ -164,6 +168,13 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         gathererLanes: (caps.gathererLanes ?? []).map(toGathererLane),
         crafterLanes: (caps.crafterLanes ?? []).map(toCrafterLane),
         hauler: caps.hauler ? ServerContract.Types.hauler_stats.from(caps.hauler) : undefined,
+        launcher: caps.launcher
+            ? ServerContract.Types.launcher_stats.from({
+                  charge_rate: caps.launcher.chargeRate,
+                  velocity: caps.launcher.velocity,
+                  drain: caps.launcher.drain,
+              })
+            : undefined,
     }
 }
 
@@ -180,6 +191,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         entity.engines === undefined ||
         entity.generator === undefined ||
         entity.hauler === undefined ||
+        entity.launcher === undefined ||
         entity.capacity === undefined
     const caps = needsRecompute ? recomputeCaps(entity) : undefined
 
@@ -190,6 +202,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const engines = entity.engines ?? caps?.engines
     const generator = entity.generator ?? caps?.generator
     const hauler = entity.hauler ?? caps?.hauler
+    const launcher = entity.launcher ?? caps?.launcher
     const capacity = entity.capacity ?? caps?.capacity
 
     const cargo: CargoStack[] = entity.cargo.map(cargoItemToStack)
@@ -203,6 +216,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         engines,
         generator,
         hauler,
+        launcher,
         loaderLanes,
         gathererLanes,
         crafterLanes,
@@ -229,12 +243,17 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
             return this.loaderLanes.length > 0
         },
 
+        hasLauncher() {
+            return this.launcher !== undefined
+        },
+
         capabilities(): EntityCapabilities {
             return {
                 hullmass: this.shipMass,
                 capacity: this.capacity ? UInt32.from(this.capacity) : undefined,
                 engines: this.engines,
                 generator: this.generator,
+                launcher: this.launcher,
             }
         },
 

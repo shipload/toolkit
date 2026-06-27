@@ -142,6 +142,13 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         if (caps.generator) info.generator = caps.generator
         if (caps.hauler) info.hauler = caps.hauler
         if (caps.warp) info.warp = caps.warp
+        if (caps.launcher) {
+            info.launcher = ServerContract.Types.launcher_stats.from({
+                charge_rate: caps.launcher.chargeRate,
+                velocity: caps.launcher.velocity,
+                drain: caps.launcher.drain,
+            })
+        }
 
         info.gatherer_lanes = (caps.gathererLanes ?? []).map((l) =>
             ServerContract.Types.gatherer_lane.from({

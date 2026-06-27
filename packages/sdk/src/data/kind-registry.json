@@ -29,6 +29,20 @@
       "defaultLabel": "Factory"
     },
     {
+      "kind": "mdriver",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 20,
+      "zCoord": 0,
+      "defaultLabel": "Mass Driver"
+    },
+    {
+      "kind": "mcatcher",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 28,
+      "zCoord": 0,
+      "defaultLabel": "Mass Catcher"
+    },
+    {
       "kind": "container",
       "classification": "OrbitalVessel",
       "capabilityFlags": 3,
@@ -69,6 +83,16 @@
     {
       "itemId": 10204,
       "kind": "factory",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10205,
+      "kind": "mdriver",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10206,
+      "kind": "mcatcher",
       "displayLabel": ""
     },
     {
