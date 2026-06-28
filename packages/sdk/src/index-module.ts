@@ -50,6 +50,7 @@ export {
     ConstructionManager,
 } from './managers'
 export type {
+    PlayerRosterEntry,
     LocationStratum,
     NftConfigForItem,
     BuildableTarget,
@@ -206,11 +207,12 @@ export type {
     HasScheduleAndLocation,
 } from './travel/travel'
 
-export {planRoute, sdkSystemGraph, MAX_LEGS} from './travel/route-planner'
+export {planRoute, sdkSystemGraph, setScanProvider, MAX_LEGS} from './travel/route-planner'
 export type {
     Coord,
     Neighbor,
     SystemGraph,
+    ScanProvider,
     RoutePlan,
     RouteFailure,
     RouteResult,

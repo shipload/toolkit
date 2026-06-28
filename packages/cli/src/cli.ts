@@ -28,6 +28,7 @@ import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
 import * as wrapentity from './commands/action/wrapentity'
 import * as init from './commands/init'
+import * as census from './commands/query/census'
 import * as config from './commands/query/config'
 import * as entities from './commands/query/entities'
 import * as entity from './commands/query/entity'
@@ -42,6 +43,7 @@ import * as nearby from './commands/query/nearby'
 import * as nft from './commands/query/nft'
 import * as nftinfo from './commands/query/nftinfo'
 import * as player from './commands/query/player'
+import * as players from './commands/query/players'
 import * as recipe from './commands/query/recipe'
 import * as resources from './commands/query/resources'
 import * as gatherable from './commands/query/gatherable'
@@ -96,6 +98,8 @@ export function build(): Command {
     waitCmd.register(program)
     epoch.register(program)
     player.register(program)
+    players.register(program)
+    census.register(program)
     buildGenericEntityParent(program, parseEntityType, entity.defaultShow)
     for (const type of ALL_ENTITY_TYPES) {
         buildEntityParent(program, type, entity.defaultShow)

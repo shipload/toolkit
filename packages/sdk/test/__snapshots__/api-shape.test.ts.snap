@@ -27,6 +27,7 @@ exports[`Entity public surface 1`] = `
 exports[`EntitiesManager method surface 1`] = `
 [
   "constructor",
+  "getAllEntities",
   "getEntities",
   "getEntity",
   "getProjection",

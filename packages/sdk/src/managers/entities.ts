@@ -34,6 +34,15 @@ export class EntitiesManager extends BaseManager {
         return entities.map((e) => new Entity(e))
     }
 
+    async getAllEntities(kind?: EntityTypeName): Promise<ServerContract.Types.entity_row[]> {
+        const rows = await this.server.table('entity').all()
+        if (!kind) {
+            return rows
+        }
+        const wanted = Name.from(kind)
+        return rows.filter((row) => wanted.equals(row.kind))
+    }
+
     async getSummaries(
         owner: NameType | ServerContract.Types.player_row,
         kind?: EntityTypeName

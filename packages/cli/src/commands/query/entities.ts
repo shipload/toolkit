@@ -1,6 +1,7 @@
 import type {Command} from 'commander'
-import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType} from '../../lib/args'
-import {server} from '../../lib/client'
+import type {ServerTypes} from '@shipload/sdk'
+import {ALL_ENTITY_TYPES, type EntityTypeName, parseEntityType, parseUint32} from '../../lib/args'
+import {getShipload, server} from '../../lib/client'
 import {renderEntityFull} from '../../lib/entity-header'
 import {formatOutput} from '../../lib/format'
 import {getAccountName} from '../../lib/session'
@@ -62,11 +63,84 @@ export function renderFull(owner: string, rows: any[]): string {
     return [header, ...rows.map((r) => renderEntityFull(r))].join('\n\n')
 }
 
+interface GlobalEntityLine {
+    id: string
+    kind: string
+    owner: string
+    entity_name: string
+    coord: string
+}
+
+function toGlobalLine(e: ServerTypes.entity_row): GlobalEntityLine {
+    const z = e.coordinates.z?.toNumber()
+    const coord =
+        z === undefined
+            ? `${e.coordinates.x},${e.coordinates.y}`
+            : `${e.coordinates.x},${e.coordinates.y},${z}`
+    return {
+        id: String(e.id),
+        kind: e.kind.toString(),
+        owner: e.owner.toString(),
+        entity_name: e.name,
+        coord,
+    }
+}
+
+const GCOL = {id: 5, kind: 10, owner: 13, name: 20}
+
+export function renderGlobal(lines: GlobalEntityLine[], limit?: number): string {
+    const header = `All entities (${lines.length}):`
+    if (lines.length === 0) return header
+    const shown = limit && lines.length > limit ? lines.slice(0, limit) : lines
+    const colHeader =
+        '  ' +
+        [
+            'ID'.padStart(GCOL.id),
+            'TYPE'.padEnd(GCOL.kind),
+            'OWNER'.padEnd(GCOL.owner),
+            'NAME'.padEnd(GCOL.name),
+            'COORD',
+        ].join('   ')
+    const out = [header, '', colHeader]
+    for (const l of shown) {
+        out.push(
+            '  ' +
+                [
+                    l.id.padStart(GCOL.id),
+                    l.kind.padEnd(GCOL.kind),
+                    l.owner.padEnd(GCOL.owner),
+                    (l.entity_name || '—').padEnd(GCOL.name),
+                    l.coord,
+                ].join('   ')
+        )
+    }
+    if (shown.length < lines.length) {
+        out.push('', `  … ${lines.length - shown.length} more (use --json for the full set)`)
+    }
+    return out.join('\n')
+}
+
+async function runAllEntities(
+    type: EntityTypeName | undefined,
+    options: {json?: boolean; limit?: number}
+): Promise<void> {
+    const shipload = await getShipload()
+    const rows = await shipload.entities.getAllEntities(type)
+    const lines = rows.map(toGlobalLine)
+    console.log(
+        formatOutput(lines, {json: Boolean(options.json)}, (l) => renderGlobal(l, options.limit))
+    )
+}
+
 async function runEntities(
     owner: string | undefined,
     type: EntityTypeName | undefined,
-    options: {full?: boolean; json?: boolean}
+    options: {full?: boolean; json?: boolean; all?: boolean; limit?: number}
 ): Promise<void> {
+    if (options.all) {
+        await runAllEntities(type, options)
+        return
+    }
     const target = owner ?? getAccountName()
     let result: unknown
     if (options.full) {
@@ -91,11 +165,18 @@ function registerFiltered(program: Command, name: string, type: EntityTypeName):
         .command(name)
         .description(`List ${name} for an owner. Shorthand for \`entities --type ${type}\`.`)
         .argument('[owner]', 'account name')
+        .option('--all', 'list across all players (ignores owner)')
+        .option('--limit <n>', 'cap rows shown with --all (text only)', parseUint32)
         .option('--full', 'show full entity state instead of summaries')
         .option('--json', 'emit JSON instead of formatted text')
-        .action(async (owner: string | undefined, options: {full?: boolean; json?: boolean}) => {
-            await runEntities(owner, type, options)
-        })
+        .action(
+            async (
+                owner: string | undefined,
+                options: {full?: boolean; json?: boolean; all?: boolean; limit?: number}
+            ) => {
+                await runEntities(owner, type, options)
+            }
+        )
 }
 
 export function register(program: Command): void {
@@ -108,12 +189,20 @@ export function register(program: Command): void {
             `filter by entity type (${ALL_ENTITY_TYPES.join('/')})`,
             parseEntityType
         )
+        .option('--all', 'list across all players (ignores owner)')
+        .option('--limit <n>', 'cap rows shown with --all (text only)', parseUint32)
         .option('--full', 'show full entity state instead of summaries')
         .option('--json', 'emit JSON instead of formatted text')
         .action(
             async (
                 owner: string | undefined,
-                options: {type?: EntityTypeName; full?: boolean; json?: boolean}
+                options: {
+                    type?: EntityTypeName
+                    full?: boolean
+                    json?: boolean
+                    all?: boolean
+                    limit?: number
+                }
             ) => {
                 await runEntities(owner, options.type, options)
             }

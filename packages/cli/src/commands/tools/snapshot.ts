@@ -1,10 +1,9 @@
 import {writeFile} from 'node:fs/promises'
 import type {Command} from 'commander'
-import {chain} from '../../lib/client'
+import {chain, gameContractName, getShipload} from '../../lib/client'
 import {getTableRows} from '../../lib/chain-debug'
 import {manifestToJSON, type SnapshotManifest} from '../../lib/snapshot-manifest'
 
-const DEFAULT_CONTRACT = 'shipload.gm'
 const PAGE_LIMIT = 1000
 
 async function fetchAllRows(
@@ -37,7 +36,7 @@ export function registerSubcommand(tools: Command): void {
         .description('Capture all server-contract state into a JSON manifest')
         .option('--out <file>', 'output file path (default: ./snapshot-<timestamp>.json)')
         .option('--source <url>', 'override chain endpoint', String(chain.url))
-        .option('--contract <account>', 'server contract account', DEFAULT_CONTRACT)
+        .option('--contract <account>', 'server contract account', gameContractName)
         .action(async (opts: {out?: string; source: string; contract: string}) => {
             const chainUrl = opts.source
             const scope = opts.contract
@@ -89,5 +88,33 @@ export function registerSubcommand(tools: Command): void {
             console.log(
                 `  state: epoch=${epoch}, players=${manifest.players.length}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}, groups=${manifest.entitygroups.length}, reserve scopes=${manifest.reserves.length}`
             )
+
+            if (opts.contract === gameContractName && opts.source === String(chain.url)) {
+                try {
+                    const shipload = await getShipload()
+                    const owners = [
+                        ...new Set(
+                            manifest.entities.map((e) => String((e as {owner?: unknown}).owner))
+                        ),
+                    ]
+                    const perOwner = await Promise.all(
+                        owners.map((owner) => shipload.entities.getSummaries(owner))
+                    )
+                    const summed = perOwner.reduce((acc, s) => acc + s.length, 0)
+                    if (summed === manifest.entities.length) {
+                        console.log(`  sanity check: per-player entity totals match (${summed})`)
+                    } else {
+                        console.warn(
+                            `  WARNING: captured entities=${manifest.entities.length} but per-player getsummaries totals ${summed}. Snapshot may be incomplete or pointed at the wrong contract.`
+                        )
+                    }
+                } catch (err) {
+                    console.warn(
+                        `  sanity check skipped: ${err instanceof Error ? err.message : String(err)}`
+                    )
+                }
+            } else {
+                console.log('  sanity check skipped (custom --contract/--source)')
+            }
         })
 }
