@@ -21,8 +21,8 @@ import {
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
 
-function makeGathererStats(strength: number, tolerance: number, conductivity: number): bigint {
-    return encodeStats([strength, tolerance, conductivity, 0])
+function makeGathererStats(strength: number, tolerance: number, saturation: number): bigint {
+    return encodeStats([strength, tolerance, saturation, 0])
 }
 
 function makeCrafterStats(reactivity: number, conductivity: number): bigint {
@@ -72,8 +72,8 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
     expect(result.gathererLanes![1].slotIndex).toBe(1)
 
     // Yields are amp-scaled and distinct
-    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, conductivity: 400}, 1)
-    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, conductivity: 300}, 1)
+    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, saturation: 400}, 1)
+    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, saturation: 300}, 1)
     const expectedYield1 = applySlotMultiplier(caps1.yield, 100)
     const expectedYield2 = applySlotMultiplier(caps2.yield, 100)
     expect(result.gathererLanes![0].yield).toBe(expectedYield1)

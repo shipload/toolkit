@@ -26,14 +26,12 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR)
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
-        [ITEM_GATHERER_T1, ITEM_CRAFTER_T1, ITEM_SHIP_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED].sort(
-            (a, b) => a - b
-        )
+        [ITEM_CRAFTER_T1, ITEM_SHIP_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED].sort((a, b) => a - b)
     )
 })
 
-test('Sensor feeds the gatherer drain stat', () => {
-    const consumers = getRecipeConsumers(ITEM_SENSOR)
+test('Resin feeds the gatherer drain stat', () => {
+    const consumers = getRecipeConsumers(ITEM_RESIN)
     const gatherer = consumers.find((c) => c.outputItemId === ITEM_GATHERER_T1)
     expect(gatherer).toBeDefined()
     const drain = gatherer?.statFlows.find(
@@ -58,11 +56,12 @@ test('getResourceDemand traces a dual-resource component to both resources', () 
 })
 
 test('getResourceDemand recurses through a module to raw resources', () => {
-    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Sensor (10 crystal each)
+    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Resin (5 biomass + 5 crystal each)
     expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({
         ore: 1500,
         gas: 1500,
-        crystal: 3000,
+        biomass: 1500,
+        crystal: 1500,
     })
 })
 
@@ -70,9 +69,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by exactly one recipe', () => {
+test('getComponentDemand reports Resin as consumed by two recipes', () => {
     const demand = getComponentDemand()
     const resin = demand.find((d) => d.itemId === ITEM_RESIN)
     expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(1)
+    expect(resin?.consumerCount).toBe(2)
 })

@@ -77,7 +77,7 @@ export function computeGathererCapabilities(
     depth: number
 } {
     const str = stats.strength
-    const con = stats.conductivity
+    const con = stats.saturation
     const tol = stats.tolerance
 
     return {
