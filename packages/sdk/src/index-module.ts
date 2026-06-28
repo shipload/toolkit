@@ -356,8 +356,13 @@ export {
 } from './derivation/capability-mappings'
 export {SLOT_FORMULAS} from './data/capability-formulas'
 export type {SlotConsumer, SlotConsumerKind} from './data/capability-formulas'
-export {getAllRecipes, getRecipeConsumers, getComponentDemand} from './derivation/recipe-usage'
-export type {StatFlow, RecipeConsumer, DemandRow} from './derivation/recipe-usage'
+export {
+    getAllRecipes,
+    getRecipeConsumers,
+    getComponentDemand,
+    getResourceDemand,
+} from './derivation/recipe-usage'
+export type {StatFlow, RecipeConsumer, DemandRow, ResourceDemand} from './derivation/recipe-usage'
 
 export {
     encodeStats,

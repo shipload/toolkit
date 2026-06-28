@@ -1,8 +1,15 @@
 import {expect, test} from 'bun:test'
-import {getAllRecipes, getRecipeConsumers, getComponentDemand} from './recipe-usage'
+import {
+    getAllRecipes,
+    getRecipeConsumers,
+    getComponentDemand,
+    getResourceDemand,
+} from './recipe-usage'
 import {
     ITEM_SENSOR,
     ITEM_RESIN,
+    ITEM_PLATE,
+    ITEM_BEAM,
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_EXTRACTOR_T1_PACKED,
@@ -40,6 +47,27 @@ test('Sensor is a mass-only sink in the Extractor recipe', () => {
     const extractor = consumers.find((c) => c.outputItemId === ITEM_EXTRACTOR_T1_PACKED)
     expect(extractor).toBeDefined()
     expect(extractor?.statFlows).toHaveLength(0)
+})
+
+test('getResourceDemand returns the resource tonnage for a single-resource component', () => {
+    expect(getResourceDemand(ITEM_PLATE)).toEqual({ore: 10})
+})
+
+test('getResourceDemand traces a dual-resource component to both resources', () => {
+    expect(getResourceDemand(ITEM_BEAM)).toEqual({ore: 5, gas: 5})
+})
+
+test('getResourceDemand recurses through a module to raw resources', () => {
+    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Sensor (10 crystal each)
+    expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({
+        ore: 1500,
+        gas: 1500,
+        crystal: 3000,
+    })
+})
+
+test('getResourceDemand scales by quantity', () => {
+    expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
 test('getComponentDemand reports Resin as consumed by exactly one recipe', () => {

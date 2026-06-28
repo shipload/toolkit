@@ -1,6 +1,6 @@
 import {expect, test} from 'bun:test'
 import {getRecipeConsumers, getComponentDemand} from '@shipload/sdk'
-import {renderWhereUsed, renderDemand} from './recipe'
+import {renderWhereUsed, renderDemand, renderResourceDemand} from './recipe'
 
 const ITEM_SENSOR = 10006
 
@@ -17,4 +17,13 @@ test('renderDemand surfaces Resin as the least-used component', () => {
     expect(out).toContain('Resin')
     const resinLine = out.split('\n').find((l) => l.includes('Resin'))
     expect(resinLine).toContain('1')
+})
+
+test('renderResourceDemand shows tonnage and percentage per resource', () => {
+    const out = renderResourceDemand('Test', {ore: 30, gas: 10})
+    const oreLine = out.split('\n').find((l) => l.includes('Ore'))
+    expect(oreLine).toContain('30')
+    expect(oreLine).toContain('75')
+    const gasLine = out.split('\n').find((l) => l.includes('Gas'))
+    expect(gasLine).toContain('25')
 })

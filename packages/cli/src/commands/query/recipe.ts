@@ -1,14 +1,19 @@
 import {
+    CATEGORY_LABELS,
     type DemandRow,
     formatMass,
     formatTier,
+    getAllRecipes,
     getComponentDemand,
     getItem,
     getRecipe,
     getRecipeConsumers,
+    getResourceDemand,
     getStatDefinitions,
+    ITEM_SHIP_T1_PACKED,
     type RecipeConsumer,
     type ResourceCategory,
+    type ResourceDemand,
     typeLabel,
 } from '@shipload/sdk'
 import Table from 'cli-table3'
@@ -289,6 +294,47 @@ export function renderDemand(rows: DemandRow[]): string {
     )
 }
 
+export function renderResourceDemand(label: string, demand: ResourceDemand): string {
+    const entries = (Object.entries(demand) as [ResourceCategory, number][])
+        .filter(([, t]) => t > 0)
+        .sort((a, b) => b[1] - a[1])
+    const total = entries.reduce((sum, [, t]) => sum + t, 0)
+    const table = borderlessTable(['Resource', 'Tonnes', '%'], ['left', 'right', 'right'])
+    for (const [cat, t] of entries) {
+        const pct = total > 0 ? Math.round((t / total) * 1000) / 10 : 0
+        table.push([CATEGORY_LABELS[cat], String(t), `${pct}%`])
+    }
+    return [`${label} — raw-resource demand (${total} t total):`, trimEnds(table.toString())].join(
+        '\n'
+    )
+}
+
+function referenceLoadout(): number[] {
+    const modules = getAllRecipes()
+        .map((r) => r.outputItemId)
+        .filter((outId) => {
+            try {
+                return getItem(outId).type === 'module'
+            } catch {
+                return false
+            }
+        })
+    return [ITEM_SHIP_T1_PACKED, ...modules]
+}
+
+function aggregateResourceDemand(itemIds: number[]): ResourceDemand {
+    const out: ResourceDemand = {}
+    for (const id of itemIds) {
+        for (const [cat, t] of Object.entries(getResourceDemand(id)) as [
+            ResourceCategory,
+            number,
+        ][]) {
+            out[cat] = (out[cat] ?? 0) + t
+        }
+    }
+    return out
+}
+
 async function fetchAllRecipes(): Promise<Recipe[]> {
     const PAGE = 50
     const all: Recipe[] = []
@@ -318,15 +364,45 @@ export function register(program: Command): void {
         .option('--tier <n>', 'filter list by output tier', parseUint32)
         .option('--where-used', 'reverse view: list every recipe that consumes <id>')
         .option('--demand', 'component-demand tally across all recipes (ascending by usage)')
+        .option(
+            '--resource-demand',
+            'raw-resource (Ore/Crystal/Gas/Regolith/Biomass) tonnage for <id>, or a reference loadout'
+        )
         .option('--json', 'emit JSON instead of formatted text')
         .action(
             async (
                 id: number | undefined,
-                opts: {tier?: number; whereUsed?: boolean; demand?: boolean; json?: boolean}
+                opts: {
+                    tier?: number
+                    whereUsed?: boolean
+                    demand?: boolean
+                    resourceDemand?: boolean
+                    json?: boolean
+                }
             ) => {
                 if (opts.demand) {
                     const rows = getComponentDemand()
                     console.log(formatOutput(rows, {json: Boolean(opts.json)}, renderDemand))
+                    return
+                }
+                if (opts.resourceDemand) {
+                    if (id !== undefined) {
+                        const demand = getResourceDemand(id)
+                        console.log(
+                            formatOutput(demand, {json: Boolean(opts.json)}, (d) =>
+                                renderResourceDemand(itemName(id), d)
+                            )
+                        )
+                        return
+                    }
+                    const loadout = referenceLoadout()
+                    const demand = aggregateResourceDemand(loadout)
+                    const label = `Reference loadout (Ship T1 + ${loadout.length - 1} modules)`
+                    console.log(
+                        formatOutput(demand, {json: Boolean(opts.json)}, (d) =>
+                            renderResourceDemand(label, d)
+                        )
+                    )
                     return
                 }
                 if (opts.whereUsed) {

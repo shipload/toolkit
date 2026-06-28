@@ -4,9 +4,32 @@ import {getItem} from '../data/catalog'
 import {getStatDefinitions} from './stats'
 import {SLOT_FORMULAS, type SlotConsumerKind} from '../data/capability-formulas'
 import {KIND_TO_ITEM_ID} from './capability-mappings'
+import type {ResourceCategory} from '../types'
 
 export function getAllRecipes(): Recipe[] {
     return recipes as unknown as Recipe[]
+}
+
+export type ResourceDemand = Partial<Record<ResourceCategory, number>>
+
+function accumulateResourceDemand(itemId: number, quantity: number, out: ResourceDemand): void {
+    const item = getItem(itemId)
+    if (item.type === 'resource' && item.category) {
+        out[item.category] = (out[item.category] ?? 0) + quantity
+        return
+    }
+    const recipe = getRecipe(itemId)
+    if (!recipe) return
+    for (const input of recipe.inputs) {
+        accumulateResourceDemand(input.itemId, input.quantity * quantity, out)
+    }
+}
+
+// Raw-resource tonnage to craft `quantity` of an item, tracing recipes to the resource leaves.
+export function getResourceDemand(itemId: number, quantity = 1): ResourceDemand {
+    const out: ResourceDemand = {}
+    accumulateResourceDemand(itemId, quantity, out)
+    return out
 }
 
 const ITEM_ID_TO_KIND = new Map<number, SlotConsumerKind>()
