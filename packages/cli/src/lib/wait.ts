@@ -1,7 +1,8 @@
 import { Option } from "commander";
-import type { ServerTypes } from "@shipload/sdk";
+import { type Projectable, type ServerTypes, schedule } from "@shipload/sdk";
 import { loadConfig } from "./config";
 import { renderEntityFull } from "./entity-header";
+import { formatDuration } from "./format";
 import { makeProgressRenderer } from "./progress";
 import { ensureNoPendingResolve } from "./resolve-prompt";
 import type { TransactResult } from "./session";
@@ -90,7 +91,10 @@ export async function maybeAwaitAndPrint(
 	options: WaitableOptions,
 	result?: TransactResult,
 ): Promise<void> {
-	if (!options.wait && !options.track) return;
+	if (!options.wait && !options.track) {
+		await printResolveHint(entityId, result);
+		return;
+	}
 	const initialSnapshot = result?.snapshots.get(String(entityId)) as
 		| EntitySnapshot
 		| undefined;
@@ -99,6 +103,30 @@ export async function maybeAwaitAndPrint(
 		initialSnapshot,
 		autoResolve: options.autoResolve ?? true,
 	});
+}
+
+async function printResolveHint(
+	entityId: bigint | number,
+	result?: TransactResult,
+): Promise<void> {
+	try {
+		const snap =
+			(result?.snapshots.get(String(entityId)) as EntitySnapshot | undefined) ??
+			(await getEntitySnapshot(entityId));
+		const projectable = snap as unknown as Projectable;
+		if (schedule.orderedTasks(projectable).length === 0) return;
+		const remaining = schedule.scheduleRemaining(projectable, new Date());
+		const cmd = `shiploadcli ${snap.type} ${entityId} resolve`;
+		const head =
+			remaining > 0
+				? `completes in ${formatDuration(remaining)} · run \`${cmd}\` when it finishes`
+				: `ready to resolve · run \`${cmd}\` now`;
+		console.log(
+			`  → ${head}, or re-run with --wait to auto-resolve`,
+		);
+	} catch {
+		// hint is advisory only
+	}
 }
 
 export async function awaitAndPrint(

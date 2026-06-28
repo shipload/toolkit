@@ -10,10 +10,7 @@ import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export async function buildAction(ctx: EntityContext): Promise<Action> {
     const shipload = await getShipload()
-    return shipload.actions.demolish({
-        entityType: ctx.entityType,
-        entityId: ctx.entityId,
-    })
+    return shipload.actions.demolish(ctx.entityId)
 }
 
 interface DemolishCliOptions {

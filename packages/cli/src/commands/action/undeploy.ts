@@ -16,10 +16,7 @@ export interface UndeployOpts {
 
 export async function buildAction(opts: UndeployOpts): Promise<Action> {
     const shipload = await getShipload()
-    return shipload.actions.undeploy(
-        {entityType: opts.hostType, entityId: opts.hostId},
-        {entityType: opts.targetType, entityId: opts.targetId}
-    )
+    return shipload.actions.undeploy(opts.hostId, opts.targetId)
 }
 
 interface UndeployCliOptions {
