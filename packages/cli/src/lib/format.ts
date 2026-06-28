@@ -5,6 +5,7 @@ import {
 	displayName,
 	formatLocation as formatSdkLocation,
 	formatMass,
+	formatMassScaled,
 	LocationType,
 	PRECISION,
 	resolveItem,
@@ -231,10 +232,11 @@ export function formatResolveHint(
 }
 
 export function formatReserve(reserve: number, reserveMax: number): string {
-	if (reserveMax === 0) return "0";
-	if (reserve === reserveMax) return `${reserveMax}`;
+	if (reserveMax === 0) return "0 t";
+	const total = formatMassScaled(reserveMax * 1000);
+	if (reserve === reserveMax) return total;
 	const pct = Math.round((reserve / reserveMax) * 100);
-	return `${reserve}/${reserveMax} (${pct}%)`;
+	return `${formatMassScaled(reserve * 1000)} / ${total} (${pct}%)`;
 }
 
 export function formatEntityRef(ref: { entityType: string; entityId: number | bigint }): string {

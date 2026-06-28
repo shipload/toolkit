@@ -1,4 +1,4 @@
-import { encodeStats } from "@shipload/sdk";
+import { encodeStats, formatMassScaled } from "@shipload/sdk";
 import Table from "cli-table3";
 import { formatCoordinatePair, formatDuration, formatItem, jsonStringify } from "./format";
 import { formatItemStats } from "./item-stats";
@@ -112,7 +112,7 @@ function summaryRow(
 				row.push(lead ? String(lead.index) : "");
 				break;
 			case "reserve":
-				row.push(lead ? String(lead.reserve) : "");
+				row.push(lead ? formatMassScaled(lead.reserve * 1000) : "");
 				break;
 			case "stats":
 				row.push(lead ? formatStats(lead.itemId, lead.stats) : "");

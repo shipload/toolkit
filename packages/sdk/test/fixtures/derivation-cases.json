@@ -2,7 +2,7 @@
     "catalog_hash": "f28c0bc391a9e3da01fcef2e1c8a401d2583a9fe17b6ade6944e02dfda577c43",
     "epoch_seed": "0202020202020202020202020202020202020202020202020202020202020202",
     "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
-    "generated_at": "2026-06-27T22:26:42.922Z",
+    "generated_at": "2026-06-28T00:16:54.691Z",
     "stratum": [
         {
             "name": "asteroid: known yielding stratum",
@@ -11,7 +11,7 @@
             "stratum": 8,
             "expected": {
                 "item_id": 201,
-                "reserve": 134454,
+                "reserve": 2689080,
                 "richness": 604,
                 "seed": "18298824793260127225"
             }
@@ -23,7 +23,7 @@
             "stratum": 1107,
             "expected": {
                 "item_id": 301,
-                "reserve": 11274,
+                "reserve": 225480,
                 "richness": 785,
                 "seed": "1104081681788411781"
             }
@@ -35,7 +35,7 @@
             "stratum": 99,
             "expected": {
                 "item_id": 201,
-                "reserve": 11802,
+                "reserve": 236040,
                 "richness": 501,
                 "seed": "4600428321081920569"
             }
@@ -47,7 +47,7 @@
             "stratum": 48,
             "expected": {
                 "item_id": 401,
-                "reserve": 6709,
+                "reserve": 134180,
                 "richness": 608,
                 "seed": "9526419344518841836"
             }
@@ -59,7 +59,7 @@
             "stratum": 95,
             "expected": {
                 "item_id": 101,
-                "reserve": 6316,
+                "reserve": 126320,
                 "richness": 467,
                 "seed": "16397561610218869316"
             }
@@ -71,7 +71,7 @@
             "stratum": 90,
             "expected": {
                 "item_id": 401,
-                "reserve": 31522,
+                "reserve": 630440,
                 "richness": 682,
                 "seed": "9586363057827563467"
             }

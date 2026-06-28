@@ -15,8 +15,8 @@ export const DEPTH_THRESHOLD_T10 = 63000
 export const LOCATION_MIN_DEPTH = 500
 export const LOCATION_MAX_DEPTH = 65535
 
-export const YIELD_FRACTION_SHALLOW = 0.0025
-export const YIELD_FRACTION_DEEP = 0.0005
+export const YIELD_FRACTION_SHALLOW = 0.005
+export const YIELD_FRACTION_DEEP = 0.001
 
 export function yieldThresholdAt(stratum: number): number {
     const clamped = stratum > 65535 ? 65535 : stratum

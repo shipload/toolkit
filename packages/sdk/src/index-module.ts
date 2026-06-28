@@ -132,7 +132,15 @@ export {
 
 export type {StratumInfo, ResourceStats, DerivedStratum} from './derivation'
 
-export {RESERVE_TIERS, TIER_ROLL_MAX, tierOfReserve, rollTier, rollWithinTier} from './derivation'
+export {
+    RESERVE_TIERS,
+    TIER_ROLL_MAX,
+    tierOfReserve,
+    rollTier,
+    rollWithinTier,
+    RESOURCE_TIER_MULT_TENTHS,
+    applyResourceTierMultiplier,
+} from './derivation'
 export type {ReserveTier, TierRange} from './derivation'
 
 export {getEffectiveReserve} from './derivation'

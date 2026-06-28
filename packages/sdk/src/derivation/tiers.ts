@@ -60,6 +60,15 @@ export function rollWithinTier(
     return Math.max(1, Math.floor(depositMass / resourceUnitMass))
 }
 
+// Must mirror the contract tier-multiplier table in tiers.hpp byte-for-byte; values are in tenths (T1..T10).
+export const RESOURCE_TIER_MULT_TENTHS = [200, 154, 118, 91, 70, 54, 41, 32, 24, 19] as const
+
+export function applyResourceTierMultiplier(units: number, resourceTier: number): number {
+    const idx = resourceTier < 1 ? 0 : resourceTier > 10 ? 9 : resourceTier - 1
+    const scaled = Math.floor((units * RESOURCE_TIER_MULT_TENTHS[idx]) / 10)
+    return scaled > 0 ? scaled : 1
+}
+
 const RESERVE_TIER_ENTRIES = Object.entries(RESERVE_TIERS) as Array<[ReserveTier, TierRange]>
 
 export function tierOfReserve(reserve: number, itemId: number): ReserveTier | null {

@@ -28,7 +28,15 @@ export {
     PLANET_SUBTYPE_INDUSTRIAL,
 } from './resources'
 
-export {RESERVE_TIERS, TIER_ROLL_MAX, tierOfReserve, rollTier, rollWithinTier} from './tiers'
+export {
+    RESERVE_TIERS,
+    TIER_ROLL_MAX,
+    tierOfReserve,
+    rollTier,
+    rollWithinTier,
+    RESOURCE_TIER_MULT_TENTHS,
+    applyResourceTierMultiplier,
+} from './tiers'
 export type {ReserveTier, TierRange} from './tiers'
 
 export {getEffectiveReserve} from './reserve-regen'

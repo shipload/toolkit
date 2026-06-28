@@ -3,7 +3,7 @@ import {hash512} from '../utils/hash'
 import {Coordinates, type CoordinatesType} from '../types'
 import {getItem} from '../data/catalog'
 import {getEligibleResources, getResourceWeight, yieldThresholdAt} from './resources'
-import {RESERVE_TIERS, rollTier, rollWithinTier} from './tiers'
+import {RESERVE_TIERS, rollTier, rollWithinTier, applyResourceTierMultiplier} from './tiers'
 
 export interface StratumInfo {
     itemId: number
@@ -63,8 +63,9 @@ export function deriveStratum(
     const tierRoll = ((bytes[18] << 8) | bytes[19]) >>> 0
     const withinRoll = ((bytes[20] << 8) | bytes[21]) >>> 0
     const tier = rollTier(tierRoll, stratum)
-    const unitMass = getItem(selectedItemId).mass
-    const reserve = rollWithinTier(withinRoll, RESERVE_TIERS[tier], unitMass)
+    const selected = getItem(selectedItemId)
+    const baseReserve = rollWithinTier(withinRoll, RESERVE_TIERS[tier], selected.mass)
+    const reserve = applyResourceTierMultiplier(baseReserve, selected.tier)
 
     const seedBigInt =
         (BigInt(bytes[8]) << 56n) |
