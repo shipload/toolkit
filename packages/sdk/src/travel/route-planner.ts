@@ -1,5 +1,6 @@
 import {distanceBetweenPoints, findNearbyPlanets} from './travel'
 import {hasSystem} from '../utils/system'
+import {nearbyWormholes, wormholeAt} from '../derivation/wormhole'
 import {PRECISION} from '../types'
 import {Checksum256, type Checksum256Type} from '@wharfkit/antelope'
 
@@ -170,14 +171,26 @@ function reconstruct(cameFrom: Map<string, Coord>, origin: Coord, dest: Coord): 
 
 export function sdkSystemGraph(seed: Checksum256Type): SystemGraph {
     const s = Checksum256.from(seed)
+    // Travelable nodes mirror the contract's is_travelable: systems plus wormhole mouths.
     return {
-        hasSystem: (c) => hasSystem(s, {x: c.x, y: c.y}),
-        nearby: (c, reachTiles) =>
-            findNearbyPlanets(s, {x: c.x, y: c.y}, reachTiles * PRECISION)
-                .map((d) => ({
-                    coord: {x: Number(d.destination.x), y: Number(d.destination.y)},
-                    dist: Number(d.distance) / PRECISION,
-                }))
-                .filter((n) => !(n.coord.x === c.x && n.coord.y === c.y)),
+        hasSystem: (c) => hasSystem(s, {x: c.x, y: c.y}) || wormholeAt(s, c.x, c.y) !== null,
+        nearby: (c, reachTiles) => {
+            const seen = new Set<string>([`${c.x},${c.y}`])
+            const out: Neighbor[] = []
+            for (const d of findNearbyPlanets(s, {x: c.x, y: c.y}, reachTiles * PRECISION)) {
+                const coord = {x: Number(d.destination.x), y: Number(d.destination.y)}
+                const k = `${coord.x},${coord.y}`
+                if (seen.has(k)) continue
+                seen.add(k)
+                out.push({coord, dist: Number(d.distance) / PRECISION})
+            }
+            for (const coord of nearbyWormholes(s, c.x, c.y, reachTiles)) {
+                const k = `${coord.x},${coord.y}`
+                if (seen.has(k)) continue
+                seen.add(k)
+                out.push({coord, dist: Math.hypot(coord.x - c.x, coord.y - c.y)})
+            }
+            return out
+        },
     }
 }

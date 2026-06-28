@@ -5,6 +5,7 @@ import {
     feistel,
     feistelInv,
     isValidWormholePair,
+    nearbyWormholes,
     partnerRegion,
     wormholeAt,
 } from '../src/derivation/wormhole'
@@ -86,5 +87,23 @@ describe('location kind + transit duration', () => {
     test('transit duration is fixed-velocity: distance / (PRECISION * WH.TRANSIT_SPEED)', () => {
         expect(calc_transit_duration(0, 0, 300000, 0).toNumber()).toBe(600)
         expect(WH.TRANSIT_SPEED).toBe(500)
+    })
+})
+
+describe('nearbyWormholes', () => {
+    test('finds a wormhole mouth within reach of a nearby coordinate', () => {
+        const ep = ENDPOINTS[0].from
+        const found = nearbyWormholes(SEED, ep.x, ep.y - 5, 6)
+        expect(found).toContainEqual(ep)
+    })
+
+    test('excludes the mouth when it is beyond reach', () => {
+        const ep = ENDPOINTS[0].from
+        expect(nearbyWormholes(SEED, ep.x, ep.y - 20, 6)).not.toContainEqual(ep)
+    })
+
+    test('does not return the query coordinate itself', () => {
+        const ep = ENDPOINTS[0].from
+        expect(nearbyWormholes(SEED, ep.x, ep.y, 6)).not.toContainEqual(ep)
     })
 })

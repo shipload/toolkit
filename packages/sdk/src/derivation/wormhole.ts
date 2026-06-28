@@ -103,6 +103,27 @@ export function wormholeAt(
     if (!w || w.A.x !== x || w.A.y !== y) return null
     return w.B
 }
+
+// Wormhole mouths (the local A endpoint) within reachTiles of (x,y); regions are RSIZE-wide so only a few overlap.
+export function nearbyWormholes(
+    seed: Checksum256Type,
+    x: number,
+    y: number,
+    reachTiles: number
+): {x: number; y: number}[] {
+    const min = regionOf(x - reachTiles, y - reachTiles)
+    const max = regionOf(x + reachTiles, y + reachTiles)
+    const out: {x: number; y: number}[] = []
+    for (let rx = min.rx; rx <= max.rx; rx++) {
+        for (let ry = min.ry; ry <= max.ry; ry++) {
+            const w = wormholeOfRegion(seed, {rx, ry})
+            if (!w) continue
+            if (w.A.x === x && w.A.y === y) continue
+            if (dist({x, y}, w.A) <= reachTiles) out.push(w.A)
+        }
+    }
+    return out
+}
 export function isValidWormholePair(
     seed: Checksum256Type,
     ax: number,

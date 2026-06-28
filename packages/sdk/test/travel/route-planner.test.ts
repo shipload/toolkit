@@ -1,5 +1,12 @@
 import {describe, expect, test} from 'bun:test'
-import {MAX_LEGS, planRoute, type Coord, type SystemGraph} from '../../src/travel/route-planner'
+import {Bytes, Checksum256} from '@wharfkit/antelope'
+import {
+    MAX_LEGS,
+    planRoute,
+    sdkSystemGraph,
+    type Coord,
+    type SystemGraph,
+} from '../../src/travel/route-planner'
 
 function gridGraph(systems: Coord[]): SystemGraph {
     const set = new Set(systems.map((s) => `${s.x},${s.y}`))
@@ -173,5 +180,20 @@ describe('planRoute partial path on failure', () => {
 describe('MAX_LEGS', () => {
     test('is the single-trip hop cap of 12', () => {
         expect(MAX_LEGS).toBe(12)
+    })
+})
+
+describe('sdkSystemGraph wormholes', () => {
+    // Mirrors the contract is_travelable: a wormhole mouth is a travelable node even with no system.
+    const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
+    const MOUTH = {x: 12, y: 295} // known wormhole mouth for SEED (see wormhole.test.ts)
+
+    test('a wormhole mouth is a valid destination', () => {
+        expect(sdkSystemGraph(SEED).hasSystem(MOUTH)).toBe(true)
+    })
+
+    test('nearby surfaces a wormhole mouth within reach', () => {
+        const neighbors = sdkSystemGraph(SEED).nearby({x: MOUTH.x, y: MOUTH.y - 5}, 6)
+        expect(neighbors.map((n) => n.coord)).toContainEqual(MOUTH)
     })
 })
