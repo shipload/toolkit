@@ -1,5 +1,6 @@
 import type {Checksum256Type} from '@wharfkit/antelope'
 import {hash512} from '../utils/hash'
+import {COORD_MAX, COORD_MIN} from '../coordinates/constants'
 
 export const WH = {
     RSIZE: 75,
@@ -72,6 +73,9 @@ function endpointInRegion(seed: Checksum256Type, R: Region, key: string): {x: nu
 function dist(a: {x: number; y: number}, b: {x: number; y: number}): number {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
 }
+function inBounds(c: {x: number; y: number}): boolean {
+    return c.x >= COORD_MIN && c.x <= COORD_MAX && c.y >= COORD_MIN && c.y <= COORD_MAX
+}
 function wormholeOfRegion(
     seed: Checksum256Type,
     R: Region
@@ -82,6 +86,7 @@ function wormholeOfRegion(
     if (roll16(seed, `wh-exists-${key}`) >= WH.THRESHOLD) return null
     const A = endpointInRegion(seed, R, key)
     const B = endpointInRegion(seed, P, key)
+    if (!inBounds(A) || !inBounds(B)) return null
     if (dist(A, B) < WH.MIN_REACH) return null
     return {A, B}
 }

@@ -169,9 +169,38 @@ function reconstruct(cameFrom: Map<string, Coord>, origin: Coord, dest: Coord): 
     return {ok: true, waypoints, legs: waypoints.length, totalDistance}
 }
 
+export interface ScanProvider {
+    getLocationType(seedHex: string, x: number, y: number): number
+    systemsInBox(
+        seedHex: string,
+        xMin: number,
+        yMin: number,
+        xMax: number,
+        yMax: number
+    ): {x: number; y: number; locType: number}[]
+}
+
+let scanProvider: ScanProvider | null = null
+const graphCache = new Map<string, SystemGraph>()
+
+// Inject a fast (e.g. wasm) location-type backend; null restores the pure-JS path. Clears the graph cache.
+export function setScanProvider(provider: ScanProvider | null): void {
+    scanProvider = provider
+    graphCache.clear()
+}
+
 export function sdkSystemGraph(seed: Checksum256Type): SystemGraph {
     const s = Checksum256.from(seed)
-    // Travelable nodes mirror the contract's is_travelable: systems plus wormhole mouths.
+    const seedHex = s.toString()
+    const cached = graphCache.get(seedHex)
+    if (cached) return cached
+    const graph = scanProvider ? wasmSystemGraph(s, seedHex, scanProvider) : jsSystemGraph(s)
+    graphCache.set(seedHex, graph)
+    return graph
+}
+
+// Travelable nodes mirror the contract's is_travelable: systems plus wormhole mouths.
+function jsSystemGraph(s: Checksum256): SystemGraph {
     return {
         hasSystem: (c) => hasSystem(s, {x: c.x, y: c.y}) || wormholeAt(s, c.x, c.y) !== null,
         nearby: (c, reachTiles) => {
@@ -183,6 +212,58 @@ export function sdkSystemGraph(seed: Checksum256Type): SystemGraph {
                 if (seen.has(k)) continue
                 seen.add(k)
                 out.push({coord, dist: Number(d.distance) / PRECISION})
+            }
+            for (const coord of nearbyWormholes(s, c.x, c.y, reachTiles)) {
+                const k = `${coord.x},${coord.y}`
+                if (seen.has(k)) continue
+                seen.add(k)
+                out.push({coord, dist: Math.hypot(coord.x - c.x, coord.y - c.y)})
+            }
+            return out
+        },
+    }
+}
+
+const SCAN_BUCKET = 48
+
+function wasmSystemGraph(s: Checksum256, seedHex: string, scan: ScanProvider): SystemGraph {
+    // Per-bucket system cache: reused across the overlapping node queries A* makes (and across routes).
+    const bucketCache = new Map<string, {x: number; y: number}[]>()
+    const bucketSystems = (bx: number, by: number): {x: number; y: number}[] => {
+        const k = `${bx},${by}`
+        let v = bucketCache.get(k)
+        if (v === undefined) {
+            const xMin = bx * SCAN_BUCKET
+            const yMin = by * SCAN_BUCKET
+            v = scan
+                .systemsInBox(seedHex, xMin, yMin, xMin + SCAN_BUCKET - 1, yMin + SCAN_BUCKET - 1)
+                .map((cell) => ({x: cell.x, y: cell.y}))
+            bucketCache.set(k, v)
+        }
+        return v
+    }
+    return {
+        hasSystem: (c) =>
+            scan.getLocationType(seedHex, c.x, c.y) !== 0 || wormholeAt(s, c.x, c.y) !== null,
+        nearby: (c, reachTiles) => {
+            const r = Math.floor(reachTiles)
+            const seen = new Set<string>([`${c.x},${c.y}`])
+            const out: Neighbor[] = []
+            const bx0 = Math.floor((c.x - r) / SCAN_BUCKET)
+            const bx1 = Math.floor((c.x + r) / SCAN_BUCKET)
+            const by0 = Math.floor((c.y - r) / SCAN_BUCKET)
+            const by1 = Math.floor((c.y + r) / SCAN_BUCKET)
+            for (let bx = bx0; bx <= bx1; bx++) {
+                for (let by = by0; by <= by1; by++) {
+                    for (const cell of bucketSystems(bx, by)) {
+                        const dist = Math.hypot(cell.x - c.x, cell.y - c.y)
+                        if (dist > reachTiles) continue
+                        const k = `${cell.x},${cell.y}`
+                        if (seen.has(k)) continue
+                        seen.add(k)
+                        out.push({coord: {x: cell.x, y: cell.y}, dist})
+                    }
+                }
             }
             for (const coord of nearbyWormholes(s, c.x, c.y, reachTiles)) {
                 const k = `${coord.x},${coord.y}`

@@ -1,12 +1,5 @@
 import {cpus} from 'node:os'
-import {
-    deriveLocationSize,
-    deriveLocationStatic,
-    deriveResourceStats,
-    deriveStratum,
-    getItem,
-    type LocationType,
-} from '@shipload/sdk'
+import {scanCells} from '@shipload/sdk/scan'
 import {Checksum256} from '@wharfkit/antelope'
 import {type Command, InvalidArgumentError} from 'commander'
 import {type EntityRef, parseEntityRef, parseUint32} from '../../lib/args'
@@ -14,6 +7,7 @@ import {getGameSeed, server} from '../../lib/client'
 import {jsonStringify} from '../../lib/format'
 import {resolveReach} from '../../lib/reach'
 import {Histogram} from '../../lib/scan/histogram'
+import {ingestDerivedCells, resolveItemName, type ScanAccumulators} from '../../lib/scan/ingest'
 import {MultiHigh} from '../../lib/scan/multi-high'
 import {formatDuration} from '../../lib/scan/progress'
 import {
@@ -209,78 +203,26 @@ async function runScan(radius: number, options: ScanOptions): Promise<void> {
             cellsScanned += r.cellsScanned
         }
     } else {
-        let progressCells = 0
+        const acc: ScanAccumulators = {histogram, multiHigh, leaderboard, locationCounts}
+        const gameSeedHex = String(gameSeed)
+        const epochSeedHex = String(epochSeed)
+        const BATCH = 500
 
-        for (const coord of cells) {
-            cellsScanned++
-            progressCells++
+        for (let i = 0; i < cells.length; i += BATCH) {
+            const batch = cells.slice(i, i + BATCH)
+            const derived = await scanCells(gameSeedHex, epochSeedHex, batch)
+            const {strata} = ingestDerivedCells(derived, acc, resolveItemName)
+            strataCount += strata
+            cellsScanned += batch.length
 
-            if (progressCells % 1000 === 0 || progressCells === cells.length) {
-                const elapsed = (Date.now() - startMs) / 1000
-                const rate = progressCells / Math.max(elapsed, 0.001)
-                const remaining = Math.max(0, cells.length - progressCells)
-                const eta = remaining / Math.max(rate, 0.001)
-                const pct = Math.min(100, Math.floor((progressCells / cells.length) * 100))
-                console.error(
-                    `[${pct}%] ${progressCells}/${cells.length} cells · ${locationCounts.planets + locationCounts.asteroids + locationCounts.nebulas + locationCounts.iceFields} locations · ${strataCount} strata · elapsed ${formatDuration(elapsed)} · ETA ${formatDuration(eta)}`
-                )
-            }
-
-            const loc = deriveLocationStatic(gameSeed, coord)
-            const locType = loc.type.toNumber() as LocationType
-            if (locType === 0) continue
-
-            switch (locType) {
-                case 1:
-                    locationCounts.planets++
-                    break
-                case 2:
-                    locationCounts.asteroids++
-                    break
-                case 3:
-                    locationCounts.nebulas++
-                    break
-                case 4:
-                    locationCounts.iceFields++
-                    break
-            }
-
-            const size = deriveLocationSize(loc)
-            if (size === 0) continue
-
-            const subtype = loc.subtype.toNumber()
-
-            for (let stratum = 0; stratum < size; stratum++) {
-                const s = deriveStratum(epochSeed, coord, stratum, locType, subtype, size)
-                if (s.reserve === 0) continue
-
-                const stats = deriveResourceStats(s.seed)
-                strataCount++
-
-                histogram.ingest(stats)
-                multiHigh.ingest(stats)
-
-                const itemName = (() => {
-                    try {
-                        return getItem(s.itemId).name
-                    } catch {
-                        return `#${s.itemId}`
-                    }
-                })()
-
-                const entry: LeaderboardEntry = {
-                    coord,
-                    locType,
-                    subtype,
-                    itemId: s.itemId,
-                    itemName,
-                    stratum,
-                    richness: s.richness,
-                    reserve: s.reserve,
-                    stats,
-                }
-                leaderboard.ingest(entry)
-            }
+            const elapsed = (Date.now() - startMs) / 1000
+            const rate = cellsScanned / Math.max(elapsed, 0.001)
+            const remaining = Math.max(0, cells.length - cellsScanned)
+            const eta = remaining / Math.max(rate, 0.001)
+            const pct = Math.min(100, Math.floor((cellsScanned / cells.length) * 100))
+            console.error(
+                `[${pct}%] ${cellsScanned}/${cells.length} cells · ${locationCounts.planets + locationCounts.asteroids + locationCounts.nebulas + locationCounts.iceFields} locations · ${strataCount} strata · elapsed ${formatDuration(elapsed)} · ETA ${formatDuration(eta)}`
+            )
         }
     }
 

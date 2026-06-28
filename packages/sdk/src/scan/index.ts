@@ -115,12 +115,107 @@ export function systemsInBox(
     return res
 }
 
+export interface LocationCell {
+    x: number
+    y: number
+    locType: number
+    subtype: number
+    size: number
+}
+
+export function locationsInBox(
+    gameSeed: string,
+    xMin: number,
+    yMin: number,
+    xMax: number,
+    yMax: number
+): LocationCell[] {
+    const e = ex()
+    const mem = e.memory as WebAssembly.Memory
+    const g = e.malloc(32)
+    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
+    let cap = 256
+    let out = e.malloc(cap * 16)
+    let n = e.locations_in_box(g, xMin, yMin, xMax, yMax, out, cap)
+    if (n < 0) {
+        e.free(out)
+        cap = -n
+        out = e.malloc(cap * 16)
+        n = e.locations_in_box(g, xMin, yMin, xMax, yMax, out, cap)
+    }
+    const res: LocationCell[] = []
+    const dv = new DataView(mem.buffer.slice(out, out + n * 16))
+    for (let i = 0; i < n; i++) {
+        const o = i * 16
+        res.push({
+            x: dv.getInt32(o, true),
+            y: dv.getInt32(o + 4, true),
+            locType: dv.getUint8(o + 8),
+            subtype: dv.getUint8(o + 9),
+            size: dv.getUint32(o + 12, true),
+        })
+    }
+    e.free(g)
+    e.free(out)
+    return res
+}
+
+export interface WormholeCell {
+    x: number
+    y: number
+    exit: {x: number; y: number}
+}
+
+export function wormholesInBox(
+    gameSeed: string,
+    xMin: number,
+    yMin: number,
+    xMax: number,
+    yMax: number
+): WormholeCell[] {
+    const e = ex()
+    const mem = e.memory as WebAssembly.Memory
+    const g = e.malloc(32)
+    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
+    let cap = 256
+    let out = e.malloc(cap * 16)
+    let n = e.wormholes_in_box(g, xMin, yMin, xMax, yMax, out, cap)
+    if (n < 0) {
+        e.free(out)
+        cap = -n
+        out = e.malloc(cap * 16)
+        n = e.wormholes_in_box(g, xMin, yMin, xMax, yMax, out, cap)
+    }
+    const res: WormholeCell[] = []
+    const dv = new DataView(mem.buffer.slice(out, out + n * 16))
+    for (let i = 0; i < n; i++) {
+        const o = i * 16
+        res.push({
+            x: dv.getInt32(o, true),
+            y: dv.getInt32(o + 4, true),
+            exit: {x: dv.getInt32(o + 8, true), y: dv.getInt32(o + 12, true)},
+        })
+    }
+    e.free(g)
+    e.free(out)
+    return res
+}
+
 export async function scanCells(
     gameSeed: string,
     epochSeed: string,
     cells: Coord[]
 ): Promise<DerivedCell[]> {
     await scanReady()
+    return scanCellsCore(gameSeed, epochSeed, cells)
+}
+
+// Sync sibling of scanCells; caller must warm the instance via scanReady() first.
+export function scanCellsSync(gameSeed: string, epochSeed: string, cells: Coord[]): DerivedCell[] {
+    return scanCellsCore(gameSeed, epochSeed, cells)
+}
+
+function scanCellsCore(gameSeed: string, epochSeed: string, cells: Coord[]): DerivedCell[] {
     const e = ex()
     const mem = e.memory as WebAssembly.Memory
     const write = (b: Uint8Array) => {
