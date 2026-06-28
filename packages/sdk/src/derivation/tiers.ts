@@ -73,10 +73,13 @@ const RESERVE_TIER_ENTRIES = Object.entries(RESERVE_TIERS) as Array<[ReserveTier
 
 export function tierOfReserve(reserve: number, itemId: number): ReserveTier | null {
     if (reserve <= 0) return null
-    const unitMass = getItem(itemId).mass
-    if (unitMass <= 0) return null
-    const impliedMassLow = reserve * unitMass
-    const impliedMassHigh = impliedMassLow + unitMass
+    const item = getItem(itemId)
+    if (item.mass <= 0) return null
+    // Reverse the resource-tier multiplier so bands read relative to the resource tier.
+    const idx = item.tier < 1 ? 0 : item.tier > 10 ? 9 : item.tier - 1
+    const baseReserve = (reserve * 10) / RESOURCE_TIER_MULT_TENTHS[idx]
+    const impliedMassLow = baseReserve * item.mass
+    const impliedMassHigh = impliedMassLow + item.mass
     for (const [tier, range] of RESERVE_TIER_ENTRIES) {
         if (impliedMassHigh > range.min && impliedMassLow <= range.max) return tier
     }
