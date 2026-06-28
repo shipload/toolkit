@@ -4,7 +4,7 @@ SHELL := /usr/bin/env bash
 .PHONY: test test/sdk test/item-renderer test/image-renderer test/cli test/oracle
 .PHONY: build build/sdk build/item-renderer build/image-renderer build/cli build/oracle
 .PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli dev/oracle
-.PHONY: format codegen sync/catalog
+.PHONY: format codegen sync/catalog sync/scan
 .PHONY: changeset release-status release publish release/cli
 .PHONY: clean
 
@@ -50,6 +50,9 @@ codegen:
 
 sync/catalog:
 	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../contracts/build/catalog}
+
+sync/scan:
+	$(MAKE) -C packages/sdk sync-scan SCAN_SRC=$${SCAN_SRC:-../../../contracts/build/scan/scan.wasm}
 
 changeset:
 	$(MAKE) check

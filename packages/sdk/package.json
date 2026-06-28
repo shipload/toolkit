@@ -24,6 +24,11 @@
             "import": "./lib/testing.m.js",
             "require": "./lib/testing.js"
         },
+        "./scan": {
+            "types": "./lib/scan.d.ts",
+            "import": "./lib/scan.m.js",
+            "require": "./lib/scan.js"
+        },
         "./package.json": "./package.json"
     },
     "files": [

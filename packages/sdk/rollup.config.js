@@ -66,4 +66,30 @@ export default [
         output: {file: 'lib/testing.d.ts', format: 'esm'},
         plugins: [dts(), cleanup({extensions: ['d.ts']})],
     },
+    {
+        input: 'src/scan/index.ts',
+        output: {
+            file: 'lib/scan.js',
+            format: 'cjs',
+            sourcemap: true,
+            exports: 'named',
+        },
+        plugins: codePlugins(),
+        external,
+    },
+    {
+        input: 'src/scan/index.ts',
+        output: {
+            file: 'lib/scan.m.js',
+            format: 'esm',
+            sourcemap: true,
+        },
+        plugins: codePlugins(),
+        external,
+    },
+    {
+        input: 'src/scan/index.ts',
+        output: {file: 'lib/scan.d.ts', format: 'esm'},
+        plugins: [dts(), cleanup({extensions: ['d.ts']})],
+    },
 ]
