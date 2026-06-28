@@ -44,6 +44,38 @@ function ex(): any {
 
 const hex = (h: string) => Uint8Array.from(h.match(/../g)!.map((b) => parseInt(b, 16)))
 
+// Shared marshalling for the `*_in_box` exports; grow-and-retry once on overflow (export returns -needed).
+function boxScan<T>(
+    exportName: string,
+    stride: number,
+    gameSeed: string,
+    xMin: number,
+    yMin: number,
+    xMax: number,
+    yMax: number,
+    decode: (dv: DataView, o: number) => T
+): T[] {
+    const e = ex()
+    const mem = e.memory as WebAssembly.Memory
+    const g = e.malloc(32)
+    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
+    let cap = 256
+    let out = e.malloc(cap * stride)
+    let n = e[exportName](g, xMin, yMin, xMax, yMax, out, cap)
+    if (n < 0) {
+        e.free(out)
+        cap = -n
+        out = e.malloc(cap * stride)
+        n = e[exportName](g, xMin, yMin, xMax, yMax, out, cap)
+    }
+    const dv = new DataView(mem.buffer, out, n * stride)
+    const res: T[] = []
+    for (let i = 0; i < n; i++) res.push(decode(dv, i * stride))
+    e.free(g)
+    e.free(out)
+    return res
+}
+
 export function getLocationType(gameSeed: string, x: number, y: number): number {
     const e = ex()
     const mem = e.memory as WebAssembly.Memory
@@ -87,32 +119,11 @@ export function systemsInBox(
     xMax: number,
     yMax: number
 ): SystemCell[] {
-    const e = ex()
-    const mem = e.memory as WebAssembly.Memory
-    const g = e.malloc(32)
-    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
-    let cap = 256
-    let out = e.malloc(cap * 12)
-    let n = e.systems_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    if (n < 0) {
-        e.free(out)
-        cap = -n
-        out = e.malloc(cap * 12)
-        n = e.systems_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    }
-    const res: SystemCell[] = []
-    const dv = new DataView(mem.buffer.slice(out, out + n * 12))
-    for (let i = 0; i < n; i++) {
-        const o = i * 12
-        res.push({
-            x: dv.getInt32(o, true),
-            y: dv.getInt32(o + 4, true),
-            locType: dv.getUint32(o + 8, true),
-        })
-    }
-    e.free(g)
-    e.free(out)
-    return res
+    return boxScan('systems_in_box', 12, gameSeed, xMin, yMin, xMax, yMax, (dv, o) => ({
+        x: dv.getInt32(o, true),
+        y: dv.getInt32(o + 4, true),
+        locType: dv.getUint32(o + 8, true),
+    }))
 }
 
 export interface LocationCell {
@@ -130,34 +141,13 @@ export function locationsInBox(
     xMax: number,
     yMax: number
 ): LocationCell[] {
-    const e = ex()
-    const mem = e.memory as WebAssembly.Memory
-    const g = e.malloc(32)
-    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
-    let cap = 256
-    let out = e.malloc(cap * 16)
-    let n = e.locations_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    if (n < 0) {
-        e.free(out)
-        cap = -n
-        out = e.malloc(cap * 16)
-        n = e.locations_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    }
-    const res: LocationCell[] = []
-    const dv = new DataView(mem.buffer.slice(out, out + n * 16))
-    for (let i = 0; i < n; i++) {
-        const o = i * 16
-        res.push({
-            x: dv.getInt32(o, true),
-            y: dv.getInt32(o + 4, true),
-            locType: dv.getUint8(o + 8),
-            subtype: dv.getUint8(o + 9),
-            size: dv.getUint32(o + 12, true),
-        })
-    }
-    e.free(g)
-    e.free(out)
-    return res
+    return boxScan('locations_in_box', 16, gameSeed, xMin, yMin, xMax, yMax, (dv, o) => ({
+        x: dv.getInt32(o, true),
+        y: dv.getInt32(o + 4, true),
+        locType: dv.getUint8(o + 8),
+        subtype: dv.getUint8(o + 9),
+        size: dv.getUint32(o + 12, true),
+    }))
 }
 
 export interface WormholeCell {
@@ -173,32 +163,11 @@ export function wormholesInBox(
     xMax: number,
     yMax: number
 ): WormholeCell[] {
-    const e = ex()
-    const mem = e.memory as WebAssembly.Memory
-    const g = e.malloc(32)
-    new Uint8Array(mem.buffer, g, 32).set(hex(gameSeed))
-    let cap = 256
-    let out = e.malloc(cap * 16)
-    let n = e.wormholes_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    if (n < 0) {
-        e.free(out)
-        cap = -n
-        out = e.malloc(cap * 16)
-        n = e.wormholes_in_box(g, xMin, yMin, xMax, yMax, out, cap)
-    }
-    const res: WormholeCell[] = []
-    const dv = new DataView(mem.buffer.slice(out, out + n * 16))
-    for (let i = 0; i < n; i++) {
-        const o = i * 16
-        res.push({
-            x: dv.getInt32(o, true),
-            y: dv.getInt32(o + 4, true),
-            exit: {x: dv.getInt32(o + 8, true), y: dv.getInt32(o + 12, true)},
-        })
-    }
-    e.free(g)
-    e.free(out)
-    return res
+    return boxScan('wormholes_in_box', 16, gameSeed, xMin, yMin, xMax, yMax, (dv, o) => ({
+        x: dv.getInt32(o, true),
+        y: dv.getInt32(o + 4, true),
+        exit: {x: dv.getInt32(o + 8, true), y: dv.getInt32(o + 12, true)},
+    }))
 }
 
 export async function scanCells(
@@ -241,9 +210,8 @@ function scanCellsCore(gameSeed: string, epochSeed: string, cells: Coord[]): Der
         depOut = e.malloc(cap * 40)
         n = e.scan_cells(gp, ep, cp, cells.length, locOut, depOut, cap)
     }
-    const locView = new DataView(mem.buffer.slice(locOut, locOut + cells.length * 8))
-    const depView = new DataView(mem.buffer.slice(depOut, depOut + n * 40))
-    for (const p of [gp, ep, cp, locOut, depOut]) e.free(p)
+    const locView = new DataView(mem.buffer, locOut, cells.length * 8)
+    const depView = new DataView(mem.buffer, depOut, n * 40)
     const out: DerivedCell[] = cells.map((c, i) => ({
         location: {
             x: c.x,
@@ -271,5 +239,6 @@ function scanCellsCore(gameSeed: string, epochSeed: string, cells: Coord[]): Der
             ],
         })
     }
+    for (const p of [gp, ep, cp, locOut, depOut]) e.free(p)
     return out
 }
