@@ -3,13 +3,21 @@ import {getRecipeConsumers, getComponentDemand} from '@shipload/sdk'
 import {renderWhereUsed, renderDemand, renderResourceDemand} from './recipe'
 
 const ITEM_SENSOR = 10006
+const ITEM_RESIN = 10010
 
-test('renderWhereUsed shows the gatherer drain flow and marks the extractor as a sink', () => {
+test('renderWhereUsed shows the crafter drain flow and marks the extractor as a sink', () => {
     const out = renderWhereUsed(ITEM_SENSOR, getRecipeConsumers(ITEM_SENSOR))
     expect(out).toContain('Sensor')
-    expect(out).toContain('Gatherer')
+    expect(out).toContain('Crafter')
     expect(out).toContain('drain')
     expect(out).toMatch(/Extractor.*sink|sink.*Extractor/s)
+})
+
+test('renderWhereUsed shows the gatherer drain flow fed by Resin', () => {
+    const out = renderWhereUsed(ITEM_RESIN, getRecipeConsumers(ITEM_RESIN))
+    expect(out).toContain('Resin')
+    expect(out).toContain('Gatherer')
+    expect(out).toContain('drain')
 })
 
 test('renderDemand surfaces Resin as the least-used component', () => {
