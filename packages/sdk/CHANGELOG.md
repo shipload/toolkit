@@ -1,5 +1,20 @@
 # @shipload/sdk
 
+## 1.0.0-next.40
+
+### Patch Changes
+
+- 74c1205: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Recipe output improvements
+  - Add recipe where-used and demand analysis to the CLI
+  - Test fixes
+  - Increased resource deposit sizes (20x to 2x) + spawn rates (2x)
+  - Allow routing to wormhole mouths
+  - Reverse the deposit-size multiplier in tierOfReserve
+
 ## 1.0.0-next.39
 
 ### Patch Changes
