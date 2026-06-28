@@ -112,7 +112,7 @@ describe('deriveStratum reserve tiers', () => {
         }
     })
 
-    test('shallow yield rate near 0.5%', () => {
+    test('shallow yield rate near 0.2%', () => {
         let yielded = 0
         const N = 30_000
         for (let i = 0; i < N; i++) {
@@ -122,11 +122,11 @@ describe('deriveStratum reserve tiers', () => {
             if (r.reserve > 0) yielded++
         }
         const rate = yielded / N
-        assert.isAbove(rate, 0.003, `shallow yield rate ${rate} too low`)
-        assert.isBelow(rate, 0.007, `shallow yield rate ${rate} too high`)
+        assert.isAbove(rate, 0.0012, `shallow yield rate ${rate} too low`)
+        assert.isBelow(rate, 0.003, `shallow yield rate ${rate} too high`)
     })
 
-    test('deep yield rate near 0.1%', () => {
+    test('deep yield rate near 0.04%', () => {
         let yielded = 0
         const N = 100_000
         for (let i = 0; i < N; i++) {
@@ -136,8 +136,8 @@ describe('deriveStratum reserve tiers', () => {
             if (r.reserve > 0) yielded++
         }
         const rate = yielded / N
-        assert.isAbove(rate, 0.0006, `deep yield rate ${rate} too low`)
-        assert.isBelow(rate, 0.0016, `deep yield rate ${rate} too high`)
+        assert.isAbove(rate, 0.0002, `deep yield rate ${rate} too low`)
+        assert.isBelow(rate, 0.0009, `deep yield rate ${rate} too high`)
     })
 
     test('deeper strata bias toward larger tiers', () => {
