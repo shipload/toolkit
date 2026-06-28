@@ -1,0 +1,50 @@
+import {expect, test} from 'bun:test'
+import {getAllRecipes, getRecipeConsumers, getComponentDemand} from './recipe-usage'
+import {
+    ITEM_SENSOR,
+    ITEM_RESIN,
+    ITEM_GATHERER_T1,
+    ITEM_CRAFTER_T1,
+    ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_SHIP_T1_PACKED,
+} from '../data/item-ids'
+
+test('getAllRecipes returns the full catalog including the gatherer', () => {
+    const all = getAllRecipes()
+    expect(all.length).toBeGreaterThan(20)
+    expect(all.some((r) => r.outputItemId === ITEM_GATHERER_T1)).toBe(true)
+})
+
+test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
+    const consumers = getRecipeConsumers(ITEM_SENSOR)
+    const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
+    expect(ids).toEqual(
+        [ITEM_GATHERER_T1, ITEM_CRAFTER_T1, ITEM_SHIP_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED].sort(
+            (a, b) => a - b
+        )
+    )
+})
+
+test('Sensor feeds the gatherer drain stat', () => {
+    const consumers = getRecipeConsumers(ITEM_SENSOR)
+    const gatherer = consumers.find((c) => c.outputItemId === ITEM_GATHERER_T1)
+    expect(gatherer).toBeDefined()
+    const drain = gatherer?.statFlows.find(
+        (f) => f.capability === 'Gathering' && f.attribute === 'drain'
+    )
+    expect(drain).toBeDefined()
+})
+
+test('Sensor is a mass-only sink in the Extractor recipe', () => {
+    const consumers = getRecipeConsumers(ITEM_SENSOR)
+    const extractor = consumers.find((c) => c.outputItemId === ITEM_EXTRACTOR_T1_PACKED)
+    expect(extractor).toBeDefined()
+    expect(extractor?.statFlows).toHaveLength(0)
+})
+
+test('getComponentDemand reports Resin as consumed by exactly one recipe', () => {
+    const demand = getComponentDemand()
+    const resin = demand.find((d) => d.itemId === ITEM_RESIN)
+    expect(resin).toBeDefined()
+    expect(resin?.consumerCount).toBe(1)
+})

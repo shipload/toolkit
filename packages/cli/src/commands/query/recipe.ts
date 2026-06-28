@@ -1,9 +1,13 @@
 import {
+    type DemandRow,
     formatMass,
     formatTier,
+    getComponentDemand,
     getItem,
     getRecipe,
+    getRecipeConsumers,
     getStatDefinitions,
+    type RecipeConsumer,
     type ResourceCategory,
     typeLabel,
 } from '@shipload/sdk'
@@ -237,6 +241,54 @@ export function renderDetail(r: Recipe): string {
     return sections.join('\n\n')
 }
 
+function statFlowLabel(flow: RecipeConsumer['statFlows'][number]): string {
+    const role =
+        flow.capability && flow.attribute
+            ? `${flow.capability}.${flow.attribute}`
+            : `slot ${flow.slotIndex} (dormant)`
+    return flow.sourceStatLabel ? `${role} ← ${flow.sourceStatLabel}` : role
+}
+
+export function renderWhereUsed(componentId: number, consumers: RecipeConsumer[]): string {
+    const name = itemName(componentId)
+    if (consumers.length === 0) return `${name} is not consumed by any recipe.`
+    const table = borderlessTable(
+        ['Qty', 'Consumer', 'ID', 'Role'],
+        ['right', 'left', 'right', 'left']
+    )
+    for (const c of consumers) {
+        const role =
+            c.statFlows.length === 0
+                ? 'sink (mass only)'
+                : c.statFlows.map(statFlowLabel).join(', ')
+        table.push([String(c.quantity), itemName(c.outputItemId), String(c.outputItemId), role])
+    }
+    const statSourced = consumers.filter((c) => c.statFlows.length > 0).length
+    const header = `Consumers of ${name} (${consumers.length}; ${statSourced} stat-source, ${consumers.length - statSourced} sink-only):`
+    return [header, trimEnds(table.toString())].join('\n')
+}
+
+export function renderDemand(rows: DemandRow[]): string {
+    const table = borderlessTable(
+        ['Uses', 'Component', 'ID', 'StatSrc', 'Sink', 'Consumed by'],
+        ['right', 'left', 'right', 'right', 'right', 'left']
+    )
+    for (const r of rows) {
+        const consumers = r.consumers.map((id) => itemName(id)).join(', ')
+        table.push([
+            String(r.consumerCount),
+            itemName(r.itemId),
+            String(r.itemId),
+            String(r.statSourceCount),
+            String(r.sinkOnlyCount),
+            consumers,
+        ])
+    }
+    return [`Component demand (${rows.length} items, ascending):`, trimEnds(table.toString())].join(
+        '\n'
+    )
+}
+
 async function fetchAllRecipes(): Promise<Recipe[]> {
     const PAGE = 50
     const all: Recipe[] = []
@@ -264,31 +316,64 @@ export function register(program: Command): void {
         )
         .argument('[id]', 'output item id (omit to list all)', parseUint32)
         .option('--tier <n>', 'filter list by output tier', parseUint32)
+        .option('--where-used', 'reverse view: list every recipe that consumes <id>')
+        .option('--demand', 'component-demand tally across all recipes (ascending by usage)')
         .option('--json', 'emit JSON instead of formatted text')
-        .action(async (id: number | undefined, opts: {tier?: number; json?: boolean}) => {
-            if (id === undefined) {
-                let recipes = await fetchAllRecipes()
-                if (opts.tier !== undefined) {
-                    recipes = recipes.filter((r) => {
-                        try {
-                            return getItem(r.output_item_id).tier === opts.tier
-                        } catch {
-                            return false
-                        }
-                    })
+        .action(
+            async (
+                id: number | undefined,
+                opts: {tier?: number; whereUsed?: boolean; demand?: boolean; json?: boolean}
+            ) => {
+                if (opts.demand) {
+                    const rows = getComponentDemand()
+                    console.log(formatOutput(rows, {json: Boolean(opts.json)}, renderDemand))
+                    return
                 }
-                console.log(formatOutput(recipes, {json: Boolean(opts.json)}, renderList))
-                return
+                if (opts.whereUsed) {
+                    if (id === undefined) {
+                        console.error('--where-used requires an item id')
+                        process.exitCode = 1
+                        return
+                    }
+                    const consumers = getRecipeConsumers(id)
+                    console.log(
+                        formatOutput(consumers, {json: Boolean(opts.json)}, (c) =>
+                            renderWhereUsed(id, c)
+                        )
+                    )
+                    return
+                }
+                await runForward(id, opts)
             }
-            const res = (await server.readonly('getrecipe', {
-                output_item_id: id,
-            })) as unknown as {recipes: Recipe[]}
-            const recipe = res.recipes?.[0]
-            if (!recipe) {
-                console.error(`No recipe with output item id ${id}`)
-                process.exitCode = 1
-                return
-            }
-            console.log(formatOutput(recipe, {json: Boolean(opts.json)}, renderDetail))
-        })
+        )
+}
+
+async function runForward(
+    id: number | undefined,
+    opts: {tier?: number; json?: boolean}
+): Promise<void> {
+    if (id === undefined) {
+        let recipes = await fetchAllRecipes()
+        if (opts.tier !== undefined) {
+            recipes = recipes.filter((r) => {
+                try {
+                    return getItem(r.output_item_id).tier === opts.tier
+                } catch {
+                    return false
+                }
+            })
+        }
+        console.log(formatOutput(recipes, {json: Boolean(opts.json)}, renderList))
+        return
+    }
+    const res = (await server.readonly('getrecipe', {
+        output_item_id: id,
+    })) as unknown as {recipes: Recipe[]}
+    const recipe = res.recipes?.[0]
+    if (!recipe) {
+        console.error(`No recipe with output item id ${id}`)
+        process.exitCode = 1
+        return
+    }
+    console.log(formatOutput(recipe, {json: Boolean(opts.json)}, renderDetail))
 }

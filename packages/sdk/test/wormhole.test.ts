@@ -10,7 +10,6 @@ import {
 } from '../src/derivation/wormhole'
 import {getLocationKind} from '../src/utils/system'
 import {calc_transit_duration} from '../src/travel/travel'
-import {PRECISION} from '../src/types'
 
 const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
 
