@@ -95,16 +95,22 @@ describe("formatResolveHint", () => {
 
 describe("formatReserve", () => {
 	test("returns single value when reserve equals reserve_max", () => {
-		expect(formatReserve(820, 820)).toBe("820");
+		expect(formatReserve(820, 820)).toBe("820 t");
+	});
+	test("compacts large full reserves", () => {
+		expect(formatReserve(288_000, 288_000)).toBe("288k t");
 	});
 	test("returns remaining/max with percentage when depleted", () => {
-		expect(formatReserve(56, 820)).toBe("56/820 (7%)");
+		expect(formatReserve(56, 820)).toBe("56 t / 820 t (7%)");
+	});
+	test("compacts large partial reserves", () => {
+		expect(formatReserve(144_000, 288_000)).toBe("144k t / 288k t (50%)");
 	});
 	test("fully depleted shows 0/max (0%)", () => {
-		expect(formatReserve(0, 820)).toBe("0/820 (0%)");
+		expect(formatReserve(0, 820)).toBe("0 t / 820 t (0%)");
 	});
 	test("handles reserve_max of 0 gracefully", () => {
-		expect(formatReserve(0, 0)).toBe("0");
+		expect(formatReserve(0, 0)).toBe("0 t");
 	});
 });
 
