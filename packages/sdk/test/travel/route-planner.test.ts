@@ -159,7 +159,8 @@ describe('planRoute partial path on failure', () => {
         if (result.ok) return
         expect(result.partialWaypoints?.length ?? 0).toBeGreaterThan(0)
         // the partial path ends at furthest, a real system
-        const last = result.partialWaypoints![result.partialWaypoints!.length - 1]
+        const waypoints = result.partialWaypoints ?? []
+        const last = waypoints[waypoints.length - 1]
         expect(graph.hasSystem(last)).toBe(true)
     })
 
