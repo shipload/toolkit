@@ -18,6 +18,7 @@
             "!**/packages/sdk/src/contracts",
             "!**/packages/sdk/src/data/*.json",
             "!**/packages/sdk/src/data/item-ids.ts",
+            "!**/packages/sdk/src/scan/scan-wasm.base64.ts",
             "!**/packages/sdk/test/data",
             "!**/packages/cli/src/contracts"
         ]
