@@ -1,5 +1,36 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.41
+
+### Patch Changes
+
+- bdf4b6e: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Recipe output improvements
+  - Add recipe where-used and demand analysis to the CLI
+  - Test fixes
+  - Increased resource deposit sizes (20x to 2x) + spawn rates (2x)
+  - Replace non-null assertions in route-planner test
+  - Add @shipload/sdk/scan wasm loader subpath
+  - Update yield-rate tests for 0.8x spawn rate
+  - Lower deposit spawn rate to 0.8x
+- 039862e: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Recipe output improvements
+  - Add recipe where-used and demand analysis to the CLI
+  - Test fixes
+  - Increased resource deposit sizes (20x to 2x) + spawn rates (2x)
+  - Update yield-rate tests for 0.8x spawn rate
+  - Lower deposit spawn rate to 0.8x
+- Updated dependencies [bdf4b6e]
+- Updated dependencies [bdf4b6e]
+- Updated dependencies [039862e]
+  - @shipload/sdk@1.0.0-next.41
+
 ## 1.0.0-next.40
 
 ### Patch Changes
