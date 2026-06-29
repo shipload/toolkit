@@ -69,6 +69,12 @@ function traceToRawCategoryStat(
     return traceToRawCategoryStat(subRecipe, subSource, nextVisited)
 }
 
+// Producing role for a capability·attribute: entity hull slots all roll up to "Hull"; modules use their own name.
+export function sourceLabelForOutput(itemId: number): string {
+    const item = getItem(itemId)
+    return item.type === 'entity' ? 'Hull' : item.name
+}
+
 let cached: StatMapping[] | undefined
 
 export function deriveStatMappings(): StatMapping[] {
@@ -82,22 +88,37 @@ export function deriveStatMappings(): StatMapping[] {
         const itemId = KIND_TO_ITEM_ID[kind]
         const recipe = getRecipe(itemId)
         if (!recipe) continue
+        const source = sourceLabelForOutput(itemId)
         for (const [slotIdxStr, consumer] of Object.entries(slots)) {
             const slotIdx = Number(slotIdxStr)
             const slot = recipe.statSlots[slotIdx]
             if (!slot) continue
-            for (const source of slot.sources) {
-                const stat = traceToRawCategoryStat(recipe, source)
+            for (const src of slot.sources) {
+                const stat = traceToRawCategoryStat(recipe, src)
                 if (!stat) continue
-                const key = `${stat.label}|${consumer.capability}|${consumer.attribute}`
+                const key = `${stat.label}|${consumer.capability}|${consumer.attribute}|${source}`
                 if (seen.has(key)) continue
                 seen.add(key)
                 out.push({
                     stat: stat.label,
                     capability: consumer.capability,
                     attribute: consumer.attribute,
+                    source,
                 })
             }
+        }
+    }
+    // Keep source only where a capability·attribute is produced by more than one source.
+    const sourcesByAttr = new Map<string, Set<string>>()
+    for (const m of out) {
+        const k = `${m.capability}|${m.attribute}`
+        const set = sourcesByAttr.get(k) ?? new Set<string>()
+        set.add(m.source as string)
+        sourcesByAttr.set(k, set)
+    }
+    for (const m of out) {
+        if ((sourcesByAttr.get(`${m.capability}|${m.attribute}`)?.size ?? 0) <= 1) {
+            m.source = undefined
         }
     }
     cached = out

@@ -366,6 +366,7 @@ export {
     getStatMappings,
     getStatMappingsForStat,
     getStatMappingsForCapability,
+    sourceLabelForOutput,
 } from './derivation/capability-mappings'
 export {SLOT_FORMULAS} from './data/capability-formulas'
 export type {SlotConsumer, SlotConsumerKind} from './data/capability-formulas'

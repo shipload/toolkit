@@ -8,6 +8,7 @@ export interface StatMapping {
     stat: string
     capability: string
     attribute: string
+    source?: string // producing module/role, set only when capability·attribute is ambiguous
 }
 
 export const capabilityNames: string[] = [

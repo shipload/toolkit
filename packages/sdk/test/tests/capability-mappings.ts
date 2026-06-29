@@ -54,6 +54,30 @@ describe('deriveStatMappings', () => {
     })
 })
 
+describe('source qualifier (ambiguous capability·attribute)', () => {
+    test('Energy.capacity carries a source because >1 module produces it', () => {
+        const rows = getStatMappingsForCapability('Energy').filter(
+            (m) => m.attribute === 'capacity'
+        )
+        assert.isAbove(rows.length, 0)
+        assert.isTrue(rows.every((m) => typeof m.source === 'string' && m.source.length > 0))
+        assert.isAbove(new Set(rows.map((m) => m.source)).size, 1)
+    })
+
+    test('Storage.capacity splits across Cargo Bay and entity Hull', () => {
+        const rows = getStatMappingsForCapability('Storage').filter(
+            (m) => m.attribute === 'capacity'
+        )
+        assert.include([...new Set(rows.map((m) => m.source))], 'Hull')
+    })
+
+    test('unambiguous attributes carry no source qualifier', () => {
+        const rows = getStatMappingsForCapability('Crafter').filter((m) => m.attribute === 'speed')
+        assert.isAbove(rows.length, 0)
+        assert.isTrue(rows.every((m) => m.source === undefined))
+    })
+})
+
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Gathering.yield', 'Storage.capacity'],
