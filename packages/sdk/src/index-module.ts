@@ -422,6 +422,7 @@ export {
     feistelInv,
     regionOf,
     partnerRegion,
+    nearbyWormholes,
     wormholeAt,
     wormholeAtRegionEndpoint,
     isValidWormholePair,

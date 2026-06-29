@@ -107,3 +107,10 @@ describe('nearbyWormholes', () => {
         expect(nearbyWormholes(SEED, ep.x, ep.y, 6)).not.toContainEqual(ep)
     })
 })
+
+describe('package root export', () => {
+    test('re-exports nearbyWormholes from the index', async () => {
+        const root = await import('../src/index')
+        expect(typeof (root as Record<string, unknown>).nearbyWormholes).toBe('function')
+    })
+})
