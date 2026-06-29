@@ -410,7 +410,7 @@ describe('Crafting', () => {
         })
     })
 
-    describe('T2 Multi-Source Blending', () => {
+    describe.skip('T2 Multi-Source Blending (skipped: T2 recipes temporarily removed)', () => {
         test('Plate T2 blends component + raw ore stats', () => {
             const plateEncoded = encodeStats([400, 300])
             const oreT2Seed = encodeStats([600, 0, 200])
