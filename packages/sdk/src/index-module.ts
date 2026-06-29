@@ -284,6 +284,17 @@ export type {
 } from './scheduling/cancel'
 
 export {
+    derivedLoaders,
+    estimateUnwrapDuration,
+    incomingHoldMass,
+    projectedPeakCargomass,
+    receiveFits,
+    unwrapLoadDuration,
+    unwrapTransitDuration,
+} from './scheduling/unwrap'
+export type {DerivedLoaders, UnwrapDestination, UnwrapItem} from './scheduling/unwrap'
+
+export {
     projectedCargoAvailableAt,
     availableForItem,
     cargoReadyAt,
