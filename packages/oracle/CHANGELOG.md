@@ -1,5 +1,21 @@
 # @shipload/oracle
 
+## 0.0.1-next.33
+
+### Patch Changes
+
+- 56e5e24: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Dedupe stat coverage tuples for multi-source mappings
+  - Always carry producer on capability mappings
+  - Add sendAsset transfer action
+  - Add source qualifier to ambiguous stat mappings
+  - Mirror unwrap timing and fits from the contract
+  - Remove T2 recipes
+  - Re-export nearby wormholes
+
 ## 0.0.1-next.32
 
 ### Patch Changes
