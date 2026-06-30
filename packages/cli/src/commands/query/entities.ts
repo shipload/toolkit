@@ -223,4 +223,5 @@ const PLURAL: Record<EntityTypeName, string> = {
     mcatcher: 'masscatchers',
     nexus: 'nexuses',
     plot: 'plots',
+    hub: 'hubs',
 }

@@ -1,6 +1,6 @@
 {
-    "catalog_hash": "e837f54c5e81f55adccea078d3fa3dcdcb9f389a697e82bfa8867a4debe0b7ad",
-    "generated_at": "2026-06-28T17:51:05.594Z",
+    "catalog_hash": "0e2f3f41840648652cd80cc3ac1b8867dfdb888a481ec0507fcc6fe074ae4b97",
+    "generated_at": "2026-06-30T04:09:57.706Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -1110,7 +1110,7 @@
                                         },
                                         {
                                             "item_id": 10001,
-                                            "stats": 1025,
+                                            "stats": 1049601,
                                             "modules": [],
                                             "quantity": 1
                                         }
@@ -1259,7 +1259,7 @@
                                         },
                                         {
                                             "item_id": 10001,
-                                            "stats": 1025,
+                                            "stats": 1049601,
                                             "modules": [],
                                             "quantity": 1
                                         }
@@ -1293,7 +1293,7 @@
                 "cargo": [
                     {
                         "item_id": 10001,
-                        "stats": 1025,
+                        "stats": 1049601,
                         "modules": [],
                         "quantity": 1,
                         "id": 0

@@ -30,11 +30,11 @@ describe('deriveStatMappings', () => {
         assert.deepInclude(tuples, 'Storage.capacity')
     })
 
-    test('Insulation drives Loader.mass', () => {
+    test('Insulation drives Loading.mass', () => {
         const tuples = getStatMappingsForStat('Insulation').map(
             (m) => `${m.capability}.${m.attribute}`
         )
-        assert.deepInclude(tuples, 'Loader.mass')
+        assert.deepInclude(tuples, 'Loading.mass')
     })
 
     test('Resonance drives Energy.capacity', () => {
@@ -81,7 +81,7 @@ describe('producer (source) is always present', () => {
     })
 
     test('a single-producer attribute now carries its producer too', () => {
-        const rows = getStatMappingsForCapability('Crafter').filter((m) => m.attribute === 'speed')
+        const rows = getStatMappingsForCapability('Crafting').filter((m) => m.attribute === 'speed')
         assert.isAbove(rows.length, 0)
         assert.isTrue(rows.every((m) => typeof m.source === 'string' && m.source.length > 0))
         assert.strictEqual(new Set(rows.map((m) => m.source)).size, 1)
@@ -92,19 +92,19 @@ describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Gathering.yield', 'Storage.capacity'],
         Tolerance: ['Gathering.depth'],
-        Density: ['Hull.mass', 'Storage.capacity'],
-        Conductivity: ['Crafter.drain'],
-        Resonance: ['Energy.capacity', 'Hauler.capacity', 'Warp.range'],
-        Reflectivity: ['Energy.recharge', 'Hauler.drain'],
+        Density: ['Gathering.yield', 'Hull.mass', 'Storage.capacity'],
+        Conductivity: ['Crafting.drain', 'Energy.capacity', 'Hauling.drain', 'Warp.range'],
+        Resonance: ['Energy.capacity', 'Hauling.capacity'],
+        Reflectivity: ['Energy.recharge', 'Hauling.capacity', 'Warp.range'],
         Volatility: ['Energy.capacity', 'Movement.thrust'],
-        Reactivity: ['Crafter.speed'],
-        Thermal: ['Energy.capacity', 'Movement.drain', 'Warp.range'],
-        Hardness: ['Storage.capacity'],
-        Cohesion: ['Storage.capacity'],
-        Fineness: ['Hull.mass'],
-        Plasticity: ['Energy.capacity', 'Hauler.efficiency', 'Loader.thrust'],
-        Insulation: ['Energy.capacity', 'Loader.mass'],
-        Saturation: ['Gathering.drain'],
+        Reactivity: ['Movement.thrust'],
+        Thermal: ['Energy.capacity', 'Movement.drain'],
+        Hardness: ['Gathering.depth', 'Storage.capacity'],
+        Cohesion: ['Crafting.speed', 'Storage.capacity'],
+        Fineness: ['Crafting.speed', 'Hull.mass'],
+        Plasticity: ['Energy.capacity', 'Hauling.efficiency', 'Loading.thrust'],
+        Insulation: ['Energy.capacity', 'Loading.mass'],
+        Saturation: ['Gathering.drain', 'Loading.thrust'],
     }
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {
@@ -126,8 +126,8 @@ describe('producer-join helpers', () => {
     })
 
     test('getProducersForAttribute is empty for attributes with no slot producer', () => {
-        assert.deepEqual(getProducersForAttribute('Loader', 'quantity'), [])
-        assert.deepEqual(getProducersForAttribute('Crafter', 'quality'), [])
+        assert.deepEqual(getProducersForAttribute('Loading', 'quantity'), [])
+        assert.deepEqual(getProducersForAttribute('Crafting', 'quality'), [])
         assert.deepEqual(getProducersForAttribute('Launch', 'range'), [])
     })
 
@@ -146,7 +146,7 @@ describe('producer-join helpers', () => {
     test('getCapabilityAttributeRows keeps uncovered attributes as one source-less row', () => {
         const rows = getCapabilityAttributeRows()
         const loaderQty = rows.filter(
-            (r) => r.capability === 'Loader' && r.attribute === 'quantity'
+            (r) => r.capability === 'Loading' && r.attribute === 'quantity'
         )
         assert.strictEqual(loaderQty.length, 1)
         assert.strictEqual(loaderQty[0].source, undefined)

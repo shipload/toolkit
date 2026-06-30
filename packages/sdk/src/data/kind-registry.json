@@ -9,35 +9,35 @@
     },
     {
       "kind": "warehouse",
-      "classification": "PlanetaryStructure",
+      "classification": "OrbitalStructure",
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Warehouse"
     },
     {
       "kind": "extractor",
-      "classification": "PlanetaryStructure",
+      "classification": "OrbitalStructure",
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Extractor"
     },
     {
       "kind": "factory",
-      "classification": "PlanetaryStructure",
+      "classification": "OrbitalStructure",
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Factory"
     },
     {
       "kind": "mdriver",
-      "classification": "PlanetaryStructure",
+      "classification": "OrbitalStructure",
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Mass Driver"
     },
     {
       "kind": "mcatcher",
-      "classification": "PlanetaryStructure",
+      "classification": "OrbitalStructure",
       "capabilityFlags": 28,
       "zCoord": 0,
       "defaultLabel": "Mass Catcher"
@@ -62,6 +62,13 @@
       "capabilityFlags": 0,
       "zCoord": 0,
       "defaultLabel": "Plot"
+    },
+    {
+      "kind": "hub",
+      "classification": "OrbitalStructure",
+      "capabilityFlags": 4,
+      "zCoord": 0,
+      "defaultLabel": "Station Hub"
     }
   ],
   "templates": [
@@ -103,6 +110,11 @@
     {
       "itemId": 20200,
       "kind": "container",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10207,
+      "kind": "hub",
       "displayLabel": ""
     }
   ]

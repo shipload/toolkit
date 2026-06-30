@@ -31,8 +31,8 @@ describe('getEntityClass', () => {
         assert.equal(getEntityClass(ENTITY_CONTAINER), EntityClass.OrbitalVessel)
     })
 
-    test('warehouse maps to PlanetaryStructure', () => {
-        assert.equal(getEntityClass(ENTITY_WAREHOUSE), EntityClass.PlanetaryStructure)
+    test('warehouse maps to OrbitalStructure', () => {
+        assert.equal(getEntityClass(ENTITY_WAREHOUSE), EntityClass.OrbitalStructure)
     })
 
     test('string "ship" maps to OrbitalVessel', () => {
@@ -43,8 +43,8 @@ describe('getEntityClass', () => {
         assert.equal(getEntityClass('container'), EntityClass.OrbitalVessel)
     })
 
-    test('string "warehouse" maps to PlanetaryStructure', () => {
-        assert.equal(getEntityClass('warehouse'), EntityClass.PlanetaryStructure)
+    test('string "warehouse" maps to OrbitalStructure', () => {
+        assert.equal(getEntityClass('warehouse'), EntityClass.OrbitalStructure)
     })
 
     test('location throws', () => {

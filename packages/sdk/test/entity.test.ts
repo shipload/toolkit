@@ -7,6 +7,7 @@ import {
     isContainer,
     isExtractor,
     isFactory,
+    isHub,
     isMassCatcher,
     isMassDriver,
     isNexus,
@@ -36,6 +37,7 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     plot: isPlot,
     mdriver: isMassDriver,
     mcatcher: isMassCatcher,
+    hub: isHub,
 }
 
 const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {
@@ -63,6 +65,7 @@ describe('Entity unification — registry-driven', () => {
                     EntityClass.OrbitalVessel,
                     EntityClass.PlanetaryStructure,
                     EntityClass.Plot,
+                    EntityClass.OrbitalStructure,
                 ]).toContain(cls)
             })
 

@@ -87,7 +87,7 @@ describe('buildImmutableData', () => {
     })
 
     test('component (ore-based) emits decoded crafted stat keys', () => {
-        const stats = encodeStats([512, 333])
+        const stats = encodeStats([512, 333, 250])
         const entries = buildComponentImmutable(ITEM_COMPONENT_ORE_BASED, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -101,9 +101,11 @@ describe('buildImmutableData', () => {
             'deposit_symbol',
             'strength',
             'density',
+            'tolerance',
         ])
         expect(findEntry(entries, 'strength')!.second).toEqual(['uint16', 512])
         expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 333])
+        expect(findEntry(entries, 'tolerance')!.second).toEqual(['uint16', 250])
     })
 
     test('module (engine) emits volatility/thermal + computed thrust/drain', () => {
@@ -132,12 +134,11 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeEngineDrain(thm)])
     })
 
-    test('module (gatherer) emits 4 stats + 3 computed values in fixed order', () => {
+    test('module (gatherer) emits 3 stats + 3 computed values in fixed order', () => {
         const str = 500
-        const tol = 600
-        const con = 400
-        const ref = 700
-        const stats = encodeStats([str, tol, con, ref])
+        const hrd = 600
+        const sat = 400
+        const stats = encodeStats([str, hrd, sat])
         const entries = buildModuleImmutable(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -150,39 +151,38 @@ describe('buildImmutableData', () => {
             'deposit_token',
             'deposit_symbol',
             'strength',
-            'tolerance',
+            'hardness',
             'saturation',
-            'plasticity',
             'yield',
             'drain',
             'depth',
         ])
         expect(findEntry(entries, 'yield')!.second).toEqual(['uint16', computeGathererYield(str)])
-        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeGathererDrain(con)])
+        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeGathererDrain(sat)])
         expect(findEntry(entries, 'depth')!.second).toEqual([
             'uint16',
-            computeGathererDepth(tol, 1),
+            computeGathererDepth(hrd, 1),
         ])
     })
 
-    test('crafter immutable data uses conductivity, not fineness', () => {
-        const rea = 400
+    test('crafter immutable data uses fineness, not reactivity', () => {
+        const fin = 400
         const con = 250
-        const stats = encodeStats([rea, con])
+        const stats = encodeStats([fin, con])
         const entries = buildModuleImmutable(ITEM_CRAFTER_T1, 1, stats, 0, 0)
         const names = entries.map((e) => e.first)
-        expect(names).toContain('reactivity')
+        expect(names).toContain('fineness')
         expect(names).toContain('conductivity')
-        expect(names).not.toContain('fineness')
+        expect(names).not.toContain('reactivity')
         expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
         expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeCrafterDrain(con)])
     })
 
     test('module (hauler) emits 3 stats + 3 computed capabilities', () => {
         const res = 400
-        const con = 250
-        const ref = 600
-        const stats = encodeStats([res, con, ref])
+        const pla = 250
+        const con = 600
+        const stats = encodeStats([res, pla, con])
         const entries = buildModuleImmutable(ITEM_HAULER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -196,7 +196,7 @@ describe('buildImmutableData', () => {
             'deposit_symbol',
             'resonance',
             'plasticity',
-            'reflectivity',
+            'conductivity',
             'capacity',
             'efficiency',
             'drain',
@@ -208,11 +208,11 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'efficiency')!.second).toEqual([
             'uint16',
-            computeHaulerEfficiency(con),
+            computeHaulerEfficiency(pla),
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
-            moduleComputeHaulerDrain(ref),
+            moduleComputeHaulerDrain(con),
         ])
     })
 

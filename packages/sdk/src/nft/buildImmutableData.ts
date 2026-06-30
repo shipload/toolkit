@@ -198,16 +198,14 @@ export function buildModuleImmutable(
         }
         case MODULE_GATHERER: {
             const str = decodeStat(stats, 0)
-            const tol = decodeStat(stats, 1)
-            const con = decodeStat(stats, 2)
-            const ref = decodeStat(stats, 3)
+            const hrd = decodeStat(stats, 1)
+            const sat = decodeStat(stats, 2)
             base.push({first: 'strength', second: ['uint16', str]})
-            base.push({first: 'tolerance', second: ['uint16', tol]})
-            base.push({first: 'saturation', second: ['uint16', con]})
-            base.push({first: 'plasticity', second: ['uint16', ref]})
+            base.push({first: 'hardness', second: ['uint16', hrd]})
+            base.push({first: 'saturation', second: ['uint16', sat]})
             base.push({first: 'yield', second: ['uint16', computeGathererYield(str)]})
-            base.push({first: 'drain', second: ['uint16', computeGathererDrain(con)]})
-            base.push({first: 'depth', second: ['uint16', computeGathererDepth(tol, item.tier)]})
+            base.push({first: 'drain', second: ['uint16', computeGathererDrain(sat)]})
+            base.push({first: 'depth', second: ['uint16', computeGathererDepth(hrd, item.tier)]})
             break
         }
         case MODULE_LOADER: {
@@ -220,17 +218,17 @@ export function buildModuleImmutable(
             break
         }
         case MODULE_WARP: {
-            const res = decodeStat(stats, 0)
-            base.push({first: 'resonance', second: ['uint16', res]})
-            base.push({first: 'range', second: ['uint32', computeWarpRange(res)]})
+            const ref = decodeStat(stats, 0)
+            base.push({first: 'reflectivity', second: ['uint16', ref]})
+            base.push({first: 'range', second: ['uint32', computeWarpRange(ref)]})
             break
         }
         case MODULE_CRAFTER: {
-            const rea = decodeStat(stats, 0)
+            const fin = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
-            base.push({first: 'reactivity', second: ['uint16', rea]})
+            base.push({first: 'fineness', second: ['uint16', fin]})
             base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(rea)]})
+            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin)]})
             base.push({first: 'drain', second: ['uint16', computeCrafterDrain(con)]})
             break
         }
@@ -267,13 +265,13 @@ export function buildModuleImmutable(
         case MODULE_HAULER: {
             const res = decodeStat(stats, 0)
             const pla = decodeStat(stats, 1)
-            const ref = decodeStat(stats, 2)
+            const con = decodeStat(stats, 2)
             base.push({first: 'resonance', second: ['uint16', res]})
             base.push({first: 'plasticity', second: ['uint16', pla]})
-            base.push({first: 'reflectivity', second: ['uint16', ref]})
+            base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res)]})
             base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(pla)]})
-            base.push({first: 'drain', second: ['uint16', computeHaulerDrain(ref)]})
+            base.push({first: 'drain', second: ['uint16', computeHaulerDrain(con)]})
             break
         }
     }

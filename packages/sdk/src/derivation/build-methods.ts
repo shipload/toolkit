@@ -15,7 +15,7 @@ export function availableBuildMethods(itemId: number): BuildMethod[] {
     const kindMeta = getKindMeta(template.kind)
     if (!kindMeta) return ['craft+deploy']
 
-    if (kindMeta.classification === EntityClass.PlanetaryStructure) {
+    if (kindMeta.classification === EntityClass.OrbitalStructure) {
         return ['craft+deploy', 'plot']
     }
     return ['craft+deploy']

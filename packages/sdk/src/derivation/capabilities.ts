@@ -78,12 +78,12 @@ export function computeGathererCapabilities(
 } {
     const str = stats.strength
     const con = stats.saturation
-    const tol = stats.tolerance
+    const hrd = stats.hardness
 
     return {
         yield: 200 + str,
         drain: 2 * Math.max(250, 1250 - Math.floor((con * 25) / 20)),
-        depth: gathererDepthForTier(tol, tier),
+        depth: gathererDepthForTier(hrd, tier),
     }
 }
 
@@ -106,11 +106,11 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
     speed: number
     drain: number
 } {
-    const rea = stats.reactivity
+    const fin = stats.fineness
     const con = stats.conductivity
 
     return {
-        speed: 100 + Math.floor((rea * 4) / 5),
+        speed: 100 + Math.floor((fin * 4) / 5),
         drain: Math.max(5, 30 - Math.floor(con / 33)),
     }
 }
@@ -122,12 +122,12 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
 } {
     const resonance = stats.resonance
     const plasticity = stats.plasticity
-    const reflectivity = stats.reflectivity
+    const conductivity = stats.conductivity
 
     return {
         capacity: Math.max(1, 1 + Math.floor(resonance / 400)),
         efficiency: 2000 + plasticity * 6,
-        drain: Math.max(3, 15 - Math.floor(reflectivity / 80)),
+        drain: Math.max(3, 15 - Math.floor(conductivity / 80)),
     }
 }
 
@@ -224,8 +224,8 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
 export function computeWarpCapabilities(stats: Record<string, number>): {
     range: number
 } {
-    const resonance = stats.resonance
-    return {range: 100 + resonance * 3}
+    const reflectivity = stats.reflectivity
+    return {range: 100 + reflectivity * 3}
 }
 
 export function computeWarehouseHullCapabilities(stats: Record<string, number>): {

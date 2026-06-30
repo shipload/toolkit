@@ -40,12 +40,12 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
         2: {capability: 'Gathering', attribute: 'drain'},
     },
     loader: {
-        0: {capability: 'Loader', attribute: 'mass'},
-        1: {capability: 'Loader', attribute: 'thrust'},
+        0: {capability: 'Loading', attribute: 'mass'},
+        1: {capability: 'Loading', attribute: 'thrust'},
     },
     crafter: {
-        0: {capability: 'Crafter', attribute: 'speed'},
-        1: {capability: 'Crafter', attribute: 'drain'},
+        0: {capability: 'Crafting', attribute: 'speed'},
+        1: {capability: 'Crafting', attribute: 'drain'},
     },
     storage: {
         0: {capability: 'Storage', attribute: 'capacity'},
@@ -54,9 +54,9 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
         3: {capability: 'Storage', attribute: 'capacity'},
     },
     hauler: {
-        0: {capability: 'Hauler', attribute: 'capacity'},
-        1: {capability: 'Hauler', attribute: 'efficiency'},
-        2: {capability: 'Hauler', attribute: 'drain'},
+        0: {capability: 'Hauling', attribute: 'capacity'},
+        1: {capability: 'Hauling', attribute: 'efficiency'},
+        2: {capability: 'Hauling', attribute: 'drain'},
     },
     warp: {
         0: {capability: 'Warp', attribute: 'range'},

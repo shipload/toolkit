@@ -97,11 +97,13 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            assert.equal(stats.length, 2)
+            assert.equal(stats.length, 3)
             const str = stats.find((s) => s.key === 'strength')
             const den = stats.find((s) => s.key === 'density')
+            const tol = stats.find((s) => s.key === 'tolerance')
             assert.equal(str!.value, 517)
             assert.equal(den!.value, 262)
+            assert.equal(tol!.value, 250)
         })
 
         test('resin from biomass stacks blends weighted average', () => {
@@ -120,15 +122,17 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            assert.equal(stats.length, 2)
+            assert.equal(stats.length, 3)
             const sat = stats.find((s) => s.key === 'saturation')
             const pla = stats.find((s) => s.key === 'plasticity')
+            const ins = stats.find((s) => s.key === 'insulation')
             assert.equal(sat!.value, 560)
             assert.equal(pla!.value, 560)
+            assert.equal(ins!.value, 560)
         })
 
         test('frame from regolith (single-source)', () => {
-            // Recipe 10002 statSlots: [regolith stat 1 (hardness), regolith stat 0 (cohesion)].
+            // Recipe 10002 statSlots: [regolith hardness, regolith cohesion, regolith fineness, biomass saturation].
             const stats = computeComponentStats(ITEM_FRAME, [
                 {
                     category: 'regolith',
@@ -146,11 +150,15 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            assert.equal(stats.length, 2)
+            assert.equal(stats.length, 4)
             const hard = stats.find((s) => s.key === 'hardness')
             const comp = stats.find((s) => s.key === 'cohesion')
+            const fin = stats.find((s) => s.key === 'fineness')
+            const sat = stats.find((s) => s.key === 'saturation')
             assert.equal(hard!.value, 200)
             assert.equal(comp!.value, 500)
+            assert.equal(fin!.value, 700)
+            assert.equal(sat!.value, 800)
         })
     })
 
@@ -191,7 +199,8 @@ describe('Crafting', () => {
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'resonance')
             assert.property(decoded, 'plasticity')
-            assert.property(decoded, 'reflectivity')
+            assert.property(decoded, 'conductivity')
+            assert.notProperty(decoded, 'reflectivity')
             assert.notProperty(decoded, 'cohesion')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')

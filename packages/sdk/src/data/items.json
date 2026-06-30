@@ -522,6 +522,12 @@
     "tier": 1
   },
   {
+    "id": 10207,
+    "mass": 2400000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
     "id": 20001,
     "mass": 500,
     "type": "component",

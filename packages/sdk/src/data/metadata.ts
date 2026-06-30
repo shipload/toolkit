@@ -262,6 +262,11 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Planetary receiving platform with storage module slots; catches launched payloads.',
         color: '#4AE898',
     },
+    10207: {
+        name: 'Station Hub',
+        description: 'Orbital command structure. Anchors a player station cluster.',
+        color: '#A0B8D0',
+    },
 
     // === Components (T2) ===
     20001: {

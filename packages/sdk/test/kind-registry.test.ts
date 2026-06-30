@@ -74,9 +74,9 @@ describe('kind-registry', () => {
         expect(getEntityClass('ship')).toBe(EntityClass.OrbitalVessel)
         expect(getEntityClass('container')).toBe(EntityClass.OrbitalVessel)
         expect(getEntityClass('nexus')).toBe(EntityClass.OrbitalVessel)
-        expect(getEntityClass('warehouse')).toBe(EntityClass.PlanetaryStructure)
-        expect(getEntityClass('extractor')).toBe(EntityClass.PlanetaryStructure)
-        expect(getEntityClass('factory')).toBe(EntityClass.PlanetaryStructure)
+        expect(getEntityClass('warehouse')).toBe(EntityClass.OrbitalStructure)
+        expect(getEntityClass('extractor')).toBe(EntityClass.OrbitalStructure)
+        expect(getEntityClass('factory')).toBe(EntityClass.OrbitalStructure)
     })
 
     test('getEntityClass throws for unknown kinds', () => {

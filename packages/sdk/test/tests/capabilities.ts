@@ -48,9 +48,9 @@ describe('Capabilities', () => {
     })
 
     test('getStatMappingsForCapability filters correctly', () => {
-        const manufacturing = getStatMappingsForCapability('Crafter')
+        const manufacturing = getStatMappingsForCapability('Crafting')
         assert.isTrue(manufacturing.length > 0)
-        assert.isTrue(manufacturing.every((m) => m.capability === 'Crafter'))
+        assert.isTrue(manufacturing.every((m) => m.capability === 'Crafting'))
     })
 
     test('isInvertedAttribute returns true for drain and mass', () => {

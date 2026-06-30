@@ -11,12 +11,14 @@ export enum EntityClass {
     OrbitalVessel = 0,
     PlanetaryStructure = 1,
     Plot = 2,
+    OrbitalStructure = 3,
 }
 
 const CLASSIFICATION_BY_NAME: Record<string, EntityClass> = {
     OrbitalVessel: EntityClass.OrbitalVessel,
     PlanetaryStructure: EntityClass.PlanetaryStructure,
     Plot: EntityClass.Plot,
+    OrbitalStructure: EntityClass.OrbitalStructure,
 }
 
 export type EntityTypeName =
@@ -29,6 +31,7 @@ export type EntityTypeName =
     | 'plot'
     | 'mdriver'
     | 'mcatcher'
+    | 'hub'
 
 export interface KindMeta {
     kind: Name
@@ -135,6 +138,7 @@ export const ENTITY_NEXUS = Name.from('nexus')
 export const ENTITY_PLOT = Name.from('plot')
 export const ENTITY_MASS_DRIVER = Name.from('mdriver')
 export const ENTITY_MASS_CATCHER = Name.from('mcatcher')
+export const ENTITY_HUB = Name.from('hub')
 
 export function isShip(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_SHIP) ?? false
@@ -162,4 +166,7 @@ export function isMassDriver(entity: {type?: Name}): boolean {
 }
 export function isMassCatcher(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_MASS_CATCHER) ?? false
+}
+export function isHub(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_HUB) ?? false
 }
