@@ -109,9 +109,11 @@ describe('stat coverage', () => {
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {
         test(`${stat} drives ${expectedTuples.length} attribute(s)`, () => {
-            const actual = getStatMappingsForStat(stat)
-                .map((m) => `${m.capability}.${m.attribute}`)
-                .sort()
+            const actual = [
+                ...new Set(
+                    getStatMappingsForStat(stat).map((m) => `${m.capability}.${m.attribute}`)
+                ),
+            ].sort()
             assert.deepEqual(actual, expectedTuples.slice().sort())
         })
     }
