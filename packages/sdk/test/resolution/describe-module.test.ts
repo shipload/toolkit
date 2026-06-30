@@ -64,14 +64,14 @@ describe('describeModule', () => {
 
     test('Loader produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Loader',
+            capability: 'Loading',
             attributes: [
                 {label: 'Mass', value: 500},
                 {label: 'Thrust', value: 100},
                 {label: 'Quantity', value: 20},
             ],
         })
-        expect(desc?.id).toBe('module.loader.description')
+        expect(desc?.id).toBe('module.loading.description')
         expect(desc?.template).toBe('generates {thrust} thrust with a weight of {mass} per unit')
         expect(desc?.params).toEqual({thrust: 100, mass: 500})
         expect(desc?.highlightKeys).toEqual(['thrust', 'mass'])
@@ -79,13 +79,13 @@ describe('describeModule', () => {
 
     test('Crafter produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Crafter',
+            capability: 'Crafting',
             attributes: [
                 {label: 'Speed', value: 580},
                 {label: 'Drain', value: 15},
             ],
         })
-        expect(desc?.id).toBe('module.crafter.description')
+        expect(desc?.id).toBe('module.crafting.description')
         expect(desc?.template).toBe(
             'manufactures items at {speed} speed while draining {drain} energy per second'
         )
@@ -117,14 +117,14 @@ describe('describeModule', () => {
 
     test('Hauler produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Hauler',
+            capability: 'Hauling',
             attributes: [
                 {label: 'Capacity', value: 4},
                 {label: 'Efficiency', value: 80},
                 {label: 'Drain', value: 25},
             ],
         })
-        expect(desc?.id).toBe('module.hauler.description')
+        expect(desc?.id).toBe('module.hauling.description')
         expect(desc?.template).toBe(
             'locks onto up to {capacity} targets at {efficiency} efficiency while draining {drain} energy per distance travelled per target'
         )
@@ -257,7 +257,7 @@ describe('describeModuleForSlot', () => {
     test('describeModuleForSlot uses capability when installed module name differs', () => {
         const slot = {
             installed: true,
-            name: 'Cargo Bay',
+            name: 'Cargo Hold',
             capability: 'Storage',
             attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
         } as unknown as ResolvedModuleSlot

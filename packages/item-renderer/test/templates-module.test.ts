@@ -46,7 +46,7 @@ test('Hauler template renders its capability prose', () => {
     const item = FIXTURES.haulerT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderModule(item, resolved)
-    expect(svg).toContain('HAULER')
+    expect(svg).toContain('HAULING')
     expect(svg).toContain('locks onto')
 })
 

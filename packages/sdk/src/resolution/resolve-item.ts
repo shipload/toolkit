@@ -198,7 +198,7 @@ function computeCapabilityGroup(
         case MODULE_LOADER: {
             const caps = computeLoaderCapabilities(stats)
             return {
-                capability: 'Loader',
+                capability: 'Loading',
                 attributes: [
                     {label: 'Mass', value: caps.mass},
                     {label: 'Thrust', value: caps.thrust},
@@ -209,7 +209,7 @@ function computeCapabilityGroup(
         case MODULE_CRAFTER: {
             const caps = computeCrafterCapabilities(stats)
             return {
-                capability: 'Crafter',
+                capability: 'Crafting',
                 attributes: [
                     {label: 'Speed', value: caps.speed},
                     {label: 'Drain', value: caps.drain},
@@ -219,7 +219,7 @@ function computeCapabilityGroup(
         case MODULE_HAULER: {
             const caps = computeHaulerCapabilities(stats)
             return {
-                capability: 'Hauler',
+                capability: 'Hauling',
                 attributes: [
                     {label: 'Capacity', value: caps.capacity},
                     {label: 'Efficiency', value: caps.efficiency},

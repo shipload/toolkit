@@ -86,8 +86,8 @@ describe('resolveItem', () => {
             [ITEM_ENGINE_T1, 'Engine', ['Thrust', 'Drain']],
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
             [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth']],
-            [ITEM_LOADER_T1, 'Loader', ['Mass', 'Thrust', 'Quantity']],
-            [ITEM_CRAFTER_T1, 'Crafter', ['Speed', 'Drain']],
+            [ITEM_LOADER_T1, 'Loading', ['Mass', 'Thrust', 'Quantity']],
+            [ITEM_CRAFTER_T1, 'Crafting', ['Speed', 'Drain']],
         ]
         for (const [itemId, capName, attrNames] of expectations) {
             const result = resolveItem(UInt16.from(itemId), UInt64.from(12345))
@@ -127,12 +127,12 @@ describe('resolveItem', () => {
         const seed = encodeStats([500, 500, 500, 500])
         const resolved = resolveItem(UInt16.from(ITEM_HAULER_T1), UInt64.from(seed))
         assert.equal(resolved.itemType, 'module')
-        assert.equal(resolved.name, 'Hauler')
+        assert.equal(resolved.name, 'Tractor Beam')
         assert.isArray(resolved.attributes)
         assert.lengthOf(resolved.attributes!, 1)
 
         const group = resolved.attributes![0]
-        assert.equal(group.capability, 'Hauler')
+        assert.equal(group.capability, 'Hauling')
         assert.lengthOf(group.attributes, 3)
 
         assert.deepEqual(group.attributes[0], {label: 'Capacity', value: 2})

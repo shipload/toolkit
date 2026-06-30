@@ -61,8 +61,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         ],
         highlightKeys: ['yield', 'depth', 'drain'],
     },
-    loader: {
-        id: 'module.loader.description',
+    loading: {
+        id: 'module.loading.description',
         template: 'generates {thrust} thrust with a weight of {mass} per unit',
         params: [
             ['thrust', 'Thrust'],
@@ -70,8 +70,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         ],
         highlightKeys: ['thrust', 'mass'],
     },
-    crafter: {
-        id: 'module.crafter.description',
+    crafting: {
+        id: 'module.crafting.description',
         template: 'manufactures items at {speed} speed while draining {drain} energy per second',
         params: [
             ['speed', 'Speed'],
@@ -91,8 +91,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         params: [['capacity', 'Energy Capacity']],
         highlightKeys: ['capacity'],
     },
-    hauler: {
-        id: 'module.hauler.description',
+    hauling: {
+        id: 'module.hauling.description',
         template:
             'locks onto up to {capacity} targets at {efficiency} efficiency while draining {drain} energy per distance travelled per target',
         params: [

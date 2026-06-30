@@ -26,11 +26,20 @@ export const colors = {
     capability: {
         engine: '#4a8abf',
         generator: '#22c55e',
+        reactor: '#22c55e',
         gatherer: '#f59e0b',
+        'limpet bay': '#f59e0b',
         loader: '#eab308',
+        loading: '#eab308',
+        'shuttle bay': '#eab308',
         manufacturing: '#a855f7',
+        crafting: '#a855f7',
+        fabricator: '#a855f7',
         storage: '#14b8a6',
+        'cargo hold': '#14b8a6',
         hauler: '#f97316',
+        hauling: '#f97316',
+        'tractor beam': '#f97316',
     },
 } as const
 

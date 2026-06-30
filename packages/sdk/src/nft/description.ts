@@ -107,7 +107,7 @@ export function entityDisplayName(itemId: number): string {
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:
-            return 'Extractor'
+            return 'Mining Rig'
         case ITEM_FACTORY_T1_PACKED:
             return 'Factory'
         case ITEM_CONTAINER_T1_PACKED:
@@ -124,19 +124,19 @@ export function moduleDisplayName(itemId: number): string {
         case ITEM_ENGINE_T1:
             return 'Engine'
         case ITEM_GENERATOR_T1:
-            return 'Generator'
+            return 'Reactor'
         case ITEM_GATHERER_T1:
-            return 'Gatherer'
+            return 'Limpet Bay'
         case ITEM_LOADER_T1:
-            return 'Loader'
+            return 'Shuttle Bay'
         case ITEM_CRAFTER_T1:
-            return 'Crafter'
+            return 'Fabricator'
         case ITEM_STORAGE_T1:
-            return 'Cargo Bay'
+            return 'Cargo Hold'
         case ITEM_HAULER_T1:
-            return 'Hauler'
+            return 'Tractor Beam'
         case ITEM_WARP_T1:
-            return 'Warp'
+            return 'Warp Drive'
         case ITEM_BATTERY_T1:
             return 'Battery Bank'
         default:

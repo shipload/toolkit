@@ -176,46 +176,46 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#E86344',
     },
     10101: {
-        name: 'Generator',
+        name: 'Reactor',
         description: 'Basic energy system. Stores and recharges energy from resonant crystals.',
         color: '#4ADBFF',
     },
     10102: {
-        name: 'Gatherer',
+        name: 'Limpet Bay',
         description: 'Basic gathering system. Probes and conduits for raw resources.',
         color: '#7B8D9E',
     },
     10103: {
-        name: 'Loader',
+        name: 'Shuttle Bay',
         description: 'Basic cargo handling system. Loads and unloads cargo with articulated arms.',
         color: '#5A8B3E',
     },
     10104: {
-        name: 'Crafter',
+        name: 'Fabricator',
         description:
             'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
         color: '#B877FF',
     },
     10105: {
-        name: 'Cargo Bay',
+        name: 'Cargo Hold',
         description: 'Expanded cargo storage with reinforced internal holds.',
         color: '#8B7355',
     },
     10106: {
-        name: 'Hauler',
+        name: 'Tractor Beam',
         description:
             'Projects a haul beam to lock onto and transport containers or warehouses through group travel.',
         color: '#4ADBFF',
     },
     10107: {
-        name: 'Warp',
+        name: 'Warp Drive',
         description:
             'Folds local space-time around the hull, projecting the ship across vast distances in a single discharge of the entire energy reserve.',
         color: '#9be4ff',
     },
     10108: {
         name: 'Battery Bank',
-        description: 'Stores additional charge produced by generators.',
+        description: 'Stores additional charge produced by reactors.',
         color: '#4ADBFF',
     },
     10109: {
@@ -241,7 +241,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#EAB308',
     },
     10203: {
-        name: 'Extractor',
+        name: 'Mining Rig',
         description:
             'Planetary resource extraction facility with generator and gatherer module slots.',
         color: '#D4726F',
@@ -290,12 +290,14 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 }
 
 export const entityMetadata: Record<number, EntityMetadata> = {
-    10201: {moduleSlotLabels: ['Engine', 'Generator', 'Gatherer', 'Loader', 'Storage']},
-    10202: {moduleSlotLabels: ['Loader', 'Storage', 'Storage', 'Storage', 'Storage']},
-    10203: {moduleSlotLabels: ['Generator', 'Gatherer']},
-    10204: {moduleSlotLabels: ['Generator', 'Crafter']},
-    10205: {moduleSlotLabels: ['Generator', 'Drive Coil']},
-    10206: {moduleSlotLabels: ['Storage', 'Storage', 'Storage']},
+    10201: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
+    10202: {
+        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
+    },
+    10203: {moduleSlotLabels: ['Reactor', 'Limpet Bay']},
+    10204: {moduleSlotLabels: ['Reactor', 'Fabricator']},
+    10205: {moduleSlotLabels: ['Reactor', 'Drive Coil']},
+    10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
 }
 
 for (const item of items as Array<{id: number}>) {
