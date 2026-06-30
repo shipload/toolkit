@@ -6,8 +6,11 @@ import {
     getStatMappings,
     getStatMappingsForCapability,
     getStatMappingsForStat,
+    getProducersForAttribute,
+    getCapabilityAttributeRows,
     type StatMapping,
 } from '../../src/derivation/capability-mappings'
+import {capabilityAttributes} from '../../src/data/capabilities'
 
 describe('deriveStatMappings', () => {
     test('produces mappings for every stat the contract currently consumes', () => {
@@ -54,27 +57,34 @@ describe('deriveStatMappings', () => {
     })
 })
 
-describe('source qualifier (ambiguous capability·attribute)', () => {
-    test('Energy.capacity carries a source because >1 module produces it', () => {
+describe('producer (source) is always present', () => {
+    test('every derived mapping carries a non-empty source', () => {
+        const mappings = deriveStatMappings()
+        assert.isAbove(mappings.length, 0)
+        assert.isTrue(mappings.every((m) => typeof m.source === 'string' && m.source.length > 0))
+    })
+
+    test('Energy.capacity is produced by more than one source', () => {
         const rows = getStatMappingsForCapability('Energy').filter(
             (m) => m.attribute === 'capacity'
         )
-        assert.isAbove(rows.length, 0)
-        assert.isTrue(rows.every((m) => typeof m.source === 'string' && m.source.length > 0))
         assert.isAbove(new Set(rows.map((m) => m.source)).size, 1)
     })
 
-    test('Storage.capacity splits across Cargo Bay and entity Hull', () => {
+    test('Storage.capacity splits across a module and the entity Hull', () => {
         const rows = getStatMappingsForCapability('Storage').filter(
             (m) => m.attribute === 'capacity'
         )
-        assert.include([...new Set(rows.map((m) => m.source))], 'Hull')
+        const sources = [...new Set(rows.map((m) => m.source))]
+        assert.include(sources, 'Hull')
+        assert.isAbove(sources.length, 1)
     })
 
-    test('unambiguous attributes carry no source qualifier', () => {
+    test('a single-producer attribute now carries its producer too', () => {
         const rows = getStatMappingsForCapability('Crafter').filter((m) => m.attribute === 'speed')
         assert.isAbove(rows.length, 0)
-        assert.isTrue(rows.every((m) => m.source === undefined))
+        assert.isTrue(rows.every((m) => typeof m.source === 'string' && m.source.length > 0))
+        assert.strictEqual(new Set(rows.map((m) => m.source)).size, 1)
     })
 })
 
@@ -105,4 +115,45 @@ describe('stat coverage', () => {
             assert.deepEqual(actual, expectedTuples.slice().sort())
         })
     }
+})
+
+describe('producer-join helpers', () => {
+    test('getProducersForAttribute returns the distinct producers', () => {
+        assert.strictEqual(getProducersForAttribute('Energy', 'capacity').length, 2)
+        assert.strictEqual(getProducersForAttribute('Movement', 'thrust').length, 1)
+    })
+
+    test('getProducersForAttribute is empty for attributes with no slot producer', () => {
+        assert.deepEqual(getProducersForAttribute('Loader', 'quantity'), [])
+        assert.deepEqual(getProducersForAttribute('Crafter', 'quality'), [])
+        assert.deepEqual(getProducersForAttribute('Launch', 'range'), [])
+    })
+
+    test('getCapabilityAttributeRows expands multi-producer attributes', () => {
+        const rows = getCapabilityAttributeRows()
+        assert.strictEqual(rows.length, capabilityAttributes.length + 2)
+        const energyCap = rows.filter(
+            (r) => r.capability === 'Energy' && r.attribute === 'capacity'
+        )
+        assert.strictEqual(energyCap.length, 2)
+        assert.isTrue(
+            energyCap.every((r) => typeof r.source === 'string' && (r.source as string).length > 0)
+        )
+    })
+
+    test('getCapabilityAttributeRows keeps uncovered attributes as one source-less row', () => {
+        const rows = getCapabilityAttributeRows()
+        const loaderQty = rows.filter(
+            (r) => r.capability === 'Loader' && r.attribute === 'quantity'
+        )
+        assert.strictEqual(loaderQty.length, 1)
+        assert.strictEqual(loaderQty[0].source, undefined)
+    })
+
+    test('getCapabilityAttributeRows carries a shared description on every row', () => {
+        const rows = getCapabilityAttributeRows()
+        assert.isTrue(
+            rows.every((r) => typeof r.description === 'string' && r.description.length > 0)
+        )
+    })
 })

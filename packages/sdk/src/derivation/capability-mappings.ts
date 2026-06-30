@@ -18,7 +18,8 @@ import {
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
 } from '../data/item-ids'
-import type {StatMapping} from '../data/capabilities'
+import type {StatMapping, CapabilityAttributeRow} from '../data/capabilities'
+import {capabilityAttributes} from '../data/capabilities'
 
 export const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
     engine: ITEM_ENGINE_T1,
@@ -108,19 +109,6 @@ export function deriveStatMappings(): StatMapping[] {
             }
         }
     }
-    // Keep source only where a capability·attribute is produced by more than one source.
-    const sourcesByAttr = new Map<string, Set<string>>()
-    for (const m of out) {
-        const k = `${m.capability}|${m.attribute}`
-        const set = sourcesByAttr.get(k) ?? new Set<string>()
-        set.add(m.source as string)
-        sourcesByAttr.set(k, set)
-    }
-    for (const m of out) {
-        if ((sourcesByAttr.get(`${m.capability}|${m.attribute}`)?.size ?? 0) <= 1) {
-            m.source = undefined
-        }
-    }
     cached = out
     return out
 }
@@ -135,4 +123,40 @@ export function getStatMappingsForStat(stat: string): StatMapping[] {
 
 export function getStatMappingsForCapability(capability: string): StatMapping[] {
     return deriveStatMappings().filter((m) => m.capability === capability)
+}
+
+export function getProducersForAttribute(capability: string, attribute: string): string[] {
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const m of deriveStatMappings()) {
+        if (m.capability !== capability || m.attribute !== attribute) continue
+        if (seen.has(m.source)) continue
+        seen.add(m.source)
+        out.push(m.source)
+    }
+    return out
+}
+
+export function getCapabilityAttributeRows(): CapabilityAttributeRow[] {
+    const rows: CapabilityAttributeRow[] = []
+    for (const ca of capabilityAttributes) {
+        const producers = getProducersForAttribute(ca.capability, ca.attribute)
+        if (producers.length === 0) {
+            rows.push({
+                capability: ca.capability,
+                attribute: ca.attribute,
+                description: ca.description,
+            })
+            continue
+        }
+        for (const source of producers) {
+            rows.push({
+                capability: ca.capability,
+                attribute: ca.attribute,
+                description: ca.description,
+                source,
+            })
+        }
+    }
+    return rows
 }

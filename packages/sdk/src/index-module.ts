@@ -359,13 +359,15 @@ export {
     isInvertedAttribute,
     getCapabilityAttributes,
 } from './data/capabilities'
-export type {CapabilityAttribute, StatMapping} from './data/capabilities'
+export type {CapabilityAttribute, StatMapping, CapabilityAttributeRow} from './data/capabilities'
 
 export {
     deriveStatMappings,
     getStatMappings,
     getStatMappingsForStat,
     getStatMappingsForCapability,
+    getProducersForAttribute,
+    getCapabilityAttributeRows,
     sourceLabelForOutput,
 } from './derivation/capability-mappings'
 export {SLOT_FORMULAS} from './data/capability-formulas'

@@ -8,7 +8,14 @@ export interface StatMapping {
     stat: string
     capability: string
     attribute: string
-    source?: string // producing module/role, set only when capability·attribute is ambiguous
+    source: string // producing module/role, always present
+}
+
+export interface CapabilityAttributeRow {
+    capability: string
+    attribute: string
+    description: string
+    source?: string // producing module/role; absent when no formula-derived producer exists
 }
 
 export const capabilityNames: string[] = [
