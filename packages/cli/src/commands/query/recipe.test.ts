@@ -13,11 +13,11 @@ test('renderWhereUsed shows the fabricator drain flow and marks the mining rig a
     expect(out).toMatch(/Mining Rig.*sink|sink.*Mining Rig/s)
 })
 
-test('renderWhereUsed shows the gatherer drain flow fed by Resin', () => {
+test('renderWhereUsed shows the hauling efficiency flow fed by Resin', () => {
     const out = renderWhereUsed(ITEM_RESIN, getRecipeConsumers(ITEM_RESIN))
     expect(out).toContain('Resin')
-    expect(out).toContain('Gatherer')
-    expect(out).toContain('drain')
+    expect(out).toContain('Tractor Beam')
+    expect(out).toContain('Hauling.efficiency')
 })
 
 test('renderDemand surfaces Resin as the least-used component', () => {
