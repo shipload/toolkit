@@ -354,3 +354,22 @@ test('getLaunchQuote mirrors uint32 payload mass wrapping at item and total boun
 
     expect(quote.chargeTime).toBe(999408)
 })
+
+test('sendAsset builds an atomicassets::transfer to the recipient with the given memo', () => {
+    const action = sl.actions.sendAsset('alice', 'bob', 7, 'gg')
+    expect(String(action.account)).toBe('atomicassets')
+    expect(String(action.name)).toBe('transfer')
+    expect(String(action.authorization[0].actor)).toBe('alice')
+    expect(String(action.authorization[0].permission)).toBe('active')
+    const data = action.decodeData(ATOMICASSETS_ABI)
+    expect(String(data.from)).toBe('alice')
+    expect(String(data.to)).toBe('bob')
+    expect(data.asset_ids.map(String)).toEqual(['7'])
+    expect(String(data.memo)).toBe('gg')
+})
+
+test('sendAsset defaults to an empty memo', () => {
+    const action = sl.actions.sendAsset('alice', 'bob', 7)
+    const data = action.decodeData(ATOMICASSETS_ABI)
+    expect(String(data.memo)).toBe('')
+})

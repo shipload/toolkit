@@ -593,6 +593,23 @@ export class ActionsManager extends BaseManager {
         )
     }
 
+    sendAsset(owner: NameType, recipient: NameType, assetId: UInt64Type, memo = ''): Action {
+        return Action.from(
+            {
+                account: this.atomicAssetsAccount,
+                name: 'transfer',
+                authorization: [{actor: Name.from(owner), permission: 'active'}],
+                data: {
+                    from: Name.from(owner),
+                    to: Name.from(recipient),
+                    asset_ids: [UInt64.from(assetId)],
+                    memo,
+                },
+            },
+            ATOMICASSETS_ABI
+        )
+    }
+
     // Two top-level actions the wallet signs to unwrap an NFT into a host's cargo.
     unwrapCargoTx(owner: NameType, assetId: UInt64Type, hostId: UInt64Type): Action[] {
         return [this.transferForUnwrap(owner, assetId), this.placecargo(owner, hostId, assetId)]
