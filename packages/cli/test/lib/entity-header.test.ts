@@ -35,7 +35,7 @@ describe("renderEntityFull modules", () => {
 			],
 		});
 		expect(out).toMatch(/Modules:/);
-		expect(out).toMatch(/#0 \(Any\):\s+Gatherer \(T1\) — depth \d+ · yield \d+ · \d+\.\d+ energy\/min/);
+		expect(out).toMatch(/#0 \(Any\):\s+Limpet Bay \(T1\) — depth \d+ · yield \d+ · \d+\.\d+ energy\/min/);
 	});
 
 	test("renders empty slot with its accepted type", () => {

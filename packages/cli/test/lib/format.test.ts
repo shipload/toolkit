@@ -233,7 +233,7 @@ describe("formatTaskShort", () => {
 			type: 8 as never,
 			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(t)).toBe("Deploy Loader (T1)");
+		expect(formatTaskShort(t)).toBe("Deploy Shuttle Bay (T1)");
 	});
 
 	test("Unwrap / Undeploy list cargo", () => {
@@ -247,7 +247,7 @@ describe("formatTaskShort", () => {
 			type: 11 as never,
 			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
 		});
-		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Loader (T1)");
+		expect(formatTaskShort(undeploy)).toBe("Undeploy 1 Shuttle Bay (T1)");
 	});
 
 	test("Demolish is bare verb", () => {

@@ -5,12 +5,12 @@ import {renderWhereUsed, renderDemand, renderResourceDemand} from './recipe'
 const ITEM_SENSOR = 10006
 const ITEM_RESIN = 10010
 
-test('renderWhereUsed shows the crafter drain flow and marks the extractor as a sink', () => {
+test('renderWhereUsed shows the fabricator drain flow and marks the mining rig as a sink', () => {
     const out = renderWhereUsed(ITEM_SENSOR, getRecipeConsumers(ITEM_SENSOR))
     expect(out).toContain('Sensor')
-    expect(out).toContain('Crafter')
+    expect(out).toContain('Fabricator')
     expect(out).toContain('drain')
-    expect(out).toMatch(/Extractor.*sink|sink.*Extractor/s)
+    expect(out).toMatch(/Mining Rig.*sink|sink.*Mining Rig/s)
 })
 
 test('renderWhereUsed shows the gatherer drain flow fed by Resin', () => {
