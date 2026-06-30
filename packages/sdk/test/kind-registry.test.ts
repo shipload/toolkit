@@ -5,17 +5,21 @@ import {
     CAP_MODULES,
     CAP_UNDEPLOY,
     CAP_WRAP,
+    ENTITY_HUB,
+    ENTITY_WAREHOUSE,
     EntityClass,
     getEntityClass,
     getKindMeta,
     getPackedEntityType,
     getTemplateMeta,
+    isHub,
     kindCan,
     type EntityTypeName,
 } from '../src/data/kind-registry'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_HUB_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../src/data/item-ids'
@@ -77,6 +81,15 @@ describe('kind-registry', () => {
         expect(getEntityClass('warehouse')).toBe(EntityClass.OrbitalStructure)
         expect(getEntityClass('extractor')).toBe(EntityClass.OrbitalStructure)
         expect(getEntityClass('factory')).toBe(EntityClass.OrbitalStructure)
+        expect(getEntityClass('mdriver')).toBe(EntityClass.OrbitalStructure)
+        expect(getEntityClass('mcatcher')).toBe(EntityClass.OrbitalStructure)
+        expect(getEntityClass('hub')).toBe(EntityClass.OrbitalStructure)
+    })
+
+    test('isHub identifies the hub kind', () => {
+        expect(isHub({type: ENTITY_HUB})).toBeTrue()
+        expect(isHub({type: ENTITY_WAREHOUSE})).toBeFalse()
+        expect(isHub({})).toBeFalse()
     })
 
     test('getEntityClass throws for unknown kinds', () => {
@@ -88,6 +101,7 @@ describe('kind-registry', () => {
         expect(getPackedEntityType(ITEM_WAREHOUSE_T1_PACKED)?.toString()).toBe('warehouse')
         expect(getPackedEntityType(ITEM_CONTAINER_T1_PACKED)?.toString()).toBe('container')
         expect(getPackedEntityType(ITEM_CONTAINER_T2_PACKED)?.toString()).toBe('container')
+        expect(getPackedEntityType(ITEM_HUB_T1_PACKED)?.toString()).toBe('hub')
     })
 
     test('getPackedEntityType returns null for non-template item IDs', () => {

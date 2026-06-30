@@ -9,6 +9,7 @@ import {LocationsManager} from './locations'
 import {CoordinatesManager} from './coordinates'
 import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
+import {ClusterManager} from './cluster'
 import {NftManager} from './nft'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
@@ -19,6 +20,7 @@ export class GameContext {
     private _coordinates?: CoordinatesManager
     private _epochs?: EpochsManager
     private _actions?: ActionsManager
+    private _clusters?: ClusterManager
     private _nft?: NftManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
@@ -73,6 +75,13 @@ export class GameContext {
             this._actions = new ActionsManager(this)
         }
         return this._actions
+    }
+
+    get clusters(): ClusterManager {
+        if (!this._clusters) {
+            this._clusters = new ClusterManager(this)
+        }
+        return this._clusters
     }
 
     get nft(): NftManager {

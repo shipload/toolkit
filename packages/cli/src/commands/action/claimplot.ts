@@ -1,4 +1,4 @@
-import {isPlotBuildable, ServerTypes, type Shipload} from '@shipload/sdk'
+import {isPlotBuildable, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseInt64, parseUint16} from '../../lib/args'
@@ -13,14 +13,18 @@ export interface ClaimplotOpts {
     entityType: EntityTypeName
     entityId: bigint
     targetItemId: number
-    x: bigint
-    y: bigint
+    hubId: bigint
+    gx: number
+    gy: number
 }
 
 export async function buildAction(opts: ClaimplotOpts, shipload?: Shipload): Promise<Action> {
     const sl = shipload ?? (await getShipload())
-    const coords = ServerTypes.coordinates.from({x: opts.x, y: opts.y})
-    return sl.actions.claimplot(opts.entityId, opts.targetItemId, coords)
+    return sl.actions.claimplot(opts.entityId, opts.targetItemId, {
+        hub: opts.hubId,
+        gx: opts.gx,
+        gy: opts.gy,
+    })
 }
 
 interface ClaimplotCliOptions {
@@ -31,27 +35,29 @@ interface ClaimplotCliOptions {
 export async function runClaimplot(
     ctx: EntityContext,
     targetItemId: number,
-    x: bigint,
-    y: bigint,
+    hubId: bigint,
+    gx: number,
+    gy: number,
     options: ClaimplotCliOptions
 ): Promise<void> {
     await withValidation(async () => {
         if (!isPlotBuildable(targetItemId)) {
             throw new ValidationError(
-                `item ${targetItemId} is not plot-buildable (plot is for planetary structures: warehouse, extractor, factory)`
+                `item ${targetItemId} is not plot-buildable (plot is for orbital structures: warehouse, extractor, factory)`
             )
         }
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             targetItemId,
-            x,
-            y,
+            hubId,
+            gx,
+            gy,
         })
         const result = await transact(
             {action},
             {
-                description: `Claiming plot for item ${targetItemId} at (${x}, ${y}) via ${ctx.entityType}:${ctx.entityId}`,
+                description: `Claiming plot for item ${targetItemId} in hub ${hubId} cell (${gx}, ${gy}) via ${ctx.entityType}:${ctx.entityId}`,
             }
         )
         await maybeAwaitAndPrint(ctx.entityId, options, result)
@@ -60,26 +66,24 @@ export async function runClaimplot(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'claimplot',
-    description: 'Claim a Plot at coords for a planetary structure (warehouse/extractor/factory)',
+    description: 'Claim a Plot in a station hub cell for an orbital structure',
     appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('claimplot')
-            .description(
-                'Claim a Plot at coords for a planetary structure (warehouse/extractor/factory)'
-            )
+            .description('Claim a Plot in a station hub cell for an orbital structure')
             .addHelpText(
                 'before',
-                'Requires: this entity has a Crafter module installed, is idle, is at <x> <y>, ' +
-                    'and <x> <y> is a planet.\n' +
-                    'Creates a new Plot entity immediately at <x> <y> (capacity = sum of recipe input masses) ' +
+                'Requires: this entity has a Crafter module installed, is idle, and the target ' +
+                    'cell <gx> <gy> is a free cell in hub <hub-id> footprint.\n' +
+                    'Creates a new Plot entity immediately in that cell (capacity = sum of recipe input masses) ' +
                     'and prints its id. Then unload recipe inputs into the Plot and run `buildplot` on the same entity.\n'
             )
             .addHelpText(
                 'after',
                 `
 Examples:
-  # Claim a Warehouse plot at (-7, 9) using ship 1 (must be at those coords)
-  shiploadcli ship 1 claimplot 11 -7 9
+  # Claim a Warehouse plot in hub 5 at cell (-1, 0) using ship 1
+  shiploadcli ship 1 claimplot 11 5 -1 0
 
   # Then deposit inputs (cargo refs are <item-id>:<stack-id>:<qty>) and build:
   shiploadcli ship 1 unload plot 42 101:0:100000
@@ -88,13 +92,20 @@ Examples:
 Find target item ids via \`shiploadcli recipe <item-id>\` or by browsing \`shiploadcli items\`.`
             )
             .argument('<target-item-id>', 'item id of the structure to build', parseUint16)
-            .argument('<x>', 'plot X coordinate (entity must be at these coords)', parseInt64)
-            .argument('<y>', 'plot Y coordinate (entity must be at these coords)', parseInt64)
+            .argument('<hub-id>', 'entity id of the station hub to build in', parseInt64)
+            .argument('<gx>', 'footprint cell X offset within the hub', parseInt64)
+            .argument('<gy>', 'footprint cell Y offset within the hub', parseInt64)
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(
-                async (targetItemId: number, x: bigint, y: bigint, opts: ClaimplotCliOptions) => {
-                    await runClaimplot(ctx, targetItemId, x, y, opts)
+                async (
+                    targetItemId: number,
+                    hubId: bigint,
+                    gx: bigint,
+                    gy: bigint,
+                    opts: ClaimplotCliOptions
+                ) => {
+                    await runClaimplot(ctx, targetItemId, hubId, Number(gx), Number(gy), opts)
                 }
             ),
 }

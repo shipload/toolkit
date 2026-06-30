@@ -10,6 +10,7 @@ import type {LocationsManager} from './managers/locations'
 import type {CoordinatesManager} from './managers/coordinates'
 import type {EpochsManager} from './managers/epochs'
 import type {ActionsManager} from './managers/actions'
+import type {ClusterManager} from './managers/cluster'
 import type {NftManager} from './managers/nft'
 import type {SubscriptionsManager} from './subscriptions/manager'
 import type {GameState} from './entities/gamestate'
@@ -121,6 +122,10 @@ export class Shipload {
 
     get actions(): ActionsManager {
         return this._context.actions
+    }
+
+    get clusters(): ClusterManager {
+        return this._context.clusters
     }
 
     get nft(): NftManager {

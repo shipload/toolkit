@@ -17,7 +17,7 @@ import {
     type UInt64Type,
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {Coordinates, PRECISION, type CoordinatesType} from '../types'
+import {Coordinates, PRECISION, type ClusterSlotType, type CoordinatesType} from '../types'
 import {ServerContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
@@ -435,22 +435,39 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    deploy(entityId: UInt64Type, ref: ServerContract.ActionParams.Type.cargo_ref): Action {
+    deploy(
+        entityId: UInt64Type,
+        ref: ServerContract.ActionParams.Type.cargo_ref,
+        slot?: ClusterSlotType
+    ): Action {
         return this.server.action('deploy', {
             id: UInt64.from(entityId),
             ref,
+            slot: slot ? {hub: UInt64.from(slot.hub), gx: slot.gx, gy: slot.gy} : undefined,
         })
     }
 
-    claimplot(
-        entityId: UInt64Type,
-        targetItemId: UInt16Type,
-        coords: ServerContract.ActionParams.Type.coordinates
-    ): Action {
+    claimplot(entityId: UInt64Type, targetItemId: UInt16Type, slot: ClusterSlotType): Action {
         return this.server.action('claimplot', {
             builder_id: UInt64.from(entityId),
             target_item_id: UInt16.from(targetItemId),
-            coords,
+            slot: {hub: UInt64.from(slot.hub), gx: slot.gx, gy: slot.gy},
+        })
+    }
+
+    movetile(
+        hubId: UInt64Type,
+        fromGx: number,
+        fromGy: number,
+        toGx: number,
+        toGy: number
+    ): Action {
+        return this.server.action('movetile', {
+            hub_id: UInt64.from(hubId),
+            from_gx: fromGx,
+            from_gy: fromGy,
+            to_gx: toGx,
+            to_gy: toGy,
         })
     }
 

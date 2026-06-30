@@ -5,6 +5,7 @@ import {
     type UInt32,
     type UInt32Type,
     UInt64,
+    type UInt64Type,
 } from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 
@@ -24,6 +25,12 @@ export const BASE_ORBITAL_MASS = 100000
 
 export const MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE = 100
 export const MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL = 200
+
+export interface ClusterSlotType {
+    hub: UInt64Type
+    gx: number
+    gy: number
+}
 
 export interface ShipLike {
     coordinates: ServerContract.Types.coordinates

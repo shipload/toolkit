@@ -46,9 +46,12 @@ export {
     LocationsManager,
     EpochsManager,
     ActionsManager,
+    ClusterManager,
+    computeFreeCells,
     NftManager,
     ConstructionManager,
 } from './managers'
+export type {GridCell, ClusterCell, Cluster} from './managers'
 export type {
     PlayerRosterEntry,
     LocationStratum,
@@ -315,6 +318,7 @@ export {
     ENTITY_FACTORY,
     ENTITY_CONTAINER,
     ENTITY_NEXUS,
+    ENTITY_HUB,
     getEntityClass,
     getPackedEntityType,
     getKindMeta,
@@ -332,6 +336,7 @@ export {
     isContainer,
     isNexus,
     isPlot,
+    isHub,
 } from './data/kind-registry'
 export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'
