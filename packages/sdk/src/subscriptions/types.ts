@@ -139,6 +139,21 @@ export type ErrorMessage = {
     sub_id?: string
 }
 
+export interface ClusterCellWire {
+    gx: number
+    gy: number
+    entity: number
+}
+
+export type ClusterDeltaMessage = {
+    type: 'cluster'
+    sub_id: string
+    hub_id: number
+    seq: number
+    cells?: ClusterCellWire[]
+    erased?: boolean
+}
+
 export type ServerMessage =
     | AckMessage
     | SnapshotMessage
@@ -149,3 +164,4 @@ export type ServerMessage =
     | EventCatchupCompleteMessage
     | PongMessage
     | ErrorMessage
+    | ClusterDeltaMessage

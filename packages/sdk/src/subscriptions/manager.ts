@@ -3,6 +3,8 @@ import type {
     BoundingBox,
     BoundsDeltaMessage,
     ClientMessage,
+    ClusterCellWire,
+    ClusterDeltaMessage,
     EntityDeletedMessage,
     ServerMessage,
     SnapshotMessage,
@@ -57,6 +59,12 @@ export interface EntitySubscriptionHandlers {
     ) => void
     onDeleted?: (id: string, meta: EntitySubscriptionMeta) => void
     onError?: (error: Error) => void
+    onCluster?: (payload: {
+        hubId: number
+        seq: number
+        cells: ClusterCellWire[] | null
+        erased: boolean
+    }) => void
 }
 
 export interface EntitiesSubscriptionHandle {
@@ -306,6 +314,9 @@ export class SubscriptionsManager {
             case 'entity_deleted':
                 this.handleEntityDeleted(msg)
                 break
+            case 'cluster':
+                this.handleCluster(msg)
+                break
             case 'error':
                 this.handleError(msg)
                 break
@@ -366,5 +377,16 @@ export class SubscriptionsManager {
             this.entitySubs.delete(msg.sub_id)
         }
         sub.handlers.onDeleted?.(String(msg.entity_id), {seq: msg.seq})
+    }
+
+    private handleCluster(msg: ClusterDeltaMessage) {
+        const sub = this.entitySubs.get(msg.sub_id)
+        if (!sub) return
+        sub.handlers.onCluster?.({
+            hubId: msg.hub_id,
+            seq: msg.seq,
+            cells: msg.erased ? null : (msg.cells ?? []),
+            erased: msg.erased === true,
+        })
     }
 }
