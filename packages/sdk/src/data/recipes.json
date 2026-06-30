@@ -998,5 +998,33 @@
       }
     ],
     "blendWeights": []
+  },
+  {
+    "outputItemId": 10207,
+    "outputMass": 2400000,
+    "inputs": [
+      {
+        "itemId": 10005,
+        "quantity": 200
+      },
+      {
+        "itemId": 10010,
+        "quantity": 200
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": []
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
   }
 ]

@@ -1,4 +1,4 @@
-import {EntityClass, getKindMeta, getTemplateMeta} from '../data/kind-registry'
+import {ENTITY_HUB, EntityClass, getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import {getRecipe} from '../data/recipes-runtime'
 import {getItems} from '../data/catalog'
 import type {Item} from '../types'
@@ -15,7 +15,10 @@ export function availableBuildMethods(itemId: number): BuildMethod[] {
     const kindMeta = getKindMeta(template.kind)
     if (!kindMeta) return ['craft+deploy']
 
-    if (kindMeta.classification === EntityClass.OrbitalStructure) {
+    if (
+        kindMeta.classification === EntityClass.OrbitalStructure &&
+        !kindMeta.kind.equals(ENTITY_HUB)
+    ) {
         return ['craft+deploy', 'plot']
     }
     return ['craft+deploy']
