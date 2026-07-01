@@ -13,6 +13,7 @@ import * as gather from './commands/action/gather'
 import * as grouptravel from './commands/action/grouptravel'
 import * as join from './commands/action/join'
 import * as load from './commands/action/load'
+import * as movetile from './commands/action/movetile'
 import * as recharge from './commands/action/recharge'
 import * as refrshentity from './commands/action/refrshentity'
 import * as resolve from './commands/action/resolve'
@@ -29,6 +30,7 @@ import * as wrap from './commands/action/wrap'
 import * as wrapentity from './commands/action/wrapentity'
 import * as init from './commands/init'
 import * as census from './commands/query/census'
+import * as cluster from './commands/query/cluster'
 import * as config from './commands/query/config'
 import * as entities from './commands/query/entities'
 import * as entity from './commands/query/entity'
@@ -142,6 +144,8 @@ export function build(): Command {
     registerEntitySubcommand(claimplot.SUBCOMMAND)
     registerEntitySubcommand(buildplot.SUBCOMMAND)
     registerEntitySubcommand(undeploy.SUBCOMMAND)
+    registerEntitySubcommand(movetile.SUBCOMMAND)
+    registerEntitySubcommand(cluster.SUBCOMMAND)
     registerEntitySubcommand(wrap.SUBCOMMAND)
     registerEntitySubcommand(wrapentity.SUBCOMMAND)
     registerEntitySubcommand(demolish.SUBCOMMAND)

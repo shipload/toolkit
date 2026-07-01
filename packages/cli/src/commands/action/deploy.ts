@@ -1,5 +1,6 @@
 import {
     cargoRef,
+    type ClusterSlotType,
     EntityClass,
     getEntityClass,
     getLocationType,
@@ -22,6 +23,7 @@ import {projectedCoords} from '../../lib/projection'
 import {transact} from '../../lib/session'
 import {getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
+import {type DeployCell, parseCellOption, resolveDeploySlot} from './deploy-slot'
 
 export interface DeployOpts {
     entityType: EntityTypeName
@@ -29,6 +31,7 @@ export interface DeployOpts {
     packedItemId: number
     stackId: bigint
     modules?: ServerTypes.module_entry[]
+    slot?: ClusterSlotType
 }
 
 export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promise<Action> {
@@ -39,12 +42,14 @@ export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promis
             item_id: opts.packedItemId,
             stats: opts.stackId,
             modules: opts.modules ?? [],
-        })
+        }),
+        opts.slot
     )
 }
 
 interface DeployCliOptions extends Record<string, unknown> {
     modules?: string
+    cell?: DeployCell
 }
 
 export async function runDeploy(
@@ -62,7 +67,7 @@ export async function runDeploy(
         const packedEntityType = getPackedEntityType(input.itemId)
         if (
             packedEntityType !== null &&
-            getEntityClass(packedEntityType) === EntityClass.PlanetaryStructure
+            getEntityClass(packedEntityType) === EntityClass.OrbitalStructure
         ) {
             const coords = projectedCoords(snap)
             const gameSeed = await getGameSeed()
@@ -84,12 +89,14 @@ export async function runDeploy(
             [input],
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
+        const slot = resolveDeploySlot(input.itemId, options.cell)
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             packedItemId: input.itemId,
             stackId: resolved.stackId,
             modules: parseModulesJson(options.modules),
+            slot,
         })
         await transact({action}, {description: `Deploying from ${ctx.entityType}:${ctx.entityId}`})
     })
@@ -126,6 +133,11 @@ Use \`shiploadcli ship N cargo\` to find item-ids and stack-ids.`
                     '--modules <json>',
                     'modules vector for the packed entity (JSON array, default [])'
                 )
+            )
+            .option(
+                '--cell <hub-id:gx:gy>',
+                'deploy a structure into this hub cell (e.g. 5:-1:0)',
+                parseCellOption
             )
             .action(async (input: ParsedCargoInput, opts: DeployCliOptions) => {
                 await runDeploy(ctx, input, opts)
