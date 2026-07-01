@@ -1,5 +1,22 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.45
+
+### Patch Changes
+
+- 579f6f7: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Add station cluster commands to CLI
+  - Update snapshots and tests for T1 recipe rebalance
+  - Rename modules and entities in CLI test assertions
+  - Add station cluster support to SDK
+  - Rebalance T1 recipe stat pairings
+  - Allow zero cargo capacity entities
+- Updated dependencies [579f6f7]
+  - @shipload/sdk@1.0.0-next.45
+
 ## 1.0.0-next.44
 
 ### Patch Changes
