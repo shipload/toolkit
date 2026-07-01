@@ -26,6 +26,7 @@ import {
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
+    computeBaseHullmass,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
     computeContainerCapabilities,
@@ -298,7 +299,7 @@ function hullCapsForEntity(
         case ITEM_CONTAINER_T2_PACKED:
             return computeContainerT2Capabilities(decoded)
         default:
-            throw new Error(`resolveItem: no capacity formula wired for entity item ${itemId}`)
+            return {hullmass: computeBaseHullmass(decoded), capacity: 0}
     }
 }
 
@@ -316,6 +317,7 @@ function resolveEntity(
         const bigStats = toBigStats(stats)
         const decoded = decodeCraftedItemStats(id, bigStats)
         if (decoded.strength === undefined) decoded.strength = decodeStat(bigStats, 0)
+        if (decoded.density === undefined) decoded.density = decodeStat(bigStats, 1)
         if (decoded.hardness === undefined) decoded.hardness = decodeStat(bigStats, 2)
         const hullCaps = hullCapsForEntity(id, decoded)
         attributes = [

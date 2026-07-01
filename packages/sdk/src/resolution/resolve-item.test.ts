@@ -2,10 +2,11 @@ import {expect, test} from 'bun:test'
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import {resolveItem} from './resolve-item'
 import {encodeStats} from '../derivation/crafting'
-import {computeContainerCapabilities} from '../derivation/capabilities'
+import {computeBaseHullmass, computeContainerCapabilities} from '../derivation/capabilities'
 import {
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_HUB_T1_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
 } from '../data/item-ids'
@@ -35,3 +36,13 @@ for (const [label, itemId] of CONTAINER_ENTITIES) {
         expect(capacity).toBe(expected)
     })
 }
+
+test('resolveItem resolves the station hub with hullmass and zero cargo capacity', () => {
+    const stats = hullStats(300, 100, 400)
+    const resolved = resolveItem(UInt16.from(ITEM_HUB_T1_PACKED), stats)
+    const hull = resolved.attributes?.find((g) => g.capability === 'Hull')
+    expect(hull?.attributes.find((a) => a.label === 'Mass')?.value).toBe(
+        computeBaseHullmass({density: 100})
+    )
+    expect(hull?.attributes.find((a) => a.label === 'Capacity')?.value).toBe(0)
+})
