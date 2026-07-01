@@ -46,3 +46,14 @@ test('movetile builds with hub id and signed from/to coords', () => {
     expect(Number(data.to_gx)).toBe(1)
     expect(Number(data.to_gy)).toBe(-1)
 })
+
+test('swaptile builds with hub id and signed a/b coords', () => {
+    const action = sl.actions.swaptile(5, -2, 0, 1, -1)
+    expect(String(action.name)).toBe('swaptile')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.hub_id)).toBe('5')
+    expect(Number(data.a_gx)).toBe(-2)
+    expect(Number(data.a_gy)).toBe(0)
+    expect(Number(data.b_gx)).toBe(1)
+    expect(Number(data.b_gy)).toBe(-1)
+})

@@ -471,6 +471,16 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    swaptile(hubId: UInt64Type, aGx: number, aGy: number, bGx: number, bGy: number): Action {
+        return this.server.action('swaptile', {
+            hub_id: UInt64.from(hubId),
+            a_gx: aGx,
+            a_gy: aGy,
+            b_gx: bGx,
+            b_gy: bGy,
+        })
+    }
+
     buildplot(entityId: UInt64Type, plotId: UInt64Type): Action {
         return this.server.action('buildplot', {
             builder_id: UInt64.from(entityId),
