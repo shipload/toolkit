@@ -3,13 +3,20 @@ import {hash512} from '../utils/hash'
 import {Coordinates, type CoordinatesType} from '../types'
 import {getItem} from '../data/catalog'
 import {getEligibleResources, getResourceWeight, yieldThresholdAt} from './resources'
-import {RESERVE_TIERS, rollTier, rollWithinTier, applyResourceTierMultiplier} from './tiers'
+import {
+    RESERVE_TIERS,
+    rollTier,
+    rollWithinTier,
+    applyResourceTierMultiplier,
+    type ReserveTier,
+} from './tiers'
 
 export interface StratumInfo {
     itemId: number
     seed: bigint
     richness: number
     reserve: number
+    tier: ReserveTier
 }
 
 export interface ResourceStats {
@@ -35,10 +42,10 @@ export function deriveStratum(
     const rawReserve = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0
 
     if (rawReserve > yieldThresholdAt(stratum))
-        return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
+        return {itemId: 0, seed: 0n, richness: 0, reserve: 0, tier: 'small'}
 
     const eligible = getEligibleResources(locationType, subtype, stratum)
-    if (eligible.length === 0) return {itemId: 0, seed: 0n, richness: 0, reserve: 0}
+    if (eligible.length === 0) return {itemId: 0, seed: 0n, richness: 0, reserve: 0, tier: 'small'}
 
     const resourceRoll = ((bytes[4] << 24) | (bytes[5] << 16) | (bytes[6] << 8) | bytes[7]) >>> 0
 
@@ -83,7 +90,7 @@ export function deriveStratum(
     const roll = 500 + 100 * z
     const richness = Math.max(1, Math.min(999, Math.round(roll)))
 
-    return {itemId: selectedItemId, seed: seedBigInt, richness, reserve}
+    return {itemId: selectedItemId, seed: seedBigInt, richness, reserve, tier}
 }
 
 /**
