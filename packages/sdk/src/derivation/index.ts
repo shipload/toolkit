@@ -52,4 +52,6 @@ export {
     starsForStat,
     starRating,
     statMagnitude,
+    compareByStars,
 } from './stars'
+export type {StarSortable} from './stars'

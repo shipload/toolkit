@@ -160,7 +160,9 @@ export {
     starsForStat,
     starRating,
     statMagnitude,
+    compareByStars,
 } from './derivation'
+export type {StarSortable} from './derivation'
 
 export {hash, hash512} from './utils/hash'
 export {validateDisplayName, normalizeDisplayName} from './utils/display-name'

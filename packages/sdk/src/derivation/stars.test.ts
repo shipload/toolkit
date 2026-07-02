@@ -1,5 +1,6 @@
 import {expect, test} from 'bun:test'
 import {
+    compareByStars,
     MAX_STARS_PER_STAT,
     MAX_STAR_RATING,
     starRating,
@@ -42,6 +43,21 @@ test('statMagnitude sums raw values for tiebreaking', () => {
     expect(statMagnitude(599, 599, 599)).toBe(1797)
     expect(statMagnitude(251, 251, 251)).toBe(753)
     expect(statMagnitude(599, 599, 599)).toBeGreaterThan(statMagnitude(251, 251, 251))
+})
+
+test('compareByStars orders by rating desc, then magnitude desc', () => {
+    const rows = [
+        {key: 'low-rating', rating: 3, magnitude: 9000},
+        {key: 'high-rating', rating: 6, magnitude: 300},
+        {key: 'tie-small', rating: 6, magnitude: 600},
+        {key: 'tie-big', rating: 6, magnitude: 900},
+    ]
+    const ordered = [...rows].sort(compareByStars).map((r) => r.key)
+    expect(ordered).toEqual(['tie-big', 'tie-small', 'high-rating', 'low-rating'])
+})
+
+test('compareByStars returns 0 when rating and magnitude are equal', () => {
+    expect(compareByStars({rating: 4, magnitude: 500}, {rating: 4, magnitude: 500})).toBe(0)
 })
 
 test('constants hold their documented values', () => {
