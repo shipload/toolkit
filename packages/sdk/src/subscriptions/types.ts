@@ -143,6 +143,7 @@ export interface ClusterCellWire {
     gx: number
     gy: number
     entity: number
+    type?: string
 }
 
 export type ClusterDeltaMessage = {

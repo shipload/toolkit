@@ -29,10 +29,15 @@ describe('cluster delta routing', () => {
             sub_id: handle.subId,
             hub_id: 42,
             seq: 7,
-            cells: [{gx: 0, gy: 1, entity: 99}],
+            cells: [{gx: 0, gy: 1, entity: 99, type: 'warehouse'}],
         })
         expect(received).toEqual([
-            {hubId: 42, seq: 7, cells: [{gx: 0, gy: 1, entity: 99}], erased: false},
+            {
+                hubId: 42,
+                seq: 7,
+                cells: [{gx: 0, gy: 1, entity: 99, type: 'warehouse'}],
+                erased: false,
+            },
         ])
     })
 
