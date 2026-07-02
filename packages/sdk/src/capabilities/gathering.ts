@@ -30,9 +30,8 @@ export function calc_gather_duration(
     stratum: number,
     richness: number
 ): UInt32 {
-    return UInt32.from(
-        Math.floor(gather_duration_raw(gatherer, itemMass, quantity, stratum, richness))
-    )
+    const raw = gather_duration_raw(gatherer, itemMass, quantity, stratum, richness)
+    return UInt32.from(raw <= 0 ? 0 : Math.max(Math.floor(raw), 1))
 }
 
 export function calc_gather_rate(
@@ -48,6 +47,7 @@ export function calc_gather_rate(
 }
 
 export function calc_gather_energy(gatherer: GathererStats, duration: number): UInt32 {
-    const energy = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
-    return UInt32.from(energy)
+    if (duration <= 0) return UInt32.from(0)
+    const raw = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
+    return UInt32.from(Math.min(Math.max(raw, 1), 4294967295))
 }

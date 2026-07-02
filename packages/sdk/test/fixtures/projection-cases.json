@@ -1,6 +1,6 @@
 {
     "catalog_hash": "d40a88957dbddd67df67857e22b96a46744615fbd167f798d085232c23c709f9",
-    "generated_at": "2026-06-30T04:09:57.706Z",
+    "generated_at": "2026-07-02T05:28:14.392Z",
     "cases": [
         {
             "name": "ship-travel-step0",
@@ -840,7 +840,7 @@
                                             "quantity": 1
                                         }
                                     ],
-                                    "energy_cost": 0
+                                    "energy_cost": 1
                                 }
                             ]
                         }
@@ -973,7 +973,7 @@
                                             "quantity": 1
                                         }
                                     ],
-                                    "energy_cost": 0
+                                    "energy_cost": 1
                                 }
                             ]
                         }
@@ -990,7 +990,7 @@
                     "y": 6,
                     "z": 800
                 },
-                "energy": 1056,
+                "energy": 1055,
                 "cargomass": 1000,
                 "cargo": [
                     {
