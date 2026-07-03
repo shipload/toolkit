@@ -9,6 +9,7 @@ import {
     ITEM_SENSOR,
     ITEM_SENSOR_T2,
     ITEM_RESIN,
+    ITEM_FRAME,
     ITEM_PLATE,
     ITEM_BEAM,
     ITEM_GATHERER_T1,
@@ -33,8 +34,8 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     )
 })
 
-test('Resin feeds the gatherer drain stat', () => {
-    const consumers = getRecipeConsumers(ITEM_RESIN)
+test('Frame feeds the gatherer drain stat', () => {
+    const consumers = getRecipeConsumers(ITEM_FRAME)
     const gatherer = consumers.find((c) => c.outputItemId === ITEM_GATHERER_T1)
     expect(gatherer).toBeDefined()
     const drain = gatherer?.statFlows.find(
@@ -59,12 +60,12 @@ test('getResourceDemand traces a dual-resource component to both resources', () 
 })
 
 test('getResourceDemand recurses through a module to raw resources', () => {
-    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Resin (5 biomass + 5 crystal each)
+    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Frame (5 regolith + 5 biomass each)
     expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({
         ore: 1500,
         gas: 1500,
+        regolith: 1500,
         biomass: 1500,
-        crystal: 1500,
     })
 })
 

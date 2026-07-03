@@ -21,12 +21,12 @@ import {
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
 
-function makeGathererStats(strength: number, tolerance: number, saturation: number): bigint {
-    return encodeStats([strength, tolerance, saturation, 0])
+function makeGathererStats(strength: number, hardness: number, saturation: number): bigint {
+    return encodeStats([strength, hardness, saturation, 0])
 }
 
-function makeCrafterStats(reactivity: number, conductivity: number): bigint {
-    return encodeStats([reactivity, conductivity])
+function makeCrafterStats(fineness: number, conductivity: number): bigint {
+    return encodeStats([fineness, conductivity])
 }
 
 function makeLoaderStats(insulation: number, plasticity: number): bigint {
@@ -72,8 +72,8 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
     expect(result.gathererLanes![1].slotIndex).toBe(1)
 
     // Yields are amp-scaled and distinct
-    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, saturation: 400}, 1)
-    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, saturation: 300}, 1)
+    const caps1 = computeGathererCapabilities({strength: 300, hardness: 200, saturation: 400}, 1)
+    const caps2 = computeGathererCapabilities({strength: 500, hardness: 100, saturation: 300}, 1)
     const expectedYield1 = applySlotMultiplier(caps1.yield, 100)
     const expectedYield2 = applySlotMultiplier(caps2.yield, 100)
     expect(result.gathererLanes![0].yield).toBe(expectedYield1)
@@ -110,7 +110,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     expect(result.crafterLanes!.length).toBe(1)
     expect(result.crafterLanes![0].slotIndex).toBe(0)
 
-    const caps = computeCrafterCapabilities({reactivity: 400, conductivity: 300})
+    const caps = computeCrafterCapabilities({fineness: 400, conductivity: 300})
     const expectedSpeed = applySlotMultiplier(caps.speed, 120)
     expect(result.crafterLanes![0].speed).toBe(expectedSpeed)
     expect(result.crafterLanes![0].drain).toBe(caps.drain)
