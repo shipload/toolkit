@@ -31,7 +31,8 @@ export function calc_gather_duration(
     richness: number
 ): UInt32 {
     const raw = gather_duration_raw(gatherer, itemMass, quantity, stratum, richness)
-    return UInt32.from(raw <= 0 ? 0 : Math.max(Math.floor(raw), 1))
+    // +1 per-gather setup cost mirrors the contract: splitting a bulk gather must not undercut lane-time
+    return UInt32.from(raw <= 0 ? 0 : Math.floor(raw) + 1)
 }
 
 export function calc_gather_rate(
