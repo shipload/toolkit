@@ -116,6 +116,11 @@
       "itemId": 10207,
       "kind": "hub",
       "displayLabel": ""
+    },
+    {
+      "itemId": 20210,
+      "kind": "ship",
+      "displayLabel": "Prospector"
     }
   ]
 }

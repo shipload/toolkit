@@ -1026,5 +1026,618 @@
       }
     ],
     "blendWeights": []
+  },
+  {
+    "outputItemId": 20001,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 1
+      },
+      {
+        "itemId": 102,
+        "quantity": 12
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20002,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10002,
+        "quantity": 1
+      },
+      {
+        "itemId": 402,
+        "quantity": 6
+      },
+      {
+        "itemId": 502,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 3
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20003,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10003,
+        "quantity": 1
+      },
+      {
+        "itemId": 302,
+        "quantity": 12
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20004,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10004,
+        "quantity": 1
+      },
+      {
+        "itemId": 202,
+        "quantity": 6
+      },
+      {
+        "itemId": 102,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20005,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10005,
+        "quantity": 1
+      },
+      {
+        "itemId": 102,
+        "quantity": 6
+      },
+      {
+        "itemId": 302,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20006,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10006,
+        "quantity": 1
+      },
+      {
+        "itemId": 202,
+        "quantity": 12
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20007,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10007,
+        "quantity": 1
+      },
+      {
+        "itemId": 502,
+        "quantity": 12
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20008,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10008,
+        "quantity": 1
+      },
+      {
+        "itemId": 402,
+        "quantity": 12
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20009,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10009,
+        "quantity": 1
+      },
+      {
+        "itemId": 302,
+        "quantity": 6
+      },
+      {
+        "itemId": 402,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 3
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20010,
+    "outputMass": 6400,
+    "inputs": [
+      {
+        "itemId": 10010,
+        "quantity": 1
+      },
+      {
+        "itemId": 502,
+        "quantity": 6
+      },
+      {
+        "itemId": 202,
+        "quantity": 6
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20210,
+    "outputMass": 3840000,
+    "inputs": [
+      {
+        "itemId": 20001,
+        "quantity": 300
+      },
+      {
+        "itemId": 20008,
+        "quantity": 300
+      },
+      {
+        "itemId": 20007,
+        "quantity": 300
+      },
+      {
+        "itemId": 20003,
+        "quantity": 300
+      },
+      {
+        "itemId": 20006,
+        "quantity": 300
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": []
   }
 ]

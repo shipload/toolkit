@@ -173,6 +173,7 @@ import {
     ITEM_FACTORY_T1_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
+    ITEM_PROSPECTOR_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
@@ -202,23 +203,39 @@ import {
 import type {EntitySlot} from '../data/recipes-runtime'
 import {computeTravelDrain} from '../nft/description'
 
+export const CAPACITY_TIER_TABLE = [1.0, 1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6]
+
+export function capacityTierMultiplier(tier: number): number {
+    const clampedTier = tier >= 1 && tier <= 10 ? tier : 1
+    return CAPACITY_TIER_TABLE[clampedTier - 1]
+}
+
+export function applyCapacityTier(baseCapacity: number, tier: number): number {
+    return clampUint32(Math.floor(baseCapacity * capacityTierMultiplier(tier)))
+}
+
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
+    let base: number
     switch (itemId) {
         case ITEM_SHIP_T1_PACKED:
-            return computeShipHullCapabilities(stats).capacity
+        case ITEM_PROSPECTOR_T2_PACKED:
+            base = computeShipHullCapabilities(stats).capacity
+            break
         case ITEM_EXTRACTOR_T1_PACKED:
         case ITEM_FACTORY_T1_PACKED:
         case ITEM_MASS_DRIVER_T1_PACKED:
         case ITEM_MASS_CATCHER_T1_PACKED:
         case ITEM_CONTAINER_T1_PACKED:
-            return computeContainerCapabilities(stats).capacity
-        case ITEM_WAREHOUSE_T1_PACKED:
-            return computeWarehouseHullCapabilities(stats).capacity
         case ITEM_CONTAINER_T2_PACKED:
-            return computeContainerT2Capabilities(stats).capacity
+            base = computeContainerCapabilities(stats).capacity
+            break
+        case ITEM_WAREHOUSE_T1_PACKED:
+            base = computeWarehouseHullCapabilities(stats).capacity
+            break
         default:
             return 0
     }
+    return applyCapacityTier(base, getItem(itemId).tier)
 }
 
 export function computeWarpCapabilities(stats: Record<string, number>): {
@@ -492,21 +509,4 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
         hullmass: computeBaseHullmass(stats),
         capacity: Math.floor(22000000 * 6 ** exponent),
     }
-}
-
-export function computeContainerT2Capabilities(stats: Record<string, number>): {
-    hullmass: number
-    capacity: number
-} {
-    const strength = stats.strength ?? 0
-    const density = stats.density ?? 0
-    const hardness = stats.hardness ?? 0
-
-    const hullmass = 70000 - 50 * density
-
-    const statSum = strength + hardness
-    const exponent = statSum / 2947
-    const capacity = Math.floor(24000000 * 6 ** exponent)
-
-    return {hullmass, capacity}
 }

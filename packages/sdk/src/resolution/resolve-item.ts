@@ -26,26 +26,13 @@ import {
     computeGeneratorCapabilities,
     computeHaulerCapabilities,
     computeLoaderCapabilities,
+    computeBaseCapacity,
     computeBaseHullmass,
-    computeShipHullCapabilities,
-    computeWarehouseHullCapabilities,
-    computeContainerCapabilities,
-    computeContainerT2Capabilities,
     computeStorageCapabilities,
 } from '../derivation/capabilities'
 import {applySlotMultiplierUint32} from '../entities/slot-multiplier'
 import {categoryColors, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
 import type {ServerContract} from '../contracts'
-import {
-    ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONTAINER_T2_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_MASS_CATCHER_T1_PACKED,
-    ITEM_MASS_DRIVER_T1_PACKED,
-    ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-} from '../data/item-ids'
 
 export interface ResolvedItemStat {
     key: string
@@ -285,21 +272,9 @@ function hullCapsForEntity(
     hullmass: number
     capacity: number
 } {
-    switch (itemId) {
-        case ITEM_SHIP_T1_PACKED:
-            return computeShipHullCapabilities(decoded)
-        case ITEM_WAREHOUSE_T1_PACKED:
-            return computeWarehouseHullCapabilities(decoded)
-        case ITEM_EXTRACTOR_T1_PACKED:
-        case ITEM_FACTORY_T1_PACKED:
-        case ITEM_MASS_DRIVER_T1_PACKED:
-        case ITEM_MASS_CATCHER_T1_PACKED:
-        case ITEM_CONTAINER_T1_PACKED:
-            return computeContainerCapabilities(decoded)
-        case ITEM_CONTAINER_T2_PACKED:
-            return computeContainerT2Capabilities(decoded)
-        default:
-            return {hullmass: computeBaseHullmass(decoded), capacity: 0}
+    return {
+        hullmass: computeBaseHullmass(decoded),
+        capacity: computeBaseCapacity(itemId, decoded),
     }
 }
 

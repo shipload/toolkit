@@ -8,23 +8,28 @@
     "slots": [
       {
         "type": "any",
-        "outputPct": 100
+        "outputPct": 80,
+        "maxTier": 1
       },
       {
         "type": "any",
-        "outputPct": 100
+        "outputPct": 80,
+        "maxTier": 1
       },
       {
         "type": "any",
-        "outputPct": 100
+        "outputPct": 80,
+        "maxTier": 1
       },
       {
         "type": "any",
-        "outputPct": 100
+        "outputPct": 80,
+        "maxTier": 1
       },
       {
         "type": "any",
-        "outputPct": 100
+        "outputPct": 80,
+        "maxTier": 1
       }
     ]
   },
@@ -33,23 +38,28 @@
     "slots": [
       {
         "type": "loader",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       }
     ]
   },
@@ -58,11 +68,13 @@
     "slots": [
       {
         "type": "generator",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       },
       {
         "type": "gatherer",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       }
     ]
   },
@@ -71,11 +83,13 @@
     "slots": [
       {
         "type": "generator",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       },
       {
         "type": "crafter",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       }
     ]
   },
@@ -84,11 +98,13 @@
     "slots": [
       {
         "type": "generator",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       },
       {
         "type": "launcher",
-        "outputPct": 200
+        "outputPct": 200,
+        "maxTier": 1
       }
     ]
   },
@@ -97,15 +113,18 @@
     "slots": [
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       },
       {
         "type": "storage",
-        "outputPct": 100
+        "outputPct": 100,
+        "maxTier": 1
       }
     ]
   },
@@ -116,5 +135,35 @@
   {
     "entityItemId": 20200,
     "slots": []
+  },
+  {
+    "entityItemId": 20210,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "any",
+        "outputPct": 80,
+        "maxTier": 1
+      }
+    ]
   }
 ]

@@ -280,12 +280,65 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Advanced composite framing reinforced with tier 2 regolith and biomass polymer.',
         color: '#C4A57B',
     },
+    20003: {
+        name: 'Plasma Cell',
+        description: 'Advanced high-energy gaseous storage cell reinforced with tier 2 gas.',
+        color: '#E86344',
+    },
+    20004: {
+        name: 'Resonator',
+        description: 'Advanced crystalline resonance lattice reinforced with tier 2 crystal.',
+        color: '#4ADBFF',
+    },
+    20005: {
+        name: 'Beam',
+        description: 'Advanced heavy-duty structural beam reinforced with tier 2 ore.',
+        color: '#7B8D9E',
+    },
+    20006: {
+        name: 'Sensor',
+        description: 'Advanced crystal-lattice sensing element reinforced with tier 2 crystal.',
+        color: '#4ADBFF',
+    },
+    20007: {
+        name: 'Polymer',
+        description: 'Advanced pliable biomass-derived polymer reinforced with tier 2 biomass.',
+        color: '#5A8B3E',
+    },
+    20008: {
+        name: 'Ceramic',
+        description: 'Advanced hardened ceramic reinforced with tier 2 regolith.',
+        color: '#C4A57B',
+    },
+    20009: {
+        name: 'Reactor',
+        description: 'Advanced gas-pressurized reaction vessel reinforced with tier 2 gas.',
+        color: '#B877FF',
+    },
+    20010: {
+        name: 'Resin',
+        description: 'Advanced saturated organic binder reinforced with tier 2 biomass.',
+        color: '#5A8B3E',
+    },
+
+    // === Modules (T2) ===
+    20102: {
+        name: 'Gatherer (T2)',
+        description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',
+        color: '#7B8D9E',
+    },
 
     // === Entities (packed, T2) ===
     20200: {
         name: 'Container',
         description: 'Advanced cargo container with improved capacity formulas.',
         color: '#9BADB8',
+    },
+    20210: {
+        name: 'Prospector',
+        description:
+            'Advanced exploration vessel with tiered engine, generator, and gatherer slots.',
+        color: '#4AE898',
     },
 }
 
@@ -298,6 +351,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10204: {moduleSlotLabels: ['Reactor', 'Fabricator']},
     10205: {moduleSlotLabels: ['Reactor', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
+    20210: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Limpet Bay', 'Cargo Hold']},
 }
 
 for (const item of items as Array<{id: number}>) {

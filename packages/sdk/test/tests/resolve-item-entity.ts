@@ -2,8 +2,8 @@ import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 
 import {
+    applyCapacityTier,
     computeContainerCapabilities,
-    computeContainerT2Capabilities,
     computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
     encodeStats,
@@ -43,10 +43,11 @@ describe('resolveItem - entity capacity dispatch', () => {
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 
-    test('container-t2 uses computeContainerT2Capabilities', () => {
+    test('container-t2 uses the plain container base times the tier-2 multiplier (container_t2 retired)', () => {
         const resolved = resolveItem(ITEM_CONTAINER_T2_PACKED, defaultPackedStats)
         const decodedInputs = {strength: 500, density: 500, hardness: 500, cohesion: 500}
-        const expected = computeContainerT2Capabilities(decodedInputs).capacity
+        const base = computeContainerCapabilities(decodedInputs).capacity
+        const expected = applyCapacityTier(base, 2)
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })
 })

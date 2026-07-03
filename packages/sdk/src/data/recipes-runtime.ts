@@ -23,6 +23,7 @@ export interface Recipe {
 export interface EntitySlot {
     type: ModuleType
     outputPct: number
+    maxTier: number
 }
 
 export interface EntityLayout {

@@ -57,8 +57,8 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
     ]
 
     const layout: EntitySlot[] = [
-        {type: 'gatherer', outputPct: 100},
-        {type: 'gatherer', outputPct: 100},
+        {type: 'gatherer', outputPct: 100, maxTier: 1},
+        {type: 'gatherer', outputPct: 100, maxTier: 1},
     ]
 
     const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
@@ -102,7 +102,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
         {slotIndex: 0, itemId: ITEM_CRAFTER_T1, stats: crafterStats},
     ]
 
-    const layout: EntitySlot[] = [{type: 'crafter', outputPct: 120}]
+    const layout: EntitySlot[] = [{type: 'crafter', outputPct: 120, maxTier: 1}]
 
     const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
 
@@ -126,7 +126,7 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
 
     const modules: InstalledModule[] = [{slotIndex: 0, itemId: ITEM_LOADER_T1, stats: loaderStats}]
 
-    const layout: EntitySlot[] = [{type: 'loader', outputPct: 80}]
+    const layout: EntitySlot[] = [{type: 'loader', outputPct: 80, maxTier: 1}]
 
     const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
 

@@ -18,17 +18,19 @@ import {
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_GATHERER_T1,
+    ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_BATTERY_T1,
     ITEM_LOADER_T1,
+    ITEM_PROSPECTOR_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
-import {gathererDepthForTier} from '../derivation/capabilities'
+import {applyCapacityTier, gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 
 function idiv(a: number, b: number): number {
@@ -48,11 +50,6 @@ export function computeBaseCapacityShip(stats: bigint): number {
 export function computeBaseCapacityContainer(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
     return Math.floor(22_000_000 * 6 ** (s / 1998))
-}
-
-export function computeBaseCapacityContainerT2(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(24_000_000 * 6 ** (s / 2947))
 }
 
 export function computeBaseCapacityWarehouse(stats: bigint): number {
@@ -114,6 +111,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Container'
         case ITEM_CONTAINER_T2_PACKED:
             return 'Container'
+        case ITEM_PROSPECTOR_T2_PACKED:
+            return 'Prospector'
         default:
             return 'Entity'
     }
@@ -127,6 +126,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Reactor'
         case ITEM_GATHERER_T1:
             return 'Limpet Bay'
+        case ITEM_GATHERER_T2:
+            return 'Gatherer (T2)'
         case ITEM_LOADER_T1:
             return 'Shuttle Bay'
         case ITEM_CRAFTER_T1:
@@ -230,18 +231,20 @@ export function buildEntityDescription(
 ): string {
     const hullMass = computeBaseHullmass(hullStats)
     let baseCapacity = 0
-    if (itemId === ITEM_SHIP_T1_PACKED) {
+    if (itemId === ITEM_SHIP_T1_PACKED || itemId === ITEM_PROSPECTOR_T2_PACKED) {
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)
     } else if (
         itemId === ITEM_EXTRACTOR_T1_PACKED ||
         itemId === ITEM_FACTORY_T1_PACKED ||
-        itemId === ITEM_CONTAINER_T1_PACKED
+        itemId === ITEM_CONTAINER_T1_PACKED ||
+        itemId === ITEM_CONTAINER_T2_PACKED
     ) {
         baseCapacity = computeBaseCapacityContainer(hullStats)
-    } else if (itemId === ITEM_CONTAINER_T2_PACKED) {
-        baseCapacity = computeBaseCapacityContainerT2(hullStats)
+    }
+    if (baseCapacity > 0) {
+        baseCapacity = applyCapacityTier(baseCapacity, getItem(itemId).tier)
     }
 
     let out = entityDisplayName(itemId)

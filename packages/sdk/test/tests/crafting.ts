@@ -3,14 +3,15 @@ import {assert} from 'chai'
 import {UInt64} from '@wharfkit/antelope'
 
 import {
+    applyCapacityTier,
     blendCargoStacks,
     blendCrossGroup,
     blendStacks,
     calc_craft_duration,
     calc_craft_energy,
+    computeBaseCapacity,
     computeComponentStats,
     computeContainerCapabilities,
-    computeContainerT2Capabilities,
     computeCraftedOutputStats,
     computeEntityStats,
     computeInputMass,
@@ -25,6 +26,7 @@ import {
     ITEM_FRAME,
     ITEM_FRAME_T2,
     ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
     ITEM_ENGINE_T1,
     ITEM_RESIN,
     ITEM_HAULER_T1,
@@ -566,29 +568,22 @@ describe('Crafting', () => {
     })
 
     describe('T2 Container Capabilities', () => {
-        test('T2 container has lighter hullmass than T1 at same density', () => {
-            const t1 = computeContainerCapabilities({
-                strength: 500,
-                density: 500,
-                hardness: 500,
-                cohesion: 500,
-            })
-            const t2 = computeContainerT2Capabilities({
-                strength: 500,
-                density: 500,
-                hardness: 500,
-                cohesion: 500,
-            })
-            assert.isBelow(t2.hullmass, t1.hullmass)
+        test('T2 container capacity exceeds T1 at identical stats (tier 2 multiplier, container_t2 retired)', () => {
+            const stats = {strength: 500, density: 500, hardness: 500, cohesion: 500}
+            const t1 = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
+            const t2 = computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats)
+            assert.isAbove(t2, t1)
         })
 
-        test('T2 container formulas match contract', () => {
+        test('T2 container capacity is the plain container base times the tier-2 multiplier', () => {
             const stats = {strength: 400, density: 300, hardness: 600, cohesion: 200}
-            const caps = computeContainerT2Capabilities(stats)
-            assert.equal(caps.hullmass, 70000 - 50 * 300)
-            const statSum = 400 + 600
-            const expected = Math.floor(24000000 * 6 ** (statSum / 2947))
-            assert.equal(caps.capacity, expected)
+            const base = computeContainerCapabilities(stats).capacity
+            const expected = applyCapacityTier(base, 2)
+            assert.equal(computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats), expected)
+            assert.equal(
+                computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats),
+                Math.floor(base * 1.4)
+            )
         })
     })
 

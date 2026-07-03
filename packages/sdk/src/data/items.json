@@ -529,19 +529,80 @@
   },
   {
     "id": 20001,
-    "mass": 500,
+    "mass": 6400,
     "type": "component",
     "tier": 2
   },
   {
     "id": 20002,
-    "mass": 300,
+    "mass": 6400,
     "type": "component",
     "tier": 2
   },
   {
+    "id": 20003,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20004,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20005,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20006,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20007,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20008,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20009,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20010,
+    "mass": 6400,
+    "type": "component",
+    "tier": 2
+  },
+  {
+    "id": 20102,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "gatherer"
+  },
+  {
     "id": 20200,
     "mass": 80000,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 20210,
+    "mass": 3840000,
     "type": "entity",
     "tier": 2
   }
