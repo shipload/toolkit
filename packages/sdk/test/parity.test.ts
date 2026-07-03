@@ -38,14 +38,15 @@ describe('gather duration parity matrix', () => {
                 c.richness
             ).toNumber()
 
-            // Hand-computed expected from the same transliterated formula.
+            // Hand-computed: floor of the transliterated formula plus the per-gather setup cost.
             const massFactor = oreT1.mass / GATHER_MASS_DIVISOR
             const depthPenalty = 1 + c.stratum / DEPTH_PENALTY_DIVISOR
             const richnessMul = c.richness / 1000
-            const expected = Math.floor(
-                (c.tonnage * massFactor * GATHER_TIME_SCALE * depthPenalty) /
-                    (c.yield * richnessMul)
-            )
+            const expected =
+                Math.floor(
+                    (c.tonnage * massFactor * GATHER_TIME_SCALE * depthPenalty) /
+                        (c.yield * richnessMul)
+                ) + 1
 
             expect(duration).toBe(expected)
         })

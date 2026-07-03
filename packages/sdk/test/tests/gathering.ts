@@ -234,12 +234,12 @@ describe('gathering', () => {
 
         test('median hydrogen at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 21)
+            assert.equal(duration.toNumber(), 22)
         })
 
         test('median copper at stratum 600', () => {
             const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
-            assert.equal(duration.toNumber(), 56)
+            assert.equal(duration.toNumber(), 57)
         })
 
         test('exact formula calculation', () => {
@@ -251,9 +251,10 @@ describe('gathering', () => {
             const massFactor = itemMass / 228
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
-            const expected = Math.floor(
-                (quantity * massFactor * 100 * depthPenalty) / (yieldValue * richnessMul)
-            )
+            const expected =
+                Math.floor(
+                    (quantity * massFactor * 100 * depthPenalty) / (yieldValue * richnessMul)
+                ) + 1
             const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness)
             assert.equal(duration.toNumber(), expected)
         })
@@ -266,7 +267,8 @@ describe('gathering', () => {
             })
             const one = calc_gather_duration(linearGatherer, 10000, 1, 5000, 500).toNumber()
             const ten = calc_gather_duration(linearGatherer, 10000, 10, 5000, 500).toNumber()
-            assert.equal(ten, one * 10)
+            // remove the per-gather setup cost from each, then it is linear in quantity
+            assert.equal(ten - 1, (one - 1) * 10)
         })
 
         test('calc_gather_rate reports contextual units per time', () => {
