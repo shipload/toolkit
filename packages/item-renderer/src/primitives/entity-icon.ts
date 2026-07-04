@@ -23,6 +23,7 @@ const entityIconLabels: Record<EntityIconSlug, string> = {
 
 const entityIconNames: Record<string, EntityIconSlug> = {
     ship: 'ship',
+    prospector: 'ship',
     container: 'container',
 }
 

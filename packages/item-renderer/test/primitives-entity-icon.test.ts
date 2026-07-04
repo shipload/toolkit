@@ -14,6 +14,8 @@ test('entityIconSlugs covers the available packed entity icons', () => {
 test('entityIconSlugForName resolves tier-shared entity names', () => {
     expect(entityIconSlugForName('Ship')).toBe('ship')
     expect(entityIconSlugForName('Ship (T1)')).toBe('ship')
+    expect(entityIconSlugForName('Prospector')).toBe('ship')
+    expect(entityIconSlugForName('Prospector (T2)')).toBe('ship')
     expect(entityIconSlugForName('Container T2')).toBe('container')
     expect(entityIconSlugForName('Warehouse')).toBeNull()
 })
