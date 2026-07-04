@@ -22,7 +22,9 @@ import {
     ITEM_GENERATOR_T1,
     ITEM_HAULER_SHIP_T2_PACKED,
     ITEM_HAULER_T1,
+    ITEM_HAULER_T2,
     ITEM_BATTERY_T1,
+    ITEM_LAUNCHER_T1,
     ITEM_LOADER_T1,
     ITEM_PROSPECTOR_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
@@ -127,11 +129,10 @@ export function moduleDisplayName(itemId: number): string {
         case ITEM_ENGINE_T1:
             return 'Engine'
         case ITEM_GENERATOR_T1:
-            return 'Reactor'
+            return 'Power Core'
         case ITEM_GATHERER_T1:
-            return 'Limpet Bay'
         case ITEM_GATHERER_T2:
-            return 'Gatherer (T2)'
+            return 'Limpet Bay'
         case ITEM_LOADER_T1:
             return 'Shuttle Bay'
         case ITEM_CRAFTER_T1:
@@ -139,11 +140,14 @@ export function moduleDisplayName(itemId: number): string {
         case ITEM_STORAGE_T1:
             return 'Cargo Hold'
         case ITEM_HAULER_T1:
+        case ITEM_HAULER_T2:
             return 'Tractor Beam'
         case ITEM_WARP_T1:
             return 'Warp Drive'
         case ITEM_BATTERY_T1:
             return 'Battery Bank'
+        case ITEM_LAUNCHER_T1:
+            return 'Drive Coil'
         default:
             return 'Module'
     }

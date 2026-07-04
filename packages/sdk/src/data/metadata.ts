@@ -176,7 +176,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#E86344',
     },
     10101: {
-        name: 'Reactor',
+        name: 'Power Core',
         description: 'Basic energy system. Stores and recharges energy from resonant crystals.',
         color: '#4ADBFF',
     },
@@ -215,7 +215,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
     10108: {
         name: 'Battery Bank',
-        description: 'Stores additional charge produced by reactors.',
+        description: 'Stores additional charge produced by the power core.',
         color: '#4ADBFF',
     },
     10109: {
@@ -253,7 +253,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
     10205: {
         name: 'Mass Driver',
-        description: 'Planetary launch platform with generator and drive coil module slots.',
+        description: 'Planetary launch platform with power core and drive coil module slots.',
         color: '#E86344',
     },
     10206: {
@@ -329,7 +329,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
 
     20106: {
-        name: 'Tractor Beam (T2)',
+        name: 'Tractor Beam',
         description:
             'Advanced haul beam projector reinforced with tier 2 components for greater towing capacity.',
         color: '#4ADBFF',
@@ -344,7 +344,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     20210: {
         name: 'Prospector',
         description:
-            'Advanced exploration vessel with tiered engine, generator, and gatherer slots.',
+            'Advanced exploration vessel with tiered engine, power core, and limpet bay slots.',
         color: '#4AE898',
     },
     20211: {
@@ -356,16 +356,16 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 }
 
 export const entityMetadata: Record<number, EntityMetadata> = {
-    10201: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
+    10201: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
     10202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },
-    10203: {moduleSlotLabels: ['Reactor', 'Limpet Bay']},
-    10204: {moduleSlotLabels: ['Reactor', 'Fabricator']},
-    10205: {moduleSlotLabels: ['Reactor', 'Drive Coil']},
+    10203: {moduleSlotLabels: ['Power Core', 'Limpet Bay']},
+    10204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
+    10205: {moduleSlotLabels: ['Power Core', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
-    20210: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Limpet Bay', 'Flex Socket']},
-    20211: {moduleSlotLabels: ['Engine', 'Reactor', 'Tractor Beam', 'Tractor Beam']},
+    20210: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Limpet Bay', 'Flex Slot']},
+    20211: {moduleSlotLabels: ['Engine', 'Power Core', 'Tractor Beam', 'Tractor Beam']},
 }
 
 for (const item of items as Array<{id: number}>) {

@@ -12,6 +12,8 @@ import {
     ITEM_STORAGE_T1,
     ITEM_WARP_T1,
 } from '../data/item-ids'
+import {getItem} from '../data/catalog'
+import type {EntitySlot} from '../data/recipes-runtime'
 
 export const MODULE_ANY = 0
 export const MODULE_ENGINE = 1
@@ -99,4 +101,11 @@ export function moduleSlotTypeToCode(slotType: string): number {
         default:
             return MODULE_ANY
     }
+}
+
+export function slotAcceptsModule(slot: EntitySlot, moduleItemId: number): boolean {
+    const moduleType = getModuleCapabilityType(moduleItemId)
+    if (moduleType === 0xff) return false
+    if (!moduleAccepts(moduleSlotTypeToCode(slot.type), moduleType)) return false
+    return getItem(moduleItemId).tier <= slot.maxTier
 }

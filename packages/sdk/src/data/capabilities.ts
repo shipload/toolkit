@@ -43,7 +43,7 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {
         capability: 'Energy',
         attribute: 'capacity',
-        description: 'Energy capacity from Reactors and installed Battery Bank modules',
+        description: 'Energy capacity from Power Cores and installed Battery Bank modules',
     },
     {capability: 'Energy', attribute: 'recharge', description: 'Energy regeneration rate'},
     {capability: 'Loading', attribute: 'mass', description: 'Weight of the loader unit itself'},
