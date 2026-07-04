@@ -20,6 +20,7 @@ export interface ModuleDescription {
 export interface RenderDescriptionOptions {
     translate?: (id: string, fallback: string) => string
     formatNumber?: (n: number) => string
+    formatParam?: (paramName: string, value: number, descId: string) => string | undefined
 }
 
 interface TemplateSpec {
@@ -27,6 +28,7 @@ interface TemplateSpec {
     template: string
     params: readonly [string, string][]
     highlightKeys: readonly string[]
+    derive?: Record<string, (get: (label: string) => number) => number>
 }
 
 const TEMPLATES: Record<string, TemplateSpec> = {
@@ -53,13 +55,15 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     gatherer: {
         id: 'module.gatherer.description',
         template:
-            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per second',
+            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per minute',
         params: [
             ['yield', 'Yield'],
             ['depth', 'Depth'],
-            ['drain', 'Drain'],
         ],
         highlightKeys: ['yield', 'depth', 'drain'],
+        derive: {
+            drain: (get) => Math.round((get('Drain') / 10000) * 60 * 10) / 10,
+        },
     },
     loading: {
         id: 'module.loading.description',
@@ -72,12 +76,12 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     },
     crafting: {
         id: 'module.crafting.description',
-        template: 'manufactures items at {speed} speed while draining {drain} energy per second',
-        params: [
-            ['speed', 'Speed'],
-            ['drain', 'Drain'],
-        ],
+        template: 'manufactures items at {speed} speed while draining {drain} energy per minute',
+        params: [['speed', 'Speed']],
         highlightKeys: ['speed', 'drain'],
+        derive: {
+            drain: (get) => Math.round(((get('Drain') * get('Speed')) / 150000) * 60 * 10) / 10,
+        },
     },
     storage: {
         id: 'module.storage.description',
@@ -113,6 +117,12 @@ export function describeModule(input: CapabilityInput): ModuleDescription | null
     for (const [paramName, attrLabel] of spec.params) {
         const attr = input.attributes.find((a) => a.label === attrLabel)
         if (attr) params[paramName] = attr.value
+    }
+    if (spec.derive) {
+        const get = (label: string) => input.attributes.find((a) => a.label === label)?.value ?? 0
+        for (const [paramName, fn] of Object.entries(spec.derive)) {
+            params[paramName] = fn(get)
+        }
     }
     return {
         id: spec.id,
@@ -158,7 +168,10 @@ export function renderDescription(
         if (raw === undefined) {
             spans.push({text: `{${paramName}}`})
         } else {
-            const formatted = typeof raw === 'number' ? formatNumber(raw) : raw
+            const formatted =
+                typeof raw === 'number'
+                    ? (options?.formatParam?.(paramName, raw, desc.id) ?? formatNumber(raw))
+                    : raw
             const highlight = (desc.highlightKeys as readonly string[]).includes(paramName)
             spans.push(highlight ? {text: formatted, highlight: true} : {text: formatted})
         }

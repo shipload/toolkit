@@ -1,7 +1,7 @@
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {getItem} from '../data/catalog'
+import {getItem, getModules} from '../data/catalog'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {entityMetadata, itemMetadata} from '../data/metadata'
 import {
@@ -56,6 +56,10 @@ export interface ResolvedModuleSlot {
     capability?: string
     installed: boolean
     attributes?: {label: string; value: number}[]
+    slotLabel?: string
+    slotType?: string
+    outputPct?: number
+    maxTier?: number
 }
 
 export interface ResolvedItem {
@@ -244,11 +248,22 @@ function computeCapabilityGroup(
     }
 }
 
+// Recipe-less higher-tier modules reuse the T1 stat layout of their module type.
+function decodeModuleStats(id: number, big: bigint): Record<string, number> {
+    const decoded = decodeCraftedItemStats(id, big)
+    if (Object.keys(decoded).length > 0) return decoded
+    const moduleType = getItem(id).moduleType
+    if (!moduleType) return decoded
+    const t1 = getModules({moduleType, tier: 1})[0]
+    if (!t1) return decoded
+    return decodeCraftedItemStats(Number(t1.id), big)
+}
+
 function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
     const item = getItem(id)
     let attributes: ResolvedAttributeGroup[] | undefined
     if (stats !== undefined) {
-        const decoded = decodeCraftedItemStats(id, toBigStats(stats))
+        const decoded = decodeModuleStats(id, toBigStats(stats))
         const modType = getModuleCapabilityType(id)
         const group = computeCapabilityGroup(modType, decoded, item.tier)
         if (group) attributes = [group]
@@ -309,11 +324,17 @@ function resolveEntity(
     if (layout && layout.slots.length > 0) {
         const slotLabels = entityMetadata[id]?.moduleSlotLabels ?? []
         moduleSlots = layout.slots.map((slot, i) => {
+            const slotInfo = {
+                slotLabel: slotLabels[i] ?? slot.type,
+                slotType: slot.type,
+                outputPct: slot.outputPct,
+                maxTier: slot.maxTier,
+            }
             const mod = modules?.[i]
             if (mod?.installed) {
                 const modItemId = Number(mod.installed.item_id.value.toString())
                 const modStats = BigInt(mod.installed.stats.toString())
-                const decodedStats = decodeCraftedItemStats(modItemId, modStats)
+                const decodedStats = decodeModuleStats(modItemId, modStats)
                 const modType = getModuleCapabilityType(modItemId)
                 let modName = 'Module'
                 let modTier = 1
@@ -330,11 +351,13 @@ function resolveEntity(
                     capability: group?.capability,
                     installed: true,
                     attributes: group?.attributes,
+                    ...slotInfo,
                 }
             }
             return {
                 name: slotLabels[i] ?? slot.type,
                 installed: false,
+                ...slotInfo,
             }
         })
     }

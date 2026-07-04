@@ -323,7 +323,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 
     // === Modules (T2) ===
     20102: {
-        name: 'Gatherer (T2)',
+        name: 'Limpet Bay',
         description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',
         color: '#7B8D9E',
     },
@@ -351,7 +351,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10204: {moduleSlotLabels: ['Reactor', 'Fabricator']},
     10205: {moduleSlotLabels: ['Reactor', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
-    20210: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Limpet Bay', 'Cargo Hold']},
+    20210: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Limpet Bay', 'Flex Socket']},
 }
 
 for (const item of items as Array<{id: number}>) {

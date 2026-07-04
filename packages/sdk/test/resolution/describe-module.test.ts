@@ -56,9 +56,9 @@ describe('describeModule', () => {
         })
         expect(desc?.id).toBe('module.gatherer.description')
         expect(desc?.template).toBe(
-            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per second'
+            'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per minute'
         )
-        expect(desc?.params).toEqual({yield: 600, drain: 300, depth: 350})
+        expect(desc?.params).toEqual({yield: 600, drain: 1.8, depth: 350})
         expect(desc?.highlightKeys).toEqual(['yield', 'depth', 'drain'])
     })
 
@@ -87,9 +87,9 @@ describe('describeModule', () => {
         })
         expect(desc?.id).toBe('module.crafting.description')
         expect(desc?.template).toBe(
-            'manufactures items at {speed} speed while draining {drain} energy per second'
+            'manufactures items at {speed} speed while draining {drain} energy per minute'
         )
-        expect(desc?.params).toEqual({speed: 580, drain: 15})
+        expect(desc?.params).toEqual({speed: 580, drain: 3.5})
         expect(desc?.highlightKeys).toEqual(['speed', 'drain'])
     })
 

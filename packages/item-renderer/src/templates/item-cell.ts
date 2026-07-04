@@ -13,6 +13,7 @@ export interface ItemCellProps {
     size?: number
     quantityColor?: string
     quantityPrefix?: string
+    iconImageHref?: string
 }
 
 export function abbreviateQuantity(n: number): string {
@@ -65,7 +66,18 @@ function cellInner(props: ItemCellProps): string {
     const entitySlug =
         props.resolved.itemType === 'entity' ? entityIconSlugForName(props.resolved.name) : null
 
-    if (componentSlug) {
+    if (props.iconImageHref) {
+        const iconSize = Math.round(size * (showQuantity ? 0.72 : 0.9))
+        const iconY = showQuantity ? Math.round(size * 0.08) : Math.round(height / 2 - iconSize / 2)
+        content = el('image', {
+            href: props.iconImageHref,
+            x: (size - iconSize) / 2,
+            y: iconY,
+            width: iconSize,
+            height: iconSize,
+            preserveAspectRatio: 'xMidYMid meet',
+        })
+    } else if (componentSlug) {
         const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
         const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
         content = componentIcon(componentSlug, {
