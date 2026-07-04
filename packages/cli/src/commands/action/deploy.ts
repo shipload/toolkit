@@ -13,9 +13,12 @@ import {
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName, parseCargoInput} from '../../lib/args'
-import {parseModulesJson} from '../../lib/cargo-build'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
-import {type ParsedCargoInput, resolveCargoInputs} from '../../lib/cargo-resolve'
+import {
+    type ParsedCargoInput,
+    pickModulesOverride,
+    resolveCargoInputs,
+} from '../../lib/cargo-resolve'
 import {getGameSeed, getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
@@ -31,6 +34,7 @@ export interface DeployOpts {
     packedItemId: number
     stackId: bigint
     modules?: ServerTypes.module_entry[]
+    targetEntityId?: bigint
     slot?: ClusterSlotType
 }
 
@@ -42,6 +46,7 @@ export async function buildAction(opts: DeployOpts, shipload?: Shipload): Promis
             item_id: opts.packedItemId,
             stats: opts.stackId,
             modules: opts.modules ?? [],
+            entity_id: opts.targetEntityId,
         }),
         opts.slot
     )
@@ -95,7 +100,8 @@ export async function runDeploy(
             entityId: ctx.entityId,
             packedItemId: input.itemId,
             stackId: resolved.stackId,
-            modules: parseModulesJson(options.modules),
+            modules: pickModulesOverride(options.modules, resolved.modules),
+            targetEntityId: resolved.entityId,
             slot,
         })
         await transact({action}, {description: `Deploying from ${ctx.entityType}:${ctx.entityId}`})

@@ -8,13 +8,16 @@ import {
     type ParsedCargoRef,
     parseUint8,
 } from '../../lib/args'
-import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
+import {validateTargetTriple} from '../../lib/cargo-build'
+import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
+import {pickModulesOverride, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {bundleWithIdleResolve} from '../../lib/resolve-prompt'
 import {transact} from '../../lib/session'
+import {type EntitySnapshot, getEntitySnapshot} from '../../lib/snapshot'
 
 export interface RmModuleOpts {
     entityType: EntityTypeName
@@ -23,6 +26,7 @@ export interface RmModuleOpts {
     targetItemId?: bigint
     targetStats?: bigint
     targetModules?: ServerTypes.module_entry[]
+    targetEntityId?: bigint
 }
 
 export async function buildAction(opts: RmModuleOpts, shipload?: Shipload): Promise<Action> {
@@ -33,6 +37,7 @@ export async function buildAction(opts: RmModuleOpts, shipload?: Shipload): Prom
                   item_id: Number(opts.targetItemId),
                   stats: opts.targetStats!,
                   modules: opts.targetModules ?? [],
+                  entity_id: opts.targetEntityId,
               })
             : null
     return sl.actions.rmmodule(opts.entityId, opts.moduleIndex, targetRef)
@@ -57,16 +62,28 @@ export async function runRmModule(
             targetStats,
             targetModules: options.targetModules,
         })
+        let targetModules: ServerTypes.module_entry[] | undefined
+        let targetEntityId: bigint | undefined
+        let snap: EntitySnapshot | undefined
+        if (options.target !== undefined) {
+            snap = await getEntitySnapshot(ctx.entityId)
+            const [resolved] = resolveCargoInputs(
+                [{itemId: options.target.itemId, stackId: options.target.stackId, quantity: 1}],
+                projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
+            )
+            targetModules = pickModulesOverride(options.targetModules, resolved.modules)
+            targetEntityId = resolved.entityId
+        }
         const action = await buildAction({
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             moduleIndex,
             targetItemId,
             targetStats,
-            targetModules:
-                targetItemId !== undefined ? parseModulesJson(options.targetModules) : undefined,
+            targetModules,
+            targetEntityId,
         })
-        return bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve))
+        return bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve), snap)
     })
     await transact(
         {actions},

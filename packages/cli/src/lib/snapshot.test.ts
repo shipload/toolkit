@@ -56,3 +56,38 @@ test("loader thrust rollup clamps to uint16 max", () => {
 	);
 	expect(snap.loaders?.thrust).toBe(65535n);
 });
+
+test("cargo mapping carries entity_id from an individuated cargo_view", () => {
+	const snap = entityInfoToSnapshot(
+		entityInfoWith({
+			cargo: [
+				{
+					item_id: u(10201),
+					quantity: u(1),
+					stats: u(196849),
+					modules: [],
+					id: u(5),
+					entity_id: u(42),
+				},
+			],
+		}),
+	);
+	expect(snap.cargo[0].entity_id).toBe(42n);
+});
+
+test("cargo mapping yields undefined entity_id for a bare cargo row", () => {
+	const snap = entityInfoToSnapshot(
+		entityInfoWith({
+			cargo: [
+				{
+					item_id: u(10201),
+					quantity: u(1),
+					stats: u(196849),
+					modules: [],
+					id: u(5),
+				},
+			],
+		}),
+	);
+	expect(snap.cargo[0].entity_id).toBeUndefined();
+});

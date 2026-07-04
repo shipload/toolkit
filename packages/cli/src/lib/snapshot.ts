@@ -2,6 +2,7 @@ import { type ServerTypes, schedule, rollupGatherer, rollupCrafter, rollupLoader
 import { UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
 import type { LaneTaskView } from "./cancel-compute";
+import { toBigIntOrUndefined } from "./cargo-build";
 import { server } from "./client";
 
 export interface EntitySnapshot {
@@ -20,6 +21,7 @@ export interface EntitySnapshot {
 		stats?: bigint;
 		modules?: unknown[];
 		id?: bigint;
+		entity_id?: bigint;
 	}[];
 	capacity?: bigint;
 	energy?: bigint;
@@ -59,6 +61,7 @@ export function entityInfoToSnapshot(
 			stats: BigInt(c.stats.toString()),
 			modules: c.modules,
 			id: BigInt(c.id.toString()),
+			entity_id: toBigIntOrUndefined(c.entity_id),
 		})),
 		gatherer_lanes: ei.gatherer_lanes ?? [],
 		crafter_lanes: ei.crafter_lanes ?? [],

@@ -196,6 +196,34 @@ describe('entityInfoToSnapshot', () => {
             stats: 0n,
             id: 0n,
         })
+        expect(snap.cargo[0].entity_id).toBeUndefined()
+    })
+
+    test('carries entity_id from an individuated cargo_view', () => {
+        const ei = ServerContract.Types.entity_info.from({
+            type: 'ship',
+            id: 7,
+            owner: 'alice',
+            entity_name: 'Individuated',
+            coordinates: {x: 0, y: 0, z: 800},
+            item_id: 0,
+            cargomass: 5,
+            cargo: [
+                {item_id: 10201, quantity: 1, stats: 196849, modules: [], id: 5, entity_id: 42},
+            ],
+            modules: [],
+            is_idle: true,
+            current_task_elapsed: 0,
+            current_task_remaining: 0,
+            pending_tasks: [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            loader_lanes: [],
+            lanes: [],
+            holds: [],
+        })
+        const snap = entityInfoToSnapshot(ei)
+        expect(snap.cargo[0].entity_id).toBe(42n)
     })
 })
 

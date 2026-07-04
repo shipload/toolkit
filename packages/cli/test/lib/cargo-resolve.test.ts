@@ -28,7 +28,7 @@ describe("resolveCargoInputs — single input matching one stack", () => {
 			[{ itemId: 201, quantity: 12, stackId: 251479207179n }],
 			cargo,
 		);
-		expect(result).toEqual([{ itemId: 201, quantity: 12, stackId: 251479207179n }]);
+		expect(result).toEqual([{ itemId: 201, quantity: 12, stackId: 251479207179n, modules: [], entityId: undefined }]);
 	});
 	test("rejects when stack-id doesn't match any stack for the item-id", () => {
 		const cargo = [stack(201, 45, 251479207179n)];
@@ -69,8 +69,8 @@ describe("resolveCargoInputs — multi-stack same item", () => {
 			cargo,
 		);
 		expect(result).toEqual([
-			{ itemId: 301, quantity: 11, stackId: 1000n },
-			{ itemId: 301, quantity: 21, stackId: 2000n },
+			{ itemId: 301, quantity: 11, stackId: 1000n, modules: [], entityId: undefined },
+			{ itemId: 301, quantity: 21, stackId: 2000n, modules: [], entityId: undefined },
 		]);
 	});
 	test("rejects duplicate (item-id, stack-id) pairs as configuration error", () => {

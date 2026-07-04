@@ -1,4 +1,5 @@
 import { ServerTypes, TaskType, schedule } from "@shipload/sdk";
+import { toBigIntOrUndefined } from "./cargo-build";
 import type { EntitySnapshot } from "./snapshot";
 
 export interface ProjectedCargoStack {
@@ -7,6 +8,7 @@ export interface ProjectedCargoStack {
 	quantity: bigint;
 	modules: unknown[];
 	id: bigint;
+	entity_id?: bigint;
 }
 
 interface ModuleEntryLike {
@@ -90,19 +92,31 @@ function toBigInts(item: ServerTypes.cargo_item): {
 	stats: bigint;
 	quantity: bigint;
 	modules: unknown[];
+	entity_id?: bigint;
 } {
 	return {
 		item_id: BigInt(item.item_id.toString()),
 		stats: BigInt(item.stats.toString()),
 		quantity: BigInt(item.quantity.toString()),
 		modules: (item.modules ?? []) as unknown[],
+		entity_id: toBigIntOrUndefined(item.entity_id),
 	};
+}
+
+function isIndividuated(entity_id: bigint | undefined): boolean {
+	return entity_id != null && entity_id !== 0n;
 }
 
 function addCargo(stacks: ProjectedCargoStack[], item: ServerTypes.cargo_item): void {
 	const incoming = toBigInts(item);
-	const idx = stacks.findIndex((s) =>
-		sameKind(s, incoming.item_id, incoming.stats, incoming.modules),
+	if (isIndividuated(incoming.entity_id)) {
+		stacks.push({ ...incoming, id: 0n });
+		return;
+	}
+	const idx = stacks.findIndex(
+		(s) =>
+			sameKind(s, incoming.item_id, incoming.stats, incoming.modules) &&
+			!isIndividuated(s.entity_id),
 	);
 	if (idx === -1) {
 		stacks.push({ ...incoming, id: 0n });
@@ -113,9 +127,11 @@ function addCargo(stacks: ProjectedCargoStack[], item: ServerTypes.cargo_item): 
 
 function removeCargo(stacks: ProjectedCargoStack[], item: ServerTypes.cargo_item): void {
 	const incoming = toBigInts(item);
-	const idx = stacks.findIndex((s) =>
-		sameKind(s, incoming.item_id, incoming.stats, incoming.modules),
-	);
+	const individuated = isIndividuated(incoming.entity_id);
+	const idx = stacks.findIndex((s) => {
+		if (!sameKind(s, incoming.item_id, incoming.stats, incoming.modules)) return false;
+		return individuated ? s.entity_id === incoming.entity_id : !isIndividuated(s.entity_id);
+	});
 	if (idx === -1) return;
 	stacks[idx].quantity -= incoming.quantity;
 	if (stacks[idx].quantity <= 0n) stacks.splice(idx, 1);
@@ -161,6 +177,7 @@ export function snapshotToStacks(snap: EntitySnapshot): ProjectedCargoStack[] {
 		quantity: c.quantity,
 		modules: (c.modules ?? []) as unknown[],
 		id: c.id ?? 0n,
+		entity_id: c.entity_id,
 	}));
 }
 

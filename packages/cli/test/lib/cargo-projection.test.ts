@@ -9,7 +9,7 @@ import {
 import { entityInfoToSnapshot } from "../../src/lib/snapshot";
 
 function makeShip(opts: {
-	cargo?: { item_id: number; quantity: number; stats: number | bigint; id?: number }[];
+	cargo?: { item_id: number; quantity: number; stats: number | bigint; id?: number; entity_id?: number }[];
 	current_task?: ServerContract.Types.task;
 	pending_tasks?: ServerContract.Types.task[];
 }) {
@@ -35,6 +35,7 @@ function makeShip(opts: {
 			stats: c.stats,
 			modules: [],
 			id: c.id ?? 0,
+			...(c.entity_id != null ? { entity_id: c.entity_id } : {}),
 		})),
 		modules: [],
 		is_idle: !opts.current_task,
@@ -50,7 +51,10 @@ function makeShip(opts: {
 	return entityInfoToSnapshot(ei);
 }
 
-function task(type: TaskType, items: { item_id: number; quantity: number; stats: number | bigint }[]) {
+function task(
+	type: TaskType,
+	items: { item_id: number; quantity: number; stats: number | bigint; entity_id?: number }[],
+) {
 	return ServerContract.Types.task.from({
 		type,
 		duration: 60,
@@ -60,6 +64,7 @@ function task(type: TaskType, items: { item_id: number; quantity: number; stats:
 			quantity: i.quantity,
 			stats: i.stats,
 			modules: [],
+			...(i.entity_id != null ? { entity_id: i.entity_id } : {}),
 		})),
 	});
 }
@@ -157,6 +162,82 @@ describe("projectCargoFromSnapshot", () => {
 		const out = projectCargoFromSnapshot(snap);
 		expect(out).toHaveLength(1);
 		expect(out[0].quantity).toBe(7n);
+	});
+
+	test("carries entity_id from an individuated base cargo row through to no-op projection", () => {
+		const snap = makeShip({
+			cargo: [{ item_id: 10201, quantity: 1, stats: 196849n, id: 5, entity_id: 42 }],
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(1);
+		expect(out[0].entity_id).toBe(42n);
+	});
+
+	test("carries entity_id from a pending LOAD task's individuated cargo item", () => {
+		const snap = makeShip({
+			cargo: [],
+			current_task: task(TaskType.LOAD, [
+				{ item_id: 10201, quantity: 1, stats: 196849n, entity_id: 77 },
+			]),
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(1);
+		expect(out[0].entity_id).toBe(77n);
+	});
+
+	test("non-individuated stacks with matching item+stats+modules still merge (entity_id absent on both)", () => {
+		const snap = makeShip({
+			cargo: [{ item_id: 101, quantity: 5, stats: 100n, id: 1 }],
+			current_task: task(TaskType.LOAD, [{ item_id: 101, quantity: 5, stats: 100n }]),
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(1);
+		expect(out[0].quantity).toBe(10n);
+		expect(out[0].entity_id).toBeUndefined();
+	});
+
+	test("individuated LOAD does not merge into an existing same-kind bare stack", () => {
+		const snap = makeShip({
+			cargo: [{ item_id: 10201, quantity: 5, stats: 196849n, id: 1 }],
+			current_task: task(TaskType.LOAD, [
+				{ item_id: 10201, quantity: 1, stats: 196849n, entity_id: 42 },
+			]),
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(2);
+		const bare = out.find((s) => s.entity_id === undefined);
+		const individuated = out.find((s) => s.entity_id === 42n);
+		expect(bare?.quantity).toBe(5n);
+		expect(individuated?.quantity).toBe(1n);
+	});
+
+	test("non-individuated LOAD does not merge into an existing individuated same-kind stack", () => {
+		const snap = makeShip({
+			cargo: [{ item_id: 10201, quantity: 1, stats: 196849n, id: 1, entity_id: 42 }],
+			current_task: task(TaskType.LOAD, [{ item_id: 10201, quantity: 5, stats: 196849n }]),
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(2);
+		const bare = out.find((s) => s.entity_id === undefined);
+		const individuated = out.find((s) => s.entity_id === 42n);
+		expect(bare?.quantity).toBe(5n);
+		expect(individuated?.quantity).toBe(1n);
+	});
+
+	test("individuated UNLOAD targets the matching entity_id row, not an arbitrary same-kind row", () => {
+		const snap = makeShip({
+			cargo: [
+				{ item_id: 10201, quantity: 3, stats: 196849n, id: 1 },
+				{ item_id: 10201, quantity: 1, stats: 196849n, id: 2, entity_id: 42 },
+			],
+			current_task: task(TaskType.UNLOAD, [
+				{ item_id: 10201, quantity: 1, stats: 196849n, entity_id: 42 },
+			]),
+		});
+		const out = projectCargoFromSnapshot(snap);
+		expect(out).toHaveLength(1);
+		expect(out[0].entity_id).toBeUndefined();
+		expect(out[0].quantity).toBe(3n);
 	});
 });
 

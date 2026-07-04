@@ -3,7 +3,7 @@ import { type Action, UInt64 } from "@wharfkit/antelope";
 import type { EntityRef } from "./args";
 import { getShipload } from "./client";
 import { transact } from "./session";
-import { completedTaskCount, getEntitySnapshot } from "./snapshot";
+import { type EntitySnapshot, completedTaskCount, getEntitySnapshot } from "./snapshot";
 
 export async function ensureNoPendingResolve(
 	entityId: bigint | number,
@@ -27,12 +27,13 @@ export async function bundleWithIdleResolve(
 	entityId: bigint | number,
 	action: Action,
 	autoResolve: boolean,
+	snap?: EntitySnapshot,
 ): Promise<Action[]> {
 	if (!autoResolve) return [action];
-	const snap = await getEntitySnapshot(entityId);
+	const s = snap ?? (await getEntitySnapshot(entityId));
 	const sl = await getShipload();
 	return composeIdleResolve(
-		{ id: UInt64.from(snap.id), lanes: snap.lanes },
+		{ id: UInt64.from(s.id), lanes: s.lanes },
 		action,
 		sl.actions,
 		new Date(),

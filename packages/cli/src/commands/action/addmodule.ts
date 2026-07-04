@@ -16,6 +16,8 @@ import {
     parseUint8,
 } from '../../lib/args'
 import {parseModulesJson, validateTargetTriple} from '../../lib/cargo-build'
+import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
+import {pickModulesOverride, resolveCargoInputs} from '../../lib/cargo-resolve'
 import {formatCargoRef} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -35,6 +37,7 @@ export interface AddModuleOpts {
     targetItemId?: bigint
     targetStats?: bigint
     targetModules?: ServerTypes.module_entry[]
+    targetEntityId?: bigint
 }
 
 function findCargoEntry(cargo: EntitySnapshot['cargo'], itemId: number, stats: bigint): unknown {
@@ -77,11 +80,6 @@ export function preflightAgainstSnapshot(snap: EntitySnapshot, opts: AddModuleOp
     }
 }
 
-export async function preflightAddModule(opts: AddModuleOpts): Promise<void> {
-    const snap = await getEntitySnapshot(opts.entityId)
-    preflightAgainstSnapshot(snap, opts)
-}
-
 export async function buildAction(opts: AddModuleOpts, shipload?: Shipload): Promise<Action> {
     const sl = shipload ?? (await getShipload())
     const moduleRef = cargoRef({
@@ -95,6 +93,7 @@ export async function buildAction(opts: AddModuleOpts, shipload?: Shipload): Pro
                   item_id: Number(opts.targetItemId),
                   stats: opts.targetStats!,
                   modules: opts.targetModules ?? [],
+                  entity_id: opts.targetEntityId,
               })
             : null
     return sl.actions.addmodule(opts.entityId, opts.moduleIndex, moduleRef, targetRef)
@@ -122,8 +121,6 @@ export async function runAddModule(
         moduleModules: parseModulesJson(options.modules),
         targetItemId: options.target !== undefined ? BigInt(options.target.itemId) : undefined,
         targetStats: options.target?.stackId,
-        targetModules:
-            options.target !== undefined ? parseModulesJson(options.targetModules) : undefined,
     }
     const actions = await withValidation(async () => {
         validateTargetTriple({
@@ -131,7 +128,16 @@ export async function runAddModule(
             targetStats: addOpts.targetStats,
             targetModules: options.targetModules,
         })
-        await preflightAddModule(addOpts)
+        const snap = await getEntitySnapshot(ctx.entityId)
+        preflightAgainstSnapshot(snap, addOpts)
+        if (options.target !== undefined) {
+            const [resolved] = resolveCargoInputs(
+                [{itemId: options.target.itemId, stackId: options.target.stackId, quantity: 1}],
+                projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
+            )
+            addOpts.targetModules = pickModulesOverride(options.targetModules, resolved.modules)
+            addOpts.targetEntityId = resolved.entityId
+        }
         const action = await buildAction(addOpts)
         return bundleWithIdleResolve(ctx.entityId, action, Boolean(options.autoResolve))
     })

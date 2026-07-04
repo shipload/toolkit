@@ -8,6 +8,12 @@ export function parseModulesJson(
 	return JSON.parse(json) as ServerTypes.module_entry[];
 }
 
+export function toBigIntOrUndefined(
+	v: { toString(): string } | null | undefined,
+): bigint | undefined {
+	return v != null ? BigInt(v.toString()) : undefined;
+}
+
 export interface TargetTriple {
 	targetItemId?: bigint;
 	targetStats?: bigint;

@@ -1,4 +1,5 @@
 import type { ServerTypes } from "@shipload/sdk";
+import { parseModulesJson, toBigIntOrUndefined } from "./cargo-build";
 import { formatItem } from "./format";
 import { formatItemStats } from "./item-stats";
 import { ValidationError } from "./validate";
@@ -13,6 +14,8 @@ export interface ResolvedCargoInput {
 	itemId: number;
 	stackId: bigint;
 	quantity: number;
+	modules: ServerTypes.module_entry[];
+	entityId?: bigint;
 }
 
 function stackRow(itemId: number, s:ServerTypes.cargo_item): string {
@@ -35,6 +38,14 @@ function noMatchingStackMessage(p: ParsedCargoInput, matches:ServerTypes.cargo_i
 	const header = `no cargo stack matches item ${p.itemId} (${formatItem(p.itemId)}) with stack ${p.stackId} — available stacks for item ${p.itemId}:`;
 	const rows = matches.map((s) => stackRow(p.itemId, s));
 	return [header, ...rows].join("\n");
+}
+
+export function pickModulesOverride(
+	overrideJson: string | undefined,
+	resolvedModules: ServerTypes.module_entry[],
+): ServerTypes.module_entry[] {
+	const override = overrideJson ? parseModulesJson(overrideJson) : undefined;
+	return override ?? resolvedModules;
 }
 
 export function resolveCargoInputs(
@@ -77,7 +88,13 @@ export function resolveCargoInputs(
 				`cargo has ${stackQty}× ${formatItem(p.itemId)} in stack ${p.stackId}${decodedSuffix}, requested ${requested} — reduce qty or gather more`,
 			);
 		}
-		resolved.push({ itemId: p.itemId, stackId: p.stackId, quantity: p.quantity });
+		resolved.push({
+			itemId: p.itemId,
+			stackId: p.stackId,
+			quantity: p.quantity,
+			modules: stack.modules,
+			entityId: toBigIntOrUndefined(stack.entity_id),
+		});
 	}
 	return resolved;
 }
