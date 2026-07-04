@@ -165,5 +165,30 @@
         "maxTier": 1
       }
     ]
+  },
+  {
+    "entityItemId": 20211,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ]
   }
 ]

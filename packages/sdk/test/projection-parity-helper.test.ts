@@ -1,9 +1,12 @@
 import {describe, expect, test} from 'bun:test'
-import {Name, UInt16, UInt32} from '@wharfkit/antelope'
+import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../src/contracts'
 import {cargoItemToStack} from '../src/capabilities/storage'
 import {assertProjectionEquals, type ContractProjectedState} from '../src/testing/projection-parity'
-import {createProjectedEntity} from '../src/scheduling/projection'
+import {createProjectedEntity, type Projectable} from '../src/scheduling/projection'
+import {makeEntity} from '../src/entities/makers'
+import {ITEM_HAULER_T1, ITEM_SHIP_T1_PACKED} from '../src/data/item-ids'
+import {encodeStats} from '../src/derivation/crafting'
 
 function makeContractState(
     overrides: Partial<ContractProjectedState> = {}
@@ -113,5 +116,43 @@ describe('assertProjectionEquals', () => {
         const sdk = makeSdkProjected()
         sdk.engines = engines
         expect(() => assertProjectionEquals(contract, sdk)).not.toThrow()
+    })
+})
+
+describe('hauler capacity_by_tier lockstep (regression)', () => {
+    const haulerModule = {slotIndex: 0, itemId: ITEM_HAULER_T1, stats: encodeStats([500, 0, 0])}
+    const expectedByTier = [{tier: 1, capacity: 2}]
+
+    function byTierPlain(stats: ServerContract.Types.hauler_stats | undefined) {
+        return (stats?.capacity_by_tier ?? []).map((c) => ({
+            tier: c.tier.toNumber(),
+            capacity: c.capacity.toNumber(),
+        }))
+    }
+
+    test('makeEntity carries capacity_by_tier into the wire hauler_stats', () => {
+        const ship = makeEntity(ITEM_SHIP_T1_PACKED, {
+            id: UInt64.from(1),
+            owner: 'alice',
+            name: 'Hauler Test Ship',
+            coordinates: {x: 0, y: 0},
+            hullmass: 1000,
+            capacity: 1000000,
+            modules: [haulerModule],
+        })
+        expect(byTierPlain(ship.hauler)).toEqual(expectedByTier)
+    })
+
+    test('createProjectedEntity carries capacity_by_tier when recomputing from modules', () => {
+        const projectable: Projectable = {
+            coordinates: {x: 0, y: 0},
+            cargo: [],
+            cargomass: UInt32.from(0),
+            item_id: ITEM_SHIP_T1_PACKED,
+            modules: [haulerModule],
+            stats: 0n,
+        }
+        const projected = createProjectedEntity(projectable)
+        expect(byTierPlain(projected.hauler)).toEqual(expectedByTier)
     })
 })

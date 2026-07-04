@@ -204,7 +204,7 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', res])
         expect(findEntry(entries, 'capacity')!.second).toEqual([
             'uint8',
-            computeHaulerCapacity(res),
+            computeHaulerCapacity(res, 1),
         ])
         expect(findEntry(entries, 'efficiency')!.second).toEqual([
             'uint16',

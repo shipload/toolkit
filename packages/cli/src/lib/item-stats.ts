@@ -80,7 +80,7 @@ function formatModuleCapability(itemId: number, stats: bigint): string {
 			return `Gatherer: depth ${c.depth} · yield ${c.yield} · ${c.drain} energy/s`;
 		}
 		case MODULE_HAULER: {
-			const c = computeHaulerCapabilities(decoded);
+			const c = computeHaulerCapabilities(decoded, getItem(itemId).tier);
 			return `Hauler: capacity ${c.capacity} · efficiency ${c.efficiency} · ${c.drain} energy/load`;
 		}
 		case MODULE_CRAFTER: {

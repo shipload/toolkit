@@ -11,6 +11,7 @@ import {
     ITEM_WARP_T1,
     ITEM_STORAGE_T1,
     ITEM_HAULER_T1,
+    ITEM_HAULER_T2,
     ITEM_LOADER_T1,
     ITEM_CRAFTER_T1,
     ITEM_GATHERER_T1,
@@ -188,6 +189,35 @@ describe('computeEntityCapabilities', () => {
         expect(result.loaders).toBeDefined()
         expect(result.loaders?.quantity).toBeGreaterThan(0)
         expect(result.loaders?.mass).toBeGreaterThan(0)
+    })
+
+    test('hauler: single T1 beam yields capacity 2 and a single capacityByTier entry', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_HAULER_T1, stats: encodeStats([500, 0, 0])},
+        ]
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        expect(result.hauler?.capacity).toBe(2)
+        expect(result.hauler?.capacityByTier).toEqual([{tier: 1, capacity: 2}])
+    })
+
+    test('hauler: 2x T2 beams sum capacity into a single tier-2 capacityByTier bucket', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_HAULER_T2, stats: encodeStats([500, 0, 0])},
+            {slotIndex: 1, itemId: ITEM_HAULER_T2, stats: encodeStats([500, 0, 0])},
+        ]
+        const result = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        expect(result.hauler?.capacity).toBe(6)
+        expect(result.hauler?.capacityByTier).toEqual([{tier: 2, capacity: 6}])
     })
 
     test('launcher modules aggregate charge and velocity with slot amp and flat drain', () => {

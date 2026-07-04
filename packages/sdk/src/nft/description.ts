@@ -20,6 +20,7 @@ import {
     ITEM_GATHERER_T1,
     ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
+    ITEM_HAULER_SHIP_T2_PACKED,
     ITEM_HAULER_T1,
     ITEM_BATTERY_T1,
     ITEM_LOADER_T1,
@@ -30,7 +31,7 @@ import {
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
-import {applyCapacityTier, gathererDepthForTier} from '../derivation/capabilities'
+import {gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 
 function idiv(a: number, b: number): number {
@@ -80,7 +81,8 @@ export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - i
 export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla * pla, 10000)
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (fin: number): number => Math.max(5, 30 - idiv(fin, 33))
-export const computeHaulerCapacity = (fin: number): number => Math.max(1, 1 + idiv(fin, 400))
+export const computeHaulerCapacity = (fin: number, tier: number): number =>
+    Math.max(tier, tier + idiv(fin, 400))
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
 export const computeHaulerDrain = (com: number): number => Math.max(3, 15 - idiv(com, 80))
 export const computeWarpRange = (stat: number): number => 100 + stat * 3
@@ -113,6 +115,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Container'
         case ITEM_PROSPECTOR_T2_PACKED:
             return 'Prospector'
+        case ITEM_HAULER_SHIP_T2_PACKED:
+            return 'Hauler'
         default:
             return 'Entity'
     }
@@ -203,7 +207,8 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const res = decodeStat(stats, 0)
             const pla = decodeStat(stats, 1)
             const ref = decodeStat(stats, 2)
-            out += `  Capacity ${computeHaulerCapacity(res)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${computeHaulerDrain(ref)}`
+            const tier = getItem(itemId).tier
+            out += `  Capacity ${computeHaulerCapacity(res, tier)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${computeHaulerDrain(ref)}`
             break
         }
         case MODULE_WARP: {
@@ -231,7 +236,11 @@ export function buildEntityDescription(
 ): string {
     const hullMass = computeBaseHullmass(hullStats)
     let baseCapacity = 0
-    if (itemId === ITEM_SHIP_T1_PACKED || itemId === ITEM_PROSPECTOR_T2_PACKED) {
+    if (
+        itemId === ITEM_SHIP_T1_PACKED ||
+        itemId === ITEM_PROSPECTOR_T2_PACKED ||
+        itemId === ITEM_HAULER_SHIP_T2_PACKED
+    ) {
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)
@@ -242,9 +251,6 @@ export function buildEntityDescription(
         itemId === ITEM_CONTAINER_T2_PACKED
     ) {
         baseCapacity = computeBaseCapacityContainer(hullStats)
-    }
-    if (baseCapacity > 0) {
-        baseCapacity = applyCapacityTier(baseCapacity, getItem(itemId).tier)
     }
 
     let out = entityDisplayName(itemId)

@@ -269,7 +269,7 @@ export function buildModuleImmutable(
             base.push({first: 'resonance', second: ['uint16', res]})
             base.push({first: 'plasticity', second: ['uint16', pla]})
             base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res)]})
+            base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res, item.tier)]})
             base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(pla)]})
             base.push({first: 'drain', second: ['uint16', computeHaulerDrain(con)]})
             break

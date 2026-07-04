@@ -121,6 +121,11 @@
       "itemId": 20210,
       "kind": "ship",
       "displayLabel": "Prospector"
+    },
+    {
+      "itemId": 20211,
+      "kind": "ship",
+      "displayLabel": "Hauler"
     }
   ]
 }

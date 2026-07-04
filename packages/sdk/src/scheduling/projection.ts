@@ -167,7 +167,14 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         loaderLanes: (caps.loaderLanes ?? []).map(toLoaderLane),
         gathererLanes: (caps.gathererLanes ?? []).map(toGathererLane),
         crafterLanes: (caps.crafterLanes ?? []).map(toCrafterLane),
-        hauler: caps.hauler ? ServerContract.Types.hauler_stats.from(caps.hauler) : undefined,
+        hauler: caps.hauler
+            ? ServerContract.Types.hauler_stats.from({
+                  capacity: caps.hauler.capacity,
+                  efficiency: caps.hauler.efficiency,
+                  drain: caps.hauler.drain,
+                  capacity_by_tier: caps.hauler.capacityByTier,
+              })
+            : undefined,
         launcher: caps.launcher
             ? ServerContract.Types.launcher_stats.from({
                   charge_rate: caps.launcher.chargeRate,

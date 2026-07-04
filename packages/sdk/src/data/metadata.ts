@@ -328,6 +328,13 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#7B8D9E',
     },
 
+    20106: {
+        name: 'Tractor Beam (T2)',
+        description:
+            'Advanced haul beam projector reinforced with tier 2 components for greater towing capacity.',
+        color: '#4ADBFF',
+    },
+
     // === Entities (packed, T2) ===
     20200: {
         name: 'Container',
@@ -338,6 +345,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         name: 'Prospector',
         description:
             'Advanced exploration vessel with tiered engine, generator, and gatherer slots.',
+        color: '#4AE898',
+    },
+    20211: {
+        name: 'Hauler',
+        description:
+            'Advanced towing vessel with tiered engine, generator, and tractor beam slots.',
         color: '#4AE898',
     },
 }
@@ -352,6 +365,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10205: {moduleSlotLabels: ['Reactor', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
     20210: {moduleSlotLabels: ['Engine', 'Reactor', 'Limpet Bay', 'Limpet Bay', 'Flex Socket']},
+    20211: {moduleSlotLabels: ['Engine', 'Reactor', 'Tractor Beam', 'Tractor Beam']},
 }
 
 for (const item of items as Array<{id: number}>) {

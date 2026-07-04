@@ -6,6 +6,7 @@ import {
     ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
+    ITEM_HAULER_T2,
     ITEM_LAUNCHER_T1,
     ITEM_LOADER_T1,
     ITEM_STORAGE_T1,
@@ -54,6 +55,7 @@ export function getModuleCapabilityType(itemId: number): number {
         case ITEM_STORAGE_T1:
             return MODULE_STORAGE
         case ITEM_HAULER_T1:
+        case ITEM_HAULER_T2:
             return MODULE_HAULER
         case ITEM_WARP_T1:
             return MODULE_WARP

@@ -209,7 +209,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_HAULER: {
-            const caps = computeHaulerCapabilities(stats)
+            const caps = computeHaulerCapabilities(stats, tier)
             return {
                 capability: 'Hauling',
                 attributes: [

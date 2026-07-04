@@ -1590,6 +1590,54 @@
     "blendWeights": []
   },
   {
+    "outputItemId": 20106,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20004,
+        "quantity": 300
+      },
+      {
+        "itemId": 20010,
+        "quantity": 300
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": [
+      1,
+      1
+    ]
+  },
+  {
     "outputItemId": 20210,
     "outputMass": 3840000,
     "inputs": [
@@ -1612,6 +1660,65 @@
       {
         "itemId": 20006,
         "quantity": 300
+      },
+      {
+        "itemId": 10201,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20211,
+    "outputMass": 3840000,
+    "inputs": [
+      {
+        "itemId": 20001,
+        "quantity": 300
+      },
+      {
+        "itemId": 20002,
+        "quantity": 300
+      },
+      {
+        "itemId": 20008,
+        "quantity": 300
+      },
+      {
+        "itemId": 20010,
+        "quantity": 300
+      },
+      {
+        "itemId": 20004,
+        "quantity": 300
+      },
+      {
+        "itemId": 10201,
+        "quantity": 1
       }
     ],
     "statSlots": [

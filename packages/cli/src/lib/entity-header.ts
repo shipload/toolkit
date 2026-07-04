@@ -211,8 +211,9 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 			const fin = decodeStat(stats, 0);
 			const con = decodeStat(stats, 1);
 			const com = decodeStat(stats, 2);
+			const tier = getItem(itemId).tier;
 			const drain = NFT.computeHaulerDrain(com);
-			return `capacity ${computeHaulerCapacity(fin)} · efficiency ${computeHaulerEfficiency(con)} · ${drain} energy/load`;
+			return `capacity ${computeHaulerCapacity(fin, tier)} · efficiency ${computeHaulerEfficiency(con)} · ${drain} energy/load`;
 		}
 		case MODULE_WARP: {
 			const res = decodeStat(stats, 0);

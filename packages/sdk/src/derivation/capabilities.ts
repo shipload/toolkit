@@ -115,7 +115,10 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
     }
 }
 
-export function computeHaulerCapabilities(stats: Record<string, number>): {
+export function computeHaulerCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {
     capacity: number
     efficiency: number
     drain: number
@@ -125,7 +128,7 @@ export function computeHaulerCapabilities(stats: Record<string, number>): {
     const conductivity = stats.conductivity
 
     return {
-        capacity: Math.max(1, 1 + Math.floor(resonance / 400)),
+        capacity: computeHaulerCapacity(resonance, tier),
         efficiency: 2000 + plasticity * 6,
         drain: Math.max(3, 15 - Math.floor(conductivity / 80)),
     }
@@ -171,6 +174,7 @@ import {
     ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_HAULER_SHIP_T2_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
@@ -201,7 +205,7 @@ import {
     type InstalledModule,
 } from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
-import {computeTravelDrain} from '../nft/description'
+import {computeHaulerCapacity, computeTravelDrain} from '../nft/description'
 
 export const CAPACITY_TIER_TABLE = [1.0, 1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6]
 
@@ -219,6 +223,7 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
     switch (itemId) {
         case ITEM_SHIP_T1_PACKED:
         case ITEM_PROSPECTOR_T2_PACKED:
+        case ITEM_HAULER_SHIP_T2_PACKED:
             base = computeShipHullCapabilities(stats).capacity
             break
         case ITEM_EXTRACTOR_T1_PACKED:
@@ -290,7 +295,12 @@ export interface ComputedCapabilities {
     loaderLanes?: LoaderLaneEntry[]
     crafter?: {speed: number; drain: number}
     crafterLanes?: CrafterLaneEntry[]
-    hauler?: {capacity: number; efficiency: number; drain: number}
+    hauler?: {
+        capacity: number
+        efficiency: number
+        drain: number
+        capacityByTier: {tier: number; capacity: number}[]
+    }
     warp?: {range: number}
     launcher?: {chargeRate: number; velocity: number; drain: number}
 }
@@ -332,6 +342,7 @@ export function computeEntityCapabilities(
     let weightedHaulerEffNum = 0n
     let totalHaulerDrain = 0
     let hasHauler = false
+    const haulerCapByTier = new Map<number, number>()
 
     let totalWarpRange = 0
     let hasWarp = false
@@ -409,9 +420,10 @@ export function computeEntityCapabilities(
             })
         } else if (modType === MODULE_HAULER) {
             hasHauler = true
-            const caps = computeHaulerCapabilities(decodedStats)
+            const caps = computeHaulerCapabilities(decodedStats, item.tier)
             const eff = applySlotMultiplier(caps.efficiency, amp)
             totalHaulerCapacity += caps.capacity
+            haulerCapByTier.set(item.tier, (haulerCapByTier.get(item.tier) ?? 0) + caps.capacity)
             weightedHaulerEffNum += BigInt(eff) * BigInt(caps.capacity)
             totalHaulerDrain += caps.drain
         } else if (modType === MODULE_WARP) {
@@ -483,6 +495,9 @@ export function computeEntityCapabilities(
             capacity: totalHaulerCapacity,
             efficiency: clampUint16(efficiency),
             drain: totalHaulerDrain,
+            capacityByTier: [...haulerCapByTier.entries()]
+                .sort((a, b) => a[0] - b[0])
+                .map(([tier, capacity]) => ({tier, capacity})),
         }
     }
     if (hasWarp) {

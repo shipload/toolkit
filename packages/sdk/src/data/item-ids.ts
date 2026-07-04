@@ -89,5 +89,7 @@ export const ITEM_CERAMIC_T2 = 20008
 export const ITEM_REACTOR_T2 = 20009
 export const ITEM_RESIN_T2 = 20010
 export const ITEM_GATHERER_T2 = 20102
+export const ITEM_HAULER_T2 = 20106
 export const ITEM_CONTAINER_T2_PACKED = 20200
 export const ITEM_PROSPECTOR_T2_PACKED = 20210
+export const ITEM_HAULER_SHIP_T2_PACKED = 20211

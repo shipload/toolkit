@@ -140,7 +140,14 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
 
         if (caps.engines) info.engines = caps.engines
         if (caps.generator) info.generator = caps.generator
-        if (caps.hauler) info.hauler = caps.hauler
+        if (caps.hauler) {
+            info.hauler = ServerContract.Types.hauler_stats.from({
+                capacity: caps.hauler.capacity,
+                efficiency: caps.hauler.efficiency,
+                drain: caps.hauler.drain,
+                capacity_by_tier: caps.hauler.capacityByTier,
+            })
+        }
         if (caps.warp) info.warp = caps.warp
         if (caps.launcher) {
             info.launcher = ServerContract.Types.launcher_stats.from({
