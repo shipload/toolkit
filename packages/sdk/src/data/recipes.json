@@ -1672,6 +1672,10 @@
           {
             "inputIndex": 0,
             "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
           }
         ]
       },
@@ -1679,6 +1683,10 @@
         "sources": [
           {
             "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
             "statIndex": 1
           }
         ]
@@ -1727,6 +1735,10 @@
           {
             "inputIndex": 0,
             "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
           }
         ]
       },
@@ -1734,6 +1746,10 @@
         "sources": [
           {
             "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
             "statIndex": 1
           }
         ]

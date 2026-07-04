@@ -1,127 +1,127 @@
 {
-    "catalog_hash": "a28addb0bfc21d003d9e52856185c1331c41e99c71444ff912d87e385e313f55",
-    "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
-    "generated_at": "2026-07-04T07:40:48.320Z",
-    "cases": [
-        {
-            "name": "pos 37,1503",
-            "x": 37,
-            "y": 1503,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": 1089834,
-                    "y": 1059080
-                }
-            }
-        },
-        {
-            "name": "pos 10,3215",
-            "x": 10,
-            "y": 3215,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": 231926,
-                    "y": 912148
-                }
-            }
-        },
-        {
-            "name": "pos 31,4489",
-            "x": 31,
-            "y": 4489,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": 487878,
-                    "y": 568416
-                }
-            }
-        },
-        {
-            "name": "neg-fwd -11207,-8707",
-            "x": -11207,
-            "y": -8707,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -299718,
-                    "y": -170785
-                }
-            }
-        },
-        {
-            "name": "neg-rev -299718,-170785",
-            "x": -299718,
-            "y": -170785,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -11207,
-                    "y": -8707
-                }
-            }
-        },
-        {
-            "name": "neg-fwd -11250,-8365",
-            "x": -11250,
-            "y": -8365,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -593217,
-                    "y": -1062050
-                }
-            }
-        },
-        {
-            "name": "neg-rev -593217,-1062050",
-            "x": -593217,
-            "y": -1062050,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -11250,
-                    "y": -8365
-                }
-            }
-        },
-        {
-            "name": "neg-fwd -11194,-7801",
-            "x": -11194,
-            "y": -7801,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -619497,
-                    "y": -483318
-                }
-            }
-        },
-        {
-            "name": "neg-rev -619497,-483318",
-            "x": -619497,
-            "y": -483318,
-            "expected": {
-                "is_wormhole": true,
-                "destination": {
-                    "x": -11194,
-                    "y": -7801
-                }
-            }
-        },
-        {
-            "name": "non-endpoint",
-            "x": 38,
-            "y": 1503,
-            "expected": {
-                "is_wormhole": false,
-                "destination": {
-                    "x": 38,
-                    "y": 1503
-                }
-            }
+  "catalog_hash": "ec23ac4d0985abe5d77929619f844767a0b6fa5ed87090f04f87f1f828cba8cb",
+  "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
+  "generated_at": "2026-07-04T19:09:18.421Z",
+  "cases": [
+    {
+      "name": "pos 37,1503",
+      "x": 37,
+      "y": 1503,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": 1089834,
+          "y": 1059080
         }
-    ]
+      }
+    },
+    {
+      "name": "pos 10,3215",
+      "x": 10,
+      "y": 3215,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": 231926,
+          "y": 912148
+        }
+      }
+    },
+    {
+      "name": "pos 31,4489",
+      "x": 31,
+      "y": 4489,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": 487878,
+          "y": 568416
+        }
+      }
+    },
+    {
+      "name": "neg-fwd -11207,-8707",
+      "x": -11207,
+      "y": -8707,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -299718,
+          "y": -170785
+        }
+      }
+    },
+    {
+      "name": "neg-rev -299718,-170785",
+      "x": -299718,
+      "y": -170785,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -11207,
+          "y": -8707
+        }
+      }
+    },
+    {
+      "name": "neg-fwd -11250,-8365",
+      "x": -11250,
+      "y": -8365,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -593217,
+          "y": -1062050
+        }
+      }
+    },
+    {
+      "name": "neg-rev -593217,-1062050",
+      "x": -593217,
+      "y": -1062050,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -11250,
+          "y": -8365
+        }
+      }
+    },
+    {
+      "name": "neg-fwd -11194,-7801",
+      "x": -11194,
+      "y": -7801,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -619497,
+          "y": -483318
+        }
+      }
+    },
+    {
+      "name": "neg-rev -619497,-483318",
+      "x": -619497,
+      "y": -483318,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": -11194,
+          "y": -7801
+        }
+      }
+    },
+    {
+      "name": "non-endpoint",
+      "x": 38,
+      "y": 1503,
+      "expected": {
+        "is_wormhole": false,
+        "destination": {
+          "x": 38,
+          "y": 1503
+        }
+      }
+    }
+  ]
 }

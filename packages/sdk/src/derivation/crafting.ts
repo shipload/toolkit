@@ -141,16 +141,20 @@ export function computeEntityStats(
     }
 
     return recipe.statSlots.map((slot) => {
-        const src = slot.sources[0]
-        const key = keyForStatSlot(recipe, slot)
-        if (!src) return {key, value: 1}
-        const input = recipe.inputs[src.inputIndex]
-        if (!input) {
-            return {key, value: 1}
+        const slotKey = keyForStatSlot(recipe, slot)
+        if (slot.sources.length === 0) return {key: slotKey, value: 1}
+        let weightedSum = 0
+        let totalWeight = 0
+        for (const src of slot.sources) {
+            const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
+            const input = recipe.inputs[src.inputIndex]
+            if (!input) continue
+            const weight = recipe.blendWeights?.[src.inputIndex] ?? 1
+            weightedSum += (blendedByComponent[input.itemId]?.[key] ?? 0) * weight
+            totalWeight += weight
         }
-        const blended = blendedByComponent[input.itemId] ?? {}
-        const value = blended[key] ?? 0
-        return {key, value: Math.max(1, Math.min(999, value))}
+        const value = totalWeight > 0 ? Math.floor(weightedSum / totalWeight) : 0
+        return {key: slotKey, value: Math.max(1, Math.min(999, value))}
     })
 }
 
