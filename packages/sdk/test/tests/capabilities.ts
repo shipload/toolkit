@@ -70,6 +70,7 @@ describe('Capabilities', () => {
                 capacity: 2,
                 efficiency: 5000,
                 drain: 9,
+                capacity_by_tier: [{tier: 1, capacity: 2}],
             }),
         }
         assert.isTrue(capsHasHauler(caps))
