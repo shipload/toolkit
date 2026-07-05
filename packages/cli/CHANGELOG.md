@@ -1,5 +1,20 @@
 # @shipload/cli
 
+## 1.0.0-next.51
+
+### Patch Changes
+
+- 5b7d970: - Update renderer snapshots for Power Core module rename
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Blend all stat-slot sources in entity stat derivation
+  - Helpers for slot modules + module renames
+- Updated dependencies [5b7d970]
+  - @shipload/oracle@0.0.1-next.37
+  - @shipload/sdk@1.0.0-next.47
+
 ## 1.0.0-next.50
 
 ### Patch Changes
