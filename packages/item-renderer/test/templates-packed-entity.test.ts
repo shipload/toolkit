@@ -14,7 +14,7 @@ test('renders Ship with hull attributes and two modules', () => {
     expect(svg).toContain('Mass')
     expect(svg).toContain('Capacity')
     expect(svg).toContain('Engine:')
-    expect(svg).toContain('Reactor:')
+    expect(svg).toContain('Power Core:')
 })
 
 test('renders empty-module rows when slots are unfilled', () => {
@@ -62,8 +62,8 @@ test('ship with two modules renders capability-colored prose, white highlights, 
     // Capability prose labels in their capability colors.
     expect(svg).toContain('Engine:')
     expect(svg).toContain('#4a8abf')
-    expect(svg).toContain('Reactor:')
-    expect(svg).toContain('#22c55e')
+    expect(svg).toContain('Power Core:')
+    expect(svg).toContain('#7E93C4')
     // Prose body present, highlighted numbers white, no gold.
     expect(svg).toContain('thrust for')
     expect(svg).toContain('#e6e8ec')
