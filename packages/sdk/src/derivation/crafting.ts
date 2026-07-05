@@ -297,7 +297,7 @@ export function computeCraftedOutputStats(
             out.push(0)
             continue
         }
-        if (slot.sources.length === 1 || recipe.blendWeights.length === 0) {
+        if (slot.sources.length === 1) {
             const src = slot.sources[0]
             const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
             const input = recipe.inputs[src.inputIndex]
