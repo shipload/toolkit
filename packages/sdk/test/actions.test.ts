@@ -3,6 +3,7 @@ import {Chains} from '@wharfkit/common'
 import {Shipload} from '../src'
 import {ServerContract} from '../src/contracts'
 import {ATOMICASSETS_ABI} from '../src/nft/atomicassets'
+import {ITEM_PROSPECTOR_T2_PACKED} from '../src/data/item-ids'
 
 const sl = new Shipload(Chains.Jungle4)
 
@@ -65,6 +66,16 @@ test('craft with a target cross-crafts onto the target entity', () => {
     expect(String(action.name)).toBe('craft')
     const data = action.decodeData(ServerContract.abi)
     expect(String(data.target)).toBe('7')
+})
+
+test('upgrade builds an eon.shipload action with the right fields', () => {
+    const action = sl.actions.upgrade(1, 2, ITEM_PROSPECTOR_T2_PACKED, [], undefined)
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('upgrade')
+    const data = action.decodeData(ServerContract.abi)
+    expect(Number(data.builder_id)).toBe(1)
+    expect(Number(data.target_id)).toBe(2)
+    expect(Number(data.target_item_id)).toBe(ITEM_PROSPECTOR_T2_PACKED)
 })
 
 test('setLastPayer builds an atomicassets::setlastpayer action authed by the owner', () => {

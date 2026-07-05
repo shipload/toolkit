@@ -44,6 +44,7 @@ export type {EffectiveReserveInput} from './reserve-regen'
 
 export * from './stats'
 export * from './crafting'
+export * from './upgrades'
 
 export {
     STAR_STEP,

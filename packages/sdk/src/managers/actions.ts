@@ -447,6 +447,25 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    upgrade(
+        builderId: UInt64Type,
+        targetId: UInt64Type,
+        targetItemId: UInt16Type,
+        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        slot?: UInt8Type
+    ): Action {
+        const params: ServerContract.ActionParams.upgrade = {
+            builder_id: UInt64.from(builderId),
+            target_id: UInt64.from(targetId),
+            target_item_id: UInt16.from(targetItemId),
+            inputs,
+        }
+        if (slot !== undefined) {
+            params.slot = UInt8.from(slot)
+        }
+        return this.server.action('upgrade', params)
+    }
+
     claimplot(entityId: UInt64Type, targetItemId: UInt16Type, slot: ClusterSlotType): Action {
         return this.server.action('claimplot', {
             builder_id: UInt64.from(entityId),

@@ -1698,7 +1698,8 @@
         "sources": []
       }
     ],
-    "blendWeights": []
+    "blendWeights": [],
+    "sourceSubclass": 10201
   },
   {
     "outputItemId": 20211,
@@ -1761,6 +1762,7 @@
         "sources": []
       }
     ],
-    "blendWeights": []
+    "blendWeights": [],
+    "sourceSubclass": 10201
   }
 ]
