@@ -104,7 +104,7 @@ export const computeBatteryBankCapacity = (
 export function entityDisplayName(itemId: number): string {
     switch (itemId) {
         case ITEM_SHIP_T1_PACKED:
-            return 'Ship'
+            return 'Roustabout'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:

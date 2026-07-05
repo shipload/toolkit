@@ -231,7 +231,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#7B8D9E',
     },
     10201: {
-        name: 'Ship',
+        name: 'Roustabout',
         description: 'General-purpose vessel with 5 module slots.',
         color: '#4AE898',
     },
