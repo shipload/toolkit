@@ -7,6 +7,9 @@ import {taskCargoEffect} from './availability'
 import {candidateLaneCompletesAt} from './lanes'
 
 const NFT_TRANSIT_THRUST = 400
+const BASELINE_LOADER: DerivedLoaders = {mass: 2000, thrust: 1, quantity: 1}
+// ground-level entities (warehouses, z=0) still incur a base orbital climb of load effort
+const MIN_LOAD_Z = 800
 
 export interface DerivedLoaders {
     mass: number
@@ -67,7 +70,7 @@ export function unwrapLoadDuration(
 ): number {
     if (!loaders || itemMass <= 0) return 0
     const total = itemMass + loaders.mass
-    const flight = flightTime(destZ, acceleration(loaders.thrust, total))
+    const flight = flightTime(Math.max(destZ, MIN_LOAD_Z), acceleration(loaders.thrust, total))
     return Math.floor(flight / loaders.quantity)
 }
 
@@ -92,7 +95,7 @@ export function estimateUnwrapDuration(dest: UnwrapDestination, item: UnwrapItem
             modules: item.modules,
         })
     )
-    const loaders = derivedLoaders(dest.loader_lanes)
+    const loaders = derivedLoaders(dest.loader_lanes) ?? BASELINE_LOADER
     const dz = Number(dest.coordinates.z ?? 0)
     const load = unwrapLoadDuration(loaders, itemMass, dz)
     const transit = unwrapTransitDuration(

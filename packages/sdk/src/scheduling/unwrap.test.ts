@@ -39,6 +39,32 @@ describe('unwrap duration mirror', () => {
         expect(unwrapTransitDuration(0, {x: 0, y: 0}, {x: 9, y: 9})).toBe(0)
         expect(unwrapLoadDuration(null, 500, 3000)).toBe(0)
     })
+
+    test('load altitude is floored so ground-level (z=0) destinations are not instant', () => {
+        const loaders = {mass: 500, thrust: 200, quantity: 1}
+        const atZero = unwrapLoadDuration(loaders, 1000, 0)
+        const at800 = unwrapLoadDuration(loaders, 1000, 800)
+        expect(atZero).toBeGreaterThan(0)
+        expect(atZero).toBe(at800)
+    })
+
+    test('estimateUnwrapDuration uses worst-loader baseline when dest has no loaders', () => {
+        // IRON (101); same coords so transit is 0 and the estimate is baseline load alone
+        const item = {itemId: 101, quantity: 10, modules: [], originX: 0, originY: 0}
+        const bareDest = {loader_lanes: [], coordinates: {x: 0, y: 0, z: 800}}
+
+        const bare = estimateUnwrapDuration(bareDest, item)
+        expect(bare).toBeGreaterThan(0)
+
+        const loadedDest = {
+            loader_lanes: [{mass: 500, thrust: 200}],
+            coordinates: {x: 0, y: 0, z: 800},
+        }
+        const loaded = estimateUnwrapDuration(loadedDest, item)
+        expect(loaded).toBeLessThanOrEqual(bare)
+
+        expect(unwrapLoadDuration(null, 500, 3000)).toBe(0)
+    })
 })
 
 test('incomingHoldMass sums incoming-kind hold mass', () => {
