@@ -1,5 +1,24 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.48
+
+### Patch Changes
+
+- 5887a8e: - Roustabout renaming continued
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Export eligibleUpgrades and add upgrade hold and task kinds
+  - Sync the Container T2 catalog
+  - Name the T1 ship Roustabout
+  - Average multi-source stat slots when blend weights are empty
+  - Sync T2 recipe catalog after fresh components and module upgrades
+  - Add SDK support for the subclass upgrade action
+- Updated dependencies [5887a8e]
+  - @shipload/item-renderer@1.0.0-next.48
+  - @shipload/sdk@1.0.0-next.48
+
 ## 1.0.0-next.47
 
 ### Patch Changes

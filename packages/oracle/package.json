@@ -1,6 +1,6 @@
 {
     "name": "@shipload/oracle",
-    "version": "0.0.1-next.37",
+    "version": "0.0.1-next.38",
     "private": true,
     "type": "module",
     "main": "src/index.ts",

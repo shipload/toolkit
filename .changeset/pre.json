@@ -10,6 +10,7 @@
   },
   "changesets": [
     "big-files-accept",
+    "breezy-clowns-accept",
     "busy-coins-refuse",
     "clear-eels-sell",
     "clear-meteors-fetch",
