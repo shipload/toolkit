@@ -150,6 +150,8 @@ export type {ReserveTier, TierRange} from './derivation'
 export {getEffectiveReserve} from './derivation'
 export type {EffectiveReserveInput} from './derivation'
 
+export {eligibleUpgrades} from './derivation'
+
 export {getStatDefinitions, getStatName, resolveStats} from './derivation'
 export type {StatDefinition, NamedStats} from './derivation'
 

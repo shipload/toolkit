@@ -64,6 +64,8 @@ export enum TaskType {
     DEMOLISH = 13,
     CLAIMPLOT = 14,
     BUILDPLOT = 15,
+    CHARGE = 16,
+    UPGRADE = 17,
 }
 
 export enum HoldKind {
@@ -71,6 +73,7 @@ export enum HoldKind {
     PUSH = 2,
     GATHER = 3,
     BUILD = 4,
+    UPGRADE = 6,
 }
 
 export enum LocationType {
