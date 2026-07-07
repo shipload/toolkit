@@ -12,10 +12,10 @@ export function capsHasCrafter(caps: EntityCapabilities): boolean {
 
 export function calc_craft_duration(speed: number, totalInputMass: number): UInt32 {
     const duration = Math.floor(totalInputMass / speed)
-    return UInt32.from(Math.max(duration, 1))
+    return UInt32.from(duration + 1)
 }
 
 export function calc_craft_energy(drain: number, totalInputMass: number): UInt32 {
     const raw = Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR)
-    return UInt32.from(Math.min(Math.max(raw, 1), 4294967295))
+    return UInt32.from(Math.min(Math.max(raw + 1, 1), 4294967295))
 }

@@ -1,6 +1,6 @@
 {
   "catalog_hash": "7eda15a96f8a2f1c1ebfe9365c53059933ad81a492e5e01d44118178d99d8019",
-  "generated_at": "2026-07-06T03:13:53.446Z",
+  "generated_at": "2026-07-06T23:07:54.860Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -1117,7 +1117,7 @@
               "tasks": [
                 {
                   "type": 7,
-                  "duration": 46,
+                  "duration": 47,
                   "cancelable": 2,
                   "cargo": [
                     {
@@ -1133,7 +1133,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1
+                  "energy_cost": 2
                 }
               ]
             }
@@ -1267,7 +1267,7 @@
               "tasks": [
                 {
                   "type": 7,
-                  "duration": 46,
+                  "duration": 47,
                   "cancelable": 2,
                   "cargo": [
                     {
@@ -1283,7 +1283,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1
+                  "energy_cost": 2
                 }
               ]
             }
@@ -1307,7 +1307,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 843,
+        "energy": 842,
         "cargomass": 4000,
         "cargo": [
           {

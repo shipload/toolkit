@@ -60,7 +60,7 @@ describe('craft duration parity matrix', () => {
         expect(inputMass).toBe(10000)
         const speed = 200
         const duration = calc_craft_duration(speed, inputMass).toNumber()
-        expect(duration).toBe(50)
+        expect(duration).toBe(51)
     })
 
     test('batch of 100 Plates at crafter.speed=200', () => {
@@ -69,7 +69,7 @@ describe('craft duration parity matrix', () => {
         expect(inputMass).toBe(1_000_000)
         const speed = 200
         const duration = calc_craft_duration(speed, inputMass).toNumber()
-        expect(duration).toBe(5000)
+        expect(duration).toBe(5001)
     })
 
     test('computeInputMass(Plate) reflects new catalog (10 t Ore x 1000)', () => {

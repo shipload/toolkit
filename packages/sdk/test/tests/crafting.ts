@@ -590,13 +590,13 @@ describe('Crafting', () => {
     describe('calc_craft_duration', () => {
         test('basic duration calculation', () => {
             const duration = calc_craft_duration(500, 450000)
-            assert.equal(duration.toNumber(), 900)
+            assert.equal(duration.toNumber(), 901)
         })
 
-        test('scales linearly with total input mass', () => {
+        test('per-task setup cost keeps splitting no cheaper than batching', () => {
             const single = calc_craft_duration(500, 450000)
             const batch = calc_craft_duration(500, 450000 * 8)
-            assert.equal(batch.toNumber(), single.toNumber() * 8)
+            assert.isAtMost(batch.toNumber(), single.toNumber() * 8)
         })
 
         test('higher speed reduces duration', () => {
@@ -659,9 +659,9 @@ describe('Crafting', () => {
 
     describe('calc_craft_energy', () => {
         test('basic energy calculation', () => {
-            // Plate: 450K input_mass × drain 17 / 150K = 51
+            // Plate: 450K input_mass × drain 17 / 150K = 51, +1 setup cost = 52
             const energy = calc_craft_energy(17, 450000)
-            assert.equal(energy.toNumber(), 51)
+            assert.equal(energy.toNumber(), 52)
         })
 
         test('higher drain costs more energy', () => {
@@ -681,15 +681,15 @@ describe('Crafting', () => {
             assert.equal(energy.toNumber(), 1)
         })
 
-        test('scales linearly with batched input mass', () => {
+        test('per-task setup cost keeps a batch no pricier than split crafts', () => {
             const single = calc_craft_energy(17, 450000)
             const batch = calc_craft_energy(17, 1350000)
-            assert.equal(batch.toNumber(), single.toNumber() * 3)
+            assert.isAtMost(batch.toNumber(), single.toNumber() * 3)
         })
 
         test('energy exceeds the old uint16 ceiling on oversized input', () => {
             const energy = calc_craft_energy(30, 450_000_000)
-            assert.equal(energy.toNumber(), 90000)
+            assert.equal(energy.toNumber(), 90001)
         })
     })
 })

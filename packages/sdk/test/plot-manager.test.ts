@@ -146,7 +146,7 @@ describe('PlotManager.timeToComplete', () => {
             speed: UInt16.from(14400),
             drain: UInt32.from(0),
         }
-        expect(manager.timeToComplete(plot, crafter)).toBe(1000)
+        expect(manager.timeToComplete(plot, crafter)).toBe(1001)
     })
 
     test('minimum result is 1', () => {
