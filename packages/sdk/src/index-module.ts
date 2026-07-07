@@ -570,5 +570,21 @@ export type {DescribeOptions} from './resolution/display-name'
 
 export * from './subscriptions'
 
-export {planParallelGather, planParallelTransfer} from './planner'
-export type {LanePlanEntry, PlanTarget, GatherPlanEntity} from './planner'
+export {
+    allocateProportional,
+    buildGatherPlan,
+    gatherEnergyCost,
+    maxQtyForCharge,
+    planParallelTransfer,
+    splitCost,
+} from './planner'
+export type {
+    BuildGatherPlanOpts,
+    FillCap,
+    GatherCycle,
+    GatherLimpet,
+    GatherPlan,
+    GatherPlanEntity,
+    LanePlanEntry,
+    PlanTarget,
+} from './planner'

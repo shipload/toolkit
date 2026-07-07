@@ -21,6 +21,7 @@ import {Coordinates, PRECISION, type ClusterSlotType, type CoordinatesType} from
 import {ServerContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
+import type {GatherPlan} from '../planner'
 
 const CHARGE_K = 1n
 const ENERGY_DIVISOR = 1_000_000n
@@ -392,6 +393,29 @@ export class ActionsManager extends BaseManager {
             ref_block_prefix: 0,
             actions,
         })
+    }
+
+    // Mirrors the contract's projected_energy walk: recharge (if due) then gathers, per cycle.
+    flattenGatherPlan(
+        plan: GatherPlan,
+        ctx: {sourceId: UInt64Type; destinationId: UInt64Type; stratum: UInt16Type}
+    ): Action[] {
+        const actions: Action[] = []
+        for (const cycle of plan.cycles) {
+            if (cycle.rechargeBefore) actions.push(this.recharge(ctx.sourceId))
+            for (const limpet of cycle.limpets) {
+                actions.push(
+                    this.gather(
+                        ctx.sourceId,
+                        ctx.destinationId,
+                        ctx.stratum,
+                        limpet.quantity,
+                        limpet.slot
+                    )
+                )
+            }
+        }
+        return actions
     }
 
     warp(entityId: UInt64Type, destination: CoordinatesType): Action {
