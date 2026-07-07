@@ -6,6 +6,7 @@ import {componentIcon, componentIconSlugForName} from '../primitives/component-i
 import {entityIcon, entityIconSlugForName} from '../primitives/entity-icon.ts'
 import {moduleIcon, moduleIconSlugForName} from '../primitives/module-icon.ts'
 import {resourceIcon} from '../primitives/resource-icon.ts'
+import {stationEntityIcon, stationEntityIconKindForName} from '../primitives/station-entity-icon.ts'
 import {tokens} from '../tokens/index.ts'
 
 export interface ItemCellProps {
@@ -64,6 +65,10 @@ function cellInner(props: ItemCellProps): string {
         props.resolved.itemType === 'component'
             ? componentIconSlugForName(props.resolved.name)
             : null
+    const stationEntityKind =
+        props.resolved.itemType === 'entity'
+            ? stationEntityIconKindForName(props.resolved.name)
+            : null
     const entitySlug =
         props.resolved.itemType === 'entity' ? entityIconSlugForName(props.resolved.name) : null
     const moduleSlug =
@@ -84,6 +89,14 @@ function cellInner(props: ItemCellProps): string {
         const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
         const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
         content = componentIcon(componentSlug, {
+            x: (size - iconSize) / 2,
+            y: iconY,
+            size: iconSize,
+        })
+    } else if (stationEntityKind) {
+        const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
+        const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
+        content = stationEntityIcon(stationEntityKind, {
             x: (size - iconSize) / 2,
             y: iconY,
             size: iconSize,

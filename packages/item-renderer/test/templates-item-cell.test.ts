@@ -49,10 +49,11 @@ test('container entity cell renders the detailed entity SVG icon', () => {
     expect(svg).toContain('viewBox="0 0 1024 1024"')
 })
 
-test('entity cell without a premade icon renders abbreviation', () => {
+test('station entity cell renders the detailed station SVG icon', () => {
     const resolved = resolveItem(ITEM_WAREHOUSE_T1_PACKED)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('>WH<')
+    expect(svg).not.toContain('>WH<')
+    expect(svg).toContain('data-station-entity="warehouse"')
 })
 
 test('resource cell renders the detailed resource SVG icon', () => {

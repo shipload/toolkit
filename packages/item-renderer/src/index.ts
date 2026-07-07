@@ -84,6 +84,22 @@ export type {
     ModuleIconSvgOpts,
 } from './primitives/module-icon.ts'
 
+// Station entity icon primitive
+export {
+    stationEntityIcon,
+    stationEntityIconBody,
+    stationEntityIconKinds,
+    stationEntityIconKindForName,
+    stationEntityIconKindForPackedItemId,
+    stationEntityIconLabelForKind,
+    stationEntityIconSvg,
+} from './primitives/station-entity-icon.ts'
+export type {
+    StationEntityIconInlineOpts,
+    StationEntityIconKind,
+    StationEntityIconSvgOpts,
+} from './primitives/station-entity-icon.ts'
+
 // Item cell templates
 export {renderItemCell, itemCellGroup, abbreviateQuantity} from './templates/item-cell.ts'
 export type {ItemCellProps, ItemCellGroupProps} from './templates/item-cell.ts'
