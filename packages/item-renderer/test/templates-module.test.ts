@@ -33,6 +33,14 @@ test('Engine values mode renders the capability header + prose narrative', () =>
     expect(svg).toContain('>90</tspan>')
 })
 
+test('Engine template renders the module icon in the header', () => {
+    const item = FIXTURES.engineT1
+    const resolved = resolveItem(item.item_id, item.stats, item.modules)
+    const svg = renderModule(item, resolved)
+    expect(svg).toContain('data-module="engine"')
+    expect(svg).not.toContain('>00</text>')
+})
+
 test('Engine prose highlights numbers in white, never gold', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)

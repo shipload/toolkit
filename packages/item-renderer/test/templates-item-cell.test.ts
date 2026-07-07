@@ -25,10 +25,12 @@ test('component cell renders the detailed component SVG icon', () => {
     expect(svg).toContain('#7f95a9')
 })
 
-test('module cell renders abbreviation', () => {
+test('module cell renders the detailed module SVG icon', () => {
     const resolved = resolveItem(ITEM_ENGINE_T1)
     const svg = renderItemCell({resolved, size: 48})
-    expect(svg).toContain('>EN<')
+    expect(svg).not.toContain('>EN<')
+    expect(svg).toContain('data-module="engine"')
+    expect(svg).toContain('#39e4ef')
 })
 
 test('ship entity cell renders the detailed entity SVG icon', () => {
@@ -118,12 +120,12 @@ test('tier border uses SDK tierColors for the resolved tier', () => {
     expect(svg).toContain('#8b8b8b')
 })
 
-test('module abbreviation cell uses proportional font size for different sizes', () => {
+test('module icon cell uses proportional icon scale for different sizes', () => {
     const resolved = resolveItem(ITEM_ENGINE_T1)
     const svg28 = renderItemCell({resolved, size: 28})
     const svg80 = renderItemCell({resolved, size: 80})
-    expect(svg28).toContain('font-size="10"')
-    expect(svg80).toContain('font-size="29"')
+    expect(svg28).toContain('scale(0.09375)')
+    expect(svg80).toContain('scale(0.26171875)')
 })
 
 test('resource cell uses the same icon pipeline for gas', () => {

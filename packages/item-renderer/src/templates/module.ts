@@ -3,6 +3,7 @@ import {describeModuleForItem, formatLocation, renderDescription} from '@shiploa
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
+import {moduleIcon, moduleIconSlugForName} from '../primitives/module-icon.ts'
 import {text} from '../primitives/text.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {spanParagraph} from '../primitives/span-paragraph.ts'
@@ -91,12 +92,15 @@ export function renderModule(
 
     const badge = quantityBadge({x: w - pad, y: pad + BADGE_Y, quantity, tone: iconColor})
 
-    const icon = iconHex({
-        x: pad,
-        y: pad + ICON_Y,
-        color: iconColor,
-        code: shortCode(resolved.itemId),
-    })
+    const moduleSlug = moduleIconSlugForName(resolved.name)
+    const icon = moduleSlug
+        ? moduleIcon(moduleSlug, {x: pad, y: pad + ICON_Y - 2, size: 28})
+        : iconHex({
+              x: pad,
+              y: pad + ICON_Y,
+              color: iconColor,
+              code: shortCode(resolved.itemId),
+          })
 
     const name = titleText(pad + 34, pad + 22, resolved)
 

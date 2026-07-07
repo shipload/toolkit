@@ -4,6 +4,7 @@ import {el} from '../primitives/svg.ts'
 import {text} from '../primitives/text.ts'
 import {componentIcon, componentIconSlugForName} from '../primitives/component-icon.ts'
 import {entityIcon, entityIconSlugForName} from '../primitives/entity-icon.ts'
+import {moduleIcon, moduleIconSlugForName} from '../primitives/module-icon.ts'
 import {resourceIcon} from '../primitives/resource-icon.ts'
 import {tokens} from '../tokens/index.ts'
 
@@ -65,6 +66,8 @@ function cellInner(props: ItemCellProps): string {
             : null
     const entitySlug =
         props.resolved.itemType === 'entity' ? entityIconSlugForName(props.resolved.name) : null
+    const moduleSlug =
+        props.resolved.itemType === 'module' ? moduleIconSlugForName(props.resolved.name) : null
 
     if (props.iconImageHref) {
         const iconSize = Math.round(size * (showQuantity ? 0.72 : 0.9))
@@ -89,6 +92,14 @@ function cellInner(props: ItemCellProps): string {
         const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
         const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
         content = entityIcon(entitySlug, {
+            x: (size - iconSize) / 2,
+            y: iconY,
+            size: iconSize,
+        })
+    } else if (moduleSlug) {
+        const iconSize = Math.round(size * (showQuantity ? 0.66 : 0.84))
+        const iconY = showQuantity ? Math.round(size * 0.12) : Math.round(height / 2 - iconSize / 2)
+        content = moduleIcon(moduleSlug, {
             x: (size - iconSize) / 2,
             y: iconY,
             size: iconSize,
