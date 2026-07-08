@@ -1,5 +1,20 @@
 # @shipload/cli
 
+## 1.0.0-next.55
+
+### Patch Changes
+
+- b68df4a: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Queue routes as a single travelroute
+  - Account for busy lanes in the route simulator
+  - Add travelroute action builder and route simulator
+- Updated dependencies [b68df4a]
+  - @shipload/oracle@0.0.1-next.41
+  - @shipload/sdk@1.0.0-next.51
+
 ## 1.0.0-next.54
 
 ### Patch Changes
