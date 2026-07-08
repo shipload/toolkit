@@ -1,5 +1,5 @@
 import {findNearbyPlanets, PRECISION} from '@shipload/sdk'
-import {type Action, Name} from '@wharfkit/antelope'
+import {Name} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {parseEntityRefList, parseInt64} from '../../lib/args'
 import {getGameSeed, getShipload} from '../../lib/client'
@@ -190,20 +190,14 @@ export function register(program: Command): void {
 
             if (options.queue) {
                 const sl = await getShipload()
-                const actions: Action[] = []
-                for (const w of plan.waypoints) {
-                    if (isGroup) {
-                        const refs = entities.map((e) => ({
-                            entityType: Name.from(e.entityType),
-                            entityId: e.entityId,
-                        }))
-                        actions.push(sl.actions.grouptravel(refs, {x: w.x, y: w.y}, true))
-                    } else {
-                        actions.push(sl.actions.travel(lead.entityId, {x: w.x, y: w.y}, true))
-                    }
-                }
+                const refs = entities.map((e) => ({
+                    entityType: Name.from(e.entityType),
+                    entityId: e.entityId,
+                }))
+                const waypoints = plan.waypoints.map((w) => ({x: w.x, y: w.y}))
+                const action = sl.actions.travelroute(refs, waypoints, true)
                 await transact(
-                    {actions},
+                    {actions: [action]},
                     {description: `Route ${meta.label} → (${dest.x},${dest.y}) — ${plan.legs} legs`}
                 )
             }
