@@ -177,6 +177,7 @@ export {
     calc_acceleration,
     calc_energyusage,
     calc_flighttime,
+    calc_group_flighttime,
     calc_loader_acceleration,
     calc_loader_flighttime,
     calc_onesided_duration,
@@ -229,6 +230,9 @@ export type {
 
 export {computePerLegReach, computeGroupPerLegReach} from './travel/reach'
 export type {ReachStats} from './travel/reach'
+
+export {simulateRoute} from './travel/route-simulator'
+export type {RouteMoverInput, RouteLegSim, RouteSim} from './travel/route-simulator'
 
 export * as schedule from './scheduling/schedule'
 export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'

@@ -18,6 +18,9 @@ export const CONTAINER_Z = 300
 
 export const TRAVEL_MAX_DURATION = 86400
 
+export const BASE_HAUL_PENALTY_MILLI = 300
+export const HAULER_EFFICIENCY_DENOM = 10000
+
 export const MIN_ORBITAL_ALTITUDE = 800
 export const MAX_ORBITAL_ALTITUDE = 3000
 

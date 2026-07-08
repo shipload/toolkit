@@ -206,6 +206,11 @@ describe('travel', () => {
             const time = calc_rechargetime(1000, 1000, 10)
             assert.equal(Number(time), 0)
         })
+
+        test('floors a sub-tick deficit to 1 (matches contract max(...,1))', () => {
+            const time = calc_rechargetime(1000, 995, 10)
+            assert.equal(Number(time), 1)
+        })
     })
 
     describe('calc_ship_rechargetime', () => {

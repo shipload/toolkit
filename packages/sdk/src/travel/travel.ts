@@ -23,9 +23,11 @@ import {
 
 import type {ServerContract} from '../contracts'
 import {
+    BASE_HAUL_PENALTY_MILLI,
     BASE_ORBITAL_MASS,
     type CargoMassInfo,
     type Distance,
+    HAULER_EFFICIENCY_DENOM,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL,
@@ -187,7 +189,8 @@ export function calc_rechargetime(
     const cap = UInt32.from(capacity)
     const eng = UInt32.from(energy)
     if (eng.gte(cap)) return UInt32.zero
-    return cap.subtracting(eng).dividing(recharge)
+    const ticks = cap.subtracting(eng).dividing(recharge)
+    return ticks.equals(UInt32.zero) ? UInt32.from(1) : ticks
 }
 
 export function calc_ship_rechargetime(ship: ShipLike): UInt32 {
@@ -261,6 +264,29 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     }
 
     return mass
+}
+
+export function calc_group_flighttime(
+    totalThrust: number,
+    haulCount: number,
+    pooledHaulCap: number,
+    weightedHaulEffNum: number,
+    totalMass: number,
+    distance: UInt64Type
+): UInt32 {
+    const avgHaulEff = pooledHaulCap > 0 ? Math.trunc(weightedHaulEffNum / pooledHaulCap) : 0
+    let effectiveThrust = totalThrust
+    if (haulCount > 0) {
+        const penaltyMilli =
+            1000 +
+            Math.trunc(
+                (haulCount * BASE_HAUL_PENALTY_MILLI * (HAULER_EFFICIENCY_DENOM - avgHaulEff)) /
+                    HAULER_EFFICIENCY_DENOM
+            )
+        effectiveThrust = Math.trunc((totalThrust * 1000) / penaltyMilli)
+    }
+    const acceleration = calc_acceleration(effectiveThrust, totalMass)
+    return calc_flighttime(distance, acceleration)
 }
 
 export function calc_energyusage(distance: UInt64Type, drain: UInt32Type): UInt32 {

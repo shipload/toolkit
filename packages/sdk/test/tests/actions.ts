@@ -3,7 +3,7 @@ import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
 import Shipload, {ActionsManager, PlatformContract, ServerContract} from '$lib'
 import {Chains} from '@wharfkit/common'
-import {Int64, UInt64} from '@wharfkit/antelope'
+import {Int64, Serializer, UInt64} from '@wharfkit/antelope'
 
 const client = makeClient('https://jungle4.greymass.com')
 
@@ -210,6 +210,117 @@ describe('ActionsManager', () => {
         test('creates cleanrsvp action with UInt64 args', () => {
             const action = shipload.actions.cleanrsvp(UInt64.from(5), UInt64.from(100))
             assert.equal(action.name.toString(), 'cleanrsvp')
+        })
+    })
+
+    describe('travelroute', () => {
+        test('travelroute builds the action with entities, waypoints, and recharge', () => {
+            const action = shipload.actions.travelroute(
+                [{entityType: 'ship', entityId: 24}],
+                [
+                    {x: 1000, y: 0},
+                    {x: 2000, y: 0},
+                ],
+                true
+            )
+            assert.equal(action.account.toString(), 'eon.shipload')
+            assert.equal(action.name.toString(), 'travelroute')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'travelroute',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(data.entities.length, 1)
+            assert.equal(data.waypoints.length, 2)
+            assert.equal(Number(data.waypoints[1].x), 2000)
+            assert.equal(Boolean(data.recharge), true)
+        })
+    })
+
+    describe('sync guard', () => {
+        const EXCLUDED = new Set([
+            // read-only get* queries — no builder needed
+            'getcluster',
+            'getconfig',
+            'getdeposit',
+            'geteligible',
+            'getentcls',
+            'getentities',
+            'getentity',
+            'getfootprint',
+            'getitemdata',
+            'getitemids',
+            'getitems',
+            'getitemtype',
+            'getitemtypes',
+            'getkindmeta',
+            'getlocation',
+            'getlocdata',
+            'getmodtypes',
+            'getmodules',
+            'getnearby',
+            'getnftbase',
+            'getnftinfo',
+            'getplayer',
+            'getprojstate',
+            'getrecipe',
+            'getrecipes',
+            'getrescats',
+            'getreserves',
+            'getresources',
+            'getslots',
+            'getstratum',
+            'getsummaries',
+            // admin / setup actions — contract authority only
+            'addnexus',
+            'cleartable',
+            'configlog',
+            'enable',
+            'fixcargomass',
+            'forcereveal',
+            'genesisfleet',
+            'setcoords',
+            'setnftcfg',
+            'setwrapcost',
+            'setwrapfee',
+            'wipe',
+            // data import actions — admin one-shot migrations
+            'importcargo',
+            'importentity',
+            'importgroup',
+            'importplayer',
+            'importreserve',
+            'importstate',
+            // internal / notification actions — not player-initiated
+            'configlog',
+            'notify',
+            // debug / util
+            'descentity',
+            'hash',
+            'hash512',
+            'nftimgurl',
+            'rmnftcfg',
+            // stow actions (platform-side, handled via NFT transfer flow)
+            'stowcargo',
+            'stowentity',
+        ])
+
+        test('every server action has an ActionsManager builder (or is explicitly excluded)', () => {
+            const actions = shipload.actions
+            const builderNames = new Set<string>()
+            for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(actions))) {
+                if (typeof (actions as any)[k] === 'function') builderNames.add(k.toLowerCase())
+            }
+            const allActionNames = ServerContract.abi.actions.map((a) => String(a.name))
+            const missing = allActionNames.filter((n) => !builderNames.has(n.toLowerCase()))
+            assert.deepEqual(
+                missing.filter((n) => !EXCLUDED.has(n)),
+                []
+            )
+        })
+
+        test('travelroute is surfaced as a builder', () => {
+            assert.equal(typeof (shipload.actions as any).travelroute, 'function')
         })
     })
 })
