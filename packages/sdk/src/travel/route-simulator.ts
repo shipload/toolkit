@@ -17,6 +17,8 @@ export interface RouteMoverInput {
     energy: number
     priorMobilityEnd: number
     narrowBarrierEnd: number
+    /** Max end (seconds-from-now) over all this entity's lanes incl. worker/craft; gates recharges like the contract's all_lanes_end. Default 0. */
+    allLanesEnd?: number
 }
 
 export interface RouteLegSim {
@@ -64,11 +66,15 @@ export function simulateRoute(
     let reachable = true
     const legs: RouteLegSim[] = []
 
-    const firstBarrier = movers
+    const mobilityBarrier = movers
         .filter((m) => m.hasMovement)
         .reduce((mx, m) => Math.max(mx, m.priorMobilityEnd, m.narrowBarrierEnd), 0)
 
-    let totalSeconds = firstBarrier
+    const rechargeFloor = movers
+        .filter((m) => m.hasMovement && m.generator)
+        .reduce((mx, m) => Math.max(mx, m.allLanesEnd ?? 0), 0)
+
+    let clock = 0
 
     let from = origin
     for (const to of waypoints) {
@@ -111,6 +117,7 @@ export function simulateRoute(
                     const key = String(m.ref.entityId)
                     energyByMover.set(key, m.generator.capacity)
                 }
+                clock = Math.max(clock, rechargeFloor) + rechargeSeconds
             }
         }
 
@@ -148,7 +155,7 @@ export function simulateRoute(
             energyByMover.set(key, Math.max(0, curEnergy - cost))
         }
 
-        totalSeconds += rechargeSeconds + flightSeconds
+        clock = Math.max(clock, mobilityBarrier) + flightSeconds
 
         legs.push({
             from,
@@ -163,5 +170,5 @@ export function simulateRoute(
         from = to
     }
 
-    return {legs, totalSeconds, reachable}
+    return {legs, totalSeconds: clock, reachable}
 }
