@@ -1,5 +1,16 @@
 # @shipload/oracle
 
+## 0.0.1-next.40
+
+### Patch Changes
+
+- 8163b39: - Regenerate item-renderer snapshots for increased generator capacity
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Increased base power core capacity
+
 ## 0.0.1-next.39
 
 ### Patch Changes
