@@ -28,7 +28,7 @@ function batteryBankCapacity(vol: number, thm: number, pla: number, ins: number)
 }
 
 function generatorCapacity(resonance: number): number {
-    return 950 + Math.floor(resonance / 2)
+    return 1300 + Math.floor(resonance / 2)
 }
 
 describe('Battery Bank module derivation', () => {

@@ -35,7 +35,7 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     const ref = stats.reflectivity
 
     return {
-        capacity: 950 + Math.floor(res / 2),
+        capacity: 1300 + Math.floor(res / 2),
         recharge: 2 * (1 + Math.floor((ref * 3) / 1000)),
     }
 }

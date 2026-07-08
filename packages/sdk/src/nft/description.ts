@@ -72,7 +72,7 @@ export const computeTravelDrain = (totalThrust: number, avgThm: number): number 
     const den = totalThrust * computeEngineDrain(ENGINE_DRAIN_REF_THM)
     return idiv(num, den)
 }
-export const computeGeneratorCap = (com: number): number => 950 + idiv(com, 2)
+export const computeGeneratorCap = (com: number): number => 1300 + idiv(com, 2)
 export const computeGeneratorRech = (fin: number): number => 2 * (1 + idiv(fin * 3, 1000))
 export const computeGathererYield = (str: number): number => 200 + str
 export const computeGathererDrain = (con: number): number =>

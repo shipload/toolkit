@@ -16,7 +16,7 @@
           "y": 3,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -87,7 +87,7 @@
           "y": 3,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -97,7 +97,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -142,7 +142,7 @@
           "y": 3,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -213,7 +213,7 @@
           "y": 3,
           "z": 3000
         },
-        "energy": 175,
+        "energy": 455,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -223,7 +223,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -344,7 +344,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -455,7 +455,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -465,7 +465,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -510,7 +510,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -593,7 +593,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -603,7 +603,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -648,7 +648,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -731,7 +731,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 5000,
         "cargo": [
           {
@@ -749,7 +749,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -794,7 +794,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -873,7 +873,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -883,7 +883,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -928,7 +928,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -1007,7 +1007,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 843,
+        "energy": 1123,
         "cargomass": 1000,
         "cargo": [
           {
@@ -1025,7 +1025,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -1070,7 +1070,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 10000,
         "modules": [
           {
@@ -1157,7 +1157,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 10000,
         "cargo": [
           {
@@ -1175,7 +1175,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -1220,7 +1220,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 10000,
         "modules": [
           {
@@ -1307,7 +1307,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 842,
+        "energy": 1122,
         "cargomass": 4000,
         "cargo": [
           {
@@ -1325,7 +1325,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
@@ -1370,7 +1370,7 @@
           "y": -49,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "modules": [
           {
@@ -1421,7 +1421,7 @@
           "y": -49,
           "z": 800
         },
-        "energy": 844,
+        "energy": 1124,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -1431,7 +1431,7 @@
           "drain": 223
         },
         "generator": {
-          "capacity": 844,
+          "capacity": 1124,
           "recharge": 1
         },
         "gatherer_lanes": [
