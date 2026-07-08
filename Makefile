@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 .PHONY: install check check/sdk check/item-renderer check/image-renderer check/cli check/oracle
-.PHONY: test test/sdk test/item-renderer test/image-renderer test/cli test/oracle
+.PHONY: test test/sdk test/item-renderer test/image-renderer test/cli test/oracle test/item-renderer/update
 .PHONY: build build/sdk build/item-renderer build/image-renderer build/cli build/oracle
 .PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli dev/oracle
 .PHONY: format codegen sync/catalog sync/scan
@@ -26,6 +26,7 @@ test:
 
 test/sdk:            ; $(MAKE) -C packages/sdk test
 test/item-renderer:  ; $(MAKE) -C packages/item-renderer test
+test/item-renderer/update: ; $(MAKE) -C packages/item-renderer test-update
 test/image-renderer: ; $(MAKE) -C packages/image-renderer test
 test/cli:            ; $(MAKE) -C packages/cli test
 test/oracle:         ; $(MAKE) -C packages/oracle test
