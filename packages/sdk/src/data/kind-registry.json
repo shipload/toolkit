@@ -75,7 +75,22 @@
     {
       "itemId": 10201,
       "kind": "ship",
+      "displayLabel": "Ship"
+    },
+    {
+      "itemId": 10210,
+      "kind": "ship",
       "displayLabel": "Roustabout"
+    },
+    {
+      "itemId": 10211,
+      "kind": "ship",
+      "displayLabel": "Prospector"
+    },
+    {
+      "itemId": 10212,
+      "kind": "ship",
+      "displayLabel": "Tender"
     },
     {
       "itemId": 10202,

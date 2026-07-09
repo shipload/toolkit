@@ -25,6 +25,7 @@ const entityIconNames: Record<string, EntityIconSlug> = {
     ship: 'ship',
     roustabout: 'ship',
     prospector: 'ship',
+    tender: 'ship',
     hauler: 'ship',
     container: 'container',
 }

@@ -133,6 +133,66 @@
     "slots": []
   },
   {
+    "entityItemId": 10210,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "any",
+        "outputPct": 80,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
+    "entityItemId": 10211,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
+    "entityItemId": 10212,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
     "entityItemId": 20200,
     "slots": []
   },

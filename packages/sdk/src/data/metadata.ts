@@ -231,7 +231,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#7B8D9E',
     },
     10201: {
-        name: 'Roustabout',
+        name: 'Ship',
         description: 'General-purpose vessel with 5 module slots.',
         color: '#4AE898',
     },
@@ -266,6 +266,23 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         name: 'Station Hub',
         description: 'Orbital command structure. Anchors a player station cluster.',
         color: '#A0B8D0',
+    },
+    10210: {
+        name: 'Roustabout',
+        description:
+            'A basic starter ship. One engine, one power core, and one open slot to fit as you like.',
+        color: '#4AE898',
+    },
+    10211: {
+        name: 'Prospector',
+        description: 'A light gathering ship. One engine, one power core, one gathering rig.',
+        color: '#4AE898',
+    },
+    10212: {
+        name: 'Tender',
+        description:
+            'A logistics ship with a shuttle bay for moving cargo between ships and stations.',
+        color: '#4AE898',
     },
 
     // === Components (T2) ===
@@ -357,6 +374,9 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 
 export const entityMetadata: Record<number, EntityMetadata> = {
     10201: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
+    10210: {moduleSlotLabels: ['Engine', 'Power Core', 'Utility Bay']},
+    10211: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay']},
+    10212: {moduleSlotLabels: ['Engine', 'Power Core', 'Shuttle Bay']},
     10202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },

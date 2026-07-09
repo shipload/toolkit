@@ -26,9 +26,12 @@ import {
     ITEM_BATTERY_T1,
     ITEM_LAUNCHER_T1,
     ITEM_LOADER_T1,
+    ITEM_PROSPECTOR_T1_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
+    ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
+    ITEM_TENDER_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
 } from '../data/item-ids'
@@ -104,7 +107,13 @@ export const computeBatteryBankCapacity = (
 export function entityDisplayName(itemId: number): string {
     switch (itemId) {
         case ITEM_SHIP_T1_PACKED:
+            return 'Ship'
+        case ITEM_ROUSTABOUT_T1_PACKED:
             return 'Roustabout'
+        case ITEM_PROSPECTOR_T1_PACKED:
+            return 'Prospector'
+        case ITEM_TENDER_T1_PACKED:
+            return 'Tender'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:
@@ -242,6 +251,9 @@ export function buildEntityDescription(
     let baseCapacity = 0
     if (
         itemId === ITEM_SHIP_T1_PACKED ||
+        itemId === ITEM_ROUSTABOUT_T1_PACKED ||
+        itemId === ITEM_PROSPECTOR_T1_PACKED ||
+        itemId === ITEM_TENDER_T1_PACKED ||
         itemId === ITEM_PROSPECTOR_T2_PACKED ||
         itemId === ITEM_HAULER_SHIP_T2_PACKED
     ) {

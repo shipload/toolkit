@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "7eda15a96f8a2f1c1ebfe9365c53059933ad81a492e5e01d44118178d99d8019",
-  "generated_at": "2026-07-06T23:07:54.860Z",
+  "catalog_hash": "8da87de2107fd644dfdb5b23cdb910fe06fe925476bd9736cf3cbf1b6d572969",
+  "generated_at": "2026-07-09T03:31:55.093Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -268,7 +268,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 621,
+        "energy": 901,
         "cargomass": 0,
         "modules": [
           {
@@ -334,7 +334,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 621,
+        "energy": 901,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
@@ -389,7 +389,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 621,
+        "energy": 901,
         "cargomass": 0,
         "modules": [
           {
