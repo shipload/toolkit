@@ -7,7 +7,6 @@ import {
 } from './recipe-usage'
 import {
     ITEM_SENSOR,
-    ITEM_SENSOR_T2,
     ITEM_RESIN,
     ITEM_FRAME,
     ITEM_PLATE,
@@ -16,6 +15,9 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
+    ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_PROSPECTOR_T1_PACKED,
+    ITEM_TENDER_T1_PACKED,
 } from '../data/item-ids'
 
 test('getAllRecipes returns the full catalog including the gatherer', () => {
@@ -28,9 +30,14 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR)
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
-        [ITEM_CRAFTER_T1, ITEM_SHIP_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED, ITEM_SENSOR_T2].sort(
-            (a, b) => a - b
-        )
+        [
+            ITEM_CRAFTER_T1,
+            ITEM_SHIP_T1_PACKED,
+            ITEM_EXTRACTOR_T1_PACKED,
+            ITEM_ROUSTABOUT_T1_PACKED,
+            ITEM_PROSPECTOR_T1_PACKED,
+            ITEM_TENDER_T1_PACKED,
+        ].sort((a, b) => a - b)
     )
 })
 
@@ -73,9 +80,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by three recipes', () => {
+test('getComponentDemand reports Resin as consumed by two recipes', () => {
     const demand = getComponentDemand()
     const resin = demand.find((d) => d.itemId === ITEM_RESIN)
     expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(3)
+    expect(resin?.consumerCount).toBe(2)
 })
