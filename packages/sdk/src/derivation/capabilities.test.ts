@@ -17,6 +17,10 @@ import {
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_LOADER_T1,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_PROSPECTOR_T1_PACKED,
+    ITEM_TENDER_T1_PACKED,
 } from '../data/item-ids'
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
@@ -41,6 +45,19 @@ test('computeBaseCapacity uses container formula for all container-class entitie
         ITEM_FACTORY_T1_PACKED,
         ITEM_MASS_DRIVER_T1_PACKED,
         ITEM_MASS_CATCHER_T1_PACKED,
+    ]) {
+        expect(computeBaseCapacity(itemId, stats)).toBe(expected)
+    }
+})
+
+test('computeBaseCapacity uses ship-hull formula for every ship-class entity', () => {
+    const stats = {strength: 300, hardness: 400, density: 100}
+    const expected = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
+    expect(expected).toBeGreaterThan(0)
+    for (const itemId of [
+        ITEM_ROUSTABOUT_T1_PACKED,
+        ITEM_PROSPECTOR_T1_PACKED,
+        ITEM_TENDER_T1_PACKED,
     ]) {
         expect(computeBaseCapacity(itemId, stats)).toBe(expected)
     }
