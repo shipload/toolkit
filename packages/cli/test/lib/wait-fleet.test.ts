@@ -31,7 +31,7 @@ function laneWith(tasks: Array<{type: number; duration: number}>): ServerContrac
 		lane_key: 0,
 		schedule: {
 			started,
-			tasks: tasks.map((t) => ({type: t.type, duration: t.duration, cancelable: 0, cargo: []})),
+			tasks: tasks.map((t) => ({type: t.type, duration: t.duration, cancelable: 0, cargo: [], couplings: []})),
 		},
 	})
 }
@@ -179,7 +179,7 @@ describe('waitForFleetAvailable — first-match', () => {
 			lane_key: 0,
 			schedule: {
 				started: new Date(Date.now() - 120_000).toISOString().slice(0, 23),
-				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: []}],
+				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: [], couplings: []}],
 			},
 		})
 		const idleWithCompleted = snap({
@@ -221,7 +221,7 @@ describe('waitForFleetAvailable — first-match', () => {
 			lane_key: 0,
 			schedule: {
 				started: new Date(Date.now() - 120_000).toISOString().slice(0, 23),
-				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: []}],
+				tasks: [{type: 0, duration: 60, cancelable: 0, cargo: [], couplings: []}],
 			},
 		})
 		const idleWithCompleted = snap({
@@ -314,7 +314,7 @@ test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
 		lanes: [
 			{lane_key: 3, schedule: {
 				started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),
-				tasks: [{type: 5, duration: 300, cancelable: 0, cargo: []}]}},
+				tasks: [{type: 5, duration: 300, cancelable: 0, cargo: [], couplings: []}]}},
 		],
 		holds: [],
 	})

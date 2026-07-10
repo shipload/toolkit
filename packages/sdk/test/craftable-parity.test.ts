@@ -42,7 +42,7 @@ const PENDING_CRAFT_LANE = {
                         entity_id: null,
                     },
                 ],
-                entitytarget: null,
+                couplings: [],
                 entitygroup: null,
                 energy_cost: null,
             },

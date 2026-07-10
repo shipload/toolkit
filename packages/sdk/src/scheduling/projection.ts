@@ -357,7 +357,7 @@ function applyGatherTask(
 ): void {
     if (!options.complete) return
     applyEnergyCost(projected, task)
-    if (!task.entitytarget) {
+    if (task.couplings.length === 0) {
         applyAddCargoTask(projected, task)
     }
 }
@@ -369,13 +369,8 @@ function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.t
     for (let i = 0; i < task.cargo.length - 1; i++) {
         removeCargoItem(projected, task.cargo[i])
     }
-    addCargoItem(projected, task.cargo[task.cargo.length - 1])
-}
-
-function applyDeployTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
-    applyEnergyCost(projected, task)
-    if (task.cargo.length > 0) {
-        removeCargoItem(projected, task.cargo[0])
+    if (task.couplings.length === 0) {
+        addCargoItem(projected, task.cargo[task.cargo.length - 1])
     }
 }
 
@@ -401,9 +396,6 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             break
         case TaskType.CRAFT:
             applyCraftTask(projected, task)
-            break
-        case TaskType.DEPLOY:
-            applyDeployTask(projected, task)
             break
         case TaskType.UNDEPLOY:
         case TaskType.DEMOLISH:
@@ -560,9 +552,6 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 break
             case TaskType.CRAFT:
                 if (taskComplete) applyCraftTask(projected, task)
-                break
-            case TaskType.DEPLOY:
-                if (taskComplete) applyDeployTask(projected, task)
                 break
             case TaskType.UNDEPLOY:
             case TaskType.DEMOLISH:

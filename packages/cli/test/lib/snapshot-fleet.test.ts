@@ -13,7 +13,7 @@ function busy(id: bigint, remaining: number, total = 60): EntitySnapshot {
     const started = new Date(Date.now() - (total - remaining) * 1000).toISOString().slice(0, 23)
     const lane = ServerContract.Types.lane.from({
         lane_key: 0,
-        schedule: {started, tasks: [{type: 1, duration: total, cancelable: 0, cargo: []}]},
+        schedule: {started, tasks: [{type: 1, duration: total, cancelable: 0, cargo: [], couplings: []}]},
     })
     return {
         type: 'ship',

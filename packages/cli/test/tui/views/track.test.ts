@@ -38,7 +38,7 @@ function busy(remaining: number): EntitySnapshot {
         is_idle: false,
         lanes: [
             makeLane(0, startedIso, [
-                {type: 1, duration: elapsed + remaining, cancelable: 0, cargo: []},
+                {type: 1, duration: elapsed + remaining, cancelable: 0, cargo: [], couplings: []},
             ]),
         ],
     }
@@ -46,7 +46,13 @@ function busy(remaining: number): EntitySnapshot {
 
 function idle(completed: number): EntitySnapshot {
     const pastStart = new Date(Date.now() - (completed * 30 + 10) * 1000).toISOString().slice(0, 23)
-    const tasks = new Array(completed).fill({type: 1, duration: 30, cancelable: 0, cargo: []})
+    const tasks = new Array(completed).fill({
+        type: 1,
+        duration: 30,
+        cancelable: 0,
+        cargo: [],
+        couplings: [],
+    })
     return {
         type: 'ship',
         id: 3n,
@@ -163,6 +169,7 @@ function multiLane(at: Date): ServerContract.Types.entity_info {
                             cancelable: 0,
                             coordinates: {x: 3, y: 9, z: 800},
                             cargo: [],
+                            couplings: [],
                         },
                     ],
                 },
@@ -172,8 +179,8 @@ function multiLane(at: Date): ServerContract.Types.entity_info {
                 schedule: {
                     started: new Date(at.getTime() - 60_000).toISOString().slice(0, 23),
                     tasks: [
-                        {type: 5, duration: 300, cancelable: 0, cargo: []},
-                        {type: 7, duration: 540, cancelable: 2, cargo: []},
+                        {type: 5, duration: 300, cancelable: 0, cargo: [], couplings: []},
+                        {type: 7, duration: 540, cancelable: 2, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -199,11 +206,13 @@ function laneNativeSnapshot(): EntitySnapshot {
         is_idle: false,
         lanes: [
             makeLane(schedule.LANE_BARRIER, iso(30_000), [
-                {type: 7, duration: 60, cancelable: 0, cargo: []},
+                {type: 7, duration: 60, cancelable: 0, cargo: [], couplings: []},
             ]),
-            makeLane(4, iso(-10_000), [{type: 5, duration: 120, cancelable: 0, cargo: []}]),
+            makeLane(4, iso(-10_000), [
+                {type: 5, duration: 120, cancelable: 0, cargo: [], couplings: []},
+            ]),
             makeLane(schedule.LANE_MOBILITY, iso(-90_000), [
-                {type: 1, duration: 30, cancelable: 0, cargo: []},
+                {type: 1, duration: 30, cancelable: 0, cargo: [], couplings: []},
             ]),
         ],
     }
@@ -325,8 +334,8 @@ describe('createTrackView', () => {
                     id: 42n,
                     lanes: [
                         makeLane(schedule.LANE_MOBILITY, '2026-06-11T12:00:00.000', [
-                            {type: 1, duration: 30, cancelable: 0, cargo: []},
-                            {type: 5, duration: 20, cancelable: 0, cargo: []},
+                            {type: 1, duration: 30, cancelable: 0, cargo: [], couplings: []},
+                            {type: 5, duration: 20, cancelable: 0, cargo: [], couplings: []},
                         ]),
                     ],
                 },
@@ -362,8 +371,8 @@ describe('createTrackView', () => {
                     id: 42n,
                     lanes: [
                         makeLane(schedule.LANE_MOBILITY, '2026-06-11T12:00:00.000', [
-                            {type: 1, duration: 10, cancelable: 0, cargo: []},
-                            {type: 5, duration: 10, cancelable: 0, cargo: []},
+                            {type: 1, duration: 10, cancelable: 0, cargo: [], couplings: []},
+                            {type: 5, duration: 10, cancelable: 0, cargo: [], couplings: []},
                         ]),
                     ],
                 },
@@ -401,8 +410,8 @@ describe('createTrackView', () => {
                 id: 42n,
                 lanes: [
                     makeLane(schedule.LANE_MOBILITY, '2026-06-11T12:00:00.000', [
-                        {type: 1, duration: 10, cancelable: 0, cargo: []},
-                        {type: 5, duration: 100, cancelable: 0, cargo: []},
+                        {type: 1, duration: 10, cancelable: 0, cargo: [], couplings: []},
+                        {type: 5, duration: 100, cancelable: 0, cargo: [], couplings: []},
                     ]),
                 ],
             }
@@ -423,8 +432,8 @@ describe('createTrackView', () => {
                     ...initial,
                     lanes: [
                         makeLane(schedule.LANE_MOBILITY, '2026-06-11T12:00:00.000', [
-                            {type: 7, duration: 40, cancelable: 0, cargo: []},
-                            {type: 5, duration: 100, cancelable: 0, cargo: []},
+                            {type: 7, duration: 40, cancelable: 0, cargo: [], couplings: []},
+                            {type: 5, duration: 100, cancelable: 0, cargo: [], couplings: []},
                         ]),
                     ],
                 })
@@ -517,8 +526,8 @@ describe('createTrackView', () => {
                 ...busy(60),
                 lanes: [
                     makeLane(0, startedIso, [
-                        {type: 1, duration: 60, cancelable: 0, cargo: []},
-                        {type: 2, duration: 30, cancelable: 0, cargo: []},
+                        {type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []},
+                        {type: 2, duration: 30, cancelable: 0, cargo: [], couplings: []},
                     ]),
                 ],
             },

@@ -303,6 +303,8 @@ describe('ActionsManager', () => {
             // stow actions (platform-side, handled via NFT transfer flow)
             'stowcargo',
             'stowentity',
+            // admin entity removal
+            'delentity',
         ])
 
         test('every server action has an ActionsManager builder (or is explicitly excluded)', () => {

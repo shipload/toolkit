@@ -149,18 +149,15 @@ function applyTaskToCargo(stacks: ProjectedCargoStack[], task: ServerTypes.task)
 			for (const item of items) removeCargo(stacks, item);
 			return;
 		case TaskType.GATHER:
-			if (!task.entitytarget) {
+			if (task.couplings.length === 0) {
 				for (const item of items) addCargo(stacks, item);
 			}
 			return;
 		case TaskType.CRAFT:
 			if (items.length > 0) {
 				for (let i = 0; i < items.length - 1; i++) removeCargo(stacks, items[i]);
-				addCargo(stacks, items[items.length - 1]);
+				if (task.couplings.length === 0) addCargo(stacks, items[items.length - 1]);
 			}
-			return;
-		case TaskType.DEPLOY:
-			if (items.length > 0) removeCargo(stacks, items[0]);
 			return;
 		case TaskType.UNDEPLOY:
 			for (const item of items) addCargo(stacks, item);

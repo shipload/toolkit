@@ -68,7 +68,6 @@ const TASK_TYPES: Record<number, string> = {
 	[TaskType.GATHER]: "Gather",
 	[TaskType.WARP]: "Warp",
 	[TaskType.CRAFT]: "Craft",
-	[TaskType.DEPLOY]: "Deploy",
 	[TaskType.UNWRAP]: "Unwrap",
 	[TaskType.UNDEPLOY]: "Undeploy",
 	[TaskType.DEMOLISH]: "Demolish",
@@ -113,12 +112,16 @@ export function formatTaskShort(t: ServerTypes.task): string {
 		case TaskType.LOAD: {
 			const items = formatItemList(t.cargo);
 			const head = items ? `Receive ${items}` : "Receive cargo";
-			return t.entitytarget ? `${head} from ${formatEntityRefShort(t.entitytarget)}` : head;
+			return t.couplings.length > 0
+				? `${head} from ${formatEntityRefShort(t.couplings[0].counterpart)}`
+				: head;
 		}
 		case TaskType.UNLOAD: {
 			const items = formatItemList(t.cargo);
 			const head = items ? `Send ${items}` : "Send cargo";
-			return t.entitytarget ? `${head} to ${formatEntityRefShort(t.entitytarget)}` : head;
+			return t.couplings.length > 0
+				? `${head} to ${formatEntityRefShort(t.couplings[0].counterpart)}`
+				: head;
 		}
 		case TaskType.GATHER: {
 			const items = formatItemList(t.cargo);
@@ -131,12 +134,6 @@ export function formatTaskShort(t: ServerTypes.task): string {
 			if (!last) return "Craft";
 			const name = itemDisplayName(Number(last.item_id)) ?? `Item ${Number(last.item_id)}`;
 			return `Craft ${Number(last.quantity)} ${name}`;
-		}
-		case TaskType.DEPLOY: {
-			const first = t.cargo?.[0];
-			if (!first) return "Deploy";
-			const name = itemDisplayName(Number(first.item_id)) ?? `Item ${Number(first.item_id)}`;
-			return `Deploy ${name}`;
 		}
 		case TaskType.UNWRAP: {
 			const items = formatItemList(t.cargo);

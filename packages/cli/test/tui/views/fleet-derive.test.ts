@@ -24,7 +24,7 @@ function startedOffset(secondsFromNow: number): string {
 }
 
 function task(type: TaskType, duration: number): unknown {
-    return {type, duration, cancelable: 0, cargo: []}
+    return {type, duration, cancelable: 0, cargo: [], couplings: []}
 }
 
 function snapWithLanes(type: string, id: number, lanes: EntitySnapshot['lanes']): EntitySnapshot {
@@ -45,12 +45,20 @@ function snap(type: string, id: number, isIdle: boolean, completed = 0, name = '
     let lanes: EntitySnapshot['lanes'] = []
     if (!isIdle) {
         const started = new Date(Date.now() - 5000).toISOString().slice(0, 23)
-        lanes = [makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: []}])]
+        lanes = [
+            makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []}]),
+        ]
     } else if (completed > 0) {
         const started = new Date(Date.now() - (completed * 30 + 10) * 1000)
             .toISOString()
             .slice(0, 23)
-        const tasks = new Array(completed).fill({type: 1, duration: 30, cancelable: 0, cargo: []})
+        const tasks = new Array(completed).fill({
+            type: 1,
+            duration: 30,
+            cancelable: 0,
+            cargo: [],
+            couplings: [],
+        })
         lanes = [makeLane(started, tasks)]
     }
     return {

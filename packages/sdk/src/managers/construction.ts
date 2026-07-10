@@ -105,10 +105,10 @@ export class ConstructionManager extends BaseManager {
                 for (const task of lane.schedule.tasks) {
                     cumulativeSec += task.duration.toNumber()
                     if (!isPushTask(task)) continue
-                    if (!task.entitytarget) continue
+                    if (task.couplings.length === 0) continue
                     const projectedEndMs = startedMs + cumulativeSec * 1000
                     if (projectedEndMs < nowMs) continue
-                    const targetIdStr = task.entitytarget.entity_id.toString()
+                    const targetIdStr = task.couplings[0].counterpart.entity_id.toString()
                     const etaSeconds = Math.max(0, Math.round((projectedEndMs - nowMs) / 1000))
                     let perTarget = buckets.get(targetIdStr)
                     if (!perTarget) {
@@ -370,8 +370,8 @@ function isPushTask(task: ServerContract.Types.task): boolean {
 function isBuildOfPlot(task: ServerContract.Types.task, plotId: UInt64): boolean {
     return (
         task.type.toNumber() === TaskType.BUILDPLOT &&
-        task.entitytarget !== undefined &&
-        task.entitytarget.entity_id.equals(plotId)
+        task.couplings.length > 0 &&
+        task.couplings[0].counterpart.entity_id.equals(plotId)
     )
 }
 
@@ -379,9 +379,9 @@ function reservationsOf(source: ServerContract.Types.entity_info): Reservation[]
     const out = new Map<string, Reservation>()
     for (const task of getTasks(source)) {
         if (!isPushTask(task)) continue
-        if (!task.entitytarget) continue
-        const targetType = task.entitytarget.entity_type
-        const targetId = task.entitytarget.entity_id
+        if (task.couplings.length === 0) continue
+        const targetType = task.couplings[0].counterpart.entity_type
+        const targetId = task.couplings[0].counterpart.entity_id
         for (const c of task.cargo) {
             const itemId = c.item_id.toNumber()
             const quantity = c.quantity.toNumber()

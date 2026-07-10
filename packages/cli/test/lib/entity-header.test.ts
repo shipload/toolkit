@@ -109,7 +109,7 @@ describe("renderEntityFull live energy", () => {
 					lane_key: 0,
 					schedule: {
 						started,
-						tasks: [{ type: 5, duration: 60, cancelable: 0, cargo: [] }],
+						tasks: [{ type: 5, duration: 60, cancelable: 0, cargo: [], couplings: [] }],
 					},
 				},
 			],
@@ -322,6 +322,7 @@ describe("renderEntityHeader", () => {
 								cancelable: 0,
 								coordinates: { x: 5, y: 5, z: 800 },
 								cargo: [],
+								couplings: [],
 							},
 						],
 					},
@@ -401,6 +402,7 @@ function invTask(
 			stats: i.stats,
 			modules: [],
 		})),
+		couplings: [],
 		...extras,
 	});
 }
@@ -536,6 +538,7 @@ function busyTask(
 			stats: i.stats,
 			modules: [],
 		})),
+		couplings: [],
 	});
 }
 
@@ -629,8 +632,8 @@ describe("renderEntityFull worker-lane schedule", () => {
 					schedule: {
 						started: new Date(at.getTime() - 30_000).toISOString().slice(0, 23),
 						tasks: [
-							{ type: 5, duration: 300, cancelable: 0, cargo: [] },
-							{ type: 7, duration: 540, cancelable: 2, cargo: [] },
+							{ type: 5, duration: 300, cancelable: 0, cargo: [], couplings: [] },
+							{ type: 7, duration: 540, cancelable: 2, cargo: [], couplings: [] },
 						],
 					},
 				},

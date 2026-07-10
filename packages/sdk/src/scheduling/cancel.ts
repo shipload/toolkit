@@ -1,5 +1,5 @@
 import type {ServerContract} from '../contracts'
-import {TaskCancelable, TaskType} from '../types'
+import {HoldKind, TaskCancelable, TaskType} from '../types'
 import {calcCargoItemMass} from '../capabilities/storage'
 import {taskCargoEffect, cargoKey} from './availability'
 import * as schedule from './schedule'
@@ -169,34 +169,26 @@ export function cancelEligibility(
         if (timing[i].running && t.cancelable.equals(TaskCancelable.ALWAYS))
             effects.abandonsRunning = true
         if (t.energy_cost) energyForfeited += t.energy_cost.toNumber()
-        if (t.type.equals(TaskType.BUILDPLOT) && t.entitytarget)
-            effects.keepsPlotDeposits = {plot: t.entitytarget}
-        if (t.hold && t.entitytarget) {
-            const counterpart = input.counterparts?.get(t.entitytarget.entity_id.toString())
-            const hold =
-                (counterpart?.holds ?? []).find((h) => h.id.equals(t.hold!)) ??
-                (entity.holds ?? []).find((h) => h.id.equals(t.hold!))
-            if (hold) {
-                const kind = hold.kind.toNumber()
-                effects.releasedHolds.push({counterpart: t.entitytarget, kind})
-                if (kind === 1 /* HOLD_PULL */) {
-                    effects.refunds.push({giver: t.entitytarget, cargo: t.cargo})
-                    const giver = counterpart
-                    if (giver) {
-                        const returned = t.cargo.reduce(
-                            (s, c) => s + calcCargoItemMass(c).toNumber(),
-                            0
-                        )
-                        const cap = giver.capacity
-                            ? giver.capacity.toNumber()
-                            : Number.MAX_SAFE_INTEGER
-                        if (giver.cargomass.toNumber() + returned > cap) {
-                            return {
-                                ok: false,
-                                blockedReason: CancelBlockReason.WOULD_OVERFILL,
-                                range,
-                                effects: {...EMPTY_EFFECTS},
-                            }
+        if (t.type.equals(TaskType.BUILDPLOT) && t.couplings.length > 0)
+            effects.keepsPlotDeposits = {plot: t.couplings[0].counterpart}
+        for (const c of t.couplings) {
+            const kind = c.kind.toNumber()
+            effects.releasedHolds.push({counterpart: c.counterpart, kind})
+            if (kind === HoldKind.PULL) {
+                effects.refunds.push({giver: c.counterpart, cargo: t.cargo})
+                const giver = input.counterparts?.get(c.counterpart.entity_id.toString())
+                if (giver) {
+                    const returned = t.cargo.reduce(
+                        (s, c) => s + calcCargoItemMass(c).toNumber(),
+                        0
+                    )
+                    const cap = giver.capacity ? giver.capacity.toNumber() : Number.MAX_SAFE_INTEGER
+                    if (giver.cargomass.toNumber() + returned > cap) {
+                        return {
+                            ok: false,
+                            blockedReason: CancelBlockReason.WOULD_OVERFILL,
+                            range,
+                            effects: {...EMPTY_EFFECTS},
                         }
                     }
                 }

@@ -37,7 +37,7 @@ function laneWithTask(laneKey: number) {
         lane_key: laneKey,
         schedule: {
             started: '2026-06-02T10:00:00.000',
-            tasks: [{type: 1, duration: 60, cancelable: 0, cargo: []}],
+            tasks: [{type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []}],
         },
     })
 }

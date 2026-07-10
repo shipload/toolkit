@@ -39,6 +39,7 @@ function makeSnapshot(opts: {
 							duration: 10,
 							cancelable: 0,
 							cargo: [],
+							couplings: [],
 						}),
 					},
 				}),
@@ -56,7 +57,7 @@ function makeSnapshot(opts: {
 				lane_key: 0,
 				schedule: {
 					started,
-					tasks: [{ type: 1, duration: total, cancelable: 0, cargo: [] }],
+					tasks: [{ type: 1, duration: total, cancelable: 0, cargo: [], couplings: [] }],
 				},
 			}),
 		];

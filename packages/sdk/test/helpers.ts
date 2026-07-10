@@ -136,6 +136,7 @@ export function makeTask(
             ? {x: overrides.coordinates.x, y: overrides.coordinates.y}
             : undefined,
         cargo: cargoItems,
+        couplings: [],
         energy_cost: overrides.energy_cost ? UInt16.from(overrides.energy_cost) : undefined,
     })
 }

@@ -29,6 +29,7 @@ export type energy_stats = ServerContract.Types.energy_stats
 export type schedule = ServerContract.Types.schedule
 export type lane = ServerContract.Types.lane
 export type task = ServerContract.Types.task
+export type coupling = ServerContract.Types.coupling
 export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
 

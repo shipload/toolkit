@@ -10,6 +10,7 @@ function travelTask(destX: number, destY: number) {
 		cancelable: 0,
 		coordinates: { x: destX, y: destY },
 		cargo: [],
+		couplings: [],
 	});
 }
 
@@ -107,6 +108,7 @@ function unloadTask(quantity: number, stackId = 12345) {
 		cancelable: 1,
 		coordinates: { x: 0, y: 0 },
 		cargo: [oreCargoItem(quantity, stackId)],
+		couplings: [],
 	});
 }
 

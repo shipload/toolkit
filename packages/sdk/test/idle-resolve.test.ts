@@ -18,7 +18,7 @@ function task(type: TaskType, duration: number) {
         cancelable: 2,
         coordinates: null,
         cargo: [],
-        entitytarget: null,
+        couplings: [],
         entitygroup: null,
         energy_cost: null,
     }

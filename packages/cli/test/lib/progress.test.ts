@@ -40,7 +40,7 @@ function busyTick(remaining_s: number, elapsed_s: number): ProgressTick {
 				lane_key: 0,
 				schedule: {
 					started,
-					tasks: [{ type: 1, duration: 60, cancelable: 0, cargo: [] }],
+					tasks: [{ type: 1, duration: 60, cancelable: 0, cargo: [], couplings: [] }],
 				},
 			},
 		],
@@ -65,6 +65,7 @@ function idleTick(completedTasks: number): ProgressTick {
 		duration: 30,
 		cancelable: 0,
 		cargo: [],
+		couplings: [],
 	}));
 	const ei = ServerContract.Types.entity_info.from({
 		type: "ship",
@@ -154,7 +155,7 @@ describe("composeBlock multi-lane", () => {
 					lane_key: 0,
 					schedule: {
 						started: new Date(at.getTime() - 120_000).toISOString().slice(0, 23),
-						tasks: [{ type: 1, duration: 60, cancelable: 0, coordinates: { x: 3, y: 9, z: 800 }, cargo: [] }],
+						tasks: [{ type: 1, duration: 60, cancelable: 0, coordinates: { x: 3, y: 9, z: 800 }, cargo: [], couplings: [] }],
 					},
 				},
 				{
@@ -162,8 +163,8 @@ describe("composeBlock multi-lane", () => {
 					schedule: {
 						started: new Date(at.getTime() - 60_000).toISOString().slice(0, 23),
 						tasks: [
-							{ type: 5, duration: 300, cancelable: 0, cargo: [] },
-							{ type: 7, duration: 540, cancelable: 2, cargo: [] },
+							{ type: 5, duration: 300, cancelable: 0, cargo: [], couplings: [] },
+							{ type: 7, duration: 540, cancelable: 2, cargo: [], couplings: [] },
 						],
 					},
 				},

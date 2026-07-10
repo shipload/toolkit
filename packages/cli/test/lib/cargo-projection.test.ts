@@ -66,6 +66,7 @@ function task(
 			modules: [],
 			...(i.entity_id != null ? { entity_id: i.entity_id } : {}),
 		})),
+		couplings: [],
 	});
 }
 
@@ -100,13 +101,13 @@ describe("projectCargoFromSnapshot", () => {
 		expect(out[0].quantity).toBe(20n);
 	});
 
-	test("ignores GATHER with entitytarget (cargo goes to other entity)", () => {
+	test("ignores GATHER with couplings (cargo goes to other entity)", () => {
 		const gatherToOther = ServerContract.Types.task.from({
 			type: TaskType.GATHER,
 			duration: 60,
 			cancelable: 0,
 			cargo: [{ item_id: 101, quantity: 15, stats: 100n, modules: [] }],
-			entitytarget: { entity_type: "container", entity_id: 99 },
+			couplings: [{ counterpart: { entity_type: "container", entity_id: 99 }, hold: 0, kind: 3 }],
 		});
 		const snap = makeShip({ cargo: [], current_task: gatherToOther });
 		const out = projectCargoFromSnapshot(snap);
@@ -263,7 +264,7 @@ function gatherOnWorkerLane(at: Date) {
 		loader_lanes: [],
 		lanes: [
 			{ lane_key: 3, schedule: { started, tasks: [
-				{ type: 5, duration: 300, cancelable: 0,
+				{ type: 5, duration: 300, cancelable: 0, couplings: [],
 				  cargo: [{ item_id: 101, quantity: 25, stats: 0, modules: [], id: 0 }] },
 			] } },
 		],

@@ -29,6 +29,7 @@ function task(duration: number): ServerContract.Types.task {
         duration: UInt32.from(duration),
         cancelable: 0,
         cargo: [],
+        couplings: [],
     })
 }
 

@@ -33,7 +33,7 @@ function startedOffset(secondsFromNow: number): string {
 }
 
 function task(type: TaskType, duration: number): unknown {
-    return {type, duration, cancelable: 0, cargo: []}
+    return {type, duration, cancelable: 0, cargo: [], couplings: []}
 }
 
 function snapWithLanes(type: string, id: number, lanes: EntitySnapshot['lanes']): EntitySnapshot {
@@ -61,12 +61,20 @@ function snap(type: string, id: number, isIdle: boolean, completed = 0): EntityS
     let lanes: EntitySnapshot['lanes'] = []
     if (!isIdle) {
         const started = new Date(Date.now() - 5000).toISOString().slice(0, 23)
-        lanes = [makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: []}])]
+        lanes = [
+            makeLane(started, [{type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []}]),
+        ]
     } else if (completed > 0) {
         const started = new Date(Date.now() - (completed * 30 + 10) * 1000)
             .toISOString()
             .slice(0, 23)
-        const tasks = new Array(completed).fill({type: 1, duration: 30, cancelable: 0, cargo: []})
+        const tasks = new Array(completed).fill({
+            type: 1,
+            duration: 30,
+            cancelable: 0,
+            cargo: [],
+            couplings: [],
+        })
         lanes = [makeLane(started, tasks)]
     }
     return {
@@ -443,7 +451,7 @@ describe('createFleetView', () => {
         const t = tickFor([
             snapWithLanes('ship', 1, [
                 makeLane(startedOffset(-20), [task(TaskType.GATHER, 260)], 3),
-                makeLane(startedOffset(12), [task(TaskType.DEPLOY, 30)], schedule.LANE_BARRIER),
+                makeLane(startedOffset(12), [task(TaskType.UNDEPLOY, 30)], schedule.LANE_BARRIER),
                 makeLane(startedOffset(-90), [task(TaskType.TRAVEL, 30)]),
             ]),
         ])
@@ -534,7 +542,7 @@ describe('createFleetView', () => {
             makeLane(startedOffset(-10), [task(TaskType.GATHER, 120)], 1),
             makeLane(startedOffset(-10), [task(TaskType.LOAD, 120)], 2),
             makeLane(startedOffset(-10), [task(TaskType.CRAFT, 120)], 3),
-            makeLane(startedOffset(15), [task(TaskType.DEPLOY, 45)], schedule.LANE_BARRIER),
+            makeLane(startedOffset(15), [task(TaskType.UNDEPLOY, 45)], schedule.LANE_BARRIER),
         ])
         wide.entity_name = 'wide-row-name'
         const t = tickFor([wide])

@@ -60,12 +60,11 @@ export enum TaskType {
     GATHER = 5,
     WARP = 6,
     CRAFT = 7,
-    DEPLOY = 8,
     TRANSIT = 9,
     UNWRAP = 10,
     UNDEPLOY = 11,
+    LAUNCH = 12,
     DEMOLISH = 13,
-    CLAIMPLOT = 14,
     BUILDPLOT = 15,
     CHARGE = 16,
     UPGRADE = 17,
@@ -76,6 +75,7 @@ export enum HoldKind {
     PUSH = 2,
     GATHER = 3,
     BUILD = 4,
+    FLIGHT = 5,
     UPGRADE = 6,
 }
 

@@ -70,7 +70,8 @@
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 670851
+                  "energy_cost": 670851,
+                  "couplings": []
                 }
               ]
             }
@@ -196,7 +197,8 @@
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 670851
+                  "energy_cost": 670851,
+                  "couplings": []
                 }
               ]
             }
@@ -317,7 +319,8 @@
                   "type": 2,
                   "duration": 85,
                   "cancelable": 2,
-                  "cargo": []
+                  "cargo": [],
+                  "couplings": []
                 }
               ]
             }
@@ -438,7 +441,8 @@
                   "type": 2,
                   "duration": 85,
                   "cancelable": 2,
-                  "cargo": []
+                  "cargo": [],
+                  "couplings": []
                 }
               ]
             }
@@ -572,11 +576,16 @@
                       "quantity": 5
                     }
                   ],
-                  "entitytarget": {
-                    "entity_type": "warehouse",
-                    "entity_id": 2
-                  },
-                  "hold": 1
+                  "couplings": [
+                    {
+                      "counterpart": {
+                        "entity_type": "warehouse",
+                        "entity_id": 2
+                      },
+                      "hold": 1,
+                      "kind": 3
+                    }
+                  ]
                 }
               ]
             }
@@ -710,11 +719,16 @@
                       "quantity": 5
                     }
                   ],
-                  "entitytarget": {
-                    "entity_type": "warehouse",
-                    "entity_id": 2
-                  },
-                  "hold": 1
+                  "couplings": [
+                    {
+                      "counterpart": {
+                        "entity_type": "warehouse",
+                        "entity_id": 2
+                      },
+                      "hold": 1,
+                      "kind": 3
+                    }
+                  ]
                 }
               ]
             }
@@ -856,7 +870,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1000
+                  "energy_cost": 1000,
+                  "couplings": []
                 }
               ]
             }
@@ -990,7 +1005,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1000
+                  "energy_cost": 1000,
+                  "couplings": []
                 }
               ]
             }
@@ -1133,7 +1149,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1570
+                  "energy_cost": 1570,
+                  "couplings": []
                 }
               ]
             }
@@ -1283,7 +1300,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1570
+                  "energy_cost": 1570,
+                  "couplings": []
                 }
               ]
             }

@@ -22,7 +22,7 @@ function workerOnlyInfoArgs(at: Date) {
 				lane_key: 3,
 				schedule: {
 					started: startedWorker,
-					tasks: [{ type: 6, duration: 300, cancelable: 0, cargo: [] }],
+					tasks: [{ type: 6, duration: 300, cancelable: 0, cargo: [], couplings: [] }],
 				},
 			},
 		],
@@ -55,7 +55,7 @@ function multiLaneInfoArgs(at: Date) {
 				lane_key: 0,
 				schedule: {
 					started: startedMobility,
-					tasks: [{ type: 1, duration: 60, cancelable: 0, cargo: [] }],
+					tasks: [{ type: 1, duration: 60, cancelable: 0, cargo: [], couplings: [] }],
 				},
 			},
 			{
@@ -63,8 +63,8 @@ function multiLaneInfoArgs(at: Date) {
 				schedule: {
 					started: startedWorker,
 					tasks: [
-						{ type: 6, duration: 300, cancelable: 0, cargo: [] },
-						{ type: 7, duration: 540, cancelable: 2, cargo: [] },
+						{ type: 6, duration: 300, cancelable: 0, cargo: [], couplings: [] },
+						{ type: 7, duration: 540, cancelable: 2, cargo: [], couplings: [] },
 					],
 				},
 			},

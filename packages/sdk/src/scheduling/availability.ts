@@ -23,14 +23,15 @@ export function taskCargoEffect(task: Task): CargoEffect {
         case TaskType.UNLOAD:
             return {added: [], removed: task.cargo}
         case TaskType.GATHER:
-            return task.entitytarget ? {added: [], removed: []} : {added: task.cargo, removed: []}
+            return task.couplings.length > 0
+                ? {added: [], removed: []}
+                : {added: task.cargo, removed: []}
         case TaskType.CRAFT:
             if (task.cargo.length === 0) return {added: [], removed: []}
-            return {added: [task.cargo[task.cargo.length - 1]], removed: task.cargo.slice(0, -1)}
-        case TaskType.DEPLOY:
-            return task.cargo.length > 0
-                ? {added: [], removed: [task.cargo[0]]}
-                : {added: [], removed: []}
+            return {
+                added: task.couplings.length === 0 ? [task.cargo[task.cargo.length - 1]] : [],
+                removed: task.cargo.slice(0, -1),
+            }
         default:
             return {added: [], removed: []}
     }

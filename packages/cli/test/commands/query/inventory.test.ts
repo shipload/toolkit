@@ -58,6 +58,7 @@ function invTask(
             stats: i.stats,
             modules: [],
         })),
+        couplings: [],
     })
 }
 

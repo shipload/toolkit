@@ -59,8 +59,8 @@ test('tasks renders schedule with per-task timing', () => {
                 schedule: {
                     started,
                     tasks: [
-                        {type: 1, duration: 222, cancelable: 0, cargo: []},
-                        {type: 5, duration: 1968, cancelable: 0, cargo: []},
+                        {type: 1, duration: 222, cancelable: 0, cargo: [], couplings: []},
+                        {type: 5, duration: 1968, cancelable: 0, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -94,8 +94,8 @@ test('entity with schedule completed by wall-clock shows all done', () => {
                 schedule: {
                     started,
                     tasks: [
-                        {type: 2, duration: 51, cancelable: 0, cargo: []},
-                        {type: 7, duration: 3120, cancelable: 0, cargo: []},
+                        {type: 2, duration: 51, cancelable: 0, cargo: [], couplings: []},
+                        {type: 7, duration: 3120, cancelable: 0, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -138,6 +138,7 @@ function multiLaneInfoArgs(at: Date) {
                             cancelable: 0,
                             coordinates: {x: 3, y: 9, z: 800},
                             cargo: [],
+                            couplings: [],
                         },
                     ],
                 },
@@ -147,8 +148,8 @@ function multiLaneInfoArgs(at: Date) {
                 schedule: {
                     started: startedWorker,
                     tasks: [
-                        {type: 6, duration: 300, cancelable: 0, cargo: []},
-                        {type: 7, duration: 540, cancelable: 2, cargo: []},
+                        {type: 6, duration: 300, cancelable: 0, cargo: [], couplings: []},
+                        {type: 7, duration: 540, cancelable: 2, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -170,7 +171,7 @@ test('renders all lanes as semantic sections in lane-native order', () => {
                 lane_key: schedule.LANE_BARRIER,
                 schedule: {
                     started: startedBarrier,
-                    tasks: [{type: 1, duration: 60, cancelable: 0, cargo: []}],
+                    tasks: [{type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []}],
                 },
             },
             {
@@ -178,8 +179,8 @@ test('renders all lanes as semantic sections in lane-native order', () => {
                 schedule: {
                     started: startedWorker,
                     tasks: [
-                        {type: 6, duration: 300, cancelable: 0, cargo: []},
-                        {type: 7, duration: 540, cancelable: 2, cargo: []},
+                        {type: 6, duration: 300, cancelable: 0, cargo: [], couplings: []},
+                        {type: 7, duration: 540, cancelable: 2, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -187,7 +188,7 @@ test('renders all lanes as semantic sections in lane-native order', () => {
                 lane_key: 1,
                 schedule: {
                     started: startedWaiting,
-                    tasks: [{type: 5, duration: 60, cancelable: 0, cargo: []}],
+                    tasks: [{type: 5, duration: 60, cancelable: 0, cargo: [], couplings: []}],
                 },
             },
             {
@@ -201,6 +202,7 @@ test('renders all lanes as semantic sections in lane-native order', () => {
                             cancelable: 0,
                             coordinates: {x: 3, y: 9, z: 800},
                             cargo: [],
+                            couplings: [],
                         },
                     ],
                 },
@@ -229,7 +231,7 @@ test('barrier lane renders as barrier instead of a worker lane', () => {
                 lane_key: schedule.LANE_BARRIER,
                 schedule: {
                     started: startedBarrier,
-                    tasks: [{type: 1, duration: 60, cancelable: 0, cargo: []}],
+                    tasks: [{type: 1, duration: 60, cancelable: 0, cargo: [], couplings: []}],
                 },
             },
         ],
@@ -252,8 +254,8 @@ test('active lane with a completed front surfaces ready to resolve at section le
                 schedule: {
                     started: startedWorker,
                     tasks: [
-                        {type: 6, duration: 60, cancelable: 0, cargo: []},
-                        {type: 7, duration: 120, cancelable: 2, cargo: []},
+                        {type: 6, duration: 60, cancelable: 0, cargo: [], couplings: []},
+                        {type: 7, duration: 120, cancelable: 2, cargo: [], couplings: []},
                     ],
                 },
             },
@@ -319,6 +321,7 @@ test('json formatter derives pending from lanes and exposes lane-native fields',
                             duration: 60,
                             cancelable: 0,
                             cargo: [{item_id: 1, quantity: 2, stats: 123, modules: []}],
+                            couplings: [],
                         },
                     ],
                 },
@@ -328,8 +331,8 @@ test('json formatter derives pending from lanes and exposes lane-native fields',
                 schedule: {
                     started: workerStarted,
                     tasks: [
-                        {type: 7, duration: 540, cancelable: 2, cargo: []},
-                        {type: 2, duration: 30, cancelable: 0, cargo: []},
+                        {type: 7, duration: 540, cancelable: 2, cargo: [], couplings: []},
+                        {type: 2, duration: 30, cancelable: 0, cargo: [], couplings: []},
                     ],
                 },
             },

@@ -1,6 +1,6 @@
 import {Int64, Name, TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../../src/contracts'
-import type {TaskType} from '../../src/types'
+import {HoldKind, TaskType} from '../../src/types'
 
 export const COORDS = ServerContract.Types.coordinates.from({
     x: Int64.from(0),
@@ -27,7 +27,31 @@ export interface MakeTaskOpts {
     cargo?: Array<{itemId: number; qty: number}>
 }
 
+function couplingKindForType(type: TaskType): HoldKind | undefined {
+    switch (type) {
+        case TaskType.LOAD:
+            return HoldKind.PULL
+        case TaskType.UNLOAD:
+            return HoldKind.PUSH
+        case TaskType.BUILDPLOT:
+            return HoldKind.BUILD
+        default:
+            return undefined
+    }
+}
+
 export function makeTask(opts: MakeTaskOpts): TaskStruct {
+    const kind = couplingKindForType(opts.type)
+    const couplings =
+        opts.target && kind !== undefined
+            ? [
+                  ServerContract.Types.coupling.from({
+                      counterpart: opts.target,
+                      hold: UInt64.from(0),
+                      kind: UInt8.from(kind),
+                  }),
+              ]
+            : []
     return ServerContract.Types.task.from({
         type: UInt8.from(opts.type),
         duration: UInt32.from(opts.duration),
@@ -40,7 +64,7 @@ export function makeTask(opts: MakeTaskOpts): TaskStruct {
                 modules: [],
             })
         ),
-        entitytarget: opts.target,
+        couplings,
     })
 }
 

@@ -134,7 +134,7 @@ function task(partial: Partial<ServerTypes.task>): ServerTypes.task {
 		cancelable: 0 as never,
 		coordinates: undefined,
 		cargo: [],
-		entitytarget: undefined,
+		couplings: [] as never,
 		entitygroup: undefined,
 		energy_cost: undefined,
 		...partial,
@@ -162,7 +162,7 @@ describe("formatTaskShort", () => {
 		const t = task({
 			type: 3 as never,
 			cargo: [{ item_id: 101 as never, quantity: 5 as never, stats: 0n as never }] as never,
-			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
+			couplings: [{ counterpart: { entity_type: "warehouse" as never, entity_id: 6n as never }, hold: 0n as never, kind: 1 as never }] as never,
 		});
 		expect(formatTaskShort(t)).toBe("Receive 5 Crude Ore (T1) from warehouse 6");
 	});
@@ -171,7 +171,7 @@ describe("formatTaskShort", () => {
 		const t = task({
 			type: 4 as never,
 			cargo: [{ item_id: 10001 as never, quantity: 7 as never, stats: 0n as never }] as never,
-			entitytarget: { entity_type: "warehouse" as never, entity_id: 6n as never } as never,
+			couplings: [{ counterpart: { entity_type: "warehouse" as never, entity_id: 6n as never }, hold: 0n as never, kind: 2 as never }] as never,
 		});
 		expect(formatTaskShort(t)).toBe("Send 7 Plate (T1) to warehouse 6");
 	});
@@ -180,7 +180,7 @@ describe("formatTaskShort", () => {
 		const t = task({
 			type: 3 as never,
 			cargo: [{ item_id: 101 as never, quantity: 3 as never, stats: 0n as never }] as never,
-			entitytarget: { entity_type: "ship" as never, entity_id: 12n as never } as never,
+			couplings: [{ counterpart: { entity_type: "ship" as never, entity_id: 12n as never }, hold: 0n as never, kind: 1 as never }] as never,
 		});
 		expect(formatTaskShort(t)).toBe("Receive 3 Crude Ore (T1) from ship 12");
 	});
@@ -226,14 +226,6 @@ describe("formatTaskShort", () => {
 
 	test("Craft with empty cargo is bare 'Craft' (defensive)", () => {
 		expect(formatTaskShort(task({ type: 7 as never }))).toBe("Craft");
-	});
-
-	test("Deploy uses first cargo entry as the deployed item", () => {
-		const t = task({
-			type: 8 as never,
-			cargo: [{ item_id: 10103 as never, quantity: 1 as never, stats: 0n as never }] as never,
-		});
-		expect(formatTaskShort(t)).toBe("Deploy Shuttle Bay (T1)");
 	});
 
 	test("Unwrap / Undeploy list cargo", () => {
