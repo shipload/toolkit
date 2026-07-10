@@ -42,7 +42,7 @@ test('resolveItem resolves the station hub with hullmass and zero cargo capacity
     const resolved = resolveItem(UInt16.from(ITEM_HUB_T1_PACKED), stats)
     const hull = resolved.attributes?.find((g) => g.capability === 'Hull')
     expect(hull?.attributes.find((a) => a.label === 'Mass')?.value).toBe(
-        computeBaseHullmass({density: 100})
+        computeBaseHullmass(ITEM_HUB_T1_PACKED, {density: 100})
     )
     expect(hull?.attributes.find((a) => a.label === 'Capacity')?.value).toBe(0)
 })

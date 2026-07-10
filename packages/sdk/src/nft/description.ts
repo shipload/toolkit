@@ -42,6 +42,7 @@ import {
 import {decodeStat} from '../derivation/crafting'
 import {gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
+import {getBaseHullmassFor} from '../derivation/capabilities'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -51,9 +52,9 @@ export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
 }
 
-export function computeBaseHullmass(stats: bigint): number {
+export function computeBaseHullmass(itemId: number, stats: bigint): number {
     const density = decodeStat(stats, 1)
-    return 100000 - 75 * density
+    return Math.floor((getBaseHullmassFor(itemId) * (2000 - density)) / 2000)
 }
 
 export function computeBaseCapacityShip(stats: bigint): number {
@@ -267,7 +268,7 @@ export function buildEntityDescription(
     moduleItems: number[],
     moduleStats: bigint[]
 ): string {
-    const hullMass = computeBaseHullmass(hullStats)
+    const hullMass = computeBaseHullmass(itemId, hullStats)
     let baseCapacity = 0
     if (
         itemId === ITEM_SHIP_T1_PACKED ||

@@ -30,6 +30,7 @@ export interface EntitySlot {
 export interface EntityLayout {
     entityItemId: number
     slots: EntitySlot[]
+    baseHullmass: number
 }
 
 const recipesById = new Map<number, Recipe>()

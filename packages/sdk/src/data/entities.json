@@ -1,7 +1,8 @@
 [
   {
     "entityItemId": 10200,
-    "slots": []
+    "slots": [],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10201,
@@ -31,7 +32,8 @@
         "outputPct": 80,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10202,
@@ -61,7 +63,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10203,
@@ -76,7 +79,8 @@
         "outputPct": 200,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10204,
@@ -91,7 +95,8 @@
         "outputPct": 200,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10205,
@@ -106,7 +111,8 @@
         "outputPct": 200,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10206,
@@ -126,11 +132,13 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10207,
-    "slots": []
+    "slots": [],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 10210,
@@ -150,7 +158,8 @@
         "outputPct": 80,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 3200000
   },
   {
     "entityItemId": 10211,
@@ -170,7 +179,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 3600000
   },
   {
     "entityItemId": 10212,
@@ -190,7 +200,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 3600000
   },
   {
     "entityItemId": 10214,
@@ -210,7 +221,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 4400000
   },
   {
     "entityItemId": 10215,
@@ -230,7 +242,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 5000000
   },
   {
     "entityItemId": 10216,
@@ -255,7 +268,8 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10217,
@@ -280,11 +294,13 @@
         "outputPct": 100,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 4800000
   },
   {
     "entityItemId": 20200,
-    "slots": []
+    "slots": [],
+    "baseHullmass": 100000
   },
   {
     "entityItemId": 20210,
@@ -314,7 +330,8 @@
         "outputPct": 80,
         "maxTier": 1
       }
-    ]
+    ],
+    "baseHullmass": 5760000
   },
   {
     "entityItemId": 20211,
@@ -339,6 +356,7 @@
         "outputPct": 100,
         "maxTier": 2
       }
-    ]
+    ],
+    "baseHullmass": 7040000
   }
 ]

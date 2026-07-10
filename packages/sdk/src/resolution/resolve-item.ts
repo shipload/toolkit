@@ -289,7 +289,7 @@ function hullCapsForEntity(
     capacity: number
 } {
     return {
-        hullmass: computeBaseHullmass(decoded),
+        hullmass: computeBaseHullmass(itemId, decoded),
         capacity: computeBaseCapacity(itemId, decoded),
     }
 }
