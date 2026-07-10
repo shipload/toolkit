@@ -17,7 +17,7 @@ test('renderItem dispatches to packed entity template for entities', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderItem(item, resolved)
-    expect(svg).toContain('Roustabout')
+    expect(svg).toContain('Ship')
     expect(svg).toContain('Capacity')
 })
 

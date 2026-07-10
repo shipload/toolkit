@@ -7,7 +7,7 @@ test('renders Ship with hull attributes and two modules', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderPackedEntity(item, resolved)
-    expect(svg).toContain('Roustabout')
+    expect(svg).toContain('Ship')
     expect(svg).not.toContain('(Packed)')
     expect(svg).not.toContain('(T1)')
     expect(svg).toMatch(/>\s*T1<\/tspan>/)
