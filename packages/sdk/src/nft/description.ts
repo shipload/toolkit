@@ -43,7 +43,7 @@ function idiv(a: number, b: number): number {
     return Math.floor(a / b)
 }
 
-function toWholeEnergy(milli: number): number {
+export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
 }
 

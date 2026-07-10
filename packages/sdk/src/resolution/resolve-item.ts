@@ -31,6 +31,7 @@ import {
     computeStorageCapabilities,
 } from '../derivation/capabilities'
 import {applySlotMultiplierUint32} from '../entities/slot-multiplier'
+import {toWholeEnergy} from '../nft/description'
 import {categoryColors, componentIcon, itemAbbreviations, moduleIcon} from '../data/colors'
 import type {ServerContract} from '../contracts'
 
@@ -171,8 +172,8 @@ function computeCapabilityGroup(
             return {
                 capability: 'Generator',
                 attributes: [
-                    {label: 'Capacity', value: caps.capacity},
-                    {label: 'Recharge', value: caps.recharge},
+                    {label: 'Capacity', value: toWholeEnergy(caps.capacity)},
+                    {label: 'Recharge', value: toWholeEnergy(caps.recharge)},
                 ],
             }
         }
@@ -182,7 +183,7 @@ function computeCapabilityGroup(
                 capability: 'Gatherer',
                 attributes: [
                     {label: 'Yield', value: caps.yield},
-                    {label: 'Drain', value: caps.drain},
+                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
                     {label: 'Depth', value: caps.depth},
                 ],
             }
@@ -204,7 +205,7 @@ function computeCapabilityGroup(
                 capability: 'Crafting',
                 attributes: [
                     {label: 'Speed', value: caps.speed},
-                    {label: 'Drain', value: caps.drain},
+                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
                 ],
             }
         }
@@ -215,7 +216,7 @@ function computeCapabilityGroup(
                 attributes: [
                     {label: 'Capacity', value: caps.capacity},
                     {label: 'Efficiency', value: caps.efficiency},
-                    {label: 'Drain', value: caps.drain},
+                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
                 ],
             }
         }
@@ -238,7 +239,7 @@ function computeCapabilityGroup(
                 attributes: [
                     {
                         label: 'Energy Capacity',
-                        value: applySlotMultiplierUint32(caps.capacity, outputPct),
+                        value: toWholeEnergy(applySlotMultiplierUint32(caps.capacity, outputPct)),
                     },
                 ],
             }
