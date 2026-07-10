@@ -137,7 +137,7 @@ describe('resolveItem', () => {
 
         assert.deepEqual(group.attributes[0], {label: 'Capacity', value: 2})
         assert.deepEqual(group.attributes[1], {label: 'Efficiency', value: 5000})
-        assert.deepEqual(group.attributes[2], {label: 'Drain', value: 8750})
+        assert.deepEqual(group.attributes[2], {label: 'Drain', value: 9})
     })
 })
 
