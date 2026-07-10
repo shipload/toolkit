@@ -22,6 +22,10 @@ import {
     ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_PROSPECTOR_T1_PACKED,
     ITEM_TENDER_T1_PACKED,
+    ITEM_TUG_T1_PACKED,
+    ITEM_PORTER_T1_PACKED,
+    ITEM_WRANGLER_T1_PACKED,
+    ITEM_DREDGER_T1_PACKED,
 } from '../data/item-ids'
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
@@ -59,6 +63,10 @@ test('computeBaseCapacity uses ship-hull formula for every ship-class entity', (
         ITEM_ROUSTABOUT_T1_PACKED,
         ITEM_PROSPECTOR_T1_PACKED,
         ITEM_TENDER_T1_PACKED,
+        ITEM_TUG_T1_PACKED,
+        ITEM_PORTER_T1_PACKED,
+        ITEM_WRANGLER_T1_PACKED,
+        ITEM_DREDGER_T1_PACKED,
     ]) {
         expect(computeBaseCapacity(itemId, stats)).toBe(expected)
     }

@@ -93,6 +93,26 @@
       "displayLabel": "Tender"
     },
     {
+      "itemId": 10214,
+      "kind": "ship",
+      "displayLabel": "Tug"
+    },
+    {
+      "itemId": 10215,
+      "kind": "ship",
+      "displayLabel": "Porter"
+    },
+    {
+      "itemId": 10216,
+      "kind": "ship",
+      "displayLabel": "Wrangler"
+    },
+    {
+      "itemId": 10217,
+      "kind": "ship",
+      "displayLabel": "Dredger"
+    },
+    {
       "itemId": 10202,
       "kind": "warehouse",
       "displayLabel": ""

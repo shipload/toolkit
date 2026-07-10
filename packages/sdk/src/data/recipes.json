@@ -1207,6 +1207,262 @@
     "sourceSubclass": 10210
   },
   {
+    "outputItemId": 10214,
+    "outputMass": 2400000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 300
+      },
+      {
+        "itemId": 10008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10003,
+        "quantity": 300
+      },
+      {
+        "itemId": 10006,
+        "quantity": 300
+      },
+      {
+        "itemId": 10210,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclass": 10210
+  },
+  {
+    "outputItemId": 10215,
+    "outputMass": 2400000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 300
+      },
+      {
+        "itemId": 10008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10003,
+        "quantity": 300
+      },
+      {
+        "itemId": 10006,
+        "quantity": 300
+      },
+      {
+        "itemId": 10210,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclass": 10210
+  },
+  {
+    "outputItemId": 10216,
+    "outputMass": 2400000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 300
+      },
+      {
+        "itemId": 10008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10003,
+        "quantity": 300
+      },
+      {
+        "itemId": 10006,
+        "quantity": 300
+      },
+      {
+        "itemId": 10211,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclass": 10211
+  },
+  {
+    "outputItemId": 10217,
+    "outputMass": 2400000,
+    "inputs": [
+      {
+        "itemId": 10001,
+        "quantity": 300
+      },
+      {
+        "itemId": 10008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10003,
+        "quantity": 300
+      },
+      {
+        "itemId": 10006,
+        "quantity": 300
+      },
+      {
+        "itemId": 10211,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclass": 10211
+  },
+  {
     "outputItemId": 20001,
     "outputMass": 4800,
     "inputs": [

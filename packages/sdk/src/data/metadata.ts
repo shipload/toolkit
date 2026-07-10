@@ -284,6 +284,29 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A logistics ship with a shuttle bay for moving cargo between ships and stations.',
         color: '#4AE898',
     },
+    10214: {
+        name: 'Tug',
+        description:
+            'A logistics ship with a tractor beam for towing containers from place to place.',
+        color: '#4AE898',
+    },
+    10215: {
+        name: 'Porter',
+        description:
+            'A cargo ship built around a large storage hold. The extra mass makes it slower than a Roustabout.',
+        color: '#4AE898',
+    },
+    10216: {
+        name: 'Wrangler',
+        description: 'A heavy gathering ship with two gathering rigs, so it mines faster.',
+        color: '#4AE898',
+    },
+    10217: {
+        name: 'Dredger',
+        description:
+            'A gathering ship with its own storage hold, so it can keep mining before it has to offload.',
+        color: '#4AE898',
+    },
 
     // === Components (T2) ===
     20001: {
@@ -377,6 +400,10 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10210: {moduleSlotLabels: ['Engine', 'Power Core', 'Utility Bay']},
     10211: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay']},
     10212: {moduleSlotLabels: ['Engine', 'Power Core', 'Shuttle Bay']},
+    10214: {moduleSlotLabels: ['Engine', 'Power Core', 'Tractor Beam']},
+    10215: {moduleSlotLabels: ['Engine', 'Power Core', 'Cargo Hold']},
+    10216: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Limpet Bay']},
+    10217: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Cargo Hold']},
     10202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },

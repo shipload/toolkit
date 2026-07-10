@@ -193,6 +193,96 @@
     ]
   },
   {
+    "entityItemId": 10214,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
+    "entityItemId": 10215,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
+    "entityItemId": 10216,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
+    "entityItemId": 10217,
+    "slots": [
+      {
+        "type": "engine",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "generator",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ]
+  },
+  {
     "entityItemId": 20200,
     "slots": []
   },

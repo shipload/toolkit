@@ -182,6 +182,10 @@ import {
     ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_TENDER_T1_PACKED,
+    ITEM_TUG_T1_PACKED,
+    ITEM_PORTER_T1_PACKED,
+    ITEM_WRANGLER_T1_PACKED,
+    ITEM_DREDGER_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
 import {
@@ -228,6 +232,10 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
         case ITEM_ROUSTABOUT_T1_PACKED:
         case ITEM_PROSPECTOR_T1_PACKED:
         case ITEM_TENDER_T1_PACKED:
+        case ITEM_TUG_T1_PACKED:
+        case ITEM_PORTER_T1_PACKED:
+        case ITEM_WRANGLER_T1_PACKED:
+        case ITEM_DREDGER_T1_PACKED:
         case ITEM_PROSPECTOR_T2_PACKED:
         case ITEM_HAULER_SHIP_T2_PACKED:
             base = computeShipHullCapabilities(stats).capacity

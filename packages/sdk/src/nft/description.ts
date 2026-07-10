@@ -32,6 +32,10 @@ import {
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
     ITEM_TENDER_T1_PACKED,
+    ITEM_TUG_T1_PACKED,
+    ITEM_PORTER_T1_PACKED,
+    ITEM_WRANGLER_T1_PACKED,
+    ITEM_DREDGER_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
 } from '../data/item-ids'
@@ -120,6 +124,14 @@ export function entityDisplayName(itemId: number): string {
             return 'Prospector'
         case ITEM_TENDER_T1_PACKED:
             return 'Tender'
+        case ITEM_TUG_T1_PACKED:
+            return 'Tug'
+        case ITEM_PORTER_T1_PACKED:
+            return 'Porter'
+        case ITEM_WRANGLER_T1_PACKED:
+            return 'Wrangler'
+        case ITEM_DREDGER_T1_PACKED:
+            return 'Dredger'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:
@@ -262,6 +274,10 @@ export function buildEntityDescription(
         itemId === ITEM_ROUSTABOUT_T1_PACKED ||
         itemId === ITEM_PROSPECTOR_T1_PACKED ||
         itemId === ITEM_TENDER_T1_PACKED ||
+        itemId === ITEM_TUG_T1_PACKED ||
+        itemId === ITEM_PORTER_T1_PACKED ||
+        itemId === ITEM_WRANGLER_T1_PACKED ||
+        itemId === ITEM_DREDGER_T1_PACKED ||
         itemId === ITEM_PROSPECTOR_T2_PACKED ||
         itemId === ITEM_HAULER_SHIP_T2_PACKED
     ) {
