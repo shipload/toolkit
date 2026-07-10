@@ -237,6 +237,36 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('gatherplan', () => {
+        test('builds the action with defaults (recharge=true, empty slots)', () => {
+            const action = shipload.actions.gatherplan(39, 13, 236, 35379)
+            assert.equal(action.account.toString(), 'eon.shipload')
+            assert.equal(action.name.toString(), 'gatherplan')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'gatherplan',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.source_id), '39')
+            assert.equal(String(data.destination_id), '13')
+            assert.equal(String(data.stratum), '236')
+            assert.equal(String(data.quantity), '35379')
+            assert.equal(Boolean(data.recharge), true)
+            assert.equal(data.slots.array.length, 0)
+        })
+
+        test('encodes an explicit slot filter as bytes', () => {
+            const action = shipload.actions.gatherplan(39, 39, 100, 500, false, [2, 3])
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'gatherplan',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(Boolean(data.recharge), false)
+            assert.deepEqual(Array.from(data.slots.array as Uint8Array), [2, 3])
+        })
+    })
+
     describe('sync guard', () => {
         const EXCLUDED = new Set([
             // read-only get* queries — no builder needed

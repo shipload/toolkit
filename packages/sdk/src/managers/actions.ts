@@ -1,5 +1,6 @@
 import {
     Action,
+    Bytes,
     Checksum256,
     type Checksum256Type,
     Int64,
@@ -386,6 +387,24 @@ export class ActionsManager extends BaseManager {
             params.slot = UInt8.from(slot)
         }
         return this.server.action('gather', params)
+    }
+
+    gatherplan(
+        sourceId: UInt64Type,
+        destinationId: UInt64Type,
+        stratum: UInt16Type,
+        quantity: UInt32Type,
+        recharge = true,
+        slots: number[] = []
+    ): Action {
+        return this.server.action('gatherplan', {
+            source_id: UInt64.from(sourceId),
+            destination_id: UInt64.from(destinationId),
+            stratum: UInt16.from(stratum),
+            quantity: UInt32.from(quantity),
+            recharge,
+            slots: Bytes.from(slots),
+        })
     }
 
     // Packs N gather actions into one Transaction; the wallet/session fills in TAPoS at sign time.
