@@ -68,6 +68,7 @@ export enum TaskType {
     BUILDPLOT = 15,
     CHARGE = 16,
     UPGRADE = 17,
+    SHUTTLE = 18,
 }
 
 export enum HoldKind {

@@ -316,6 +316,20 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    shuttle(
+        carrierId: UInt64Type,
+        fromId: UInt64Type,
+        toId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('shuttle', {
+            carrier: UInt64.from(carrierId),
+            from_id: UInt64.from(fromId),
+            to_id: UInt64.from(toId),
+            items,
+        })
+    }
+
     launch(
         launcherId: UInt64Type,
         catcherId: UInt64Type,

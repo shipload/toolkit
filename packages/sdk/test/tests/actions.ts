@@ -147,6 +147,36 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('shuttle', () => {
+        test('creates shuttle action with single item', () => {
+            const action = shipload.actions.shuttle(1, 2, 3, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+            ])
+            assert.equal(action.account.toString(), 'eon.shipload')
+            assert.equal(action.name.toString(), 'shuttle')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'shuttle',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.carrier), '1')
+            assert.equal(String(data.from_id), '2')
+            assert.equal(String(data.to_id), '3')
+            assert.equal(data.items.length, 1)
+            assert.equal(String(data.items[0].item_id), '101')
+            assert.equal(String(data.items[0].quantity), '10')
+        })
+
+        test('creates shuttle action with multiple items', () => {
+            const action = shipload.actions.shuttle(1, 2, 3, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+                {item_id: 201, stats: 1n, modules: [], quantity: 5},
+            ])
+            assert.equal(action.name.toString(), 'shuttle')
+            assert.isDefined(action.data)
+        })
+    })
+
     describe('deploy', () => {
         test('creates deploy action with cargo_ref', () => {
             const action = shipload.actions.deploy(42, {
