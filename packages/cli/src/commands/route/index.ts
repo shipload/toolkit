@@ -195,7 +195,7 @@ export function register(program: Command): void {
                     entityId: e.entityId,
                 }))
                 const waypoints = plan.waypoints.map((w) => ({x: w.x, y: w.y}))
-                const action = sl.actions.travelroute(refs, waypoints, true)
+                const action = sl.actions.travelplan(refs, waypoints, true)
                 await transact(
                     {actions: [action]},
                     {description: `Route ${meta.label} → (${dest.x},${dest.y}) — ${plan.legs} legs`}

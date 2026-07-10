@@ -213,9 +213,9 @@ describe('ActionsManager', () => {
         })
     })
 
-    describe('travelroute', () => {
-        test('travelroute builds the action with entities, waypoints, and recharge', () => {
-            const action = shipload.actions.travelroute(
+    describe('travelplan', () => {
+        test('travelplan builds the action with entities, waypoints, and recharge', () => {
+            const action = shipload.actions.travelplan(
                 [{entityType: 'ship', entityId: 24}],
                 [
                     {x: 1000, y: 0},
@@ -224,10 +224,10 @@ describe('ActionsManager', () => {
                 true
             )
             assert.equal(action.account.toString(), 'eon.shipload')
-            assert.equal(action.name.toString(), 'travelroute')
+            assert.equal(action.name.toString(), 'travelplan')
             const data = Serializer.decode({
                 data: action.data,
-                type: 'travelroute',
+                type: 'travelplan',
                 abi: ServerContract.abi,
             }) as any
             assert.equal(data.entities.length, 1)
@@ -291,6 +291,8 @@ describe('ActionsManager', () => {
             'importplayer',
             'importreserve',
             'importstate',
+            'migratetasks',
+            'migswap',
             // internal / notification actions — not player-initiated
             'configlog',
             'notify',
@@ -321,8 +323,8 @@ describe('ActionsManager', () => {
             )
         })
 
-        test('travelroute is surfaced as a builder', () => {
-            assert.equal(typeof (shipload.actions as any).travelroute, 'function')
+        test('travelplan is surfaced as a builder', () => {
+            assert.equal(typeof (shipload.actions as any).travelplan, 'function')
         })
     })
 })

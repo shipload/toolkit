@@ -199,12 +199,12 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    travelroute(entities: EntityRefInput[], waypoints: WaypointInput[], recharge = true): Action {
+    travelplan(entities: EntityRefInput[], waypoints: WaypointInput[], recharge = true): Action {
         const entityRefs = this.entityRefs(entities)
         const wps = waypoints.map((w) =>
             ServerContract.Types.route_waypoint.from({x: Int64.from(w.x), y: Int64.from(w.y)})
         )
-        return this.server.action('travelroute', {
+        return this.server.action('travelplan', {
             entities: entityRefs,
             waypoints: wps,
             recharge,
