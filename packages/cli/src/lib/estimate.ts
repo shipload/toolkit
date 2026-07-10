@@ -178,7 +178,7 @@ function toShipLike(snap: EntitySnapshot): {
 	const engines: ServerTypes.movement_stats | undefined = raw.engines
 		? ServerTypes.movement_stats.from({
 				thrust: coerceUInt32(raw.engines.thrust),
-				drain: coerceUInt16(raw.engines.drain),
+				drain: coerceUInt32(raw.engines.drain),
 			})
 		: undefined;
 	const generator: ServerTypes.energy_stats | undefined = raw.generator

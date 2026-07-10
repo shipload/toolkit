@@ -1,4 +1,4 @@
-import type {UInt16, UInt32} from '@wharfkit/antelope'
+import type {UInt32} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 import type {ProjectedEntity} from '../scheduling/projection'
 import {type CargoStack, cargoItemToStack, mergeStacks} from '../capabilities/storage'
@@ -6,7 +6,7 @@ import {type CargoStack, cargoItemToStack, mergeStacks} from '../capabilities/st
 export interface ContractProjectedState {
     owner: {toString(): string}
     coordinates: ServerContract.Types.coordinates
-    energy?: UInt16
+    energy?: UInt32
     cargomass: UInt32
     cargo: ServerContract.Types.cargo_view[]
     hullmass?: UInt32

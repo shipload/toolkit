@@ -255,7 +255,7 @@ describe('computeEntityCapabilities', () => {
             SHIP_LAYOUT
         )
         expect(r.engines!.thrust).toBe(775)
-        expect(r.engines!.drain).toBe(118)
+        expect(r.engines!.drain).toBe(118_000)
     })
 
     test('two average engines yield drain 59', () => {
@@ -270,7 +270,7 @@ describe('computeEntityCapabilities', () => {
             SHIP_LAYOUT
         )
         expect(r.engines!.thrust).toBe(1550)
-        expect(r.engines!.drain).toBe(59)
+        expect(r.engines!.drain).toBe(59_000)
     })
 
     test('mixed thm averages: thm 300 + thm 700 behaves like thm 500', () => {
@@ -284,6 +284,6 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(r.engines!.drain).toBe(59)
+        expect(r.engines!.drain).toBe(59_000)
     })
 })

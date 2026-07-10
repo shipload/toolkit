@@ -2,14 +2,14 @@ import {expect, test} from 'bun:test'
 import {computeTravelDrain} from '../src/nft/description'
 
 test('single average engine anchors to 118', () => {
-    expect(computeTravelDrain(775, 500)).toBe(118)
+    expect(computeTravelDrain(775, 500)).toBe(118_000)
 })
 test('two average engines halve the per-tile cost', () => {
-    expect(computeTravelDrain(1550, 500)).toBe(59)
+    expect(computeTravelDrain(1550, 500)).toBe(59_000)
 })
 test('maxed-quality single engine is cheaper', () => {
-    expect(computeTravelDrain(1149, 999)).toBe(66)
+    expect(computeTravelDrain(1149, 999)).toBe(66_634)
 })
 test('low-quality starter engine is pricier', () => {
-    expect(computeTravelDrain(625, 300)).toBe(156)
+    expect(computeTravelDrain(625, 300)).toBe(156_528)
 })

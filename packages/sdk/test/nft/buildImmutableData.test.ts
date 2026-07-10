@@ -19,6 +19,10 @@ import {
 } from '../../src'
 import {computeHaulerDrain as moduleComputeHaulerDrain} from '../../src/nft/description'
 
+function toWholeEnergy(milli: number): number {
+    return Math.floor((milli + 500) / 1000)
+}
+
 const ITEM_CRUDE_ORE = 101
 const ITEM_COMPONENT_ORE_BASED = 10001
 const ITEM_ENGINE_T1 = 10100
@@ -158,7 +162,10 @@ describe('buildImmutableData', () => {
             'depth',
         ])
         expect(findEntry(entries, 'yield')!.second).toEqual(['uint16', computeGathererYield(str)])
-        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeGathererDrain(sat)])
+        expect(findEntry(entries, 'drain')!.second).toEqual([
+            'uint16',
+            toWholeEnergy(computeGathererDrain(sat)),
+        ])
         expect(findEntry(entries, 'depth')!.second).toEqual([
             'uint16',
             computeGathererDepth(hrd, 1),
@@ -175,7 +182,10 @@ describe('buildImmutableData', () => {
         expect(names).toContain('conductivity')
         expect(names).not.toContain('reactivity')
         expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
-        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeCrafterDrain(con)])
+        expect(findEntry(entries, 'drain')!.second).toEqual([
+            'uint16',
+            toWholeEnergy(computeCrafterDrain(con)),
+        ])
     })
 
     test('module (hauler) emits 3 stats + 3 computed capabilities', () => {
@@ -212,7 +222,7 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
-            moduleComputeHaulerDrain(con),
+            toWholeEnergy(moduleComputeHaulerDrain(con)),
         ])
     })
 

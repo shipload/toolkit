@@ -659,26 +659,26 @@ describe('Crafting', () => {
 
     describe('calc_craft_energy', () => {
         test('basic energy calculation', () => {
-            // Plate: 450K input_mass × drain 17 / 150K = 51, +1 setup cost = 52
-            const energy = calc_craft_energy(17, 450000)
-            assert.equal(energy.toNumber(), 52)
+            // Plate: 450K input_mass × drain 17_000 / 150K = 51_000, +1 setup cost = 51_001
+            const energy = calc_craft_energy(17_000, 450000)
+            assert.equal(energy.toNumber(), 51_001)
         })
 
         test('higher drain costs more energy', () => {
-            const low = calc_craft_energy(5, 450000)
-            const high = calc_craft_energy(30, 450000)
+            const low = calc_craft_energy(5_000, 450000)
+            const high = calc_craft_energy(30_000, 450000)
             assert.isAbove(high.toNumber(), low.toNumber())
         })
 
-        test('floors craft energy at 1 (never free)', () => {
-            // 5_000 mass × 24 drain / 150_000 divisor = 0 before flooring
-            const energy = calc_craft_energy(24, 5_000)
-            assert.equal(energy.toNumber(), 1)
+        test('floors craft energy at 1000 (never free)', () => {
+            // 5_000 mass × 24_000 drain / 150_000 divisor = 800 before flooring
+            const energy = calc_craft_energy(24_000, 5_000)
+            assert.equal(energy.toNumber(), 1000)
         })
 
-        test('zero input floors to 1 energy', () => {
-            const energy = calc_craft_energy(17, 0)
-            assert.equal(energy.toNumber(), 1)
+        test('zero input floors to 1000 energy', () => {
+            const energy = calc_craft_energy(17_000, 0)
+            assert.equal(energy.toNumber(), 1000)
         })
 
         test('per-task setup cost keeps a batch no pricier than split crafts', () => {

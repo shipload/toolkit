@@ -50,5 +50,5 @@ export function calc_gather_rate(
 export function calc_gather_energy(gatherer: GathererStats, duration: number): UInt32 {
     if (duration <= 0) return UInt32.from(0)
     const raw = Math.floor((duration * gatherer.drain.toNumber()) / PRECISION)
-    return UInt32.from(Math.min(Math.max(raw, 1), 4294967295))
+    return UInt32.from(Math.min(Math.max(raw, 1000), 4294967295))
 }

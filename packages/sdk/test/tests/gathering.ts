@@ -194,7 +194,7 @@ describe('gathering', () => {
     describe('calc_gather_duration', () => {
         const gatherer = makeGatherer({
             yield: UInt16.from(700),
-            drain: UInt16.from(25),
+            drain: UInt16.from(25_000),
             depth: UInt16.from(950),
         })
 
@@ -306,7 +306,7 @@ describe('gathering', () => {
     describe('calc_gather_energy', () => {
         const gatherer = makeGatherer({
             yield: UInt16.from(700),
-            drain: UInt16.from(25),
+            drain: UInt16.from(25_000),
             depth: UInt16.from(950),
         })
 
@@ -329,12 +329,12 @@ describe('gathering', () => {
         test('energy scales with drain rate', () => {
             const lowDrain = makeGatherer({
                 yield: UInt16.from(700),
-                drain: UInt16.from(10),
+                drain: UInt16.from(20_000),
                 depth: UInt16.from(950),
             })
             const highDrain = makeGatherer({
                 yield: UInt16.from(700),
-                drain: UInt16.from(50),
+                drain: UInt16.from(50_000),
                 depth: UInt16.from(950),
             })
             const lowEnergy = calc_gather_energy(lowDrain, 1000)

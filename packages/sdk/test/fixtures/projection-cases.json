@@ -1,6 +1,6 @@
 {
   "catalog_hash": "8da87de2107fd644dfdb5b23cdb910fe06fe925476bd9736cf3cbf1b6d572969",
-  "generated_at": "2026-07-09T03:31:55.093Z",
+  "generated_at": "2026-07-09T23:41:39.090Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -16,7 +16,7 @@
           "y": 3,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -70,7 +70,7 @@
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 669
+                  "energy_cost": 670851
                 }
               ]
             }
@@ -87,24 +87,24 @@
           "y": 3,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -113,7 +113,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -142,7 +142,7 @@
           "y": 3,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -196,7 +196,7 @@
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 669
+                  "energy_cost": 670851
                 }
               ]
             }
@@ -213,24 +213,24 @@
           "y": 3,
           "z": 3000
         },
-        "energy": 455,
+        "energy": 454349,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -239,7 +239,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -268,7 +268,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901,
+        "energy": 901583,
         "cargomass": 0,
         "modules": [
           {
@@ -315,7 +315,7 @@
               "tasks": [
                 {
                   "type": 2,
-                  "duration": 223,
+                  "duration": 85,
                   "cancelable": 2,
                   "cargo": []
                 }
@@ -334,24 +334,24 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901,
+        "energy": 901583,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -360,7 +360,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -389,7 +389,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901,
+        "energy": 901583,
         "cargomass": 0,
         "modules": [
           {
@@ -436,7 +436,7 @@
               "tasks": [
                 {
                   "type": 2,
-                  "duration": 223,
+                  "duration": 85,
                   "cancelable": 2,
                   "cargo": []
                 }
@@ -455,24 +455,24 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -481,7 +481,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -510,7 +510,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -593,24 +593,24 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -619,7 +619,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -648,7 +648,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -731,7 +731,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 5000,
         "cargo": [
           {
@@ -746,17 +746,17 @@
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -765,7 +765,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -794,7 +794,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -856,7 +856,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1
+                  "energy_cost": 1000
                 }
               ]
             }
@@ -873,24 +873,24 @@
           "y": 6,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -899,7 +899,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -928,7 +928,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -990,7 +990,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1
+                  "energy_cost": 1000
                 }
               ]
             }
@@ -1007,7 +1007,7 @@
           "y": 6,
           "z": 800
         },
-        "energy": 1123,
+        "energy": 1124200,
         "cargomass": 1000,
         "cargo": [
           {
@@ -1022,17 +1022,17 @@
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -1041,7 +1041,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -1070,7 +1070,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 10000,
         "modules": [
           {
@@ -1133,7 +1133,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 2
+                  "energy_cost": 1570
                 }
               ]
             }
@@ -1157,7 +1157,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 10000,
         "cargo": [
           {
@@ -1172,17 +1172,17 @@
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -1191,7 +1191,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -1220,7 +1220,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 10000,
         "modules": [
           {
@@ -1283,7 +1283,7 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 2
+                  "energy_cost": 1570
                 }
               ]
             }
@@ -1307,7 +1307,7 @@
           "y": 0,
           "z": 800
         },
-        "energy": 1122,
+        "energy": 1123630,
         "cargomass": 4000,
         "cargo": [
           {
@@ -1322,17 +1322,17 @@
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -1341,7 +1341,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],
@@ -1370,7 +1370,7 @@
           "y": -49,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "modules": [
           {
@@ -1421,24 +1421,24 @@
           "y": -49,
           "z": 800
         },
-        "energy": 1124,
+        "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
         "hullmass": 4884025,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223
+          "drain": 223617
         },
         "generator": {
-          "capacity": 1124,
-          "recharge": 1
+          "capacity": 1125200,
+          "recharge": 2622
         },
         "gatherer_lanes": [
           {
             "slot_index": 3,
             "yield": 330,
-            "drain": 1968,
+            "drain": 1967500,
             "depth": 1565,
             "output_pct": 80
           }
@@ -1447,7 +1447,7 @@
           {
             "slot_index": 4,
             "speed": 216,
-            "drain": 24,
+            "drain": 23546,
             "output_pct": 80
           }
         ],

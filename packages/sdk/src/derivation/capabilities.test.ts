@@ -2,6 +2,7 @@ import {expect, test} from 'bun:test'
 import {
     computeEntityCapabilities,
     computeGathererCapabilities,
+    computeGeneratorCapabilities,
     computeCrafterCapabilities,
     computeLoaderCapabilities,
     computeBaseCapacity,
@@ -165,4 +166,17 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
 test('per-lane amp-scaled stats clamp to UInt16, matching the contract clamp_to_uint16', () => {
     expect(applySlotMultiplier(60000, 200)).toBe(U16_MAX)
     expect(applySlotMultiplier(1000, 150)).toBe(1500)
+})
+
+test('generator capacity and recharge are denominated to milli-energy', () => {
+    const caps = computeGeneratorCapabilities({resonance: 213, reflectivity: 213})
+    expect(caps.capacity).toBe(1_406_500)
+    expect(caps.recharge).toBe(3_278)
+})
+
+test('gatherer/crafter/hauler drains are denominated', () => {
+    expect(computeGathererCapabilities({strength: 0, hardness: 0, saturation: 213}, 1).drain).toBe(
+        1_967_500
+    )
+    expect(computeCrafterCapabilities({fineness: 0, conductivity: 213}).drain).toBe(23_546)
 })

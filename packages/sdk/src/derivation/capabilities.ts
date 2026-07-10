@@ -35,8 +35,8 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     const ref = stats.reflectivity
 
     return {
-        capacity: 1300 + Math.floor(res / 2),
-        recharge: 2 * (1 + Math.floor((ref * 3) / 1000)),
+        capacity: 1_300_000 + res * 500,
+        recharge: 2000 + ref * 6,
     }
 }
 
@@ -82,7 +82,7 @@ export function computeGathererCapabilities(
 
     return {
         yield: 200 + str,
-        drain: 2 * Math.max(250, 1250 - Math.floor((con * 25) / 20)),
+        drain: 2 * Math.max(250_000, 1_250_000 - con * 1250),
         depth: gathererDepthForTier(hrd, tier),
     }
 }
@@ -111,7 +111,7 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
 
     return {
         speed: 100 + Math.floor((fin * 4) / 5),
-        drain: Math.max(5, 30 - Math.floor(con / 33)),
+        drain: Math.max(5000, 30000 - Math.floor((con * 1000) / 33)),
     }
 }
 
@@ -130,7 +130,7 @@ export function computeHaulerCapabilities(
     return {
         capacity: computeHaulerCapacity(resonance, tier),
         efficiency: 2000 + plasticity * 6,
-        drain: Math.max(3, 15 - Math.floor(conductivity / 80)),
+        drain: Math.max(3000, 15000 - Math.min(12000, Math.floor((conductivity * 1000) / 80))),
     }
 }
 
@@ -166,7 +166,7 @@ export function computeBatteryCapabilities(stats: Record<string, number>): {
     const insulation = stats.insulation ?? 0
 
     const statSum = volatility + thermal + plasticity + insulation
-    return {capacity: 2_500 + Math.floor((statSum * 7_500) / 3996)}
+    return {capacity: 2_500_000 + Math.floor((statSum * 7_500_000) / 3996)}
 }
 
 import {
@@ -380,8 +380,8 @@ export function computeEntityCapabilities(
         } else if (modType === MODULE_GENERATOR) {
             hasGenerator = true
             const caps = computeGeneratorCapabilities(decodedStats)
-            totalGenCapacity += applySlotMultiplier(caps.capacity, amp)
-            totalGenRecharge += applySlotMultiplier(caps.recharge, amp)
+            totalGenCapacity += applySlotMultiplierUint32(caps.capacity, amp)
+            totalGenRecharge += applySlotMultiplierUint32(caps.recharge, amp)
         } else if (modType === MODULE_GATHERER) {
             hasGatherer = true
             const tier = item.tier

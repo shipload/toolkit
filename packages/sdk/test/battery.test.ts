@@ -24,11 +24,11 @@ function generatorStats(resonance: number, reflectivity: number): bigint {
 }
 
 function batteryBankCapacity(vol: number, thm: number, pla: number, ins: number): number {
-    return 2500 + Math.floor(((vol + thm + pla + ins) * 7500) / 3996)
+    return 2_500_000 + Math.floor(((vol + thm + pla + ins) * 7_500_000) / 3996)
 }
 
 function generatorCapacity(resonance: number): number {
-    return 1300 + Math.floor(resonance / 2)
+    return 1_300_000 + resonance * 500
 }
 
 describe('Battery Bank module derivation', () => {

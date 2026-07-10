@@ -112,7 +112,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         holds: [],
     }
 
-    if (state.energy !== undefined) info.energy = UInt16.from(state.energy)
+    if (state.energy !== undefined) info.energy = UInt32.from(state.energy)
 
     if (kind === 'container') {
         info.modules = []

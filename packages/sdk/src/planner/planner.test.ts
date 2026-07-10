@@ -58,7 +58,7 @@ function entity(overrides: EntityOverrides = {}): GatherPlanEntity {
         gatherer_lanes: overrides.gatherer_lanes ?? [],
         loader_lanes: overrides.loader_lanes ?? [],
         generator: overrides.generator,
-        energy: overrides.energy !== undefined ? UInt16.from(overrides.energy) : undefined,
+        energy: overrides.energy !== undefined ? UInt32.from(overrides.energy) : undefined,
         lanes: overrides.lanes ?? [],
         coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
         cargo: [],

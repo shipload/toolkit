@@ -1,4 +1,4 @@
-import type {Name, UInt16, UInt32, UInt8} from '@wharfkit/antelope'
+import type {Name, UInt32, UInt8} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 
 export interface LoaderStats {
@@ -24,7 +24,7 @@ export interface MovementCapability {
 }
 
 export interface EnergyCapability {
-    energy: UInt16
+    energy: UInt32
 }
 
 export interface StorageCapability {
@@ -65,7 +65,7 @@ export interface EntityCapabilities {
 export interface EntityState {
     owner: Name
     location: ServerContract.Types.coordinates
-    energy?: UInt16
+    energy?: UInt32
     cargomass: UInt32
     cargo: ServerContract.Types.cargo_item[]
 }

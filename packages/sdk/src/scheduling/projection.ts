@@ -1,4 +1,4 @@
-import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, type UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, TaskType} from '../types'
 import {
@@ -33,7 +33,7 @@ import type {ScheduleData} from './schedule'
 
 export interface ProjectedEntity {
     location: Coordinates
-    energy: UInt16
+    energy: UInt32
     cargo: CargoStack[]
     shipMass: UInt32
     capacity?: UInt64
@@ -58,7 +58,7 @@ export interface ProjectedEntity {
 
 export interface Projectable extends ScheduleData {
     coordinates: Coordinates | ServerContract.Types.coordinates
-    energy?: UInt16
+    energy?: UInt32
     hullmass?: UInt32
     generator?: ServerContract.Types.energy_stats
     engines?: ServerContract.Types.movement_stats
@@ -216,7 +216,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
 
     const projected: ProjectedEntity = {
         location: Coordinates.from(entity.coordinates),
-        energy: UInt16.from(entity.energy ?? 0),
+        energy: UInt32.from(entity.energy ?? 0),
         cargo,
         shipMass,
         capacity: capacity ? UInt64.from(capacity) : undefined,
@@ -286,12 +286,12 @@ function applyRechargeTask(
     if (!projected.generator) return
 
     if (options.complete) {
-        projected.energy = UInt16.from(projected.generator.capacity)
+        projected.energy = UInt32.from(projected.generator.capacity)
     } else if (options.progress !== undefined) {
         const capacity = Number(projected.generator.capacity)
         const currentEnergy = Number(projected.energy)
         const rechargeAmount = (capacity - currentEnergy) * options.progress
-        projected.energy = UInt16.from(Math.min(capacity, currentEnergy + rechargeAmount))
+        projected.energy = UInt32.from(Math.min(capacity, currentEnergy + rechargeAmount))
     }
 }
 
@@ -317,8 +317,8 @@ function applyFlightTask(
             Math.floor(Number(task.energy_cost ?? 0) * options.progress)
         )
         projected.energy = projected.energy.gt(partialEnergy)
-            ? UInt16.from(projected.energy.subtracting(partialEnergy))
-            : UInt16.from(0)
+            ? UInt32.from(projected.energy.subtracting(partialEnergy))
+            : UInt32.from(0)
     }
 }
 
@@ -344,10 +344,10 @@ function applyRemoveCargoTask(projected: ProjectedEntity, task: ServerContract.T
 
 function applyEnergyCost(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     if (!task.energy_cost) return
-    const energyCost = UInt16.from(task.energy_cost)
+    const energyCost = UInt32.from(task.energy_cost)
     projected.energy = projected.energy.gt(energyCost)
-        ? UInt16.from(projected.energy.subtracting(energyCost))
-        : UInt16.from(0)
+        ? UInt32.from(projected.energy.subtracting(energyCost))
+        : UInt32.from(0)
 }
 
 function applyGatherTask(

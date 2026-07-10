@@ -75,6 +75,10 @@ export function moduleSlotsForImmutable(
 
 const IMAGE_HOST_URL = 'https://item.shiploadgame.com/item'
 
+function toWholeEnergy(milli: number): number {
+    return Math.floor((milli + 500) / 1000)
+}
+
 function bytesToBase64Url(bytes: Uint8Array): string {
     let binary = ''
     for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]!)
@@ -192,8 +196,14 @@ export function buildModuleImmutable(
             const ref = decodeStat(stats, 1)
             base.push({first: 'resonance', second: ['uint16', res]})
             base.push({first: 'reflectivity', second: ['uint16', ref]})
-            base.push({first: 'capacity', second: ['uint16', computeGeneratorCap(res)]})
-            base.push({first: 'recharge', second: ['uint16', computeGeneratorRech(ref)]})
+            base.push({
+                first: 'capacity',
+                second: ['uint16', toWholeEnergy(computeGeneratorCap(res))],
+            })
+            base.push({
+                first: 'recharge',
+                second: ['uint16', toWholeEnergy(computeGeneratorRech(ref))],
+            })
             break
         }
         case MODULE_GATHERER: {
@@ -204,7 +214,10 @@ export function buildModuleImmutable(
             base.push({first: 'hardness', second: ['uint16', hrd]})
             base.push({first: 'saturation', second: ['uint16', sat]})
             base.push({first: 'yield', second: ['uint16', computeGathererYield(str)]})
-            base.push({first: 'drain', second: ['uint16', computeGathererDrain(sat)]})
+            base.push({
+                first: 'drain',
+                second: ['uint16', toWholeEnergy(computeGathererDrain(sat))],
+            })
             base.push({first: 'depth', second: ['uint16', computeGathererDepth(hrd, item.tier)]})
             break
         }
@@ -229,7 +242,7 @@ export function buildModuleImmutable(
             base.push({first: 'fineness', second: ['uint16', fin]})
             base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin)]})
-            base.push({first: 'drain', second: ['uint16', computeCrafterDrain(con)]})
+            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeCrafterDrain(con))]})
             break
         }
         case MODULE_STORAGE: {
@@ -258,7 +271,7 @@ export function buildModuleImmutable(
             base.push({first: 'insulation', second: ['uint16', ins]})
             base.push({
                 first: 'capacity',
-                second: ['uint32', computeBatteryBankCapacity(vol, thm, pla, ins)],
+                second: ['uint32', toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins))],
             })
             break
         }
@@ -271,7 +284,7 @@ export function buildModuleImmutable(
             base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res, item.tier)]})
             base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(pla)]})
-            base.push({first: 'drain', second: ['uint16', computeHaulerDrain(con)]})
+            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeHaulerDrain(con))]})
             break
         }
     }

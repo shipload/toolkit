@@ -53,4 +53,9 @@ describe('makeEntity', () => {
     test('throws for unknown packed item IDs', () => {
         expect(() => makeEntity(99999, baseState)).toThrow()
     })
+
+    test('accepts milli-energy values above the uint16 range', () => {
+        const e = makeEntity(ITEM_SHIP_T1_PACKED, {...baseState, energy: 1_125_200})
+        expect(Number(e.energy)).toBe(1_125_200)
+    })
 })

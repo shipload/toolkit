@@ -14,7 +14,6 @@ import {
     type Checksum256,
     Int64,
     type Int64Type,
-    UInt16,
     UInt32,
     type UInt32Type,
     UInt64,
@@ -197,7 +196,7 @@ export function calc_ship_rechargetime(ship: ShipLike): UInt32 {
     if (!ship.generator) return UInt32.from(0)
     return calc_rechargetime(
         ship.generator.capacity,
-        ship.energy ?? UInt16.from(0),
+        ship.energy ?? UInt32.from(0),
         ship.generator.recharge
     )
 }
