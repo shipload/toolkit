@@ -118,27 +118,30 @@ describe('cost helpers', () => {
     const RICHNESS = 500
 
     test('gatherEnergyCost is 0 for non-positive quantity and positive otherwise', () => {
-        const lane = gathererLane(0, 700, 1250, 5000)
+        const lane = gathererLane(0, 700, 1_250_000, 5000)
         expect(gatherEnergyCost(lane, 0, STRATUM, ITEM_MASS, RICHNESS)).toBe(0)
         expect(gatherEnergyCost(lane, 100, STRATUM, ITEM_MASS, RICHNESS)).toBeGreaterThan(0)
     })
 
     test('splitCost across two lanes is monotonic non-decreasing in quantity', () => {
-        const reaching = [gathererLane(0, 700, 1250, 5000), gathererLane(1, 700, 1250, 5000)]
+        const reaching = [
+            gathererLane(0, 700, 1_250_000, 5000),
+            gathererLane(1, 700, 1_250_000, 5000),
+        ]
         const c100 = splitCost(reaching, 100, STRATUM, ITEM_MASS, RICHNESS)
         const c200 = splitCost(reaching, 200, STRATUM, ITEM_MASS, RICHNESS)
         expect(c200).toBeGreaterThanOrEqual(c100)
     })
 
     test('maxQtyForCharge returns hi when the whole batch fits the charge', () => {
-        const reaching = [gathererLane(0, 700, 1250, 5000)]
+        const reaching = [gathererLane(0, 700, 1_250_000, 5000)]
         // capacity huge → the full 500 fits
         expect(maxQtyForCharge(reaching, 500, 1_000_000, STRATUM, ITEM_MASS, RICHNESS)).toBe(500)
     })
 
     test('maxQtyForCharge finds the boundary: result fits, result+1 does not', () => {
-        const reaching = [gathererLane(0, 700, 1250, 5000)]
-        const capacity = 40
+        const reaching = [gathererLane(0, 700, 1_250_000, 5000)]
+        const capacity = 40_000
         const q = maxQtyForCharge(reaching, 100_000, capacity, STRATUM, ITEM_MASS, RICHNESS)
         expect(splitCost(reaching, q, STRATUM, ITEM_MASS, RICHNESS)).toBeLessThanOrEqual(capacity)
         expect(splitCost(reaching, q + 1, STRATUM, ITEM_MASS, RICHNESS)).toBeGreaterThan(capacity)
@@ -157,9 +160,9 @@ describe('buildGatherPlan', () => {
 
     test('single cycle when the target fits one charge and energy is full', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
-            generator: energyStats(1200, 2),
-            energy: 1200,
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(1_200_000, 2000),
+            energy: 1_200_000,
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 100}, OPTS)
         expect(plan.cycleCount).toBe(1)
@@ -172,9 +175,12 @@ describe('buildGatherPlan', () => {
 
     test('two limpets split one charge proportional to yield, finish within 1s of each other', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 200, 500, 5000), gathererLane(1, 400, 500, 5000)],
-            generator: energyStats(60_000, 2),
-            energy: 60_000,
+            gatherer_lanes: [
+                gathererLane(0, 200, 500_000, 5000),
+                gathererLane(1, 400, 500_000, 5000),
+            ],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 60}, OPTS)
         expect(plan.cycleCount).toBe(1)
@@ -185,9 +191,9 @@ describe('buildGatherPlan', () => {
     })
 
     test('multi-cycle: fills beyond one charge; totalOre equals fill target; each cycle fits the charge', () => {
-        const CAP = 40
+        const CAP = 40_000
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
             generator: energyStats(CAP, 2),
             energy: CAP,
         })
@@ -214,9 +220,9 @@ describe('buildGatherPlan', () => {
 
     test('cap reasons: hold binds, reserve binds, requested binds', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
-            generator: energyStats(60_000, 2),
-            energy: 60_000,
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
         })
         expect(
             buildGatherPlan(e, STRATUM, 'max', {...OPTS, holdRoom: 300, reserveRemaining: 9999}).cap
@@ -228,9 +234,9 @@ describe('buildGatherPlan', () => {
     })
 
     test('total ETA sums per-cycle recharge + gather seconds', () => {
-        const CAP = 40
+        const CAP = 40_000
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
             generator: energyStats(CAP, 2),
             energy: CAP,
         })
@@ -242,11 +248,11 @@ describe('buildGatherPlan', () => {
     test('excludes limpets that cannot reach the stratum and warns', () => {
         const e = entity({
             gatherer_lanes: [
-                gathererLane(0, 700, 1250, 5000), // reaches 100
-                gathererLane(1, 700, 1250, 50), // does not reach 100
+                gathererLane(0, 700, 1_250_000, 5000), // reaches 100
+                gathererLane(1, 700, 1_250_000, 50), // does not reach 100
             ],
-            generator: energyStats(60_000, 2),
-            energy: 60_000,
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 100}, OPTS)
         expect(plan.cycles[0].limpets).toHaveLength(1)
@@ -256,9 +262,12 @@ describe('buildGatherPlan', () => {
 
     test('reports structured limpet reach counts (all reaching)', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000), gathererLane(1, 700, 1250, 5000)],
-            generator: energyStats(60_000, 2),
-            energy: 60_000,
+            gatherer_lanes: [
+                gathererLane(0, 700, 1_250_000, 5000),
+                gathererLane(1, 700, 1_250_000, 5000),
+            ],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
         expect(plan.totalLimpets).toBe(2)
@@ -268,11 +277,11 @@ describe('buildGatherPlan', () => {
     test('reachingCount excludes limpets that cannot reach the stratum', () => {
         const e = entity({
             gatherer_lanes: [
-                gathererLane(0, 700, 1250, 5000), // reaches 100
-                gathererLane(1, 700, 1250, 50), // does not reach 100
+                gathererLane(0, 700, 1_250_000, 5000), // reaches 100
+                gathererLane(1, 700, 1_250_000, 50), // does not reach 100
             ],
-            generator: energyStats(60_000, 2),
-            energy: 60_000,
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
         expect(plan.totalLimpets).toBe(2)
@@ -280,9 +289,9 @@ describe('buildGatherPlan', () => {
     })
 
     test('single-limpet ship still fills across cycles', () => {
-        const CAP = 40
+        const CAP = 40_000
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
             generator: energyStats(CAP, 2),
             energy: CAP,
         })
@@ -293,18 +302,18 @@ describe('buildGatherPlan', () => {
 
     test('throws when no gatherer reaches the stratum', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 50)],
-            generator: energyStats(1200, 2),
-            energy: 1200,
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 50)],
+            generator: energyStats(1_200_000, 2000),
+            energy: 1_200_000,
         })
         expect(() => buildGatherPlan(e, STRATUM, 'max', OPTS)).toThrow('no gatherer reaches')
     })
 
     test('zero fill target yields an empty plan (no cycles)', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
-            generator: energyStats(1200, 2),
-            energy: 1200,
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(1_200_000, 2000),
+            energy: 1_200_000,
         })
         const plan = buildGatherPlan(e, STRATUM, 'max', {...OPTS, holdRoom: 0})
         expect(plan.cycleCount).toBe(0)
@@ -314,9 +323,9 @@ describe('buildGatherPlan', () => {
 
     test('first cycle skips recharge when current energy already covers the small batch', () => {
         const e = entity({
-            gatherer_lanes: [gathererLane(0, 700, 1250, 5000)],
-            generator: energyStats(60_000, 2),
-            energy: 60_000, // full
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000, // full
         })
         const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
         expect(plan.cycles[0].rechargeBefore).toBe(false)
