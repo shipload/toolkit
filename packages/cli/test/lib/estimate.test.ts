@@ -5,6 +5,7 @@ import {
 	computeFlightDurationSeconds,
 	computeGatherCargoDelta,
 	type EstimateResult,
+	estimateGatherFromStratum,
 	estimateTravel,
 	populateCraftFeasibility,
 	populateGatherFeasibility,
@@ -428,5 +429,139 @@ describe("estimateTravel projection", () => {
 			hasSystemAtDestination: true,
 		});
 		expect(est.travel?.origin).toEqual({ x: 0, y: 0 });
+	});
+});
+
+describe("estimateGatherFromStratum — gatherplan model", () => {
+	const RICHNESS = 500;
+	const STRATUM = 100;
+	const ORE = 101;
+	const CAPACITY = 1_406_000n;
+
+	function gatherSnap(overrides: Record<string, unknown> = {}) {
+		return {
+			type: "ship",
+			id: 39n,
+			owner: "agent.gm",
+			entity_name: "Test Gatherer",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0n,
+			cargo: [],
+			capacity: 10_000_000n,
+			energy: 1_406_000n,
+			generator: { capacity: CAPACITY, recharge: 2n },
+			gatherer_lanes: [
+				{ slot_index: 2, yield: 510, drain: 2_500_000, depth: 5495, output_pct: 100 },
+				{ slot_index: 3, yield: 510, drain: 2_500_000, depth: 5495, output_pct: 100 },
+			],
+			crafter_lanes: [],
+			loader_lanes: [],
+			is_idle: true,
+			lanes: [],
+			holds: [],
+			...overrides,
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+	}
+
+	function estimate(overrides: Record<string, unknown> = {}, quantity = 8000, recharge = true) {
+		return estimateGatherFromStratum({
+			snapshot: gatherSnap(overrides),
+			entityId: 39n,
+			stratum: STRATUM,
+			quantity,
+			itemId: ORE,
+			richness: RICHNESS,
+			reserveRemaining: 1_000_000,
+			recharge,
+		});
+	}
+
+	test("multi-charge fill plans cycles with recharges and stays feasible with recharge=true", () => {
+		const est = estimate();
+		expect(est.gather?.limpets).toBe(2);
+		expect(est.gather!.cycles).toBeGreaterThan(1);
+		expect(est.gather!.recharges).toBe(est.gather!.cycles - 1);
+		expect(est.energy_cost).toBeGreaterThan(Number(CAPACITY));
+		expect(est.duration_s).toBeGreaterThan(0);
+		expect(est.with_recharge).toBe(true);
+		expect(est.feasibility.ok).toBe(true);
+	});
+
+	test("multi-charge fill without recharge reports insufficient_energy", () => {
+		const est = estimate({}, 8000, false);
+		expect(est.feasibility.ok).toBe(false);
+		expect(est.feasibility.issues.some((i) => i.code === "insufficient_energy")).toBe(true);
+	});
+
+	test("single affordable cycle needs no recharge either way", () => {
+		const est = estimate({}, 100, false);
+		expect(est.gather?.cycles).toBe(1);
+		expect(est.gather?.recharges).toBe(0);
+		expect(est.with_recharge).toBe(false);
+		expect(est.feasibility.ok).toBe(true);
+	});
+
+	test("parallel limpets beat the single-lane serial duration", () => {
+		const twoLanes = estimate({}, 100, false);
+		const oneLane = estimateGatherFromStratum({
+			snapshot: gatherSnap({
+				gatherer_lanes: [
+					{ slot_index: 2, yield: 510, drain: 2_500_000, depth: 5495, output_pct: 100 },
+				],
+			}),
+			entityId: 39n,
+			stratum: STRATUM,
+			quantity: 100,
+			itemId: ORE,
+			richness: RICHNESS,
+			reserveRemaining: 1_000_000,
+			recharge: false,
+		});
+		expect(twoLanes.duration_s).toBeLessThan(oneLane.duration_s);
+	});
+
+	test("only reaching limpets deploy", () => {
+		const est = estimateGatherFromStratum({
+			snapshot: gatherSnap({
+				gatherer_lanes: [
+					{ slot_index: 2, yield: 510, drain: 2_500_000, depth: 5495, output_pct: 100 },
+					{ slot_index: 3, yield: 510, drain: 2_500_000, depth: 50, output_pct: 100 },
+				],
+			}),
+			entityId: 39n,
+			stratum: STRATUM,
+			quantity: 100,
+			itemId: ORE,
+			richness: RICHNESS,
+			reserveRemaining: 1_000_000,
+			recharge: true,
+		});
+		expect(est.gather?.limpets).toBe(1);
+	});
+
+	test("reserve and cargo caps surface as feasibility issues on the full request", () => {
+		const overReserve = estimateGatherFromStratum({
+			snapshot: gatherSnap(),
+			entityId: 39n,
+			stratum: STRATUM,
+			quantity: 100,
+			itemId: ORE,
+			richness: RICHNESS,
+			reserveRemaining: 50,
+			recharge: true,
+		});
+		expect(overReserve.feasibility.ok).toBe(false);
+		expect(overReserve.feasibility.issues.some((i) => i.code.includes("reserve"))).toBe(true);
+
+		const overCargo = estimate({ capacity: 1000n }, 100, true);
+		expect(overCargo.feasibility.ok).toBe(false);
+		expect(overCargo.feasibility.issues.some((i) => i.code.includes("cargo"))).toBe(true);
+	});
+
+	test("no generator degrades to a zero estimate (preflight/chain surface it)", () => {
+		const est = estimate({ generator: undefined }, 100, true);
+		expect(est.duration_s).toBe(0);
+		expect(est.feasibility.ok).toBe(true);
 	});
 });

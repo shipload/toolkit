@@ -64,6 +64,11 @@ export function renderEstimate(e: EstimateResult): string {
 			: `${renderIssues(e.feasibility.issues)}\n${body}`;
 	}
 
+	if (e.gather && e.gather.cycles > 0) {
+		const limpets = `${e.gather.limpets} limpet${e.gather.limpets === 1 ? "" : "s"}`;
+		const cycles = `${e.gather.cycles} charge cycle${e.gather.cycles === 1 ? "" : "s"}`;
+		headerParts.push(`${limpets} × ${cycles}`);
+	}
 	for (const [itemIdStr, qty] of Object.entries(e.cargo_delta)) {
 		const id = Number(itemIdStr);
 		headerParts.push(`cargo ${signed(qty)} ${formatItem(id)}`);

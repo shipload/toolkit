@@ -19,19 +19,21 @@
  */
 
 import {
+	buildGatherPlan,
 	calc_craft_energy,
 	calc_energyusage,
-	calc_gather_duration,
-	calc_gather_energy,
 	calc_ship_flighttime,
 	calc_ship_mass,
 	calc_ship_rechargetime,
 	distanceBetweenPoints,
+	gatherEnergyCost,
 	getItem,
 	hasSystem,
 	ServerTypes,
 	laneKeyForModule,
-	type GathererStats,
+	splitCost,
+	type GatherPlan,
+	type GatherPlanEntity,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
@@ -74,6 +76,12 @@ export interface CraftSummary {
 	}[];
 }
 
+export interface GatherPlanSummary {
+	limpets: number;
+	cycles: number;
+	recharges: number;
+}
+
 export interface EstimateResult {
 	duration_s: number;
 	energy_cost: number;
@@ -82,6 +90,7 @@ export interface EstimateResult {
 	with_recharge?: boolean;
 	travel?: TravelSummary;
 	craft?: CraftSummary;
+	gather?: GatherPlanSummary;
 }
 
 /**
@@ -458,61 +467,115 @@ export async function estimateGather(params: {
 		};
 	}
 
+	return estimateGatherFromStratum({
+		snapshot: snap,
+		entityId,
+		stratum,
+		quantity,
+		itemId,
+		richness,
+		reserveRemaining: Number(stratumResponse?.stratum?.reserve?.toString() ?? "0"),
+		recharge: params.recharge ?? false,
+		now,
+	});
+}
+
+/** Pure gather estimator — models the run as gatherplan plans it, via the SDK's buildGatherPlan mirror. */
+export function estimateGatherFromStratum(params: {
+	snapshot: EntitySnapshot;
+	entityId: bigint | number;
+	stratum: number;
+	quantity: number;
+	itemId: number;
+	richness: number;
+	reserveRemaining: number;
+	recharge: boolean;
+	now?: Date;
+}): EstimateResult {
+	const { snapshot: snap, entityId, stratum, quantity, itemId, richness, recharge } = params;
+	const now = params.now ?? new Date();
 	const itemMass = getItem(itemId).mass;
 
-	const busyLaneKeys = snap.lanes
-		.filter((l) => l.schedule.tasks.length > 0)
-		.map((l) => Number(l.lane_key.toString()));
-	const laneInputs: GathererLaneInput[] = gLanes.map((l) => ({
-		slotIndex: Number(l.slot_index.toString()),
-		yield: Number(l.yield.toString()),
-		drain: Number(l.drain.toString()),
-		depth: Number(l.depth.toString()),
-		outputPct: Number(l.output_pct.toString()),
-	}));
-	const pickedLane = pickGathererLane(laneInputs, busyLaneKeys, stratum);
-	const gatherer: GathererStats = {
-		yield: coerceUInt16(pickedLane.yield),
-		drain: UInt32.from(pickedLane.drain),
-		depth: coerceUInt16(pickedLane.depth),
-	};
+	const planEntity = {
+		...snap,
+		generator: snap.generator
+			? ServerTypes.energy_stats.from({
+					capacity: coerceUInt32(snap.generator.capacity),
+					recharge: coerceUInt32(snap.generator.recharge),
+				})
+			: undefined,
+		gatherer_lanes: (snap.gatherer_lanes ?? []).map((l) => ServerTypes.gatherer_lane.from(l)),
+		loader_lanes: [],
+	} as unknown as GatherPlanEntity;
 
-	const duration = calc_gather_duration(gatherer, itemMass, quantity, stratum, richness);
-	const energy = calc_gather_energy(gatherer, Number(duration));
-
-	const recharge = params.recharge ?? false;
-	let rechargeSeconds = 0;
-	if (recharge) {
-		const ship = toShipLike(snap);
-		if (ship.generator) {
-			rechargeSeconds = Number(calc_ship_rechargetime(ship));
-		}
+	let plan: GatherPlan;
+	try {
+		// caps become feasibility issues below, so the plan models the full request
+		plan = buildGatherPlan(
+			planEntity,
+			stratum,
+			{ quantity },
+			{
+				richness,
+				itemMass,
+				holdRoom: Number.POSITIVE_INFINITY,
+				reserveRemaining: Number.POSITIVE_INFINITY,
+				now,
+			},
+		);
+	} catch {
+		// no reaching limpet / no generator — preflight and the chain surface these
+		return {
+			duration_s: 0,
+			energy_cost: 0,
+			cargo_delta: computeGatherCargoDelta(itemId, quantity),
+			feasibility: { ok: true, issues: [] },
+			with_recharge: false,
+		};
 	}
 
-	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
-	const rawSnap = snap as any;
-	const rawCapacity = rawSnap.capacity ?? 0;
-	const rawGen = rawSnap.generator;
-	const rawEnergy = rawSnap.energy;
+	const laneBySlot = new Map(planEntity.gatherer_lanes.map((l) => [l.slot_index.toNumber(), l]));
+	let energyTotal = 0;
+	for (const cycle of plan.cycles) {
+		for (const limpet of cycle.limpets) {
+			const lane = laneBySlot.get(limpet.slot);
+			if (lane) {
+				energyTotal += gatherEnergyCost(lane, limpet.quantity, stratum, itemMass, richness);
+			}
+		}
+	}
+	const rechargeCount = plan.cycles.filter((c) => c.rechargeBefore).length;
 
-	const gatherIssues = populateGatherFeasibility({
-		generatorCapacity: rawGen ? Number(String(rawGen.capacity ?? "0")) : 0,
-		currentEnergy: Number(String(rawEnergy ?? "0")),
-		energyCost: Number(energy),
-		availableCargo: Number(String(rawCapacity)) - Number(projectedCargoMass(snap, now)),
-		cargoDelta: itemMass * quantity,
-		reserveRemaining: Number(stratumResponse?.stratum?.reserve?.toString() ?? "0"),
-		quantity,
-		willRechargeFirst: recharge,
-		entity: { entityType: snap.type, entityId },
-	});
+	const reaching = planEntity.gatherer_lanes.filter((l) => l.depth.toNumber() >= stratum);
+	const singleUnitCost = splitCost(reaching, 1, stratum, itemMass, richness);
+	const generatorCapacity = snap.generator ? Number(String(snap.generator.capacity)) : 0;
+	const tailEnergy = Number(String(projectRemainingSnapshotAt(snap, now).energy ?? 0));
+	const availableCargo =
+		Number(String(snap.capacity ?? 0)) - Number(projectedCargoMass(snap, now));
+
+	const issues = collectIssues(
+		checkEnergyCapacity(generatorCapacity, singleUnitCost, "gather"),
+		recharge
+			? null
+			: checkEnergyAvailable(tailEnergy, energyTotal, "gather", {
+					entityType: snap.type,
+					entityId,
+				}),
+		checkReserve(params.reserveRemaining, quantity),
+		checkCargoCapacity(availableCargo, itemMass * quantity),
+	);
 
 	return {
-		duration_s: Number(duration) + rechargeSeconds,
-		energy_cost: Number(energy),
+		duration_s: plan.totalSeconds,
+		energy_cost: energyTotal,
 		cargo_delta: computeGatherCargoDelta(itemId, quantity),
-		feasibility: { ok: gatherIssues.length === 0, issues: gatherIssues },
-		with_recharge: recharge,
+		feasibility: { ok: issues.length === 0, issues },
+		with_recharge: recharge && rechargeCount > 0,
+		gather: {
+			limpets: plan.reachingCount,
+			cycles: plan.cycleCount,
+			recharges: rechargeCount,
+		},
 	};
 }
 
