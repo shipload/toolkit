@@ -29,22 +29,23 @@ import {
     WAIT_OPTION,
     type WaitableOptions,
 } from '../../lib/wait'
-import {buildAction as buildRechargeAction} from './recharge'
 
 export interface GatherOpts {
     source: {entityType: EntityTypeName; entityId: bigint}
     destination: {entityType: EntityTypeName; entityId: bigint}
     stratum: number
     quantity: number
+    recharge: boolean
 }
 
 export async function buildAction(opts: GatherOpts, shipload?: Shipload): Promise<Action> {
     const sl = shipload ?? (await getShipload())
-    return sl.actions.gather(
+    return sl.actions.gatherplan(
         opts.source.entityId,
         opts.destination.entityId,
         opts.stratum,
-        opts.quantity
+        opts.quantity,
+        opts.recharge
     )
 }
 
@@ -192,6 +193,7 @@ export async function runGather(
         destination: {entityType: destType, entityId: destId},
         stratum,
         quantity,
+        recharge: false,
     }
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     const rechargeRequested = Boolean(options.recharge)
@@ -239,29 +241,16 @@ export async function runGather(
         console.error(renderIssues(est.feasibility.issues))
         if (!options.force) process.exit(1)
     }
-    const action = await buildAction(gatherOpts)
+    const action = await buildAction({...gatherOpts, recharge: useRecharge})
     try {
-        const result = useRecharge
-            ? await transact(
-                  {
-                      actions: [
-                          await buildRechargeAction({
-                              entityType: ctx.entityType,
-                              entityId: ctx.entityId,
-                          }),
-                          action,
-                      ],
-                  },
-                  {
-                      description: `Recharge + gather ${quantity} from stratum ${stratum}`,
-                  }
-              )
-            : await transact(
-                  {action},
-                  {
-                      description: `Gathering ${quantity} from stratum ${stratum}`,
-                  }
-              )
+        const result = await transact(
+            {action},
+            {
+                description: useRecharge
+                    ? `Recharge + gather ${quantity} from stratum ${stratum}`
+                    : `Gathering ${quantity} from stratum ${stratum}`,
+            }
+        )
         await maybeAwaitAndPrint(ctx.entityId, options, result)
     } catch (err) {
         const enriched = await enrichGatherError(err, {
@@ -299,10 +288,10 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addOption(TRACK_OPTION)
             .addOption(AUTO_RESOLVE_OPTION)
             .option('--force', 'submit despite failed feasibility checks (advanced)')
-            .option('--recharge', 'recharge to full energy before gathering')
+            .option('--recharge', 'insert recharge steps whenever a gather cycle needs them')
             .option(
                 '--auto-recharge',
-                'recharge before gathering only when projected energy is insufficient (--recharge always recharges)'
+                'enable recharge steps only when projected energy is insufficient (--recharge always enables them)'
             )
             .action(
                 async (

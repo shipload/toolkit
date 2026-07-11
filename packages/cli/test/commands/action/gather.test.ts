@@ -9,10 +9,11 @@ test('gather builds action with source + dest refs', async () => {
             destination: {entityType: 'warehouse', entityId: 0n},
             stratum: 3,
             quantity: 100,
+            recharge: false,
         },
         getLocalShipload()
     )
-    expect(action.name.toString()).toBe('gather')
+    expect(action.name.toString()).toBe('gatherplan')
 })
 
 test('gather SUBCOMMAND exposes --recharge and --auto-recharge', () => {
