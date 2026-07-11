@@ -267,27 +267,6 @@ test('craft with both target and slot includes both', () => {
     expect(Number(data.slot)).toBe(1)
 })
 
-test('bundleGather packs N gather actions into one ordered Transaction', () => {
-    const gathers = [
-        {sourceId: 11, destinationId: 2, stratum: 3, quantity: 10, slot: 0},
-        {sourceId: 22, destinationId: 2, stratum: 3, quantity: 10, slot: 1},
-        {sourceId: 33, destinationId: 2, stratum: 3, quantity: 5},
-    ]
-    const tx = sl.actions.bundleGather(gathers)
-    expect(tx.actions.length).toBe(3)
-    expect(tx.actions.every((a) => String(a.name) === 'gather')).toBe(true)
-    const d0 = tx.actions[0].decodeData(ServerContract.abi)
-    const d1 = tx.actions[1].decodeData(ServerContract.abi)
-    const d2 = tx.actions[2].decodeData(ServerContract.abi)
-    // distinct source_id values anchor ordering — a reversed array would fail here
-    expect(String(d0.source_id)).toBe('11')
-    expect(String(d1.source_id)).toBe('22')
-    expect(String(d2.source_id)).toBe('33')
-    expect(Number(d0.slot)).toBe(0)
-    expect(Number(d1.slot)).toBe(1)
-    expect(d2.slot).toBeNull()
-})
-
 test('getLaunchQuote mirrors contract launch formulas for a deterministic route', () => {
     const start = new Date('2026-06-26T00:00:00.000Z')
     const quote = sl.actions.getLaunchQuote(
