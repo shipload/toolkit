@@ -47,10 +47,13 @@ export function register(program: Command): void {
         .argument('<entities>', 'comma-separated entity refs (type:id)', parseEntityRefList)
         .argument('<x>', 'destination x', parseInt64)
         .argument('<y>', 'destination y', parseInt64)
-        .option('--recharge', 'recharge to full energy before travelling')
+        .option(
+            '--recharge',
+            'insert a recharge before the flight when the group is below full charge'
+        )
         .option(
             '--auto-recharge',
-            'recharge before travelling only when projected energy is insufficient (--recharge always recharges)'
+            'enable the recharge step only when projected energy is insufficient (--recharge enables it whenever below full)'
         )
         .option('--estimate', 'print duration/energy/cargo estimate without submitting')
         .addOption(WAIT_OPTION)
