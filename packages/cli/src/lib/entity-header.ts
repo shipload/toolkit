@@ -208,12 +208,12 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 			return `speed ${speed} · ${drainPerMin.toFixed(1)} energy/min`;
 		}
 		case MODULE_HAULER: {
-			const fin = decodeStat(stats, 0);
-			const con = decodeStat(stats, 1);
-			const com = decodeStat(stats, 2);
+			const res = decodeStat(stats, 0);
+			const pla = decodeStat(stats, 1);
+			const con = decodeStat(stats, 2);
 			const tier = getItem(itemId).tier;
-			const drain = NFT.computeHaulerDrain(com);
-			return `capacity ${computeHaulerCapacity(fin, tier)} · efficiency ${computeHaulerEfficiency(con)} · ${drain} energy/load`;
+			const drain = NFT.computeHaulerDrain(con, tier) / 1000;
+			return `capacity ${computeHaulerCapacity(res, tier)} · efficiency ${computeHaulerEfficiency(pla)} · ${drain.toFixed(1)} energy/tile`;
 		}
 		case MODULE_WARP: {
 			const res = decodeStat(stats, 0);
@@ -221,11 +221,13 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		}
 		case MODULE_STORAGE: {
 			const str = decodeStat(stats, 0);
-			const fin = decodeStat(stats, 2);
-			const sat = decodeStat(stats, 3);
-			const sum = str + fin + sat;
-			const pct = 10 + Math.floor((sum * 10) / 2997);
-			return `+${pct}% capacity`;
+			const den = decodeStat(stats, 1);
+			const hrd = decodeStat(stats, 2);
+			const coh = decodeStat(stats, 3);
+			const tier = getItem(itemId).tier;
+			const capacity = NFT.computeCargoBayCapacity(str, den, hrd);
+			const drain = NFT.computeCargoBayDrain(coh, tier) / 1000;
+			return `${formatMass(capacity)} capacity · ${drain.toFixed(1)} energy/tile`;
 		}
 		default:
 			return "";

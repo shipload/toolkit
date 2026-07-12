@@ -176,12 +176,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 80,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 80,
         "maxTier": 1
       },
       {
@@ -197,12 +197,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
@@ -218,12 +218,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
@@ -239,12 +239,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
@@ -260,12 +260,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
@@ -281,12 +281,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 1
       },
       {
@@ -307,12 +307,12 @@
     "slots": [
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 1
       },
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 1
       },
       {

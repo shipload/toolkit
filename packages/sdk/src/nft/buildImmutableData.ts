@@ -13,6 +13,7 @@ import {
     MODULE_WARP,
 } from '../capabilities/modules'
 import {decodeStat, decodeCraftedItemStats} from '../derivation/crafting'
+import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
 import {getStatDefinitions} from '../derivation/stats'
 import type {ResourceCategory} from '../types'
 import {Types as ServerTypes} from '../contracts/server'
@@ -28,6 +29,7 @@ import {
     computeGeneratorCap,
     computeGeneratorRech,
     computeCargoBayCapacity,
+    computeCargoBayDrain,
     computeBatteryBankCapacity,
     computeHaulerCapacity,
     computeHaulerDrain,
@@ -187,8 +189,14 @@ export function buildModuleImmutable(
             const thm = decodeStat(stats, 1)
             base.push({first: 'volatility', second: ['uint16', vol]})
             base.push({first: 'thermal', second: ['uint16', thm]})
-            base.push({first: 'thrust', second: ['uint32', computeEngineThrust(vol)]})
-            base.push({first: 'drain', second: ['uint16', computeEngineDrain(thm)]})
+            base.push({
+                first: 'thrust',
+                second: ['uint32', computeEngineThrust(computeEffectiveModuleStat(vol))],
+            })
+            base.push({
+                first: 'drain',
+                second: ['uint16', computeEngineDrain(computeEffectiveModuleStat(thm))],
+            })
             break
         }
         case MODULE_GENERATOR: {
@@ -198,11 +206,17 @@ export function buildModuleImmutable(
             base.push({first: 'reflectivity', second: ['uint16', ref]})
             base.push({
                 first: 'capacity',
-                second: ['uint16', toWholeEnergy(computeGeneratorCap(res))],
+                second: [
+                    'uint16',
+                    toWholeEnergy(computeGeneratorCap(computeEffectiveModuleStat(res))),
+                ],
             })
             base.push({
                 first: 'recharge',
-                second: ['uint16', toWholeEnergy(computeGeneratorRech(ref))],
+                second: [
+                    'uint16',
+                    toWholeEnergy(computeGeneratorRech(computeEffectiveModuleStat(ref))),
+                ],
             })
             break
         }
@@ -256,7 +270,11 @@ export function buildModuleImmutable(
             base.push({first: 'cohesion', second: ['uint16', com]})
             base.push({
                 first: 'capacity',
-                second: ['uint32', computeCargoBayCapacity(str, den, hrd, com)],
+                second: ['uint32', computeCargoBayCapacity(str, den, hrd)],
+            })
+            base.push({
+                first: 'drain',
+                second: ['uint16', toWholeEnergy(computeCargoBayDrain(com, item.tier))],
             })
             break
         }
@@ -284,7 +302,10 @@ export function buildModuleImmutable(
             base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'capacity', second: ['uint8', computeHaulerCapacity(res, item.tier)]})
             base.push({first: 'efficiency', second: ['uint16', computeHaulerEfficiency(pla)]})
-            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeHaulerDrain(con))]})
+            base.push({
+                first: 'drain',
+                second: ['uint16', toWholeEnergy(computeHaulerDrain(con, item.tier))],
+            })
             break
         }
     }

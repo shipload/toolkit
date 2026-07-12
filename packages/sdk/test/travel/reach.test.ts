@@ -2,22 +2,27 @@ import {describe, expect, test} from 'bun:test'
 import {computePerLegReach, computeGroupPerLegReach} from '../../src/travel/reach'
 
 describe('computePerLegReach', () => {
-    test('capacity / drain with no haul', () => {
-        expect(computePerLegReach({generator: {capacity: 1000n}, engines: {drain: 10n}})).toBe(100)
+    test('reach is capacity divided by effective movement drain', () => {
+        expect(computePerLegReach({generator: {capacity: 1000n}, engines: {drain: 20n}})).toBe(50)
     })
-    test('haul drain shrinks reach', () => {
-        const s = {generator: {capacity: 1000n}, engines: {drain: 10n}, hauler: {drain: 5n}}
-        expect(computePerLegReach(s, 2)).toBe(1000 / 20)
-    })
+
     test('throws without engine', () => {
         expect(() => computePerLegReach({generator: {capacity: 1000n}})).toThrow()
     })
 })
 
 describe('computeGroupPerLegReach', () => {
-    test('bottleneck mover wins', () => {
-        const a = {generator: {capacity: 1000n}, engines: {drain: 10n}}
-        const b = {generator: {capacity: 1000n}, engines: {drain: 20n}}
-        expect(computeGroupPerLegReach([a, b], 0)).toBe(50)
+    test('group reach is bounded by the most constrained mover and excludes cargo vessels', () => {
+        const haulingShip = {generator: {capacity: 1056n}, engines: {drain: 107n}}
+        const escort = {generator: {capacity: 2000n}, engines: {drain: 100n}}
+        const container = {generator: {capacity: 0n}}
+        expect(computeGroupPerLegReach([haulingShip, escort, container])).toBeCloseTo(9.87, 2)
+    })
+
+    test('adding cargo participants cannot change loadout-defined group reach', () => {
+        const ship = {generator: {capacity: 1000n}, engines: {drain: 100n}}
+        const container = {generator: {capacity: 0n}}
+        expect(computeGroupPerLegReach([ship])).toBe(10)
+        expect(computeGroupPerLegReach([ship, container, container])).toBe(10)
     })
 })

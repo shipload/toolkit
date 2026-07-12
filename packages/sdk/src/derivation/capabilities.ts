@@ -1,4 +1,5 @@
 import {getEntityLayout} from '../data/recipes-runtime'
+import {computeEffectiveModuleStat} from './stat-scaling'
 
 export const DEFAULT_BASE_HULLMASS = 100_000
 
@@ -29,8 +30,8 @@ export function computeEngineCapabilities(stats: Record<string, number>): {
     thrust: number
     drain: number
 } {
-    const vol = stats.volatility
-    const thm = stats.thermal
+    const vol = computeEffectiveModuleStat(stats.volatility)
+    const thm = computeEffectiveModuleStat(stats.thermal)
 
     return {
         thrust: 400 + Math.floor((vol * 3) / 4),
@@ -42,8 +43,8 @@ export function computeGeneratorCapabilities(stats: Record<string, number>): {
     capacity: number
     recharge: number
 } {
-    const res = stats.resonance
-    const ref = stats.reflectivity
+    const res = computeEffectiveModuleStat(stats.resonance)
+    const ref = computeEffectiveModuleStat(stats.reflectivity)
 
     return {
         capacity: 1_300_000 + res * 500,
@@ -141,7 +142,7 @@ export function computeHaulerCapabilities(
     return {
         capacity: computeHaulerCapacity(resonance, tier),
         efficiency: 2000 + plasticity * 6,
-        drain: Math.max(3000, 15000 - Math.min(12000, Math.floor((conductivity * 1000) / 80))),
+        drain: computeHaulerDrain(conductivity, tier),
     }
 }
 
@@ -156,16 +157,21 @@ export function computeLauncherCapabilities(
     }
 }
 
-export function computeStorageCapabilities(stats: Record<string, number>): {
+export function computeStorageCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {
     capacity: number
+    drain: number
 } {
-    const strength = stats.strength ?? 0
-    const density = stats.density ?? 0
-    const hardness = stats.hardness ?? 0
-    const cohesion = stats.cohesion ?? 0
-
-    const statSum = strength + density + hardness + cohesion
-    return {capacity: 10_000_000 + Math.floor((statSum * 50_000_000) / 3996)}
+    return {
+        capacity: computeCargoBayCapacity(
+            stats.strength ?? 0,
+            stats.density ?? 0,
+            stats.hardness ?? 0
+        ),
+        drain: computeCargoBayDrain(stats.cohesion ?? 0, tier),
+    }
 }
 
 export function computeBatteryCapabilities(stats: Record<string, number>): {
@@ -223,7 +229,13 @@ import {
     type InstalledModule,
 } from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
-import {computeHaulerCapacity, computeTravelDrain} from '../nft/description'
+import {
+    computeCargoBayCapacity,
+    computeCargoBayDrain,
+    computeHaulerCapacity,
+    computeHaulerDrain,
+    computeTravelDrain,
+} from '../nft/description'
 
 export const CAPACITY_TIER_TABLE = [1.0, 1.4, 1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2, 4.6]
 
@@ -309,10 +321,18 @@ export interface LoaderLaneEntry {
     outputPct: number
 }
 
+export interface TravelDrainBreakdown {
+    engine: number
+    cargoHolds: number
+    tractorBeams: number
+    total: number
+}
+
 export interface ComputedCapabilities {
     hullmass: number
     capacity: number
     engines?: {thrust: number; drain: number}
+    travelDrain?: TravelDrainBreakdown
     generator?: {capacity: number; recharge: number}
     gatherer?: {yield: number; drain: number; depth: number}
     gathererLanes?: GathererLaneEntry[]
@@ -356,6 +376,7 @@ export function computeEntityCapabilities(
     let hasGatherer = false
 
     let totalStorageCapacity = 0
+    let totalCargoHoldDrain = 0
     const baseCapacity = computeBaseCapacity(itemId, stats)
     let installedModuleMass = 0
 
@@ -394,7 +415,7 @@ export function computeEntityCapabilities(
             hasEngine = true
             const caps = computeEngineCapabilities(decodedStats)
             totalThrust += applySlotMultiplier(caps.thrust, amp)
-            totalEngineThm += decodedStats.thermal ?? 0
+            totalEngineThm += computeEffectiveModuleStat(decodedStats.thermal ?? 0)
             engineCount += 1
         } else if (modType === MODULE_GENERATOR) {
             hasGenerator = true
@@ -429,8 +450,9 @@ export function computeEntityCapabilities(
                 outputPct: amp,
             })
         } else if (modType === MODULE_STORAGE) {
-            const caps = computeStorageCapabilities(decodedStats)
+            const caps = computeStorageCapabilities(decodedStats, item.tier)
             totalStorageCapacity += applySlotMultiplierUint32(caps.capacity, amp)
+            totalCargoHoldDrain += caps.drain
         } else if (modType === MODULE_CRAFTER) {
             hasCrafter = true
             const caps = computeCrafterCapabilities(decodedStats)
@@ -485,7 +507,15 @@ export function computeEntityCapabilities(
 
     if (hasEngine) {
         const avgThm = engineCount > 0 ? Math.trunc(totalEngineThm / engineCount) : 0
-        result.engines = {thrust: totalThrust, drain: computeTravelDrain(totalThrust, avgThm)}
+        const engineDrain = computeTravelDrain(totalThrust, avgThm)
+        const totalDrain = clampUint32(engineDrain + totalCargoHoldDrain + totalHaulerDrain)
+        result.engines = {thrust: totalThrust, drain: totalDrain}
+        result.travelDrain = {
+            engine: engineDrain,
+            cargoHolds: totalCargoHoldDrain,
+            tractorBeams: totalHaulerDrain,
+            total: totalDrain,
+        }
     }
     if (hasGenerator) {
         result.generator = {

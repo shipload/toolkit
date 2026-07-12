@@ -204,7 +204,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     10106: {
         name: 'Tractor Beam',
         description:
-            'Projects a haul beam to lock onto and transport containers or warehouses through group travel.',
+            'Projects a haul beam to lock onto and transport containers through group travel.',
         color: '#4ADBFF',
     },
     10107: {

@@ -9,7 +9,7 @@ export function maxTravelDistance(entity: MovementCapability): UInt32 {
 }
 
 export function calcEnergyUsage(entity: MovementCapability, distance: UInt64): UInt64 {
-    return distance.dividing(PRECISION).multiplying(entity.engines.drain)
+    return distance.multiplying(entity.engines.drain).dividing(PRECISION)
 }
 
 export function hasEnergyForDistance(

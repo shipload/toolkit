@@ -1,6 +1,7 @@
 import {expect, test} from 'bun:test'
 import {
     computeEntityCapabilities,
+    computeEngineCapabilities,
     computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeCrafterCapabilities,
@@ -26,9 +27,13 @@ import {
     ITEM_PORTER_T1_PACKED,
     ITEM_WRANGLER_T1_PACKED,
     ITEM_DREDGER_T1_PACKED,
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
 } from '../data/item-ids'
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
+import {computeTravelDrain} from '../nft/description'
+import {computeEffectiveModuleStat} from './stat-scaling'
 
 function makeGathererStats(strength: number, hardness: number, saturation: number): bigint {
     return encodeStats([strength, hardness, saturation, 0])
@@ -180,6 +185,28 @@ test('generator capacity and recharge are denominated to milli-energy', () => {
     const caps = computeGeneratorCapabilities({resonance: 213, reflectivity: 213})
     expect(caps.capacity).toBe(1_406_500)
     expect(caps.recharge).toBe(3_278)
+})
+
+test('engine and generator capabilities use tapered quality consistently', () => {
+    const modules: InstalledModule[] = [
+        {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+        {slotIndex: 1, itemId: ITEM_GENERATOR_T1, stats: encodeStats([500, 500])},
+    ]
+    const layout: EntitySlot[] = [
+        {type: 'engine', outputPct: 100, maxTier: 1},
+        {type: 'generator', outputPct: 100, maxTier: 1},
+    ]
+
+    const result = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1_PACKED, modules, layout)
+    const engines = computeEngineCapabilities({volatility: 500, thermal: 500})
+
+    expect(result.engines).toEqual({
+        thrust: engines.thrust,
+        drain: computeTravelDrain(engines.thrust, computeEffectiveModuleStat(500)),
+    })
+    expect(result.generator).toEqual(
+        computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
+    )
 })
 
 test('gatherer/crafter/hauler drains are denominated', () => {

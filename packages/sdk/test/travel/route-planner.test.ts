@@ -101,6 +101,35 @@ describe('planRoute', () => {
         ])
     })
 
+    test('prefers the lower elapsed-time chain when leg costs are supplied', () => {
+        const graph = gridGraph([
+            {x: 10, y: 0},
+            {x: 6, y: 9},
+            {x: 14, y: 7},
+            {x: 20, y: 0},
+        ])
+        let destinationEdges = 0
+        const result = planRoute({
+            origin: {x: 0, y: 0},
+            dest: {x: 20, y: 0},
+            perLegReach: 11,
+            graph,
+            legCost: ({to, isDestination}) => {
+                if (isDestination) destinationEdges++
+                return to.y === 0 ? 20 : 1
+            },
+        })
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.legs).toBe(3)
+        expect(result.waypoints).toEqual([
+            {x: 6, y: 9},
+            {x: 14, y: 7},
+            {x: 20, y: 0},
+        ])
+        expect(destinationEdges).toBeGreaterThan(0)
+    })
+
     test('rejects an empty destination cell', () => {
         const graph = gridGraph([{x: 10, y: 0}])
         const result = planRoute({

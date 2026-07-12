@@ -26,6 +26,19 @@ export interface RoutePlan {
     totalDistance: number
 }
 
+export interface RouteLegInput {
+    from: Coord
+    to: Coord
+    distance: number
+    isDestination: boolean
+}
+
+/**
+ * Returns the elapsed-time search cost for a leg, or null when the leg is not contract-feasible.
+ */
+export type RouteLegCost = (leg: RouteLegInput) => number | null
+export type RouteHeuristicCost = (from: Coord, dest: Coord) => number
+
 export type RouteFailureReason = 'empty-destination' | 'no-path' | 'max-legs'
 
 export interface RouteFailure {
@@ -46,6 +59,8 @@ export interface PlanRouteParams {
     corridorSlack?: number
     nodeBudget?: number
     maxLegs?: number
+    legCost?: RouteLegCost
+    heuristicCost?: RouteHeuristicCost
 }
 
 const key = (c: Coord): string => `${c.x},${c.y}`
@@ -65,12 +80,25 @@ export function planRoute(params: PlanRouteParams): RouteResult {
     }
 
     const straightLine = dist(origin, dest)
-    const heuristic = (c: Coord): number => Math.ceil(dist(c, dest) / perLegReach)
+    if (straightLine <= perLegReach) {
+        const directCost = params.legCost?.({
+            from: origin,
+            to: dest,
+            distance: straightLine,
+            isDestination: true,
+        })
+        if (directCost !== null) {
+            return {ok: true, waypoints: [dest], legs: 1, totalDistance: straightLine}
+        }
+    }
+    const heuristic = (c: Coord): number =>
+        params.heuristicCost?.(c, dest) ??
+        (params.legCost ? 0 : Math.ceil(dist(c, dest) / perLegReach))
 
     const gScore = new Map<string, number>([[key(origin), 0]])
     const cameFrom = new Map<string, Coord>()
-    const frontier: {coord: Coord; g: number; f: number; remaining: number}[] = [
-        {coord: origin, g: 0, f: heuristic(origin), remaining: straightLine},
+    const frontier: {coord: Coord; legs: number; cost: number; f: number; remaining: number}[] = [
+        {coord: origin, legs: 0, cost: 0, f: heuristic(origin), remaining: straightLine},
     ]
 
     let furthest = origin
@@ -88,6 +116,7 @@ export function planRoute(params: PlanRouteParams): RouteResult {
             }
         }
         const current = frontier.splice(bestIdx, 1)[0]
+        if (current.cost !== gScore.get(key(current.coord))) continue
 
         if (sameCoord(current.coord, dest)) {
             return reconstruct(cameFrom, origin, dest)
@@ -105,20 +134,31 @@ export function planRoute(params: PlanRouteParams): RouteResult {
                 dist(origin, n.coord) + dist(n.coord, dest) <= straightLine + corridorSlack
             if (!inCorridor) continue
 
-            const tentativeG = current.g + 1
-            if (tentativeG > maxLegs) {
+            const tentativeLegs = current.legs + 1
+            if (tentativeLegs > maxLegs) {
                 cappedByMaxLegs = true
                 continue
             }
+            const evaluatedCost = params.legCost?.({
+                from: current.coord,
+                to: n.coord,
+                distance: n.dist,
+                isDestination: sameCoord(n.coord, dest),
+            })
+            if (evaluatedCost === null) continue
+            const legCost = evaluatedCost ?? 1
+            if (!(legCost >= 0) || !Number.isFinite(legCost)) continue
             const nk = key(n.coord)
-            if (tentativeG < (gScore.get(nk) ?? Infinity)) {
-                gScore.set(nk, tentativeG)
+            const nextCost = current.cost + legCost
+            if (nextCost < (gScore.get(nk) ?? Infinity)) {
+                gScore.set(nk, nextCost)
                 cameFrom.set(nk, current.coord)
                 const remaining = dist(n.coord, dest)
                 frontier.push({
                     coord: n.coord,
-                    g: tentativeG,
-                    f: tentativeG + Math.ceil(remaining / perLegReach),
+                    legs: tentativeLegs,
+                    cost: nextCost,
+                    f: nextCost + heuristic(n.coord),
                     remaining,
                 })
             }

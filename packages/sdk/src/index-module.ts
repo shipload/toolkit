@@ -178,6 +178,7 @@ export {
     calc_acceleration,
     calc_energyusage,
     calc_flighttime,
+    calc_travel_flighttime,
     calc_group_flighttime,
     calc_loader_acceleration,
     calc_loader_flighttime,
@@ -227,6 +228,9 @@ export type {
     RouteResult,
     RouteFailureReason,
     PlanRouteParams,
+    RouteLegInput,
+    RouteLegCost,
+    RouteHeuristicCost,
 } from './travel/route-planner'
 
 export {computePerLegReach, computeGroupPerLegReach} from './travel/reach'
@@ -451,7 +455,11 @@ export {
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
 } from './derivation/capabilities'
-export type {GathererDepthParams, ComputedCapabilities} from './derivation/capabilities'
+export type {
+    GathererDepthParams,
+    ComputedCapabilities,
+    TravelDrainBreakdown,
+} from './derivation/capabilities'
 
 export {
     WH,
@@ -530,6 +538,11 @@ export {
     ATOMICASSETS_ACCOUNT,
     SHIPLOAD_COLLECTION,
 } from './nft/atomicassets'
+export {
+    MODULE_STAT_SCALING_ANCHOR,
+    MODULE_STAT_SCALING_POST_ANCHOR_PERCENT,
+    computeEffectiveModuleStat,
+} from './derivation/stat-scaling'
 export type {
     AtomicAssetRow,
     AtomicSchemaRow,

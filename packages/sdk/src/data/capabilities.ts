@@ -38,8 +38,17 @@ export const capabilityAttributes: CapabilityAttribute[] = [
         attribute: 'capacity',
         description: 'Cargo capacity added by hulls and installed Cargo Hold modules',
     },
+    {
+        capability: 'Storage',
+        attribute: 'drain',
+        description: 'Fixed normal-travel drain contributed by an installed Cargo Hold',
+    },
     {capability: 'Movement', attribute: 'thrust', description: 'Propulsion force'},
-    {capability: 'Movement', attribute: 'drain', description: 'Energy consumed per movement'},
+    {
+        capability: 'Movement',
+        attribute: 'drain',
+        description: 'Total installed energy consumed per tile of normal travel',
+    },
     {
         capability: 'Energy',
         attribute: 'capacity',
@@ -80,7 +89,7 @@ export const capabilityAttributes: CapabilityAttribute[] = [
     {
         capability: 'Hauling',
         attribute: 'drain',
-        description: 'Energy consumed per target during haul-beam operation',
+        description: 'Fixed normal-travel drain contributed by an installed Tractor Beam',
     },
 ]
 

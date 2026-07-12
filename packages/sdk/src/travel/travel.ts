@@ -205,6 +205,16 @@ export function calc_flighttime(distance: UInt64Type, acceleration: number): UIn
     return UInt32.from(2 * Math.sqrt(Number(distance) / acceleration))
 }
 
+export function calc_travel_flighttime(distance: UInt64Type, acceleration: number): UInt32 {
+    const cruiseTransitionDistance = 2 * PRECISION
+    if (Number(distance) <= cruiseTransitionDistance) {
+        return calc_flighttime(distance, acceleration)
+    }
+
+    const cruiseVelocity = Math.sqrt(acceleration * cruiseTransitionDistance)
+    return UInt32.from(Number(distance) / cruiseVelocity + cruiseVelocity / acceleration)
+}
+
 export function calc_transit_duration(ax: number, ay: number, bx: number, by: number): UInt32 {
     const distance = distanceBetweenPoints(ax, ay, bx, by)
     return UInt32.from(Math.floor(distance.toNumber() / (PRECISION * WH.TRANSIT_SPEED)))
@@ -234,7 +244,7 @@ export function calc_loader_acceleration(ship: ShipLike, mass: UInt64): number {
 
 export function calc_ship_flighttime(ship: ShipLike, mass: UInt64, distance: UInt64): UInt32 {
     const acceleration = calc_ship_acceleration(ship, mass)
-    return calc_flighttime(distance, acceleration)
+    return calc_travel_flighttime(distance, acceleration)
 }
 
 export function calc_ship_acceleration(ship: ShipLike, mass: UInt64): number {
@@ -285,11 +295,11 @@ export function calc_group_flighttime(
         effectiveThrust = Math.trunc((totalThrust * 1000) / penaltyMilli)
     }
     const acceleration = calc_acceleration(effectiveThrust, totalMass)
-    return calc_flighttime(distance, acceleration)
+    return calc_travel_flighttime(distance, acceleration)
 }
 
 export function calc_energyusage(distance: UInt64Type, drain: UInt32Type): UInt32 {
-    return UInt64.from(distance).dividing(PRECISION).multiplying(drain)
+    return UInt64.from(distance).multiplying(drain).dividing(PRECISION)
 }
 
 export function calculateTransferTime(

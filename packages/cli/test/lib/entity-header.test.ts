@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { HoldKind, ServerContract, TaskType } from "@shipload/sdk";
+import { encodeStats, HoldKind, ServerContract, TaskType } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import {
 	type HeaderContext,
@@ -27,6 +27,37 @@ const idleShip = {
 } as any;
 
 describe("renderEntityFull modules", () => {
+	test("renders Tractor Beam fixed installed drain per tile", () => {
+		const out = renderEntityFull({
+			...idleShip,
+			modules: [
+				{
+					type: 9,
+					installed: { item_id: 10106, stats: encodeStats([500, 500, 500]) },
+				},
+			],
+		});
+		expect(out).toContain("8.8 energy/tile");
+		expect(out).not.toContain("energy/load");
+	});
+
+	test("renders Cargo Hold capacity and fixed installed drain", () => {
+		const out = renderEntityFull({
+			...idleShip,
+			modules: [
+				{
+					type: 8,
+					installed: {
+						item_id: 10105,
+						stats: encodeStats([999, 999, 999, 999]),
+					},
+				},
+			],
+		});
+		expect(out).toContain("60000 t capacity");
+		expect(out).toContain("2.3 energy/tile");
+	});
+
 	test("renders installed module with slot index, accepted type, name, and stats", () => {
 		const out = renderEntityFull({
 			...idleShip,

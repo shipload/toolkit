@@ -12,7 +12,7 @@ export interface RouteMoverInput {
     hasMovement: boolean
     engines?: {thrust: number; drain: number}
     generator?: {capacity: number; recharge: number}
-    hauler?: {capacity: number; drain: number; efficiency: number}
+    hauler?: {capacity: number; efficiency: number}
     mass: number
     energy: number
     priorMobilityEnd: number
@@ -80,18 +80,14 @@ export function simulateRoute(
     for (const to of waypoints) {
         const distance = distanceBetweenPoints(from.x, from.y, to.x, to.y)
         const distanceNum = Number(distance)
-        const distanceCells = Math.trunc(distanceNum / PRECISION)
+        const distanceCells = distanceNum / PRECISION
 
         const energyCostByMover: Record<string, number> = {}
 
         for (const m of movers) {
             if (!m.hasMovement || !m.engines) continue
             const key = String(m.ref.entityId)
-            let cost = Number(calc_energyusage(distance, m.engines.drain))
-            if (m.hauler) {
-                cost += Math.trunc(distanceCells) * m.hauler.drain * haulCount
-            }
-            energyCostByMover[key] = cost
+            energyCostByMover[key] = Number(calc_energyusage(distance, m.engines.drain))
         }
 
         let rechargeBefore = false

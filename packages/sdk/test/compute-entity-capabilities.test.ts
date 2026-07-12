@@ -2,7 +2,13 @@ import {describe, expect, test} from 'bun:test'
 import {
     computeEntityCapabilities,
     computeLauncherCapabilities,
+    computeStorageCapabilities,
 } from '../src/derivation/capabilities'
+import {
+    computeCargoBayDrain,
+    computeHaulerDrain,
+    supportDrainTierPercent,
+} from '../src/nft/description'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {
     ITEM_SHIP_T1_PACKED,
@@ -41,14 +47,83 @@ function cargoBayStats(str: number, den: number, hrd: number, coh: number): bigi
     return result
 }
 
-function cargoBayCapacity(str: number, den: number, hrd: number, coh: number): number {
-    return 10_000_000 + Math.floor(((str + den + hrd + coh) * 50_000_000) / 3996)
+function cargoBayCapacity(str: number, den: number, hrd: number): number {
+    return 10_000_000 + Math.floor(((str + den + hrd) * 50_000_000) / 2997)
 }
 
 describe('computeEntityCapabilities', () => {
     test('computeLauncherCapabilities applies slot amp to rate and velocity only', () => {
         const caps = computeLauncherCapabilities({charge_rate: 500, velocity: 300, drain: 20}, 200)
         expect(caps).toEqual({chargeRate: 1000, velocity: 600, drain: 20})
+    })
+
+    test('logistics drain tier curve preserves T1 and improves T2 by ten percent', () => {
+        expect(supportDrainTierPercent(1)).toBe(100)
+        expect(supportDrainTierPercent(2)).toBe(90)
+        expect(supportDrainTierPercent(6)).toBe(50)
+        expect(supportDrainTierPercent(10)).toBe(50)
+        expect(computeHaulerDrain(500, 1)).toBe(8_750)
+        expect(computeHaulerDrain(500, 2)).toBe(7_875)
+        expect(computeCargoBayDrain(500, 1)).toBe(6_562)
+        expect(computeCargoBayDrain(500, 2)).toBe(5_906)
+    })
+
+    test('Cargo Hold capacity uses three stats while Cohesion only improves drain', () => {
+        const low = computeStorageCapabilities(
+            {strength: 999, density: 999, hardness: 999, cohesion: 1},
+            1
+        )
+        const high = computeStorageCapabilities(
+            {strength: 999, density: 999, hardness: 999, cohesion: 999},
+            1
+        )
+        expect(low.capacity).toBe(60_000_000)
+        expect(high.capacity).toBe(low.capacity)
+        expect(high.drain).toBeLessThan(low.drain)
+    })
+
+    test('installed hold and beam drain aggregate once and ignore slot output percentage', () => {
+        const modules: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+            {slotIndex: 1, itemId: ITEM_GENERATOR_T1, stats: 0n},
+            {
+                slotIndex: 2,
+                itemId: ITEM_STORAGE_T1,
+                stats: encodeStats([500, 500, 500, 500]),
+            },
+            {slotIndex: 3, itemId: ITEM_HAULER_T1, stats: encodeStats([500, 500, 500])},
+        ]
+        const full = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            SHIP_LAYOUT
+        )
+        const taxedLayout = SHIP_LAYOUT.map((slot) => ({...slot, outputPct: 50}))
+        const taxed = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules,
+            taxedLayout
+        )
+
+        const engineOnly = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            modules.slice(0, 2),
+            SHIP_LAYOUT
+        )
+        expect(full.travelDrain).toEqual({
+            engine: engineOnly.engines!.drain,
+            cargoHolds: 6_562,
+            tractorBeams: 8_750,
+            total: engineOnly.engines!.drain + 15_312,
+        })
+        expect(full.engines?.drain).toBe(engineOnly.engines!.drain + 15_312)
+        expect(taxed.travelDrain?.cargoHolds).toBe(6_562)
+        expect(taxed.travelDrain?.tractorBeams).toBe(8_750)
+        expect(taxed.capacity).toBeLessThan(full.capacity)
+        expect(taxed.hauler?.efficiency).toBeLessThan(full.hauler?.efficiency ?? 0)
     })
 
     test('returns hullmass and capacity for ship with no modules', () => {
@@ -156,7 +231,7 @@ describe('computeEntityCapabilities', () => {
             halfOutputLayout
         )
         expect(withCargoBay.capacity).toBe(
-            base.capacity + Math.floor(cargoBayCapacity(500, 500, 500, 500) / 2)
+            base.capacity + Math.floor(cargoBayCapacity(500, 500, 500) / 2)
         )
     })
 

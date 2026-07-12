@@ -75,14 +75,10 @@ export function register(program: Command): void {
                 y: Number(leadSnapshot.coordinates.y),
             }
 
-            const haulCount = isGroup
-                ? snapshots.filter((s) => s.engines === undefined || s.engines.drain === 0n).length
-                : 0
-
             let perLegReach: number
             try {
                 perLegReach = isGroup
-                    ? computeGroupPerLegReach(snapshots, haulCount)
+                    ? computeGroupPerLegReach(snapshots)
                     : computePerLegReach(leadSnapshot)
             } catch (e) {
                 console.error((e as Error).message)

@@ -1,6 +1,6 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
-import {computeHaulerDrain, computeHaulPenalty} from '$lib'
+import {computeHaulPenalty} from '$lib'
 
 describe('computeHaulPenalty', () => {
     test('returns total_thrust unchanged when haul_count is 0', () => {
@@ -14,13 +14,5 @@ describe('computeHaulPenalty', () => {
     })
     test('applies full penalty at 0% efficiency', () => {
         assert.equal(computeHaulPenalty(1000, 2, 0), 625)
-    })
-})
-
-describe('computeHaulerDrain', () => {
-    test('scales linearly with distance and haul_count', () => {
-        assert.equal(computeHaulerDrain(10000, 9, 2), 18)
-        assert.equal(computeHaulerDrain(100000, 9, 2), 180)
-        assert.equal(computeHaulerDrain(10000, 9, 0), 0)
     })
 })

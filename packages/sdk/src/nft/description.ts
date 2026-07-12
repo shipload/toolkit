@@ -43,6 +43,7 @@ import {decodeStat} from '../derivation/crafting'
 import {gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {getBaseHullmassFor} from '../derivation/capabilities'
+import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -74,15 +75,15 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
 
 export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
 export const computeEngineDrain = (thm: number): number => 2 * Math.max(30, 50 - idiv(thm, 70))
-export const ENGINE_DRAIN_BASE = 118
+export const ENGINE_DRAIN_BASE = 156
 export const ENGINE_DRAIN_REF_THRUST = 775
 export const ENGINE_DRAIN_REF_THM = 500
 
 export const computeTravelDrain = (totalThrust: number, avgThm: number): number => {
     if (totalThrust <= 0) return 0
-    const num = ENGINE_DRAIN_BASE * ENGINE_DRAIN_REF_THRUST * computeEngineDrain(avgThm)
-    const den = totalThrust * computeEngineDrain(ENGINE_DRAIN_REF_THM)
-    return idiv(num * 1000, den)
+    const thermalFactor = computeEngineDrain(avgThm) / computeEngineDrain(ENGINE_DRAIN_REF_THM)
+    const thrustFactor = Math.sqrt(ENGINE_DRAIN_REF_THRUST / totalThrust)
+    return Math.floor(ENGINE_DRAIN_BASE * 1000 * thermalFactor * thrustFactor)
 }
 export const computeGeneratorCap = (com: number): number => 1_300_000 + com * 500
 export const computeGeneratorRech = (fin: number): number => 2000 + fin * 6
@@ -99,15 +100,22 @@ export const computeCrafterDrain = (fin: number): number =>
 export const computeHaulerCapacity = (fin: number, tier: number): number =>
     Math.max(tier, tier + idiv(fin, 400))
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
-export const computeHaulerDrain = (com: number): number =>
-    Math.max(3000, 15000 - Math.min(12000, idiv(com * 1000, 80)))
+export const supportDrainTierPercent = (tier: number): number => {
+    const clampedTier = Math.min(10, Math.max(1, Math.trunc(tier)))
+    return Math.max(50, 110 - clampedTier * 10)
+}
+const computeT1LogisticsDrain = (stat: number): number =>
+    Math.max(3000, 15000 - Math.min(12000, idiv(stat * 1000, 80)))
+export const computeHaulerDrain = (conductivity: number, tier: number): number =>
+    idiv(computeT1LogisticsDrain(conductivity) * supportDrainTierPercent(tier), 100)
+export const computeCargoBayDrain = (cohesion: number, tier: number): number =>
+    idiv(computeT1LogisticsDrain(cohesion) * 3 * supportDrainTierPercent(tier), 400)
 export const computeWarpRange = (stat: number): number => 100 + stat * 3
 export const computeCargoBayCapacity = (
     strength: number,
     density: number,
-    hardness: number,
-    cohesion: number
-): number => 10_000_000 + idiv((strength + density + hardness + cohesion) * 50_000_000, 3996)
+    hardness: number
+): number => 10_000_000 + idiv((strength + density + hardness) * 50_000_000, 2997)
 export const computeBatteryBankCapacity = (
     volatility: number,
     thermal: number,
@@ -193,14 +201,14 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
 
     switch (subtype) {
         case MODULE_ENGINE: {
-            const vol = decodeStat(stats, 0)
-            const thm = decodeStat(stats, 1)
+            const vol = computeEffectiveModuleStat(decodeStat(stats, 0))
+            const thm = computeEffectiveModuleStat(decodeStat(stats, 1))
             out += `  Thrust ${computeEngineThrust(vol)}  Drain ${computeEngineDrain(thm)}`
             break
         }
         case MODULE_GENERATOR: {
-            const res = decodeStat(stats, 0)
-            const ref = decodeStat(stats, 1)
+            const res = computeEffectiveModuleStat(decodeStat(stats, 0))
+            const ref = computeEffectiveModuleStat(decodeStat(stats, 1))
             out += `  Capacity ${toWholeEnergy(computeGeneratorCap(res))}  Recharge ${toWholeEnergy(
                 computeGeneratorRech(ref)
             )}`
@@ -233,16 +241,17 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const str = decodeStat(stats, 0)
             const den = decodeStat(stats, 1)
             const hrd = decodeStat(stats, 2)
-            const com = decodeStat(stats, 3)
-            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd, com)}`
+            const coh = decodeStat(stats, 3)
+            const tier = getItem(itemId).tier
+            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd)}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
             break
         }
         case MODULE_HAULER: {
             const res = decodeStat(stats, 0)
             const pla = decodeStat(stats, 1)
-            const ref = decodeStat(stats, 2)
+            const con = decodeStat(stats, 2)
             const tier = getItem(itemId).tier
-            out += `  Capacity ${computeHaulerCapacity(res, tier)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${toWholeEnergy(computeHaulerDrain(ref))}`
+            out += `  Capacity ${computeHaulerCapacity(res, tier)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${toWholeEnergy(computeHaulerDrain(con, tier))}`
             break
         }
         case MODULE_WARP: {

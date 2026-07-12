@@ -221,7 +221,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_STORAGE: {
-            const caps = computeStorageCapabilities(stats)
+            const caps = computeStorageCapabilities(stats, tier)
             return {
                 capability: 'Storage',
                 attributes: [
@@ -229,6 +229,7 @@ function computeCapabilityGroup(
                         label: 'Cargo Capacity',
                         value: applySlotMultiplierUint32(caps.capacity, outputPct),
                     },
+                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
                 ],
             }
         }

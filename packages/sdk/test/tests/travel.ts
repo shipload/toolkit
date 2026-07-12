@@ -11,6 +11,7 @@ import {
     calc_acceleration,
     calc_energyusage,
     calc_flighttime,
+    calc_travel_flighttime,
     calc_loader_acceleration,
     calc_loader_flighttime,
     calc_orbital_altitude,
@@ -228,6 +229,20 @@ describe('travel', () => {
         })
     })
 
+    describe('calc_travel_flighttime', () => {
+        test('preserves short-leg timing and cruises on longer legs', () => {
+            assert.equal(Number(calc_travel_flighttime(UInt64.from(20000), 100)), 28)
+            assert.equal(Number(calc_travel_flighttime(UInt64.from(60000), 100)), 56)
+        })
+
+        test('softens the time advantage of one long leg over two shorter legs', () => {
+            const longLeg = Number(calc_travel_flighttime(UInt64.from(60000), 100))
+            const twoShortLegs = Number(calc_travel_flighttime(UInt64.from(30000), 100)) * 2
+            assert.equal(longLeg, 56)
+            assert.equal(twoShortLegs, 70)
+        })
+    })
+
     describe('calc_loader_flighttime', () => {
         test('calculates loader flight time', () => {
             const mockShip = createMockShip({loaderThrust: 100, loaderMass: 5000, capacity: 500000})
@@ -247,8 +262,8 @@ describe('travel', () => {
     describe('calc_ship_flighttime', () => {
         test('calculates ship flight time', () => {
             const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
-            const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(10000))
-            assert.isAbove(Number(time), 0)
+            const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(60000))
+            assert.equal(Number(time), 178)
         })
     })
 
@@ -292,6 +307,11 @@ describe('travel', () => {
         test('calculates energy usage', () => {
             const energy = calc_energyusage(UInt64.from(10000), 1)
             assert.equal(Number(energy), 1)
+        })
+
+        test('charges fractional distance proportionally', () => {
+            const energy = calc_energyusage(UInt64.from(5500), 100)
+            assert.equal(Number(energy), 55)
         })
 
         test('increases with distance', () => {

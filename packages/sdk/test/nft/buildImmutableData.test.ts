@@ -14,10 +14,14 @@ import {
     computeHaulerCapacity,
     computeHaulerEfficiency,
     computeNftImageUrl,
+    computeEffectiveModuleStat,
     decodeStat,
     type ImmutableEntry,
 } from '../../src'
-import {computeHaulerDrain as moduleComputeHaulerDrain} from '../../src/nft/description'
+import {
+    computeCargoBayDrain,
+    computeHaulerDrain as moduleComputeHaulerDrain,
+} from '../../src/nft/description'
 
 function toWholeEnergy(milli: number): number {
     return Math.floor((milli + 500) / 1000)
@@ -134,8 +138,14 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'volatility')!.second).toEqual(['uint16', vol])
         expect(findEntry(entries, 'thermal')!.second).toEqual(['uint16', thm])
-        expect(findEntry(entries, 'thrust')!.second).toEqual(['uint32', computeEngineThrust(vol)])
-        expect(findEntry(entries, 'drain')!.second).toEqual(['uint16', computeEngineDrain(thm)])
+        expect(findEntry(entries, 'thrust')!.second).toEqual([
+            'uint32',
+            computeEngineThrust(computeEffectiveModuleStat(vol)),
+        ])
+        expect(findEntry(entries, 'drain')!.second).toEqual([
+            'uint16',
+            computeEngineDrain(computeEffectiveModuleStat(thm)),
+        ])
     })
 
     test('module (gatherer) emits 3 stats + 3 computed values in fixed order', () => {
@@ -212,6 +222,8 @@ describe('buildImmutableData', () => {
             'drain',
         ])
         expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', res])
+        expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
+        expect(findEntry(entries, 'reflectivity')).toBeUndefined()
         expect(findEntry(entries, 'capacity')!.second).toEqual([
             'uint8',
             computeHaulerCapacity(res, 1),
@@ -222,7 +234,7 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
-            toWholeEnergy(moduleComputeHaulerDrain(con)),
+            toWholeEnergy(moduleComputeHaulerDrain(con, 1)),
         ])
     })
 
@@ -237,6 +249,10 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'hardness')!.second).toEqual(['uint16', 999])
         expect(findEntry(entries, 'cohesion')!.second).toEqual(['uint16', 999])
         expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 60_000_000])
+        expect(findEntry(entries, 'drain')!.second).toEqual([
+            'uint16',
+            toWholeEnergy(computeCargoBayDrain(999, 1)),
+        ])
     })
 
     test('module (battery/Battery Bank) emits raw capacity as uint32', () => {
