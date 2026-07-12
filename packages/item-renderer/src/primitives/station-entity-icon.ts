@@ -6,6 +6,7 @@ export const stationEntityIconKinds = [
     'warehouse',
     'extractor',
     'factory',
+    'workshop',
     'mdriver',
     'mcatcher',
 ] as const
@@ -29,6 +30,7 @@ const stationEntityIconLabels: Record<StationEntityIconKind, string> = {
     warehouse: 'Warehouse',
     extractor: 'Extractor',
     factory: 'Factory',
+    workshop: 'Workshop',
     mdriver: 'Mass Driver',
     mcatcher: 'Mass Catcher',
 }
@@ -40,6 +42,7 @@ const stationEntityIconNames: Record<string, StationEntityIconKind> = {
     extractor: 'extractor',
     'mining rig': 'extractor',
     factory: 'factory',
+    workshop: 'workshop',
     mdriver: 'mdriver',
     'meteor driver': 'mdriver',
     'mass driver': 'mdriver',
@@ -168,6 +171,10 @@ function factoryIcon(): string {
     )
 }
 
+function workshopIcon(): string {
+    return factoryIcon()
+}
+
 function mdriverIcon(): string {
     return wrap(
         [
@@ -215,6 +222,7 @@ const iconBodies: Record<StationEntityIconKind, string> = {
     warehouse: warehouseIcon(),
     extractor: extractorIcon(),
     factory: factoryIcon(),
+    workshop: workshopIcon(),
     mdriver: mdriverIcon(),
     mcatcher: mcatcherIcon(),
 }

@@ -453,6 +453,50 @@ export class ActionsManager extends BaseManager {
         return this.server.action('craft', params)
     }
 
+    craftjob(
+        shipId: UInt64Type,
+        workshopId: UInt64Type,
+        slot: UInt8Type,
+        recipeId: UInt16Type,
+        quantity: UInt32Type,
+        inputs: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        const params: ServerContract.ActionParams.craftjob = {
+            ship_id: UInt64.from(shipId),
+            workshop_id: UInt64.from(workshopId),
+            slot: UInt8.from(slot),
+            recipe_id: UInt16.from(recipeId),
+            quantity: UInt32.from(quantity),
+            inputs,
+        }
+        return this.server.action('craftjob', params)
+    }
+
+    claimjob(jobId: UInt64Type, shipId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.claimjob = {
+            job_id: UInt64.from(jobId),
+            ship_id: UInt64.from(shipId),
+        }
+        return this.server.action('claimjob', params)
+    }
+
+    canceljob(jobId: UInt64Type, shipId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.canceljob = {
+            job_id: UInt64.from(jobId),
+            ship_id: UInt64.from(shipId),
+        }
+        return this.server.action('canceljob', params)
+    }
+
+    setsocket(workshopId: UInt64Type, slot: UInt8Type, open: boolean): Action {
+        const params: ServerContract.ActionParams.setsocket = {
+            workshop_id: UInt64.from(workshopId),
+            slot: UInt8.from(slot),
+            open,
+        }
+        return this.server.action('setsocket', params)
+    }
+
     blend(entityId: UInt64Type, inputs: ServerContract.ActionParams.Type.cargo_item[]): Action {
         return this.server.action('blend', {
             id: UInt64.from(entityId),

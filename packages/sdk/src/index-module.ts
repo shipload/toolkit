@@ -283,6 +283,9 @@ export type {
 export {taskCargoChanges} from './scheduling/task-cargo'
 export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 
+export {jobsToLanes, pickFabricator, socketTail, JOB_QUEUE_CAP} from './scheduling/jobs'
+export type {JobWindow, JobLane, JobLaneEntry} from './scheduling/jobs'
+
 export {composeIdleResolve} from './scheduling/idle-resolve'
 export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'
 
@@ -325,6 +328,7 @@ export {
     ENTITY_WAREHOUSE,
     ENTITY_EXTRACTOR,
     ENTITY_FACTORY,
+    ENTITY_WORKSHOP,
     ENTITY_CONTAINER,
     ENTITY_NEXUS,
     ENTITY_HUB,
@@ -342,6 +346,7 @@ export {
     isWarehouse,
     isExtractor,
     isFactory,
+    isWorkshop,
     isContainer,
     isNexus,
     isPlot,

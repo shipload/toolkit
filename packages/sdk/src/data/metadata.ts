@@ -267,6 +267,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Orbital command structure. Anchors a player station cluster.',
         color: '#A0B8D0',
     },
+    10208: {
+        name: 'Workshop',
+        description:
+            'A station workshop with five independent workers. Visiting ships bring materials and power, and the workshop does the crafting.',
+        color: '#B877FF',
+    },
     10210: {
         name: 'Roustabout',
         description:

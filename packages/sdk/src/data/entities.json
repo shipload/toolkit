@@ -141,6 +141,37 @@
     "baseHullmass": 100000
   },
   {
+    "entityItemId": 10208,
+    "slots": [
+      {
+        "type": "crafter",
+        "outputPct": 75,
+        "maxTier": 1
+      },
+      {
+        "type": "crafter",
+        "outputPct": 75,
+        "maxTier": 1
+      },
+      {
+        "type": "crafter",
+        "outputPct": 75,
+        "maxTier": 1
+      },
+      {
+        "type": "crafter",
+        "outputPct": 75,
+        "maxTier": 1
+      },
+      {
+        "type": "crafter",
+        "outputPct": 75,
+        "maxTier": 1
+      }
+    ],
+    "baseHullmass": 100000
+  },
+  {
     "entityItemId": 10210,
     "slots": [
       {

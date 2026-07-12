@@ -224,4 +224,5 @@ const PLURAL: Record<EntityTypeName, string> = {
     nexus: 'nexuses',
     plot: 'plots',
     hub: 'hubs',
+    workshop: 'workshops',
 }

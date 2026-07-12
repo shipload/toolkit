@@ -14,6 +14,7 @@ import {
     isPlot,
     isShip,
     isWarehouse,
+    isWorkshop,
 } from '../src/data/kind-registry'
 import {Entity} from '../src/entities/entity'
 import {rollupCrafter, rollupGatherer, rollupLoaders} from '../src/derivation/rollups'
@@ -32,6 +33,7 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     warehouse: isWarehouse,
     extractor: isExtractor,
     factory: isFactory,
+    workshop: isWorkshop,
     container: isContainer,
     nexus: isNexus,
     plot: isPlot,
