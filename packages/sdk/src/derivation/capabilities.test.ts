@@ -35,8 +35,8 @@ import type {EntitySlot} from '../data/recipes-runtime'
 import {computeTravelDrain} from '../nft/description'
 import {computeEffectiveModuleStat} from './stat-scaling'
 
-function makeGathererStats(strength: number, hardness: number, saturation: number): bigint {
-    return encodeStats([strength, hardness, saturation, 0])
+function makeGathererStats(strength: number, tolerance: number, saturation: number): bigint {
+    return encodeStats([strength, tolerance, saturation, 0])
 }
 
 function makeCrafterStats(fineness: number, conductivity: number): bigint {
@@ -103,8 +103,8 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
     expect(result.gathererLanes![1].slotIndex).toBe(1)
 
     // Yields are amp-scaled and distinct
-    const caps1 = computeGathererCapabilities({strength: 300, hardness: 200, saturation: 400}, 1)
-    const caps2 = computeGathererCapabilities({strength: 500, hardness: 100, saturation: 300}, 1)
+    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, saturation: 400}, 1)
+    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, saturation: 300}, 1)
     const expectedYield1 = applySlotMultiplier(caps1.yield, 100)
     const expectedYield2 = applySlotMultiplier(caps2.yield, 100)
     expect(result.gathererLanes![0].yield).toBe(expectedYield1)
@@ -214,4 +214,13 @@ test('gatherer/crafter/hauler drains are denominated', () => {
         1_967_500
     )
     expect(computeCrafterCapabilities({fineness: 0, conductivity: 213}).drain).toBe(23_546)
+})
+
+test('gatherer depth accepts canonical tolerance and legacy recipe-labelled hardness', () => {
+    expect(computeGathererCapabilities({strength: 0, tolerance: 213, saturation: 0}, 2).depth).toBe(
+        4_343
+    )
+    expect(computeGathererCapabilities({strength: 0, hardness: 213, saturation: 0}, 1).depth).toBe(
+        1_565
+    )
 })

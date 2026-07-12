@@ -394,7 +394,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         color: '#4AE898',
     },
     20211: {
-        name: 'Hauler',
+        name: 'Tug',
         description:
             'Advanced towing vessel with tiered engine, generator, and tractor beam slots.',
         color: '#4AE898',
@@ -403,13 +403,13 @@ export const itemMetadata: Record<number, ItemMetadata> = {
 
 export const entityMetadata: Record<number, EntityMetadata> = {
     10201: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
-    10210: {moduleSlotLabels: ['Engine', 'Power Core', 'Utility Bay']},
-    10211: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay']},
-    10212: {moduleSlotLabels: ['Engine', 'Power Core', 'Shuttle Bay']},
-    10214: {moduleSlotLabels: ['Engine', 'Power Core', 'Tractor Beam']},
-    10215: {moduleSlotLabels: ['Engine', 'Power Core', 'Cargo Hold']},
-    10216: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Limpet Bay']},
-    10217: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Cargo Hold']},
+    10210: {moduleSlotLabels: ['Power Core', 'Engine', 'Utility Bay']},
+    10211: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
+    10212: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
+    10214: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
+    10215: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
+    10216: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Limpet Bay']},
+    10217: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
     10202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },
@@ -417,8 +417,8 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
     10205: {moduleSlotLabels: ['Power Core', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
-    20210: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Limpet Bay', 'Flex Slot']},
-    20211: {moduleSlotLabels: ['Engine', 'Power Core', 'Tractor Beam', 'Tractor Beam']},
+    20210: {moduleSlotLabels: ['Power Core', 'Power Core', 'Engine', 'Limpet Bay']},
+    20211: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam', 'Tractor Beam']},
 }
 
 for (const item of items as Array<{id: number}>) {

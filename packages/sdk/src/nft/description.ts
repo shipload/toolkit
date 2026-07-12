@@ -154,7 +154,7 @@ export function entityDisplayName(itemId: number): string {
         case ITEM_PROSPECTOR_T2_PACKED:
             return 'Prospector'
         case ITEM_HAULER_SHIP_T2_PACKED:
-            return 'Hauler'
+            return 'Tug'
         default:
             return 'Entity'
     }

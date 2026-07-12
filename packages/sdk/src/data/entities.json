@@ -175,12 +175,12 @@
     "entityItemId": 10210,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 80,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 80,
         "maxTier": 1
       },
@@ -196,12 +196,12 @@
     "entityItemId": 10211,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 85,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 85,
         "maxTier": 1
       },
@@ -217,12 +217,12 @@
     "entityItemId": 10212,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 85,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 85,
         "maxTier": 1
       },
@@ -238,12 +238,12 @@
     "entityItemId": 10214,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 85,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 85,
         "maxTier": 1
       },
@@ -259,12 +259,12 @@
     "entityItemId": 10215,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 85,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 85,
         "maxTier": 1
       },
@@ -280,12 +280,12 @@
     "entityItemId": 10216,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 90,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 90,
         "maxTier": 1
       },
@@ -306,12 +306,12 @@
     "entityItemId": 10217,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 90,
         "maxTier": 1
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 90,
         "maxTier": 1
       },
@@ -337,7 +337,7 @@
     "entityItemId": 20210,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 100,
         "maxTier": 2
       },
@@ -347,7 +347,7 @@
         "maxTier": 2
       },
       {
-        "type": "gatherer",
+        "type": "engine",
         "outputPct": 100,
         "maxTier": 2
       },
@@ -355,11 +355,6 @@
         "type": "gatherer",
         "outputPct": 100,
         "maxTier": 2
-      },
-      {
-        "type": "any",
-        "outputPct": 80,
-        "maxTier": 1
       }
     ],
     "baseHullmass": 5760000
@@ -368,12 +363,12 @@
     "entityItemId": 20211,
     "slots": [
       {
-        "type": "engine",
+        "type": "generator",
         "outputPct": 100,
         "maxTier": 2
       },
       {
-        "type": "generator",
+        "type": "engine",
         "outputPct": 100,
         "maxTier": 2
       },

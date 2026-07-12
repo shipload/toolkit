@@ -90,12 +90,15 @@ export function computeGathererCapabilities(
 } {
     const str = stats.strength
     const con = stats.saturation
-    const hrd = stats.hardness
+    // Gatherer capabilities are positional in the contract: packed slot 1 is tolerance.
+    // T1 recipe presentation historically labels that blended slot as hardness, so retain
+    // that fallback for callers that only have recipe-decoded named stats.
+    const tol = stats.tolerance ?? stats.hardness
 
     return {
         yield: 200 + str,
         drain: 2 * Math.max(250_000, 1_250_000 - con * 1250),
-        depth: gathererDepthForTier(hrd, tier),
+        depth: gathererDepthForTier(tol, tier),
     }
 }
 
@@ -425,7 +428,14 @@ export function computeEntityCapabilities(
         } else if (modType === MODULE_GATHERER) {
             hasGatherer = true
             const tier = item.tier
-            const caps = computeGathererCapabilities(decodedStats, tier)
+            const caps = computeGathererCapabilities(
+                {
+                    strength: decodeStat(mod.stats, 0),
+                    tolerance: decodeStat(mod.stats, 1),
+                    saturation: decodeStat(mod.stats, 2),
+                },
+                tier
+            )
             const scaledYield = applySlotMultiplier(caps.yield, amp)
             totalGathYield += scaledYield
             totalGathDrain += caps.drain
