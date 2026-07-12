@@ -10,6 +10,7 @@ function task(over: Partial<{type: number; duration: number; cancelable: number;
         duration: over.duration ?? 100,
         cancelable: over.cancelable ?? TaskCancelable.BEFORE_START,
         cargo: [],
+        couplings: [],
         ...(over.group ? {entitygroup: over.group} : {}),
     })
 }
@@ -101,14 +102,20 @@ describe('cancelEligibility — linked tasks', () => {
 })
 
 const HOLD_PULL = 1
+const HOLD_BUILD = 4
 function loadTask(giverType: string, giverId: number, holdId: number, qty: number) {
     return ServerContract.Types.task.from({
         type: TaskType.LOAD,
         duration: 100,
         cancelable: TaskCancelable.ALWAYS,
         cargo: [{item_id: 7, stats: 0, modules: [], quantity: qty}],
-        entitytarget: {entity_type: giverType, entity_id: giverId},
-        hold: holdId,
+        couplings: [
+            {
+                counterpart: {entity_type: giverType, entity_id: giverId},
+                hold: holdId,
+                kind: HOLD_PULL,
+            },
+        ],
     })
 }
 
@@ -129,7 +136,13 @@ describe('cancelEligibility — effects', () => {
                 duration: 100,
                 cancelable: TaskCancelable.ALWAYS,
                 cargo: [],
-                entitytarget: {entity_type: 'plot', entity_id: 55},
+                couplings: [
+                    {
+                        counterpart: {entity_type: 'plot', entity_id: 55},
+                        hold: 0,
+                        kind: HOLD_BUILD,
+                    },
+                ],
             }),
         ])
         const plan = cancelEligibility(e, 0, 0, {now})
@@ -200,8 +213,7 @@ describe('cancelEligibility — effects', () => {
         expect(plan.effects.releasedHolds[0]?.counterpart.entity_id.toNumber()).toBe(6)
     })
 
-    test('unresolvable hold emits no releasedHolds entry', () => {
-        const lt = loadTask('warehouse', 6, 99, 4)
+    test('uncoupled task emits no releasedHolds entry', () => {
         const upcoming = new Date('2026-06-18T23:59:50.000Z')
         const e = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -213,7 +225,15 @@ describe('cancelEligibility — effects', () => {
             cargomass: 0,
             cargo: [],
             modules: [],
-            lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
+            lanes: [
+                {
+                    lane_key: 0,
+                    schedule: {
+                        started: T0,
+                        tasks: [task({cancelable: TaskCancelable.ALWAYS, type: TaskType.LOAD})],
+                    },
+                },
+            ],
             gatherer_lanes: [],
             crafter_lanes: [],
             loader_lanes: [],
@@ -221,6 +241,7 @@ describe('cancelEligibility — effects', () => {
         })
         const plan = cancelEligibility(e, 0, 0, {now: upcoming})
         expect(plan.effects.releasedHolds).toHaveLength(0)
+        expect(plan.effects.refunds).toHaveLength(0)
     })
 })
 
@@ -233,6 +254,7 @@ describe('cancelEligibility — feasibility', () => {
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            couplings: [],
         })
         const consumer = ServerContract.Types.task.from({
             type: TaskType.CRAFT,
@@ -242,6 +264,7 @@ describe('cancelEligibility — feasibility', () => {
                 {item_id: 7, stats: 0, modules: [], quantity: 2},
                 {item_id: 9, stats: 0, modules: [], quantity: 1},
             ],
+            couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -279,12 +302,14 @@ describe('cancelEligibility — feasibility', () => {
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            couplings: [],
         })
         const independent = ServerContract.Types.task.from({
             type: TaskType.TRAVEL,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [],
+            couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
             type: 'ship',
@@ -315,12 +340,14 @@ describe('cancelEligibility — feasibility', () => {
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [moduledCargo],
+            couplings: [],
         })
         const consumer = ServerContract.Types.task.from({
             type: TaskType.CRAFT,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [moduledCargo, {item_id: 9, stats: 0, modules: [], quantity: 1}],
+            couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
             type: 'ship',

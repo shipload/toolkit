@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {computeEntityCapabilities} from '../src/derivation/capabilities'
+import {computeEffectiveModuleStat} from '../src/derivation/stat-scaling'
 import {encodeStats} from '../src/derivation/crafting'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {ITEM_BATTERY_T1, ITEM_GENERATOR_T1, ITEM_SHIP_T1_PACKED} from '../src/data/item-ids'
@@ -28,7 +29,7 @@ function batteryBankCapacity(vol: number, thm: number, pla: number, ins: number)
 }
 
 function generatorCapacity(resonance: number): number {
-    return 1_300_000 + resonance * 500
+    return 1_300_000 + computeEffectiveModuleStat(resonance) * 500
 }
 
 describe('Battery Bank module derivation', () => {

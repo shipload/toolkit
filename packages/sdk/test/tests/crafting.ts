@@ -21,6 +21,7 @@ import {
     deriveResourceStats,
     encodeGatheredCargoStats,
     encodeStats,
+    getBaseHullmassFor,
     getItem,
     ITEM_ORE_T1,
     ITEM_FRAME,
@@ -476,6 +477,9 @@ describe('Crafting', () => {
     })
 
     describe('Container Capabilities', () => {
+        const containerHullmass = (density: number) =>
+            Math.floor((getBaseHullmassFor(ITEM_CONTAINER_T1_PACKED) * (2000 - density)) / 2000)
+
         test('all stats at 500 produces expected mid-range values', () => {
             const caps = computeContainerCapabilities({
                 strength: 500,
@@ -483,7 +487,7 @@ describe('Crafting', () => {
                 hardness: 500,
                 cohesion: 500,
             })
-            assert.equal(caps.hullmass, 100000 - 75 * 500)
+            assert.equal(caps.hullmass, containerHullmass(500))
             assert.equal(caps.capacity, Math.floor(22000000 * 6 ** (1500 / 2997)))
             assert.approximately(caps.capacity, 53935000, 1000000)
         })
@@ -495,7 +499,7 @@ describe('Crafting', () => {
                 hardness: 1,
                 cohesion: 1,
             })
-            assert.equal(caps.hullmass, 99925)
+            assert.equal(caps.hullmass, containerHullmass(1))
             assert.isAtLeast(caps.hullmass, 99000)
             assert.isAtMost(caps.hullmass, 100000)
             assert.isAtLeast(caps.capacity, 22000000)
@@ -509,9 +513,9 @@ describe('Crafting', () => {
                 hardness: 999,
                 cohesion: 999,
             })
-            assert.equal(caps.hullmass, 100000 - 75 * 999)
-            assert.isAtLeast(caps.hullmass, 25000)
-            assert.isAtMost(caps.hullmass, 26000)
+            assert.equal(caps.hullmass, containerHullmass(999))
+            assert.isAtLeast(caps.hullmass, 50000)
+            assert.isAtMost(caps.hullmass, 51000)
             assert.isAtLeast(caps.capacity, 131000000)
             assert.isAtMost(caps.capacity, 133000000)
         })

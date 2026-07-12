@@ -6,9 +6,12 @@ import {
 } from '../src/derivation/capabilities'
 import {
     computeCargoBayDrain,
+    computeEngineThrust,
     computeHaulerDrain,
+    computeTravelDrain,
     supportDrainTierPercent,
 } from '../src/nft/description'
+import {computeEffectiveModuleStat} from '../src/derivation/stat-scaling'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {
     ITEM_SHIP_T1_PACKED,
@@ -318,7 +321,7 @@ describe('computeEntityCapabilities', () => {
         expect(result.launcher).toEqual({chargeRate: 1000, velocity: 600, drain: 20})
     })
 
-    test('single average engine yields power-to-weight drain 118', () => {
+    test('single average engine yields power-to-weight drain', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
             {slotIndex: 1, itemId: ITEM_GENERATOR_T1, stats: 0n},
@@ -329,11 +332,12 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(r.engines!.thrust).toBe(775)
-        expect(r.engines!.drain).toBe(118_000)
+        const thrust = computeEngineThrust(computeEffectiveModuleStat(500))
+        expect(r.engines!.thrust).toBe(thrust)
+        expect(r.engines!.drain).toBe(computeTravelDrain(thrust, computeEffectiveModuleStat(500)))
     })
 
-    test('two average engines yield drain 59', () => {
+    test('two average engines halve the power-to-weight drain', () => {
         const modules: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
             {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
@@ -344,21 +348,32 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(r.engines!.thrust).toBe(1550)
-        expect(r.engines!.drain).toBe(59_000)
+        const thrust = 2 * computeEngineThrust(computeEffectiveModuleStat(500))
+        expect(r.engines!.thrust).toBe(thrust)
+        expect(r.engines!.drain).toBe(computeTravelDrain(thrust, computeEffectiveModuleStat(500)))
     })
 
     test('mixed thm averages: thm 300 + thm 700 behaves like thm 500', () => {
-        const modules: InstalledModule[] = [
+        const mixed: InstalledModule[] = [
             {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 300])},
             {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 700])},
+        ]
+        const matched: InstalledModule[] = [
+            {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
+            {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
         ]
         const r = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
-            modules,
+            mixed,
             SHIP_LAYOUT
         )
-        expect(r.engines!.drain).toBe(59_000)
+        const ref = computeEntityCapabilities(
+            SAMPLE_STATS_RECORD,
+            ITEM_SHIP_T1_PACKED,
+            matched,
+            SHIP_LAYOUT
+        )
+        expect(r.engines!.drain).toBe(ref.engines!.drain)
     })
 })

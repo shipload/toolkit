@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "8da87de2107fd644dfdb5b23cdb910fe06fe925476bd9736cf3cbf1b6d572969",
-  "generated_at": "2026-07-09T23:41:39.090Z",
+  "catalog_hash": "c51873fcc6fd4f00a9900aed762d8a1625dc2a3d7856b34cc0319a49ddc9947a",
+  "generated_at": "2026-07-12T03:46:53.221Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -63,15 +63,15 @@
               "tasks": [
                 {
                   "type": 1,
-                  "duration": 362,
+                  "duration": 483,
                   "cancelable": 1,
                   "coordinates": {
                     "x": 4,
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 670851,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 673551
                 }
               ]
             }
@@ -91,11 +91,11 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -190,15 +190,15 @@
               "tasks": [
                 {
                   "type": 1,
-                  "duration": 362,
+                  "duration": 483,
                   "cancelable": 1,
                   "coordinates": {
                     "x": 4,
                     "y": 3
                   },
                   "cargo": [],
-                  "energy_cost": 670851,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 673551
                 }
               ]
             }
@@ -215,14 +215,14 @@
           "y": 3,
           "z": 3000
         },
-        "energy": 454349,
+        "energy": 451649,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -270,7 +270,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901583,
+        "energy": 900683,
         "cargomass": 0,
         "modules": [
           {
@@ -337,14 +337,14 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901583,
+        "energy": 900683,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -392,7 +392,7 @@
           "y": 1,
           "z": 3000
         },
-        "energy": 901583,
+        "energy": 900683,
         "cargomass": 0,
         "modules": [
           {
@@ -462,11 +462,11 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -583,7 +583,7 @@
                         "entity_id": 2
                       },
                       "hold": 1,
-                      "kind": 3
+                      "kind": 1
                     }
                   ]
                 }
@@ -605,11 +605,11 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -726,7 +726,7 @@
                         "entity_id": 2
                       },
                       "hold": 1,
-                      "kind": 3
+                      "kind": 1
                     }
                   ]
                 }
@@ -756,11 +756,11 @@
             "id": 0
           }
         ],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -870,8 +870,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1000,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 1000
                 }
               ]
             }
@@ -891,11 +891,11 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -1005,8 +1005,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1000,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 1000
                 }
               ]
             }
@@ -1034,11 +1034,11 @@
             "id": 0
           }
         ],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -1149,8 +1149,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1570,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 1570
                 }
               ]
             }
@@ -1185,11 +1185,11 @@
             "id": 1000000
           }
         ],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -1300,8 +1300,8 @@
                       "quantity": 1
                     }
                   ],
-                  "energy_cost": 1570,
-                  "couplings": []
+                  "couplings": [],
+                  "energy_cost": 1570
                 }
               ]
             }
@@ -1336,11 +1336,11 @@
             "id": 0
           }
         ],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,
@@ -1442,11 +1442,11 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 4884025,
+        "hullmass": 8374000,
         "capacity": 7326256,
         "engines": {
           "thrust": 447,
-          "drain": 223617
+          "drain": 224517
         },
         "generator": {
           "capacity": 1125200,

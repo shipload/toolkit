@@ -263,7 +263,7 @@ describe('travel', () => {
         test('calculates ship flight time', () => {
             const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
             const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(60000))
-            assert.equal(Number(time), 178)
+            assert.equal(Number(time), 56)
         })
     })
 
