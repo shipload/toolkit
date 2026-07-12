@@ -417,6 +417,9 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
     10205: {moduleSlotLabels: ['Power Core', 'Drive Coil']},
     10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
+    10208: {
+        moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
+    },
     20210: {moduleSlotLabels: ['Power Core', 'Power Core', 'Engine', 'Limpet Bay']},
     20211: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam', 'Tractor Beam']},
 }
