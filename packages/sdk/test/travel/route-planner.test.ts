@@ -7,6 +7,7 @@ import {
     type Coord,
     type SystemGraph,
 } from '../../src/travel/route-planner'
+import * as scan from '../../src/scan'
 
 function gridGraph(systems: Coord[]): SystemGraph {
     const set = new Set(systems.map((s) => `${s.x},${s.y}`))
@@ -219,11 +220,11 @@ describe('sdkSystemGraph wormholes', () => {
     const MOUTH = {x: 12, y: 295} // known wormhole mouth for SEED (see wormhole.test.ts)
 
     test('a wormhole mouth is a valid destination', () => {
-        expect(sdkSystemGraph(SEED).hasSystem(MOUTH)).toBe(true)
+        expect(sdkSystemGraph(SEED, scan).hasSystem(MOUTH)).toBe(true)
     })
 
     test('nearby surfaces a wormhole mouth within reach', () => {
-        const neighbors = sdkSystemGraph(SEED).nearby({x: MOUTH.x, y: MOUTH.y - 5}, 6)
+        const neighbors = sdkSystemGraph(SEED, scan).nearby({x: MOUTH.x, y: MOUTH.y - 5}, 6)
         expect(neighbors.map((n) => n.coord)).toContainEqual(MOUTH)
     })
 })

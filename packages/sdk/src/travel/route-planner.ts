@@ -1,7 +1,4 @@
-import {distanceBetweenPoints, findNearbyPlanets} from './travel'
-import {hasSystem} from '../utils/system'
 import {nearbyWormholes, wormholeAt} from '../derivation/wormhole'
-import {PRECISION} from '../types'
 import {Checksum256, type Checksum256Type} from '@wharfkit/antelope'
 
 export interface Coord {
@@ -220,48 +217,22 @@ export interface ScanProvider {
     ): {x: number; y: number; locType: number}[]
 }
 
-let scanProvider: ScanProvider | null = null
-const graphCache = new Map<string, SystemGraph>()
+// Keyed by provider identity, so pass a stable one (the `@shipload/sdk/scan` namespace).
+const graphCache = new WeakMap<ScanProvider, Map<string, SystemGraph>>()
 
-// Inject a fast (e.g. wasm) location-type backend; null restores the pure-JS path. Clears the graph cache.
-export function setScanProvider(provider: ScanProvider | null): void {
-    scanProvider = provider
-    graphCache.clear()
-}
-
-export function sdkSystemGraph(seed: Checksum256Type): SystemGraph {
+export function sdkSystemGraph(seed: Checksum256Type, scan: ScanProvider): SystemGraph {
     const s = Checksum256.from(seed)
     const seedHex = s.toString()
-    const cached = graphCache.get(seedHex)
-    if (cached) return cached
-    const graph = scanProvider ? wasmSystemGraph(s, seedHex, scanProvider) : jsSystemGraph(s)
-    graphCache.set(seedHex, graph)
-    return graph
-}
-
-// Travelable nodes mirror the contract's is_travelable: systems plus wormhole mouths.
-function jsSystemGraph(s: Checksum256): SystemGraph {
-    return {
-        hasSystem: (c) => hasSystem(s, {x: c.x, y: c.y}) || wormholeAt(s, c.x, c.y) !== null,
-        nearby: (c, reachTiles) => {
-            const seen = new Set<string>([`${c.x},${c.y}`])
-            const out: Neighbor[] = []
-            for (const d of findNearbyPlanets(s, {x: c.x, y: c.y}, reachTiles * PRECISION)) {
-                const coord = {x: Number(d.destination.x), y: Number(d.destination.y)}
-                const k = `${coord.x},${coord.y}`
-                if (seen.has(k)) continue
-                seen.add(k)
-                out.push({coord, dist: Number(d.distance) / PRECISION})
-            }
-            for (const coord of nearbyWormholes(s, c.x, c.y, reachTiles)) {
-                const k = `${coord.x},${coord.y}`
-                if (seen.has(k)) continue
-                seen.add(k)
-                out.push({coord, dist: Math.hypot(coord.x - c.x, coord.y - c.y)})
-            }
-            return out
-        },
+    let bySeed = graphCache.get(scan)
+    if (!bySeed) {
+        bySeed = new Map()
+        graphCache.set(scan, bySeed)
     }
+    const cached = bySeed.get(seedHex)
+    if (cached) return cached
+    const graph = wasmSystemGraph(s, seedHex, scan)
+    bySeed.set(seedHex, graph)
+    return graph
 }
 
 const SCAN_BUCKET = 48

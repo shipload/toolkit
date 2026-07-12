@@ -6,6 +6,7 @@ import {getGameSeed, getShipload} from '../../lib/client'
 import {estimateGroupTravel, estimateTravel} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {planRoute, sdkSystemGraph, type Coord} from '@shipload/sdk'
+import * as scan from '@shipload/sdk/scan'
 import {
     buildHypotheticalSnapshot,
     computeGroupPerLegReach,
@@ -89,7 +90,7 @@ export function register(program: Command): void {
                 origin,
                 dest,
                 perLegReach,
-                graph: sdkSystemGraph(seed),
+                graph: sdkSystemGraph(seed, scan),
                 corridorSlack: options.corridor ? Number(options.corridor) : undefined,
                 maxLegs: options.maxLegs ? Number(options.maxLegs) : undefined,
             })
