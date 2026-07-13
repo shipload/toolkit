@@ -24,6 +24,7 @@ function makeContractState(
         hauler: undefined,
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         ...overrides,
     } as ContractProjectedState

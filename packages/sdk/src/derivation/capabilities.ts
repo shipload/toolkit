@@ -130,6 +130,19 @@ export function computeCrafterCapabilities(stats: Record<string, number>): {
     }
 }
 
+export function computeBuilderCapabilities(stats: Record<string, number>): {
+    speed: number
+    drain: number
+} {
+    const coh = stats.cohesion
+    const tol = stats.tolerance
+
+    return {
+        speed: 100 + Math.floor((coh * 4) / 5),
+        drain: Math.max(5000, 30000 - Math.floor((tol * 1000) / 33)),
+    }
+}
+
 export function computeHaulerCapabilities(
     stats: Record<string, number>,
     tier: number
@@ -217,6 +230,7 @@ import {
     MODULE_LOADER,
     MODULE_STORAGE,
     MODULE_CRAFTER,
+    MODULE_BUILDER,
     MODULE_HAULER,
     MODULE_WARP,
     MODULE_LAUNCHER,
@@ -317,6 +331,13 @@ export interface CrafterLaneEntry {
     outputPct: number
 }
 
+export interface BuilderLaneEntry {
+    slotIndex: number
+    speed: number
+    drain: number
+    outputPct: number
+}
+
 export interface LoaderLaneEntry {
     slotIndex: number
     mass: number
@@ -343,6 +364,8 @@ export interface ComputedCapabilities {
     loaderLanes?: LoaderLaneEntry[]
     crafter?: {speed: number; drain: number}
     crafterLanes?: CrafterLaneEntry[]
+    builder?: {speed: number; drain: number}
+    builderLanes?: BuilderLaneEntry[]
     hauler?: {
         capacity: number
         efficiency: number
@@ -387,6 +410,10 @@ export function computeEntityCapabilities(
     let totalCrafterDrain = 0
     let hasCrafter = false
 
+    let totalBuilderSpeed = 0
+    let totalBuilderDrain = 0
+    let hasBuilder = false
+
     let totalHaulerCapacity = 0
     let weightedHaulerEffNum = 0n
     let totalHaulerDrain = 0
@@ -405,6 +432,7 @@ export function computeEntityCapabilities(
 
     const gathererLanes: GathererLaneEntry[] = []
     const crafterLanes: CrafterLaneEntry[] = []
+    const builderLanes: BuilderLaneEntry[] = []
     const loaderLanes: LoaderLaneEntry[] = []
 
     for (const mod of modules) {
@@ -470,6 +498,18 @@ export function computeEntityCapabilities(
             totalCrafterSpeed += scaledSpeed
             totalCrafterDrain += caps.drain
             crafterLanes.push({
+                slotIndex: mod.slotIndex,
+                speed: scaledSpeed,
+                drain: caps.drain,
+                outputPct: amp,
+            })
+        } else if (modType === MODULE_BUILDER) {
+            hasBuilder = true
+            const caps = computeBuilderCapabilities(decodedStats)
+            const scaledSpeed = applySlotMultiplier(caps.speed, amp)
+            totalBuilderSpeed += scaledSpeed
+            totalBuilderDrain += caps.drain
+            builderLanes.push({
                 slotIndex: mod.slotIndex,
                 speed: scaledSpeed,
                 drain: caps.drain,
@@ -552,6 +592,10 @@ export function computeEntityCapabilities(
     if (hasCrafter) {
         result.crafter = {speed: clampUint16(totalCrafterSpeed), drain: totalCrafterDrain}
         result.crafterLanes = crafterLanes
+    }
+    if (hasBuilder) {
+        result.builder = {speed: clampUint16(totalBuilderSpeed), drain: totalBuilderDrain}
+        result.builderLanes = builderLanes
     }
     if (hasHauler) {
         const efficiency =

@@ -8,6 +8,7 @@ import {
     ITEM_TENDER_T1_PACKED,
     ITEM_TUG_T1_PACKED,
     ITEM_WRANGLER_T1_PACKED,
+    ITEM_WRIGHT_T1_PACKED,
     eligibleUpgrades,
     getEntityLayout,
 } from '../src/index'
@@ -27,6 +28,7 @@ test('Roustabout upgrades use 85 percent engine and power-core slots', () => {
     expect(directChildIds).toEqual([
         ITEM_PROSPECTOR_T1_PACKED,
         ITEM_TENDER_T1_PACKED,
+        ITEM_WRIGHT_T1_PACKED,
         ITEM_TUG_T1_PACKED,
         ITEM_PORTER_T1_PACKED,
     ])

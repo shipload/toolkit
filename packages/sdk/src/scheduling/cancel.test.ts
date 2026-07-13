@@ -29,6 +29,7 @@ function entity(tasks: ReturnType<typeof task>[], startedISO = T0) {
         lanes: [{lane_key: 0, schedule: {started: startedISO, tasks}}],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         holds: [],
     })
@@ -165,6 +166,7 @@ describe('cancelEligibility — effects', () => {
             lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [
                 {
@@ -197,6 +199,7 @@ describe('cancelEligibility — effects', () => {
             lanes: [{lane_key: 0, schedule: {started: T0, tasks: [lt]}}],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [
                 {
@@ -236,6 +239,7 @@ describe('cancelEligibility — effects', () => {
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -288,6 +292,7 @@ describe('cancelEligibility — feasibility', () => {
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -327,6 +332,7 @@ describe('cancelEligibility — feasibility', () => {
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -365,6 +371,7 @@ describe('cancelEligibility — feasibility', () => {
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })

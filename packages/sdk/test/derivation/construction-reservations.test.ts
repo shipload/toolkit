@@ -154,6 +154,7 @@ describe('partitionSources netting against reservations', () => {
                 : [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [
                 ServerContract.Types.loader_lane.from({
                     slot_index: UInt8.from(0),

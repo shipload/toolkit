@@ -38,6 +38,7 @@ describe('subscriptions/mappers', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -62,6 +63,7 @@ describe('subscriptions/mappers', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -86,6 +88,7 @@ describe('subscriptions/mappers', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -110,6 +113,7 @@ describe('subscriptions/mappers', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -176,6 +180,7 @@ describe('SubscriptionsManager', () => {
                     lanes: [],
                     gatherer_lanes: [],
                     crafter_lanes: [],
+                    builder_lanes: [],
                     loader_lanes: [],
                 },
             ],
@@ -325,6 +330,7 @@ describe('SubscriptionsManager', () => {
                 lanes: [],
                 gatherer_lanes: [],
                 crafter_lanes: [],
+                builder_lanes: [],
                 loader_lanes: [],
             },
         })

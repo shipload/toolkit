@@ -9,6 +9,7 @@ import {
     ITEM_WRANGLER_T1_PACKED,
     ITEM_DREDGER_T1_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
+    ITEM_WRIGHT_T1_PACKED,
 } from '../../src/data/item-ids'
 
 test('eligibleUpgrades returns the immediate branches of a Roustabout T1', () => {
@@ -19,6 +20,7 @@ test('eligibleUpgrades returns the immediate branches of a Roustabout T1', () =>
         [
             ITEM_PROSPECTOR_T1_PACKED,
             ITEM_TENDER_T1_PACKED,
+            ITEM_WRIGHT_T1_PACKED,
             ITEM_TUG_T1_PACKED,
             ITEM_PORTER_T1_PACKED,
         ].sort()

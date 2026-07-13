@@ -235,6 +235,27 @@
     "baseHullmass": 3600000
   },
   {
+    "entityItemId": 10213,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 85,
+        "maxTier": 1
+      },
+      {
+        "type": "engine",
+        "outputPct": 85,
+        "maxTier": 1
+      },
+      {
+        "type": "builder",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ],
+    "baseHullmass": 4400000
+  },
+  {
     "entityItemId": 10214,
     "slots": [
       {

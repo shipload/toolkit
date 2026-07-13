@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "8100033d50c413101741e3a46497eb02ff08dfa729f21fe98aa2f9dbbc7c36b2",
-  "generated_at": "2026-07-12T06:27:21.543Z",
+  "catalog_hash": "d002aabf892380d79a36dc06563c092bf5f0087ca2fb7807d8aa48d68b06c42e",
+  "generated_at": "2026-07-13T04:04:05.032Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -118,6 +118,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -245,6 +246,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -367,6 +369,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -489,6 +492,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -632,6 +636,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -783,6 +788,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -918,6 +924,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -1061,6 +1068,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -1212,6 +1220,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -1363,6 +1372,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,
@@ -1469,6 +1479,7 @@
             "output_pct": 80
           }
         ],
+        "builder_lanes": [],
         "loader_lanes": [
           {
             "slot_index": 2,

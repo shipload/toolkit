@@ -1,5 +1,6 @@
 import {
     getModuleCapabilityType,
+    MODULE_BUILDER,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
@@ -13,6 +14,7 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_BUILDER_T1,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1_PACKED,
@@ -97,6 +99,9 @@ export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla * pla, 
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (fin: number): number =>
     Math.max(5000, 30000 - idiv(fin * 1000, 33))
+export const computeBuilderSpeed = (coh: number): number => 100 + idiv(coh * 4, 5)
+export const computeBuilderDrain = (tol: number): number =>
+    Math.max(5000, 30000 - idiv(tol * 1000, 33))
 export const computeHaulerCapacity = (fin: number, tier: number): number =>
     Math.max(tier, tier + idiv(fin, 400))
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
@@ -173,6 +178,8 @@ export function moduleDisplayName(itemId: number): string {
             return 'Shuttle Bay'
         case ITEM_CRAFTER_T1:
             return 'Fabricator'
+        case ITEM_BUILDER_T1:
+            return 'Assembly Arm'
         case ITEM_STORAGE_T1:
             return 'Cargo Hold'
         case ITEM_HAULER_T1:
@@ -235,6 +242,12 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const rea = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
             out += `  Speed ${computeCrafterSpeed(rea)}  Drain ${toWholeEnergy(computeCrafterDrain(con))}`
+            break
+        }
+        case MODULE_BUILDER: {
+            const coh = decodeStat(stats, 0)
+            const tol = decodeStat(stats, 1)
+            out += `  Speed ${computeBuilderSpeed(coh)}  Drain ${toWholeEnergy(computeBuilderDrain(tol))}`
             break
         }
         case MODULE_STORAGE: {

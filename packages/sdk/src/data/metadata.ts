@@ -223,6 +223,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Accelerates and launches cargo payloads toward a remote mass catcher.',
         color: '#E86344',
     },
+    10110: {
+        name: 'Assembly Arm',
+        description:
+            'Heavy manipulator arms for on-site construction work. Claims build sites, builds them out, and upgrades ships in place.',
+        color: '#FFB347',
+    },
 
     // === Entities (packed, T1) ===
     10200: {
@@ -288,6 +294,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         name: 'Tender',
         description:
             'A logistics ship with a shuttle bay for moving cargo between ships and stations.',
+        color: '#4AE898',
+    },
+    10213: {
+        name: 'Wright',
+        description:
+            'A construction ship with an assembly arm for building structures and upgrading ships.',
         color: '#4AE898',
     },
     10214: {
@@ -406,6 +418,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10210: {moduleSlotLabels: ['Power Core', 'Engine', 'Utility Bay']},
     10211: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
     10212: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
+    10213: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm']},
     10214: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
     10215: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
     10216: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Limpet Bay']},

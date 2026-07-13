@@ -100,7 +100,7 @@ export class PlotManager extends BaseManager {
             recipe,
             progress,
             finalizeAction: Name.from('buildplot'),
-            finalizerCapability: 'crafter',
+            finalizerCapability: 'builder',
             activeTask,
             scheduledBuild,
         }

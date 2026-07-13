@@ -253,6 +253,7 @@ export {
     rawScheduleEnd,
     resolveLaneGatherer,
     resolveLaneCrafter,
+    resolveLaneBuilder,
     resolveLaneLoader,
     selectGatherLane,
     workerLaneKey,
@@ -438,6 +439,7 @@ export {
     computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeCrafterCapabilities,
+    computeBuilderCapabilities,
     computeWarehouseHullCapabilities,
     computeStorageCapabilities,
     computeBatteryCapabilities,
@@ -473,7 +475,7 @@ export {
     isValidWormholePair,
 } from './derivation/wormhole'
 
-export {rollupGatherer, rollupCrafter, rollupLoaders} from './derivation/rollups'
+export {rollupGatherer, rollupCrafter, rollupBuilder, rollupLoaders} from './derivation/rollups'
 
 export {resolveItem} from './resolution/resolve-item'
 export type {
@@ -575,6 +577,8 @@ export {
     computeLoaderThrust,
     computeCrafterSpeed,
     computeCrafterDrain,
+    computeBuilderSpeed,
+    computeBuilderDrain,
     computeHaulerCapacity,
     computeHaulerEfficiency,
     computeWarpRange,

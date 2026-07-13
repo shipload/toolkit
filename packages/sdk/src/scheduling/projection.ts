@@ -46,6 +46,7 @@ export interface ProjectedEntity {
     readonly totalMass: UInt64
     readonly gathererLanes: ServerContract.Types.gatherer_lane[]
     readonly crafterLanes: ServerContract.Types.crafter_lane[]
+    readonly builderLanes: ServerContract.Types.builder_lane[]
 
     hasMovement(): boolean
     hasStorage(): boolean
@@ -65,6 +66,7 @@ export interface Projectable extends ScheduleData {
     loader_lanes?: ServerContract.Types.loader_lane[]
     gatherer_lanes?: ServerContract.Types.gatherer_lane[]
     crafter_lanes?: ServerContract.Types.crafter_lane[]
+    builder_lanes?: ServerContract.Types.builder_lane[]
     hauler?: ServerContract.Types.hauler_stats
     launcher?: ServerContract.Types.launcher_stats
     capacity?: UInt32
@@ -93,6 +95,7 @@ interface ProjectedCaps {
     loaderLanes: ServerContract.Types.loader_lane[]
     gathererLanes: ServerContract.Types.gatherer_lane[]
     crafterLanes: ServerContract.Types.crafter_lane[]
+    builderLanes: ServerContract.Types.builder_lane[]
     hauler?: ServerContract.Types.hauler_stats
     launcher?: ServerContract.Types.launcher_stats
 }
@@ -157,6 +160,19 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
             output_pct: l.outputPct,
         })
 
+    const toBuilderLane = (l: {
+        slotIndex: number
+        speed: number
+        drain: number
+        outputPct: number
+    }): ServerContract.Types.builder_lane =>
+        ServerContract.Types.builder_lane.from({
+            slot_index: l.slotIndex,
+            speed: l.speed,
+            drain: l.drain,
+            output_pct: l.outputPct,
+        })
+
     return {
         hullmass: UInt32.from(caps.hullmass),
         capacity: UInt32.from(caps.capacity),
@@ -167,6 +183,7 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         loaderLanes: (caps.loaderLanes ?? []).map(toLoaderLane),
         gathererLanes: (caps.gathererLanes ?? []).map(toGathererLane),
         crafterLanes: (caps.crafterLanes ?? []).map(toCrafterLane),
+        builderLanes: (caps.builderLanes ?? []).map(toBuilderLane),
         hauler: caps.hauler
             ? ServerContract.Types.hauler_stats.from({
                   capacity: caps.hauler.capacity,
@@ -206,6 +223,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
     const loaderLanes = entity.loader_lanes ?? caps?.loaderLanes ?? []
     const gathererLanes = entity.gatherer_lanes ?? caps?.gathererLanes ?? []
     const crafterLanes = entity.crafter_lanes ?? caps?.crafterLanes ?? []
+    const builderLanes = entity.builder_lanes ?? caps?.builderLanes ?? []
     const engines = entity.engines ?? caps?.engines
     const generator = entity.generator ?? caps?.generator
     const hauler = entity.hauler ?? caps?.hauler
@@ -227,6 +245,7 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
         loaderLanes,
         gathererLanes,
         crafterLanes,
+        builderLanes,
 
         get cargoMass() {
             return calcStacksMass(this.cargo)

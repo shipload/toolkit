@@ -96,6 +96,7 @@ function createMockShip(
         lanes: [],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: Array.from({length: overrides.loaderQuantity ?? 1}, (_, i) => ({
             slot_index: i,
             mass: overrides.loaderMass ?? 5000,

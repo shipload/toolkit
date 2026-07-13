@@ -62,7 +62,7 @@ describe('PlotManager.buildableTarget', () => {
         expect(target.entityId.equals(UInt64.from(101))).toBe(true)
         expect(target.state).toBe('accepting')
         expect(target.finalizeAction.equals(Name.from('buildplot'))).toBe(true)
-        expect(target.finalizerCapability).toBe('crafter')
+        expect(target.finalizerCapability).toBe('builder')
         expect(target.progress.isComplete).toBe(false)
         expect(target.recipe).toBeDefined()
     })

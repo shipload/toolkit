@@ -89,6 +89,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [
                 ServerContract.Types.loader_lane.from({
                     slot_index: UInt8.from(0),
@@ -177,6 +178,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             holds: [],
         })
@@ -272,6 +274,14 @@ describe('ConstructionManager.eligibleFinalizers', () => {
             lanes: [],
             gatherer_lanes: [],
             crafter_lanes: [
+                ServerContract.Types.crafter_lane.from({
+                    slot_index: UInt8.from(0),
+                    speed: UInt16.from(speed),
+                    drain: UInt32.from(10),
+                    output_pct: UInt16.from(100),
+                }),
+            ],
+            builder_lanes: [
                 ServerContract.Types.crafter_lane.from({
                     slot_index: UInt8.from(0),
                     speed: UInt16.from(speed),

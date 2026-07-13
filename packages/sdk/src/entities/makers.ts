@@ -174,6 +174,14 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
                 output_pct: l.outputPct,
             })
         )
+        info.builder_lanes = (caps.builderLanes ?? []).map((l) =>
+            ServerContract.Types.builder_lane.from({
+                slot_index: l.slotIndex,
+                speed: l.speed,
+                drain: l.drain,
+                output_pct: l.outputPct,
+            })
+        )
         info.loader_lanes = (caps.loaderLanes ?? []).map((l) =>
             ServerContract.Types.loader_lane.from({
                 slot_index: l.slotIndex,
@@ -186,6 +194,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
 
     if (!info.gatherer_lanes) info.gatherer_lanes = []
     if (!info.crafter_lanes) info.crafter_lanes = []
+    if (!info.builder_lanes) info.builder_lanes = []
     if (!info.loader_lanes) info.loader_lanes = []
 
     const entityInfo = ServerContract.Types.entity_info.from(info)

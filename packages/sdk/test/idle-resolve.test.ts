@@ -65,6 +65,7 @@ function entity(
         lanes: opts.lanes ?? [],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         holds: opts.holds ?? [],
     })

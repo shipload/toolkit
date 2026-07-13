@@ -3,7 +3,7 @@ import {BaseManager} from './base'
 import type {ServerContract} from '../contracts'
 import {PlotManager} from './plot'
 import {getItem} from '../data/catalog'
-import {calc_craft_duration} from '../capabilities/crafting'
+import {calc_build_duration} from '../capabilities/crafting'
 import {getLanes, getTasks} from '../scheduling/schedule'
 import {HoldKind, TaskType} from '../types'
 import type {
@@ -67,15 +67,15 @@ export class ConstructionManager extends BaseManager {
             if (!entity.owner.equals(target.ownerName)) continue
             if (entity.id.equals(target.entityId)) continue
             if (!coordsEqual(entity.coordinates, target.coordinates)) continue
-            const crafterLanes = entity.crafter_lanes ?? []
-            if (crafterLanes.length === 0) continue
-            const speed = crafterLanes.reduce((s, l) => s + Number(l.speed), 0)
+            const builderLanes = entity.builder_lanes ?? []
+            if (builderLanes.length === 0) continue
+            const speed = builderLanes.reduce((s, l) => s + Number(l.speed), 0)
             out.push({
                 entityId: entity.id,
                 entityType: entity.type,
                 name: entity.entity_name,
-                capability: 'crafter',
-                crafterSpeed: speed,
+                capability: 'builder',
+                builderSpeed: speed,
                 estimatedDuration: this.estimateFinalizeDuration(target, speed),
             })
         }
@@ -263,8 +263,8 @@ export class ConstructionManager extends BaseManager {
         return reservationsOf(source)
     }
 
-    estimateFinalizeDuration(target: BuildableTarget, crafterSpeed: number): UInt32 {
-        return calc_craft_duration(crafterSpeed, target.progress.massRequired)
+    estimateFinalizeDuration(target: BuildableTarget, builderSpeed: number): UInt32 {
+        return calc_build_duration(builderSpeed, target.progress.massRequired)
     }
 
     static isConstructionKind(kind: string): boolean {

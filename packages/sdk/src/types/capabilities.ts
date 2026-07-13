@@ -18,6 +18,11 @@ export interface CrafterStats {
     drain: {toNumber(): number}
 }
 
+export interface BuilderStats {
+    speed: {toNumber(): number}
+    drain: {toNumber(): number}
+}
+
 export interface MovementCapability {
     engines: ServerContract.Types.movement_stats
     generator: ServerContract.Types.energy_stats
@@ -58,6 +63,7 @@ export interface EntityCapabilities {
     loaders?: LoaderStats
     gatherer?: GathererStats
     crafter?: CrafterStats
+    builder?: BuilderStats
     hauler?: ServerContract.Types.hauler_stats
     launcher?: ServerContract.Types.launcher_stats
 }

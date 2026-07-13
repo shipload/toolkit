@@ -125,6 +125,7 @@ describe('Entity unification — registry-driven', () => {
         function shipWithLanes(lanes: {
             loaders?: {slot_index: number; mass: number; thrust: number}[]
             crafters?: {slot_index: number; speed: number; drain: number}[]
+            builders?: {slot_index: number; speed: number; drain: number}[]
             gatherers?: {slot_index: number; yield: number; drain: number; depth: number}[]
         }) {
             return ServerContract.Types.entity_info.from({
@@ -143,6 +144,7 @@ describe('Entity unification — registry-driven', () => {
                 lanes: [],
                 gatherer_lanes: (lanes.gatherers ?? []).map((l) => ({...l, output_pct: 100})),
                 crafter_lanes: (lanes.crafters ?? []).map((l) => ({...l, output_pct: 100})),
+                builder_lanes: (lanes.builders ?? []).map((l) => ({...l, output_pct: 100})),
                 loader_lanes: (lanes.loaders ?? []).map((l) => ({...l, output_pct: 100})),
                 holds: [],
                 modules: [],

@@ -480,6 +480,13 @@
     "subtype": "launcher"
   },
   {
+    "id": 10110,
+    "mass": 960000,
+    "type": "module",
+    "tier": 1,
+    "subtype": "builder"
+  },
+  {
     "id": 10200,
     "mass": 1900000,
     "type": "entity",
@@ -547,6 +554,12 @@
   },
   {
     "id": 10212,
+    "mass": 2400000,
+    "type": "entity",
+    "tier": 1
+  },
+  {
+    "id": 10213,
     "mass": 2400000,
     "type": "entity",
     "tier": 1

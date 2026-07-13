@@ -139,6 +139,7 @@ export type ModuleType =
     | 'loader'
     | 'warp'
     | 'crafter'
+    | 'builder'
     | 'launcher'
     | 'storage'
     | 'hauler'

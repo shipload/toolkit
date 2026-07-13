@@ -6,7 +6,7 @@ import type {PlotProgress} from './plot'
 
 export type BuildState = 'initializing' | 'accepting' | 'ready' | 'scheduled' | 'finalizing'
 
-export type FinalizerCapability = 'crafter'
+export type FinalizerCapability = 'builder'
 
 export interface BuildableTarget {
     entityId: UInt64
@@ -49,7 +49,7 @@ export interface FinalizerEntityRef {
     entityType: Name
     name: string
     capability: FinalizerCapability
-    crafterSpeed: number
+    builderSpeed: number
     estimatedDuration: UInt32
 }
 

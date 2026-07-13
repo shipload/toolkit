@@ -3,6 +3,7 @@ import {getItem} from '../data/catalog'
 import {
     getModuleCapabilityType,
     MODULE_BATTERY,
+    MODULE_BUILDER,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
@@ -19,6 +20,8 @@ import type {ResourceCategory} from '../types'
 import {Types as ServerTypes} from '../contracts/server'
 import {
     buildEntityDescription,
+    computeBuilderDrain,
+    computeBuilderSpeed,
     computeCrafterDrain,
     computeCrafterSpeed,
     computeEngineDrain,
@@ -257,6 +260,15 @@ export function buildModuleImmutable(
             base.push({first: 'conductivity', second: ['uint16', con]})
             base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin)]})
             base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeCrafterDrain(con))]})
+            break
+        }
+        case MODULE_BUILDER: {
+            const coh = decodeStat(stats, 0)
+            const tol = decodeStat(stats, 1)
+            base.push({first: 'cohesion', second: ['uint16', coh]})
+            base.push({first: 'tolerance', second: ['uint16', tol]})
+            base.push({first: 'speed', second: ['uint16', computeBuilderSpeed(coh)]})
+            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeBuilderDrain(tol))]})
             break
         }
         case MODULE_STORAGE: {

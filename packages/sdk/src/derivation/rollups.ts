@@ -37,6 +37,22 @@ export function rollupCrafter(
     }
 }
 
+export function rollupBuilder(
+    lanes: ServerContract.Types.builder_lane[]
+): {speed: UInt16; drain: UInt32} | undefined {
+    if (lanes.length === 0) return undefined
+    let totalSpeed = 0
+    let totalDrain = 0
+    for (const l of lanes) {
+        totalSpeed += Number(l.speed)
+        totalDrain += Number(l.drain)
+    }
+    return {
+        speed: UInt16.from(Math.min(totalSpeed, 65535)),
+        drain: UInt32.from(totalDrain),
+    }
+}
+
 export function rollupLoaders(
     lanes: ServerContract.Types.loader_lane[]
 ): {mass: UInt32; thrust: UInt16; quantity: UInt8} | undefined {

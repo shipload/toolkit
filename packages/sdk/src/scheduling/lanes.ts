@@ -11,6 +11,8 @@ import {
     computeLoaderMass,
     computeCrafterSpeed,
     computeCrafterDrain,
+    computeBuilderSpeed,
+    computeBuilderDrain,
 } from '../nft/description'
 import type {ModuleType} from '../types'
 import {getLane, LANE_MOBILITY, type ScheduleData} from './schedule'
@@ -24,6 +26,13 @@ export interface ResolvedGathererLane {
     yield: number
     drain: number
     depth: number
+    outputPct: number
+}
+
+export interface ResolvedBuilderLane {
+    slotIndex: number
+    speed: number
+    drain: number
     outputPct: number
 }
 
@@ -107,6 +116,26 @@ export function resolveLaneCrafter(
     const amp = getSlotAmp(layout, idx)
     const speed = applySlotMultiplier(computeCrafterSpeed(rea), amp)
     const drain = computeCrafterDrain(fin)
+    return {slotIndex: idx, speed, drain, outputPct: amp}
+}
+
+export function resolveLaneBuilder(
+    modules: ModuleEntry[],
+    entityItemId: number,
+    laneKey: number
+): ResolvedBuilderLane {
+    const idx = laneKey - 1
+    const installed = idx >= 0 && idx < modules.length ? modules[idx].installed : undefined
+    if (!installed) throw new Error('builder lane has no module')
+    const item = getItem(Number(installed.item_id.value ?? installed.item_id))
+    if (item.moduleType !== 'builder') throw new Error('lane module is not a builder')
+    const stats = BigInt(installed.stats.toString())
+    const coh = decodeStat(stats, 0)
+    const tol = decodeStat(stats, 1)
+    const layout = getEntityLayout(entityItemId)?.slots ?? []
+    const amp = getSlotAmp(layout, idx)
+    const speed = applySlotMultiplier(computeBuilderSpeed(coh), amp)
+    const drain = computeBuilderDrain(tol)
     return {slotIndex: idx, speed, drain, outputPct: amp}
 }
 

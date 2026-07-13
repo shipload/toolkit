@@ -103,6 +103,7 @@ export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
         lanes: mobilityLanes(tasks, opts.scheduleStart),
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         holds: [],
     })
@@ -144,6 +145,7 @@ export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
         lanes: [],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         holds,
     })
