@@ -14,6 +14,7 @@ test('stationEntityIconKinds covers the station entity types', () => {
         'warehouse',
         'extractor',
         'factory',
+        'workshop',
         'mdriver',
         'mcatcher',
     ])

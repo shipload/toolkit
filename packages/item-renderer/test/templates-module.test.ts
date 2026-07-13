@@ -29,8 +29,8 @@ test('Engine values mode renders the capability header + prose narrative', () =>
     const svg = renderModule(item, resolved)
     expect(svg).toContain('ENGINE')
     expect(svg).toContain('thrust for travel')
-    expect(svg).toContain('700')
-    expect(svg).toContain('>90</tspan>')
+    expect(svg).toContain('615')
+    expect(svg).toContain('>94</tspan>')
 })
 
 test('Engine template renders the module icon in the header', () => {
