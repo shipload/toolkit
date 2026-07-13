@@ -44,6 +44,7 @@ function makeShip(opts: {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes,
 		holds: [],
@@ -261,6 +262,7 @@ function gatherOnWorkerLane(at: Date) {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [
 			{ lane_key: 3, schedule: { started, tasks: [

@@ -16,6 +16,7 @@ function workerOnlyInfoArgs(at: Date) {
 		modules: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [
 			{
@@ -49,6 +50,7 @@ function multiLaneInfoArgs(at: Date) {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [
 			{
@@ -91,6 +93,7 @@ describe('entityInfoToSnapshot', () => {
             pending_tasks: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             lanes: [],
             holds: [],
@@ -127,6 +130,7 @@ describe('entityInfoToSnapshot', () => {
             pending_tasks: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             lanes: [],
             holds: [],
@@ -147,6 +151,7 @@ describe('entityInfoToSnapshot', () => {
             pending_tasks: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             lanes: [],
             holds: [],
@@ -181,6 +186,7 @@ describe('entityInfoToSnapshot', () => {
             pending_tasks: [],
             gatherer_lanes: [{slot_index: 0, yield: 1, drain: 1, depth: 4, output_pct: 100}],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             lanes: [],
             holds: [],
@@ -218,6 +224,7 @@ describe('entityInfoToSnapshot', () => {
             pending_tasks: [],
             gatherer_lanes: [],
             crafter_lanes: [],
+            builder_lanes: [],
             loader_lanes: [],
             lanes: [],
             holds: [],

@@ -7,6 +7,7 @@ export const moduleIconSlugs = [
     'loader',
     'warp',
     'crafter',
+    'builder',
     'launcher',
     'storage',
     'hauler',
@@ -35,6 +36,7 @@ const moduleIconLabels: Record<ModuleIconSlug, string> = {
     loader: 'Shuttle Bay',
     warp: 'Warp Drive',
     crafter: 'Fabricator',
+    builder: 'Assembly Arm',
     launcher: 'Drive Coil',
     storage: 'Cargo Hold',
     hauler: 'Tractor Beam',
@@ -58,6 +60,9 @@ const moduleIconNames: Record<string, ModuleIconSlug> = {
     'warp-drive': 'warp',
     crafter: 'crafter',
     fabricator: 'crafter',
+    builder: 'builder',
+    'assembly arm': 'builder',
+    'assembly-arm': 'builder',
     launcher: 'launcher',
     'drive coil': 'launcher',
     'drive-coil': 'launcher',
@@ -181,6 +186,23 @@ function crafterIcon(): string {
     ].join('')
 }
 
+function builderIcon(): string {
+    return [
+        '<path d="M30 176 L48 156 H124 L142 176 V212 L124 230 H48 L30 212 Z" fill="#3f3268" stroke="#120d1b" stroke-width="10" stroke-linejoin="round"/>',
+        '<rect x="48" y="196" width="76" height="20" rx="6" fill="#39e4ef" stroke="#120d1b" stroke-width="6"/>',
+        '<path d="M96 150 L118 96 L146 108 L124 162 Z" fill="#39e4ef" stroke="#120d1b" stroke-width="7" stroke-linejoin="round"/>',
+        '<path d="M70 166 L100 82 L136 95 L106 179 Z" fill="#f59416" stroke="#120d1b" stroke-width="9" stroke-linejoin="round"/>',
+        '<path d="M112 92 L196 52 L211 82 L127 122 Z" fill="#ffac2e" stroke="#120d1b" stroke-width="9" stroke-linejoin="round"/>',
+        '<circle cx="86" cy="170" r="24" fill="#e72a9a" stroke="#120d1b" stroke-width="8"/>',
+        '<circle cx="86" cy="170" r="9" fill="#2c2343" stroke="#120d1b" stroke-width="6"/>',
+        '<circle cx="118" cy="98" r="19" fill="#e72a9a" stroke="#120d1b" stroke-width="8"/>',
+        '<circle cx="118" cy="98" r="7" fill="#2c2343" stroke="#120d1b" stroke-width="5"/>',
+        '<path d="M197 46 L232 30 L242 52 L208 68 Z" fill="#ffcb1f" stroke="#120d1b" stroke-width="8" stroke-linejoin="round"/>',
+        '<path d="M209 80 L244 96 L234 118 L199 102 Z" fill="#ffcb1f" stroke="#120d1b" stroke-width="8" stroke-linejoin="round"/>',
+        '<circle cx="203" cy="74" r="12" fill="#2c2343" stroke="#120d1b" stroke-width="6"/>',
+    ].join('')
+}
+
 function launcherIcon(): string {
     return [
         '<rect x="35" y="78" width="186" height="100" rx="28" fill="#3f3268" stroke="#120d1b" stroke-width="10"/>',
@@ -257,6 +279,7 @@ const iconBodies: Record<ModuleIconSlug, string> = {
     loader: loaderIcon(),
     warp: warpIcon(),
     crafter: crafterIcon(),
+    builder: builderIcon(),
     launcher: launcherIcon(),
     storage: storageIcon(),
     hauler: haulerIcon(),

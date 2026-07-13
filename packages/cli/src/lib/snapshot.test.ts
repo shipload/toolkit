@@ -15,6 +15,7 @@ function entityInfoWith(overrides: Record<string, unknown>): ServerTypes.entity_
 		cargo: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		modules: [],
 		...overrides,
@@ -25,6 +26,10 @@ test("crafter speed rollup clamps to uint16 max", () => {
 	const snap = entityInfoToSnapshot(
 		entityInfoWith({
 			crafter_lanes: [
+				{ speed: u(40000), drain: u(1) },
+				{ speed: u(40000), drain: u(1) },
+			],
+			builder_lanes: [
 				{ speed: u(40000), drain: u(1) },
 				{ speed: u(40000), drain: u(1) },
 			],

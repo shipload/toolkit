@@ -41,6 +41,7 @@ function makeShip(opts: {
         modules: [],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         lanes: opts.lanes ?? [],
         holds: [],
@@ -125,6 +126,7 @@ function multiLaneInfoArgs(at: Date) {
         pending_tasks: [],
         gatherer_lanes: [],
         crafter_lanes: [],
+        builder_lanes: [],
         loader_lanes: [],
         lanes: [
             {

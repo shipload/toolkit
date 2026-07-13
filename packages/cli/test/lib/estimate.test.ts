@@ -455,6 +455,7 @@ describe("estimateGatherFromStratum — gatherplan model", () => {
 				{ slot_index: 3, yield: 510, drain: 2_500_000, depth: 5495, output_pct: 100 },
 			],
 			crafter_lanes: [],
+			builder_lanes: [],
 			loader_lanes: [],
 			is_idle: true,
 			lanes: [],

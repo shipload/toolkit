@@ -16,6 +16,7 @@ test('moduleIconSlugs covers module capabilities plus the universal slot', () =>
         'loader',
         'warp',
         'crafter',
+        'builder',
         'launcher',
         'storage',
         'hauler',
@@ -32,6 +33,7 @@ test('moduleIconSlugForName resolves tier-shared module names', () => {
     expect(moduleIconSlugForName('Shuttle Bay')).toBe('loader')
     expect(moduleIconSlugForName('Warp Drive')).toBe('warp')
     expect(moduleIconSlugForName('Fabricator')).toBe('crafter')
+    expect(moduleIconSlugForName('Assembly Arm')).toBe('builder')
     expect(moduleIconSlugForName('Drive Coil')).toBe('launcher')
     expect(moduleIconSlugForName('Cargo Hold')).toBe('storage')
     expect(moduleIconSlugForName('Tractor Beam')).toBe('hauler')
@@ -47,6 +49,7 @@ test('moduleIconSlugForType resolves SDK capability types', () => {
     expect(moduleIconSlugForType('loader')).toBe('loader')
     expect(moduleIconSlugForType('warp')).toBe('warp')
     expect(moduleIconSlugForType('crafter')).toBe('crafter')
+    expect(moduleIconSlugForType('builder')).toBe('builder')
     expect(moduleIconSlugForType('launcher')).toBe('launcher')
     expect(moduleIconSlugForType('storage')).toBe('storage')
     expect(moduleIconSlugForType('hauler')).toBe('hauler')

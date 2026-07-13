@@ -1,4 +1,5 @@
-import { type ServerTypes, schedule, rollupGatherer, rollupCrafter, rollupLoaders } from "@shipload/sdk";
+import { type ServerTypes, schedule, rollupGatherer, rollupBuilder,
+	rollupCrafter, rollupLoaders } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
 import type { LaneTaskView } from "./cancel-compute";
@@ -31,10 +32,12 @@ export interface EntitySnapshot {
 	gatherer?: { yield: bigint; drain: bigint; depth: bigint };
 	hauler?: { capacity: bigint; efficiency: bigint; drain: bigint };
 	crafter?: { speed: bigint; drain: bigint };
+	builder?: { speed: bigint; drain: bigint };
 	warp?: { range: bigint };
 	loaders?: { mass: bigint; thrust: bigint; quantity: bigint };
 	gatherer_lanes: ServerTypes.gatherer_lane[];
 	crafter_lanes: ServerTypes.crafter_lane[];
+	builder_lanes: ServerTypes.builder_lane[];
 	loader_lanes: ServerTypes.loader_lane[];
 	is_idle: boolean;
 	modules?: ServerTypes.module_entry[];
@@ -65,6 +68,7 @@ export function entityInfoToSnapshot(
 		})),
 		gatherer_lanes: ei.gatherer_lanes ?? [],
 		crafter_lanes: ei.crafter_lanes ?? [],
+		builder_lanes: ei.builder_lanes ?? [],
 		loader_lanes: ei.loader_lanes ?? [],
 		is_idle: schedule.isEntityIdle(ei, now),
 		modules: ei.modules,
@@ -96,6 +100,8 @@ export function entityInfoToSnapshot(
 	}
 	const c = rollupCrafter(ei.crafter_lanes ?? []);
 	if (c) snap.crafter = {speed: BigInt(c.speed.toString()), drain: BigInt(c.drain.toString())};
+	const b = rollupBuilder(ei.builder_lanes ?? []);
+	if (b) snap.builder = {speed: BigInt(b.speed.toString()), drain: BigInt(b.drain.toString())};
 	if (ei.warp != null) {
 		snap.warp = {range: BigInt(ei.warp.range.toString())};
 	}

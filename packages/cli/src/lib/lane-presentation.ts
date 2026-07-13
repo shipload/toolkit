@@ -38,7 +38,7 @@ interface LaneLike {
     schedule: LaneScheduleLike
 }
 
-const WORKER_CAPABILITIES = new Set(['gatherer', 'loader', 'crafter'])
+const WORKER_CAPABILITIES = new Set(['gatherer', 'loader', 'crafter', 'builder'])
 const TIMEZONE_SUFFIX_RE = /(?:Z|[+-]\d{2}:?\d{2})$/i
 
 function asNumber(value: NumberLike | undefined): number {

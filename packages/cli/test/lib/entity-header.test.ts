@@ -134,6 +134,7 @@ describe("renderEntityFull live energy", () => {
 			generator: { capacity: 350, recharge: 10 },
 			gatherer_lanes: [],
 			crafter_lanes: [],
+			builder_lanes: [],
 			loader_lanes: [],
 			lanes: [
 				{
@@ -165,6 +166,7 @@ describe("renderEntityFull holds", () => {
 		modules: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [],
 	};
@@ -340,6 +342,7 @@ describe("renderEntityHeader", () => {
 			modules: [],
 			gatherer_lanes: [],
 			crafter_lanes: [],
+			builder_lanes: [],
 			loader_lanes: [],
 			lanes: [
 				{
@@ -412,6 +415,7 @@ function makeInventoryEntity(opts: {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes,
 		holds: [],
@@ -548,6 +552,7 @@ function makeBusyEntity(opts: {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [{ lane_key: 0, schedule: { started, tasks: allTasks } }],
 		holds: [],
@@ -656,6 +661,7 @@ describe("renderEntityFull worker-lane schedule", () => {
 			pending_tasks: [],
 			gatherer_lanes: [],
 			crafter_lanes: [],
+			builder_lanes: [],
 			loader_lanes: [],
 			lanes: [
 				{

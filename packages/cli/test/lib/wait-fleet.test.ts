@@ -310,6 +310,7 @@ test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
 		pending_tasks: [],
 		gatherer_lanes: [],
 		crafter_lanes: [],
+		builder_lanes: [],
 		loader_lanes: [],
 		lanes: [
 			{lane_key: 3, schedule: {
