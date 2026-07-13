@@ -16,6 +16,7 @@ import {
     ENTITY_CARGO_NOT_LOADED,
 } from '../errors'
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
+import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
 import {computeEntityCapabilities} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
@@ -115,6 +116,14 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
     const hullStats = decodeCraftedItemStats(itemId, entity.stats)
     if (hullStats.strength === undefined) hullStats.strength = decodeStat(entity.stats, 0)
     if (hullStats.hardness === undefined) hullStats.hardness = decodeStat(entity.stats, 2)
+    // The retired Ship T1 recipe only assigned names to its first two stat slots.
+    // Its on-chain entity row still carries five packed channels, and the ship hull
+    // formula deliberately consumes all five. Keep the unlabelled channels internal
+    // to projection so replay remains contract-parity until deployment replaces it.
+    if (itemId === ITEM_SHIP_T1_PACKED) {
+        hullStats.__legacyShipChannel3 = decodeStat(entity.stats, 3)
+        hullStats.__legacyShipChannel4 = decodeStat(entity.stats, 4)
+    }
     const layout = getEntityLayout(itemId)?.slots ?? []
     const installed = toInstalledModules(entity.modules)
     const caps = computeEntityCapabilities(hullStats, itemId, installed, layout)

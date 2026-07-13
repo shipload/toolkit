@@ -5,7 +5,7 @@ import {cargoItemToStack} from '../src/capabilities/storage'
 import {assertProjectionEquals, type ContractProjectedState} from '../src/testing/projection-parity'
 import {createProjectedEntity, type Projectable} from '../src/scheduling/projection'
 import {makeEntity} from '../src/entities/makers'
-import {ITEM_HAULER_T1, ITEM_SHIP_T1_PACKED} from '../src/data/item-ids'
+import {ITEM_HAULER_T1, ITEM_ROUSTABOUT_T1_PACKED} from '../src/data/item-ids'
 import {encodeStats} from '../src/derivation/crafting'
 
 function makeContractState(
@@ -132,7 +132,7 @@ describe('hauler capacity_by_tier lockstep (regression)', () => {
     }
 
     test('makeEntity carries capacity_by_tier into the wire hauler_stats', () => {
-        const ship = makeEntity(ITEM_SHIP_T1_PACKED, {
+        const ship = makeEntity(ITEM_ROUSTABOUT_T1_PACKED, {
             id: UInt64.from(1),
             owner: 'alice',
             name: 'Hauler Test Ship',
@@ -149,7 +149,7 @@ describe('hauler capacity_by_tier lockstep (regression)', () => {
             coordinates: {x: 0, y: 0},
             cargo: [],
             cargomass: UInt32.from(0),
-            item_id: ITEM_SHIP_T1_PACKED,
+            item_id: ITEM_ROUSTABOUT_T1_PACKED,
             modules: [haulerModule],
             stats: 0n,
         }

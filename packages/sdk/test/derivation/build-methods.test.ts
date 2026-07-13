@@ -5,6 +5,7 @@ import {
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_PLATE,
+    ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_ORE_T1,
@@ -28,7 +29,8 @@ describe('availableBuildMethods', () => {
     })
 
     test('orbital vessels return craft+deploy only', () => {
-        expect(availableBuildMethods(ITEM_SHIP_T1_PACKED)).toEqual(['craft+deploy'])
+        expect(availableBuildMethods(ITEM_ROUSTABOUT_T1_PACKED)).toEqual(['craft+deploy'])
+        expect(availableBuildMethods(ITEM_SHIP_T1_PACKED)).toEqual([])
         expect(availableBuildMethods(ITEM_CONTAINER_T1_PACKED)).toEqual(['craft+deploy'])
     })
 
@@ -49,7 +51,8 @@ describe('availableBuildMethods', () => {
 describe('isBuildable', () => {
     test('true for any item with build methods', () => {
         expect(isBuildable(ITEM_WAREHOUSE_T1_PACKED)).toBe(true)
-        expect(isBuildable(ITEM_SHIP_T1_PACKED)).toBe(true)
+        expect(isBuildable(ITEM_ROUSTABOUT_T1_PACKED)).toBe(true)
+        expect(isBuildable(ITEM_SHIP_T1_PACKED)).toBe(false)
         expect(isBuildable(ITEM_PLATE)).toBe(true)
     })
 
@@ -85,6 +88,7 @@ describe('isPlotBuildable', () => {
 describe('filterByBuildMethod', () => {
     const sample = [
         {itemId: ITEM_WAREHOUSE_T1_PACKED},
+        {itemId: ITEM_ROUSTABOUT_T1_PACKED},
         {itemId: ITEM_SHIP_T1_PACKED},
         {itemId: ITEM_PLATE},
         {itemId: ITEM_ORE_T1},
@@ -98,7 +102,7 @@ describe('filterByBuildMethod', () => {
     test('craft+deploy filter returns everything with a recipe', () => {
         const result = filterByBuildMethod(sample, 'craft+deploy')
         expect(result.map((s) => s.itemId).sort()).toEqual(
-            [ITEM_WAREHOUSE_T1_PACKED, ITEM_SHIP_T1_PACKED, ITEM_PLATE].sort()
+            [ITEM_WAREHOUSE_T1_PACKED, ITEM_ROUSTABOUT_T1_PACKED, ITEM_PLATE].sort()
         )
     })
 })
@@ -108,7 +112,8 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
         const list = allBuildableItems()
         const ids = list.map((i) => i.id)
         expect(ids).toContain(ITEM_WAREHOUSE_T1_PACKED)
-        expect(ids).toContain(ITEM_SHIP_T1_PACKED)
+        expect(ids).toContain(ITEM_ROUSTABOUT_T1_PACKED)
+        expect(ids).not.toContain(ITEM_SHIP_T1_PACKED)
         expect(ids).toContain(ITEM_PLATE)
         expect(ids).not.toContain(ITEM_ORE_T1)
     })

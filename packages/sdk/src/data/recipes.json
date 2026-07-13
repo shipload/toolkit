@@ -855,57 +855,6 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 10201,
-    "outputMass": 2400000,
-    "inputs": [
-      {
-        "itemId": 10001,
-        "quantity": 300
-      },
-      {
-        "itemId": 10008,
-        "quantity": 300
-      },
-      {
-        "itemId": 10007,
-        "quantity": 300
-      },
-      {
-        "itemId": 10003,
-        "quantity": 300
-      },
-      {
-        "itemId": 10006,
-        "quantity": 300
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": []
-      },
-      {
-        "sources": []
-      }
-    ],
-    "blendWeights": []
-  },
-  {
     "outputItemId": 10202,
     "outputMass": 3200000,
     "inputs": [
@@ -1062,27 +1011,27 @@
   },
   {
     "outputItemId": 10210,
-    "outputMass": 2400000,
+    "outputMass": 1600000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 300
+        "quantity": 200
       },
       {
         "itemId": 10008,
-        "quantity": 300
+        "quantity": 200
       },
       {
         "itemId": 10007,
-        "quantity": 300
+        "quantity": 200
       },
       {
         "itemId": 10003,
-        "quantity": 300
+        "quantity": 200
       },
       {
         "itemId": 10006,
-        "quantity": 300
+        "quantity": 200
       }
     ],
     "statSlots": [
@@ -1097,16 +1046,34 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           }
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          }
+        ]
       }
     ],
     "blendWeights": []
@@ -1116,24 +1083,24 @@
     "outputMass": 2400000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 100
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 100
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 100
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 100
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 100
       },
       {
         "itemId": 10210,
@@ -1156,8 +1123,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1166,10 +1133,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1180,24 +1177,24 @@
     "outputMass": 2400000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 100
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 100
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 100
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 100
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 100
       },
       {
         "itemId": 10210,
@@ -1220,8 +1217,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1230,10 +1227,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1244,24 +1271,24 @@
     "outputMass": 2400000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 100
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 100
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 100
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 100
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 100
       },
       {
         "itemId": 10210,
@@ -1284,8 +1311,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1294,10 +1321,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1308,24 +1365,24 @@
     "outputMass": 2400000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 100
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 100
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 100
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 100
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 100
       },
       {
         "itemId": 10210,
@@ -1348,8 +1405,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1358,10 +1415,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1372,24 +1459,24 @@
     "outputMass": 2400000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 100
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 100
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 100
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 100
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 100
       },
       {
         "itemId": 10210,
@@ -1412,8 +1499,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1422,10 +1509,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1433,27 +1550,27 @@
   },
   {
     "outputItemId": 10216,
-    "outputMass": 2400000,
+    "outputMass": 3600000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 150
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 150
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 150
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 150
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 150
       },
       {
         "itemId": 10211,
@@ -1476,8 +1593,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1486,10 +1603,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -1497,27 +1644,27 @@
   },
   {
     "outputItemId": 10217,
-    "outputMass": 2400000,
+    "outputMass": 3600000,
     "inputs": [
       {
-        "itemId": 10001,
-        "quantity": 300
+        "itemId": 10005,
+        "quantity": 150
       },
       {
-        "itemId": 10008,
-        "quantity": 300
+        "itemId": 10002,
+        "quantity": 150
       },
       {
-        "itemId": 10007,
-        "quantity": 300
+        "itemId": 10010,
+        "quantity": 150
       },
       {
-        "itemId": 10003,
-        "quantity": 300
+        "itemId": 10009,
+        "quantity": 150
       },
       {
-        "itemId": 10006,
-        "quantity": 300
+        "itemId": 10004,
+        "quantity": 150
       },
       {
         "itemId": 10211,
@@ -1540,8 +1687,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -1550,10 +1697,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -2146,24 +2323,24 @@
     "outputMass": 3840000,
     "inputs": [
       {
-        "itemId": 20001,
-        "quantity": 300
+        "itemId": 20005,
+        "quantity": 150
       },
       {
-        "itemId": 20008,
-        "quantity": 300
+        "itemId": 20002,
+        "quantity": 150
       },
       {
-        "itemId": 20007,
-        "quantity": 300
+        "itemId": 20010,
+        "quantity": 150
       },
       {
-        "itemId": 20003,
-        "quantity": 300
+        "itemId": 20009,
+        "quantity": 150
       },
       {
-        "itemId": 20006,
-        "quantity": 300
+        "itemId": 20004,
+        "quantity": 150
       },
       {
         "itemId": 10211,
@@ -2186,8 +2363,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -2196,10 +2373,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],
@@ -2210,24 +2417,24 @@
     "outputMass": 3840000,
     "inputs": [
       {
-        "itemId": 20001,
-        "quantity": 300
+        "itemId": 20005,
+        "quantity": 150
       },
       {
         "itemId": 20002,
-        "quantity": 300
-      },
-      {
-        "itemId": 20008,
-        "quantity": 300
+        "quantity": 150
       },
       {
         "itemId": 20010,
-        "quantity": 300
+        "quantity": 150
+      },
+      {
+        "itemId": 20009,
+        "quantity": 150
       },
       {
         "itemId": 20004,
-        "quantity": 300
+        "quantity": 150
       },
       {
         "itemId": 10214,
@@ -2250,8 +2457,8 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 1
+            "inputIndex": 1,
+            "statIndex": 0
           },
           {
             "inputIndex": 5,
@@ -2260,10 +2467,40 @@
         ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
       },
       {
-        "sources": []
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
       }
     ],
     "blendWeights": [],

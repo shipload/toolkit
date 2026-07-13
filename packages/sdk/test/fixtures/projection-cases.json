@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "d002aabf892380d79a36dc06563c092bf5f0087ca2fb7807d8aa48d68b06c42e",
-  "generated_at": "2026-07-13T04:04:05.032Z",
+  "catalog_hash": "a190c7185c2c04fec0eac276ace5d64fc7fb488affbc8dbcdc925bfeef639083",
+  "generated_at": "2026-07-13T17:58:13.819Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -63,7 +63,7 @@
               "tasks": [
                 {
                   "type": 1,
-                  "duration": 483,
+                  "duration": 486,
                   "cancelable": 1,
                   "coordinates": {
                     "x": 4,
@@ -91,8 +91,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -191,7 +191,7 @@
               "tasks": [
                 {
                   "type": 1,
-                  "duration": 483,
+                  "duration": 486,
                   "cancelable": 1,
                   "coordinates": {
                     "x": 4,
@@ -219,8 +219,8 @@
         "energy": 451649,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -342,8 +342,8 @@
         "energy": 900683,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -465,8 +465,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -609,8 +609,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -761,8 +761,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -897,8 +897,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1041,8 +1041,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1193,8 +1193,8 @@
             "id": 1000000
           }
         ],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1345,8 +1345,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1452,8 +1452,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8374000,
-        "capacity": 7326256,
+        "hullmass": 8459200,
+        "capacity": 6787341,
         "engines": {
           "thrust": 447,
           "drain": 224517

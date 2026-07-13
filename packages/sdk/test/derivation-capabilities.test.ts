@@ -4,6 +4,7 @@ import {
     applyCapacityTier,
     CAPACITY_TIER_TABLE,
     computeBaseCapacity,
+    computeBaseHullmass,
     computeShipHullCapabilities,
     gathererDepthForTier,
     GATHERER_DEPTH_TABLE,
@@ -13,6 +14,8 @@ import {
     ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_PROSPECTOR_T2_PACKED,
+    ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../src/data/item-ids'
@@ -30,16 +33,16 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
     })
 
-    test('warehouse formula is 20x the ship formula (same stat curve)', () => {
-        const ship = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
-        const wh = computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)
-        expect(Math.abs(wh - 20 * ship)).toBeLessThanOrEqual(20)
+    test('warehouse retains its own 100M base capacity curve', () => {
+        expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
+            Math.floor(100_000_000 * 6 ** (200 / 1998))
+        )
     })
 
-    test('container T1 is 4.4x the ship formula (22M base, /1998 divisor)', () => {
-        const ship = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
-        const c1 = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
-        expect(Math.abs(c1 - 4.4 * ship)).toBeLessThanOrEqual(5)
+    test('container T1 retains its own 22M base capacity curve', () => {
+        expect(computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)).toBe(
+            Math.floor(22_000_000 * 6 ** (200 / 1998))
+        )
     })
 
     test('container T2 differs from T1 (same base formula, tier 2 multiplier)', () => {
@@ -77,15 +80,44 @@ describe('computeBaseCapacity', () => {
 })
 
 describe('computeShipHullCapabilities (hull capacity formula)', () => {
-    test('asymmetric stats: capacity uses strength+hardness / 1998, not (strength+hardness+cohesion) / 2997', () => {
+    test('legacy ship inputs still follow the five-channel envelope', () => {
         const result = computeShipHullCapabilities({
             strength: 500,
             hardness: 200,
             cohesion: 400,
             density: 100,
         })
-        const expected = Math.floor(5_000_000 * 6 ** (700 / 1998))
+        const expected = Math.floor(5_000_000 * 6 ** (1200 / 4995))
         expect(result.capacity).toBe(expected)
+    })
+
+    test('Roustabout capacity and mass use all five quality channels', () => {
+        const stats = {
+            strength: 101,
+            hardness: 202,
+            plasticity: 303,
+            volatility: 404,
+            conductivity: 505,
+        }
+        const result = computeShipHullCapabilities(stats, ITEM_ROUSTABOUT_T1_PACKED)
+
+        expect(result).toEqual({hullmass: 2_715_200, capacity: 8_609_656})
+    })
+
+    test('T2 ship capacity applies its existing tier multiplier after five-channel quality', () => {
+        expect(
+            computeBaseCapacity(ITEM_PROSPECTOR_T2_PACKED, {
+                strength: 101,
+                hardness: 202,
+                saturation: 303,
+                reactivity: 404,
+                resonance: 505,
+            })
+        ).toBe(12_053_518)
+    })
+
+    test('non-ship hull mass keeps its density-based formula', () => {
+        expect(computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, {density: 500})).toBe(75_000)
     })
 })
 

@@ -14,7 +14,6 @@ import {
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_SHIP_T1_PACKED,
     ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_PROSPECTOR_T1_PACKED,
     ITEM_TENDER_T1_PACKED,
@@ -36,15 +35,8 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     expect(ids).toEqual(
         [
             ITEM_CRAFTER_T1,
-            ITEM_SHIP_T1_PACKED,
             ITEM_EXTRACTOR_T1_PACKED,
             ITEM_ROUSTABOUT_T1_PACKED,
-            ITEM_PROSPECTOR_T1_PACKED,
-            ITEM_TENDER_T1_PACKED,
-            ITEM_TUG_T1_PACKED,
-            ITEM_PORTER_T1_PACKED,
-            ITEM_WRANGLER_T1_PACKED,
-            ITEM_DREDGER_T1_PACKED,
         ].sort((a, b) => a - b)
     )
 })
@@ -88,9 +80,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by two recipes', () => {
+test('getComponentDemand reports Resin as consumed by nine recipes', () => {
     const demand = getComponentDemand()
     const resin = demand.find((d) => d.itemId === ITEM_RESIN)
     expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(2)
+    expect(resin?.consumerCount).toBe(9)
 })

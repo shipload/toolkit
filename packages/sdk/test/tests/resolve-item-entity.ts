@@ -4,7 +4,6 @@ import {assert} from 'chai'
 import {
     applyCapacityTier,
     computeContainerCapabilities,
-    computeShipHullCapabilities,
     computeWarehouseHullCapabilities,
     encodeStats,
     ITEM_CONTAINER_T1_PACKED,
@@ -26,8 +25,7 @@ describe('resolveItem - entity capacity dispatch', () => {
 
     test('ship-t1 uses computeShipHullCapabilities', () => {
         const resolved = resolveItem(ITEM_SHIP_T1_PACKED, defaultPackedStats)
-        const expected = computeShipHullCapabilities(defaultStatInputs).capacity
-        assert.equal(findCapacityAttr(resolved.attributes), expected)
+        assert.equal(findCapacityAttr(resolved.attributes), Math.floor(5_000_000 * 6 ** (2000 / 4995)))
     })
 
     test('warehouse-t1 uses computeWarehouseHullCapabilities (NOT Container)', () => {

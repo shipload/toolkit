@@ -44,6 +44,7 @@ import {
 import {decodeStat} from '../derivation/crafting'
 import {gathererDepthForTier} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
+import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
 
@@ -55,14 +56,28 @@ export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
 }
 
+function isShipHull(itemId: number): boolean {
+    return getPackedEntityType(itemId)?.equals(ENTITY_SHIP) ?? false
+}
+
+function sumPackedShipChannels(stats: bigint): number {
+    let sum = 0
+    for (let slot = 0; slot < 5; slot++) sum += decodeStat(stats, slot)
+    return sum
+}
+
 export function computeBaseHullmass(itemId: number, stats: bigint): number {
+    if (isShipHull(itemId)) {
+        return Math.floor(
+            (getBaseHullmassFor(itemId) * (10_000 - sumPackedShipChannels(stats))) / 10_000
+        )
+    }
     const density = decodeStat(stats, 1)
     return Math.floor((getBaseHullmassFor(itemId) * (2000 - density)) / 2000)
 }
 
 export function computeBaseCapacityShip(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(5_000_000 * 6 ** (s / 1998))
+    return Math.floor(5_000_000 * 6 ** (sumPackedShipChannels(stats) / 4995))
 }
 
 export function computeBaseCapacityContainer(stats: bigint): number {
@@ -292,18 +307,7 @@ export function buildEntityDescription(
 ): string {
     const hullMass = computeBaseHullmass(itemId, hullStats)
     let baseCapacity = 0
-    if (
-        itemId === ITEM_SHIP_T1_PACKED ||
-        itemId === ITEM_ROUSTABOUT_T1_PACKED ||
-        itemId === ITEM_PROSPECTOR_T1_PACKED ||
-        itemId === ITEM_TENDER_T1_PACKED ||
-        itemId === ITEM_TUG_T1_PACKED ||
-        itemId === ITEM_PORTER_T1_PACKED ||
-        itemId === ITEM_WRANGLER_T1_PACKED ||
-        itemId === ITEM_DREDGER_T1_PACKED ||
-        itemId === ITEM_PROSPECTOR_T2_PACKED ||
-        itemId === ITEM_HAULER_SHIP_T2_PACKED
-    ) {
+    if (isShipHull(itemId)) {
         baseCapacity = computeBaseCapacityShip(hullStats)
     } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
         baseCapacity = computeBaseCapacityWarehouse(hullStats)

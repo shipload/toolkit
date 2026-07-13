@@ -27,6 +27,7 @@ import {
     ITEM_PORTER_T1_PACKED,
     ITEM_WRANGLER_T1_PACKED,
     ITEM_DREDGER_T1_PACKED,
+    ITEM_WRIGHT_T1_PACKED,
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
 } from '../data/item-ids'
@@ -72,6 +73,7 @@ test('computeBaseCapacity uses ship-hull formula for every ship-class entity', (
         ITEM_PORTER_T1_PACKED,
         ITEM_WRANGLER_T1_PACKED,
         ITEM_DREDGER_T1_PACKED,
+        ITEM_WRIGHT_T1_PACKED,
     ]) {
         expect(computeBaseCapacity(itemId, stats)).toBe(expected)
     }

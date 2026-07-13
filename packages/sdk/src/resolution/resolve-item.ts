@@ -2,6 +2,7 @@ import {UInt16, UInt64} from '@wharfkit/antelope'
 import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
 import {getItem, getModules} from '../data/catalog'
+import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {entityMetadata, itemMetadata} from '../data/metadata'
 import {
@@ -284,14 +285,26 @@ function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {
 
 function hullCapsForEntity(
     itemId: number,
-    decoded: Record<string, number>
+    decoded: Record<string, number>,
+    packedStats: bigint
 ): {
     hullmass: number
     capacity: number
 } {
+    // A ship hull consumes all five positional packed channels. This is separate
+    // from the recipe-facing stat labels, which remain historical for Ship T1.
+    const hullStats = getPackedEntityType(itemId)?.equals(ENTITY_SHIP)
+        ? {
+              strength: decodeStat(packedStats, 0),
+              hardness: decodeStat(packedStats, 1),
+              plasticity: decodeStat(packedStats, 2),
+              volatility: decodeStat(packedStats, 3),
+              conductivity: decodeStat(packedStats, 4),
+          }
+        : decoded
     return {
-        hullmass: computeBaseHullmass(itemId, decoded),
-        capacity: computeBaseCapacity(itemId, decoded),
+        hullmass: computeBaseHullmass(itemId, hullStats),
+        capacity: computeBaseCapacity(itemId, hullStats),
     }
 }
 
@@ -311,7 +324,7 @@ function resolveEntity(
         if (decoded.strength === undefined) decoded.strength = decodeStat(bigStats, 0)
         if (decoded.density === undefined) decoded.density = decodeStat(bigStats, 1)
         if (decoded.hardness === undefined) decoded.hardness = decodeStat(bigStats, 2)
-        const hullCaps = hullCapsForEntity(id, decoded)
+        const hullCaps = hullCapsForEntity(id, decoded, bigStats)
         attributes = [
             {
                 capability: 'Hull',

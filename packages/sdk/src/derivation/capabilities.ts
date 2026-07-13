@@ -1,4 +1,5 @@
 import {getEntityLayout} from '../data/recipes-runtime'
+import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEffectiveModuleStat} from './stat-scaling'
 
 export const DEFAULT_BASE_HULLMASS = 100_000
@@ -7,8 +8,20 @@ export function getBaseHullmassFor(itemId: number): number {
     return getEntityLayout(itemId)?.baseHullmass ?? DEFAULT_BASE_HULLMASS
 }
 
+function isShipHull(itemId: number): boolean {
+    return getPackedEntityType(itemId)?.equals(ENTITY_SHIP) ?? false
+}
+
+function sumHullStats(stats: Record<string, number>): number {
+    return Object.values(stats).reduce((sum, value) => sum + value, 0)
+}
+
 export function computeBaseHullmass(itemId: number, stats: Record<string, number>): number {
-    return Math.floor((getBaseHullmassFor(itemId) * (2000 - stats.density)) / 2000)
+    if (isShipHull(itemId)) {
+        return Math.floor((getBaseHullmassFor(itemId) * (10_000 - sumHullStats(stats))) / 10_000)
+    }
+    const lightness = stats.density ?? stats.hardness ?? 0
+    return Math.floor((getBaseHullmassFor(itemId) * (2000 - lightness)) / 2000)
 }
 
 export function computeShipHullCapabilities(
@@ -18,8 +31,8 @@ export function computeShipHullCapabilities(
     hullmass: number
     capacity: number
 } {
-    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
-    const exponent = statSum / 1998.0
+    const statSum = sumHullStats(stats)
+    const exponent = statSum / 4995.0
     return {
         hullmass: computeBaseHullmass(itemId, stats),
         capacity: Math.floor(5000000 * 6 ** exponent),
@@ -207,18 +220,9 @@ import {
     ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
-    ITEM_HAULER_SHIP_T2_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
-    ITEM_PROSPECTOR_T1_PACKED,
-    ITEM_PROSPECTOR_T2_PACKED,
-    ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_TENDER_T1_PACKED,
-    ITEM_TUG_T1_PACKED,
-    ITEM_PORTER_T1_PACKED,
-    ITEM_WRANGLER_T1_PACKED,
-    ITEM_DREDGER_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
 import {
@@ -267,32 +271,24 @@ export function applyCapacityTier(baseCapacity: number, tier: number): number {
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
     let base: number
-    switch (itemId) {
-        case ITEM_SHIP_T1_PACKED:
-        case ITEM_ROUSTABOUT_T1_PACKED:
-        case ITEM_PROSPECTOR_T1_PACKED:
-        case ITEM_TENDER_T1_PACKED:
-        case ITEM_TUG_T1_PACKED:
-        case ITEM_PORTER_T1_PACKED:
-        case ITEM_WRANGLER_T1_PACKED:
-        case ITEM_DREDGER_T1_PACKED:
-        case ITEM_PROSPECTOR_T2_PACKED:
-        case ITEM_HAULER_SHIP_T2_PACKED:
-            base = computeShipHullCapabilities(stats, itemId).capacity
-            break
-        case ITEM_EXTRACTOR_T1_PACKED:
-        case ITEM_FACTORY_T1_PACKED:
-        case ITEM_MASS_DRIVER_T1_PACKED:
-        case ITEM_MASS_CATCHER_T1_PACKED:
-        case ITEM_CONTAINER_T1_PACKED:
-        case ITEM_CONTAINER_T2_PACKED:
-            base = computeContainerCapabilities(stats).capacity
-            break
-        case ITEM_WAREHOUSE_T1_PACKED:
-            base = computeWarehouseHullCapabilities(stats).capacity
-            break
-        default:
-            return 0
+    if (isShipHull(itemId)) {
+        base = computeShipHullCapabilities(stats, itemId).capacity
+    } else {
+        switch (itemId) {
+            case ITEM_EXTRACTOR_T1_PACKED:
+            case ITEM_FACTORY_T1_PACKED:
+            case ITEM_MASS_DRIVER_T1_PACKED:
+            case ITEM_MASS_CATCHER_T1_PACKED:
+            case ITEM_CONTAINER_T1_PACKED:
+            case ITEM_CONTAINER_T2_PACKED:
+                base = computeContainerCapabilities(stats).capacity
+                break
+            case ITEM_WAREHOUSE_T1_PACKED:
+                base = computeWarehouseHullCapabilities(stats).capacity
+                break
+            default:
+                return 0
+        }
     }
     return applyCapacityTier(base, getItem(itemId).tier)
 }

@@ -4,6 +4,7 @@ import {getRecipe, type Recipe} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {getStatDefinitions} from './stats'
 import {deriveResourceStats} from './stratum'
+import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
 
 export interface StackInput {
     quantity: number
@@ -41,6 +42,7 @@ function getItemStatKeys(itemId: number): string[] {
         if (!item.category) return []
         return getStatDefinitions(item.category).map((d) => d.key)
     }
+    if (itemId === ITEM_SHIP_T1_PACKED) return ['strength', 'density', '', '']
     const recipe = getRecipe(itemId)
     if (!recipe) return []
     return recipe.statSlots.map((slot) => keyForStatSlot(recipe, slot))

@@ -7,56 +7,61 @@ import {
 } from '../src/derivation/crafting'
 import {
     ITEM_PROSPECTOR_T1_PACKED,
-    ITEM_PLATE,
+    ITEM_BEAM,
     ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_SHIP_T1_PACKED,
 } from '../src/data/item-ids'
 
-test('computeEntityStats blends the donor hull 50/50 with Plate', () => {
-    // Plate strength 400; donor Roustabout strength 800 → expect 600. density 200/400 → 300.
+test('decodeCraftedItemStats preserves the legacy Ship T1 hull layout without a recipe', () => {
+    expect(decodeCraftedItemStats(ITEM_SHIP_T1_PACKED, encodeStats([500, 400, 0, 0]))).toEqual({
+        strength: 500,
+        density: 400,
+    })
+})
+
+test('computeEntityStats blends the donor hull 50/50 with Beam', () => {
+    // Beam strength 400; donor Roustabout strength 800 → expect 600.
     const stats = computeEntityStats(ITEM_PROSPECTOR_T1_PACKED, {
-        [ITEM_PLATE]: [{quantity: 300, stats: {strength: 400, density: 200}}],
-        [ITEM_ROUSTABOUT_T1_PACKED]: [{quantity: 1, stats: {strength: 800, density: 400}}],
+        [ITEM_BEAM]: [{quantity: 100, stats: {strength: 400, tolerance: 200}}],
+        [ITEM_ROUSTABOUT_T1_PACKED]: [{quantity: 1, stats: {strength: 800}}],
     })
     const str = stats.find((s) => s.key === 'strength')!.value
-    const den = stats.find((s) => s.key === 'density')!.value
     expect(str).toBe(600)
-    expect(den).toBe(300)
 })
 
 test('computeCraftedOutputStats averages a multi-source slot with empty blendWeights', () => {
     // empty blendWeights means equal weights: average every source, not just the first
     const out = computeCraftedOutputStats(ITEM_PROSPECTOR_T1_PACKED, [
         {
-            itemId: ITEM_PLATE,
+            itemId: ITEM_BEAM,
             category: undefined,
-            stacks: [{quantity: 300, stats: encodeStats([400, 200])}],
+            stacks: [{quantity: 100, stats: encodeStats([400, 200])}],
         },
         {
             itemId: ITEM_ROUSTABOUT_T1_PACKED,
             category: undefined,
-            stacks: [{quantity: 1, stats: encodeStats([800, 400])}],
+            stacks: [{quantity: 1, stats: encodeStats([800])}],
         },
     ])
     const decoded = decodeCraftedItemStats(ITEM_PROSPECTOR_T1_PACKED, BigInt(out.toString()))
     expect(decoded['strength']).toBe(600)
-    expect(decoded['density']).toBe(300)
 })
 
 test('computeCraftedOutputStats agrees with computeEntityStats for the donor blend', () => {
     const viaEntity = computeEntityStats(ITEM_PROSPECTOR_T1_PACKED, {
-        [ITEM_PLATE]: [{quantity: 300, stats: {strength: 400, density: 200}}],
-        [ITEM_ROUSTABOUT_T1_PACKED]: [{quantity: 1, stats: {strength: 800, density: 400}}],
+        [ITEM_BEAM]: [{quantity: 100, stats: {strength: 400, tolerance: 200}}],
+        [ITEM_ROUSTABOUT_T1_PACKED]: [{quantity: 1, stats: {strength: 800}}],
     })
     const viaCrafted = computeCraftedOutputStats(ITEM_PROSPECTOR_T1_PACKED, [
         {
-            itemId: ITEM_PLATE,
+            itemId: ITEM_BEAM,
             category: undefined,
-            stacks: [{quantity: 300, stats: encodeStats([400, 200])}],
+            stacks: [{quantity: 100, stats: encodeStats([400, 200])}],
         },
         {
             itemId: ITEM_ROUSTABOUT_T1_PACKED,
             category: undefined,
-            stacks: [{quantity: 1, stats: encodeStats([800, 400])}],
+            stacks: [{quantity: 1, stats: encodeStats([800])}],
         },
     ])
     const decoded = decodeCraftedItemStats(ITEM_PROSPECTOR_T1_PACKED, BigInt(viaCrafted.toString()))
