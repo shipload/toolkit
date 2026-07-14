@@ -33,11 +33,7 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR)
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
-        [
-            ITEM_CRAFTER_T1,
-            ITEM_EXTRACTOR_T1_PACKED,
-            ITEM_ROUSTABOUT_T1_PACKED,
-        ].sort((a, b) => a - b)
+        [ITEM_CRAFTER_T1, ITEM_EXTRACTOR_T1_PACKED, ITEM_ROUSTABOUT_T1_PACKED].sort((a, b) => a - b)
     )
 })
 

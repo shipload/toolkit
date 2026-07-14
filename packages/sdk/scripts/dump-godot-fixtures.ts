@@ -4,10 +4,7 @@ import {deriveLocationStatic, getLocationKind, getSystemName} from '../src/utils
 import {deriveLocationSize} from '../src/derivation/location-size'
 import {wormholeAt} from '../src/derivation/wormhole'
 import {getInterpolatedPosition} from '../src/travel/travel'
-import {
-    currentTaskIndexForLane,
-    currentTaskProgressFloatForLane,
-} from '../src/scheduling/lane-core'
+import {currentTaskIndexForLane, currentTaskProgressFloatForLane} from '../src/scheduling/lane-core'
 import {ServerContract} from '../src/contracts'
 
 const GAME_SEED = '0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83'
@@ -43,7 +40,16 @@ function scanBox(minX: number, minY: number, maxX: number, maxY: number): Locati
             if (kind === 'empty') continue
             if (kind === 'wormhole') {
                 const exit = wormholeAt(GAME_SEED, x, y)!
-                out.push({x, y, kind, subtype: 0, size: 0, name: '', exit_x: exit.x, exit_y: exit.y})
+                out.push({
+                    x,
+                    y,
+                    kind,
+                    subtype: 0,
+                    size: 0,
+                    name: '',
+                    exit_x: exit.x,
+                    exit_y: exit.y,
+                })
                 continue
             }
             const loc = deriveLocationStatic(GAME_SEED, {x, y})

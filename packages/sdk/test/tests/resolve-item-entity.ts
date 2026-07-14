@@ -25,7 +25,10 @@ describe('resolveItem - entity capacity dispatch', () => {
 
     test('ship-t1 uses computeShipHullCapabilities', () => {
         const resolved = resolveItem(ITEM_SHIP_T1_PACKED, defaultPackedStats)
-        assert.equal(findCapacityAttr(resolved.attributes), Math.floor(5_000_000 * 6 ** (2000 / 4995)))
+        assert.equal(
+            findCapacityAttr(resolved.attributes),
+            Math.floor(5_000_000 * 6 ** (2000 / 4995))
+        )
     })
 
     test('warehouse-t1 uses computeWarehouseHullCapabilities (NOT Container)', () => {
