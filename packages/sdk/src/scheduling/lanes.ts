@@ -130,12 +130,12 @@ export function resolveLaneBuilder(
     const item = getItem(Number(installed.item_id.value ?? installed.item_id))
     if (item.moduleType !== 'builder') throw new Error('lane module is not a builder')
     const stats = BigInt(installed.stats.toString())
-    const coh = decodeStat(stats, 0)
-    const tol = decodeStat(stats, 1)
+    const res = decodeStat(stats, 0)
+    const fin = decodeStat(stats, 1)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const speed = applySlotMultiplier(computeBuilderSpeed(coh), amp)
-    const drain = computeBuilderDrain(tol)
+    const speed = applySlotMultiplier(computeBuilderSpeed(res), amp)
+    const drain = computeBuilderDrain(fin)
     return {slotIndex: idx, speed, drain, outputPct: amp}
 }
 

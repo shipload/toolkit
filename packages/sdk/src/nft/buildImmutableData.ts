@@ -263,12 +263,12 @@ export function buildModuleImmutable(
             break
         }
         case MODULE_BUILDER: {
-            const coh = decodeStat(stats, 0)
-            const tol = decodeStat(stats, 1)
-            base.push({first: 'cohesion', second: ['uint16', coh]})
-            base.push({first: 'tolerance', second: ['uint16', tol]})
-            base.push({first: 'speed', second: ['uint16', computeBuilderSpeed(coh)]})
-            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeBuilderDrain(tol))]})
+            const res = decodeStat(stats, 0)
+            const fin = decodeStat(stats, 1)
+            base.push({first: 'resonance', second: ['uint16', res]})
+            base.push({first: 'fineness', second: ['uint16', fin]})
+            base.push({first: 'speed', second: ['uint16', computeBuilderSpeed(res)]})
+            base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeBuilderDrain(fin))]})
             break
         }
         case MODULE_STORAGE: {

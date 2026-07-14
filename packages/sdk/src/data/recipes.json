@@ -777,11 +777,11 @@
     "outputMass": 960000,
     "inputs": [
       {
-        "itemId": 10005,
+        "itemId": 10006,
         "quantity": 300
       },
       {
-        "itemId": 10002,
+        "itemId": 10008,
         "quantity": 300
       }
     ],
@@ -789,21 +789,28 @@
       {
         "sources": [
           {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
             "inputIndex": 1,
-            "statIndex": 1
+            "statIndex": 0
           }
         ]
       },
       {
         "sources": [
           {
-            "inputIndex": 0,
+            "inputIndex": 1,
             "statIndex": 1
           }
         ]
       }
     ],
-    "blendWeights": []
+    "blendWeights": [
+      1,
+      1
+    ]
   },
   {
     "outputItemId": 10200,

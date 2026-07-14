@@ -90,17 +90,17 @@ describe('producer (source) is always present', () => {
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Gathering.yield', 'Storage.capacity'],
-        Tolerance: ['Build.drain', 'Gathering.depth'],
+        Tolerance: ['Gathering.depth'],
         Density: ['Gathering.yield', 'Hull.mass', 'Storage.capacity'],
         Conductivity: ['Crafting.drain', 'Energy.capacity', 'Hauling.drain', 'Warp.range'],
-        Resonance: ['Energy.capacity', 'Hauling.capacity'],
+        Resonance: ['Build.speed', 'Energy.capacity', 'Hauling.capacity'],
         Reflectivity: ['Energy.recharge', 'Hauling.capacity', 'Warp.range'],
         Volatility: ['Energy.capacity', 'Movement.thrust'],
         Reactivity: ['Movement.thrust'],
         Thermal: ['Energy.capacity', 'Movement.drain'],
-        Hardness: ['Gathering.depth', 'Storage.capacity'],
-        Cohesion: ['Build.speed', 'Crafting.speed', 'Storage.capacity'],
-        Fineness: ['Crafting.speed', 'Hull.mass'],
+        Hardness: ['Build.speed', 'Gathering.depth', 'Storage.capacity'],
+        Cohesion: ['Crafting.speed', 'Storage.capacity'],
+        Fineness: ['Build.drain', 'Crafting.speed', 'Hull.mass'],
         Plasticity: ['Energy.capacity', 'Hauling.efficiency', 'Loading.thrust'],
         Insulation: ['Energy.capacity', 'Loading.mass'],
         Saturation: ['Gathering.drain', 'Loading.thrust'],
@@ -122,8 +122,9 @@ describe('producer-join helpers', () => {
     test('Build attributes are produced by the Assembly Arm', () => {
         const rows = getStatMappingsForCapability('Build')
         assert.deepEqual(rows.map((m) => `${m.stat}|${m.attribute}|${m.source}`).sort(), [
-            'Cohesion|speed|Assembly Arm',
-            'Tolerance|drain|Assembly Arm',
+            'Fineness|drain|Assembly Arm',
+            'Hardness|speed|Assembly Arm',
+            'Resonance|speed|Assembly Arm',
         ])
     })
 

@@ -147,12 +147,12 @@ export function computeBuilderCapabilities(stats: Record<string, number>): {
     speed: number
     drain: number
 } {
-    const coh = stats.cohesion
-    const tol = stats.tolerance
+    const resonance = stats.resonance
+    const fineness = stats.fineness
 
     return {
-        speed: 100 + Math.floor((coh * 4) / 5),
-        drain: Math.max(5000, 30000 - Math.floor((tol * 1000) / 33)),
+        speed: 100 + Math.floor((resonance * 4) / 5),
+        drain: Math.max(5000, 30000 - Math.floor((fineness * 1000) / 33)),
     }
 }
 

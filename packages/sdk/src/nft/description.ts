@@ -114,9 +114,9 @@ export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla * pla, 
 export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
 export const computeCrafterDrain = (fin: number): number =>
     Math.max(5000, 30000 - idiv(fin * 1000, 33))
-export const computeBuilderSpeed = (coh: number): number => 100 + idiv(coh * 4, 5)
-export const computeBuilderDrain = (tol: number): number =>
-    Math.max(5000, 30000 - idiv(tol * 1000, 33))
+export const computeBuilderSpeed = (resonance: number): number => 100 + idiv(resonance * 4, 5)
+export const computeBuilderDrain = (fineness: number): number =>
+    Math.max(5000, 30000 - idiv(fineness * 1000, 33))
 export const computeHaulerCapacity = (fin: number, tier: number): number =>
     Math.max(tier, tier + idiv(fin, 400))
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
@@ -260,9 +260,9 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             break
         }
         case MODULE_BUILDER: {
-            const coh = decodeStat(stats, 0)
-            const tol = decodeStat(stats, 1)
-            out += `  Speed ${computeBuilderSpeed(coh)}  Drain ${toWholeEnergy(computeBuilderDrain(tol))}`
+            const res = decodeStat(stats, 0)
+            const fin = decodeStat(stats, 1)
+            out += `  Speed ${computeBuilderSpeed(res)}  Drain ${toWholeEnergy(computeBuilderDrain(fin))}`
             break
         }
         case MODULE_STORAGE: {

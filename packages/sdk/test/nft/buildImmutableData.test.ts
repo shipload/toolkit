@@ -5,6 +5,8 @@ import {
     buildImmutableData,
     buildModuleImmutable,
     buildResourceImmutable,
+    computeBuilderDrain,
+    computeBuilderSpeed,
     computeCrafterDrain,
     computeEngineDrain,
     computeEngineThrust,
@@ -35,6 +37,7 @@ const ITEM_CRAFTER_T1 = 10104
 const ITEM_STORAGE_T1 = 10105
 const ITEM_HAULER_T1 = 10106
 const ITEM_BATTERY_T1 = 10108
+const ITEM_BUILDER_T1 = 10110
 const ITEM_SHIP_T1_PACKED = 10201
 
 function encodeStats(values: number[]): bigint {
@@ -235,6 +238,32 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
             toWholeEnergy(moduleComputeHaulerDrain(con, 1)),
+        ])
+    })
+
+    test('module (builder) emits resonance/fineness + computed speed/drain', () => {
+        const resonance = 500
+        const fineness = 330
+        const entries = buildModuleImmutable(
+            ITEM_BUILDER_T1,
+            1,
+            encodeStats([resonance, fineness]),
+            0,
+            0
+        )
+
+        expect(keys(entries).slice(-4)).toEqual(['resonance', 'fineness', 'speed', 'drain'])
+        expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', resonance])
+        expect(findEntry(entries, 'fineness')!.second).toEqual(['uint16', fineness])
+        expect(findEntry(entries, 'cohesion')).toBeUndefined()
+        expect(findEntry(entries, 'tolerance')).toBeUndefined()
+        expect(findEntry(entries, 'speed')!.second).toEqual([
+            'uint16',
+            computeBuilderSpeed(resonance),
+        ])
+        expect(findEntry(entries, 'drain')!.second).toEqual([
+            'uint16',
+            toWholeEnergy(computeBuilderDrain(fineness)),
         ])
     })
 

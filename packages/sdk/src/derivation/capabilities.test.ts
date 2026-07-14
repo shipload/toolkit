@@ -5,6 +5,7 @@ import {
     computeGathererCapabilities,
     computeGeneratorCapabilities,
     computeCrafterCapabilities,
+    computeBuilderCapabilities,
     computeLoaderCapabilities,
     computeBaseCapacity,
     computeContainerCapabilities,
@@ -30,6 +31,7 @@ import {
     ITEM_WRIGHT_T1_PACKED,
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
+    ITEM_BUILDER_T1,
 } from '../data/item-ids'
 import type {InstalledModule} from '../entities/slot-multiplier'
 import type {EntitySlot} from '../data/recipes-runtime'
@@ -46,6 +48,10 @@ function makeCrafterStats(fineness: number, conductivity: number): bigint {
 
 function makeLoaderStats(insulation: number, plasticity: number): bigint {
     return encodeStats([insulation, plasticity])
+}
+
+function makeBuilderStats(resonance: number, fineness: number): bigint {
+    return encodeStats([resonance, fineness])
 }
 
 test('computeBaseCapacity uses container formula for all container-class entities', () => {
@@ -152,6 +158,24 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     // Legacy crafter speed equals single-lane speed
     expect(result.crafter).toBeDefined()
     expect(result.crafter!.speed).toBe(expectedSpeed)
+})
+
+test('builder capabilities read canonical resonance and fineness slots', () => {
+    expect(computeBuilderCapabilities({resonance: 500, fineness: 330})).toEqual({
+        speed: 500,
+        drain: 20_000,
+    })
+})
+
+test('computeEntityCapabilities emits a Builder lane from resonance and fineness', () => {
+    const modules: InstalledModule[] = [
+        {slotIndex: 0, itemId: ITEM_BUILDER_T1, stats: makeBuilderStats(500, 330)},
+    ]
+    const layout: EntitySlot[] = [{type: 'builder', outputPct: 80, maxTier: 1}]
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+
+    expect(result.builderLanes).toEqual([{slotIndex: 0, speed: 400, drain: 20_000, outputPct: 80}])
+    expect(result.builder).toEqual({speed: 400, drain: 20_000})
 })
 
 test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum', () => {
