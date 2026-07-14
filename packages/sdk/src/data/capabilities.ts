@@ -27,6 +27,7 @@ export const capabilityNames: string[] = [
     'Gathering',
     'Warp',
     'Crafting',
+    'Build',
     'Launch',
     'Hauling',
 ]
@@ -73,6 +74,12 @@ export const capabilityAttributes: CapabilityAttribute[] = [
         description: 'Energy consumed per second while crafting',
     },
     {capability: 'Crafting', attribute: 'quality', description: 'Modifier on output quality'},
+    {capability: 'Build', attribute: 'speed', description: 'Build progress per second'},
+    {
+        capability: 'Build',
+        attribute: 'drain',
+        description: 'Energy consumed per second while building',
+    },
     {capability: 'Launch', attribute: 'range', description: 'Maximum launch distance'},
     {capability: 'Launch', attribute: 'capacity', description: 'Maximum mass per launch'},
     {capability: 'Launch', attribute: 'drain', description: 'Energy consumed per launch'},

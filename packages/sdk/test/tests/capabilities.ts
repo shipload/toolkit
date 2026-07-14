@@ -15,8 +15,8 @@ import {
 } from '$lib'
 
 describe('Capabilities', () => {
-    test('capabilityNames has 10 entries', () => {
-        assert.equal(capabilityNames.length, 10)
+    test('capabilityNames includes Build', () => {
+        assert.include(capabilityNames, 'Build')
     })
 
     test('getCapabilityAttributes returns all attributes', () => {
@@ -28,6 +28,13 @@ describe('Capabilities', () => {
         const gathering = getCapabilityAttributes('Gathering')
         assert.equal(gathering.length, 3)
         assert.isTrue(gathering.every((a) => a.capability === 'Gathering'))
+    })
+
+    test('Build exposes speed and drain attributes', () => {
+        assert.deepEqual(
+            getCapabilityAttributes('Build').map((a) => a.attribute),
+            ['speed', 'drain']
+        )
     })
 
     test('getStatMappings derivation has shape and no rationale', () => {

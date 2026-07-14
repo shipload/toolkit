@@ -8,7 +8,6 @@ import {
     getStatMappingsForStat,
     getProducersForAttribute,
     getCapabilityAttributeRows,
-    type StatMapping,
 } from '../../src/derivation/capability-mappings'
 import {capabilityAttributes} from '../../src/data/capabilities'
 
@@ -91,7 +90,7 @@ describe('producer (source) is always present', () => {
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Gathering.yield', 'Storage.capacity'],
-        Tolerance: ['Gathering.depth'],
+        Tolerance: ['Build.drain', 'Gathering.depth'],
         Density: ['Gathering.yield', 'Hull.mass', 'Storage.capacity'],
         Conductivity: ['Crafting.drain', 'Energy.capacity', 'Hauling.drain', 'Warp.range'],
         Resonance: ['Energy.capacity', 'Hauling.capacity'],
@@ -100,7 +99,7 @@ describe('stat coverage', () => {
         Reactivity: ['Movement.thrust'],
         Thermal: ['Energy.capacity', 'Movement.drain'],
         Hardness: ['Gathering.depth', 'Storage.capacity'],
-        Cohesion: ['Crafting.speed', 'Storage.capacity'],
+        Cohesion: ['Build.speed', 'Crafting.speed', 'Storage.capacity'],
         Fineness: ['Crafting.speed', 'Hull.mass'],
         Plasticity: ['Energy.capacity', 'Hauling.efficiency', 'Loading.thrust'],
         Insulation: ['Energy.capacity', 'Loading.mass'],
@@ -120,6 +119,14 @@ describe('stat coverage', () => {
 })
 
 describe('producer-join helpers', () => {
+    test('Build attributes are produced by the Assembly Arm', () => {
+        const rows = getStatMappingsForCapability('Build')
+        assert.deepEqual(rows.map((m) => `${m.stat}|${m.attribute}|${m.source}`).sort(), [
+            'Cohesion|speed|Assembly Arm',
+            'Tolerance|drain|Assembly Arm',
+        ])
+    })
+
     test('getProducersForAttribute returns the distinct producers', () => {
         assert.strictEqual(getProducersForAttribute('Energy', 'capacity').length, 2)
         assert.strictEqual(getProducersForAttribute('Movement', 'thrust').length, 1)

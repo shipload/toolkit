@@ -9,6 +9,7 @@ export type SlotConsumerKind =
     | 'gatherer'
     | 'loader'
     | 'crafter'
+    | 'builder'
     | 'storage'
     | 'hauler'
     | 'warp'
@@ -46,6 +47,10 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     crafter: {
         0: {capability: 'Crafting', attribute: 'speed'},
         1: {capability: 'Crafting', attribute: 'drain'},
+    },
+    builder: {
+        0: {capability: 'Build', attribute: 'speed'},
+        1: {capability: 'Build', attribute: 'drain'},
     },
     storage: {
         0: {capability: 'Storage', attribute: 'capacity'},
