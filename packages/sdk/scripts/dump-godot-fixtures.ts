@@ -1,5 +1,7 @@
 import {mkdirSync, writeFileSync} from 'node:fs'
 import {resolve} from 'node:path'
+import {encodeAddress} from '../src/coordinates/address'
+import {SECTOR_ADJECTIVES, SECTOR_NOUNS} from '../src/coordinates/sectors'
 import {deriveLocationStatic, getLocationKind, getSystemName} from '../src/utils/system'
 import {deriveLocationSize} from '../src/derivation/location-size'
 import {wormholeAt} from '../src/derivation/wormhole'
@@ -160,4 +162,52 @@ writeFileSync(
     resolve(OUT_DIR, 'tests/fixtures/travel-cases.json'),
     JSON.stringify({cases: travelCases}, null, 2)
 )
+
+interface AddressCase {
+    x: number
+    y: number
+    sector: string
+    region: string
+    local_x: number
+    local_y: number
+}
+
+const ADDRESS_COORDS: Array<[number, number]> = [
+    [0, 0],
+    [1, 1],
+    [-1, -1],
+    [12, -9],
+    [4999, 4999],
+    [5000, 5000],
+    [-5000, -5000],
+    [-5001, -5001],
+    [10_000, -10_000],
+    [123_456_789, -987_654_321],
+    [2_147_483_647, -2_147_483_648],
+    [-2_147_483_648, 2_147_483_647],
+]
+
+const addressCases: AddressCase[] = ADDRESS_COORDS.map(([x, y]) => {
+    const a = encodeAddress(GAME_SEED, x, y)
+    return {x, y, sector: a.sector, region: a.region, local_x: a.localX, local_y: a.localY}
+})
+
+mkdirSync(resolve(OUT_DIR, 'native/src/data'), {recursive: true})
+writeFileSync(
+    resolve(OUT_DIR, 'native/tests/fixtures/addresses-cases.json'),
+    `${JSON.stringify({game_seed: GAME_SEED, cases: addressCases}, null, 2)}\n`
+)
+writeFileSync(
+    resolve(OUT_DIR, 'native/src/data/sector-adjectives.json'),
+    `${JSON.stringify(SECTOR_ADJECTIVES, null, 2)}\n`
+)
+writeFileSync(
+    resolve(OUT_DIR, 'native/src/data/sector-nouns.json'),
+    `${JSON.stringify(SECTOR_NOUNS, null, 2)}\n`
+)
+console.log(
+    `addresses: ${addressCases.length} cases, ` +
+        `${SECTOR_ADJECTIVES.length} adjectives, ${SECTOR_NOUNS.length} nouns`
+)
+
 console.log('wrote fixtures to', OUT_DIR)
