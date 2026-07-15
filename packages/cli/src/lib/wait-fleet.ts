@@ -90,6 +90,7 @@ const TYPE_RANK: Record<EntityTypeName, number> = {
 	plot: 8,
 	hub: 9,
 	workshop: 10,
+	builddock: 11,
 }
 
 function rankType(t: EntitySnapshot['type']): number {
