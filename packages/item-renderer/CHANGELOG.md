@@ -1,5 +1,19 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.55
+
+### Patch Changes
+
+- 53de8db: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added builddock
+  - Drop refit from capper and projection modeling
+  - Add Construction Dock support
+- Updated dependencies [53de8db]
+  - @shipload/sdk@1.0.0-next.55
+
 ## 1.0.0-next.54
 
 ### Patch Changes

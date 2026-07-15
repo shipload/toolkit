@@ -1,5 +1,20 @@
 # @shipload/cli
 
+## 1.0.0-next.59
+
+### Patch Changes
+
+- 53de8db: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Added builddock
+  - Drop refit from capper and projection modeling
+  - Add Construction Dock support
+- Updated dependencies [53de8db]
+  - @shipload/oracle@0.0.1-next.45
+  - @shipload/sdk@1.0.0-next.55
+
 ## 1.0.0-next.58
 
 ### Patch Changes
