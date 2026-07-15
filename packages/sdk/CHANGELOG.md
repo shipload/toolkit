@@ -1,5 +1,17 @@
 # @shipload/sdk
 
+## 1.0.0-next.54
+
+### Patch Changes
+
+- 7c6895a: - Add the Wright ship name and icon
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirror plan-capper scheduling in the SDK
+  - dump coordinate address fixtures for the godot native core
+
 ## 1.0.0-next.53
 
 ### Patch Changes
