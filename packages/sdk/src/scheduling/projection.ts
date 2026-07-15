@@ -1,6 +1,6 @@
 import {Name, type UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import {Coordinates, TaskType} from '../types'
+import {Coordinates, RefitOp, TaskType} from '../types'
 import {
     capsHasMovement,
     capsHasStorage,
@@ -402,6 +402,13 @@ function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.t
     }
 }
 
+// Mirrors calc_task_effect's TASK_REFIT: only ADD has a projectable cargo effect (REMOVE/SWAP return mass the entity row holds, invisible to the task itself).
+function applyRefitTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    if (task.refit?.op.toNumber() === RefitOp.ADD) {
+        removeCargoItem(projected, task.cargo[0])
+    }
+}
+
 function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
     switch (task.type.toNumber()) {
         case TaskType.RECHARGE:
@@ -424,6 +431,9 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             break
         case TaskType.CRAFT:
             applyCraftTask(projected, task)
+            break
+        case TaskType.REFIT:
+            applyRefitTask(projected, task)
             break
         case TaskType.UNDEPLOY:
         case TaskType.DEMOLISH:
@@ -580,6 +590,9 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
                 break
             case TaskType.CRAFT:
                 if (taskComplete) applyCraftTask(projected, task)
+                break
+            case TaskType.REFIT:
+                if (taskComplete) applyRefitTask(projected, task)
                 break
             case TaskType.UNDEPLOY:
             case TaskType.DEMOLISH:

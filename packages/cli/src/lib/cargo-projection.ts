@@ -1,4 +1,4 @@
-import { ServerTypes, TaskType, schedule } from "@shipload/sdk";
+import { RefitOp, ServerTypes, TaskType, schedule } from "@shipload/sdk";
 import { toBigIntOrUndefined } from "./cargo-build";
 import type { EntitySnapshot } from "./snapshot";
 
@@ -161,6 +161,11 @@ function applyTaskToCargo(stacks: ProjectedCargoStack[], task: ServerTypes.task)
 			return;
 		case TaskType.UNDEPLOY:
 			for (const item of items) addCargo(stacks, item);
+			return;
+		case TaskType.REFIT:
+			if (task.refit && Number(task.refit.op) === RefitOp.ADD) {
+				for (const item of items) removeCargo(stacks, item);
+			}
 			return;
 		default:
 			return;

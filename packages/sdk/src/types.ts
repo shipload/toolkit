@@ -69,6 +69,13 @@ export enum TaskType {
     CHARGE = 16,
     UPGRADE = 17,
     SHUTTLE = 18,
+    REFIT = 19,
+}
+
+export enum RefitOp {
+    ADD = 0,
+    REMOVE = 1,
+    SWAP = 2,
 }
 
 export enum HoldKind {

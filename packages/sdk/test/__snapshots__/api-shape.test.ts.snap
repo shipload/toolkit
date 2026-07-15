@@ -9,6 +9,7 @@ exports[`Entity public surface 1`] = `
   "canWrap",
   "constructor",
   "entityClass",
+  "hasPendingCapper",
   "inv",
   "inventory",
   "isFull",

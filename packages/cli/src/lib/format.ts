@@ -8,6 +8,7 @@ import {
 	formatMassScaled,
 	LocationType,
 	PRECISION,
+	RefitOp,
 	resolveItem,
 	TaskType,
 } from "@shipload/sdk";
@@ -71,6 +72,7 @@ const TASK_TYPES: Record<number, string> = {
 	[TaskType.UNWRAP]: "Unwrap",
 	[TaskType.UNDEPLOY]: "Undeploy",
 	[TaskType.DEMOLISH]: "Demolish",
+	[TaskType.REFIT]: "Refit",
 };
 
 export function formatTaskType(type: number): string {
@@ -145,6 +147,13 @@ export function formatTaskShort(t: ServerTypes.task): string {
 		}
 		case TaskType.DEMOLISH:
 			return "Demolish";
+		case TaskType.REFIT: {
+			const op = t.refit ? Number(t.refit.op) : undefined;
+			if (op === RefitOp.REMOVE) return "Remove module";
+			const items = formatItemList(t.cargo);
+			if (op === RefitOp.SWAP) return items ? `Swap in ${items}` : "Swap module";
+			return items ? `Install ${items}` : "Install module";
+		}
 		default:
 			return formatTaskType(type);
 	}

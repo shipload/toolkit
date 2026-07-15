@@ -31,6 +31,10 @@ export class Entity extends ServerContract.Types.entity_info {
         return schedule.isIdle(this)
     }
 
+    get hasPendingCapper(): boolean {
+        return schedule.hasPendingCapper(this)
+    }
+
     get sched(): ScheduleAccessor {
         this._sched ??= new ScheduleAccessor(this)
         return this._sched

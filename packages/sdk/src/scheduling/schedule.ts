@@ -63,6 +63,24 @@ export function isIdle(entity: ScheduleData): boolean {
     return !hasSchedule(entity) && !hasHolds(entity)
 }
 
+// Mirrors is_capper_task_type: demolish/undeploy/refit cap a plan — no further appends once queued.
+export function isCapperTaskType(taskType: number): boolean {
+    return (
+        taskType === TaskType.UNDEPLOY ||
+        taskType === TaskType.DEMOLISH ||
+        taskType === TaskType.REFIT
+    )
+}
+
+export function hasPendingCapper(entity: ScheduleData): boolean {
+    for (const l of entity.lanes ?? []) {
+        for (const t of l.schedule.tasks) {
+            if (isCapperTaskType(t.type.toNumber())) return true
+        }
+    }
+    return false
+}
+
 export function isEntityIdle(entity: ScheduleData, now: Date): boolean {
     if (hasHolds(entity)) return false
     const lanes = entity.lanes
@@ -121,10 +139,13 @@ export function scheduleComplete(entity: ScheduleData, now: Date): boolean {
     return remaining === 0
 }
 
-// Mirrors contract lane_front_complete: any lane whose front task is complete and non-reserved.
+// Mirrors lane_front_complete && !capper_front_gated for own-entity holds (workshop/undeploy-target gates need cross-entity context this ScheduleData lacks).
 export function hasResolvable(entity: ScheduleData, now: Date): boolean {
     for (const l of entity.lanes ?? []) {
-        if (core.laneTaskComplete(l.schedule, 0, now)) return true
+        if (!core.laneTaskComplete(l.schedule, 0, now)) continue
+        const front = l.schedule.tasks[0]
+        if (isCapperTaskType(front.type.toNumber()) && hasHolds(entity)) continue
+        return true
     }
     return false
 }
