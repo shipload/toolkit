@@ -37,6 +37,7 @@ import {
     ITEM_TUG_T1_PACKED,
     ITEM_PORTER_T1_PACKED,
     ITEM_WRANGLER_T1_PACKED,
+    ITEM_WRIGHT_T1_PACKED,
     ITEM_DREDGER_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
@@ -159,6 +160,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Porter'
         case ITEM_WRANGLER_T1_PACKED:
             return 'Wrangler'
+        case ITEM_WRIGHT_T1_PACKED:
+            return 'Wright'
         case ITEM_DREDGER_T1_PACKED:
             return 'Dredger'
         case ITEM_WAREHOUSE_T1_PACKED:
