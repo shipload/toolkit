@@ -116,7 +116,6 @@ export function makeTask(
         coordinates?: {x: number; y: number; z?: number}
         duration?: number
         energy_cost?: number
-        refit?: {op: number; slot: number}
     } = {}
 ): ServerContract.Types.task {
     const cargoItems = (overrides.cargo ?? []).map((item) => {
@@ -139,8 +138,5 @@ export function makeTask(
         cargo: cargoItems,
         couplings: [],
         energy_cost: overrides.energy_cost ? UInt16.from(overrides.energy_cost) : undefined,
-        refit: overrides.refit
-            ? {op: UInt8.from(overrides.refit.op), slot: UInt8.from(overrides.refit.slot)}
-            : undefined,
     })
 }

@@ -63,13 +63,9 @@ export function isIdle(entity: ScheduleData): boolean {
     return !hasSchedule(entity) && !hasHolds(entity)
 }
 
-// Mirrors is_capper_task_type: demolish/undeploy/refit cap a plan — no further appends once queued.
+// Mirrors is_capper_task_type: demolish/undeploy cap a plan — no further appends once queued.
 export function isCapperTaskType(taskType: number): boolean {
-    return (
-        taskType === TaskType.UNDEPLOY ||
-        taskType === TaskType.DEMOLISH ||
-        taskType === TaskType.REFIT
-    )
+    return taskType === TaskType.UNDEPLOY || taskType === TaskType.DEMOLISH
 }
 
 export function hasPendingCapper(entity: ScheduleData): boolean {

@@ -50,10 +50,13 @@ function hold(kind: number) {
 }
 
 describe('isCapperTaskType', () => {
-    test('UNDEPLOY, DEMOLISH, REFIT are cappers', () => {
+    test('UNDEPLOY, DEMOLISH are cappers', () => {
         expect(isCapperTaskType(TaskType.UNDEPLOY)).toBe(true)
         expect(isCapperTaskType(TaskType.DEMOLISH)).toBe(true)
-        expect(isCapperTaskType(TaskType.REFIT)).toBe(true)
+    })
+
+    test('REFIT is not a capper', () => {
+        expect(isCapperTaskType(TaskType.REFIT)).toBe(false)
     })
 
     test('non-capper task types are not cappers', () => {
@@ -71,8 +74,8 @@ describe('hasPendingCapper', () => {
         expect(hasPendingCapper(entity([task({type: TaskType.TRAVEL})]))).toBe(false)
     })
 
-    test('true when a REFIT task is queued anywhere in the lane', () => {
-        const e = entity([task({type: TaskType.TRAVEL}), task({type: TaskType.REFIT})])
+    test('true when a DEMOLISH task is queued anywhere in the lane', () => {
+        const e = entity([task({type: TaskType.TRAVEL}), task({type: TaskType.DEMOLISH})])
         expect(hasPendingCapper(e)).toBe(true)
     })
 
@@ -88,18 +91,18 @@ describe('hasResolvable — capper gating', () => {
     })
 
     test('a completed capper front with no holds is resolvable', () => {
-        const e = entity([task({type: TaskType.REFIT, duration: 30})])
+        const e = entity([task({type: TaskType.DEMOLISH, duration: 30})])
         expect(hasResolvable(e, NOW)).toBe(true)
     })
 
     test('a completed capper front with a live hold is gated', () => {
-        const e = entity([task({type: TaskType.REFIT, duration: 30})], [hold(2)])
+        const e = entity([task({type: TaskType.DEMOLISH, duration: 30})], [hold(2)])
         expect(hasResolvable(e, NOW)).toBe(false)
     })
 
     test('a capper front clears once holds empty', () => {
-        const withHold = entity([task({type: TaskType.REFIT, duration: 30})], [hold(2)])
-        const cleared = entity([task({type: TaskType.REFIT, duration: 30})], [])
+        const withHold = entity([task({type: TaskType.DEMOLISH, duration: 30})], [hold(2)])
+        const cleared = entity([task({type: TaskType.DEMOLISH, duration: 30})], [])
         expect(hasResolvable(withHold, NOW)).toBe(false)
         expect(hasResolvable(cleared, NOW)).toBe(true)
     })
@@ -110,7 +113,7 @@ describe('hasResolvable — capper gating', () => {
     })
 
     test('an in-progress front is not resolvable regardless of holds', () => {
-        const e = entity([task({type: TaskType.REFIT, duration: 3600})])
+        const e = entity([task({type: TaskType.DEMOLISH, duration: 3600})])
         expect(hasResolvable(e, NOW)).toBe(false)
     })
 })

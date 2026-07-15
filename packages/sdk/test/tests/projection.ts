@@ -14,7 +14,6 @@ import {
     RECIPE_INPUTS_INSUFFICIENT,
     RECIPE_INPUTS_INVALID,
     RECIPE_NOT_FOUND,
-    RefitOp,
     ServerContract,
     ENTITY_CARGO_NOT_LOADED,
     TaskType,
@@ -135,58 +134,6 @@ describe('projectEntity (stack-aware)', () => {
             })
             const projected = projectEntity(ship)
             assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 4)
-        })
-    })
-
-    describe('REFIT tasks', () => {
-        test('ADD consumes the module from cargo', () => {
-            const ship = makeShipFixture({
-                cargo: [{item_id: 5, quantity: 1, stats: 200}],
-            })
-            ship.schedule = ServerContract.Types.schedule.from({
-                started: '2024-06-04T23:41:09.000',
-                tasks: [
-                    makeTask(TaskType.REFIT, {
-                        cargo: [{item_id: 5, quantity: 1, stats: 200}],
-                        refit: {op: RefitOp.ADD, slot: 0},
-                        duration: 0,
-                    }),
-                ],
-            })
-            const projected = projectEntity(ship)
-            assert.isUndefined(getStack(projected.cargo, 5, 200), 'module leaves cargo')
-        })
-
-        test('REMOVE has no cargo effect (module info lives on the entity row, not the task)', () => {
-            const ship = makeShipFixture({
-                cargo: [{item_id: 5, quantity: 1, stats: 200}],
-            })
-            ship.schedule = ServerContract.Types.schedule.from({
-                started: '2024-06-04T23:41:09.000',
-                tasks: [
-                    makeTask(TaskType.REFIT, {refit: {op: RefitOp.REMOVE, slot: 0}, duration: 0}),
-                ],
-            })
-            const projected = projectEntity(ship)
-            assert.equal(getStack(projected.cargo, 5, 200)?.quantity.toNumber(), 1)
-        })
-
-        test('SWAP has no cargo effect (matches calc_task_effect: only the ADD branch touches cargo)', () => {
-            const ship = makeShipFixture({
-                cargo: [{item_id: 6, quantity: 1, stats: 300}],
-            })
-            ship.schedule = ServerContract.Types.schedule.from({
-                started: '2024-06-04T23:41:09.000',
-                tasks: [
-                    makeTask(TaskType.REFIT, {
-                        cargo: [{item_id: 6, quantity: 1, stats: 300}],
-                        refit: {op: RefitOp.SWAP, slot: 0},
-                        duration: 0,
-                    }),
-                ],
-            })
-            const projected = projectEntity(ship)
-            assert.equal(getStack(projected.cargo, 6, 300)?.quantity.toNumber(), 1)
         })
     })
 
