@@ -218,6 +218,7 @@ export function computeBatteryCapabilities(stats: Record<string, number>): {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
@@ -277,6 +278,7 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
         switch (itemId) {
             case ITEM_EXTRACTOR_T1_PACKED:
             case ITEM_FACTORY_T1_PACKED:
+            case ITEM_CONSTRUCTION_DOCK_T1_PACKED:
             case ITEM_MASS_DRIVER_T1_PACKED:
             case ITEM_MASS_CATCHER_T1_PACKED:
             case ITEM_CONTAINER_T1_PACKED:

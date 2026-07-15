@@ -12,6 +12,7 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
@@ -27,10 +28,11 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
     })
 
-    test('extractor and factory use the container formula', () => {
+    test('extractor, factory, and Construction Dock use the container formula', () => {
         const container = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
         expect(computeBaseCapacity(ITEM_EXTRACTOR_T1_PACKED, stats)).toBe(container)
         expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
+        expect(computeBaseCapacity(ITEM_CONSTRUCTION_DOCK_T1_PACKED, stats)).toBe(container)
     })
 
     test('warehouse retains its own 100M base capacity curve', () => {

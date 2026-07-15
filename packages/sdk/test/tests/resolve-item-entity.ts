@@ -7,6 +7,7 @@ import {
     computeWarehouseHullCapabilities,
     encodeStats,
     ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
@@ -40,6 +41,12 @@ describe('resolveItem - entity capacity dispatch', () => {
 
     test('container uses computeContainerCapabilities', () => {
         const resolved = resolveItem(ITEM_CONTAINER_T1_PACKED, defaultPackedStats)
+        const expected = computeContainerCapabilities(defaultStatInputs).capacity
+        assert.equal(findCapacityAttr(resolved.attributes), expected)
+    })
+
+    test('Construction Dock uses computeContainerCapabilities', () => {
+        const resolved = resolveItem(ITEM_CONSTRUCTION_DOCK_T1_PACKED, defaultPackedStats)
         const expected = computeContainerCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })

@@ -14,6 +14,7 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
+    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_BUILDER_T1,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
@@ -170,6 +171,8 @@ export function entityDisplayName(itemId: number): string {
             return 'Mining Rig'
         case ITEM_FACTORY_T1_PACKED:
             return 'Factory'
+        case ITEM_CONSTRUCTION_DOCK_T1_PACKED:
+            return 'Construction Dock'
         case ITEM_CONTAINER_T1_PACKED:
             return 'Container'
         case ITEM_CONTAINER_T2_PACKED:
@@ -317,6 +320,7 @@ export function buildEntityDescription(
     } else if (
         itemId === ITEM_EXTRACTOR_T1_PACKED ||
         itemId === ITEM_FACTORY_T1_PACKED ||
+        itemId === ITEM_CONSTRUCTION_DOCK_T1_PACKED ||
         itemId === ITEM_CONTAINER_T1_PACKED ||
         itemId === ITEM_CONTAINER_T2_PACKED
     ) {

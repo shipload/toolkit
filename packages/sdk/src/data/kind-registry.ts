@@ -26,6 +26,7 @@ export type EntityTypeName =
     | 'warehouse'
     | 'extractor'
     | 'factory'
+    | 'builddock'
     | 'workshop'
     | 'container'
     | 'nexus'
@@ -134,6 +135,7 @@ export const ENTITY_SHIP = Name.from('ship')
 export const ENTITY_WAREHOUSE = Name.from('warehouse')
 export const ENTITY_EXTRACTOR = Name.from('extractor')
 export const ENTITY_FACTORY = Name.from('factory')
+export const ENTITY_CONSTRUCTION_DOCK = Name.from('builddock')
 export const ENTITY_WORKSHOP = Name.from('workshop')
 export const ENTITY_CONTAINER = Name.from('container')
 export const ENTITY_NEXUS = Name.from('nexus')
@@ -153,6 +155,9 @@ export function isExtractor(entity: {type?: Name}): boolean {
 }
 export function isFactory(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_FACTORY) ?? false
+}
+export function isConstructionDock(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_CONSTRUCTION_DOCK) ?? false
 }
 export function isWorkshop(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_WORKSHOP) ?? false

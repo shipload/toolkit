@@ -76,6 +76,13 @@
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Workshop"
+    },
+    {
+      "kind": "builddock",
+      "classification": "OrbitalStructure",
+      "capabilityFlags": 20,
+      "zCoord": 0,
+      "defaultLabel": "Construction Dock"
     }
   ],
   "templates": [
@@ -167,6 +174,11 @@
     {
       "itemId": 10208,
       "kind": "workshop",
+      "displayLabel": ""
+    },
+    {
+      "itemId": 10209,
+      "kind": "builddock",
       "displayLabel": ""
     },
     {

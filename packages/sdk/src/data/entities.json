@@ -172,6 +172,22 @@
     "baseHullmass": 100000
   },
   {
+    "entityItemId": 10209,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 200,
+        "maxTier": 1
+      },
+      {
+        "type": "builder",
+        "outputPct": 200,
+        "maxTier": 1
+      }
+    ],
+    "baseHullmass": 100000
+  },
+  {
     "entityItemId": 10210,
     "slots": [
       {

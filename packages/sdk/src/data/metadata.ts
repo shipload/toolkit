@@ -279,6 +279,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A station workshop with five independent workers. Visiting ships bring materials and power, and the workshop does the crafting.',
         color: '#B877FF',
     },
+    10209: {
+        name: 'Construction Dock',
+        description:
+            'An immobile station construction facility with amplified power core and assembly arm slots.',
+        color: '#FFB347',
+    },
     10210: {
         name: 'Roustabout',
         description:
@@ -433,6 +439,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10208: {
         moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
     },
+    10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
     20210: {moduleSlotLabels: ['Power Core', 'Power Core', 'Engine', 'Limpet Bay']},
     20211: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam', 'Tractor Beam']},
 }

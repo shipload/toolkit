@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {
     ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
@@ -26,6 +27,10 @@ describe('availableBuildMethods', () => {
         expect(availableBuildMethods(ITEM_WAREHOUSE_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
         expect(availableBuildMethods(ITEM_FACTORY_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
         expect(availableBuildMethods(ITEM_EXTRACTOR_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
+        expect(availableBuildMethods(ITEM_CONSTRUCTION_DOCK_T1_PACKED)).toEqual([
+            'craft+deploy',
+            'plot',
+        ])
     })
 
     test('orbital vessels return craft+deploy only', () => {
@@ -123,7 +128,12 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
             .map((i) => i.id)
             .sort()
         expect(ids).toEqual(
-            [ITEM_WAREHOUSE_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED, ITEM_FACTORY_T1_PACKED].sort()
+            [
+                ITEM_WAREHOUSE_T1_PACKED,
+                ITEM_EXTRACTOR_T1_PACKED,
+                ITEM_FACTORY_T1_PACKED,
+                ITEM_CONSTRUCTION_DOCK_T1_PACKED,
+            ].sort()
         )
     })
 })
