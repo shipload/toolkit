@@ -95,20 +95,24 @@ export class ConstructionManager extends BaseManager {
         now: Date
     ): Map<string, InboundTransfer[]> {
         const buckets = new Map<string, Map<string, InboundTransfer>>()
+        const entitiesById = new Map(entities.map((entity) => [entity.id.toString(), entity]))
         const nowMs = now.getTime()
         for (const entity of entities) {
-            const entityIdStr = entity.id.toString()
-            const sourceName = entity.entity_name || entityIdStr
             for (const lane of getLanes(entity)) {
                 const startedMs = lane.schedule.started.toDate().getTime()
                 let cumulativeSec = 0
                 for (const task of lane.schedule.tasks) {
                     cumulativeSec += task.duration.toNumber()
-                    if (!isPushTask(task)) continue
-                    if (task.couplings.length === 0) continue
+                    if (!isDeliveryTask(task)) continue
+                    const target = deliveryTarget(task)
+                    if (!target) continue
+                    const source = deliverySource(task, entity, entitiesById)
+                    if (!source) continue
                     const projectedEndMs = startedMs + cumulativeSec * 1000
                     if (projectedEndMs < nowMs) continue
-                    const targetIdStr = task.couplings[0].counterpart.entity_id.toString()
+                    const targetIdStr = target.entity_id.toString()
+                    const sourceIdStr = source.id.toString()
+                    const sourceName = source.entity_name || sourceIdStr
                     const etaSeconds = Math.max(0, Math.round((projectedEndMs - nowMs) / 1000))
                     let perTarget = buckets.get(targetIdStr)
                     if (!perTarget) {
@@ -119,15 +123,15 @@ export class ConstructionManager extends BaseManager {
                         const itemId = c.item_id.toNumber()
                         const quantity = c.quantity.toNumber()
                         if (quantity === 0) continue
-                        const key = `${entityIdStr}#${itemId}`
+                        const key = `${sourceIdStr}#${itemId}`
                         const existing = perTarget.get(key)
                         if (existing) {
                             existing.quantity += quantity
                             existing.etaSeconds = Math.min(existing.etaSeconds, etaSeconds)
                         } else {
                             perTarget.set(key, {
-                                sourceEntityId: entity.id,
-                                sourceEntityType: entity.type,
+                                sourceEntityId: source.id,
+                                sourceEntityType: source.type,
                                 sourceName,
                                 itemId,
                                 quantity,
@@ -363,7 +367,34 @@ function partitionSources(
     return {eligible, unreachable}
 }
 
-function isPushTask(task: ServerContract.Types.task): boolean {
+function isDeliveryTask(task: ServerContract.Types.task): boolean {
+    const type = task.type.toNumber()
+    return type === TaskType.UNLOAD || type === TaskType.SHUTTLE
+}
+
+function deliveryTarget(
+    task: ServerContract.Types.task
+): ServerContract.Types.entity_ref | undefined {
+    if (task.type.toNumber() === TaskType.SHUTTLE) {
+        return task.couplings.find((coupling) => coupling.kind.toNumber() === HoldKind.PUSH)
+            ?.counterpart
+    }
+    return task.couplings[0]?.counterpart
+}
+
+function deliverySource(
+    task: ServerContract.Types.task,
+    transporter: ServerContract.Types.entity_info,
+    entitiesById: ReadonlyMap<string, ServerContract.Types.entity_info>
+): ServerContract.Types.entity_info | undefined {
+    if (task.type.toNumber() !== TaskType.SHUTTLE) return transporter
+    const source = task.couplings.find(
+        (coupling) => coupling.kind.toNumber() === HoldKind.PULL
+    )?.counterpart
+    return source ? entitiesById.get(source.entity_id.toString()) : undefined
+}
+
+function isReservingPushTask(task: ServerContract.Types.task): boolean {
     return task.type.toNumber() === TaskType.UNLOAD
 }
 
@@ -378,7 +409,7 @@ function isBuildOfPlot(task: ServerContract.Types.task, plotId: UInt64): boolean
 function reservationsOf(source: ServerContract.Types.entity_info): Reservation[] {
     const out = new Map<string, Reservation>()
     for (const task of getTasks(source)) {
-        if (!isPushTask(task)) continue
+        if (!isReservingPushTask(task)) continue
         if (task.couplings.length === 0) continue
         const targetType = task.couplings[0].counterpart.entity_type
         const targetId = task.couplings[0].counterpart.entity_id

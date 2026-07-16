@@ -1,7 +1,8 @@
 import {describe, expect, test} from 'bun:test'
-import {Name, TimePoint, UInt64} from '@wharfkit/antelope'
+import {Name, TimePoint, UInt8, UInt64} from '@wharfkit/antelope'
+import {ServerContract} from '../../src/contracts'
 import {ConstructionManager} from '../../src/managers/construction'
-import {TaskType} from '../../src/types'
+import {HoldKind, TaskType} from '../../src/types'
 import {entityRef, makeHauler, makeTask} from './construction-fixtures'
 
 const PLOT_ID = UInt64.from(1101)
@@ -42,6 +43,149 @@ describe('ConstructionManager.inboundTransfersTo', () => {
                 etaSeconds: 132,
             },
         ])
+    })
+
+    test('attributes SHUTTLE cargo to its PULL source and targets its PUSH coupling', () => {
+        const shuttle = makeTask({
+            type: TaskType.SHUTTLE,
+            duration: 132,
+            cargo: [{itemId: PLATE, qty: 5}],
+        })
+        shuttle.couplings.push(
+            ServerContract.Types.coupling.from({
+                counterpart: entityRef('ship', 88),
+                hold: UInt64.from(1),
+                kind: UInt8.from(HoldKind.PULL),
+            }),
+            ServerContract.Types.coupling.from({
+                counterpart: plotRef(),
+                hold: UInt64.from(2),
+                kind: UInt8.from(HoldKind.PUSH),
+            })
+        )
+        const transporter = makeHauler({id: 21, tasks: [shuttle]})
+        const source = makeHauler({id: 88, name: 'Source #88'})
+
+        expect(mgr.inboundTransfersTo(PLOT_ID, [transporter, source], NOW)).toEqual([
+            {
+                sourceEntityId: UInt64.from(88),
+                sourceEntityType: Name.from('ship'),
+                sourceName: 'Source #88',
+                itemId: PLATE,
+                quantity: 5,
+                etaSeconds: 132,
+            },
+        ])
+    })
+
+    test('keeps distinct SHUTTLE sources separate when they share one transporter', () => {
+        const from = (sourceId: number, quantity: number) => {
+            const shuttle = makeTask({
+                type: TaskType.SHUTTLE,
+                duration: 60,
+                cargo: [{itemId: PLATE, qty: quantity}],
+            })
+            shuttle.couplings.push(
+                ServerContract.Types.coupling.from({
+                    counterpart: entityRef('ship', sourceId),
+                    hold: UInt64.from(sourceId),
+                    kind: UInt8.from(HoldKind.PULL),
+                }),
+                ServerContract.Types.coupling.from({
+                    counterpart: plotRef(),
+                    hold: UInt64.from(sourceId + 1000),
+                    kind: UInt8.from(HoldKind.PUSH),
+                })
+            )
+            return shuttle
+        }
+        const transporter = makeHauler({
+            id: 21,
+            tasks: [from(88, 5), from(89, 7)],
+        })
+        const sourceA = makeHauler({id: 88, name: 'Source A'})
+        const sourceB = makeHauler({id: 89, name: 'Source B'})
+
+        expect(mgr.inboundTransfersTo(PLOT_ID, [transporter, sourceA, sourceB], NOW)).toEqual([
+            {
+                sourceEntityId: UInt64.from(88),
+                sourceEntityType: Name.from('ship'),
+                sourceName: 'Source A',
+                itemId: PLATE,
+                quantity: 5,
+                etaSeconds: 60,
+            },
+            {
+                sourceEntityId: UInt64.from(89),
+                sourceEntityType: Name.from('ship'),
+                sourceName: 'Source B',
+                itemId: PLATE,
+                quantity: 7,
+                etaSeconds: 120,
+            },
+        ])
+    })
+
+    test('skips a SHUTTLE task without a PULL coupling', () => {
+        const shuttle = makeTask({
+            type: TaskType.SHUTTLE,
+            duration: 132,
+            cargo: [{itemId: PLATE, qty: 5}],
+        })
+        shuttle.couplings.push(
+            ServerContract.Types.coupling.from({
+                counterpart: plotRef(),
+                hold: UInt64.from(2),
+                kind: UInt8.from(HoldKind.PUSH),
+            })
+        )
+
+        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 23, tasks: [shuttle]})], NOW)).toEqual(
+            []
+        )
+    })
+
+    test('skips a SHUTTLE task whose PULL source is not supplied', () => {
+        const shuttle = makeTask({
+            type: TaskType.SHUTTLE,
+            duration: 132,
+            cargo: [{itemId: PLATE, qty: 5}],
+        })
+        shuttle.couplings.push(
+            ServerContract.Types.coupling.from({
+                counterpart: entityRef('ship', 88),
+                hold: UInt64.from(1),
+                kind: UInt8.from(HoldKind.PULL),
+            }),
+            ServerContract.Types.coupling.from({
+                counterpart: plotRef(),
+                hold: UInt64.from(2),
+                kind: UInt8.from(HoldKind.PUSH),
+            })
+        )
+
+        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 24, tasks: [shuttle]})], NOW)).toEqual(
+            []
+        )
+    })
+
+    test('skips a SHUTTLE task without a PUSH coupling', () => {
+        const shuttle = makeTask({
+            type: TaskType.SHUTTLE,
+            duration: 132,
+            cargo: [{itemId: PLATE, qty: 5}],
+        })
+        shuttle.couplings.push(
+            ServerContract.Types.coupling.from({
+                counterpart: entityRef('warehouse', 88),
+                hold: UInt64.from(1),
+                kind: UInt8.from(HoldKind.PULL),
+            })
+        )
+
+        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 22, tasks: [shuttle]})], NOW)).toEqual(
+            []
+        )
     })
 
     test('ignores a LOAD (pull) targeting the plot (cargo flows to the loader, not the plot)', () => {

@@ -2,13 +2,37 @@ import dts from 'rollup-plugin-dts'
 import typescript from '@rollup/plugin-typescript'
 import cleanup from 'rollup-plugin-cleanup'
 import json from '@rollup/plugin-json'
+import compiler from 'typescript'
 import pkg from './package.json'
 
 const external = [...Object.keys(pkg.dependencies), 'node:crypto', 'node:fs']
 
+const typescriptPlugins = () => {
+    let watchMode = process.env.ROLLUP_WATCH === 'true'
+    const noWatcher = {close() {}}
+    const sys = {
+        ...compiler.sys,
+        watchFile: (...args) => (watchMode ? compiler.sys.watchFile(...args) : noWatcher),
+        watchDirectory: (...args) => (watchMode ? compiler.sys.watchDirectory(...args) : noWatcher),
+    }
+    const oneShotCompiler = new Proxy(compiler, {
+        get: (target, property, receiver) =>
+            property === 'sys' ? sys : Reflect.get(target, property, receiver),
+    })
+    return [
+        {
+            name: 'typescript-watch-mode',
+            buildStart() {
+                watchMode = this.meta.watchMode === true
+            },
+        },
+        typescript({target: 'es2020', typescript: oneShotCompiler}),
+    ]
+}
+
 const codePlugins = () => [
     json(),
-    typescript({target: 'es2020'}),
+    ...typescriptPlugins(),
     cleanup({extensions: ['js', 'ts']}),
 ]
 

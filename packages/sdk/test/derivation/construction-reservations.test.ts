@@ -3,7 +3,7 @@ import {Name, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
 import {ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
-import {TaskType} from '../../src/types'
+import {HoldKind, TaskType} from '../../src/types'
 import {
     COORDS,
     entityRef,
@@ -233,6 +233,41 @@ describe('partitionSources netting against reservations', () => {
         const cargo = [makeCargoRow(10, 100, PLATE, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
+        expect(sources[0].relevantCargo[0].available).toBe(80)
+        expect(sources[0].relevantCargo[0].reserved).toBe(0)
+    })
+
+    test('a pending SHUTTLE does not reserve or subtract transporter cargo', () => {
+        const plot = makePlot()
+        const target = mgr.getTarget(plot, [])!
+        const shuttle = makeTask({
+            type: TaskType.SHUTTLE,
+            duration: 60,
+            cargo: [{itemId: PLATE, qty: 30}],
+        })
+        shuttle.couplings.push(
+            ServerContract.Types.coupling.from({
+                counterpart: entityRef('warehouse', 88),
+                hold: UInt64.from(401),
+                kind: UInt8.from(HoldKind.PULL),
+            }),
+            ServerContract.Types.coupling.from({
+                counterpart: entityRef('plot', 9999),
+                hold: UInt64.from(402),
+                kind: UInt8.from(HoldKind.PUSH),
+            })
+        )
+        const ship = makeLoaderShip(
+            10,
+            ServerContract.Types.schedule.from({
+                started: SCHEDULE_START,
+                tasks: [shuttle],
+            })
+        )
+        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+
+        expect(mgr.reservationsFrom(UInt64.from(10), [ship])).toEqual([])
+        const sources = mgr.partitionSources(target, [ship], cargo).eligible
         expect(sources[0].relevantCargo[0].available).toBe(80)
         expect(sources[0].relevantCargo[0].reserved).toBe(0)
     })
