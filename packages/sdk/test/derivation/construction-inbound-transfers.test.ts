@@ -140,9 +140,9 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             })
         )
 
-        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 23, tasks: [shuttle]})], NOW)).toEqual(
-            []
-        )
+        expect(
+            mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 23, tasks: [shuttle]})], NOW)
+        ).toEqual([])
     })
 
     test('skips a SHUTTLE task whose PULL source is not supplied', () => {
@@ -164,9 +164,9 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             })
         )
 
-        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 24, tasks: [shuttle]})], NOW)).toEqual(
-            []
-        )
+        expect(
+            mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 24, tasks: [shuttle]})], NOW)
+        ).toEqual([])
     })
 
     test('skips a SHUTTLE task without a PUSH coupling', () => {
@@ -183,9 +183,9 @@ describe('ConstructionManager.inboundTransfersTo', () => {
             })
         )
 
-        expect(mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 22, tasks: [shuttle]})], NOW)).toEqual(
-            []
-        )
+        expect(
+            mgr.inboundTransfersTo(PLOT_ID, [makeHauler({id: 22, tasks: [shuttle]})], NOW)
+        ).toEqual([])
     })
 
     test('ignores a LOAD (pull) targeting the plot (cargo flows to the loader, not the plot)', () => {

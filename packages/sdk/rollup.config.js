@@ -30,11 +30,7 @@ const typescriptPlugins = () => {
     ]
 }
 
-const codePlugins = () => [
-    json(),
-    ...typescriptPlugins(),
-    cleanup({extensions: ['js', 'ts']}),
-]
+const codePlugins = () => [json(), ...typescriptPlugins(), cleanup({extensions: ['js', 'ts']})]
 
 /** @type {import('rollup').RollupOptions} */
 export default [
