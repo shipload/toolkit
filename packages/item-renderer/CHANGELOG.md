@@ -1,5 +1,18 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.56
+
+### Patch Changes
+
+- bcc59b3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Formatting
+  - Support shuttle construction transfers
+- Updated dependencies [bcc59b3]
+  - @shipload/sdk@1.0.0-next.56
+
 ## 1.0.0-next.55
 
 ### Patch Changes

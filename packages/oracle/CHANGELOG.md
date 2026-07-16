@@ -1,5 +1,16 @@
 # @shipload/oracle
 
+## 0.0.1-next.46
+
+### Patch Changes
+
+- bcc59b3: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Formatting
+  - Support shuttle construction transfers
+
 ## 0.0.1-next.45
 
 ### Patch Changes
