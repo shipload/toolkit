@@ -2369,23 +2369,23 @@
     "outputMass": 3840000,
     "inputs": [
       {
-        "itemId": 20005,
+        "itemId": 20001,
         "quantity": 150
       },
       {
-        "itemId": 20002,
+        "itemId": 20008,
         "quantity": 150
       },
       {
-        "itemId": 20010,
+        "itemId": 20007,
         "quantity": 150
       },
       {
-        "itemId": 20009,
+        "itemId": 20003,
         "quantity": 150
       },
       {
-        "itemId": 20004,
+        "itemId": 20006,
         "quantity": 150
       },
       {
@@ -2463,23 +2463,23 @@
     "outputMass": 3840000,
     "inputs": [
       {
-        "itemId": 20005,
+        "itemId": 20001,
         "quantity": 150
       },
       {
-        "itemId": 20002,
+        "itemId": 20008,
         "quantity": 150
       },
       {
-        "itemId": 20010,
+        "itemId": 20007,
         "quantity": 150
       },
       {
-        "itemId": 20009,
+        "itemId": 20003,
         "quantity": 150
       },
       {
-        "itemId": 20004,
+        "itemId": 20006,
         "quantity": 150
       },
       {
