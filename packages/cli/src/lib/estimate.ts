@@ -694,15 +694,20 @@ export async function estimateGroupTravel(params: {
 
 const INCOMING_HOLD_KINDS = new Set<number>([HoldKind.PUSH, HoldKind.GATHER, HoldKind.FLIGHT]);
 
-async function findCoupledTask(
-	counterpartId: string,
+export type CounterpartFetch = (entityId: string) => Promise<ServerTypes.entity_info>;
+
+async function fetchCounterpartEntity(entityId: string): Promise<ServerTypes.entity_info> {
+	return (await server.readonly("getentity", {
+		entity_id: entityId,
+	})) as unknown as ServerTypes.entity_info;
+}
+
+function findCoupledTask(
+	counterpart: ServerTypes.entity_info,
 	holdId: string,
 	receiverId: string,
-): Promise<{ task: ServerTypes.task; coupling: ServerTypes.coupling } | undefined> {
-	const raw = (await server.readonly("getentity", {
-		entity_id: counterpartId,
-	})) as unknown as ServerTypes.entity_info;
-	for (const ordered of schedule.orderedTasks(raw)) {
+): { task: ServerTypes.task; coupling: ServerTypes.coupling } | undefined {
+	for (const ordered of schedule.orderedTasks(counterpart)) {
 		const coupling = ordered.task.couplings.find(
 			(c) => c.hold.toString() === holdId && c.counterpart.entity_id.toString() === receiverId,
 		);
@@ -715,12 +720,19 @@ async function findCoupledTask(
 export async function buildIncomingSources(
 	receiverId: bigint | number,
 	holds: readonly ServerTypes.hold[],
+	fetcher: CounterpartFetch = fetchCounterpartEntity,
 ): Promise<IncomingSource[]> {
 	const receiverKey = String(receiverId);
+	const incoming = holds.filter((h) => INCOMING_HOLD_KINDS.has(h.kind.toNumber()));
+	const counterpartIds = [...new Set(incoming.map((h) => h.counterpart.entity_id.toString()))];
+	const counterparts = new Map(
+		await Promise.all(counterpartIds.map(async (id) => [id, await fetcher(id)] as const)),
+	);
 	const sources: IncomingSource[] = [];
-	for (const h of holds) {
-		if (!INCOMING_HOLD_KINDS.has(h.kind.toNumber())) continue;
-		const found = await findCoupledTask(h.counterpart.entity_id.toString(), h.id.toString(), receiverKey);
+	for (const h of incoming) {
+		const counterpart = counterparts.get(h.counterpart.entity_id.toString());
+		if (!counterpart) continue;
+		const found = findCoupledTask(counterpart, h.id.toString(), receiverKey);
 		if (!found) continue;
 		const items = calcCounterpartDelivery(found.task, found.coupling);
 		if (items.length === 0) continue;

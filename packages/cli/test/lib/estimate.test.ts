@@ -3,6 +3,7 @@ import {
 	type CargoInput,
 	cargoInputKey,
 	cargoKey,
+	HoldKind,
 	type IncomingSource,
 	laneKeyForModule,
 	projectedCargoAvailableAt,
@@ -10,6 +11,7 @@ import {
 	TaskType,
 } from "@shipload/sdk";
 import {
+	buildIncomingSources,
 	computeCraftCargoDelta,
 	computeFlightDurationSeconds,
 	computeGatherCargoDelta,
@@ -679,5 +681,87 @@ describe("estimateCraft — incoming cargo availability", () => {
 		expect(est.craft?.waitsForIncoming?.readyIn_s).toBeGreaterThan(250);
 		expect(est.craft?.waitsForIncoming?.readyIn_s).toBeLessThan(320);
 		expect(renderEstimate(est)).toContain("Waits for incoming cargo");
+	});
+});
+
+describe("buildIncomingSources", () => {
+	const RECEIVER = 5n;
+
+	function makeHold(id: number, kind: number, counterpartId: number) {
+		return ServerTypes.hold.from({
+			id,
+			kind,
+			counterpart: { entity_type: "ship", entity_id: counterpartId },
+			until: new Date(Date.now() + 60_000),
+			incoming_mass: 0,
+		});
+	}
+
+	function makeCounterpart(taskSpecs: { holdId: number; itemId: number; quantity: number }[]) {
+		return {
+			lanes: [
+				ServerTypes.lane.from({
+					lane_key: 0,
+					schedule: {
+						started: new Date(),
+						tasks: taskSpecs.map((spec) => ({
+							type: TaskType.UNLOAD,
+							duration: 60,
+							cancelable: 1,
+							cargo: [
+								{ item_id: spec.itemId, stats: 0, modules: [], quantity: spec.quantity },
+							],
+							couplings: [
+								{
+									counterpart: { entity_type: "ship", entity_id: RECEIVER },
+									hold: spec.holdId,
+									kind: HoldKind.PUSH,
+								},
+							],
+						})),
+					},
+				}),
+			],
+		} as unknown as ServerTypes.entity_info;
+	}
+
+	test("fetches each distinct counterpart once and resolves every hold's manifest", async () => {
+		const counterpart = makeCounterpart([
+			{ holdId: 1, itemId: 301, quantity: 10 },
+			{ holdId: 2, itemId: 302, quantity: 20 },
+		]);
+		const fetched: string[] = [];
+		const sources = await buildIncomingSources(
+			RECEIVER,
+			[makeHold(1, HoldKind.PUSH, 9), makeHold(2, HoldKind.GATHER, 9)],
+			async (id) => {
+				fetched.push(id);
+				return counterpart;
+			},
+		);
+		expect(fetched).toEqual(["9"]);
+		expect(sources.map((s) => s.holdId)).toEqual(["1", "2"]);
+		expect(sources[0].items[0].item_id.toNumber()).toBe(301);
+		expect(sources[1].items[0].item_id.toNumber()).toBe(302);
+	});
+
+	test("skips non-incoming holds without fetching their counterpart", async () => {
+		const fetched: string[] = [];
+		const sources = await buildIncomingSources(RECEIVER, [makeHold(3, HoldKind.PULL, 7)], async (id) => {
+			fetched.push(id);
+			return makeCounterpart([]);
+		});
+		expect(fetched).toEqual([]);
+		expect(sources).toEqual([]);
+	});
+
+	test("skips holds whose counterpart has no matching coupling", async () => {
+		const counterpart = makeCounterpart([{ holdId: 99, itemId: 301, quantity: 10 }]);
+		const sources = await buildIncomingSources(
+			RECEIVER,
+			[makeHold(1, HoldKind.PUSH, 9)],
+			async () => counterpart,
+		);
+		expect(sources).toEqual([]);
 	});
 });
