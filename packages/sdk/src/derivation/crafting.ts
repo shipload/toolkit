@@ -66,6 +66,24 @@ function keyForRecipeInputStat(recipe: Recipe, inputIndex: number, statIndex: nu
     return innerKeys[statIndex] ?? ''
 }
 
+export function usedInputStatKeys(outputItemId: number): string[][] {
+    const recipe = getRecipe(outputItemId)
+    if (!recipe) return []
+    const usedIdx = recipe.inputs.map(() => new Set<number>())
+    for (const slot of recipe.statSlots) {
+        for (const src of slot.sources) {
+            usedIdx[src.inputIndex]?.add(src.statIndex)
+        }
+    }
+    return recipe.inputs.map((input, i) => {
+        const keys = getItemStatKeys(input.itemId)
+        return [...usedIdx[i]]
+            .sort((a, b) => a - b)
+            .map((idx) => keys[idx] ?? '')
+            .filter(Boolean)
+    })
+}
+
 export function decodeCraftedItemStats(itemId: number, stats: bigint): Record<string, number> {
     const keys = getItemStatKeys(itemId)
     const result: Record<string, number> = {}

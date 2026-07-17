@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
-import {ServerContract, TaskType, TaskCancelable} from '../index-module'
+import {ServerContract, TaskType, TaskCancelable, HoldKind} from '../index-module'
 import {cancelEligibility, CancelBlockReason} from './cancel'
+import type {IncomingSource} from './availability'
 
 const T0 = '2026-06-19T00:00:00'
 
@@ -378,5 +379,164 @@ describe('cancelEligibility — feasibility', () => {
         expect(cancelEligibility(e, 1, 0, {now: upcoming}).blockedReason).toBe(
             CancelBlockReason.WOULD_STRAND
         )
+    })
+})
+
+describe('cancelEligibility — cross-entity strand (counterpart queued consumer)', () => {
+    const upcoming = new Date('2026-06-18T23:59:50.000Z')
+
+    function entityWithId(
+        id: number,
+        tasks: ReturnType<typeof ServerContract.Types.task.from>[],
+        cargo: {
+            id: number
+            item_id: number
+            stats: number
+            modules: never[]
+            quantity: number
+        }[] = []
+    ) {
+        return ServerContract.Types.entity_info.from({
+            type: 'ship',
+            id,
+            owner: 'player.gm',
+            entity_name: `Ship ${id}`,
+            coordinates: {x: 0, y: 0, z: 0},
+            item_id: 1,
+            cargomass: 0,
+            cargo,
+            modules: [],
+            lanes: [{lane_key: 0, schedule: {started: T0, tasks}}],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            builder_lanes: [],
+            loader_lanes: [],
+            holds: [],
+        })
+    }
+
+    function pushTask() {
+        return ServerContract.Types.task.from({
+            type: TaskType.UNLOAD,
+            duration: 50,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            couplings: [
+                {counterpart: {entity_type: 'ship', entity_id: 2}, hold: 1, kind: HoldKind.PUSH},
+            ],
+        })
+    }
+
+    function craftConsumerTask() {
+        return ServerContract.Types.task.from({
+            type: TaskType.CRAFT,
+            duration: 100,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [
+                {item_id: 7, stats: 0, modules: [], quantity: 2},
+                {item_id: 9, stats: 0, modules: [], quantity: 1},
+            ],
+            couplings: [],
+        })
+    }
+
+    function incoming(): IncomingSource[] {
+        return [
+            {
+                holdId: '1',
+                until: new Date('2026-06-19T00:00:50.000Z'),
+                items: [
+                    ServerContract.Types.cargo_item.from({
+                        item_id: 7,
+                        stats: 0,
+                        modules: [],
+                        quantity: 2,
+                    }),
+                ],
+            },
+        ]
+    }
+
+    function upgradeConsumerTask() {
+        return ServerContract.Types.task.from({
+            type: TaskType.UPGRADE,
+            duration: 100,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            couplings: [],
+        })
+    }
+
+    test('blocked: counterpart consumer loses coverage without this delivery', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const counterpart = entityWithId(2, [craftConsumerTask()])
+        const plan = cancelEligibility(producer, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['2', counterpart]]),
+            counterpartIncoming: new Map([['2', incoming()]]),
+        })
+        expect(plan.ok).toBe(false)
+        expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND_COUNTERPART)
+        expect(plan.blockedByCounterpart?.entity_id.toNumber()).toBe(2)
+    })
+
+    test('blocked: counterpart upgrade consumer loses coverage without this delivery', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const counterpart = entityWithId(2, [upgradeConsumerTask()])
+        const plan = cancelEligibility(producer, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['2', counterpart]]),
+            counterpartIncoming: new Map([['2', incoming()]]),
+        })
+        expect(plan.ok).toBe(false)
+        expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND_COUNTERPART)
+        expect(plan.blockedByCounterpart?.entity_id.toNumber()).toBe(2)
+    })
+
+    test('allowed: counterpart upgrade consumer already covered on-hand', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const counterpart = entityWithId(
+            2,
+            [upgradeConsumerTask()],
+            [{id: 1, item_id: 7, stats: 0, modules: [], quantity: 2}]
+        )
+        const plan = cancelEligibility(producer, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['2', counterpart]]),
+            counterpartIncoming: new Map([['2', incoming()]]),
+        })
+        expect(plan.ok).toBe(true)
+    })
+
+    test('allowed: counterpart consumer already covered on-hand (surplus coverage)', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const counterpart = entityWithId(
+            2,
+            [craftConsumerTask()],
+            [{id: 1, item_id: 7, stats: 0, modules: [], quantity: 2}]
+        )
+        const plan = cancelEligibility(producer, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['2', counterpart]]),
+            counterpartIncoming: new Map([['2', incoming()]]),
+        })
+        expect(plan.ok).toBe(true)
+    })
+
+    test('allowed: counterpart data not loaded, check skipped gracefully', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const plan = cancelEligibility(producer, 0, 0, {now: upcoming})
+        expect(plan.ok).toBe(true)
+    })
+
+    test('allowed: counterpart has no queued consumer', () => {
+        const producer = entityWithId(1, [pushTask()])
+        const idleCounterpart = entityWithId(2, [])
+        const plan = cancelEligibility(producer, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['2', idleCounterpart]]),
+            counterpartIncoming: new Map([['2', incoming()]]),
+        })
+        expect(plan.ok).toBe(true)
     })
 })

@@ -74,4 +74,46 @@ describe("renderEstimate — craft block", () => {
 		expect(out).toContain("1000");
 		expect(out).toContain("2000");
 	});
+	test("renders a waits-for-incoming-cargo line before Inputs when set", () => {
+		const out = renderEstimate({
+			duration_s: 5,
+			energy_cost: 100,
+			cargo_delta: { 301: -32, 10003: 1 },
+			feasibility: { ok: true, issues: [] },
+			craft: {
+				outputItemId: 10003,
+				outputQty: 1,
+				slots: [
+					{
+						itemId: 301,
+						requiredQty: 32,
+						contributions: [{ stackId: 214202522n, qty: 32 }],
+					},
+				],
+				waitsForIncoming: { readyIn_s: 120 },
+			},
+		});
+		expect(out).toContain("Waits for incoming cargo, ready in 2m");
+		expect(out.indexOf("Waits for incoming cargo")).toBeLessThan(out.indexOf("Inputs:"));
+	});
+	test("omits the waits-for-incoming-cargo line when unset", () => {
+		const out = renderEstimate({
+			duration_s: 5,
+			energy_cost: 100,
+			cargo_delta: { 301: -32, 10003: 1 },
+			feasibility: { ok: true, issues: [] },
+			craft: {
+				outputItemId: 10003,
+				outputQty: 1,
+				slots: [
+					{
+						itemId: 301,
+						requiredQty: 32,
+						contributions: [{ stackId: 214202522n, qty: 32 }],
+					},
+				],
+			},
+		});
+		expect(out).not.toContain("Waits for incoming cargo");
+	});
 });

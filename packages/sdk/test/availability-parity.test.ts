@@ -176,11 +176,17 @@ describe('projectedCargoAvailableAt', () => {
 
 describe('cargoReadyAt', () => {
     test('returns epoch when no scheduled task produces the inputs', () => {
-        expect(cargoReadyAt(factory12(), [201, 101]).getTime()).toBe(0)
+        const demand = [
+            {itemId: 201, stats: 316058715n, quantity: 100},
+            {itemId: 101, stats: 458292414n, quantity: 100},
+        ]
+        expect(cargoReadyAt(factory12(), demand).getTime()).toBe(0)
     })
 
-    test('returns the latest completion of a task producing a required input', () => {
-        const ready = cargoReadyAt(factory12({incomingLoad: true}), [201, 101])
+    test('returns the completion of the incoming load once it makes the depleted stats bucket sufficient', () => {
+        // Committed crafts consume exactly the 1900 on-hand units of this stats bucket to zero; only the load replenishes it.
+        const demand = [{itemId: 101, stats: 458292414n, quantity: 1}]
+        const ready = cargoReadyAt(factory12({incomingLoad: true}), demand)
         expect(ready.toISOString()).toBe('2026-06-11T23:02:57.000Z')
     })
 })

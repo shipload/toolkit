@@ -1,4 +1,4 @@
-import {getRecipe, ServerTypes, type Shipload} from '@shipload/sdk'
+import {getRecipe, type IncomingSource, ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
@@ -10,7 +10,7 @@ import {
     parseUint64,
 } from '../../lib/args'
 import {decideUseRecharge} from '../../lib/auto-recharge'
-import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
+import {type ProjectedCargoStack, projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {formatCargoRef, safeItemName} from '../../lib/cargo-table'
 import {
     type ParsedCargoInput,
@@ -20,7 +20,7 @@ import {
 import {getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {assertNotBoth, withValidation} from '../../lib/errors'
-import {estimateCraft} from '../../lib/estimate'
+import {buildIncomingSources, estimateCraft} from '../../lib/estimate'
 import {renderIssues} from '../../lib/feasibility'
 import {renderEstimate} from '../../lib/render-estimate'
 import {transact} from '../../lib/session'
@@ -91,6 +91,28 @@ async function validateRecipeSlotTotals(
     }
 }
 
+// Folds incoming manifest items into projected stacks by item+stats, mirroring resolveCargoInputs' own matching.
+function mergeIncomingCargo(
+    stacks: ProjectedCargoStack[],
+    incoming: IncomingSource[]
+): ProjectedCargoStack[] {
+    const merged = stacks.map((s) => ({...s}))
+    for (const src of incoming) {
+        for (const item of src.items) {
+            const itemId = BigInt(item.item_id.toString())
+            const stats = BigInt(item.stats.toString())
+            const quantity = BigInt(item.quantity.toString())
+            const idx = merged.findIndex((s) => s.item_id === itemId && s.stats === stats)
+            if (idx === -1) {
+                merged.push({item_id: itemId, stats, quantity, modules: item.modules ?? [], id: 0n})
+            } else {
+                merged[idx] = {...merged[idx], quantity: merged[idx].quantity + quantity}
+            }
+        }
+    }
+    return merged
+}
+
 export async function runCraft(
     ctx: EntityContext,
     recipeId: number,
@@ -101,9 +123,16 @@ export async function runCraft(
     assertNotBoth(options, ['estimate', 'wait'], ['estimate', 'track'])
     await withValidation(async () => {
         const snap = await getEntitySnapshot(ctx.entityId)
+        const rawEntity = (await server.readonly('getentity', {
+            entity_id: ctx.entityId,
+        })) as unknown as ServerTypes.entity_info
+        const incoming = await buildIncomingSources(ctx.entityId, rawEntity.holds ?? [])
         const resolved = resolveCargoInputs(
             inputs,
-            projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
+            mergeIncomingCargo(
+                projectCargoFromSnapshot(snap),
+                incoming
+            ) as unknown as ServerTypes.cargo_item[]
         )
         await validateRecipeSlotTotals(recipeId, quantity, resolved)
         const rechargeRequested = Boolean(options.recharge)
@@ -114,6 +143,7 @@ export async function runCraft(
             inputs: resolved,
             snapshot: snap,
             recharge: rechargeRequested,
+            incoming,
         })
         if (options.estimate) {
             console.log(renderEstimate(est))
@@ -131,6 +161,7 @@ export async function runCraft(
                     inputs: resolved,
                     snapshot: snap,
                     recharge: true,
+                    incoming,
                 }),
         })
         if (!useRecharge && !est.feasibility.ok) {

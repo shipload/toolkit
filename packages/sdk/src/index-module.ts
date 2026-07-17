@@ -319,7 +319,11 @@ export {
     availableForItem,
     cargoReadyAt,
     taskCargoEffect,
+    calcCounterpartDelivery,
+    cargoKey,
+    cargoInputKey,
 } from './scheduling/availability'
+export type {CargoInput, IncomingSource} from './scheduling/availability'
 
 export {maxCraftable} from './capabilities/craftable'
 
@@ -412,6 +416,7 @@ export {
     decodeStat,
     decodeStats,
     decodeCraftedItemStats,
+    usedInputStatKeys,
     blendStacks,
     computeComponentStats,
     blendComponentStacks,

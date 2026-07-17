@@ -41,7 +41,11 @@ export function renderEstimate(e: EstimateResult): string {
 	if (e.energy_cost !== 0) headerParts.push(`energy ${signed(-e.energy_cost)}`);
 
 	if (e.craft) {
-		const lines: string[] = [`${prefix} ${headerParts.join(", ")}`, "Inputs:"];
+		const lines: string[] = [`${prefix} ${headerParts.join(", ")}`];
+		if (e.craft.waitsForIncoming) {
+			lines.push(`Waits for incoming cargo, ready in ${formatDuration(e.craft.waitsForIncoming.readyIn_s)}`);
+		}
+		lines.push("Inputs:");
 		for (const slot of e.craft.slots) {
 			const total = slot.contributions.reduce((s, c) => s + c.qty, 0);
 			const itemName = formatItem(slot.itemId);

@@ -25,22 +25,30 @@ import {
 	calc_ship_flighttime,
 	calc_ship_mass,
 	calc_ship_rechargetime,
+	calcCounterpartDelivery,
+	cargoInputKey,
+	cargoReadyAt,
 	distanceBetweenPoints,
 	gatherEnergyCost,
 	getItem,
 	hasSystem,
+	HoldKind,
 	ServerTypes,
 	laneKeyForModule,
+	projectedCargoAvailableAt,
+	schedule,
 	splitCost,
+	type CargoInput,
 	type GatherPlan,
 	type GatherPlanEntity,
+	type IncomingSource,
 } from "@shipload/sdk";
 import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
-import { projectedCargoMass, projectedCoords, projectRemainingSnapshotAt } from "./projection";
 import {
+	checkCargoAvailability,
 	checkCargoCapacity,
 	checkDestinationIsSystem,
 	checkEnergyAvailable,
@@ -51,6 +59,8 @@ import {
 	collectIssues,
 	type FeasibilityIssue,
 } from "./feasibility";
+import { formatItem } from "./format";
+import { projectedCargoMass, projectedCoords, projectRemainingSnapshotAt } from "./projection";
 import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
 
 export interface TravelSummary {
@@ -73,6 +83,15 @@ export interface CraftSummary {
 		itemId: number;
 		requiredQty: number;
 		contributions: { stackId: bigint; qty: number }[];
+	}[];
+	waitsForIncoming?: { readyIn_s: number };
+}
+
+export interface CraftRecipe {
+	output_item_id: number | bigint | { toString(): string };
+	inputs: {
+		item_id: number | bigint | { toString(): string };
+		quantity: number | bigint | { toString(): string };
 	}[];
 }
 
@@ -673,6 +692,43 @@ export async function estimateGroupTravel(params: {
 	};
 }
 
+const INCOMING_HOLD_KINDS = new Set<number>([HoldKind.PUSH, HoldKind.GATHER, HoldKind.FLIGHT]);
+
+async function findCoupledTask(
+	counterpartId: string,
+	holdId: string,
+	receiverId: string,
+): Promise<{ task: ServerTypes.task; coupling: ServerTypes.coupling } | undefined> {
+	const raw = (await server.readonly("getentity", {
+		entity_id: counterpartId,
+	})) as unknown as ServerTypes.entity_info;
+	for (const ordered of schedule.orderedTasks(raw)) {
+		const coupling = ordered.task.couplings.find(
+			(c) => c.hold.toString() === holdId && c.counterpart.entity_id.toString() === receiverId,
+		);
+		if (coupling) return { task: ordered.task, coupling };
+	}
+	return undefined;
+}
+
+/** For each incoming-kind hold on the receiver, locate the counterpart's coupled task and read its manifest. */
+export async function buildIncomingSources(
+	receiverId: bigint | number,
+	holds: readonly ServerTypes.hold[],
+): Promise<IncomingSource[]> {
+	const receiverKey = String(receiverId);
+	const sources: IncomingSource[] = [];
+	for (const h of holds) {
+		if (!INCOMING_HOLD_KINDS.has(h.kind.toNumber())) continue;
+		const found = await findCoupledTask(h.counterpart.entity_id.toString(), h.id.toString(), receiverKey);
+		if (!found) continue;
+		const items = calcCounterpartDelivery(found.task, found.coupling);
+		if (items.length === 0) continue;
+		sources.push({ holdId: h.id.toString(), until: h.until.toDate(), items });
+	}
+	return sources;
+}
+
 export async function estimateCraft(params: {
 	entityId: bigint | number;
 	recipeId: number;
@@ -680,6 +736,8 @@ export async function estimateCraft(params: {
 	inputs: ResolvedCargoInput[];
 	snapshot?: EntitySnapshot;
 	recharge?: boolean;
+	incoming?: IncomingSource[];
+	recipe?: CraftRecipe;
 }): Promise<EstimateResult> {
 	const { entityId, recipeId, quantity, inputs } = params;
 	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
@@ -696,18 +754,13 @@ export async function estimateCraft(params: {
 		};
 	}
 
-	const recipeResponse = (await server.readonly("getrecipe", {
-		output_item_id: recipeId,
-	})) as unknown as {
-		recipes: {
-			output_item_id: number | bigint | { toString(): string };
-			inputs: {
-				item_id: number | bigint | { toString(): string };
-				quantity: number | bigint | { toString(): string };
-			}[];
-		}[];
-	};
-	const recipe = recipeResponse?.recipes?.[0];
+	const recipe =
+		params.recipe ??
+		(
+			(await server.readonly("getrecipe", {
+				output_item_id: recipeId,
+			})) as unknown as { recipes: CraftRecipe[] }
+		)?.recipes?.[0];
 	const outputItemId = recipe ? Number(recipe.output_item_id.toString()) : 0;
 
 	let totalInputMass = 0;
@@ -763,6 +816,49 @@ export async function estimateCraft(params: {
 		entity: { entityType: snap.type, entityId },
 	});
 
+	const incoming = params.incoming ?? [];
+	let waitsForIncoming: { readyIn_s: number } | undefined;
+	if (inputs.length > 0) {
+		const demand: CargoInput[] = inputs.map((i) => ({
+			itemId: i.itemId,
+			stats: i.stackId,
+			modules: i.modules,
+			quantity: i.quantity,
+		}));
+		const availabilityEntity = {
+			lanes: snap.lanes,
+			cargo: snap.cargo.map((c) =>
+				ServerTypes.cargo_item.from({
+					item_id: c.item_id,
+					stats: c.stats ?? 0n,
+					modules: (c.modules as ServerTypes.module_entry[] | undefined) ?? [],
+					quantity: c.quantity,
+				}),
+			),
+		};
+		const readyAt = cargoReadyAt(availabilityEntity, demand, incoming);
+		const probe = new Date(readyAt.getTime() + 1);
+		const availAtReady = projectedCargoAvailableAt(availabilityEntity, probe, incoming);
+		const shortfalls = demand.filter((d) => (availAtReady.get(cargoInputKey(d)) ?? 0n) < BigInt(d.quantity));
+		if (shortfalls.length > 0) {
+			for (const d of shortfalls) {
+				const have = Number(availAtReady.get(cargoInputKey(d)) ?? 0n);
+				const issue = checkCargoAvailability(have, d.quantity, formatItem(d.itemId));
+				if (issue) craftIssues.push(issue);
+			}
+		} else if (readyAt.getTime() > now.getTime()) {
+			const availWithoutIncoming = projectedCargoAvailableAt(availabilityEntity, probe, []);
+			const sufficientWithoutIncoming = demand.every(
+				(d) => (availWithoutIncoming.get(cargoInputKey(d)) ?? 0n) >= BigInt(d.quantity),
+			);
+			if (!sufficientWithoutIncoming) {
+				waitsForIncoming = {
+					readyIn_s: Math.max(0, Math.round((readyAt.getTime() - now.getTime()) / 1000)),
+				};
+			}
+		}
+	}
+
 	const craftSlots =
 		recipe?.inputs.map((slot) => {
 			const itemId = Number(slot.item_id.toString());
@@ -783,6 +879,7 @@ export async function estimateCraft(params: {
 			outputItemId,
 			outputQty: quantity,
 			slots: craftSlots,
+			...(waitsForIncoming ? { waitsForIncoming } : {}),
 		},
 	};
 }

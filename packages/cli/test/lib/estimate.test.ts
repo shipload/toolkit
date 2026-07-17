@@ -1,9 +1,19 @@
 import { describe, expect, test } from "bun:test";
-import { TaskType, laneKeyForModule } from "@shipload/sdk";
+import {
+	type CargoInput,
+	cargoInputKey,
+	cargoKey,
+	type IncomingSource,
+	laneKeyForModule,
+	projectedCargoAvailableAt,
+	ServerTypes,
+	TaskType,
+} from "@shipload/sdk";
 import {
 	computeCraftCargoDelta,
 	computeFlightDurationSeconds,
 	computeGatherCargoDelta,
+	estimateCraft,
 	type EstimateResult,
 	estimateGatherFromStratum,
 	estimateTravel,
@@ -564,5 +574,110 @@ describe("estimateGatherFromStratum — gatherplan model", () => {
 		const est = estimate({ generator: undefined }, 100, true);
 		expect(est.duration_s).toBe(0);
 		expect(est.feasibility.ok).toBe(true);
+	});
+});
+
+describe("craft sufficiency keys match SDK availability keys", () => {
+	const cases: { label: string; itemId: number; stats: bigint; modules: unknown[] }[] = [
+		{ label: "plain input", itemId: 301, stats: 214202522n, modules: [] },
+		{ label: "module-bearing input", itemId: 302, stats: 7n, modules: [{ type: 3 }] },
+	];
+
+	for (const { label, itemId, stats, modules } of cases) {
+		test(label, () => {
+			const entries = modules.map((m) => ServerTypes.module_entry.from(m));
+			const input: CargoInput = { itemId, stats, modules: entries, quantity: 4 };
+			const item = ServerTypes.cargo_item.from({
+				item_id: itemId,
+				stats,
+				modules: entries,
+				quantity: 4,
+			});
+			expect(cargoInputKey(input)).toBe(cargoKey(item));
+			const avail = projectedCargoAvailableAt({ lanes: [], cargo: [item] }, new Date());
+			expect(avail.get(cargoInputKey(input))).toBe(4n);
+		});
+	}
+});
+
+describe("estimateCraft — incoming cargo availability", () => {
+	const INPUT_ITEM = 301;
+	const OUTPUT_ITEM = 10003;
+	const STATS = 214202522n;
+	const NEEDED = 32;
+
+	function craftSnap(overrides: Record<string, unknown> = {}) {
+		return {
+			type: "ship",
+			id: 5n,
+			owner: "agent.gm",
+			entity_name: "Test Crafter",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0n,
+			cargo: [],
+			capacity: 10_000_000n,
+			energy: 10_000_000n,
+			generator: { capacity: 10_000_000n, recharge: 1n },
+			crafter_lanes: [{ speed: 100, drain: 1 }],
+			gatherer_lanes: [],
+			builder_lanes: [],
+			loader_lanes: [],
+			is_idle: true,
+			lanes: [],
+			...overrides,
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+	}
+
+	const RECIPE = {
+		output_item_id: OUTPUT_ITEM,
+		inputs: [{ item_id: INPUT_ITEM, quantity: NEEDED }],
+	};
+
+	const inputs = [{ itemId: INPUT_ITEM, stackId: STATS, quantity: NEEDED, modules: [] }];
+
+	test("shortfall with no incoming coverage stays infeasible", async () => {
+		const est = await estimateCraft({
+			entityId: 5n,
+			recipeId: OUTPUT_ITEM,
+			quantity: 1,
+			inputs,
+			snapshot: craftSnap(),
+			recipe: RECIPE,
+		});
+		expect(est.feasibility.ok).toBe(false);
+		expect(est.feasibility.issues.some((i) => i.code === "insufficient_cargo")).toBe(true);
+	});
+
+	test("incoming hold covering the shortfall makes the plan feasible and waits", async () => {
+		const until = new Date(Date.now() + 5 * 60_000);
+		const incoming: IncomingSource[] = [
+			{
+				holdId: "1",
+				until,
+				items: [
+					ServerTypes.cargo_item.from({
+						item_id: INPUT_ITEM,
+						stats: STATS,
+						modules: [],
+						quantity: NEEDED,
+					}),
+				],
+			},
+		];
+		const est = await estimateCraft({
+			entityId: 5n,
+			recipeId: OUTPUT_ITEM,
+			quantity: 1,
+			inputs,
+			snapshot: craftSnap(),
+			recipe: RECIPE,
+			incoming,
+		});
+		expect(est.feasibility.ok).toBe(true);
+		expect(est.craft?.waitsForIncoming).toBeDefined();
+		expect(est.craft?.waitsForIncoming?.readyIn_s).toBeGreaterThan(250);
+		expect(est.craft?.waitsForIncoming?.readyIn_s).toBeLessThan(320);
+		expect(renderEstimate(est)).toContain("Waits for incoming cargo");
 	});
 });

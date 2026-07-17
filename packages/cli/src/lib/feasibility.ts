@@ -2,6 +2,7 @@ export type FeasibilityCode =
 	| "energy_capacity_exceeded"
 	| "insufficient_energy"
 	| "insufficient_cargo_capacity"
+	| "insufficient_cargo"
 	| "insufficient_reserve"
 	| "excessive_travel_duration"
 	| "origin_equals_target"
@@ -53,6 +54,20 @@ export function checkCargoCapacity(available: number, delta: number): Feasibilit
 		severity: "error",
 		message: `cargo delta ${delta} exceeds available ${available}`,
 		detail: { available, delta },
+	};
+}
+
+export function checkCargoAvailability(
+	available: number,
+	required: number,
+	itemLabel: string,
+): FeasibilityIssue | null {
+	if (required <= available) return null;
+	return {
+		code: "insufficient_cargo",
+		severity: "error",
+		message: `needs ${required} ${itemLabel}, only ${available} available on hand, scheduled, and incoming`,
+		detail: { available, required },
 	};
 }
 

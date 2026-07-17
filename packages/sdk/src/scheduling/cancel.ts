@@ -1,7 +1,12 @@
 import type {ServerContract} from '../contracts'
 import {HoldKind, TaskCancelable, TaskType} from '../types'
 import {calcCargoItemMass} from '../capabilities/storage'
-import {taskCargoEffect, cargoKey} from './availability'
+import {
+    taskCargoEffect,
+    cargoKey,
+    isIncomingCouplingKind,
+    type IncomingSource,
+} from './availability'
 import * as schedule from './schedule'
 import {validateSchedule, type Projectable} from './projection'
 
@@ -11,6 +16,7 @@ export enum CancelBlockReason {
     DONE = 'DONE',
     CONTAINS_LINKED_TASK = 'CONTAINS_LINKED_TASK',
     WOULD_STRAND = 'WOULD_STRAND',
+    WOULD_STRAND_COUNTERPART = 'WOULD_STRAND_COUNTERPART',
     WOULD_OVERFILL = 'WOULD_OVERFILL',
     NOT_OWNER = 'NOT_OWNER',
 }
@@ -38,12 +44,14 @@ export interface CancelEffects {
 export interface CancelPlan {
     ok: boolean
     blockedReason?: CancelBlockReason
+    blockedByCounterpart?: EntityRef
     range: {count: number; taskIndices: number[]}
     effects: CancelEffects
 }
 export interface CancelEligibilityInput {
     now: Date
     counterparts?: Map<string, EntityInfo>
+    counterpartIncoming?: Map<string, readonly IncomingSource[]>
 }
 
 const EMPTY_EFFECTS: CancelEffects = {refunds: [], releasedHolds: [], abandonsRunning: false}
@@ -57,15 +65,18 @@ function postCancelEntity(entity: EntityInfo, laneKey: number, fromTaskIndex: nu
     return clone
 }
 
-function feasibleAfterCancel(post: EntityInfo): boolean {
-    const ordered = schedule.orderedTasks(post as unknown as Projectable)
+// C1: every pending consumer keeps its inputs covered by on-hand + own-lane producers strictly-before + incoming strictly-before.
+function queueFeasible(entity: EntityInfo, incoming: readonly IncomingSource[] = []): boolean {
+    const ordered = schedule.orderedTasks(entity as unknown as Projectable)
     const base = new Map<string, number>()
-    for (const c of post.cargo ?? []) {
+    for (const c of entity.cargo ?? []) {
         const k = cargoKey(c)
         base.set(k, (base.get(k) ?? 0) + c.quantity.toNumber())
     }
     const isConsumer = (t: Task) =>
-        t.type.toNumber() === TaskType.CRAFT || t.type.toNumber() === TaskType.UNLOAD
+        t.type.toNumber() === TaskType.CRAFT ||
+        t.type.toNumber() === TaskType.UNLOAD ||
+        t.type.toNumber() === TaskType.UPGRADE
     for (const self of ordered) {
         if (!isConsumer(self.task)) continue
         const map = new Map(base)
@@ -73,6 +84,12 @@ function feasibleAfterCancel(post: EntityInfo): boolean {
             if (other.completesAt.getTime() >= self.completesAt.getTime()) continue
             for (const out of taskCargoEffect(other.task).added) {
                 map.set(cargoKey(out), (map.get(cargoKey(out)) ?? 0) + out.quantity.toNumber())
+            }
+        }
+        for (const src of incoming) {
+            if (src.until.getTime() >= self.completesAt.getTime()) continue
+            for (const item of src.items) {
+                map.set(cargoKey(item), (map.get(cargoKey(item)) ?? 0) + item.quantity.toNumber())
             }
         }
         for (const other of ordered) {
@@ -86,6 +103,11 @@ function feasibleAfterCancel(post: EntityInfo): boolean {
             if ((map.get(cargoKey(inp)) ?? 0) < inp.quantity.toNumber()) return false
         }
     }
+    return true
+}
+
+function feasibleAfterCancel(post: EntityInfo): boolean {
+    if (!queueFeasible(post)) return false
     try {
         validateSchedule(post as unknown as Projectable)
     } catch {
@@ -161,6 +183,37 @@ export function cancelEligibility(
 
     const post = postCancelEntity(entity, laneKey, fromTaskIndex)
     if (!feasibleAfterCancel(post)) return block(CancelBlockReason.WOULD_STRAND)
+
+    // cross-entity C1: a counterpart losing this delivery must still feed its own queued consumers.
+    const releasedByCounterpart = new Map<string, {counterpart: EntityRef; holdIds: Set<string>}>()
+    for (const i of taskIndices) {
+        for (const c of tasks[i].couplings ?? []) {
+            if (!isIncomingCouplingKind(c.kind.toNumber())) continue
+            const id = c.counterpart.entity_id.toString()
+            const entry = releasedByCounterpart.get(id) ?? {
+                counterpart: c.counterpart,
+                holdIds: new Set<string>(),
+            }
+            entry.holdIds.add(c.hold.toString())
+            releasedByCounterpart.set(id, entry)
+        }
+    }
+    for (const [counterpartId, released] of releasedByCounterpart) {
+        const counterpart = input.counterparts?.get(counterpartId)
+        if (!counterpart) continue
+        const incoming = (input.counterpartIncoming?.get(counterpartId) ?? []).filter(
+            (src) => !released.holdIds.has(src.holdId)
+        )
+        if (!queueFeasible(counterpart, incoming)) {
+            return {
+                ok: false,
+                blockedReason: CancelBlockReason.WOULD_STRAND_COUNTERPART,
+                blockedByCounterpart: released.counterpart,
+                range,
+                effects: {...EMPTY_EFFECTS},
+            }
+        }
+    }
 
     const effects: CancelEffects = {refunds: [], releasedHolds: [], abandonsRunning: false}
     let energyForfeited = 0
