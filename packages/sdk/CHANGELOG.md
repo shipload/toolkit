@@ -1,5 +1,16 @@
 # @shipload/sdk
 
+## 1.0.0-next.57
+
+### Patch Changes
+
+- aec43cb: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Mirror incoming-aware cargo readiness in SDK and CLI
+  - dump travel formula fixtures for the godot client
+
 ## 1.0.0-next.56
 
 ### Patch Changes
