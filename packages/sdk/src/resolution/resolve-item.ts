@@ -8,6 +8,7 @@ import {entityMetadata, itemMetadata} from '../data/metadata'
 import {
     getModuleCapabilityType,
     isModuleItem,
+    MODULE_BUILDER,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_BATTERY,
@@ -21,6 +22,7 @@ import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeCrafterCapabilities,
+    computeBuilderCapabilities,
     computeBatteryCapabilities,
     computeEngineCapabilities,
     computeGathererCapabilities,
@@ -204,6 +206,16 @@ function computeCapabilityGroup(
             const caps = computeCrafterCapabilities(stats)
             return {
                 capability: 'Crafting',
+                attributes: [
+                    {label: 'Speed', value: caps.speed},
+                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
+                ],
+            }
+        }
+        case MODULE_BUILDER: {
+            const caps = computeBuilderCapabilities(stats)
+            return {
+                capability: 'Build',
                 attributes: [
                     {label: 'Speed', value: caps.speed},
                     {label: 'Drain', value: toWholeEnergy(caps.drain)},
