@@ -44,7 +44,7 @@ import {
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
-import {gathererDepthForTier} from '../derivation/capabilities'
+import {gathererDepthForTier, computeGathererYield} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
@@ -106,7 +106,6 @@ export const computeTravelDrain = (totalThrust: number, avgThm: number): number 
 }
 export const computeGeneratorCap = (com: number): number => 1_300_000 + com * 500
 export const computeGeneratorRech = (fin: number): number => 2000 + fin * 6
-export const computeGathererYield = (str: number): number => 200 + str
 export const computeGathererDrain = (con: number): number =>
     2 * Math.max(250_000, 1_250_000 - con * 1250)
 export const computeGathererDepth = (tol: number, tier: number): number =>
@@ -247,7 +246,7 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const tol = decodeStat(stats, 1)
             const con = decodeStat(stats, 2)
             const tier = getItem(itemId).tier
-            out += `  Yield ${computeGathererYield(str)}  Depth ${computeGathererDepth(
+            out += `  Yield ${computeGathererYield(str, tier)}  Depth ${computeGathererDepth(
                 tol,
                 tier
             )}  Drain ${toWholeEnergy(computeGathererDrain(con))}`

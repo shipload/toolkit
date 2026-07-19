@@ -1,7 +1,8 @@
 import {UInt8, UInt16, UInt64} from '@wharfkit/antelope'
 import {expect, test} from 'bun:test'
 import {encodeStats} from '../derivation/crafting'
-import {computeGathererYield, computeGathererDepth, computeGathererDrain} from '../nft/description'
+import {computeGathererDepth, computeGathererDrain} from '../nft/description'
+import {computeGathererYield} from '../derivation/capabilities'
 import {computeLoaderThrust, computeLoaderMass} from '../nft/description'
 import {computeCrafterSpeed, computeCrafterDrain} from '../nft/description'
 import {applySlotMultiplier} from '../entities/slot-multiplier'
@@ -77,8 +78,8 @@ test('resolveLaneGatherer reads the layout slot amp and applies it to yield (par
 
     // The resolver routes through the real layout's amp, not a hardcoded 100.
     expect(result.outputPct).toBe(ampFromLayout)
-    // Yield equals the contract formula clamp_to_uint16(compute_gatherer_yield(str) * amp / 100).
-    expect(result.yield).toBe(applySlotMultiplier(computeGathererYield(GATH_STR), ampFromLayout))
+    // Yield equals the contract formula clamp_to_uint16(compute_gatherer_yield(str, tier) * amp / 100).
+    expect(result.yield).toBe(applySlotMultiplier(computeGathererYield(GATH_STR, 1), ampFromLayout))
     expect(result.drain).toBe(computeGathererDrain(GATH_CON))
     expect(result.depth).toBe(computeGathererDepth(GATH_TOL, 1))
     expect(result.slotIndex).toBe(GATHERER_SLOT_IDX)
@@ -86,11 +87,11 @@ test('resolveLaneGatherer reads the layout slot amp and applies it to yield (par
 
 test('resolveLaneGatherer amp-scaling parity holds for a non-100 amp', () => {
     // Parity for a non-100 amp: clamp_to_uint16(value * amp / 100).
-    expect(applySlotMultiplier(computeGathererYield(GATH_STR), 80)).toBe(
-        Math.min(Math.floor((computeGathererYield(GATH_STR) * 80) / 100), 65535)
+    expect(applySlotMultiplier(computeGathererYield(GATH_STR, 1), 80)).toBe(
+        Math.min(Math.floor((computeGathererYield(GATH_STR, 1) * 80) / 100), 65535)
     )
-    expect(applySlotMultiplier(computeGathererYield(GATH_STR), 120)).toBe(
-        Math.floor((computeGathererYield(GATH_STR) * 120) / 100)
+    expect(applySlotMultiplier(computeGathererYield(GATH_STR, 1), 120)).toBe(
+        Math.floor((computeGathererYield(GATH_STR, 1) * 120) / 100)
     )
 })
 

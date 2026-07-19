@@ -1,14 +1,16 @@
-import {expect, test} from 'bun:test'
+import {describe, expect, test} from 'bun:test'
 import {
     computeEntityCapabilities,
     computeEngineCapabilities,
     computeGathererCapabilities,
+    computeGathererYield,
     computeGeneratorCapabilities,
     computeCrafterCapabilities,
     computeBuilderCapabilities,
     computeLoaderCapabilities,
     computeBaseCapacity,
     computeContainerCapabilities,
+    GATHERER_YIELD_TIER_TABLE,
 } from './capabilities'
 import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
 import {encodeStats} from './crafting'
@@ -247,4 +249,31 @@ test('gatherer depth accepts canonical tolerance and legacy recipe-labelled hard
     expect(computeGathererCapabilities({strength: 0, hardness: 213, saturation: 0}, 1).depth).toBe(
         1_565
     )
+})
+
+describe('computeGathererYield', () => {
+    test('table is the k=0.2 integer-percent curve T1..T10', () => {
+        expect([...GATHERER_YIELD_TIER_TABLE]).toEqual([
+            100, 120, 140, 160, 180, 200, 220, 240, 260, 280,
+        ])
+    })
+
+    test('T1 equals the base yield 200 + str (no change)', () => {
+        expect(computeGathererYield(500, 1)).toBe(700)
+        expect(computeGathererYield(0, 1)).toBe(200)
+    })
+
+    test('T2 scales base yield by 1.2, floored', () => {
+        expect(computeGathererYield(500, 2)).toBe(840) // floor(700 * 120 / 100)
+        expect(computeGathererYield(213, 2)).toBe(495) // floor(413 * 120 / 100) = floor(495.6)
+    })
+
+    test('T10 scales base yield by 2.8, floored', () => {
+        expect(computeGathererYield(500, 10)).toBe(1960) // 700 * 280 / 100
+    })
+
+    test('tier is clamped to [1, 10]', () => {
+        expect(computeGathererYield(500, 0)).toBe(700)
+        expect(computeGathererYield(500, 99)).toBe(1960)
+    })
 })

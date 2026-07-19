@@ -109,7 +109,7 @@ export function computeGathererCapabilities(
     const tol = stats.tolerance ?? stats.hardness
 
     return {
-        yield: 200 + str,
+        yield: computeGathererYield(str, tier),
         drain: 2 * Math.max(250_000, 1_250_000 - con * 1250),
         depth: gathererDepthForTier(tol, tier),
     }
@@ -268,6 +268,14 @@ export function capacityTierMultiplier(tier: number): number {
 
 export function applyCapacityTier(baseCapacity: number, tier: number): number {
     return clampUint32(Math.floor(baseCapacity * capacityTierMultiplier(tier)))
+}
+
+export const GATHERER_YIELD_TIER_TABLE = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+
+export function computeGathererYield(str: number, tier: number): number {
+    const clampedTier = Math.min(Math.max(tier, 1), GATHERER_YIELD_TIER_TABLE.length)
+    const pct = GATHERER_YIELD_TIER_TABLE[clampedTier - 1]
+    return Math.floor(((200 + str) * pct) / 100)
 }
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {

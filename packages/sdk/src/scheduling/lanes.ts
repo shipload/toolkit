@@ -2,10 +2,9 @@ import type {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {decodeStat} from '../derivation/crafting'
-import {gathererDepthForTier} from '../derivation/capabilities'
+import {gathererDepthForTier, computeGathererYield} from '../derivation/capabilities'
 import {applySlotMultiplier, getSlotAmp} from '../entities/slot-multiplier'
 import {
-    computeGathererYield,
     computeGathererDrain,
     computeLoaderThrust,
     computeLoaderMass,
@@ -76,7 +75,7 @@ export function resolveLaneGatherer(
     const con = decodeStat(stats, 2)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const yieldVal = applySlotMultiplier(computeGathererYield(str), amp)
+    const yieldVal = applySlotMultiplier(computeGathererYield(str, item.tier ?? 1), amp)
     const drain = computeGathererDrain(con)
     const depth = gathererDepthForTier(tol, item.tier ?? 1)
     return {slotIndex: idx, yield: yieldVal, drain, depth, outputPct: amp}

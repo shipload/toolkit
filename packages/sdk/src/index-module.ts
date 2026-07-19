@@ -463,6 +463,7 @@ export {
     GATHERER_DEPTH_TABLE,
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
+    computeGathererYield,
 } from './derivation/capabilities'
 export type {
     GathererDepthParams,
@@ -577,7 +578,6 @@ export {
     ENGINE_DRAIN_REF_THM,
     computeGeneratorCap,
     computeGeneratorRech,
-    computeGathererYield,
     computeGathererDrain,
     computeGathererDepth,
     computeLoaderMass,

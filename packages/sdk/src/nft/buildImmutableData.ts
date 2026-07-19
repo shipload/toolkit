@@ -14,6 +14,7 @@ import {
     MODULE_WARP,
 } from '../capabilities/modules'
 import {decodeStat, decodeCraftedItemStats} from '../derivation/crafting'
+import {computeGathererYield} from '../derivation/capabilities'
 import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
 import {getStatDefinitions} from '../derivation/stats'
 import type {ResourceCategory} from '../types'
@@ -28,7 +29,6 @@ import {
     computeEngineThrust,
     computeGathererDepth,
     computeGathererDrain,
-    computeGathererYield,
     computeGeneratorCap,
     computeGeneratorRech,
     computeCargoBayCapacity,
@@ -230,7 +230,10 @@ export function buildModuleImmutable(
             base.push({first: 'strength', second: ['uint16', str]})
             base.push({first: 'hardness', second: ['uint16', hrd]})
             base.push({first: 'saturation', second: ['uint16', sat]})
-            base.push({first: 'yield', second: ['uint16', computeGathererYield(str)]})
+            base.push({
+                first: 'yield',
+                second: ['uint16', computeGathererYield(str, item.tier)],
+            })
             base.push({
                 first: 'drain',
                 second: ['uint16', toWholeEnergy(computeGathererDrain(sat))],

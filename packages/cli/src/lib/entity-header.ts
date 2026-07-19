@@ -193,7 +193,7 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 			const con = decodeStat(stats, 2);
 			const tier = getItem(itemId).tier;
 			const drainPerMin = (computeGathererDrain(con) / 10000) * 60;
-			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str)} · ${drainPerMin.toFixed(1)} energy/min`;
+			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str, tier)} · ${drainPerMin.toFixed(1)} energy/min`;
 		}
 		case MODULE_LOADER: {
 			const ins = decodeStat(stats, 0);

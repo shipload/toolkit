@@ -174,7 +174,10 @@ describe('buildImmutableData', () => {
             'drain',
             'depth',
         ])
-        expect(findEntry(entries, 'yield')!.second).toEqual(['uint16', computeGathererYield(str)])
+        expect(findEntry(entries, 'yield')!.second).toEqual([
+            'uint16',
+            computeGathererYield(str, 1),
+        ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
             toWholeEnergy(computeGathererDrain(sat)),
