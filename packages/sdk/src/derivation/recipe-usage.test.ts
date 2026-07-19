@@ -20,8 +20,6 @@ import {
     ITEM_TENDER_T1_PACKED,
     ITEM_TUG_T1_PACKED,
     ITEM_PORTER_T1_PACKED,
-    ITEM_WRANGLER_T1_PACKED,
-    ITEM_DREDGER_T1_PACKED,
 } from '../data/item-ids'
 
 test('getAllRecipes returns the full catalog including the gatherer', () => {
@@ -82,9 +80,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by nine recipes', () => {
+test('getComponentDemand reports Resin as consumed by eight recipes', () => {
     const demand = getComponentDemand()
     const resin = demand.find((d) => d.itemId === ITEM_RESIN)
     expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(9)
+    expect(resin?.consumerCount).toBe(8)
 })

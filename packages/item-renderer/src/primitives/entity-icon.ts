@@ -28,7 +28,7 @@ const entityIconNames: Record<string, EntityIconSlug> = {
     tender: 'ship',
     tug: 'ship',
     porter: 'ship',
-    wrangler: 'ship',
+    smith: 'ship',
     dredger: 'ship',
     wright: 'ship',
     hauler: 'ship',

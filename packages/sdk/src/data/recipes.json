@@ -1595,31 +1595,31 @@
     "sourceSubclass": 10210
   },
   {
-    "outputItemId": 10216,
-    "outputMass": 3600000,
+    "outputItemId": 10218,
+    "outputMass": 2400000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 150
+        "quantity": 100
       },
       {
         "itemId": 10002,
-        "quantity": 150
+        "quantity": 100
       },
       {
         "itemId": 10010,
-        "quantity": 150
+        "quantity": 100
       },
       {
         "itemId": 10009,
-        "quantity": 150
+        "quantity": 100
       },
       {
         "itemId": 10004,
-        "quantity": 150
+        "quantity": 100
       },
       {
-        "itemId": 10211,
+        "itemId": 10210,
         "quantity": 1
       }
     ],
@@ -1686,101 +1686,7 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10211
-  },
-  {
-    "outputItemId": 10217,
-    "outputMass": 3600000,
-    "inputs": [
-      {
-        "itemId": 10005,
-        "quantity": 150
-      },
-      {
-        "itemId": 10002,
-        "quantity": 150
-      },
-      {
-        "itemId": 10010,
-        "quantity": 150
-      },
-      {
-        "itemId": 10009,
-        "quantity": 150
-      },
-      {
-        "itemId": 10004,
-        "quantity": 150
-      },
-      {
-        "itemId": 10211,
-        "quantity": 1
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          },
-          {
-            "inputIndex": 5,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 0
-          },
-          {
-            "inputIndex": 5,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 2,
-            "statIndex": 0
-          },
-          {
-            "inputIndex": 5,
-            "statIndex": 2
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 3,
-            "statIndex": 0
-          },
-          {
-            "inputIndex": 5,
-            "statIndex": 3
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 4,
-            "statIndex": 0
-          },
-          {
-            "inputIndex": 5,
-            "statIndex": 4
-          }
-        ]
-      }
-    ],
-    "blendWeights": [],
-    "sourceSubclass": 10211
+    "sourceSubclass": 10210
   },
   {
     "outputItemId": 20001,
@@ -2365,28 +2271,28 @@
     "sourceSubclass": 10200
   },
   {
-    "outputItemId": 20210,
-    "outputMass": 3840000,
+    "outputItemId": 20212,
+    "outputMass": 4320000,
     "inputs": [
       {
         "itemId": 20001,
-        "quantity": 150
+        "quantity": 200
       },
       {
         "itemId": 20008,
-        "quantity": 150
+        "quantity": 200
       },
       {
         "itemId": 20007,
-        "quantity": 150
+        "quantity": 200
       },
       {
         "itemId": 20003,
-        "quantity": 150
+        "quantity": 200
       },
       {
         "itemId": 20006,
-        "quantity": 150
+        "quantity": 200
       },
       {
         "itemId": 10211,
@@ -2459,31 +2365,31 @@
     "sourceSubclass": 10211
   },
   {
-    "outputItemId": 20211,
-    "outputMass": 3840000,
+    "outputItemId": 20213,
+    "outputMass": 5760000,
     "inputs": [
       {
-        "itemId": 20001,
+        "itemId": 20005,
         "quantity": 150
       },
       {
-        "itemId": 20008,
+        "itemId": 20002,
         "quantity": 150
       },
       {
-        "itemId": 20007,
+        "itemId": 20010,
         "quantity": 150
       },
       {
-        "itemId": 20003,
+        "itemId": 20009,
         "quantity": 150
       },
       {
-        "itemId": 20006,
+        "itemId": 20004,
         "quantity": 150
       },
       {
-        "itemId": 10214,
+        "itemId": 20212,
         "quantity": 1
       }
     ],
@@ -2550,6 +2456,100 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10214
+    "sourceSubclass": 20212
+  },
+  {
+    "outputItemId": 20214,
+    "outputMass": 5760000,
+    "inputs": [
+      {
+        "itemId": 20005,
+        "quantity": 150
+      },
+      {
+        "itemId": 20002,
+        "quantity": 150
+      },
+      {
+        "itemId": 20010,
+        "quantity": 150
+      },
+      {
+        "itemId": 20009,
+        "quantity": 150
+      },
+      {
+        "itemId": 20004,
+        "quantity": 150
+      },
+      {
+        "itemId": 20212,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclass": 20212
   }
 ]

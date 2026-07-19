@@ -227,7 +227,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 3600000
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10212,
@@ -248,7 +248,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 3600000
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10213,
@@ -269,7 +269,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 4400000
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10214,
@@ -290,7 +290,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 4400000
+    "baseHullmass": 4000000
   },
   {
     "entityItemId": 10215,
@@ -311,28 +311,23 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 5000000
+    "baseHullmass": 4000000
   },
   {
-    "entityItemId": 10216,
+    "entityItemId": 10218,
     "slots": [
       {
         "type": "generator",
-        "outputPct": 90,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
         "type": "engine",
-        "outputPct": 90,
+        "outputPct": 85,
         "maxTier": 1
       },
       {
-        "type": "gatherer",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "gatherer",
+        "type": "crafter",
         "outputPct": 100,
         "maxTier": 1
       }
@@ -340,52 +335,21 @@
     "baseHullmass": 4000000
   },
   {
-    "entityItemId": 10217,
-    "slots": [
-      {
-        "type": "generator",
-        "outputPct": 90,
-        "maxTier": 1
-      },
-      {
-        "type": "engine",
-        "outputPct": 90,
-        "maxTier": 1
-      },
-      {
-        "type": "gatherer",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "storage",
-        "outputPct": 100,
-        "maxTier": 1
-      }
-    ],
-    "baseHullmass": 4800000
-  },
-  {
     "entityItemId": 20200,
     "slots": [],
     "baseHullmass": 100000
   },
   {
-    "entityItemId": 20210,
+    "entityItemId": 20212,
     "slots": [
       {
         "type": "generator",
-        "outputPct": 100,
-        "maxTier": 2
-      },
-      {
-        "type": "generator",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 2
       },
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 90,
         "maxTier": 2
       },
       {
@@ -394,32 +358,58 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 5760000
+    "baseHullmass": 5920000
   },
   {
-    "entityItemId": 20211,
+    "entityItemId": 20213,
     "slots": [
       {
         "type": "generator",
-        "outputPct": 100,
+        "outputPct": 95,
         "maxTier": 2
       },
       {
         "type": "engine",
-        "outputPct": 100,
+        "outputPct": 95,
         "maxTier": 2
       },
       {
-        "type": "hauler",
-        "outputPct": 100,
+        "type": "aux",
+        "outputPct": 95,
         "maxTier": 2
       },
       {
-        "type": "hauler",
+        "type": "gatherer",
         "outputPct": 100,
         "maxTier": 2
       }
     ],
-    "baseHullmass": 7040000
+    "baseHullmass": 7360000
+  },
+  {
+    "entityItemId": 20214,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 7360000
   }
 ]

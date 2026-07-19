@@ -10,6 +10,8 @@ import {
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
     MODULE_ANY,
+    MODULE_AUX,
+    MODULE_BATTERY,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
@@ -82,5 +84,15 @@ describe('modules', () => {
 
     test('isModuleItem identifies ITEM_HAULER_T1', () => {
         assert.isTrue(isModuleItem(ITEM_HAULER_T1))
+    })
+
+    test('MODULE_AUX slot accepts generator, engine, and battery modules', () => {
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_GENERATOR))
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_ENGINE))
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_BATTERY))
+    })
+
+    test('MODULE_AUX slot rejects MODULE_GATHERER', () => {
+        assert.isFalse(moduleAccepts(MODULE_AUX, MODULE_GATHERER))
     })
 })

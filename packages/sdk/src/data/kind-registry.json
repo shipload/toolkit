@@ -122,14 +122,9 @@
       "displayLabel": "Porter"
     },
     {
-      "itemId": 10216,
+      "itemId": 10218,
       "kind": "ship",
-      "displayLabel": "Wrangler"
-    },
-    {
-      "itemId": 10217,
-      "kind": "ship",
-      "displayLabel": "Dredger"
+      "displayLabel": "Smith"
     },
     {
       "itemId": 10202,
@@ -182,14 +177,19 @@
       "displayLabel": ""
     },
     {
-      "itemId": 20210,
+      "itemId": 20212,
       "kind": "ship",
       "displayLabel": "Prospector"
     },
     {
-      "itemId": 20211,
+      "itemId": 20213,
       "kind": "ship",
-      "displayLabel": "Tug"
+      "displayLabel": "Prospector"
+    },
+    {
+      "itemId": 20214,
+      "kind": "ship",
+      "displayLabel": "Dredger"
     }
   ]
 }

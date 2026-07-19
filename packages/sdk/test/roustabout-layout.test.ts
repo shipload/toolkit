@@ -1,13 +1,14 @@
 import {expect, test} from 'bun:test'
 import {
-    ITEM_DREDGER_T1_PACKED,
+    ITEM_DREDGER_T2_PACKED,
     ITEM_PORTER_T1_PACKED,
     ITEM_PROSPECTOR_T1_PACKED,
+    ITEM_PROSPECTOR_T2_AUX_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
     ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_SMITH_T1_PACKED,
     ITEM_TENDER_T1_PACKED,
     ITEM_TUG_T1_PACKED,
-    ITEM_WRANGLER_T1_PACKED,
     ITEM_WRIGHT_T1_PACKED,
     eligibleUpgrades,
     getEntityLayout,
@@ -31,6 +32,7 @@ test('Roustabout upgrades use 85 percent engine and power-core slots', () => {
         ITEM_WRIGHT_T1_PACKED,
         ITEM_TUG_T1_PACKED,
         ITEM_PORTER_T1_PACKED,
+        ITEM_SMITH_T1_PACKED,
     ])
 
     for (const itemId of directChildIds) {
@@ -40,28 +42,28 @@ test('Roustabout upgrades use 85 percent engine and power-core slots', () => {
     }
 })
 
-test('Prospector children use 90 percent engine and power-core slots', () => {
+test('Prospector T1 upgrades into Prospector T2 at 90 percent engine and power-core slots', () => {
     const childIds = eligibleUpgrades(ITEM_PROSPECTOR_T1_PACKED).map(
         (recipe) => recipe.outputItemId
     )
-    expect(childIds).toEqual([
-        ITEM_WRANGLER_T1_PACKED,
-        ITEM_DREDGER_T1_PACKED,
-        ITEM_PROSPECTOR_T2_PACKED,
-    ])
+    expect(childIds).toEqual([ITEM_PROSPECTOR_T2_PACKED])
 
-    for (const itemId of [ITEM_WRANGLER_T1_PACKED, ITEM_DREDGER_T1_PACKED]) {
-        const slots = getEntityLayout(itemId)?.slots
-        expect(slots?.[0]).toMatchObject({type: 'generator', outputPct: 90})
-        expect(slots?.[1]).toMatchObject({type: 'engine', outputPct: 90})
-    }
+    const slots = getEntityLayout(ITEM_PROSPECTOR_T2_PACKED)?.slots
+    expect(slots?.[0]).toMatchObject({type: 'generator', outputPct: 90})
+    expect(slots?.[1]).toMatchObject({type: 'engine', outputPct: 90})
 })
 
-test('Prospector T2 doubles up on power cores at full output', () => {
+test('Prospector T2 has a single power core, engine, and gatherer slot', () => {
     expect(getEntityLayout(ITEM_PROSPECTOR_T2_PACKED)?.slots).toEqual([
-        {type: 'generator', outputPct: 100, maxTier: 2},
-        {type: 'generator', outputPct: 100, maxTier: 2},
-        {type: 'engine', outputPct: 100, maxTier: 2},
+        {type: 'generator', outputPct: 90, maxTier: 2},
+        {type: 'engine', outputPct: 90, maxTier: 2},
         {type: 'gatherer', outputPct: 100, maxTier: 2},
     ])
+})
+
+test('Prospector T2 upgrades into the Prospector T2 AUX and Dredger T2', () => {
+    const childIds = eligibleUpgrades(ITEM_PROSPECTOR_T2_PACKED).map(
+        (recipe) => recipe.outputItemId
+    )
+    expect(childIds).toEqual([ITEM_PROSPECTOR_T2_AUX_PACKED, ITEM_DREDGER_T2_PACKED])
 })

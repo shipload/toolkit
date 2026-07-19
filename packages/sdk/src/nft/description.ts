@@ -23,7 +23,6 @@ import {
     ITEM_GATHERER_T1,
     ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
-    ITEM_HAULER_SHIP_T2_PACKED,
     ITEM_HAULER_T1,
     ITEM_HAULER_T2,
     ITEM_BATTERY_T1,
@@ -31,15 +30,16 @@ import {
     ITEM_LOADER_T1,
     ITEM_PROSPECTOR_T1_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
+    ITEM_PROSPECTOR_T2_AUX_PACKED,
     ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
+    ITEM_SMITH_T1_PACKED,
     ITEM_STORAGE_T1,
     ITEM_TENDER_T1_PACKED,
     ITEM_TUG_T1_PACKED,
     ITEM_PORTER_T1_PACKED,
-    ITEM_WRANGLER_T1_PACKED,
     ITEM_WRIGHT_T1_PACKED,
-    ITEM_DREDGER_T1_PACKED,
+    ITEM_DREDGER_T2_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
 } from '../data/item-ids'
@@ -159,12 +159,10 @@ export function entityDisplayName(itemId: number): string {
             return 'Tug'
         case ITEM_PORTER_T1_PACKED:
             return 'Porter'
-        case ITEM_WRANGLER_T1_PACKED:
-            return 'Wrangler'
         case ITEM_WRIGHT_T1_PACKED:
             return 'Wright'
-        case ITEM_DREDGER_T1_PACKED:
-            return 'Dredger'
+        case ITEM_SMITH_T1_PACKED:
+            return 'Smith'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
         case ITEM_EXTRACTOR_T1_PACKED:
@@ -179,8 +177,10 @@ export function entityDisplayName(itemId: number): string {
             return 'Container'
         case ITEM_PROSPECTOR_T2_PACKED:
             return 'Prospector'
-        case ITEM_HAULER_SHIP_T2_PACKED:
-            return 'Tug'
+        case ITEM_PROSPECTOR_T2_AUX_PACKED:
+            return 'Prospector'
+        case ITEM_DREDGER_T2_PACKED:
+            return 'Dredger'
         default:
             return 'Entity'
     }

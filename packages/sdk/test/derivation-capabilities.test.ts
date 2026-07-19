@@ -13,13 +13,17 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
+    ITEM_DREDGER_T2_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_PROSPECTOR_T2_AUX_PACKED,
     ITEM_PROSPECTOR_T2_PACKED,
     ITEM_ROUSTABOUT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
+    ITEM_SMITH_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../src/data/item-ids'
+import {entityDisplayName} from '../src/nft/description'
 
 describe('computeBaseCapacity', () => {
     const stats = {strength: 100, hardness: 100, cohesion: 100, density: 100}
@@ -78,6 +82,22 @@ describe('computeBaseCapacity', () => {
 
     test('unknown item IDs return 0 (contract parity)', () => {
         expect(computeBaseCapacity(99999, stats)).toBe(0)
+    })
+
+    test('roster batch 4 ships resolve nonzero base capacity (zero-capacity trap)', () => {
+        expect(computeBaseCapacity(ITEM_SMITH_T1_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2_AUX_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_DREDGER_T2_PACKED, stats)).toBeGreaterThan(0)
+    })
+})
+
+describe('entityDisplayName (roster batch 4)', () => {
+    test('returns the correct display name for each new ship', () => {
+        expect(entityDisplayName(ITEM_SMITH_T1_PACKED)).toBe('Smith')
+        expect(entityDisplayName(ITEM_PROSPECTOR_T2_PACKED)).toBe('Prospector')
+        expect(entityDisplayName(ITEM_PROSPECTOR_T2_AUX_PACKED)).toBe('Prospector')
+        expect(entityDisplayName(ITEM_DREDGER_T2_PACKED)).toBe('Dredger')
     })
 })
 

@@ -28,6 +28,7 @@ export const MODULE_STORAGE = 8
 export const MODULE_HAULER = 9
 export const MODULE_BATTERY = 10
 export const MODULE_BUILDER = 12
+export const MODULE_AUX = 13
 
 export interface PackedModule {
     itemId: number
@@ -40,6 +41,13 @@ export interface ModuleEntry {
 }
 
 export function moduleAccepts(slotType: number, moduleType: number): boolean {
+    if (slotType === MODULE_AUX) {
+        return (
+            moduleType === MODULE_GENERATOR ||
+            moduleType === MODULE_ENGINE ||
+            moduleType === MODULE_BATTERY
+        )
+    }
     return slotType === MODULE_ANY || slotType === moduleType
 }
 
@@ -104,6 +112,8 @@ export function moduleSlotTypeToCode(slotType: string): number {
             return MODULE_HAULER
         case 'battery':
             return MODULE_BATTERY
+        case 'aux':
+            return MODULE_AUX
         default:
             return MODULE_ANY
     }

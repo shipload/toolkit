@@ -320,15 +320,10 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A cargo ship built around a large storage hold. The extra mass makes it slower than a Roustabout.',
         color: '#4AE898',
     },
-    10216: {
-        name: 'Wrangler',
-        description: 'A heavy gathering ship with two gathering rigs, so it mines faster.',
-        color: '#4AE898',
-    },
-    10217: {
-        name: 'Dredger',
+    10218: {
+        name: 'Smith',
         description:
-            'A gathering ship with its own storage hold, so it can keep mining before it has to offload.',
+            'A crafting ship. One engine, one power core, and a fabricator for crafting away from home.',
         color: '#4AE898',
     },
 
@@ -405,16 +400,21 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Advanced cargo container with improved capacity formulas.',
         color: '#9BADB8',
     },
-    20210: {
+    20212: {
         name: 'Prospector',
-        description:
-            'Advanced exploration vessel with tiered engine, power core, and limpet bay slots.',
+        description: 'The tier 2 Prospector. The same three systems, ready for tier 2 modules.',
         color: '#4AE898',
     },
-    20211: {
-        name: 'Tug',
+    20213: {
+        name: 'Prospector',
         description:
-            'Advanced towing vessel with tiered engine, generator, and tractor beam slots.',
+            'A tier 2 Prospector with an auxiliary system for extra power, mobility, or endurance.',
+        color: '#4AE898',
+    },
+    20214: {
+        name: 'Dredger',
+        description:
+            'A gathering ship that stores what it digs. Its limpet bay works alongside a cargo hold.',
         color: '#4AE898',
     },
 }
@@ -427,8 +427,7 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     10213: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm']},
     10214: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
     10215: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
-    10216: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Limpet Bay']},
-    10217: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
+    10218: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator']},
     10202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },
@@ -440,8 +439,9 @@ export const entityMetadata: Record<number, EntityMetadata> = {
         moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
     },
     10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
-    20210: {moduleSlotLabels: ['Power Core', 'Power Core', 'Engine', 'Limpet Bay']},
-    20211: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam', 'Tractor Beam']},
+    20212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
+    20213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
+    20214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
 }
 
 for (const item of items as Array<{id: number}>) {
