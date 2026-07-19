@@ -1,5 +1,22 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.59
+
+### Patch Changes
+
+- 577061a: - Mirror the roster ladder adoption in the SDK and item-renderer
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Batch and dedupe counterpart fetches in the craft incoming preflight
+  - Rename ship item constants to the tier-variant convention
+  - Add in missing builder module
+  - Include colocated src tests in the SDK test target
+  - Sync catalog for the refined T2 ship entry recipes
+- Updated dependencies [577061a]
+  - @shipload/sdk@1.0.0-next.59
+
 ## 1.0.0-next.58
 
 ### Patch Changes
