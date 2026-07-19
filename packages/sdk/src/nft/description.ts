@@ -28,18 +28,18 @@ import {
     ITEM_BATTERY_T1,
     ITEM_LAUNCHER_T1,
     ITEM_LOADER_T1,
-    ITEM_PROSPECTOR_T1_PACKED,
-    ITEM_PROSPECTOR_T2_PACKED,
-    ITEM_PROSPECTOR_T2_AUX_PACKED,
-    ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_PROSPECTOR_T1A_PACKED,
+    ITEM_PROSPECTOR_T2A_PACKED,
+    ITEM_PROSPECTOR_T2B_PACKED,
+    ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_SMITH_T1_PACKED,
+    ITEM_SMITH_T1A_PACKED,
     ITEM_STORAGE_T1,
-    ITEM_TENDER_T1_PACKED,
-    ITEM_TUG_T1_PACKED,
-    ITEM_PORTER_T1_PACKED,
-    ITEM_WRIGHT_T1_PACKED,
-    ITEM_DREDGER_T2_PACKED,
+    ITEM_TENDER_T1A_PACKED,
+    ITEM_TUG_T1A_PACKED,
+    ITEM_PORTER_T1A_PACKED,
+    ITEM_WRIGHT_T1A_PACKED,
+    ITEM_DREDGER_T2A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WARP_T1,
 } from '../data/item-ids'
@@ -149,19 +149,19 @@ export function entityDisplayName(itemId: number): string {
     switch (itemId) {
         case ITEM_SHIP_T1_PACKED:
             return 'Ship'
-        case ITEM_ROUSTABOUT_T1_PACKED:
+        case ITEM_ROUSTABOUT_T1A_PACKED:
             return 'Roustabout'
-        case ITEM_PROSPECTOR_T1_PACKED:
+        case ITEM_PROSPECTOR_T1A_PACKED:
             return 'Prospector'
-        case ITEM_TENDER_T1_PACKED:
+        case ITEM_TENDER_T1A_PACKED:
             return 'Tender'
-        case ITEM_TUG_T1_PACKED:
+        case ITEM_TUG_T1A_PACKED:
             return 'Tug'
-        case ITEM_PORTER_T1_PACKED:
+        case ITEM_PORTER_T1A_PACKED:
             return 'Porter'
-        case ITEM_WRIGHT_T1_PACKED:
+        case ITEM_WRIGHT_T1A_PACKED:
             return 'Wright'
-        case ITEM_SMITH_T1_PACKED:
+        case ITEM_SMITH_T1A_PACKED:
             return 'Smith'
         case ITEM_WAREHOUSE_T1_PACKED:
             return 'Warehouse'
@@ -175,11 +175,11 @@ export function entityDisplayName(itemId: number): string {
             return 'Container'
         case ITEM_CONTAINER_T2_PACKED:
             return 'Container'
-        case ITEM_PROSPECTOR_T2_PACKED:
+        case ITEM_PROSPECTOR_T2A_PACKED:
             return 'Prospector'
-        case ITEM_PROSPECTOR_T2_AUX_PACKED:
+        case ITEM_PROSPECTOR_T2B_PACKED:
             return 'Prospector'
-        case ITEM_DREDGER_T2_PACKED:
+        case ITEM_DREDGER_T2A_PACKED:
             return 'Dredger'
         default:
             return 'Entity'

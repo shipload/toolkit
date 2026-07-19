@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, UInt16, UInt32} from '@wharfkit/antelope'
 import {ServerContract} from '../src/contracts'
 import {projectEntity, type Projectable} from '../src/scheduling/projection'
-import {ITEM_ROUSTABOUT_T1_PACKED, ITEM_ENGINE_T1} from '../src/data/item-ids'
+import {ITEM_ROUSTABOUT_T1A_PACKED, ITEM_ENGINE_T1} from '../src/data/item-ids'
 import {encodeStats, decodeCraftedItemStats} from '../src/derivation/crafting'
 import {computeEntityCapabilities} from '../src/derivation/capabilities'
 import {getEntityLayout} from '../src/data/recipes-runtime'
@@ -18,15 +18,15 @@ describe('projectEntity (lean row recompute)', () => {
             cargomass: UInt32.from(0),
             owner: Name.from('teamgreymass'),
             stats: seed,
-            item_id: ITEM_ROUSTABOUT_T1_PACKED,
+            item_id: ITEM_ROUSTABOUT_T1A_PACKED,
             modules,
         }
 
         const expected = computeEntityCapabilities(
-            decodeCraftedItemStats(ITEM_ROUSTABOUT_T1_PACKED, seed),
-            ITEM_ROUSTABOUT_T1_PACKED,
+            decodeCraftedItemStats(ITEM_ROUSTABOUT_T1A_PACKED, seed),
+            ITEM_ROUSTABOUT_T1A_PACKED,
             modules,
-            getEntityLayout(ITEM_ROUSTABOUT_T1_PACKED)?.slots ?? []
+            getEntityLayout(ITEM_ROUSTABOUT_T1A_PACKED)?.slots ?? []
         )
 
         const projected = projectEntity(lean)

@@ -21,13 +21,13 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_LOADER_T1,
     ITEM_SHIP_T1_PACKED,
-    ITEM_ROUSTABOUT_T1_PACKED,
-    ITEM_PROSPECTOR_T1_PACKED,
-    ITEM_TENDER_T1_PACKED,
-    ITEM_TUG_T1_PACKED,
-    ITEM_PORTER_T1_PACKED,
-    ITEM_SMITH_T1_PACKED,
-    ITEM_WRIGHT_T1_PACKED,
+    ITEM_ROUSTABOUT_T1A_PACKED,
+    ITEM_PROSPECTOR_T1A_PACKED,
+    ITEM_TENDER_T1A_PACKED,
+    ITEM_TUG_T1A_PACKED,
+    ITEM_PORTER_T1A_PACKED,
+    ITEM_SMITH_T1A_PACKED,
+    ITEM_WRIGHT_T1A_PACKED,
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_BUILDER_T1,
@@ -71,13 +71,13 @@ test('computeBaseCapacity uses ship-hull formula for every ship-class entity', (
     const expected = computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)
     expect(expected).toBeGreaterThan(0)
     for (const itemId of [
-        ITEM_ROUSTABOUT_T1_PACKED,
-        ITEM_PROSPECTOR_T1_PACKED,
-        ITEM_TENDER_T1_PACKED,
-        ITEM_TUG_T1_PACKED,
-        ITEM_PORTER_T1_PACKED,
-        ITEM_SMITH_T1_PACKED,
-        ITEM_WRIGHT_T1_PACKED,
+        ITEM_ROUSTABOUT_T1A_PACKED,
+        ITEM_PROSPECTOR_T1A_PACKED,
+        ITEM_TENDER_T1A_PACKED,
+        ITEM_TUG_T1A_PACKED,
+        ITEM_PORTER_T1A_PACKED,
+        ITEM_SMITH_T1A_PACKED,
+        ITEM_WRIGHT_T1A_PACKED,
     ]) {
         expect(computeBaseCapacity(itemId, stats)).toBe(expected)
     }
@@ -221,7 +221,7 @@ test('engine and generator capabilities use tapered quality consistently', () =>
         {type: 'generator', outputPct: 100, maxTier: 1},
     ]
 
-    const result = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1_PACKED, modules, layout)
+    const result = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1A_PACKED, modules, layout)
     const engines = computeEngineCapabilities({volatility: 500, thermal: 500})
 
     expect(result.engines).toEqual({

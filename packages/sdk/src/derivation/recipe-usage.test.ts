@@ -15,11 +15,11 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_BUILDER_T1,
     ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_ROUSTABOUT_T1_PACKED,
-    ITEM_PROSPECTOR_T1_PACKED,
-    ITEM_TENDER_T1_PACKED,
-    ITEM_TUG_T1_PACKED,
-    ITEM_PORTER_T1_PACKED,
+    ITEM_ROUSTABOUT_T1A_PACKED,
+    ITEM_PROSPECTOR_T1A_PACKED,
+    ITEM_TENDER_T1A_PACKED,
+    ITEM_TUG_T1A_PACKED,
+    ITEM_PORTER_T1A_PACKED,
 } from '../data/item-ids'
 
 test('getAllRecipes returns the full catalog including the gatherer', () => {
@@ -36,7 +36,7 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
             ITEM_CRAFTER_T1,
             ITEM_BUILDER_T1,
             ITEM_EXTRACTOR_T1_PACKED,
-            ITEM_ROUSTABOUT_T1_PACKED,
+            ITEM_ROUSTABOUT_T1A_PACKED,
         ].sort((a, b) => a - b)
     )
 })

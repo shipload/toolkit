@@ -13,14 +13,14 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-    ITEM_DREDGER_T2_PACKED,
+    ITEM_DREDGER_T2A_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
-    ITEM_PROSPECTOR_T2_AUX_PACKED,
-    ITEM_PROSPECTOR_T2_PACKED,
-    ITEM_ROUSTABOUT_T1_PACKED,
+    ITEM_PROSPECTOR_T2B_PACKED,
+    ITEM_PROSPECTOR_T2A_PACKED,
+    ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_SMITH_T1_PACKED,
+    ITEM_SMITH_T1A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../src/data/item-ids'
 import {entityDisplayName} from '../src/nft/description'
@@ -85,19 +85,19 @@ describe('computeBaseCapacity', () => {
     })
 
     test('roster batch 4 ships resolve nonzero base capacity (zero-capacity trap)', () => {
-        expect(computeBaseCapacity(ITEM_SMITH_T1_PACKED, stats)).toBeGreaterThan(0)
-        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2_PACKED, stats)).toBeGreaterThan(0)
-        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2_AUX_PACKED, stats)).toBeGreaterThan(0)
-        expect(computeBaseCapacity(ITEM_DREDGER_T2_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_SMITH_T1A_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2A_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_PROSPECTOR_T2B_PACKED, stats)).toBeGreaterThan(0)
+        expect(computeBaseCapacity(ITEM_DREDGER_T2A_PACKED, stats)).toBeGreaterThan(0)
     })
 })
 
 describe('entityDisplayName (roster batch 4)', () => {
     test('returns the correct display name for each new ship', () => {
-        expect(entityDisplayName(ITEM_SMITH_T1_PACKED)).toBe('Smith')
-        expect(entityDisplayName(ITEM_PROSPECTOR_T2_PACKED)).toBe('Prospector')
-        expect(entityDisplayName(ITEM_PROSPECTOR_T2_AUX_PACKED)).toBe('Prospector')
-        expect(entityDisplayName(ITEM_DREDGER_T2_PACKED)).toBe('Dredger')
+        expect(entityDisplayName(ITEM_SMITH_T1A_PACKED)).toBe('Smith')
+        expect(entityDisplayName(ITEM_PROSPECTOR_T2A_PACKED)).toBe('Prospector')
+        expect(entityDisplayName(ITEM_PROSPECTOR_T2B_PACKED)).toBe('Prospector')
+        expect(entityDisplayName(ITEM_DREDGER_T2A_PACKED)).toBe('Dredger')
     })
 })
 
@@ -121,14 +121,14 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
             volatility: 404,
             conductivity: 505,
         }
-        const result = computeShipHullCapabilities(stats, ITEM_ROUSTABOUT_T1_PACKED)
+        const result = computeShipHullCapabilities(stats, ITEM_ROUSTABOUT_T1A_PACKED)
 
         expect(result).toEqual({hullmass: 2_715_200, capacity: 8_609_656})
     })
 
     test('T2 ship capacity applies its existing tier multiplier after five-channel quality', () => {
         expect(
-            computeBaseCapacity(ITEM_PROSPECTOR_T2_PACKED, {
+            computeBaseCapacity(ITEM_PROSPECTOR_T2A_PACKED, {
                 strength: 101,
                 hardness: 202,
                 saturation: 303,
