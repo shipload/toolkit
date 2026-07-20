@@ -180,12 +180,14 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		case MODULE_ENGINE: {
 			const vol = decodeStat(stats, 0);
 			const thm = decodeStat(stats, 1);
-			return `thrust ${computeEngineThrust(vol)} · ${computeEngineDrain(thm)} energy/step`;
+			const tier = getItem(itemId).tier;
+			return `thrust ${computeEngineThrust(vol, tier)} · ${computeEngineDrain(thm)} energy/step`;
 		}
 		case MODULE_GENERATOR: {
 			const com = decodeStat(stats, 0);
 			const fin = decodeStat(stats, 1);
-			return `capacity ${computeGeneratorCap(com)} · recharge ${computeGeneratorRech(fin)}/s`;
+			const tier = getItem(itemId).tier;
+			return `capacity ${computeGeneratorCap(com, tier)} · recharge ${computeGeneratorRech(fin, tier)}/s`;
 		}
 		case MODULE_GATHERER: {
 			const str = decodeStat(stats, 0);
@@ -198,12 +200,14 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		case MODULE_LOADER: {
 			const ins = decodeStat(stats, 0);
 			const pla = decodeStat(stats, 1);
-			return `${formatMass(computeLoaderMass(ins))} each · thrust ${computeLoaderThrust(pla)}`;
+			const tier = getItem(itemId).tier;
+			return `${formatMass(computeLoaderMass(ins))} each · thrust ${computeLoaderThrust(pla, tier)}`;
 		}
 		case MODULE_CRAFTER: {
 			const rea = decodeStat(stats, 0);
 			const fin = decodeStat(stats, 1);
-			const speed = computeCrafterSpeed(rea);
+			const tier = getItem(itemId).tier;
+			const speed = computeCrafterSpeed(rea, tier);
 			const drainPerMin = ((computeCrafterDrain(fin) * speed) / 150000) * 60;
 			return `speed ${speed} · ${drainPerMin.toFixed(1)} energy/min`;
 		}
@@ -217,7 +221,8 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 		}
 		case MODULE_WARP: {
 			const res = decodeStat(stats, 0);
-			return `range ${computeWarpRange(res)}`;
+			const tier = getItem(itemId).tier;
+			return `range ${computeWarpRange(res, tier)}`;
 		}
 		case MODULE_STORAGE: {
 			const str = decodeStat(stats, 0);

@@ -113,7 +113,7 @@ export function resolveLaneCrafter(
     const fin = decodeStat(stats, 1)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const speed = applySlotMultiplier(computeCrafterSpeed(rea), amp)
+    const speed = applySlotMultiplier(computeCrafterSpeed(rea, item.tier ?? 1), amp)
     const drain = computeCrafterDrain(fin)
     return {slotIndex: idx, speed, drain, outputPct: amp}
 }
@@ -133,7 +133,7 @@ export function resolveLaneBuilder(
     const fin = decodeStat(stats, 1)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const speed = applySlotMultiplier(computeBuilderSpeed(res), amp)
+    const speed = applySlotMultiplier(computeBuilderSpeed(res, item.tier ?? 1), amp)
     const drain = computeBuilderDrain(fin)
     return {slotIndex: idx, speed, drain, outputPct: amp}
 }
@@ -152,12 +152,13 @@ export function resolveLaneLoader(
     if (!installed) {
         return {slotIndex: idx, thrust: 0, mass: 0, outputPct: 0, valid: false}
     }
+    const item = getItem(Number(installed.item_id.value ?? installed.item_id))
     const stats = BigInt(installed.stats.toString())
     const ins = decodeStat(stats, 0)
     const pla = decodeStat(stats, 1)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const thrust = applySlotMultiplier(computeLoaderThrust(pla), amp)
+    const thrust = applySlotMultiplier(computeLoaderThrust(pla, item.tier ?? 1), amp)
     const mass = computeLoaderMass(ins)
     return {slotIndex: idx, thrust, mass, outputPct: amp, valid: true}
 }

@@ -2087,6 +2087,88 @@
     "blendWeights": []
   },
   {
+    "outputItemId": 20100,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20003,
+        "quantity": 600
+      },
+      {
+        "itemId": 10100,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20101,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20004,
+        "quantity": 600
+      },
+      {
+        "itemId": 10101,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
     "outputItemId": 20102,
     "outputMass": 1536000,
     "inputs": [

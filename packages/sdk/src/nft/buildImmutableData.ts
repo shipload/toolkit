@@ -194,7 +194,7 @@ export function buildModuleImmutable(
             base.push({first: 'thermal', second: ['uint16', thm]})
             base.push({
                 first: 'thrust',
-                second: ['uint32', computeEngineThrust(computeEffectiveModuleStat(vol))],
+                second: ['uint32', computeEngineThrust(computeEffectiveModuleStat(vol), item.tier)],
             })
             base.push({
                 first: 'drain',
@@ -211,14 +211,14 @@ export function buildModuleImmutable(
                 first: 'capacity',
                 second: [
                     'uint16',
-                    toWholeEnergy(computeGeneratorCap(computeEffectiveModuleStat(res))),
+                    toWholeEnergy(computeGeneratorCap(computeEffectiveModuleStat(res), item.tier)),
                 ],
             })
             base.push({
                 first: 'recharge',
                 second: [
                     'uint16',
-                    toWholeEnergy(computeGeneratorRech(computeEffectiveModuleStat(ref))),
+                    toWholeEnergy(computeGeneratorRech(computeEffectiveModuleStat(ref), item.tier)),
                 ],
             })
             break
@@ -247,13 +247,13 @@ export function buildModuleImmutable(
             base.push({first: 'fineness', second: ['uint16', fin]})
             base.push({first: 'plasticity', second: ['uint16', pla]})
             base.push({first: 'mass', second: ['uint32', computeLoaderMass(fin)]})
-            base.push({first: 'thrust', second: ['uint16', computeLoaderThrust(pla)]})
+            base.push({first: 'thrust', second: ['uint16', computeLoaderThrust(pla, item.tier)]})
             break
         }
         case MODULE_WARP: {
             const ref = decodeStat(stats, 0)
             base.push({first: 'reflectivity', second: ['uint16', ref]})
-            base.push({first: 'range', second: ['uint32', computeWarpRange(ref)]})
+            base.push({first: 'range', second: ['uint32', computeWarpRange(ref, item.tier)]})
             break
         }
         case MODULE_CRAFTER: {
@@ -261,7 +261,7 @@ export function buildModuleImmutable(
             const con = decodeStat(stats, 1)
             base.push({first: 'fineness', second: ['uint16', fin]})
             base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin)]})
+            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin, item.tier)]})
             base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeCrafterDrain(con))]})
             break
         }
@@ -270,7 +270,7 @@ export function buildModuleImmutable(
             const fin = decodeStat(stats, 1)
             base.push({first: 'resonance', second: ['uint16', res]})
             base.push({first: 'fineness', second: ['uint16', fin]})
-            base.push({first: 'speed', second: ['uint16', computeBuilderSpeed(res)]})
+            base.push({first: 'speed', second: ['uint16', computeBuilderSpeed(res, item.tier)]})
             base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeBuilderDrain(fin))]})
             break
         }

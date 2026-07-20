@@ -18,11 +18,13 @@ import {
     ITEM_BUILDER_T1,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
+    ITEM_ENGINE_T2,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_GATHERER_T1,
     ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
+    ITEM_GENERATOR_T2,
     ITEM_HAULER_T1,
     ITEM_HAULER_T2,
     ITEM_BATTERY_T1,
@@ -44,7 +46,18 @@ import {
     ITEM_WARP_T1,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
-import {gathererDepthForTier, computeGathererYield} from '../derivation/capabilities'
+import {
+    gathererDepthForTier,
+    computeGathererYield,
+    moduleTierPct,
+    ENGINE_THRUST_TIER_PCT,
+    GENERATOR_CAPACITY_TIER_PCT,
+    GENERATOR_RECHARGE_TIER_PCT,
+    CRAFTER_SPEED_TIER_PCT,
+    BUILDER_SPEED_TIER_PCT,
+    WARP_RANGE_TIER_PCT,
+    LOADER_THRUST_TIER_PCT,
+} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
@@ -92,7 +105,8 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
     return Math.floor(100_000_000 * 6 ** (s / 1998))
 }
 
-export const computeEngineThrust = (vol: number): number => 400 + idiv(vol * 3, 4)
+export const computeEngineThrust = (vol: number, tier: number): number =>
+    idiv((400 + idiv(vol * 3, 4)) * moduleTierPct(ENGINE_THRUST_TIER_PCT, tier), 100)
 export const computeEngineDrain = (thm: number): number => 2 * Math.max(30, 50 - idiv(thm, 70))
 export const ENGINE_DRAIN_BASE = 156
 export const ENGINE_DRAIN_REF_THRUST = 775
@@ -104,18 +118,23 @@ export const computeTravelDrain = (totalThrust: number, avgThm: number): number 
     const thrustFactor = Math.sqrt(ENGINE_DRAIN_REF_THRUST / totalThrust)
     return Math.floor(ENGINE_DRAIN_BASE * 1000 * thermalFactor * thrustFactor)
 }
-export const computeGeneratorCap = (com: number): number => 1_300_000 + com * 500
-export const computeGeneratorRech = (fin: number): number => 2000 + fin * 6
+export const computeGeneratorCap = (com: number, tier: number): number =>
+    idiv((1_300_000 + com * 500) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier), 100)
+export const computeGeneratorRech = (fin: number, tier: number): number =>
+    idiv((2000 + fin * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier), 100)
 export const computeGathererDrain = (con: number): number =>
     2 * Math.max(250_000, 1_250_000 - con * 1250)
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
 export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
-export const computeLoaderThrust = (pla: number): number => 1 + idiv(pla * pla, 10000)
-export const computeCrafterSpeed = (rea: number): number => 100 + idiv(rea * 4, 5)
+export const computeLoaderThrust = (pla: number, tier: number): number =>
+    idiv((1 + idiv(pla * pla, 10000)) * moduleTierPct(LOADER_THRUST_TIER_PCT, tier), 100)
+export const computeCrafterSpeed = (rea: number, tier: number): number =>
+    idiv((100 + idiv(rea * 4, 5)) * moduleTierPct(CRAFTER_SPEED_TIER_PCT, tier), 100)
 export const computeCrafterDrain = (fin: number): number =>
     Math.max(5000, 30000 - idiv(fin * 1000, 33))
-export const computeBuilderSpeed = (resonance: number): number => 100 + idiv(resonance * 4, 5)
+export const computeBuilderSpeed = (resonance: number, tier: number): number =>
+    idiv((100 + idiv(resonance * 4, 5)) * moduleTierPct(BUILDER_SPEED_TIER_PCT, tier), 100)
 export const computeBuilderDrain = (fineness: number): number =>
     Math.max(5000, 30000 - idiv(fineness * 1000, 33))
 export const computeHaulerCapacity = (fin: number, tier: number): number =>
@@ -131,7 +150,8 @@ export const computeHaulerDrain = (conductivity: number, tier: number): number =
     idiv(computeT1LogisticsDrain(conductivity) * supportDrainTierPercent(tier), 100)
 export const computeCargoBayDrain = (cohesion: number, tier: number): number =>
     idiv(computeT1LogisticsDrain(cohesion) * 3 * supportDrainTierPercent(tier), 400)
-export const computeWarpRange = (stat: number): number => 100 + stat * 3
+export const computeWarpRange = (stat: number, tier: number): number =>
+    idiv((100 + stat * 3) * moduleTierPct(WARP_RANGE_TIER_PCT, tier), 100)
 export const computeCargoBayCapacity = (
     strength: number,
     density: number,
@@ -188,8 +208,10 @@ export function entityDisplayName(itemId: number): string {
 export function moduleDisplayName(itemId: number): string {
     switch (itemId) {
         case ITEM_ENGINE_T1:
+        case ITEM_ENGINE_T2:
             return 'Engine'
         case ITEM_GENERATOR_T1:
+        case ITEM_GENERATOR_T2:
             return 'Power Core'
         case ITEM_GATHERER_T1:
         case ITEM_GATHERER_T2:
@@ -230,14 +252,16 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         case MODULE_ENGINE: {
             const vol = computeEffectiveModuleStat(decodeStat(stats, 0))
             const thm = computeEffectiveModuleStat(decodeStat(stats, 1))
-            out += `  Thrust ${computeEngineThrust(vol)}  Drain ${computeEngineDrain(thm)}`
+            const tier = getItem(itemId).tier
+            out += `  Thrust ${computeEngineThrust(vol, tier)}  Drain ${computeEngineDrain(thm)}`
             break
         }
         case MODULE_GENERATOR: {
             const res = computeEffectiveModuleStat(decodeStat(stats, 0))
             const ref = computeEffectiveModuleStat(decodeStat(stats, 1))
-            out += `  Capacity ${toWholeEnergy(computeGeneratorCap(res))}  Recharge ${toWholeEnergy(
-                computeGeneratorRech(ref)
+            const tier = getItem(itemId).tier
+            out += `  Capacity ${toWholeEnergy(computeGeneratorCap(res, tier))}  Recharge ${toWholeEnergy(
+                computeGeneratorRech(ref, tier)
             )}`
             break
         }
@@ -255,19 +279,22 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         case MODULE_LOADER: {
             const fin = decodeStat(stats, 0)
             const pla = decodeStat(stats, 1)
-            out += `  Mass ${computeLoaderMass(fin)}  Thrust ${computeLoaderThrust(pla)}`
+            const tier = getItem(itemId).tier
+            out += `  Mass ${computeLoaderMass(fin)}  Thrust ${computeLoaderThrust(pla, tier)}`
             break
         }
         case MODULE_CRAFTER: {
             const rea = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
-            out += `  Speed ${computeCrafterSpeed(rea)}  Drain ${toWholeEnergy(computeCrafterDrain(con))}`
+            const tier = getItem(itemId).tier
+            out += `  Speed ${computeCrafterSpeed(rea, tier)}  Drain ${toWholeEnergy(computeCrafterDrain(con))}`
             break
         }
         case MODULE_BUILDER: {
             const res = decodeStat(stats, 0)
             const fin = decodeStat(stats, 1)
-            out += `  Speed ${computeBuilderSpeed(res)}  Drain ${toWholeEnergy(computeBuilderDrain(fin))}`
+            const tier = getItem(itemId).tier
+            out += `  Speed ${computeBuilderSpeed(res, tier)}  Drain ${toWholeEnergy(computeBuilderDrain(fin))}`
             break
         }
         case MODULE_STORAGE: {
@@ -289,7 +316,8 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
         }
         case MODULE_WARP: {
             const stat = decodeStat(stats, 0)
-            out += `  Range ${computeWarpRange(stat)}`
+            const tier = getItem(itemId).tier
+            out += `  Range ${computeWarpRange(stat, tier)}`
             break
         }
         case MODULE_BATTERY: {

@@ -143,7 +143,7 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'thermal')!.second).toEqual(['uint16', thm])
         expect(findEntry(entries, 'thrust')!.second).toEqual([
             'uint32',
-            computeEngineThrust(computeEffectiveModuleStat(vol)),
+            computeEngineThrust(computeEffectiveModuleStat(vol), 1),
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
@@ -262,7 +262,7 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'tolerance')).toBeUndefined()
         expect(findEntry(entries, 'speed')!.second).toEqual([
             'uint16',
-            computeBuilderSpeed(resonance),
+            computeBuilderSpeed(resonance, 1),
         ])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',

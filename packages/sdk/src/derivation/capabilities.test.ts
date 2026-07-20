@@ -11,7 +11,24 @@ import {
     computeBaseCapacity,
     computeContainerCapabilities,
     GATHERER_YIELD_TIER_TABLE,
+    ENGINE_THRUST_TIER_PCT,
+    GENERATOR_CAPACITY_TIER_PCT,
+    GENERATOR_RECHARGE_TIER_PCT,
+    CRAFTER_SPEED_TIER_PCT,
+    BUILDER_SPEED_TIER_PCT,
+    WARP_RANGE_TIER_PCT,
+    LOADER_THRUST_TIER_PCT,
+    moduleTierPct,
 } from './capabilities'
+import {
+    computeEngineThrust,
+    computeGeneratorCap,
+    computeGeneratorRech,
+    computeCrafterSpeed,
+    computeBuilderSpeed,
+    computeWarpRange,
+    computeLoaderThrust,
+} from '../nft/description'
 import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
 import {encodeStats} from './crafting'
 import {
@@ -149,7 +166,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     expect(result.crafterLanes!.length).toBe(1)
     expect(result.crafterLanes![0].slotIndex).toBe(0)
 
-    const caps = computeCrafterCapabilities({fineness: 400, conductivity: 300})
+    const caps = computeCrafterCapabilities({fineness: 400, conductivity: 300}, 1)
     const expectedSpeed = applySlotMultiplier(caps.speed, 120)
     expect(result.crafterLanes![0].speed).toBe(expectedSpeed)
     expect(result.crafterLanes![0].drain).toBe(caps.drain)
@@ -161,7 +178,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
 })
 
 test('builder capabilities read canonical resonance and fineness slots', () => {
-    expect(computeBuilderCapabilities({resonance: 500, fineness: 330})).toEqual({
+    expect(computeBuilderCapabilities({resonance: 500, fineness: 330}, 1)).toEqual({
         speed: 500,
         drain: 20_000,
     })
@@ -191,7 +208,7 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
     expect(result.loaderLanes!.length).toBe(1)
     expect(result.loaderLanes![0].slotIndex).toBe(0)
 
-    const caps = computeLoaderCapabilities({insulation: 600, plasticity: 500})
+    const caps = computeLoaderCapabilities({insulation: 600, plasticity: 500}, 1)
     // mass is unscaled (raw); thrust is amp-scaled
     expect(result.loaderLanes![0].mass).toBe(caps.mass)
     expect(result.loaderLanes![0].thrust).toBe(applySlotMultiplier(caps.thrust, 80))
@@ -208,7 +225,7 @@ test('per-lane amp-scaled stats clamp to UInt16, matching the contract clamp_to_
 })
 
 test('generator capacity and recharge are denominated to milli-energy', () => {
-    const caps = computeGeneratorCapabilities({resonance: 213, reflectivity: 213})
+    const caps = computeGeneratorCapabilities({resonance: 213, reflectivity: 213}, 1)
     expect(caps.capacity).toBe(1_406_500)
     expect(caps.recharge).toBe(3_278)
 })
@@ -224,14 +241,14 @@ test('engine and generator capabilities use tapered quality consistently', () =>
     ]
 
     const result = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1A_PACKED, modules, layout)
-    const engines = computeEngineCapabilities({volatility: 500, thermal: 500})
+    const engines = computeEngineCapabilities({volatility: 500, thermal: 500}, 1)
 
     expect(result.engines).toEqual({
         thrust: engines.thrust,
         drain: computeTravelDrain(engines.thrust, computeEffectiveModuleStat(500)),
     })
     expect(result.generator).toEqual(
-        computeGeneratorCapabilities({resonance: 500, reflectivity: 500})
+        computeGeneratorCapabilities({resonance: 500, reflectivity: 500}, 1)
     )
 })
 
@@ -239,7 +256,7 @@ test('gatherer/crafter/hauler drains are denominated', () => {
     expect(computeGathererCapabilities({strength: 0, hardness: 0, saturation: 213}, 1).drain).toBe(
         1_967_500
     )
-    expect(computeCrafterCapabilities({fineness: 0, conductivity: 213}).drain).toBe(23_546)
+    expect(computeCrafterCapabilities({fineness: 0, conductivity: 213}, 1).drain).toBe(23_546)
 })
 
 test('gatherer depth accepts canonical tolerance and legacy recipe-labelled hardness', () => {
@@ -275,5 +292,57 @@ describe('computeGathererYield', () => {
     test('tier is clamped to [1, 10]', () => {
         expect(computeGathererYield(500, 0)).toBe(700)
         expect(computeGathererYield(500, 99)).toBe(1960)
+    })
+})
+
+describe('module tier tables', () => {
+    const ALL_TABLES = [
+        ENGINE_THRUST_TIER_PCT,
+        GENERATOR_CAPACITY_TIER_PCT,
+        GENERATOR_RECHARGE_TIER_PCT,
+        CRAFTER_SPEED_TIER_PCT,
+        BUILDER_SPEED_TIER_PCT,
+        WARP_RANGE_TIER_PCT,
+        LOADER_THRUST_TIER_PCT,
+    ]
+    test('every table has 10 rows and T1 = 100', () => {
+        for (const table of ALL_TABLES) {
+            expect(table.length).toBe(10)
+            expect(table[0]).toBe(100)
+        }
+    })
+    test('moduleTierPct clamps out-of-range tiers', () => {
+        expect(moduleTierPct(ENGINE_THRUST_TIER_PCT, 0)).toBe(100)
+        expect(moduleTierPct(ENGINE_THRUST_TIER_PCT, 11)).toBe(280)
+    })
+    test('engine thrust tiers (stat 500 pre-effective)', () => {
+        expect(computeEngineThrust(500, 1)).toBe(775)
+        expect(computeEngineThrust(500, 2)).toBe(930)
+        expect(computeEngineThrust(500, 10)).toBe(2170)
+    })
+    test('generator capacity k=0.1, recharge k=0.2', () => {
+        expect(computeGeneratorCap(500, 1)).toBe(1_550_000)
+        expect(computeGeneratorCap(500, 2)).toBe(1_705_000)
+        expect(computeGeneratorCap(500, 10)).toBe(2_945_000)
+        expect(computeGeneratorRech(500, 1)).toBe(5000)
+        expect(computeGeneratorRech(500, 2)).toBe(6000)
+        expect(computeGeneratorRech(500, 10)).toBe(14000)
+    })
+    test('crafter/builder speed tiers', () => {
+        expect(computeCrafterSpeed(500, 1)).toBe(500)
+        expect(computeCrafterSpeed(500, 2)).toBe(600)
+        expect(computeBuilderSpeed(500, 2)).toBe(600)
+        expect(computeBuilderSpeed(500, 10)).toBe(1400)
+    })
+    test('warp range tiers', () => {
+        expect(computeWarpRange(500, 1)).toBe(1600)
+        expect(computeWarpRange(500, 2)).toBe(1920)
+        expect(computeWarpRange(500, 10)).toBe(4480)
+    })
+    test('loader thrust tiers floor correctly', () => {
+        expect(computeLoaderThrust(500, 1)).toBe(26)
+        expect(computeLoaderThrust(500, 2)).toBe(31)
+        expect(computeLoaderThrust(500, 10)).toBe(72)
+        expect(computeLoaderThrust(0, 2)).toBe(1)
     })
 })

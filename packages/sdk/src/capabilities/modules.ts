@@ -3,9 +3,11 @@ import {
     ITEM_BUILDER_T1,
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
+    ITEM_ENGINE_T2,
     ITEM_GATHERER_T1,
     ITEM_GATHERER_T2,
     ITEM_GENERATOR_T1,
+    ITEM_GENERATOR_T2,
     ITEM_HAULER_T1,
     ITEM_HAULER_T2,
     ITEM_LAUNCHER_T1,
@@ -54,8 +56,10 @@ export function moduleAccepts(slotType: number, moduleType: number): boolean {
 export function getModuleCapabilityType(itemId: number): number {
     switch (itemId) {
         case ITEM_ENGINE_T1:
+        case ITEM_ENGINE_T2:
             return MODULE_ENGINE
         case ITEM_GENERATOR_T1:
+        case ITEM_GENERATOR_T2:
             return MODULE_GENERATOR
         case ITEM_GATHERER_T1:
         case ITEM_GATHERER_T2:

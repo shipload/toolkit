@@ -117,7 +117,7 @@ test('resolveLaneCrafter returns correct stats for slot 0 (laneKey=1)', () => {
     const layout = getEntityLayout(ITEM_CRAFTER_T1)?.slots ?? []
     const amp = getSlotAmp(layout, 0)
     expect(result.slotIndex).toBe(0)
-    expect(result.speed).toBe(applySlotMultiplier(computeCrafterSpeed(CRAFTER_REA), amp))
+    expect(result.speed).toBe(applySlotMultiplier(computeCrafterSpeed(CRAFTER_REA, 1), amp))
     expect(result.drain).toBe(computeCrafterDrain(CRAFTER_FIN))
     expect(result.outputPct).toBe(amp)
 })
@@ -145,7 +145,7 @@ test('resolveLaneLoader returns correct stats for slot 0 (laneKey=1)', () => {
     const amp = getSlotAmp(layout, 0)
     expect(result.valid).toBe(true)
     expect(result.slotIndex).toBe(0)
-    expect(result.thrust).toBe(applySlotMultiplier(computeLoaderThrust(LOADER_PLA), amp))
+    expect(result.thrust).toBe(applySlotMultiplier(computeLoaderThrust(LOADER_PLA, 1), amp))
     expect(result.mass).toBe(computeLoaderMass(LOADER_INS))
     expect(result.outputPct).toBe(amp)
 })

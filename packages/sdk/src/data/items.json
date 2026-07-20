@@ -649,6 +649,20 @@
     "tier": 2
   },
   {
+    "id": 20100,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "engine"
+  },
+  {
+    "id": 20101,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "generator"
+  },
+  {
     "id": 20102,
     "mass": 1536000,
     "type": "module",

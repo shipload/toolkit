@@ -161,7 +161,7 @@ function computeCapabilityGroup(
 ): ResolvedAttributeGroup | undefined {
     switch (moduleType) {
         case MODULE_ENGINE: {
-            const caps = computeEngineCapabilities(stats)
+            const caps = computeEngineCapabilities(stats, tier)
             return {
                 capability: 'Engine',
                 attributes: [
@@ -171,7 +171,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_GENERATOR: {
-            const caps = computeGeneratorCapabilities(stats)
+            const caps = computeGeneratorCapabilities(stats, tier)
             return {
                 capability: 'Generator',
                 attributes: [
@@ -192,7 +192,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_LOADER: {
-            const caps = computeLoaderCapabilities(stats)
+            const caps = computeLoaderCapabilities(stats, tier)
             return {
                 capability: 'Loading',
                 attributes: [
@@ -203,7 +203,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_CRAFTER: {
-            const caps = computeCrafterCapabilities(stats)
+            const caps = computeCrafterCapabilities(stats, tier)
             return {
                 capability: 'Crafting',
                 attributes: [
@@ -213,7 +213,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_BUILDER: {
-            const caps = computeBuilderCapabilities(stats)
+            const caps = computeBuilderCapabilities(stats, tier)
             return {
                 capability: 'Build',
                 attributes: [

@@ -381,6 +381,17 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
 
     // === Modules (T2) ===
+    20100: {
+        name: 'Engine',
+        description: 'Advanced propulsion system. Reinforced thrust chambers for higher velocity.',
+        color: '#E86344',
+    },
+    20101: {
+        name: 'Power Core',
+        description:
+            'Advanced energy system. Higher-density crystal matrix for increased energy throughput.',
+        color: '#4ADBFF',
+    },
     20102: {
         name: 'Limpet Bay',
         description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',

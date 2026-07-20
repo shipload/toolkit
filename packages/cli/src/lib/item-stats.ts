@@ -68,11 +68,11 @@ function formatModuleCapability(itemId: number, stats: bigint): string {
 	const type = getModuleCapabilityType(itemId);
 	switch (type) {
 		case MODULE_ENGINE: {
-			const c = computeEngineCapabilities(decoded);
+			const c = computeEngineCapabilities(decoded, getItem(itemId).tier);
 			return `Engine: thrust ${c.thrust} · ${c.drain} energy/step`;
 		}
 		case MODULE_GENERATOR: {
-			const c = computeGeneratorCapabilities(decoded);
+			const c = computeGeneratorCapabilities(decoded, getItem(itemId).tier);
 			return `Generator: capacity ${c.capacity} · recharge ${c.recharge}/s`;
 		}
 		case MODULE_GATHERER: {
@@ -84,11 +84,11 @@ function formatModuleCapability(itemId: number, stats: bigint): string {
 			return `Hauler: capacity ${c.capacity} · efficiency ${c.efficiency} · ${c.drain} energy/load`;
 		}
 		case MODULE_CRAFTER: {
-			const c = computeCrafterCapabilities(decoded);
+			const c = computeCrafterCapabilities(decoded, getItem(itemId).tier);
 			return `Crafter: speed ${c.speed} · ${c.drain} energy/craft`;
 		}
 		case MODULE_LOADER: {
-			const c = computeLoaderCapabilities(decoded);
+			const c = computeLoaderCapabilities(decoded, getItem(itemId).tier);
 			return `Loader: ${formatMass(c.mass)} each · thrust ${c.thrust} · ×${c.quantity}`;
 		}
 		case MODULE_STORAGE: {

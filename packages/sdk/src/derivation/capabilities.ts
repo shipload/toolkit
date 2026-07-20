@@ -39,29 +39,33 @@ export function computeShipHullCapabilities(
     }
 }
 
-export function computeEngineCapabilities(stats: Record<string, number>): {
-    thrust: number
-    drain: number
-} {
+export function computeEngineCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {thrust: number; drain: number} {
     const vol = computeEffectiveModuleStat(stats.volatility)
     const thm = computeEffectiveModuleStat(stats.thermal)
-
     return {
-        thrust: 400 + Math.floor((vol * 3) / 4),
+        thrust: Math.floor(
+            ((400 + Math.floor((vol * 3) / 4)) * moduleTierPct(ENGINE_THRUST_TIER_PCT, tier)) / 100
+        ),
         drain: 2 * Math.max(30, 50 - Math.floor(thm / 70)),
     }
 }
 
-export function computeGeneratorCapabilities(stats: Record<string, number>): {
-    capacity: number
-    recharge: number
-} {
+export function computeGeneratorCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {capacity: number; recharge: number} {
     const res = computeEffectiveModuleStat(stats.resonance)
     const ref = computeEffectiveModuleStat(stats.reflectivity)
-
     return {
-        capacity: 1_300_000 + res * 500,
-        recharge: 2000 + ref * 6,
+        capacity: Math.floor(
+            ((1_300_000 + res * 500) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier)) / 100
+        ),
+        recharge: Math.floor(
+            ((2000 + ref * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier)) / 100
+        ),
     }
 }
 
@@ -115,43 +119,49 @@ export function computeGathererCapabilities(
     }
 }
 
-export function computeLoaderCapabilities(stats: Record<string, number>): {
-    mass: number
-    thrust: number
-    quantity: number
-} {
+export function computeLoaderCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {mass: number; thrust: number; quantity: number} {
     const insulation = stats.insulation
     const plasticity = stats.plasticity
-
     return {
         mass: Math.max(200, 2000 - Math.floor(insulation * 2)),
-        thrust: 1 + Math.floor((plasticity * plasticity) / 10000),
+        thrust: Math.floor(
+            ((1 + Math.floor((plasticity * plasticity) / 10000)) *
+                moduleTierPct(LOADER_THRUST_TIER_PCT, tier)) /
+                100
+        ),
         quantity: 1,
     }
 }
 
-export function computeCrafterCapabilities(stats: Record<string, number>): {
-    speed: number
-    drain: number
-} {
+export function computeCrafterCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {speed: number; drain: number} {
     const fin = stats.fineness
     const con = stats.conductivity
-
     return {
-        speed: 100 + Math.floor((fin * 4) / 5),
+        speed: Math.floor(
+            ((100 + Math.floor((fin * 4) / 5)) * moduleTierPct(CRAFTER_SPEED_TIER_PCT, tier)) / 100
+        ),
         drain: Math.max(5000, 30000 - Math.floor((con * 1000) / 33)),
     }
 }
 
-export function computeBuilderCapabilities(stats: Record<string, number>): {
-    speed: number
-    drain: number
-} {
+export function computeBuilderCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {speed: number; drain: number} {
     const resonance = stats.resonance
     const fineness = stats.fineness
-
     return {
-        speed: 100 + Math.floor((resonance * 4) / 5),
+        speed: Math.floor(
+            ((100 + Math.floor((resonance * 4) / 5)) *
+                moduleTierPct(BUILDER_SPEED_TIER_PCT, tier)) /
+                100
+        ),
         drain: Math.max(5000, 30000 - Math.floor((fineness * 1000) / 33)),
     }
 }
@@ -272,6 +282,25 @@ export function applyCapacityTier(baseCapacity: number, tier: number): number {
 
 export const GATHERER_YIELD_TIER_TABLE = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
 
+export const MODULE_MAX_TIER = 10
+
+export const ENGINE_THRUST_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const GENERATOR_CAPACITY_TIER_PCT = [
+    100, 110, 120, 130, 140, 150, 160, 170, 180, 190,
+] as const
+export const GENERATOR_RECHARGE_TIER_PCT = [
+    100, 120, 140, 160, 180, 200, 220, 240, 260, 280,
+] as const
+export const CRAFTER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const BUILDER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const WARP_RANGE_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const LOADER_THRUST_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+
+export function moduleTierPct(table: readonly number[], tier: number): number {
+    const clamped = Math.min(Math.max(tier, 1), MODULE_MAX_TIER)
+    return table[clamped - 1]
+}
+
 export function computeGathererYield(str: number, tier: number): number {
     const clampedTier = Math.min(Math.max(tier, 1), GATHERER_YIELD_TIER_TABLE.length)
     const pct = GATHERER_YIELD_TIER_TABLE[clampedTier - 1]
@@ -303,11 +332,16 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
     return applyCapacityTier(base, getItem(itemId).tier)
 }
 
-export function computeWarpCapabilities(stats: Record<string, number>): {
-    range: number
-} {
+export function computeWarpCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {range: number} {
     const reflectivity = stats.reflectivity
-    return {range: 100 + reflectivity * 3}
+    return {
+        range: Math.floor(
+            ((100 + reflectivity * 3) * moduleTierPct(WARP_RANGE_TIER_PCT, tier)) / 100
+        ),
+    }
 }
 
 export function computeWarehouseHullCapabilities(stats: Record<string, number>): {
@@ -450,13 +484,13 @@ export function computeEntityCapabilities(
 
         if (modType === MODULE_ENGINE) {
             hasEngine = true
-            const caps = computeEngineCapabilities(decodedStats)
+            const caps = computeEngineCapabilities(decodedStats, item.tier)
             totalThrust += applySlotMultiplier(caps.thrust, amp)
             totalEngineThm += computeEffectiveModuleStat(decodedStats.thermal ?? 0)
             engineCount += 1
         } else if (modType === MODULE_GENERATOR) {
             hasGenerator = true
-            const caps = computeGeneratorCapabilities(decodedStats)
+            const caps = computeGeneratorCapabilities(decodedStats, item.tier)
             totalGenCapacity += applySlotMultiplierUint32(caps.capacity, amp)
             totalGenRecharge += applySlotMultiplierUint32(caps.recharge, amp)
         } else if (modType === MODULE_GATHERER) {
@@ -483,7 +517,7 @@ export function computeEntityCapabilities(
             })
         } else if (modType === MODULE_LOADER) {
             hasLoader = true
-            const caps = computeLoaderCapabilities(decodedStats)
+            const caps = computeLoaderCapabilities(decodedStats, item.tier)
             totalLoaderMass += caps.mass
             totalLoaderThrust += applySlotMultiplier(caps.thrust, amp)
             totalLoaderQuantity += caps.quantity
@@ -499,7 +533,7 @@ export function computeEntityCapabilities(
             totalCargoHoldDrain += caps.drain
         } else if (modType === MODULE_CRAFTER) {
             hasCrafter = true
-            const caps = computeCrafterCapabilities(decodedStats)
+            const caps = computeCrafterCapabilities(decodedStats, item.tier)
             const scaledSpeed = applySlotMultiplier(caps.speed, amp)
             totalCrafterSpeed += scaledSpeed
             totalCrafterDrain += caps.drain
@@ -511,7 +545,7 @@ export function computeEntityCapabilities(
             })
         } else if (modType === MODULE_BUILDER) {
             hasBuilder = true
-            const caps = computeBuilderCapabilities(decodedStats)
+            const caps = computeBuilderCapabilities(decodedStats, item.tier)
             const scaledSpeed = applySlotMultiplier(caps.speed, amp)
             totalBuilderSpeed += scaledSpeed
             totalBuilderDrain += caps.drain
@@ -531,7 +565,7 @@ export function computeEntityCapabilities(
             totalHaulerDrain += caps.drain
         } else if (modType === MODULE_WARP) {
             hasWarp = true
-            const caps = computeWarpCapabilities(decodedStats)
+            const caps = computeWarpCapabilities(decodedStats, item.tier)
             totalWarpRange += applySlotMultiplier(caps.range, amp)
         } else if (modType === MODULE_LAUNCHER) {
             hasLauncher = true

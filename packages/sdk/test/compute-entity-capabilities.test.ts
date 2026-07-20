@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {
     computeEntityCapabilities,
+    computeEngineCapabilities,
     computeLauncherCapabilities,
     computeStorageCapabilities,
 } from '../src/derivation/capabilities'
@@ -332,7 +333,7 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        const thrust = computeEngineThrust(computeEffectiveModuleStat(500))
+        const thrust = computeEngineThrust(computeEffectiveModuleStat(500), 1)
         expect(r.engines!.thrust).toBe(thrust)
         expect(r.engines!.drain).toBe(computeTravelDrain(thrust, computeEffectiveModuleStat(500)))
     })
@@ -348,7 +349,7 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        const thrust = 2 * computeEngineThrust(computeEffectiveModuleStat(500))
+        const thrust = 2 * computeEngineThrust(computeEffectiveModuleStat(500), 1)
         expect(r.engines!.thrust).toBe(thrust)
         expect(r.engines!.drain).toBe(computeTravelDrain(thrust, computeEffectiveModuleStat(500)))
     })
@@ -375,5 +376,9 @@ describe('computeEntityCapabilities', () => {
             SHIP_LAYOUT
         )
         expect(r.engines!.drain).toBe(ref.engines!.drain)
+    })
+
+    test('T2 engine thrust scales T1 base by 120%', () => {
+        expect(computeEngineCapabilities({volatility: 500, thermal: 500}, 2).thrust).toBe(774)
     })
 })
