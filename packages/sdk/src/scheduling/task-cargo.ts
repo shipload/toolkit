@@ -38,7 +38,7 @@ export function taskCargoChanges(task: ServerContract.Types.task): TaskCargoChan
         case TaskType.CRAFT:
             return [
                 ...items.slice(0, -1).map((i) => toChange(i, 'out')),
-                toChange(items[items.length - 1], 'in'),
+                ...(task.couplings.length > 0 ? [] : [toChange(items[items.length - 1], 'in')]),
             ]
         default:
             return []
