@@ -397,12 +397,36 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',
         color: '#7B8D9E',
     },
+    20103: {
+        name: 'Shuttle Bay',
+        description:
+            'Advanced cargo handling system. Reinforced articulated arms for greater loading throughput.',
+        color: '#5A8B3E',
+    },
+    20104: {
+        name: 'Fabricator',
+        description:
+            'Advanced crafting system. Higher-grade reaction chambers for faster processing.',
+        color: '#B877FF',
+    },
 
     20106: {
         name: 'Tractor Beam',
         description:
             'Advanced haul beam projector reinforced with tier 2 components for greater towing capacity.',
         color: '#4ADBFF',
+    },
+    20107: {
+        name: 'Warp Drive',
+        description:
+            'Advanced warp system. Reinforced field coils project the hull across greater distances.',
+        color: '#9be4ff',
+    },
+    20110: {
+        name: 'Assembly Arm',
+        description:
+            'Advanced construction system. Reinforced manipulator arms for faster build and upgrade work.',
+        color: '#FFB347',
     },
 
     // === Entities (packed, T2) ===

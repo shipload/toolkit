@@ -2226,6 +2226,92 @@
     "blendWeights": []
   },
   {
+    "outputItemId": 20103,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20007,
+        "quantity": 600
+      },
+      {
+        "itemId": 10103,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20104,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20009,
+        "quantity": 300
+      },
+      {
+        "itemId": 20006,
+        "quantity": 300
+      },
+      {
+        "itemId": 10104,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
     "outputItemId": 20106,
     "outputMass": 1536000,
     "inputs": [
@@ -2276,6 +2362,84 @@
           {
             "inputIndex": 2,
             "statIndex": 2
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20107,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20004,
+        "quantity": 300
+      },
+      {
+        "itemId": 20009,
+        "quantity": 300
+      },
+      {
+        "itemId": 10107,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20110,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20006,
+        "quantity": 300
+      },
+      {
+        "itemId": 20008,
+        "quantity": 300
+      },
+      {
+        "itemId": 10110,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
           }
         ]
       }

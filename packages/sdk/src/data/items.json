@@ -670,11 +670,39 @@
     "subtype": "gatherer"
   },
   {
+    "id": 20103,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "loader"
+  },
+  {
+    "id": 20104,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "crafter"
+  },
+  {
     "id": 20106,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "hauler"
+  },
+  {
+    "id": 20107,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "warp"
+  },
+  {
+    "id": 20110,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "builder"
   },
   {
     "id": 20200,
