@@ -22,6 +22,7 @@ import {
     ITEM_SHIP_T1_PACKED,
     ITEM_SMITH_T1A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WORKSHOP_T1_PACKED,
 } from '../src/data/item-ids'
 import {entityDisplayName} from '../src/nft/description'
 
@@ -42,6 +43,12 @@ describe('computeBaseCapacity', () => {
     test('warehouse retains its own 100M base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
             Math.floor(100_000_000 * 6 ** (200 / 1998))
+        )
+    })
+
+    test('workshop uses its own 5M dual-source base capacity curve', () => {
+        expect(computeBaseCapacity(ITEM_WORKSHOP_T1_PACKED, stats)).toBe(
+            Math.floor(5_000_000 * 6 ** (200 / 1998))
         )
     })
 

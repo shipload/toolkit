@@ -235,6 +235,7 @@ import {
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WORKSHOP_T1_PACKED,
 } from '../data/item-ids'
 import {
     getModuleCapabilityType,
@@ -325,6 +326,9 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
             case ITEM_WAREHOUSE_T1_PACKED:
                 base = computeWarehouseHullCapabilities(stats).capacity
                 break
+            case ITEM_WORKSHOP_T1_PACKED:
+                base = computeWorkshopHullCapabilities(stats).capacity
+                break
             default:
                 return 0
         }
@@ -353,6 +357,18 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     return {
         hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, stats),
         capacity: Math.floor(100000000 * 6 ** exponent),
+    }
+}
+
+export function computeWorkshopHullCapabilities(stats: Record<string, number>): {
+    hullmass: number
+    capacity: number
+} {
+    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
+    const exponent = statSum / 1998.0
+    return {
+        hullmass: computeBaseHullmass(ITEM_WORKSHOP_T1_PACKED, stats),
+        capacity: Math.floor(5000000 * 6 ** exponent),
     }
 }
 
