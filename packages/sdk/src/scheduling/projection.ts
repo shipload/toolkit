@@ -29,6 +29,7 @@ import {
     subtractFromStacks,
     stackToCargoItem,
 } from '../capabilities/storage'
+import {craftCargoOwnership} from './availability'
 import * as schedule from './schedule'
 import type {ScheduleData} from './schedule'
 
@@ -394,10 +395,13 @@ function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.t
     applyEnergyCost(projected, task)
     if (task.cargo.length === 0) return
 
-    for (let i = 0; i < task.cargo.length - 1; i++) {
-        removeCargoItem(projected, task.cargo[i])
+    const {clustered, ownOutput} = craftCargoOwnership(task)
+    if (!clustered) {
+        for (let i = 0; i < task.cargo.length - 1; i++) {
+            removeCargoItem(projected, task.cargo[i])
+        }
     }
-    if (task.couplings.length === 0) {
+    if (ownOutput) {
         addCargoItem(projected, task.cargo[task.cargo.length - 1])
     }
 }

@@ -15,6 +15,25 @@ export function calc_craft_duration(speed: number, totalInputMass: number): UInt
     return UInt32.from(duration + 1)
 }
 
+// Mirrors contract config.hpp INTAKE_RATE (provisional; a numbers pass will retune it).
+export const INTAKE_RATE = 36000
+
+// Mirrors calc_cluster_intake: whole seconds of intake for cargo sourced off other cluster members.
+export function calcClusterIntake(sourcedMass: number): number {
+    return Math.floor(sourcedMass / INTAKE_RATE)
+}
+
+// Mirrors clustercraft duration: base craft duration + intake time.
+export function calcClustercraftDuration(
+    speed: number,
+    totalInputMass: number,
+    sourcedMass: number
+): UInt32 {
+    return UInt32.from(
+        calc_craft_duration(speed, totalInputMass).toNumber() + calcClusterIntake(sourcedMass)
+    )
+}
+
 export function calc_craft_energy(drain: number, totalInputMass: number): UInt32 {
     const raw = Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR)
     return UInt32.from(Math.min(Math.max(raw + 1, 1000), 4294967295))

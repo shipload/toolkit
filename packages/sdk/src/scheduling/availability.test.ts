@@ -4,8 +4,11 @@ import {
     calcCounterpartDelivery,
     cargoReadyAt,
     type CargoInput,
+    hasIncomingCoupling,
+    hasSourceCoupling,
     type IncomingSource,
     projectedCargoAvailableAt,
+    taskCargoEffect,
 } from './availability'
 
 const T0 = '2026-06-19T00:00:00'
@@ -30,6 +33,19 @@ function coupling(kind: number) {
         counterpart: {entity_type: 'ship', entity_id: 2},
         hold: 1,
         kind,
+    })
+}
+
+function craftTask(
+    cargo: ReturnType<typeof cargoItem>[],
+    couplings: ReturnType<typeof coupling>[]
+) {
+    return ServerContract.Types.task.from({
+        type: TaskType.CRAFT,
+        duration: 60,
+        cancelable: 0,
+        cargo,
+        couplings,
     })
 }
 
@@ -153,5 +169,36 @@ describe('projectedCargoAvailableAt — incoming', () => {
         const e = entity([])
         const avail = projectedCargoAvailableAt(e, new Date(until.getTime() - 1), incomingFor(10))
         expect(avail.get('7:0') ?? 0n).toBe(0n)
+    })
+})
+
+describe('clustercraft projection parity', () => {
+    const inputs = [cargoItem(1001, 0, 10), cargoItem(1002, 0, 5)]
+    const output = cargoItem(2001, 0, 1)
+
+    test('own-hold craft: inputs removed, output added', () => {
+        const eff = taskCargoEffect(craftTask([...inputs, output], []))
+        expect(eff.removed.length).toBe(2)
+        expect(eff.added).toEqual([output])
+    })
+
+    test('clustercraft to a target: no crafter debit, no crafter credit', () => {
+        const t = craftTask(
+            [...inputs, output],
+            [coupling(HoldKind.SOURCE), coupling(HoldKind.GATHER)]
+        )
+        expect(hasSourceCoupling(t)).toBe(true)
+        expect(hasIncomingCoupling(t)).toBe(true)
+        const eff = taskCargoEffect(t)
+        expect(eff.removed).toEqual([])
+        expect(eff.added).toEqual([])
+    })
+
+    test('clustercraft with target omitted: output falls back to crafter, still no input debit', () => {
+        const t = craftTask([...inputs, output], [coupling(HoldKind.SOURCE)])
+        expect(hasIncomingCoupling(t)).toBe(false)
+        const eff = taskCargoEffect(t)
+        expect(eff.removed).toEqual([])
+        expect(eff.added).toEqual([output])
     })
 })

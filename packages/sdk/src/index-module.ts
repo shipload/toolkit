@@ -322,8 +322,14 @@ export {
     calcCounterpartDelivery,
     cargoKey,
     cargoInputKey,
+    hasSourceCoupling,
+    hasIncomingCoupling,
 } from './scheduling/availability'
 export type {CargoInput, IncomingSource} from './scheduling/availability'
+
+export {clusterStockAvailable} from './scheduling/cluster-stock'
+
+export {calcClusterIntake, calcClustercraftDuration, INTAKE_RATE} from './capabilities/crafting'
 
 export {maxCraftable} from './capabilities/craftable'
 

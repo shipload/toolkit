@@ -85,6 +85,7 @@ export enum HoldKind {
     BUILD = 4,
     FLIGHT = 5,
     UPGRADE = 6,
+    SOURCE = 7,
 }
 
 export enum LocationType {

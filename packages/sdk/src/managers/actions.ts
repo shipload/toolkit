@@ -472,6 +472,29 @@ export class ActionsManager extends BaseManager {
         return this.server.action('craftjob', params)
     }
 
+    clustercraft(
+        entityId: UInt64Type,
+        recipeId: number,
+        quantity: number,
+        sources: ServerContract.ActionParams.Type.cluster_source[],
+        target?: UInt64Type,
+        slot?: UInt8Type
+    ): Action {
+        const params: ServerContract.ActionParams.clustercraft = {
+            id: UInt64.from(entityId),
+            recipe_id: UInt16.from(recipeId),
+            quantity: UInt32.from(quantity),
+            sources,
+        }
+        if (target !== undefined) {
+            params.target = UInt64.from(target)
+        }
+        if (slot !== undefined) {
+            params.slot = UInt8.from(slot)
+        }
+        return this.server.action('clustercraft', params)
+    }
+
     claimjob(jobId: UInt64Type, shipId: UInt64Type): Action {
         const params: ServerContract.ActionParams.claimjob = {
             job_id: UInt64.from(jobId),

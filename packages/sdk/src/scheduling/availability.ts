@@ -36,6 +36,25 @@ export function isIncomingCouplingKind(kind: number): boolean {
     return INCOMING_COUPLING_KINDS.has(kind)
 }
 
+// Mirrors has_source_hold: a HOLD_SOURCE coupling marks an escrowed clustercraft.
+export function hasSourceCoupling(task: Task): boolean {
+    return task.couplings.some((c) => c.kind.toNumber() === HoldKind.SOURCE)
+}
+
+// Mirrors has_incoming_coupling: any PUSH/GATHER/FLIGHT coupling delivers output to a counterpart.
+export function hasIncomingCoupling(task: Task): boolean {
+    return task.couplings.some((c) => isIncomingCouplingKind(c.kind.toNumber()))
+}
+
+// A CRAFT task's output ownership: clustered escrows inputs off other members; own-output lands on the crafter.
+export function craftCargoOwnership(task: Task): {clustered: boolean; ownOutput: boolean} {
+    const clustered = hasSourceCoupling(task)
+    return {
+        clustered,
+        ownOutput: clustered ? !hasIncomingCoupling(task) : task.couplings.length === 0,
+    }
+}
+
 // Mirrors calc_counterpart_delivery: incoming-kind couplings only; a coupled CRAFT yields its output slot.
 export function calcCounterpartDelivery(task: Task, coupling: Coupling): CargoItem[] {
     if (!isIncomingCouplingKind(coupling.kind.toNumber())) return []
@@ -58,12 +77,14 @@ export function taskCargoEffect(task: Task): CargoEffect {
             return task.couplings.length > 0
                 ? {added: [], removed: []}
                 : {added: task.cargo, removed: []}
-        case TaskType.CRAFT:
+        case TaskType.CRAFT: {
             if (task.cargo.length === 0) return {added: [], removed: []}
+            const {clustered, ownOutput} = craftCargoOwnership(task)
             return {
-                added: task.couplings.length === 0 ? [task.cargo[task.cargo.length - 1]] : [],
-                removed: task.cargo.slice(0, -1),
+                added: ownOutput ? [task.cargo[task.cargo.length - 1]] : [],
+                removed: clustered ? [] : task.cargo.slice(0, -1),
             }
+        }
         default:
             return {added: [], removed: []}
     }
