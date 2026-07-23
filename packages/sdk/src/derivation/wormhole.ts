@@ -76,10 +76,23 @@ function dist(a: {x: number; y: number}, b: {x: number; y: number}): number {
 function inBounds(c: {x: number; y: number}): boolean {
     return c.x >= COORD_MIN && c.x <= COORD_MAX && c.y >= COORD_MIN && c.y <= COORD_MAX
 }
-function wormholeOfRegion(
-    seed: Checksum256Type,
-    R: Region
-): {A: {x: number; y: number}; B: {x: number; y: number}} | null {
+type RegionWormhole = {A: {x: number; y: number}; B: {x: number; y: number}} | null
+
+// ~11 sha512 rolls per region; pure in (seed, region), so memoized for A* neighbor probes.
+const regionCache = new Map<string, RegionWormhole>()
+const REGION_CACHE_MAX = 16384
+
+function wormholeOfRegion(seed: Checksum256Type, R: Region): RegionWormhole {
+    const cacheKey = `${seed}:${R.rx}:${R.ry}`
+    const cached = regionCache.get(cacheKey)
+    if (cached !== undefined) return cached
+    const result = deriveWormholeOfRegion(seed, R)
+    if (regionCache.size >= REGION_CACHE_MAX) regionCache.clear()
+    regionCache.set(cacheKey, result)
+    return result
+}
+
+function deriveWormholeOfRegion(seed: Checksum256Type, R: Region): RegionWormhole {
     const P = partnerRegion(seed, R)
     if (P.rx === R.rx && P.ry === R.ry) return null
     const key = pairKey(R, P)

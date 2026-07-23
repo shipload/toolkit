@@ -108,6 +108,31 @@ describe('nearbyWormholes', () => {
     })
 })
 
+describe('region memoization', () => {
+    test('wormholeAt reuses the derived region result across calls', () => {
+        const ep = ENDPOINTS[0]
+        const first = wormholeAt(SEED, ep.from.x, ep.from.y)
+        const second = wormholeAt(SEED, ep.from.x, ep.from.y)
+        expect(first).toEqual(ep.to)
+        expect(second).toBe(first!)
+    })
+
+    test('nearbyWormholes reuses derived mouths across calls', () => {
+        const ep = ENDPOINTS[0].from
+        const first = nearbyWormholes(SEED, ep.x, ep.y - 5, 6)
+        const second = nearbyWormholes(SEED, ep.x, ep.y - 5, 6)
+        expect(first.length).toBeGreaterThan(0)
+        for (let i = 0; i < first.length; i++) expect(second[i]).toBe(first[i])
+    })
+
+    test('memoized results stay seed-scoped', () => {
+        const other = Checksum256.hash(Bytes.from('another-seed', 'utf8'))
+        const ep = ENDPOINTS[0]
+        expect(wormholeAt(SEED, ep.from.x, ep.from.y)).toEqual(ep.to)
+        expect(wormholeAt(other, ep.from.x, ep.from.y)).not.toEqual(ep.to)
+    })
+})
+
 describe('package root export', () => {
     test('re-exports nearbyWormholes from the index', async () => {
         const root = await import('../src/index')
