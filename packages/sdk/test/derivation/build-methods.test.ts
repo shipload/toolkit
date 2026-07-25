@@ -9,6 +9,7 @@ import {
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WORKSHOP_T1_PACKED,
     ITEM_ORE_T1,
 } from '../../src/data/item-ids'
 import {
@@ -31,6 +32,7 @@ describe('availableBuildMethods', () => {
             'craft+deploy',
             'plot',
         ])
+        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
     })
 
     test('orbital vessels return craft+deploy only', () => {
@@ -133,6 +135,7 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
                 ITEM_EXTRACTOR_T1_PACKED,
                 ITEM_FACTORY_T1_PACKED,
                 ITEM_CONSTRUCTION_DOCK_T1_PACKED,
+                ITEM_WORKSHOP_T1_PACKED,
             ].sort()
         )
     })
