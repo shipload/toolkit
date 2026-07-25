@@ -684,6 +684,13 @@
     "subtype": "crafter"
   },
   {
+    "id": 20105,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "storage"
+  },
+  {
     "id": 20106,
     "mass": 1536000,
     "type": "module",
@@ -696,6 +703,13 @@
     "type": "module",
     "tier": 2,
     "subtype": "warp"
+  },
+  {
+    "id": 20108,
+    "mass": 1536000,
+    "type": "module",
+    "tier": 2,
+    "subtype": "battery"
   },
   {
     "id": 20110,

@@ -207,22 +207,28 @@ export function computeStorageCapabilities(
         capacity: computeCargoBayCapacity(
             stats.strength ?? 0,
             stats.density ?? 0,
-            stats.hardness ?? 0
+            stats.hardness ?? 0,
+            tier
         ),
         drain: computeCargoBayDrain(stats.cohesion ?? 0, tier),
     }
 }
 
-export function computeBatteryCapabilities(stats: Record<string, number>): {
+export function computeBatteryCapabilities(
+    stats: Record<string, number>,
+    tier: number
+): {
     capacity: number
 } {
-    const volatility = stats.volatility ?? 0
-    const thermal = stats.thermal ?? 0
-    const plasticity = stats.plasticity ?? 0
-    const insulation = stats.insulation ?? 0
-
-    const statSum = volatility + thermal + plasticity + insulation
-    return {capacity: 2_500_000 + Math.floor((statSum * 7_500_000) / 3996)}
+    return {
+        capacity: computeBatteryBankCapacity(
+            stats.volatility ?? 0,
+            stats.thermal ?? 0,
+            stats.plasticity ?? 0,
+            stats.insulation ?? 0,
+            tier
+        ),
+    }
 }
 
 import {
@@ -265,6 +271,7 @@ import type {EntitySlot} from '../data/recipes-runtime'
 import {
     computeCargoBayCapacity,
     computeCargoBayDrain,
+    computeBatteryBankCapacity,
     computeHaulerCapacity,
     computeHaulerDrain,
     computeTravelDrain,
@@ -296,6 +303,10 @@ export const CRAFTER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 2
 export const BUILDER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
 export const WARP_RANGE_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
 export const LOADER_THRUST_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const CARGO_BAY_CAPACITY_TIER_PCT = [
+    100, 110, 120, 130, 140, 150, 160, 170, 180, 190,
+] as const
+export const BATTERY_CAPACITY_TIER_PCT = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190] as const
 
 export function moduleTierPct(table: readonly number[], tier: number): number {
     const clamped = Math.min(Math.max(tier, 1), MODULE_MAX_TIER)
@@ -597,7 +608,7 @@ export function computeEntityCapabilities(
             totalLauncherVelocity = clampUint16(totalLauncherVelocity + caps.velocity)
             totalLauncherDrain = clampUint16(totalLauncherDrain + caps.drain)
         } else if (modType === MODULE_BATTERY) {
-            const caps = computeBatteryCapabilities(decodedStats)
+            const caps = computeBatteryCapabilities(decodedStats, item.tier)
             totalBatteryCapacity += applySlotMultiplierUint32(caps.capacity, amp)
         }
     }

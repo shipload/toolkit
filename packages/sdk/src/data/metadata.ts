@@ -409,6 +409,11 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'Advanced crafting system. Higher-grade reaction chambers for faster processing.',
         color: '#B877FF',
     },
+    20105: {
+        name: 'Cargo Hold',
+        description: 'Advanced cargo storage. Reinforced tier 2 holds carry more mass.',
+        color: '#8B7355',
+    },
 
     20106: {
         name: 'Tractor Beam',
@@ -421,6 +426,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
         description:
             'Advanced warp system. Reinforced field coils project the hull across greater distances.',
         color: '#9be4ff',
+    },
+    20108: {
+        name: 'Battery Bank',
+        description:
+            'Advanced battery bank. Higher-density cells store more charge from the power core.',
+        color: '#4ADBFF',
     },
     20110: {
         name: 'Assembly Arm',

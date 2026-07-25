@@ -247,7 +247,7 @@ function computeCapabilityGroup(
             }
         }
         case MODULE_BATTERY: {
-            const caps = computeBatteryCapabilities(stats)
+            const caps = computeBatteryCapabilities(stats, tier)
             return {
                 capability: 'Energy',
                 attributes: [

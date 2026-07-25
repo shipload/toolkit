@@ -2360,6 +2360,75 @@
     "blendWeights": []
   },
   {
+    "outputItemId": 20105,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20001,
+        "quantity": 300
+      },
+      {
+        "itemId": 20002,
+        "quantity": 300
+      },
+      {
+        "itemId": 10105,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 3
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
     "outputItemId": 20106,
     "outputMass": 1536000,
     "inputs": [
@@ -2443,6 +2512,75 @@
           {
             "inputIndex": 2,
             "statIndex": 0
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 20108,
+    "outputMass": 1536000,
+    "inputs": [
+      {
+        "itemId": 20003,
+        "quantity": 300
+      },
+      {
+        "itemId": 20007,
+        "quantity": 300
+      },
+      {
+        "itemId": 10108,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 3
           }
         ]
       }

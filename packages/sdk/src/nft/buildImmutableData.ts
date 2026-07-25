@@ -285,7 +285,7 @@ export function buildModuleImmutable(
             base.push({first: 'cohesion', second: ['uint16', com]})
             base.push({
                 first: 'capacity',
-                second: ['uint32', computeCargoBayCapacity(str, den, hrd)],
+                second: ['uint32', computeCargoBayCapacity(str, den, hrd, item.tier)],
             })
             base.push({
                 first: 'drain',
@@ -304,7 +304,10 @@ export function buildModuleImmutable(
             base.push({first: 'insulation', second: ['uint16', ins]})
             base.push({
                 first: 'capacity',
-                second: ['uint32', toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins))],
+                second: [
+                    'uint32',
+                    toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins, item.tier)),
+                ],
             })
             break
         }

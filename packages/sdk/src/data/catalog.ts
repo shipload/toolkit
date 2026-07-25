@@ -32,10 +32,14 @@ for (const raw of items as any[]) {
 export const itemIds = Array.from(itemsById.keys())
 
 export function getItem(itemId: UInt16Type): Item {
-    const id = UInt16.from(itemId).toNumber()
-    const item = itemsById.get(id)
-    if (!item) throw new Error(`Unknown item id: ${id}`)
+    const item = tryGetItem(itemId)
+    if (!item) throw new Error(`Unknown item id: ${UInt16.from(itemId).toNumber()}`)
     return item
+}
+
+export function tryGetItem(itemId: UInt16Type): Item | undefined {
+    const id = UInt16.from(itemId).toNumber()
+    return itemsById.get(id)
 }
 
 export function getItems(): Item[] {

@@ -1,21 +1,4 @@
-import {
-    ITEM_BATTERY_T1,
-    ITEM_BUILDER_T1,
-    ITEM_CRAFTER_T1,
-    ITEM_ENGINE_T1,
-    ITEM_ENGINE_T2,
-    ITEM_GATHERER_T1,
-    ITEM_GATHERER_T2,
-    ITEM_GENERATOR_T1,
-    ITEM_GENERATOR_T2,
-    ITEM_HAULER_T1,
-    ITEM_HAULER_T2,
-    ITEM_LAUNCHER_T1,
-    ITEM_LOADER_T1,
-    ITEM_STORAGE_T1,
-    ITEM_WARP_T1,
-} from '../data/item-ids'
-import {getItem} from '../data/catalog'
+import {getItem, tryGetItem} from '../data/catalog'
 import type {EntitySlot} from '../data/recipes-runtime'
 
 export const MODULE_ANY = 0
@@ -54,36 +37,8 @@ export function moduleAccepts(slotType: number, moduleType: number): boolean {
 }
 
 export function getModuleCapabilityType(itemId: number): number {
-    switch (itemId) {
-        case ITEM_ENGINE_T1:
-        case ITEM_ENGINE_T2:
-            return MODULE_ENGINE
-        case ITEM_GENERATOR_T1:
-        case ITEM_GENERATOR_T2:
-            return MODULE_GENERATOR
-        case ITEM_GATHERER_T1:
-        case ITEM_GATHERER_T2:
-            return MODULE_GATHERER
-        case ITEM_LOADER_T1:
-            return MODULE_LOADER
-        case ITEM_CRAFTER_T1:
-            return MODULE_CRAFTER
-        case ITEM_BUILDER_T1:
-            return MODULE_BUILDER
-        case ITEM_STORAGE_T1:
-            return MODULE_STORAGE
-        case ITEM_HAULER_T1:
-        case ITEM_HAULER_T2:
-            return MODULE_HAULER
-        case ITEM_WARP_T1:
-            return MODULE_WARP
-        case ITEM_BATTERY_T1:
-            return MODULE_BATTERY
-        case ITEM_LAUNCHER_T1:
-            return MODULE_LAUNCHER
-        default:
-            return 0xff
-    }
+    const item = tryGetItem(itemId)
+    return item?.type === 'module' && item.moduleType ? moduleSlotTypeToCode(item.moduleType) : 0xff
 }
 
 export function isModuleItem(itemId: number): boolean {

@@ -3,22 +3,29 @@ import {assert} from 'chai'
 import {
     getModuleCapabilityType,
     isModuleItem,
+    ITEM_BUILDER_T2,
     ITEM_CRAFTER_T1,
+    ITEM_CRAFTER_T2,
     ITEM_ENGINE_T1,
     ITEM_GATHERER_T1,
     ITEM_GENERATOR_T1,
     ITEM_HAULER_T1,
     ITEM_LOADER_T1,
+    ITEM_LOADER_T2,
+    ITEM_WARP_T2,
     MODULE_ANY,
     MODULE_AUX,
     MODULE_BATTERY,
+    MODULE_BUILDER,
     MODULE_CRAFTER,
     MODULE_ENGINE,
     MODULE_GATHERER,
     MODULE_GENERATOR,
     MODULE_HAULER,
     MODULE_LOADER,
+    MODULE_WARP,
     moduleAccepts,
+    moduleDisplayName,
 } from '$lib'
 
 describe('modules', () => {
@@ -94,5 +101,26 @@ describe('modules', () => {
 
     test('MODULE_AUX slot rejects MODULE_GATHERER', () => {
         assert.isFalse(moduleAccepts(MODULE_AUX, MODULE_GATHERER))
+    })
+
+    test('T2 modules missing from the old hand-maintained switch resolve to a real capability type', () => {
+        assert.equal(getModuleCapabilityType(ITEM_LOADER_T2), MODULE_LOADER)
+        assert.equal(getModuleCapabilityType(ITEM_CRAFTER_T2), MODULE_CRAFTER)
+        assert.equal(getModuleCapabilityType(ITEM_WARP_T2), MODULE_WARP)
+        assert.equal(getModuleCapabilityType(ITEM_BUILDER_T2), MODULE_BUILDER)
+    })
+
+    test('T2 modules missing from the old hand-maintained switch are recognized as modules', () => {
+        assert.isTrue(isModuleItem(ITEM_LOADER_T2))
+        assert.isTrue(isModuleItem(ITEM_CRAFTER_T2))
+        assert.isTrue(isModuleItem(ITEM_WARP_T2))
+        assert.isTrue(isModuleItem(ITEM_BUILDER_T2))
+    })
+
+    test('T2 modules missing from the old hand-maintained switch get a real display name', () => {
+        assert.equal(moduleDisplayName(ITEM_LOADER_T2), 'Shuttle Bay')
+        assert.equal(moduleDisplayName(ITEM_CRAFTER_T2), 'Fabricator')
+        assert.equal(moduleDisplayName(ITEM_WARP_T2), 'Warp Drive')
+        assert.equal(moduleDisplayName(ITEM_BUILDER_T2), 'Assembly Arm')
     })
 })

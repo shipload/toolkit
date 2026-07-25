@@ -15,39 +15,20 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-    ITEM_BUILDER_T1,
-    ITEM_BUILDER_T2,
-    ITEM_CRAFTER_T1,
-    ITEM_CRAFTER_T2,
-    ITEM_ENGINE_T1,
-    ITEM_ENGINE_T2,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
-    ITEM_GATHERER_T1,
-    ITEM_GATHERER_T2,
-    ITEM_GENERATOR_T1,
-    ITEM_GENERATOR_T2,
-    ITEM_HAULER_T1,
-    ITEM_HAULER_T2,
-    ITEM_BATTERY_T1,
-    ITEM_LAUNCHER_T1,
-    ITEM_LOADER_T1,
-    ITEM_LOADER_T2,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_PROSPECTOR_T2A_PACKED,
     ITEM_PROSPECTOR_T2B_PACKED,
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_SMITH_T1A_PACKED,
-    ITEM_STORAGE_T1,
     ITEM_TENDER_T1A_PACKED,
     ITEM_TUG_T1A_PACKED,
     ITEM_PORTER_T1A_PACKED,
     ITEM_WRIGHT_T1A_PACKED,
     ITEM_DREDGER_T2A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_WARP_T1,
-    ITEM_WARP_T2,
 } from '../data/item-ids'
 import {decodeStat} from '../derivation/crafting'
 import {
@@ -61,8 +42,11 @@ import {
     BUILDER_SPEED_TIER_PCT,
     WARP_RANGE_TIER_PCT,
     LOADER_THRUST_TIER_PCT,
+    CARGO_BAY_CAPACITY_TIER_PCT,
+    BATTERY_CAPACITY_TIER_PCT,
 } from '../derivation/capabilities'
-import {getItem} from '../data/catalog'
+import {getItem, tryGetItem} from '../data/catalog'
+import type {ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
@@ -159,14 +143,26 @@ export const computeWarpRange = (stat: number, tier: number): number =>
 export const computeCargoBayCapacity = (
     strength: number,
     density: number,
-    hardness: number
-): number => 10_000_000 + idiv((strength + density + hardness) * 50_000_000, 2997)
+    hardness: number,
+    tier: number
+): number =>
+    idiv(
+        (10_000_000 + idiv((strength + density + hardness) * 50_000_000, 2997)) *
+            moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, tier),
+        100
+    )
 export const computeBatteryBankCapacity = (
     volatility: number,
     thermal: number,
     plasticity: number,
-    insulation: number
-): number => 2_500_000 + idiv((volatility + thermal + plasticity + insulation) * 7_500_000, 3996)
+    insulation: number,
+    tier: number
+): number =>
+    idiv(
+        (2_500_000 + idiv((volatility + thermal + plasticity + insulation) * 7_500_000, 3996)) *
+            moduleTierPct(BATTERY_CAPACITY_TIER_PCT, tier),
+        100
+    )
 
 export function entityDisplayName(itemId: number): string {
     switch (itemId) {
@@ -209,41 +205,24 @@ export function entityDisplayName(itemId: number): string {
     }
 }
 
+const MODULE_DISPLAY_NAME_BY_TYPE: Partial<Record<ModuleType, string>> = {
+    engine: 'Engine',
+    generator: 'Power Core',
+    gatherer: 'Limpet Bay',
+    loader: 'Shuttle Bay',
+    crafter: 'Fabricator',
+    storage: 'Cargo Hold',
+    hauler: 'Tractor Beam',
+    warp: 'Warp Drive',
+    battery: 'Battery Bank',
+    launcher: 'Drive Coil',
+    builder: 'Assembly Arm',
+}
+
 export function moduleDisplayName(itemId: number): string {
-    switch (itemId) {
-        case ITEM_ENGINE_T1:
-        case ITEM_ENGINE_T2:
-            return 'Engine'
-        case ITEM_GENERATOR_T1:
-        case ITEM_GENERATOR_T2:
-            return 'Power Core'
-        case ITEM_GATHERER_T1:
-        case ITEM_GATHERER_T2:
-            return 'Limpet Bay'
-        case ITEM_LOADER_T1:
-        case ITEM_LOADER_T2:
-            return 'Shuttle Bay'
-        case ITEM_CRAFTER_T1:
-        case ITEM_CRAFTER_T2:
-            return 'Fabricator'
-        case ITEM_BUILDER_T1:
-        case ITEM_BUILDER_T2:
-            return 'Assembly Arm'
-        case ITEM_STORAGE_T1:
-            return 'Cargo Hold'
-        case ITEM_HAULER_T1:
-        case ITEM_HAULER_T2:
-            return 'Tractor Beam'
-        case ITEM_WARP_T1:
-        case ITEM_WARP_T2:
-            return 'Warp Drive'
-        case ITEM_BATTERY_T1:
-            return 'Battery Bank'
-        case ITEM_LAUNCHER_T1:
-            return 'Drive Coil'
-        default:
-            return 'Module'
-    }
+    const item = tryGetItem(itemId)
+    if (item?.type !== 'module' || !item.moduleType) return 'Module'
+    return MODULE_DISPLAY_NAME_BY_TYPE[item.moduleType] ?? 'Module'
 }
 
 export function formatModuleLine(slot: number, itemId: number, stats: bigint): string {
@@ -311,7 +290,7 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const hrd = decodeStat(stats, 2)
             const coh = decodeStat(stats, 3)
             const tier = getItem(itemId).tier
-            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd)}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
+            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd, tier)}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
             break
         }
         case MODULE_HAULER: {
@@ -333,7 +312,8 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const thm = decodeStat(stats, 1)
             const pla = decodeStat(stats, 2)
             const ins = decodeStat(stats, 3)
-            out += `  Energy Capacity ${toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins))}`
+            const tier = getItem(itemId).tier
+            out += `  Energy Capacity ${toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins, tier))}`
             break
         }
     }

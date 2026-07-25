@@ -230,7 +230,7 @@ function formatModuleStatLine(itemId: number, stats: bigint): string {
 			const hrd = decodeStat(stats, 2);
 			const coh = decodeStat(stats, 3);
 			const tier = getItem(itemId).tier;
-			const capacity = NFT.computeCargoBayCapacity(str, den, hrd);
+			const capacity = NFT.computeCargoBayCapacity(str, den, hrd, tier);
 			const drain = NFT.computeCargoBayDrain(coh, tier) / 1000;
 			return `${formatMass(capacity)} capacity · ${drain.toFixed(1)} energy/tile`;
 		}
