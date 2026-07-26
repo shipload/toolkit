@@ -28,6 +28,7 @@ import {
     ITEM_WORKSHOP_T1_PACKED,
 } from '../src/data/item-ids'
 import {getEntityItems} from '../src/data/catalog'
+import {getPackedEntityType} from '../src/data/kind-registry'
 import {entityDisplayName} from '../src/nft/description'
 
 describe('computeBaseCapacity', () => {
@@ -109,6 +110,32 @@ describe('entityDisplayName (roster batch 4)', () => {
         expect(entityDisplayName(ITEM_PROSPECTOR_T2A_PACKED)).toBe('Prospector')
         expect(entityDisplayName(ITEM_PROSPECTOR_T2B_PACKED)).toBe('Prospector')
         expect(entityDisplayName(ITEM_DREDGER_T2A_PACKED)).toBe('Dredger')
+    })
+})
+
+describe('computeBaseCapacity (kind-driven coverage)', () => {
+    const stats = {strength: 100, hardness: 100, cohesion: 100, density: 100}
+
+    // Hub, Nexus and Plot carry no capacity function in the C++ kind registry.
+    const NO_CAPACITY_KINDS = new Set(['hub', 'nexus', 'plot'])
+
+    test('every catalog entity item with a capacity kind returns a positive capacity', () => {
+        const items = getEntityItems()
+        expect(items.length).toBeGreaterThan(0)
+
+        const zeroed = items
+            .map((item) => Number(item.id))
+            .filter((itemId) => {
+                const kind = getPackedEntityType(itemId)?.toString()
+                return !!kind && !NO_CAPACITY_KINDS.has(kind)
+            })
+            .filter((itemId) => computeBaseCapacity(itemId, stats) === 0)
+
+        expect(zeroed).toEqual([])
+    })
+
+    test('kinds without a capacity function return zero', () => {
+        expect(computeBaseCapacity(ITEM_HUB_T1_PACKED, stats)).toBe(0)
     })
 })
 

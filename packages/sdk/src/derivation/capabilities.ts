@@ -233,12 +233,6 @@ export function computeBatteryCapabilities(
 
 import {
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONTAINER_T2_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_MASS_CATCHER_T1_PACKED,
-    ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WORKSHOP_T1_PACKED,
@@ -319,30 +313,26 @@ export function computeGathererYield(str: number, tier: number): number {
     return Math.floor(((200 + str) * pct) / 100)
 }
 
+const BASE_CAPACITY_FN_BY_KIND: Record<string, (stats: Record<string, number>) => number> = {
+    warehouse: (stats) => computeWarehouseHullCapabilities(stats).capacity,
+    workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
+    extractor: (stats) => computeContainerCapabilities(stats).capacity,
+    factory: (stats) => computeContainerCapabilities(stats).capacity,
+    builddock: (stats) => computeContainerCapabilities(stats).capacity,
+    mdriver: (stats) => computeContainerCapabilities(stats).capacity,
+    mcatcher: (stats) => computeContainerCapabilities(stats).capacity,
+    container: (stats) => computeContainerCapabilities(stats).capacity,
+}
+
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
     let base: number
     if (isShipHull(itemId)) {
         base = computeShipHullCapabilities(stats, itemId).capacity
     } else {
-        switch (itemId) {
-            case ITEM_EXTRACTOR_T1_PACKED:
-            case ITEM_FACTORY_T1_PACKED:
-            case ITEM_CONSTRUCTION_DOCK_T1_PACKED:
-            case ITEM_MASS_DRIVER_T1_PACKED:
-            case ITEM_MASS_CATCHER_T1_PACKED:
-            case ITEM_CONTAINER_T1_PACKED:
-            case ITEM_CONTAINER_T2_PACKED:
-                base = computeContainerCapabilities(stats).capacity
-                break
-            case ITEM_WAREHOUSE_T1_PACKED:
-                base = computeWarehouseHullCapabilities(stats).capacity
-                break
-            case ITEM_WORKSHOP_T1_PACKED:
-                base = computeWorkshopHullCapabilities(stats).capacity
-                break
-            default:
-                return 0
-        }
+        const kind = getPackedEntityType(itemId)
+        const capacityFn = kind ? BASE_CAPACITY_FN_BY_KIND[kind.toString()] : undefined
+        if (!capacityFn) return 0
+        base = capacityFn(stats)
     }
     return applyCapacityTier(base, getItem(itemId).tier)
 }
