@@ -16,6 +16,9 @@ import {
     ITEM_DREDGER_T2A_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
+    ITEM_HUB_T1_PACKED,
+    ITEM_MASS_CATCHER_T1_PACKED,
+    ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_PROSPECTOR_T2B_PACKED,
     ITEM_PROSPECTOR_T2A_PACKED,
     ITEM_ROUSTABOUT_T1A_PACKED,
@@ -24,6 +27,7 @@ import {
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WORKSHOP_T1_PACKED,
 } from '../src/data/item-ids'
+import {getEntityItems} from '../src/data/catalog'
 import {entityDisplayName} from '../src/nft/description'
 
 describe('computeBaseCapacity', () => {
@@ -105,6 +109,30 @@ describe('entityDisplayName (roster batch 4)', () => {
         expect(entityDisplayName(ITEM_PROSPECTOR_T2A_PACKED)).toBe('Prospector')
         expect(entityDisplayName(ITEM_PROSPECTOR_T2B_PACKED)).toBe('Prospector')
         expect(entityDisplayName(ITEM_DREDGER_T2A_PACKED)).toBe('Dredger')
+    })
+})
+
+describe('entityDisplayName (kind-registry fallback)', () => {
+    test('names structures that carry no per-template label', () => {
+        expect(entityDisplayName(ITEM_MASS_DRIVER_T1_PACKED)).toBe('Mass Driver')
+        expect(entityDisplayName(ITEM_MASS_CATCHER_T1_PACKED)).toBe('Mass Catcher')
+        expect(entityDisplayName(ITEM_HUB_T1_PACKED)).toBe('Station Hub')
+        expect(entityDisplayName(ITEM_WORKSHOP_T1_PACKED)).toBe('Workshop')
+    })
+
+    test('every catalog entity item resolves to a real name', () => {
+        const items = getEntityItems()
+        expect(items.length).toBeGreaterThan(0)
+
+        const unnamed = items
+            .map((item) => Number(item.id))
+            .filter((itemId) => entityDisplayName(itemId) === 'Entity')
+
+        expect(unnamed).toEqual([])
+    })
+
+    test('falls back to Entity for an item outside the registry', () => {
+        expect(entityDisplayName(0)).toBe('Entity')
     })
 })
 

@@ -17,19 +17,9 @@ import {
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
-    ITEM_PROSPECTOR_T1A_PACKED,
-    ITEM_PROSPECTOR_T2A_PACKED,
-    ITEM_PROSPECTOR_T2B_PACKED,
-    ITEM_ROUSTABOUT_T1A_PACKED,
-    ITEM_SHIP_T1_PACKED,
-    ITEM_SMITH_T1A_PACKED,
-    ITEM_TENDER_T1A_PACKED,
-    ITEM_TUG_T1A_PACKED,
-    ITEM_PORTER_T1A_PACKED,
-    ITEM_WRIGHT_T1A_PACKED,
-    ITEM_DREDGER_T2A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
 } from '../data/item-ids'
+import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import {decodeStat} from '../derivation/crafting'
 import {
     gathererDepthForTier,
@@ -165,44 +155,10 @@ export const computeBatteryBankCapacity = (
     )
 
 export function entityDisplayName(itemId: number): string {
-    switch (itemId) {
-        case ITEM_SHIP_T1_PACKED:
-            return 'Ship'
-        case ITEM_ROUSTABOUT_T1A_PACKED:
-            return 'Roustabout'
-        case ITEM_PROSPECTOR_T1A_PACKED:
-            return 'Prospector'
-        case ITEM_TENDER_T1A_PACKED:
-            return 'Tender'
-        case ITEM_TUG_T1A_PACKED:
-            return 'Tug'
-        case ITEM_PORTER_T1A_PACKED:
-            return 'Porter'
-        case ITEM_WRIGHT_T1A_PACKED:
-            return 'Wright'
-        case ITEM_SMITH_T1A_PACKED:
-            return 'Smith'
-        case ITEM_WAREHOUSE_T1_PACKED:
-            return 'Warehouse'
-        case ITEM_EXTRACTOR_T1_PACKED:
-            return 'Mining Rig'
-        case ITEM_FACTORY_T1_PACKED:
-            return 'Factory'
-        case ITEM_CONSTRUCTION_DOCK_T1_PACKED:
-            return 'Construction Dock'
-        case ITEM_CONTAINER_T1_PACKED:
-            return 'Container'
-        case ITEM_CONTAINER_T2_PACKED:
-            return 'Container'
-        case ITEM_PROSPECTOR_T2A_PACKED:
-            return 'Prospector'
-        case ITEM_PROSPECTOR_T2B_PACKED:
-            return 'Prospector'
-        case ITEM_DREDGER_T2A_PACKED:
-            return 'Dredger'
-        default:
-            return 'Entity'
-    }
+    const template = getTemplateMeta(itemId)
+    if (!template) return 'Entity'
+    if (template.displayLabel) return template.displayLabel
+    return getKindMeta(template.kind)?.defaultLabel || 'Entity'
 }
 
 const MODULE_DISPLAY_NAME_BY_TYPE: Partial<Record<ModuleType, string>> = {
