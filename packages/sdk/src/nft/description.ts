@@ -11,14 +11,6 @@ import {
     MODULE_STORAGE,
     MODULE_WARP,
 } from '../capabilities/modules'
-import {
-    ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONTAINER_T2_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-} from '../data/item-ids'
 import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import {decodeStat} from '../derivation/crafting'
 import {
@@ -47,6 +39,11 @@ function idiv(a: number, b: number): number {
 
 export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
+}
+
+export function formatMassTonnes(kg: number): string {
+    const tenths = idiv(kg + 50, 100)
+    return `${idiv(tenths, 10)}.${tenths % 10} t`
 }
 
 function isShipHull(itemId: number): boolean {
@@ -81,6 +78,29 @@ export function computeBaseCapacityContainer(stats: bigint): number {
 export function computeBaseCapacityWarehouse(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
     return Math.floor(100_000_000 * 6 ** (s / 1998))
+}
+
+export function computeBaseCapacityWorkshop(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(5_000_000 * 6 ** (s / 1998))
+}
+
+const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
+    ship: computeBaseCapacityShip,
+    warehouse: computeBaseCapacityWarehouse,
+    workshop: computeBaseCapacityWorkshop,
+    extractor: computeBaseCapacityContainer,
+    factory: computeBaseCapacityContainer,
+    builddock: computeBaseCapacityContainer,
+    mdriver: computeBaseCapacityContainer,
+    mcatcher: computeBaseCapacityContainer,
+    container: computeBaseCapacityContainer,
+}
+
+export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {
+    const kind = getTemplateMeta(itemId)?.kind
+    if (!kind) return 0
+    return CAPACITY_FN_BY_KIND[kind.toString()]?.(stats) ?? 0
 }
 
 export const computeEngineThrust = (vol: number, tier: number): number =>
@@ -223,7 +243,7 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const fin = decodeStat(stats, 0)
             const pla = decodeStat(stats, 1)
             const tier = getItem(itemId).tier
-            out += `  Mass ${computeLoaderMass(fin)}  Thrust ${computeLoaderThrust(pla, tier)}`
+            out += `  Mass ${formatMassTonnes(computeLoaderMass(fin))}  Thrust ${computeLoaderThrust(pla, tier)}`
             break
         }
         case MODULE_CRAFTER: {
@@ -246,7 +266,7 @@ export function formatModuleLine(slot: number, itemId: number, stats: bigint): s
             const hrd = decodeStat(stats, 2)
             const coh = decodeStat(stats, 3)
             const tier = getItem(itemId).tier
-            out += `  Cargo Capacity ${computeCargoBayCapacity(str, den, hrd, tier)}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
+            out += `  Cargo Capacity ${formatMassTonnes(computeCargoBayCapacity(str, den, hrd, tier))}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
             break
         }
         case MODULE_HAULER: {
@@ -283,25 +303,12 @@ export function buildEntityDescription(
     moduleStats: bigint[]
 ): string {
     const hullMass = computeBaseHullmass(itemId, hullStats)
-    let baseCapacity = 0
-    if (isShipHull(itemId)) {
-        baseCapacity = computeBaseCapacityShip(hullStats)
-    } else if (itemId === ITEM_WAREHOUSE_T1_PACKED) {
-        baseCapacity = computeBaseCapacityWarehouse(hullStats)
-    } else if (
-        itemId === ITEM_EXTRACTOR_T1_PACKED ||
-        itemId === ITEM_FACTORY_T1_PACKED ||
-        itemId === ITEM_CONSTRUCTION_DOCK_T1_PACKED ||
-        itemId === ITEM_CONTAINER_T1_PACKED ||
-        itemId === ITEM_CONTAINER_T2_PACKED
-    ) {
-        baseCapacity = computeBaseCapacityContainer(hullStats)
-    }
+    const baseCapacity = computeBaseCapacityForEntity(itemId, hullStats)
 
     let out = entityDisplayName(itemId)
-    out += ` - Hull ${hullMass} mass`
+    out += ` - Hull ${formatMassTonnes(hullMass)}`
     if (baseCapacity > 0) {
-        out += ` * ${baseCapacity} capacity`
+        out += ` * ${formatMassTonnes(baseCapacity)} capacity`
     }
     out += '\n\n'
 
