@@ -11,6 +11,7 @@ import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
 import {ClusterManager} from './cluster'
 import {NftManager} from './nft'
+import {JobsManager} from './jobs'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
 export class GameContext {
@@ -22,6 +23,7 @@ export class GameContext {
     private _actions?: ActionsManager
     private _clusters?: ClusterManager
     private _nft?: NftManager
+    private _jobs?: JobsManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
 
@@ -89,6 +91,13 @@ export class GameContext {
             this._nft = new NftManager(this)
         }
         return this._nft
+    }
+
+    get jobs(): JobsManager {
+        if (!this._jobs) {
+            this._jobs = new JobsManager(this)
+        }
+        return this._jobs
     }
 
     setSubscriptionsUrl(url: string) {

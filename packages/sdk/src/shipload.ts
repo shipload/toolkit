@@ -12,6 +12,7 @@ import type {EpochsManager} from './managers/epochs'
 import type {ActionsManager} from './managers/actions'
 import type {ClusterManager} from './managers/cluster'
 import type {NftManager} from './managers/nft'
+import type {JobsManager} from './managers/jobs'
 import type {SubscriptionsManager} from './subscriptions/manager'
 import type {GameState} from './entities/gamestate'
 
@@ -130,6 +131,10 @@ export class Shipload {
 
     get nft(): NftManager {
         return this._context.nft
+    }
+
+    get jobs(): JobsManager {
+        return this._context.jobs
     }
 
     get subscriptions(): SubscriptionsManager {

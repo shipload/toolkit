@@ -1,3 +1,7 @@
+import type {ServerContract} from '../contracts'
+
+type CargoItem = ServerContract.Types.cargo_item
+
 export interface JobWindow {
     id: number
     socket: number
@@ -6,6 +10,8 @@ export interface JobWindow {
     completesAt: Date
     recipeId: number
     quantity: number
+    /** Packed stat roll of the job's output, when the source carried the job's cargo. */
+    outputStats?: bigint
 }
 
 export interface JobLaneEntry {
@@ -68,4 +74,35 @@ export function pickFabricator(
         }
     }
     return best
+}
+
+export type JobStatus = 'waiting' | 'crafting' | 'ready'
+
+export function jobStatus(job: {startsAt: Date; completesAt: Date}, now: Date): JobStatus {
+    if (now < job.startsAt) return 'waiting'
+    if (now < job.completesAt) return 'crafting'
+    return 'ready'
+}
+
+// Generic in the element so raw chain JSON (readonly actions) splits by the same rule as decoded rows.
+export function splitJobCargo<T>(cargo: readonly T[]): {output: T | null; inputs: T[]} {
+    if (cargo.length === 0) return {output: null, inputs: []}
+    return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
+}
+
+export interface OwnedJob {
+    id: number
+    workshop: number
+    socket: number
+    shipId: number
+    coords: {x: number; y: number}
+    startsAt: Date
+    completesAt: Date
+    recipeId: number
+    quantity: number
+    status: JobStatus
+    output: CargoItem | null
+    inputs: CargoItem[]
+    /** Packed stat roll of `output`, so every job shape answers this the same way. */
+    outputStats?: bigint
 }

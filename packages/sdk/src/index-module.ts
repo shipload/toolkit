@@ -51,6 +51,7 @@ export {
     computeFreeCells,
     NftManager,
     ConstructionManager,
+    JobsManager,
 } from './managers'
 export type {GridCell, ClusterCell, Cluster} from './managers'
 export type {
@@ -288,8 +289,15 @@ export type {
 export {taskCargoChanges} from './scheduling/task-cargo'
 export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
 
-export {jobsToLanes, pickFabricator, socketTail, JOB_QUEUE_CAP} from './scheduling/jobs'
-export type {JobWindow, JobLane, JobLaneEntry} from './scheduling/jobs'
+export {
+    jobsToLanes,
+    pickFabricator,
+    socketTail,
+    JOB_QUEUE_CAP,
+    jobStatus,
+    splitJobCargo,
+} from './scheduling/jobs'
+export type {JobWindow, JobLane, JobLaneEntry, JobStatus, OwnedJob} from './scheduling/jobs'
 
 export {composeIdleResolve} from './scheduling/idle-resolve'
 export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'
