@@ -46,7 +46,7 @@ export const itemAbbreviations: Record<number, string> = {
     10200: 'CT',
     10201: 'SH',
     10202: 'WH',
-    20001: 'PL',
-    20002: 'FR',
-    20200: 'CT',
+    11001: 'PL',
+    11002: 'FR',
+    11200: 'CT',
 }

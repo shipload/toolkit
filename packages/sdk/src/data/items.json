@@ -589,155 +589,155 @@
     "tier": 1
   },
   {
-    "id": 20001,
+    "id": 11001,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20002,
+    "id": 11002,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20003,
+    "id": 11003,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20004,
+    "id": 11004,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20005,
+    "id": 11005,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20006,
+    "id": 11006,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20007,
+    "id": 11007,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20008,
+    "id": 11008,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20009,
+    "id": 11009,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20010,
+    "id": 11010,
     "mass": 4800,
     "type": "component",
     "tier": 2
   },
   {
-    "id": 20100,
+    "id": 11100,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "engine"
   },
   {
-    "id": 20101,
+    "id": 11101,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "generator"
   },
   {
-    "id": 20102,
+    "id": 11102,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "gatherer"
   },
   {
-    "id": 20103,
+    "id": 11103,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "loader"
   },
   {
-    "id": 20104,
+    "id": 11104,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "crafter"
   },
   {
-    "id": 20105,
+    "id": 11105,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "storage"
   },
   {
-    "id": 20106,
+    "id": 11106,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "hauler"
   },
   {
-    "id": 20107,
+    "id": 11107,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "warp"
   },
   {
-    "id": 20108,
+    "id": 11108,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "battery"
   },
   {
-    "id": 20110,
+    "id": 11110,
     "mass": 1536000,
     "type": "module",
     "tier": 2,
     "subtype": "builder"
   },
   {
-    "id": 20200,
+    "id": 11200,
     "mass": 3100000,
     "type": "entity",
     "tier": 2
   },
   {
-    "id": 20212,
+    "id": 11212,
     "mass": 4320000,
     "type": "entity",
     "tier": 2
   },
   {
-    "id": 20213,
+    "id": 11213,
     "mass": 5760000,
     "type": "entity",
     "tier": 2
   },
   {
-    "id": 20214,
+    "id": 11214,
     "mass": 5760000,
     "type": "entity",
     "tier": 2

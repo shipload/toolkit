@@ -19,9 +19,9 @@ describe('tier utilities', () => {
         assert.equal(itemTier(10001), 1)
         assert.equal(itemTier(10100), 1)
         assert.equal(itemTier(10200), 1)
-        assert.equal(itemTier(20001), 2)
-        assert.equal(itemTier(20200), 2)
-        assert.equal(itemTier(30001), 3)
+        assert.equal(itemTier(11001), 2)
+        assert.equal(itemTier(11200), 2)
+        assert.equal(itemTier(12001), 3)
     })
 
     test('itemTier returns 0 for raw resources', () => {
@@ -33,22 +33,22 @@ describe('tier utilities', () => {
         assert.equal(itemOffset(10001), 1)
         assert.equal(itemOffset(10100), 100)
         assert.equal(itemOffset(10200), 200)
-        assert.equal(itemOffset(20001), 1)
-        assert.equal(itemOffset(20200), 200)
+        assert.equal(itemOffset(11001), 1)
+        assert.equal(itemOffset(11200), 200)
     })
 
     test('itemCategory classifies crafted items', () => {
         assert.equal(itemCategory(10001), 'component')
         assert.equal(itemCategory(10100), 'module')
         assert.equal(itemCategory(10200), 'entity')
-        assert.equal(itemCategory(20001), 'component')
-        assert.equal(itemCategory(20200), 'entity')
+        assert.equal(itemCategory(11001), 'component')
+        assert.equal(itemCategory(11200), 'entity')
         assert.equal(itemCategory(101), 'resource')
     })
 
     test('isRelatedItem matches same offset across tiers', () => {
-        assert.isTrue(isRelatedItem(10001, 20001))
-        assert.isTrue(isRelatedItem(10200, 20200))
+        assert.isTrue(isRelatedItem(10001, 11001))
+        assert.isTrue(isRelatedItem(10200, 11200))
         assert.isFalse(isRelatedItem(10001, 10002))
         assert.isFalse(isRelatedItem(10001, 10100))
     })
@@ -56,7 +56,7 @@ describe('tier utilities', () => {
     test('isCraftedItem checks >= 10000', () => {
         assert.isFalse(isCraftedItem(101))
         assert.isTrue(isCraftedItem(10001))
-        assert.isTrue(isCraftedItem(20001))
+        assert.isTrue(isCraftedItem(11001))
     })
 })
 

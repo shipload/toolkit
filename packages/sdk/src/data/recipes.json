@@ -1737,7 +1737,7 @@
     "sourceSubclass": 10210
   },
   {
-    "outputItemId": 20001,
+    "outputItemId": 11001,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1774,7 +1774,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20002,
+    "outputItemId": 11002,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1823,7 +1823,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20003,
+    "outputItemId": 11003,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1860,7 +1860,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20004,
+    "outputItemId": 11004,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1901,7 +1901,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20005,
+    "outputItemId": 11005,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1942,7 +1942,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20006,
+    "outputItemId": 11006,
     "outputMass": 4800,
     "inputs": [
       {
@@ -1979,7 +1979,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20007,
+    "outputItemId": 11007,
     "outputMass": 4800,
     "inputs": [
       {
@@ -2016,7 +2016,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20008,
+    "outputItemId": 11008,
     "outputMass": 4800,
     "inputs": [
       {
@@ -2045,7 +2045,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20009,
+    "outputItemId": 11009,
     "outputMass": 4800,
     "inputs": [
       {
@@ -2094,7 +2094,7 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20010,
+    "outputItemId": 11010,
     "outputMass": 4800,
     "inputs": [
       {
@@ -2135,11 +2135,11 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20100,
+    "outputItemId": 11100,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20003,
+        "itemId": 11003,
         "quantity": 600
       },
       {
@@ -2176,11 +2176,11 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20101,
+    "outputItemId": 11101,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20004,
+        "itemId": 11004,
         "quantity": 600
       },
       {
@@ -2217,15 +2217,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20102,
+    "outputItemId": 11102,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20005,
+        "itemId": 11005,
         "quantity": 300
       },
       {
-        "itemId": 20002,
+        "itemId": 11002,
         "quantity": 300
       },
       {
@@ -2274,11 +2274,11 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20103,
+    "outputItemId": 11103,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20007,
+        "itemId": 11007,
         "quantity": 600
       },
       {
@@ -2315,15 +2315,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20104,
+    "outputItemId": 11104,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20009,
+        "itemId": 11009,
         "quantity": 300
       },
       {
-        "itemId": 20006,
+        "itemId": 11006,
         "quantity": 300
       },
       {
@@ -2360,15 +2360,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20105,
+    "outputItemId": 11105,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20001,
+        "itemId": 11001,
         "quantity": 300
       },
       {
-        "itemId": 20002,
+        "itemId": 11002,
         "quantity": 300
       },
       {
@@ -2429,15 +2429,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20106,
+    "outputItemId": 11106,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20004,
+        "itemId": 11004,
         "quantity": 300
       },
       {
-        "itemId": 20010,
+        "itemId": 11010,
         "quantity": 300
       },
       {
@@ -2486,15 +2486,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20107,
+    "outputItemId": 11107,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20004,
+        "itemId": 11004,
         "quantity": 300
       },
       {
-        "itemId": 20009,
+        "itemId": 11009,
         "quantity": 300
       },
       {
@@ -2519,15 +2519,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20108,
+    "outputItemId": 11108,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20003,
+        "itemId": 11003,
         "quantity": 300
       },
       {
-        "itemId": 20007,
+        "itemId": 11007,
         "quantity": 300
       },
       {
@@ -2588,15 +2588,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20110,
+    "outputItemId": 11110,
     "outputMass": 1536000,
     "inputs": [
       {
-        "itemId": 20006,
+        "itemId": 11006,
         "quantity": 300
       },
       {
-        "itemId": 20008,
+        "itemId": 11008,
         "quantity": 300
       },
       {
@@ -2633,15 +2633,15 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 20200,
+    "outputItemId": 11200,
     "outputMass": 3100000,
     "inputs": [
       {
-        "itemId": 20001,
+        "itemId": 11001,
         "quantity": 600
       },
       {
-        "itemId": 20008,
+        "itemId": 11008,
         "quantity": 600
       },
       {
@@ -2703,27 +2703,27 @@
     "sourceSubclass": 10200
   },
   {
-    "outputItemId": 20212,
+    "outputItemId": 11212,
     "outputMass": 4320000,
     "inputs": [
       {
-        "itemId": 20001,
+        "itemId": 11001,
         "quantity": 200
       },
       {
-        "itemId": 20008,
+        "itemId": 11008,
         "quantity": 200
       },
       {
-        "itemId": 20007,
+        "itemId": 11007,
         "quantity": 200
       },
       {
-        "itemId": 20003,
+        "itemId": 11003,
         "quantity": 200
       },
       {
-        "itemId": 20006,
+        "itemId": 11006,
         "quantity": 200
       },
       {
@@ -2797,31 +2797,31 @@
     "sourceSubclass": 10211
   },
   {
-    "outputItemId": 20213,
+    "outputItemId": 11213,
     "outputMass": 5760000,
     "inputs": [
       {
-        "itemId": 20005,
+        "itemId": 11005,
         "quantity": 150
       },
       {
-        "itemId": 20002,
+        "itemId": 11002,
         "quantity": 150
       },
       {
-        "itemId": 20010,
+        "itemId": 11010,
         "quantity": 150
       },
       {
-        "itemId": 20009,
+        "itemId": 11009,
         "quantity": 150
       },
       {
-        "itemId": 20004,
+        "itemId": 11004,
         "quantity": 150
       },
       {
-        "itemId": 20212,
+        "itemId": 11212,
         "quantity": 1
       }
     ],
@@ -2888,34 +2888,34 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 20212
+    "sourceSubclass": 11212
   },
   {
-    "outputItemId": 20214,
+    "outputItemId": 11214,
     "outputMass": 5760000,
     "inputs": [
       {
-        "itemId": 20005,
+        "itemId": 11005,
         "quantity": 150
       },
       {
-        "itemId": 20002,
+        "itemId": 11002,
         "quantity": 150
       },
       {
-        "itemId": 20010,
+        "itemId": 11010,
         "quantity": 150
       },
       {
-        "itemId": 20009,
+        "itemId": 11009,
         "quantity": 150
       },
       {
-        "itemId": 20004,
+        "itemId": 11004,
         "quantity": 150
       },
       {
-        "itemId": 20212,
+        "itemId": 11212,
         "quantity": 1
       }
     ],
@@ -2982,6 +2982,6 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 20212
+    "sourceSubclass": 11212
   }
 ]

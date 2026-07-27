@@ -187,7 +187,7 @@ function legacyEntityIdToItemId(id: string): number {
         case 'warehouse-t1':
             return 10202
         case 'container-t2':
-            return 20200
+            return 11200
         default:
             return 0
     }

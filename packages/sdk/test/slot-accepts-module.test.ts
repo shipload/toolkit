@@ -1,9 +1,14 @@
 import {describe, expect, test} from 'bun:test'
 import {getEntityLayout, slotAcceptsModule} from '../src/index'
-import {ITEM_GATHERER_T1, ITEM_GATHERER_T2, ITEM_ENGINE_T1} from '../src/data/item-ids'
+import {
+    ITEM_GATHERER_T1,
+    ITEM_GATHERER_T2,
+    ITEM_ENGINE_T1,
+    ITEM_PROSPECTOR_T2A_PACKED,
+} from '../src/data/item-ids'
 
 const ship = getEntityLayout(10201)!.slots
-const prospector = getEntityLayout(20212)!.slots
+const prospector = getEntityLayout(ITEM_PROSPECTOR_T2A_PACKED)!.slots
 
 describe('slotAcceptsModule', () => {
     test('T1 module fits a T2 slot (ceiling, not floor)', () => {

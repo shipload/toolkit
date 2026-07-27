@@ -328,112 +328,112 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
 
     // === Components (T2) ===
-    20001: {
+    11001: {
         name: 'Plate',
         description: 'Advanced structural plating reinforced with tier 2 ore.',
         color: '#9BADB8',
     },
-    20002: {
+    11002: {
         name: 'Frame',
         description:
             'Advanced composite framing reinforced with tier 2 regolith and biomass polymer.',
         color: '#C4A57B',
     },
-    20003: {
+    11003: {
         name: 'Plasma Cell',
         description: 'Advanced high-energy gaseous storage cell reinforced with tier 2 gas.',
         color: '#E86344',
     },
-    20004: {
+    11004: {
         name: 'Resonator',
         description: 'Advanced crystalline resonance lattice reinforced with tier 2 crystal.',
         color: '#4ADBFF',
     },
-    20005: {
+    11005: {
         name: 'Beam',
         description: 'Advanced heavy-duty structural beam reinforced with tier 2 ore.',
         color: '#7B8D9E',
     },
-    20006: {
+    11006: {
         name: 'Sensor',
         description: 'Advanced crystal-lattice sensing element reinforced with tier 2 crystal.',
         color: '#4ADBFF',
     },
-    20007: {
+    11007: {
         name: 'Polymer',
         description: 'Advanced pliable biomass-derived polymer reinforced with tier 2 biomass.',
         color: '#5A8B3E',
     },
-    20008: {
+    11008: {
         name: 'Ceramic',
         description: 'Advanced hardened ceramic reinforced with tier 2 regolith.',
         color: '#C4A57B',
     },
-    20009: {
+    11009: {
         name: 'Reactor',
         description: 'Advanced gas-pressurized reaction vessel reinforced with tier 2 gas.',
         color: '#B877FF',
     },
-    20010: {
+    11010: {
         name: 'Resin',
         description: 'Advanced saturated organic binder reinforced with tier 2 biomass.',
         color: '#5A8B3E',
     },
 
     // === Modules (T2) ===
-    20100: {
+    11100: {
         name: 'Engine',
         description: 'Advanced propulsion system. Reinforced thrust chambers for higher velocity.',
         color: '#E86344',
     },
-    20101: {
+    11101: {
         name: 'Power Core',
         description:
             'Advanced energy system. Higher-density crystal matrix for increased energy throughput.',
         color: '#4ADBFF',
     },
-    20102: {
+    11102: {
         name: 'Limpet Bay',
         description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',
         color: '#7B8D9E',
     },
-    20103: {
+    11103: {
         name: 'Shuttle Bay',
         description:
             'Advanced cargo handling system. Reinforced articulated arms for greater loading throughput.',
         color: '#5A8B3E',
     },
-    20104: {
+    11104: {
         name: 'Fabricator',
         description:
             'Advanced crafting system. Higher-grade reaction chambers for faster processing.',
         color: '#B877FF',
     },
-    20105: {
+    11105: {
         name: 'Cargo Hold',
         description: 'Advanced cargo storage. Reinforced tier 2 holds carry more mass.',
         color: '#8B7355',
     },
 
-    20106: {
+    11106: {
         name: 'Tractor Beam',
         description:
             'Advanced haul beam projector reinforced with tier 2 components for greater towing capacity.',
         color: '#4ADBFF',
     },
-    20107: {
+    11107: {
         name: 'Warp Drive',
         description:
             'Advanced warp system. Reinforced field coils project the hull across greater distances.',
         color: '#9be4ff',
     },
-    20108: {
+    11108: {
         name: 'Battery Bank',
         description:
             'Advanced battery bank. Higher-density cells store more charge from the power core.',
         color: '#4ADBFF',
     },
-    20110: {
+    11110: {
         name: 'Assembly Arm',
         description:
             'Advanced construction system. Reinforced manipulator arms for faster build and upgrade work.',
@@ -441,23 +441,23 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
 
     // === Entities (packed, T2) ===
-    20200: {
+    11200: {
         name: 'Container',
         description: 'Advanced cargo container with improved capacity formulas.',
         color: '#9BADB8',
     },
-    20212: {
+    11212: {
         name: 'Prospector',
         description: 'The tier 2 Prospector. The same three systems, ready for tier 2 modules.',
         color: '#4AE898',
     },
-    20213: {
+    11213: {
         name: 'Prospector',
         description:
             'A tier 2 Prospector with an auxiliary system for extra power, mobility, or endurance.',
         color: '#4AE898',
     },
-    20214: {
+    11214: {
         name: 'Dredger',
         description:
             'A gathering ship that stores what it digs. Its limpet bay works alongside a cargo hold.',
@@ -485,9 +485,9 @@ export const entityMetadata: Record<number, EntityMetadata> = {
         moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
     },
     10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
-    20212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
-    20213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
-    20214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
+    11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
+    11213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
+    11214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
 }
 
 for (const item of items as Array<{id: number}>) {

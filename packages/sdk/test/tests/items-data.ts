@@ -73,7 +73,7 @@ describe('getItem strictness', () => {
     })
 
     test('returns honest fields for a T2 component', () => {
-        const hpT2 = getItem(20001)
+        const hpT2 = getItem(11001)
         assert.equal(hpT2.name, 'Plate')
         assert.equal(hpT2.tier, 2)
         assert.equal(hpT2.type, 'component')

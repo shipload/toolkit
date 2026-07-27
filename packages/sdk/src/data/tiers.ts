@@ -18,17 +18,20 @@ export function itemTypeCode(id: number): number {
     }
 }
 
+const CRAFTED_BASE = 10000
+const TIER_STRIDE = 1000
+
 export function itemTier(id: number): number {
-    if (id < 10000) return 0
-    return Math.floor(id / 10000)
+    if (id < CRAFTED_BASE) return 0
+    return Math.floor((id - CRAFTED_BASE) / TIER_STRIDE) + 1
 }
 
 export function itemOffset(id: number): number {
-    return id % 10000
+    return id % TIER_STRIDE
 }
 
 export function itemCategory(id: number): CraftedItemCategory {
-    if (id < 10000) return 'resource'
+    if (id < CRAFTED_BASE) return 'resource'
     const offset = itemOffset(id)
     if (offset >= 200) return 'entity'
     if (offset >= 100) return 'module'
@@ -36,10 +39,10 @@ export function itemCategory(id: number): CraftedItemCategory {
 }
 
 export function isRelatedItem(a: number, b: number): boolean {
-    if (a < 10000 || b < 10000) return false
+    if (a < CRAFTED_BASE || b < CRAFTED_BASE) return false
     return itemOffset(a) === itemOffset(b)
 }
 
 export function isCraftedItem(id: number): boolean {
-    return id >= 10000
+    return id >= CRAFTED_BASE
 }

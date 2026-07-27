@@ -157,7 +157,7 @@
       "displayLabel": ""
     },
     {
-      "itemId": 20200,
+      "itemId": 11200,
       "kind": "container",
       "displayLabel": ""
     },
@@ -177,17 +177,17 @@
       "displayLabel": ""
     },
     {
-      "itemId": 20212,
+      "itemId": 11212,
       "kind": "ship",
       "displayLabel": "Prospector"
     },
     {
-      "itemId": 20213,
+      "itemId": 11213,
       "kind": "ship",
       "displayLabel": "Prospector"
     },
     {
-      "itemId": 20214,
+      "itemId": 11214,
       "kind": "ship",
       "displayLabel": "Dredger"
     }

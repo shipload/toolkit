@@ -335,12 +335,12 @@
     "baseHullmass": 4000000
   },
   {
-    "entityItemId": 20200,
+    "entityItemId": 11200,
     "slots": [],
     "baseHullmass": 100000
   },
   {
-    "entityItemId": 20212,
+    "entityItemId": 11212,
     "slots": [
       {
         "type": "generator",
@@ -361,7 +361,7 @@
     "baseHullmass": 5920000
   },
   {
-    "entityItemId": 20213,
+    "entityItemId": 11213,
     "slots": [
       {
         "type": "generator",
@@ -387,7 +387,7 @@
     "baseHullmass": 7360000
   },
   {
-    "entityItemId": 20214,
+    "entityItemId": 11214,
     "slots": [
       {
         "type": "generator",
