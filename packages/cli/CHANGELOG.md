@@ -1,5 +1,21 @@
 # @shipload/cli
 
+## 1.0.0-next.66
+
+### Patch Changes
+
+- 7d3c737: - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Sync the Cargo Hold and Battery Bank T2 module catalog and SDK mirror
+  - Mirror module tier slopes in the SDK and sync the Engine and Generator T2 catalog
+  - Scale gatherer yield with module tier
+  - Add an owner-scoped jobs manager
+- Updated dependencies [7d3c737]
+  - @shipload/oracle@0.0.1-next.52
+  - @shipload/sdk@1.0.0-next.62
+
 ## 1.0.0-next.65
 
 ### Patch Changes
