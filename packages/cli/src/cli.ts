@@ -1,5 +1,6 @@
 import {Command} from 'commander'
 import pkg from '../package.json' with {type: 'json'}
+import * as abandonplot from './commands/action/abandonplot'
 import * as addmodule from './commands/action/addmodule'
 import * as blend from './commands/action/blend'
 import * as buildplot from './commands/action/buildplot'
@@ -143,6 +144,7 @@ export function build(): Command {
     registerEntitySubcommand(deploy.SUBCOMMAND)
     registerEntitySubcommand(claimplot.SUBCOMMAND)
     registerEntitySubcommand(buildplot.SUBCOMMAND)
+    registerEntitySubcommand(abandonplot.SUBCOMMAND)
     registerEntitySubcommand(undeploy.SUBCOMMAND)
     registerEntitySubcommand(movetile.SUBCOMMAND)
     registerEntitySubcommand(cluster.SUBCOMMAND)

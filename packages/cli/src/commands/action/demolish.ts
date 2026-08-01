@@ -5,7 +5,7 @@ import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {transact} from '../../lib/session'
-import {ValidationError} from '../../lib/validate'
+import {requireConfirm} from '../../lib/validate'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION} from '../../lib/wait'
 
 export async function buildAction(ctx: EntityContext): Promise<Action> {
@@ -21,12 +21,7 @@ interface DemolishCliOptions {
 
 export async function runDemolish(ctx: EntityContext, options: DemolishCliOptions): Promise<void> {
     await withValidation(async () => {
-        if (!options.confirm) {
-            throw new ValidationError(
-                `demolish is permanent. Add --confirm to proceed. ` +
-                    `(modules and cargo must already be removed)`
-            )
-        }
+        requireConfirm(options, 'demolish', 'modules and cargo must already be removed')
         const action = await buildAction(ctx)
         const result = await transact(
             {action},

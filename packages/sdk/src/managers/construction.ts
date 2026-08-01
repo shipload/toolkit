@@ -4,7 +4,7 @@ import type {ServerContract} from '../contracts'
 import {PlotManager} from './plot'
 import {getItem} from '../data/catalog'
 import {calc_build_duration} from '../capabilities/crafting'
-import {getLanes, getTasks} from '../scheduling/schedule'
+import {getLanes, getTasks, isIdle} from '../scheduling/schedule'
 import {HoldKind, TaskType} from '../types'
 import type {
     BuildableTarget,
@@ -32,6 +32,16 @@ export class ConstructionManager extends BaseManager {
             return this.plot.buildableTarget(entity, cargo, activeTask, scheduledBuild)
         }
         return null
+    }
+
+    canAbandon(
+        entity: ServerContract.Types.entity_row,
+        cargo: ServerContract.Types.cargo_row[]
+    ): boolean {
+        if (entity.kind.toString() !== 'plot') return false
+        if (!isIdle(entity)) return false
+        if (Number(entity.cargomass) !== 0) return false
+        return !cargo.some((c) => c.entity_id.equals(entity.id))
     }
 
     eligibleSources(

@@ -8,6 +8,16 @@ export class ValidationError extends Error {
 	}
 }
 
+export function requireConfirm(
+	options: { confirm?: boolean },
+	verb: string,
+	note: string,
+): void {
+	if (!options.confirm) {
+		throw new ValidationError(`${verb} is permanent. Add --confirm to proceed. (${note})`);
+	}
+}
+
 export function checkCapacity(
 	capacity: number,
 	currentCargoMass: number,

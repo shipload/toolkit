@@ -599,6 +599,12 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    abandonplot(plotId: UInt64Type): Action {
+        return this.server.action('abandonplot', {
+            plot_id: UInt64.from(plotId),
+        })
+    }
+
     addmodule(
         entityId: UInt64Type,
         moduleIndex: number,
