@@ -222,15 +222,22 @@ describe('coordsToLocationId', () => {
         assert.isFalse(id1.equals(id3))
     })
 
-    test('origin (0,0) produces ID 0', () => {
+    test('matches the contract per-axis +2^31 bias', () => {
+        const offset = BigInt(2147483648)
         const id = coordsToLocationId({x: 0, y: 0})
-        assert.equal(id.toNumber(), 0)
+        assert.equal(id.toString(), ((offset << BigInt(32)) | offset).toString())
     })
 
     test('x in high bits, y in low bits', () => {
+        const offset = BigInt(2147483648)
         const id = coordsToLocationId({x: 1, y: 0})
-        const expected = BigInt(1) << BigInt(32)
+        const expected = ((offset + BigInt(1)) << BigInt(32)) | offset
         assert.equal(id.toString(), expected.toString())
+    })
+
+    test('rejects coordinates outside int32 bounds', () => {
+        assert.throws(() => coordsToLocationId({x: 2147483648, y: 0}))
+        assert.throws(() => coordsToLocationId({x: 0, y: -2147483649}))
     })
 
     test('Coordinates.toLocationId() matches coordsToLocationId()', () => {

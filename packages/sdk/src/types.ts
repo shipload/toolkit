@@ -8,6 +8,7 @@ import {
     type UInt64Type,
 } from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
+import {COORD_MAX, COORD_MIN} from './coordinates/constants'
 
 export const PRECISION = 10000
 export const CRAFT_ENERGY_DIVISOR = 150000
@@ -124,10 +125,18 @@ export class Coordinates extends ServerContract.Types.coordinates {
 
 export function coordsToLocationId(coords: CoordinatesType): UInt64 {
     const c = Coordinates.from(coords)
-    const mask = BigInt(0xffffffff)
-    const x = BigInt(c.x.toNumber()) & mask
-    const y = BigInt(c.y.toNumber()) & mask
-    const id = (x << BigInt(32)) | y
+    const x = BigInt(c.x.toString())
+    const y = BigInt(c.y.toString())
+    if (
+        x < BigInt(COORD_MIN) ||
+        x > BigInt(COORD_MAX) ||
+        y < BigInt(COORD_MIN) ||
+        y > BigInt(COORD_MAX)
+    ) {
+        throw new Error('coordinate out of int32 bounds')
+    }
+    const offset = BigInt(2147483648)
+    const id = ((x + offset) << BigInt(32)) | (y + offset)
     return UInt64.from(id)
 }
 
