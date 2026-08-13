@@ -71,6 +71,7 @@ export enum TaskType {
     UPGRADE = 17,
     SHUTTLE = 18,
     REFIT = 19,
+    CONTRIBUTE = 20,
 }
 
 export enum RefitOp {
