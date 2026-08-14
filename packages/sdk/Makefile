@@ -89,6 +89,7 @@ distclean: clean
 CODEGEN_URL      ?= https://jungle4.greymass.com
 PLATFORM_ACCOUNT ?= nex.shipload
 SERVER_ACCOUNT   ?= eon.shipload
+FUND_ACCOUNT     ?= fnd.shipload
 
 .PHONY: codegen
 codegen: codegen/platform codegen/server
@@ -99,7 +100,18 @@ codegen/platform:
 codegen/server:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
 
-SERVER_ABI_LOCAL ?= ../../../contracts/src/server/build/server.abi
+SERVER_ABI_LOCAL   ?= ../../../contracts/src/server/build/server.abi
+PLATFORM_ABI_LOCAL ?= ../../../contracts/src/platform/build/platform.abi
+FUND_ABI_LOCAL     ?= ../../../contracts/src/fund/build/fund.abi
+
+.PHONY: codegen/local
+codegen/local: codegen/server/local codegen/platform/local codegen/fund/local
 
 codegen/server/local:
 	bunx @wharfkit/cli generate --json $(SERVER_ABI_LOCAL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
+
+codegen/platform/local:
+	bunx @wharfkit/cli generate --json $(PLATFORM_ABI_LOCAL) --file ./src/contracts/platform.ts $(PLATFORM_ACCOUNT)
+
+codegen/fund/local:
+	bunx @wharfkit/cli generate --json $(FUND_ABI_LOCAL) --file ./src/contracts/fund.ts $(FUND_ACCOUNT)

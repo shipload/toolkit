@@ -841,4 +841,65 @@ export class ActionsManager extends BaseManager {
             max_rows: UInt64.from(maxRows),
         })
     }
+
+    found(player: NameType, entityId: UInt64Type, location: CoordinatesType): Action {
+        return this.server.action('found', {
+            player: Name.from(player),
+            entity_id: UInt64.from(entityId),
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+        })
+    }
+
+    naturalize(player: NameType, location: CoordinatesType): Action {
+        return this.server.action('naturalize', {
+            player: Name.from(player),
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+        })
+    }
+
+    contribute(
+        player: NameType,
+        entityId: UInt64Type,
+        location: CoordinatesType,
+        bundle: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.platform.action('contribute', {
+            game: this.server.account,
+            player: Name.from(player),
+            entity_id: UInt64.from(entityId),
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+            bundle,
+        })
+    }
+
+    // addcontrib asserts the citizenship rows exist, so naturalize must precede contribute.
+    firstContribution(
+        player: NameType,
+        entityId: UInt64Type,
+        location: CoordinatesType,
+        bundle: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action[] {
+        return [
+            this.naturalize(player, location),
+            this.contribute(player, entityId, location, bundle),
+        ]
+    }
+
+    mintready(maxMints?: UInt32Type): Action {
+        const params: {max_mints?: UInt32} = {}
+        if (maxMints !== undefined) {
+            params.max_mints = UInt32.from(maxMints)
+        }
+        return this.server.action('mintready', params)
+    }
+
+    charterready(location: CoordinatesType): Action {
+        return this.server.action('charterready', {
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+        })
+    }
 }

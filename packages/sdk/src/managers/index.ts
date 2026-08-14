@@ -13,6 +13,14 @@ export type {GridCell, ClusterCell, Cluster} from './cluster'
 export {NftManager} from './nft'
 export type {NftConfigForItem} from './nft'
 export {JobsManager} from './jobs'
+export {InfluenceManager} from './influence'
+export type {
+    CharterProgress,
+    ContributePreview,
+    ContributePreviewRow,
+    FoundedWorld,
+    InfluenceStanding,
+} from './influence'
 export {PlotManager} from './plot'
 export type {PlotProgress, PlotProgressInputRow} from './plot'
 export {ConstructionManager} from './construction'

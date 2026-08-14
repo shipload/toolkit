@@ -52,9 +52,15 @@ export {
     NftManager,
     ConstructionManager,
     JobsManager,
+    InfluenceManager,
 } from './managers'
 export type {GridCell, ClusterCell, Cluster} from './managers'
 export type {
+    CharterProgress,
+    ContributePreview,
+    ContributePreviewRow,
+    FoundedWorld,
+    InfluenceStanding,
     PlayerRosterEntry,
     LocationStratum,
     NftConfigForItem,
@@ -613,7 +619,14 @@ export {
     itemTypeCode,
 } from './data/tiers'
 
-export {formatMass, formatMassDelta, formatMassScaled, formatLocation} from './format'
+export {
+    formatInfluence,
+    formatLocation,
+    formatMass,
+    formatMassDelta,
+    formatMassScaled,
+    formatNeedMultiplier,
+} from './format'
 export * from './coordinates'
 
 export {displayName, baseName, describeItem} from './resolution/display-name'
@@ -639,3 +652,5 @@ export type {
     LanePlanEntry,
     PlanTarget,
 } from './planner'
+
+export * from './influence'

@@ -15,7 +15,6 @@ import {
     ITEM_CRAFTER_T1,
     ITEM_BUILDER_T1,
     ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
@@ -37,7 +36,6 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
             ITEM_CRAFTER_T1,
             ITEM_BUILDER_T1,
             ITEM_EXTRACTOR_T1_PACKED,
-            ITEM_WORKSHOP_T1_PACKED,
             ITEM_ROUSTABOUT_T1A_PACKED,
         ].sort((a, b) => a - b)
     )

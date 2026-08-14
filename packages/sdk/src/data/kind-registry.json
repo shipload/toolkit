@@ -72,7 +72,7 @@
     },
     {
       "kind": "workshop",
-      "classification": "OrbitalStructure",
+      "classification": "PlanetaryStructure",
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Workshop"

@@ -13,6 +13,7 @@ import type {ActionsManager} from './managers/actions'
 import type {ClusterManager} from './managers/cluster'
 import type {NftManager} from './managers/nft'
 import type {JobsManager} from './managers/jobs'
+import type {InfluenceManager} from './managers/influence'
 import type {SubscriptionsManager} from './subscriptions/manager'
 import type {GameState} from './entities/gamestate'
 
@@ -135,6 +136,10 @@ export class Shipload {
 
     get jobs(): JobsManager {
         return this._context.jobs
+    }
+
+    get influence(): InfluenceManager {
+        return this._context.influence
     }
 
     get subscriptions(): SubscriptionsManager {

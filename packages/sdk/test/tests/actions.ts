@@ -300,8 +300,11 @@ describe('ActionsManager', () => {
     describe('sync guard', () => {
         const EXCLUDED = new Set([
             // read-only get* queries — no builder needed
+            'getcharter',
             'getcluster',
             'getconfig',
+            'getdecomp',
+            'getdemand',
             'getdeposit',
             'geteligible',
             'getentcls',
@@ -312,17 +315,23 @@ describe('ActionsManager', () => {
             'getitemids',
             'getitems',
             'getitemtype',
+            'getinfdecay',
+            'getinfluence',
+            'getinfvalue',
             'getitemtypes',
             'getjobs',
             'getkindmeta',
             'getlocation',
             'getlocdata',
+            'getmintcfg',
             'getmodtypes',
             'getmodules',
             'getnearby',
             'getnftbase',
             'getnftinfo',
             'getplayer',
+            'getpool',
+            'getpools',
             'getprojstate',
             'getrecipe',
             'getrecipes',
@@ -344,6 +353,11 @@ describe('ActionsManager', () => {
             'genesisfleet',
             'resolveearly',
             'setcivic',
+            'setinfburn',
+            'setinfd1',
+            'setinfdemand',
+            'setinfmint',
+            'setinfweight',
             'setcluster',
             'setcoords',
             'setnextid',
@@ -355,6 +369,7 @@ describe('ActionsManager', () => {
             'importcargo',
             'importcell',
             'importentity',
+            'importepoch',
             'importgroup',
             'importnftcfg',
             'importplayer',
@@ -364,6 +379,8 @@ describe('ActionsManager', () => {
             'configlog',
             'notify',
             // debug / util
+            'dbgcredit',
+            'dbgdirection',
             'descentity',
             'hash',
             'hash512',
@@ -374,6 +391,8 @@ describe('ActionsManager', () => {
             'stowentity',
             // admin entity removal
             'delentity',
+            // inline-only, get_sender gated to the platform front door
+            'addcontrib',
         ])
 
         test('every server action has an ActionsManager builder (or is explicitly excluded)', () => {

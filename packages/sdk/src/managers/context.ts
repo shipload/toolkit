@@ -12,6 +12,7 @@ import {ActionsManager} from './actions'
 import {ClusterManager} from './cluster'
 import {NftManager} from './nft'
 import {JobsManager} from './jobs'
+import {InfluenceManager} from './influence'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
 export class GameContext {
@@ -24,6 +25,7 @@ export class GameContext {
     private _clusters?: ClusterManager
     private _nft?: NftManager
     private _jobs?: JobsManager
+    private _influence?: InfluenceManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
 
@@ -98,6 +100,13 @@ export class GameContext {
             this._jobs = new JobsManager(this)
         }
         return this._jobs
+    }
+
+    get influence(): InfluenceManager {
+        if (!this._influence) {
+            this._influence = new InfluenceManager(this)
+        }
+        return this._influence
     }
 
     setSubscriptionsUrl(url: string) {

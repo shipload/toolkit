@@ -32,3 +32,12 @@ export function formatMassScaled(kg: number): string {
     if (tonnes >= 1_000) return `${sign}${trim(tonnes / 1_000)}k t`
     return formatMass(kg)
 }
+
+export function formatInfluence(atomic: bigint | number | string): string {
+    const points = BigInt(String(atomic)) / 10_000n
+    return `${points.toLocaleString('en-US')} pts`
+}
+
+export function formatNeedMultiplier(needFp: bigint | number | string): string {
+    return `×${(Number(BigInt(String(needFp))) / 10_000).toFixed(1)}`
+}

@@ -32,7 +32,11 @@ describe('availableBuildMethods', () => {
             'craft+deploy',
             'plot',
         ])
-        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
+    })
+
+    test('the retired Workshop has no build methods', () => {
+        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual([])
+        expect(isPlotBuildable(ITEM_WORKSHOP_T1_PACKED)).toBe(false)
     })
 
     test('orbital vessels return craft+deploy only', () => {
@@ -135,7 +139,6 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
                 ITEM_EXTRACTOR_T1_PACKED,
                 ITEM_FACTORY_T1_PACKED,
                 ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-                ITEM_WORKSHOP_T1_PACKED,
             ].sort()
         )
     })
