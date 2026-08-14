@@ -314,6 +314,11 @@
     "baseHullmass": 4000000
   },
   {
+    "entityItemId": 10216,
+    "slots": [],
+    "baseHullmass": 100000
+  },
+  {
     "entityItemId": 10218,
     "slots": [
       {

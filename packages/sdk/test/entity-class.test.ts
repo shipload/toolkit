@@ -105,6 +105,6 @@ describe('Entity kind-derived flags', () => {
         expect(nexus.canUndeploy).toBeFalse()
         expect(nexus.canDemolish).toBeFalse()
         expect(nexus.canUseModules).toBeFalse()
-        expect(nexus.entityClass).toBe(EntityClass.OrbitalVessel)
+        expect(nexus.entityClass).toBe(EntityClass.OrbitalStructure)
     })
 })

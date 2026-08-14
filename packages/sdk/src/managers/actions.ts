@@ -511,6 +511,35 @@ export class ActionsManager extends BaseManager {
         return this.server.action('canceljob', params)
     }
 
+    upgradejob(
+        targetId: UInt64Type,
+        dockId: UInt64Type,
+        targetItemId: UInt16Type,
+        inputs: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        const params: ServerContract.ActionParams.upgradejob = {
+            target_id: UInt64.from(targetId),
+            dock_id: UInt64.from(dockId),
+            target_item_id: UInt16.from(targetItemId),
+            inputs,
+        }
+        return this.server.action('upgradejob', params)
+    }
+
+    claimupgrade(jobId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.claimupgrade = {
+            job_id: UInt64.from(jobId),
+        }
+        return this.server.action('claimupgrade', params)
+    }
+
+    cancelupgrade(jobId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.cancelupgrade = {
+            job_id: UInt64.from(jobId),
+        }
+        return this.server.action('cancelupgrade', params)
+    }
+
     setsocket(workshopId: UInt64Type, slot: UInt8Type, open: boolean): Action {
         const params: ServerContract.ActionParams.setsocket = {
             workshop_id: UInt64.from(workshopId),

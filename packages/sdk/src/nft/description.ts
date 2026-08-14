@@ -95,6 +95,7 @@ const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
     mdriver: computeBaseCapacityContainer,
     mcatcher: computeBaseCapacityContainer,
     container: computeBaseCapacityContainer,
+    nexus: computeBaseCapacityContainer,
 }
 
 export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {

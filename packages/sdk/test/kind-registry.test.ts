@@ -80,7 +80,7 @@ describe('kind-registry', () => {
     test('getEntityClass returns correct class per kind', () => {
         expect(getEntityClass('ship')).toBe(EntityClass.OrbitalVessel)
         expect(getEntityClass('container')).toBe(EntityClass.OrbitalVessel)
-        expect(getEntityClass('nexus')).toBe(EntityClass.OrbitalVessel)
+        expect(getEntityClass('nexus')).toBe(EntityClass.OrbitalStructure)
         expect(getEntityClass('warehouse')).toBe(EntityClass.OrbitalStructure)
         expect(getEntityClass('extractor')).toBe(EntityClass.OrbitalStructure)
         expect(getEntityClass('factory')).toBe(EntityClass.OrbitalStructure)

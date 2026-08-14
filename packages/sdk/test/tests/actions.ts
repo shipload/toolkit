@@ -342,6 +342,7 @@ describe('ActionsManager', () => {
             'getslots',
             'getstratum',
             'getsummaries',
+            'getupgjobs',
             // admin / setup actions — contract authority only
             'addnexus',
             'cleartable',

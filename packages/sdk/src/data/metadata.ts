@@ -320,6 +320,12 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A cargo ship built around a large storage hold. The extra mass makes it slower than a Roustabout.',
         color: '#4AE898',
     },
+    10216: {
+        name: 'Nexus',
+        description:
+            'A permanent installation at a world where NFT-backed assets are wrapped, unwrapped, and deployed.',
+        color: '#FFD24C',
+    },
     10218: {
         name: 'Smith',
         description:
