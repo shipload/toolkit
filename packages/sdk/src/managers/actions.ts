@@ -931,4 +931,19 @@ export class ActionsManager extends BaseManager {
             y: Int64.from(location.y),
         })
     }
+
+    votecharter(player: NameType, location: CoordinatesType, nodeId: UInt32Type): Action {
+        return this.server.action('votecharter', {
+            player: Name.from(player),
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+            node_id: UInt32.from(nodeId),
+        })
+    }
+
+    voteready(maxBallots: UInt32Type = UInt32.from(0)): Action {
+        return this.server.action('voteready', {
+            max_ballots: UInt32.from(maxBallots),
+        })
+    }
 }

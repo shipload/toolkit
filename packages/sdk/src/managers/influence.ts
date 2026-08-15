@@ -64,6 +64,7 @@ export interface FoundedWorld {
     active: bigint
     watermark: bigint
     direction: number
+    directionEpoch: number
     founder: Name
     founded: number
 }
@@ -222,6 +223,7 @@ export class InfluenceManager extends BaseManager {
             ),
             watermark: big(row.watermark),
             direction: Number(row.direction),
+            directionEpoch: Number(row.direction_epoch),
             founder: Name.from(row.founder),
             founded: Number(row.founded),
         }))
