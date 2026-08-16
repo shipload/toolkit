@@ -382,7 +382,7 @@ describe('ActionsManager', () => {
             'notify',
             // debug / util
             'dbgcredit',
-            'dbgdirection',
+            'dbgmandate',
             'descentity',
             'hash',
             'hash512',

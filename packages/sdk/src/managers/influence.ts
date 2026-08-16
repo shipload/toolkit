@@ -24,7 +24,7 @@ export interface InfluenceStanding {
     locationLifetime: bigint
     locationActive: bigint
     watermark: bigint
-    direction: number
+    mandate: number
     founder: Name
     founded: number
 }
@@ -34,7 +34,7 @@ export interface CharterProgress {
     lifetime: bigint
     watermark: bigint
     surplus: bigint
-    direction: number
+    mandate: number
     nextCost: bigint
     prereqsMet: boolean
     buildable: boolean
@@ -63,8 +63,8 @@ export interface FoundedWorld {
     lifetime: bigint
     active: bigint
     watermark: bigint
-    direction: number
-    directionEpoch: number
+    chosen: number
+    chosenEpoch: number
     founder: Name
     founded: number
 }
@@ -90,7 +90,7 @@ export class InfluenceManager extends BaseManager {
             locationLifetime: big(result.location_lifetime),
             locationActive: big(result.location_active),
             watermark: big(result.watermark),
-            direction: Number(result.direction),
+            mandate: Number(result.mandate),
             founder: Name.from(result.founder),
             founded: Number(result.founded),
         }
@@ -182,7 +182,7 @@ export class InfluenceManager extends BaseManager {
             lifetime: big(result.lifetime),
             watermark: big(result.watermark),
             surplus: big(result.surplus),
-            direction: Number(result.direction),
+            mandate: Number(result.mandate),
             nextCost: big(result.next_cost),
             prereqsMet: Boolean(result.prereqs_met),
             buildable: Boolean(result.buildable),
@@ -222,8 +222,8 @@ export class InfluenceManager extends BaseManager {
                 Math.max(0, Number(epoch) - Number(row.last_update_epoch))
             ),
             watermark: big(row.watermark),
-            direction: Number(row.direction),
-            directionEpoch: Number(row.direction_epoch),
+            chosen: Number(row.chosen),
+            chosenEpoch: Number(row.chosen_epoch),
             founder: Name.from(row.founder),
             founded: Number(row.founded),
         }))
