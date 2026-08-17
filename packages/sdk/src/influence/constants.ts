@@ -41,7 +41,7 @@ export const BAR_STEP_DOWN = BAR_STEP_UNIT
 export const CHARTER_NONE = 0
 export const CHARTER_WORKSHOP = 1
 export const CHARTER_EFFECT_SPAWN_ENTITY = 1
-export const CHARTER_WORKSHOP_COST = 300_000_000n
+export const CHARTER_WORKSHOP_COST = 2_000_000_000n
 export const CHARTER_BASELINE_STAT = 213
 export const CHARTER_MAX_PREREQS = 4
 

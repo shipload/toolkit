@@ -236,9 +236,9 @@ describe('valuation', () => {
         ).toThrow()
     })
 
-    test('the Workshop charter costs 30,000 points of hauled par T1 material', () => {
+    test('the Workshop charter costs 200,000 points of hauled par T1 material', () => {
         const perTonne = valueCargoItem(
-            {itemId: ITEM_ORE_T1, quantity: 30_000, stats: packStats(PAR)},
+            {itemId: ITEM_ORE_T1, quantity: 200_000, stats: packStats(PAR)},
             baseDemand,
             pricing
         )
