@@ -26,6 +26,27 @@ export interface InfluenceDeps {
     session: SessionLike
 }
 
+export interface PendingBallot {
+    x: number
+    y: number
+    epoch: number
+}
+
+export interface BallotReads {
+    getBallotQueue(): Promise<PendingBallot[]>
+    getCurrentEpoch(): Promise<number>
+}
+
+export interface BallotActions {
+    voteready(maxBallots: number): Action
+}
+
+export interface BallotDeps {
+    reads: BallotReads
+    actions: BallotActions
+    session: SessionLike
+}
+
 export interface FundReads {
     getLotCount(): Promise<number>
 }
@@ -45,6 +66,11 @@ export type MintReadyResult = {kind: 'poked'; maxMints?: number}
 export type CharterReadyResult =
     | {kind: 'completed'; worlds: FoundedWorld[]}
     | {kind: 'nothing-buildable'; examined: number}
+
+export type VoteReadyResult =
+    | {kind: 'settled'; due: number; maxBallots: number}
+    | {kind: 'none-due'; pending: number}
+    | {kind: 'no-ballots'}
 
 export type TendResult = {kind: 'tended'; maxLots: number} | {kind: 'no-lots'}
 
@@ -76,6 +102,23 @@ export async function completeReadyCharters(
         return {kind: 'nothing-buildable', examined: worlds.length}
     }
     return {kind: 'completed', worlds: completed}
+}
+
+export async function settleReadyBallots(
+    deps: BallotDeps,
+    maxBallots = 0
+): Promise<VoteReadyResult> {
+    const [queue, epoch] = await Promise.all([
+        deps.reads.getBallotQueue(),
+        deps.reads.getCurrentEpoch(),
+    ])
+    if (queue.length === 0) return {kind: 'no-ballots'}
+
+    const due = queue.filter((ballot) => ballot.epoch < epoch)
+    if (due.length === 0) return {kind: 'none-due', pending: queue.length}
+
+    await deps.session.transact({action: deps.actions.voteready(maxBallots)})
+    return {kind: 'settled', due: due.length, maxBallots}
 }
 
 export async function tendFund(deps: FundDeps, maxLots = 0): Promise<TendResult> {

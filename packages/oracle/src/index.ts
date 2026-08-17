@@ -20,7 +20,11 @@ export {
 export {
     completeReadyCharters,
     pokeMintReady,
+    settleReadyBallots,
     tendFund,
+    type BallotActions,
+    type BallotDeps,
+    type BallotReads,
     type CharterReadyResult,
     type CharterState,
     type FoundedWorld,
@@ -31,5 +35,7 @@ export {
     type InfluenceDeps,
     type InfluenceReads,
     type MintReadyResult,
+    type PendingBallot,
     type TendResult,
+    type VoteReadyResult,
 } from './maintenance'

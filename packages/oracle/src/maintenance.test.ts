@@ -2,10 +2,13 @@ import {expect, test} from 'bun:test'
 import {
     completeReadyCharters,
     pokeMintReady,
+    settleReadyBallots,
     tendFund,
+    type BallotDeps,
     type FoundedWorld,
     type FundDeps,
     type InfluenceDeps,
+    type PendingBallot,
 } from './maintenance'
 
 function influenceDeps(opts: {
@@ -99,6 +102,65 @@ test('charterready honors a per-tick world cap', async () => {
     const result = await completeReadyCharters(deps, {maxWorlds: 2})
     expect(result).toEqual({kind: 'completed', worlds: [worlds[0], worlds[1]]})
     expect(sent).toEqual(['charterready:1,1', 'charterready:2,2'])
+})
+
+function ballotDeps(opts: {queue: PendingBallot[]; epoch: number}): {
+    deps: BallotDeps
+    sent: string[]
+} {
+    const sent: string[] = []
+    const deps: BallotDeps = {
+        reads: {
+            getBallotQueue: async () => opts.queue,
+            getCurrentEpoch: async () => opts.epoch,
+        },
+        actions: {
+            voteready: (maxBallots) => {
+                sent.push(`voteready:${maxBallots}`)
+                return {name: 'voteready'} as never
+            },
+        },
+        session: {transact: async () => ({})},
+    }
+    return {deps, sent}
+}
+
+test('voteready does nothing when the ballot queue is empty', async () => {
+    const {deps, sent} = ballotDeps({queue: [], epoch: 9})
+    expect(await settleReadyBallots(deps)).toEqual({kind: 'no-ballots'})
+    expect(sent).toEqual([])
+})
+
+test('voteready leaves the current epoch alone', async () => {
+    const queue = [
+        {x: 1, y: 1, epoch: 9},
+        {x: 2, y: 2, epoch: 9},
+    ]
+    const {deps, sent} = ballotDeps({queue, epoch: 9})
+    expect(await settleReadyBallots(deps)).toEqual({kind: 'none-due', pending: 2})
+    expect(sent).toEqual([])
+})
+
+test('voteready settles once a ballot falls behind the epoch', async () => {
+    const queue = [
+        {x: 1, y: 1, epoch: 8},
+        {x: 2, y: 2, epoch: 9},
+    ]
+    const {deps, sent} = ballotDeps({queue, epoch: 9})
+    expect(await settleReadyBallots(deps)).toEqual({kind: 'settled', due: 1, maxBallots: 0})
+    expect(sent).toEqual(['voteready:0'])
+})
+
+test('voteready sweeps with the contract default cap', async () => {
+    const {deps, sent} = ballotDeps({queue: [{x: 1, y: 1, epoch: 7}], epoch: 9})
+    await settleReadyBallots(deps)
+    expect(sent).toEqual(['voteready:0'])
+})
+
+test('voteready accepts an explicit cap', async () => {
+    const {deps, sent} = ballotDeps({queue: [{x: 1, y: 1, epoch: 7}], epoch: 9})
+    expect(await settleReadyBallots(deps, 5)).toEqual({kind: 'settled', due: 1, maxBallots: 5})
+    expect(sent).toEqual(['voteready:5'])
 })
 
 test('tend does nothing when the fund holds no lots', async () => {
