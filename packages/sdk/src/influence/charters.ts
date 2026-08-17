@@ -1,26 +1,27 @@
-import {ITEM_WORKSHOP_T1_PACKED} from '../data/item-ids'
-import {
-    CHARTER_EFFECT_SPAWN_ENTITY,
-    CHARTER_NONE,
-    CHARTER_WORKSHOP,
-    CHARTER_WORKSHOP_COST,
-} from './constants'
+import chartersJson from '../data/charters.json'
+import {CHARTER_NONE} from './constants'
+
+export interface CharterEffect {
+    kind: number
+    itemId: number
+    targetItemId: number
+    slotMask: number
+    stat: number
+}
 
 export interface CharterNode {
     nodeId: number
     cost: bigint
     prereqs: number[]
-    effect: {kind: number; itemId: number}
+    effect: CharterEffect
 }
 
-export const CHARTER_REGISTRY: CharterNode[] = [
-    {
-        nodeId: CHARTER_WORKSHOP,
-        cost: CHARTER_WORKSHOP_COST,
-        prereqs: [],
-        effect: {kind: CHARTER_EFFECT_SPAWN_ENTITY, itemId: ITEM_WORKSHOP_T1_PACKED},
-    },
-]
+export const CHARTER_REGISTRY: CharterNode[] = chartersJson.nodes.map((node) => ({
+    nodeId: node.nodeId,
+    cost: BigInt(node.cost),
+    prereqs: [...node.prereqs],
+    effect: {...node.effect},
+}))
 
 export function charterNode(nodeId: number): CharterNode | undefined {
     if (nodeId === CHARTER_NONE) return undefined

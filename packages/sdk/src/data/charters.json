@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "nodeId": 1,
+      "cost": "2000000000",
+      "prereqs": [],
+      "effect": {
+        "kind": 1,
+        "itemId": 10208,
+        "targetItemId": 0,
+        "slotMask": 0,
+        "stat": 0
+      }
+    },
+    {
+      "nodeId": 2,
+      "cost": "4000000000",
+      "prereqs": [
+        1
+      ],
+      "effect": {
+        "kind": 1,
+        "itemId": 10216,
+        "targetItemId": 0,
+        "slotMask": 0,
+        "stat": 0
+      }
+    },
+    {
+      "nodeId": 3,
+      "cost": "3000000000",
+      "prereqs": [
+        1
+      ],
+      "effect": {
+        "kind": 1,
+        "itemId": 10209,
+        "targetItemId": 0,
+        "slotMask": 0,
+        "stat": 0
+      }
+    },
+    {
+      "nodeId": 4,
+      "cost": "2000000000",
+      "prereqs": [
+        1
+      ],
+      "effect": {
+        "kind": 2,
+        "itemId": 10104,
+        "targetItemId": 10208,
+        "slotMask": 0,
+        "stat": 400
+      }
+    },
+    {
+      "nodeId": 5,
+      "cost": "3000000000",
+      "prereqs": [
+        3
+      ],
+      "effect": {
+        "kind": 2,
+        "itemId": 10110,
+        "targetItemId": 10209,
+        "slotMask": 2,
+        "stat": 400
+      }
+    }
+  ]
+}
