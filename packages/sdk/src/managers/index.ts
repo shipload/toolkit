@@ -20,6 +20,10 @@ export type {
     ContributePreviewRow,
     FoundedWorld,
     InfluenceStanding,
+    PendingBallot,
+    VoteCast,
+    VoteOption,
+    VoteStandings,
 } from './influence'
 export {PlotManager} from './plot'
 export type {PlotProgress, PlotProgressInputRow} from './plot'

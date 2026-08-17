@@ -141,6 +141,15 @@ export function coordsToLocationId(coords: CoordinatesType): UInt64 {
     return UInt64.from(id)
 }
 
+export function locationIdToCoords(id: UInt64Type): {x: number; y: number} {
+    const value = BigInt(UInt64.from(id).toString())
+    const offset = BigInt(2147483648)
+    return {
+        x: Number((value >> BigInt(32)) - offset),
+        y: Number((value & BigInt('0xffffffff')) - offset),
+    }
+}
+
 export interface Distance {
     origin: ServerContract.ActionParams.Type.coordinates
     destination: ServerContract.ActionParams.Type.coordinates

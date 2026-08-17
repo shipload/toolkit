@@ -1,8 +1,9 @@
 import {Int64, Name, type NameType, UInt64} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import type {ServerContract} from '../contracts'
-import {coordsToLocationId, type CoordinatesType} from '../types'
+import {ServerContract} from '../contracts'
+import {coordsToLocationId, locationIdToCoords, type CoordinatesType} from '../types'
 import {
+    type BuiltCharter,
     citizenryName,
     contributeDuration,
     decayActive,
@@ -60,13 +61,48 @@ export interface ContributePreview {
 
 export interface FoundedWorld {
     locationId: bigint
+    x: number
+    y: number
     lifetime: bigint
     active: bigint
     watermark: bigint
     chosen: number
     chosenEpoch: number
+    mandate: number | undefined
     founder: Name
     founded: number
+}
+
+export interface VoteOption {
+    nodeId: number
+    cost: bigint
+    eligible: boolean
+    total: bigint | undefined
+}
+
+export interface VoteStandings {
+    locationId: bigint
+    epoch: number
+    chosen: number
+    chosenEpoch: number
+    mandate: number
+    ballotEpoch: number | undefined
+    talliesSuppressed: boolean
+    options: VoteOption[]
+}
+
+export interface VoteCast {
+    account: Name
+    epoch: number
+    nodeId: number
+    weight: bigint
+}
+
+export interface PendingBallot {
+    locationId: bigint
+    x: number
+    y: number
+    epoch: number
 }
 
 function big(value: unknown): bigint {
@@ -211,11 +247,83 @@ export class InfluenceManager extends BaseManager {
         return (await this.server.readonly('getmintcfg')) as ServerContract.Types.mintcfg_result
     }
 
-    async getFoundedWorlds(): Promise<FoundedWorld[]> {
-        const rows = (await this.server.table('infloc').all()) as ServerContract.Types.infloc_row[]
-        const epoch = (await this.getState()).epoch
+    async getVotes(location: CoordinatesType): Promise<VoteStandings> {
+        const result = (await this.server.readonly('getvotes', {
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+        })) as ServerContract.Types.vote_result
+
+        const epoch = Number(result.epoch)
+        const rawBallotEpoch = Number(result.ballot_epoch)
+        const ballotEpoch = rawBallotEpoch === 0 ? undefined : rawBallotEpoch
+        const talliesSuppressed = ballotEpoch !== undefined && ballotEpoch < epoch
+
+        return {
+            locationId: big(result.location_id),
+            epoch,
+            chosen: Number(result.chosen),
+            chosenEpoch: Number(result.chosen_epoch),
+            mandate: Number(result.effective),
+            ballotEpoch,
+            talliesSuppressed,
+            options: result.options.map((option) => ({
+                nodeId: Number(option.node_id),
+                cost: big(option.cost),
+                eligible: Boolean(option.eligible),
+                total: talliesSuppressed ? undefined : big(option.total),
+            })),
+        }
+    }
+
+    async getVoteCasts(location: CoordinatesType): Promise<VoteCast[]> {
+        const rows = await this.scopedRows<ServerContract.Types.infvote_row>(
+            'infvote',
+            coordsToLocationId(location),
+            ServerContract.Types.infvote_row
+        )
+        return rows.map((row) => ({
+            account: Name.from(row.account),
+            epoch: Number(row.epoch),
+            nodeId: Number(row.node_id),
+            weight: big(row.weight),
+        }))
+    }
+
+    async getVoteTallies(location: CoordinatesType): Promise<{nodeId: number; total: bigint}[]> {
+        const rows = await this.scopedRows<ServerContract.Types.inftally_row>(
+            'inftally',
+            coordsToLocationId(location),
+            ServerContract.Types.inftally_row
+        )
+        return rows.map((row) => ({nodeId: Number(row.node_id), total: big(row.total)}))
+    }
+
+    async getBuiltCharters(location: CoordinatesType): Promise<BuiltCharter[]> {
+        const rows = await this.scopedRows<ServerContract.Types.charters_row>(
+            'charters',
+            coordsToLocationId(location),
+            ServerContract.Types.charters_row
+        )
+        return rows.map((row) => ({nodeId: Number(row.node_id), entityId: big(row.entity_id)}))
+    }
+
+    async getBallotQueue(): Promise<PendingBallot[]> {
+        const rows = (await this.server
+            .table('infballot')
+            .all()) as ServerContract.Types.infballot_row[]
         return rows.map((row) => ({
             locationId: big(row.location_id),
+            ...locationIdToCoords(row.location_id),
+            epoch: Number(row.epoch),
+        }))
+    }
+
+    async getFoundedWorlds(opts: {withMandate?: boolean} = {}): Promise<FoundedWorld[]> {
+        const rows = (await this.server.table('infloc').all()) as ServerContract.Types.infloc_row[]
+        const epoch = (await this.getState()).epoch
+        const worlds = rows.map((row) => ({
+            locationId: big(row.location_id),
+            ...locationIdToCoords(row.location_id),
             lifetime: big(row.lifetime),
             active: decayActive(
                 big(row.active),
@@ -224,9 +332,36 @@ export class InfluenceManager extends BaseManager {
             watermark: big(row.watermark),
             chosen: Number(row.chosen),
             chosenEpoch: Number(row.chosen_epoch),
+            mandate: undefined as number | undefined,
             founder: Name.from(row.founder),
             founded: Number(row.founded),
         }))
+
+        if (!opts.withMandate) return worlds
+
+        for (const world of worlds) {
+            world.mandate = (await this.getCharter({x: world.x, y: world.y})).mandate
+        }
+        return worlds
+    }
+
+    private async scopedRows<T>(table: string, scope: UInt64, type: unknown): Promise<T[]> {
+        const rows: T[] = []
+        let lowerBound: UInt64 | undefined
+        for (;;) {
+            const page = await this.client.v1.chain.get_table_rows({
+                code: this.server.account,
+                table,
+                scope,
+                type: type as never,
+                limit: 1000,
+                lower_bound: lowerBound,
+            })
+            rows.push(...(page.rows as T[]))
+            if (!page.more || page.next_key === undefined) break
+            lowerBound = UInt64.from(String(page.next_key))
+        }
+        return rows
     }
 
     async isFounded(location: CoordinatesType): Promise<boolean> {
