@@ -17,9 +17,11 @@ const NEXUS = 2
 const DOCK = 3
 const WORKSHOP_TUNEUP = 4
 const DOCK_TUNEUP = 5
+const DEPOT = 6
 
 const WORKSHOP_ENTITY = 100n
 const DOCK_ENTITY = 300n
+const DEPOT_ENTITY = 600n
 
 function world(built: BuiltCharter[], present?: bigint[]): CharterWorld {
     if (!present) return {built}
@@ -47,7 +49,7 @@ describe('charter eligibility mirror', () => {
 
     test('completing the root opens the fork and closes the singleton path', () => {
         const built = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
-        expect(eligibleIds(built)).toEqual([NEXUS, DOCK, WORKSHOP_TUNEUP])
+        expect(eligibleIds(built)).toEqual([NEXUS, DOCK, WORKSHOP_TUNEUP, DEPOT])
         expect(charterSingletonMandate(built)).toBe(CHARTER_NONE)
     })
 
@@ -75,6 +77,7 @@ describe('charter eligibility mirror', () => {
             {nodeId: NEXUS, entityId: 200n},
             {nodeId: DOCK, entityId: DOCK_ENTITY},
             {nodeId: DOCK_TUNEUP, entityId: 0n},
+            {nodeId: DEPOT, entityId: DEPOT_ENTITY},
         ]
         expect(charterSingletonMandate(world(built, [WORKSHOP_ENTITY, DOCK_ENTITY]))).toBe(
             WORKSHOP_TUNEUP

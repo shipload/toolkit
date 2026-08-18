@@ -5,6 +5,7 @@ import {
     CAPACITY_TIER_TABLE,
     computeBaseCapacity,
     computeBaseHullmass,
+    computeDepotHullCapabilities,
     computeShipHullCapabilities,
     gathererDepthForTier,
     GATHERER_DEPTH_TABLE,
@@ -13,6 +14,7 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
+    ITEM_DEPOT_T1_PACKED,
     ITEM_DREDGER_T2A_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
@@ -48,6 +50,12 @@ describe('computeBaseCapacity', () => {
     test('warehouse retains its own 100M base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
             Math.floor(100_000_000 * 6 ** (200 / 1998))
+        )
+    })
+
+    test('depot retains its own 50M base capacity curve', () => {
+        expect(computeBaseCapacity(ITEM_DEPOT_T1_PACKED, stats)).toBe(
+            Math.floor(50_000_000 * 6 ** (200 / 1998))
         )
     })
 
@@ -101,6 +109,16 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_PROSPECTOR_T2A_PACKED, stats)).toBeGreaterThan(0)
         expect(computeBaseCapacity(ITEM_PROSPECTOR_T2B_PACKED, stats)).toBeGreaterThan(0)
         expect(computeBaseCapacity(ITEM_DREDGER_T2A_PACKED, stats)).toBeGreaterThan(0)
+    })
+})
+
+describe('computeDepotHullCapabilities (depot hull curve, matches contract compute_base_capacity_depot)', () => {
+    test('stats 0 returns exactly the 50M floor', () => {
+        expect(computeDepotHullCapabilities({strength: 0, hardness: 0}).capacity).toBe(50000000)
+    })
+
+    test('strength/hardness 213 matches contract-measured hull-only capacity', () => {
+        expect(computeDepotHullCapabilities({strength: 213, hardness: 213}).capacity).toBe(73262567)
     })
 })
 

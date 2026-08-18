@@ -233,6 +233,7 @@ export function computeBatteryCapabilities(
 
 import {
     ITEM_CONTAINER_T1_PACKED,
+    ITEM_DEPOT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     ITEM_WORKSHOP_T1_PACKED,
@@ -315,7 +316,7 @@ export function computeGathererYield(str: number, tier: number): number {
 
 const BASE_CAPACITY_FN_BY_KIND: Record<string, (stats: Record<string, number>) => number> = {
     warehouse: (stats) => computeWarehouseHullCapabilities(stats).capacity,
-    depot: (stats) => computeWarehouseHullCapabilities(stats).capacity,
+    depot: (stats) => computeDepotHullCapabilities(stats).capacity,
     workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
     extractor: (stats) => computeContainerCapabilities(stats).capacity,
     factory: (stats) => computeContainerCapabilities(stats).capacity,
@@ -359,6 +360,18 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     return {
         hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, stats),
         capacity: Math.floor(100000000 * 6 ** exponent),
+    }
+}
+
+export function computeDepotHullCapabilities(stats: Record<string, number>): {
+    hullmass: number
+    capacity: number
+} {
+    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
+    const exponent = statSum / 1998.0
+    return {
+        hullmass: computeBaseHullmass(ITEM_DEPOT_T1_PACKED, stats),
+        capacity: Math.floor(50000000 * 6 ** exponent),
     }
 }
 

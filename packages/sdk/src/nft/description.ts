@@ -85,6 +85,11 @@ export function computeBaseCapacityWorkshop(stats: bigint): number {
     return Math.floor(5_000_000 * 6 ** (s / 1998))
 }
 
+export function computeBaseCapacityDepot(stats: bigint): number {
+    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
+    return Math.floor(50_000_000 * 6 ** (s / 1998))
+}
+
 const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
     ship: computeBaseCapacityShip,
     warehouse: computeBaseCapacityWarehouse,
@@ -96,7 +101,7 @@ const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
     mcatcher: computeBaseCapacityContainer,
     container: computeBaseCapacityContainer,
     nexus: computeBaseCapacityContainer,
-    depot: computeBaseCapacityWarehouse,
+    depot: computeBaseCapacityDepot,
 }
 
 export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {
