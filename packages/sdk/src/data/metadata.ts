@@ -332,6 +332,11 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A crafting ship. One engine, one power core, and a fabricator for crafting away from home.',
         color: '#4AE898',
     },
+    10219: {
+        name: 'Depot',
+        description: 'Planetary storage facility with a loader module slot and four cargo slots.',
+        color: '#EAB308',
+    },
 
     // === Components (T2) ===
     11001: {
@@ -491,6 +496,9 @@ export const entityMetadata: Record<number, EntityMetadata> = {
         moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
     },
     10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
+    10219: {
+        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
+    },
     11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
     11213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
     11214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},

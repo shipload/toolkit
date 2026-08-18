@@ -366,6 +366,7 @@ export {
     ENTITY_CONTAINER,
     ENTITY_NEXUS,
     ENTITY_HUB,
+    ENTITY_DEPOT,
     getEntityClass,
     getPackedEntityType,
     getKindMeta,
@@ -386,6 +387,7 @@ export {
     isNexus,
     isPlot,
     isHub,
+    isDepot,
 } from './data/kind-registry'
 export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'

@@ -83,6 +83,13 @@
       "capabilityFlags": 20,
       "zCoord": 0,
       "defaultLabel": "Construction Dock"
+    },
+    {
+      "kind": "depot",
+      "classification": "PlanetaryStructure",
+      "capabilityFlags": 0,
+      "zCoord": 0,
+      "defaultLabel": "Depot"
     }
   ],
   "templates": [
@@ -195,6 +202,11 @@
       "itemId": 11214,
       "kind": "ship",
       "displayLabel": "Dredger"
+    },
+    {
+      "itemId": 10219,
+      "kind": "depot",
+      "displayLabel": ""
     }
   ]
 }

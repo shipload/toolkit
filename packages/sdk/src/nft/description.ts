@@ -96,6 +96,7 @@ const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
     mcatcher: computeBaseCapacityContainer,
     container: computeBaseCapacityContainer,
     nexus: computeBaseCapacityContainer,
+    depot: computeBaseCapacityWarehouse,
 }
 
 export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {

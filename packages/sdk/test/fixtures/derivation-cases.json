@@ -1,8 +1,8 @@
 {
-  "catalog_hash": "901f06352bc8bd993d6a70bdf3caa9fdc1cd58fe308aba26a5e2d9a42888836b",
+  "catalog_hash": "4f058a54653a7f4b4b64ee7d1b339d98593d5847c2a0c729adf669f3070521fe",
   "epoch_seed": "0202020202020202020202020202020202020202020202020202020202020202",
   "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
-  "generated_at": "2026-08-14T08:51:29.536Z",
+  "generated_at": "2026-08-18T07:24:02.803Z",
   "stratum": [
     {
       "name": "asteroid: known yielding stratum",

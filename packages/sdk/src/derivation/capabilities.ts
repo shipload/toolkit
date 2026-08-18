@@ -315,6 +315,7 @@ export function computeGathererYield(str: number, tier: number): number {
 
 const BASE_CAPACITY_FN_BY_KIND: Record<string, (stats: Record<string, number>) => number> = {
     warehouse: (stats) => computeWarehouseHullCapabilities(stats).capacity,
+    depot: (stats) => computeWarehouseHullCapabilities(stats).capacity,
     workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
     extractor: (stats) => computeContainerCapabilities(stats).capacity,
     factory: (stats) => computeContainerCapabilities(stats).capacity,

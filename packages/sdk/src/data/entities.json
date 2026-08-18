@@ -340,6 +340,37 @@
     "baseHullmass": 4000000
   },
   {
+    "entityItemId": 10219,
+    "slots": [
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 1
+      }
+    ],
+    "baseHullmass": 100000
+  },
+  {
     "entityItemId": 11200,
     "slots": [],
     "baseHullmass": 100000

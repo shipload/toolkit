@@ -89,6 +89,7 @@ export const ITEM_TUG_T1A_PACKED = 10214
 export const ITEM_PORTER_T1A_PACKED = 10215
 export const ITEM_NEXUS_T1_PACKED = 10216
 export const ITEM_SMITH_T1A_PACKED = 10218
+export const ITEM_DEPOT_T1_PACKED = 10219
 export const ITEM_PLATE_T2 = 11001
 export const ITEM_FRAME_T2 = 11002
 export const ITEM_PLASMA_CELL_T2 = 11003

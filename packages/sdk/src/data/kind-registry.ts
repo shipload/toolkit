@@ -34,6 +34,7 @@ export type EntityTypeName =
     | 'mdriver'
     | 'mcatcher'
     | 'hub'
+    | 'depot'
 
 export interface KindMeta {
     kind: Name
@@ -143,6 +144,7 @@ export const ENTITY_PLOT = Name.from('plot')
 export const ENTITY_MASS_DRIVER = Name.from('mdriver')
 export const ENTITY_MASS_CATCHER = Name.from('mcatcher')
 export const ENTITY_HUB = Name.from('hub')
+export const ENTITY_DEPOT = Name.from('depot')
 
 export function isShip(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_SHIP) ?? false
@@ -179,4 +181,7 @@ export function isMassCatcher(entity: {type?: Name}): boolean {
 }
 export function isHub(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_HUB) ?? false
+}
+export function isDepot(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_DEPOT) ?? false
 }

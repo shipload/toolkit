@@ -5,6 +5,7 @@ import {
     getEntityClass,
     getKindMeta,
     isContainer,
+    isDepot,
     isExtractor,
     isFactory,
     isConstructionDock,
@@ -43,6 +44,7 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     mdriver: isMassDriver,
     mcatcher: isMassCatcher,
     hub: isHub,
+    depot: isDepot,
 }
 
 const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {
