@@ -1,6 +1,6 @@
 import {Int64, Name, type NameType, UInt64} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {ServerContract} from '../contracts'
+import type {ServerContract} from '../contracts'
 import {coordsToLocationId, locationIdToCoords, type CoordinatesType} from '../types'
 import {
     type BuiltCharter,
@@ -276,11 +276,9 @@ export class InfluenceManager extends BaseManager {
     }
 
     async getVoteCasts(location: CoordinatesType): Promise<VoteCast[]> {
-        const rows = await this.scopedRows<ServerContract.Types.infvote_row>(
-            'infvote',
-            coordsToLocationId(location),
-            ServerContract.Types.infvote_row
-        )
+        const rows = (await this.server
+            .table('infvote', coordsToLocationId(location))
+            .all()) as ServerContract.Types.infvote_row[]
         return rows.map((row) => ({
             account: Name.from(row.account),
             epoch: Number(row.epoch),
@@ -290,20 +288,16 @@ export class InfluenceManager extends BaseManager {
     }
 
     async getVoteTallies(location: CoordinatesType): Promise<{nodeId: number; total: bigint}[]> {
-        const rows = await this.scopedRows<ServerContract.Types.inftally_row>(
-            'inftally',
-            coordsToLocationId(location),
-            ServerContract.Types.inftally_row
-        )
+        const rows = (await this.server
+            .table('inftally', coordsToLocationId(location))
+            .all()) as ServerContract.Types.inftally_row[]
         return rows.map((row) => ({nodeId: Number(row.node_id), total: big(row.total)}))
     }
 
     async getBuiltCharters(location: CoordinatesType): Promise<BuiltCharter[]> {
-        const rows = await this.scopedRows<ServerContract.Types.charters_row>(
-            'charters',
-            coordsToLocationId(location),
-            ServerContract.Types.charters_row
-        )
+        const rows = (await this.server
+            .table('charters', coordsToLocationId(location))
+            .all()) as ServerContract.Types.charters_row[]
         return rows.map((row) => ({nodeId: Number(row.node_id), entityId: big(row.entity_id)}))
     }
 
@@ -343,25 +337,6 @@ export class InfluenceManager extends BaseManager {
             world.mandate = (await this.getCharter({x: world.x, y: world.y})).mandate
         }
         return worlds
-    }
-
-    private async scopedRows<T>(table: string, scope: UInt64, type: unknown): Promise<T[]> {
-        const rows: T[] = []
-        let lowerBound: UInt64 | undefined
-        for (;;) {
-            const page = await this.client.v1.chain.get_table_rows({
-                code: this.server.account,
-                table,
-                scope,
-                type: type as never,
-                limit: 1000,
-                lower_bound: lowerBound,
-            })
-            rows.push(...(page.rows as T[]))
-            if (!page.more || page.next_key === undefined) break
-            lowerBound = UInt64.from(String(page.next_key))
-        }
-        return rows
     }
 
     async isFounded(location: CoordinatesType): Promise<boolean> {
