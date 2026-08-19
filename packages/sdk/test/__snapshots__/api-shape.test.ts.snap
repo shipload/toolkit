@@ -29,6 +29,7 @@ exports[`EntitiesManager method surface 1`] = `
 [
   "constructor",
   "getAllEntities",
+  "getDepot",
   "getEntities",
   "getEntity",
   "getProjection",

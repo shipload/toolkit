@@ -55,6 +55,17 @@ export class EntitiesManager extends BaseManager {
         return result as ServerContract.Types.entity_summary[]
     }
 
+    async getDepot(
+        depotId: UInt64Type,
+        owner: NameType | ServerContract.Types.player_row
+    ): Promise<ServerContract.Types.depot_view> {
+        const result = await this.server.readonly('getdepot', {
+            depot_id: depotId,
+            owner: this.resolveOwner(owner),
+        })
+        return result as ServerContract.Types.depot_view
+    }
+
     private resolveOwner(owner: NameType | ServerContract.Types.player_row): Name {
         if (typeof owner === 'object' && owner !== null && 'owner' in owner) {
             return owner.owner

@@ -315,6 +315,30 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    depotstore(
+        shipId: UInt64Type,
+        depotId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('depotstore', {
+            ship_id: UInt64.from(shipId),
+            depot_id: UInt64.from(depotId),
+            items,
+        })
+    }
+
+    depottake(
+        shipId: UInt64Type,
+        depotId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('depottake', {
+            ship_id: UInt64.from(shipId),
+            depot_id: UInt64.from(depotId),
+            items,
+        })
+    }
+
     shuttle(
         carrierId: UInt64Type,
         fromId: UInt64Type,

@@ -147,6 +147,61 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('depotstore', () => {
+        test('encodes ship id, depot id and the item bundle', () => {
+            const action = shipload.actions.depotstore(41, 77, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+                {item_id: 201, stats: 3n, modules: [], quantity: 5},
+            ])
+            assert.equal(action.account.toString(), 'eon.shipload')
+            assert.equal(action.name.toString(), 'depotstore')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'depotstore',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.ship_id), '41')
+            assert.equal(String(data.depot_id), '77')
+            assert.equal(data.items.length, 2)
+            assert.equal(String(data.items[0].item_id), '101')
+            assert.equal(String(data.items[0].quantity), '10')
+            assert.equal(String(data.items[1].item_id), '201')
+            assert.equal(String(data.items[1].stats), '3')
+        })
+
+        test('accepts UInt64 ids and an empty bundle', () => {
+            const action = shipload.actions.depotstore(UInt64.from(41), UInt64.from(77), [])
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'depotstore',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.ship_id), '41')
+            assert.equal(String(data.depot_id), '77')
+            assert.equal(data.items.length, 0)
+        })
+    })
+
+    describe('depottake', () => {
+        test('encodes ship id, depot id and the item bundle', () => {
+            const action = shipload.actions.depottake(41, 77, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+            ])
+            assert.equal(action.account.toString(), 'eon.shipload')
+            assert.equal(action.name.toString(), 'depottake')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'depottake',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.ship_id), '41')
+            assert.equal(String(data.depot_id), '77')
+            assert.equal(data.items.length, 1)
+            assert.equal(String(data.items[0].item_id), '101')
+            assert.equal(String(data.items[0].quantity), '10')
+        })
+    })
+
     describe('shuttle', () => {
         test('creates shuttle action with single item', () => {
             const action = shipload.actions.shuttle(1, 2, 3, [
@@ -301,11 +356,13 @@ describe('ActionsManager', () => {
         const EXCLUDED = new Set([
             // read-only get* queries — no builder needed
             'getcharter',
+            'getcharttree',
             'getcluster',
             'getconfig',
             'getdecomp',
             'getdemand',
             'getdeposit',
+            'getdepot',
             'geteligible',
             'getentcls',
             'getentities',
