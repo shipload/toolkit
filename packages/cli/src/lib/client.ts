@@ -13,6 +13,7 @@ try {
 export const gameContractName = cfg?.gameContract ?? "eon.shipload";
 export const platformContractName = cfg?.platformContract ?? "nex.shipload";
 export const atomicAssetsContractName = cfg?.atomicAssetsContract ?? "atomicassets";
+export const fundContractName = cfg?.fundContract ?? "fnd.shipload";
 
 export const chain = ChainDefinition.from({
 	id: "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d",

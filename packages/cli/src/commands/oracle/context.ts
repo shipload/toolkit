@@ -1,17 +1,29 @@
 import {
     cleanOldestReserveScope,
+    completeReadyCharters,
+    pokeMintReady,
     runOnce,
+    settleReadyBallots,
+    tendFund,
     SecretStore,
+    type BallotDeps,
+    type CharterReadyResult,
     type CleanResult,
+    type FundDeps,
+    type InfluenceDeps,
     type MaintenanceDeps,
+    type MintReadyResult,
     type OracleDeps,
     type SessionLike,
+    type TendResult,
     type TickResult,
+    type VoteReadyResult,
 } from '@shipload/oracle'
-import {Name, PrivateKey, type PublicKey} from '@wharfkit/antelope'
+import {FundContract} from '@shipload/sdk'
+import {Name, PrivateKey, UInt32, type PublicKey} from '@wharfkit/antelope'
 import {Session} from '@wharfkit/session'
 import {WalletPluginPrivateKey} from '@wharfkit/wallet-plugin-privatekey'
-import {chain, client, gameContractName, getShipload} from '../../lib/client'
+import {chain, client, fundContractName, gameContractName, getShipload} from '../../lib/client'
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
 import {ValidationError} from '../../lib/validate'
 
@@ -19,8 +31,25 @@ export interface OracleContext {
     cfg: OracleConfig
     deps: OracleDeps
     maintenance: MaintenanceDeps
+    influence: InfluenceDeps
+    ballots: BallotDeps
+    fund: FundDeps
     store: SecretStore
     close(): void
+}
+
+function wrapSession(rawSession: Session): SessionLike {
+    return {
+        transact: async ({action}) => {
+            const result = await rawSession.transact({action})
+            const processed = (result.response as {processed?: {block_num?: number}} | undefined)
+                ?.processed
+            return {
+                block_num:
+                    processed?.block_num !== undefined ? Number(processed.block_num) : undefined,
+            }
+        },
+    }
 }
 
 async function verifyOraclePermission(cfg: OracleConfig): Promise<void> {
@@ -70,17 +99,18 @@ export async function buildOracleContext(): Promise<OracleContext> {
         },
         {fetch}
     )
-    const session: SessionLike = {
-        transact: async ({action}) => {
-            const result = await rawSession.transact({action})
-            const processed = (result.response as {processed?: {block_num?: number}} | undefined)
-                ?.processed
-            return {
-                block_num:
-                    processed?.block_num !== undefined ? Number(processed.block_num) : undefined,
-            }
+    const session = wrapSession(rawSession)
+    const rawFundSession = new Session(
+        {
+            chain,
+            actor: fundContractName,
+            permission: cfg.handle,
+            walletPlugin: new WalletPluginPrivateKey(cfg.privateKey),
         },
-    }
+        {fetch}
+    )
+    const fundSession = wrapSession(rawFundSession)
+    const fundContract = new FundContract.Contract({client, account: Name.from(fundContractName)})
     const store = new SecretStore(cfg.storePath)
     const oracleId = Name.from(cfg.handle)
     const deps: OracleDeps = {
@@ -129,7 +159,54 @@ export async function buildOracleContext(): Promise<OracleContext> {
         },
         session,
     }
-    return {cfg, deps, maintenance, store, close: () => store.close()}
+    const influence: InfluenceDeps = {
+        reads: {
+            getFoundedWorlds: async () =>
+                (await shipload.influence.getFoundedWorlds()).map((w) => ({x: w.x, y: w.y})),
+            getCharter: async (world) => {
+                const charter = await shipload.influence.getCharter({x: world.x, y: world.y})
+                return {buildable: charter.buildable}
+            },
+        },
+        actions: {
+            mintready: (maxMints) => shipload.actions.mintready(maxMints),
+            charterready: (world) => shipload.actions.charterready({x: world.x, y: world.y}),
+        },
+        session,
+    }
+    const ballots: BallotDeps = {
+        reads: {
+            getBallotQueue: async () =>
+                (await shipload.influence.getBallotQueue()).map((b) => ({
+                    x: b.x,
+                    y: b.y,
+                    epoch: b.epoch,
+                })),
+            getCurrentEpoch: async () => Number(await shipload.epochs.getFinalizedEpoch(true)),
+        },
+        actions: {
+            voteready: (maxBallots) => shipload.actions.voteready(maxBallots),
+        },
+        session,
+    }
+    const fund: FundDeps = {
+        reads: {
+            getLotCount: async () => {
+                const res = await client.v1.chain.get_table_by_scope({
+                    code: fundContractName,
+                    table: 'lots',
+                    limit: 10,
+                })
+                const row = res.rows.find((r) => String(r.scope) === fundContractName)
+                return row ? Number(row.count) : 0
+            },
+        },
+        actions: {
+            tend: (maxLots) => fundContract.action('tend', {max_lots: UInt32.from(maxLots)}),
+        },
+        session: fundSession,
+    }
+    return {cfg, deps, maintenance, influence, ballots, fund, store, close: () => store.close()}
 }
 
 export async function tickOnce(ctx: OracleContext): Promise<TickResult> {
@@ -138,4 +215,29 @@ export async function tickOnce(ctx: OracleContext): Promise<TickResult> {
 
 export async function cleanOnce(ctx: OracleContext, maxRows: number): Promise<CleanResult> {
     return cleanOldestReserveScope(ctx.maintenance, maxRows)
+}
+
+export async function pokeMintReadyOnce(
+    ctx: OracleContext,
+    maxMints?: number
+): Promise<MintReadyResult> {
+    return pokeMintReady(ctx.influence, maxMints)
+}
+
+export async function completeReadyChartersOnce(
+    ctx: OracleContext,
+    opts: {maxWorlds?: number} = {}
+): Promise<CharterReadyResult> {
+    return completeReadyCharters(ctx.influence, opts)
+}
+
+export async function settleReadyBallotsOnce(
+    ctx: OracleContext,
+    maxBallots = 0
+): Promise<VoteReadyResult> {
+    return settleReadyBallots(ctx.ballots, maxBallots)
+}
+
+export async function tendFundOnce(ctx: OracleContext, maxLots = 0): Promise<TendResult> {
+    return tendFund(ctx.fund, maxLots)
 }

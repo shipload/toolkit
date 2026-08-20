@@ -1,4 +1,11 @@
-import type {CleanResult, TickResult} from '@shipload/oracle'
+import type {
+    CharterReadyResult,
+    CleanResult,
+    MintReadyResult,
+    TendResult,
+    TickResult,
+    VoteReadyResult,
+} from '@shipload/oracle'
 import Table from 'cli-table3'
 
 export interface OracleRow {
@@ -40,6 +47,34 @@ export function formatClean(r: CleanResult): string {
         return `reserve cleanup: epoch ${r.epoch} (${r.rows} rows)`
     }
     return 'reserve cleanup: nothing to clean'
+}
+
+export function formatMintReady(r: MintReadyResult): string {
+    return `mint sweep: poked (max ${r.maxMints ?? 'default'})`
+}
+
+export function formatCharterReady(r: CharterReadyResult): string {
+    if (r.kind === 'completed') {
+        return `charter sweep: completed ${r.worlds.length} world(s)`
+    }
+    return `charter sweep: nothing buildable (${r.examined} examined)`
+}
+
+export function formatVoteReady(r: VoteReadyResult): string {
+    if (r.kind === 'settled') {
+        return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxBallots})`
+    }
+    if (r.kind === 'none-due') {
+        return `ballot sweep: none due (${r.pending} pending)`
+    }
+    return 'ballot sweep: no ballots queued'
+}
+
+export function formatTend(r: TendResult): string {
+    if (r.kind === 'tended') {
+        return `fund sweep: tended (max ${r.maxLots})`
+    }
+    return 'fund sweep: no lots to tend'
 }
 
 function yn(v: boolean): string {

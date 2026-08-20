@@ -1,6 +1,22 @@
 import {expect, test} from 'bun:test'
-import type {CleanResult, TickResult} from '@shipload/oracle'
-import {formatClean, formatTick, renderStatus, type OracleStatusView} from './format'
+import type {
+    CharterReadyResult,
+    CleanResult,
+    MintReadyResult,
+    TendResult,
+    TickResult,
+    VoteReadyResult,
+} from '@shipload/oracle'
+import {
+    formatCharterReady,
+    formatClean,
+    formatMintReady,
+    formatTend,
+    formatTick,
+    formatVoteReady,
+    renderStatus,
+    type OracleStatusView,
+} from './format'
 
 const base: OracleStatusView = {
     serverAccount: 'eon.shipload',
@@ -264,4 +280,55 @@ test('formatClean describes a cleaned scope', () => {
 
 test('formatClean describes an empty pass', () => {
     expect(formatClean({kind: 'nothing-to-clean'})).toMatch(/nothing/i)
+})
+
+test('formatMintReady shows the max-mints cap', () => {
+    const r: MintReadyResult = {kind: 'poked', maxMints: 10}
+    expect(formatMintReady(r)).toContain('max 10')
+})
+
+test('formatMintReady shows "default" when uncapped', () => {
+    const r: MintReadyResult = {kind: 'poked'}
+    expect(formatMintReady(r)).toContain('max default')
+})
+
+test('formatCharterReady describes completed worlds', () => {
+    const r: CharterReadyResult = {
+        kind: 'completed',
+        worlds: [
+            {x: 1, y: 2},
+            {x: 3, y: 4},
+        ],
+    }
+    expect(formatCharterReady(r)).toContain('completed 2 world(s)')
+})
+
+test('formatCharterReady describes nothing buildable', () => {
+    const r: CharterReadyResult = {kind: 'nothing-buildable', examined: 5}
+    expect(formatCharterReady(r)).toContain('nothing buildable (5 examined)')
+})
+
+test('formatVoteReady describes a settled sweep', () => {
+    const r: VoteReadyResult = {kind: 'settled', due: 3, maxBallots: 0}
+    expect(formatVoteReady(r)).toContain('settled 3 due ballot(s)')
+})
+
+test('formatVoteReady describes none due', () => {
+    const r: VoteReadyResult = {kind: 'none-due', pending: 7}
+    expect(formatVoteReady(r)).toContain('none due (7 pending)')
+})
+
+test('formatVoteReady describes no ballots', () => {
+    const r: VoteReadyResult = {kind: 'no-ballots'}
+    expect(formatVoteReady(r)).toContain('no ballots queued')
+})
+
+test('formatTend describes a tended sweep', () => {
+    const r: TendResult = {kind: 'tended', maxLots: 0}
+    expect(formatTend(r)).toContain('tended (max 0)')
+})
+
+test('formatTend describes no lots', () => {
+    const r: TendResult = {kind: 'no-lots'}
+    expect(formatTend(r)).toContain('no lots to tend')
 })

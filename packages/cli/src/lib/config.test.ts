@@ -101,6 +101,26 @@ test('atomicAssetsContract reads [contracts] atomicassets', () => {
     expect(cfg.atomicAssetsContract).toBe('atomic.gm')
 })
 
+test('fundContract defaults to fnd.shipload', () => {
+    const dir = writeConfig(['[default]', 'private_key = PVT_K1_a', 'actor = someplayer'].join('\n'))
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.fundContract).toBe('fnd.shipload')
+})
+
+test('fundContract reads [contracts] fund', () => {
+    const dir = writeConfig(
+        [
+            '[default]',
+            'private_key = PVT_K1_a',
+            'actor = someplayer',
+            '[contracts]',
+            'fund = fund.gm',
+        ].join('\n')
+    )
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.fundContract).toBe('fund.gm')
+})
+
 test('explicit actor and permission override the defaults', () => {
     const dir = writeConfig(
         [
