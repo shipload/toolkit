@@ -22,7 +22,9 @@ import {findDecomp, DECOMP_REGISTRY} from './decomp'
 import {contributeDuration} from './duration'
 import {getStatCount, statsSumSq} from './quality'
 import {pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
-import {citizenryName} from './citizenry'
+import {citizenryName, citizenryPatternCount} from './citizenry'
+import citizenryAdjectives from '../data/citizenry-adjectives.json'
+import citizenryNouns from '../data/citizenry-nouns.json'
 
 const PAR = 213
 const WORLD = {x: 56, y: 0}
@@ -273,10 +275,34 @@ describe('citizenry names', () => {
         expect(a).toBe(b as string)
     })
 
-    test('composes the world name', () => {
+    test('composes the world name with a known noun', () => {
         const name = citizenryName(gameSeed, WORLD) ?? ''
         expect(name.length).toBeGreaterThan(0)
-        expect(/Collective|Compact|Concord of|Union/.test(name)).toBe(true)
+        expect(citizenryNouns.some((noun) => name.includes(noun))).toBe(true)
+    })
+
+    test('spreads across nouns and forms', () => {
+        const names: string[] = []
+        for (let x = 0; x < 160 && names.length < 200; x++) {
+            for (let y = 0; y < 160 && names.length < 200; y++) {
+                const name = citizenryName(gameSeed, {x, y})
+                if (name) names.push(name)
+            }
+        }
+        expect(names.length).toBeGreaterThan(100)
+
+        const nouns = new Set(names.map((n) => citizenryNouns.find((noun) => n.includes(noun))))
+        expect(nouns.size).toBeGreaterThan(20)
+
+        const ofForm = names.filter((n) => n.includes(' of ')).length
+        expect(ofForm).toBeGreaterThan(0)
+        expect(ofForm).toBeLessThan(names.length * 0.6)
+    })
+
+    test('counts every noun and adjective combination', () => {
+        expect(citizenryPatternCount()).toBe(
+            citizenryNouns.length * (1 + 2 * citizenryAdjectives.length)
+        )
     })
 
     test('is undefined away from a world', () => {

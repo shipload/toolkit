@@ -1,5 +1,5 @@
 import {Checksum256, type Checksum256Type, type Checksum512, UInt8} from '@wharfkit/antelope'
-import {hash512} from './hash'
+import {hash512, uint16} from './hash'
 import {Coordinates, type CoordinatesType, LocationType} from '../types'
 import {ServerContract} from '../contracts'
 import {deriveLocationSize} from '../derivation/location-size'
@@ -45,10 +45,6 @@ export function getLocationTypeName(type: LocationType): string {
         case LocationType.ICE_FIELD:
             return 'Ice Field'
     }
-}
-
-function uint16(hash: Checksum512, offset: number): number {
-    return (hash.array[offset] << 8) | hash.array[offset + 1]
 }
 
 function generatePlanetName(hashResult: Checksum512): string {

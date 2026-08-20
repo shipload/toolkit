@@ -9,3 +9,7 @@ export function hash512(seed: Checksum256Type, string: string): Checksum512 {
     const bytes = Bytes.from(`${seed}${string}`, 'utf8')
     return Checksum512.hash(bytes)
 }
+
+export function uint16(hash: Checksum512, offset: number): number {
+    return (hash.array[offset] << 8) | hash.array[offset + 1]
+}
