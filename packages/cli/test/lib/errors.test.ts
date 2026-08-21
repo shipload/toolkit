@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { EXIT, extractChainError, printError, resolvePreflightError } from "../../src/lib/errors";
+import { describeLoopError, EXIT, extractChainError, printError, resolvePreflightError } from "../../src/lib/errors";
 import { ValidationError } from "../../src/lib/validate";
 
 describe("extractChainError", () => {
@@ -117,5 +117,30 @@ describe("resolvePreflightError", () => {
 		const boom = new Error("network down");
 		expect(() => resolvePreflightError(boom, true)).toThrow("network down");
 		expect(() => resolvePreflightError(boom, false)).toThrow("network down");
+	});
+});
+
+describe("describeLoopError", () => {
+	test("names the error class instead of [object Object] when the session wrapper stringified an object", () => {
+		// wharfkit Session.transact falls back to `throw new Error(error)` for
+		// unrecognized failures; a non-Error object becomes message "[object Object]"
+		const wrapped = new Error({ code: 401, statusText: "Unauthorized" } as any);
+		const out = describeLoopError(wrapped);
+		expect(out).not.toContain("[object Object]");
+		expect(out.length).toBeGreaterThan(0);
+	});
+
+	test("surfaces fields from a plain-object rejection with no message string", () => {
+		const out = describeLoopError({ code: 3090003, name: "unsatisfied_authorization" });
+		expect(out).toContain("unsatisfied_authorization");
+	});
+
+	test("adds a linkauth hint for irrelevant-authority auth errors", () => {
+		const err = new Error(
+			'action declares irrelevant authority \'{"actor":"eon.shipload","permission":"oracle1"}\'; minimum authority is eon.shipload@active',
+		);
+		const out = describeLoopError(err);
+		expect(out).toContain("irrelevant authority");
+		expect(out.toLowerCase()).toContain("linkauth");
 	});
 });

@@ -12,13 +12,29 @@ export type ExitCode = (typeof EXIT)[keyof typeof EXIT];
 export function extractChainError(err: unknown): string {
 	const body = chainErrorBody(err);
 	if (body) return pickPrimaryChainMessage(body);
+	if (typeof err === "string" && err.length > 0) return err;
 	if (err && typeof err === "object") {
 		const maybe = err as { message?: string };
-		if (typeof maybe.message === "string" && maybe.message.length > 0) {
+		if (
+			typeof maybe.message === "string" &&
+			maybe.message.length > 0 &&
+			maybe.message !== "[object Object]"
+		) {
 			return stripAssertionPrefix(maybe.message);
 		}
+		const summary = summarizeErrorObject(err as Record<string, unknown>);
+		if (summary) return summary;
 	}
 	return "unknown error";
+}
+
+function summarizeErrorObject(obj: Record<string, unknown>): string | null {
+	const name = typeof obj.name === "string" && obj.name.length > 0 && obj.name !== "Error" ? obj.name : null;
+	const what = typeof obj.what === "string" && obj.what.length > 0 ? obj.what : null;
+	const label = [name, what].filter(Boolean).join(": ");
+	if (!label) return null;
+	const code = typeof obj.code === "number" || typeof obj.code === "string" ? ` (code ${obj.code})` : "";
+	return `${label}${code}`;
 }
 
 function stripAssertionPrefix(msg: string): string {
@@ -103,6 +119,10 @@ const HINTS: ChainHint[] = [
 	{
 		matches: (m) => m.includes("reached account cpu limit") || m.includes("reached account net limit"),
 		hint: "Your account's staked CPU/NET regenerates over ~24h. Wait 10-30s and retry, stake more EOS, or use a PowerUp to top up temporarily. Batch-submitting many actions back-to-back is the usual trigger.",
+	},
+	{
+		matches: (m) => m.includes("irrelevant authority"),
+		hint: "The action isn't linked to the signing permission. Link it with linkauth (open-auth crank actions like mintready/charterready/voteready link to eosio.any), then retry.",
 	},
 	{
 		matches: (m) => m.includes("non-existent permission"),
