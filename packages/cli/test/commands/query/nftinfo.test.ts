@@ -1,4 +1,5 @@
 import {expect, test} from 'bun:test'
+import {Int32, Name, UInt16} from '@wharfkit/antelope'
 import {render} from '../../../src/commands/query/nftinfo'
 
 test('nftinfo renders schemas and templates', () => {
@@ -29,4 +30,32 @@ test('nftinfo renders schemas and templates', () => {
 test('nftinfo --raw emits JSON', () => {
     const out = render({schemas: [], templates: []} as any, true)
     expect(JSON.parse(out)).toEqual({schemas: [], templates: []})
+})
+
+test('nftinfo renders wharfkit-typed rows as decoded from chain', () => {
+    const input = {
+        schemas: [
+            {
+                schema_name: Name.from('v1.ore'),
+                fields: [{name: 'quantity', field_type: 'uint64'}],
+            },
+        ],
+        templates: [
+            {
+                item_id: UInt16.from(11003),
+                schema_name: Name.from('v1.plasma'),
+                template_id: Int32.from(292),
+            },
+            {
+                item_id: UInt16.from(11004),
+                schema_name: Name.from('v1.resonator'),
+                template_id: Int32.from(0),
+            },
+        ],
+    }
+    const out = render(input as any, false)
+    expect(out).toContain('v1.plasma')
+    expect(out).toContain('292')
+    expect(out).toContain('11003')
+    expect(out).toContain('—')
 })

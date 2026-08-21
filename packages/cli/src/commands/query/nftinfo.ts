@@ -33,9 +33,10 @@ export function renderPretty(input: NftInfo): string {
     }
     lines.push('', `NFT templates (${templates.length}):`)
     for (const t of templates) {
-        const tpl = t.template_id ? String(t.template_id) : '—'
+        const templateId = Number(t.template_id ?? 0)
+        const tpl = templateId ? String(templateId) : '—'
         lines.push(
-            `  ${formatItem(t.item_id).padEnd(28)}  schema: ${t.schema_name.padEnd(16)}  template: ${tpl}`
+            `  ${formatItem(Number(t.item_id)).padEnd(28)}  schema: ${String(t.schema_name).padEnd(16)}  template: ${tpl}`
         )
     }
     return lines.join('\n')
