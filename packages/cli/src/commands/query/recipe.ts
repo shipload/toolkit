@@ -335,19 +335,22 @@ function aggregateResourceDemand(itemIds: number[]): ResourceDemand {
     return out
 }
 
-async function fetchAllRecipes(): Promise<Recipe[]> {
+export async function fetchAllRecipes(
+    readonly_: (action: string, params: object) => Promise<unknown> = async (action, params) =>
+        server.readonly(action as 'getrecipes', params as {lower_bound: number; limit: number})
+): Promise<Recipe[]> {
     const PAGE = 50
     const all: Recipe[] = []
     let lowerBound = 0
     while (true) {
-        const res = (await server.readonly('getrecipes', {
+        const res = (await readonly_('getrecipes', {
             lower_bound: lowerBound,
             limit: PAGE,
         })) as unknown as {recipes: Recipe[]}
         const page = res.recipes ?? []
         all.push(...page)
         if (page.length < PAGE) break
-        lowerBound = page[page.length - 1].output_item_id + 1
+        lowerBound = Number(page[page.length - 1].output_item_id) + 1
     }
     return all
 }

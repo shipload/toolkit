@@ -1,5 +1,6 @@
 import {expect, test} from 'bun:test'
-import {renderDetail, renderList} from '../../../src/commands/query/recipe'
+import {UInt16} from '@wharfkit/antelope'
+import {fetchAllRecipes, renderDetail, renderList} from '../../../src/commands/query/recipe'
 
 const sample = {
     output_item_id: 10001,
@@ -87,4 +88,24 @@ test('renderDetail shows output mass in tonnes not kg', () => {
     const out = renderDetail(r as any)
     expect(out).toContain('50 t')
     expect(out).not.toContain('50000')
+})
+
+test('fetchAllRecipes pages with numeric lower_bound when ids decode as UInt16', async () => {
+    const calls: unknown[] = []
+    const firstPage = Array.from({length: 50}, (_, i) => ({
+        output_item_id: UInt16.from(10000 + i),
+        output_mass: 4000,
+        inputs: [],
+        stat_slots: [],
+        blend_weights: [],
+    }))
+    firstPage[49].output_item_id = UInt16.from(11106)
+    const readonly = async (_action: string, params: {lower_bound: number}) => {
+        calls.push(params.lower_bound)
+        if (calls.length === 1) return {recipes: firstPage}
+        return {recipes: []}
+    }
+    const all = await fetchAllRecipes(readonly as any)
+    expect(all.length).toBe(50)
+    expect(calls).toEqual([0, 11107])
 })
