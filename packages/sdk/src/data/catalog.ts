@@ -106,6 +106,12 @@ const TYPE_LABEL_BY_STRING: Record<ItemType, string> = {
 
 const TYPE_BY_INDEX: ItemType[] = ['resource', 'component', 'module', 'entity']
 
+export function itemTypeIndex(itemId: UInt16Type): number {
+    const index = TYPE_BY_INDEX.indexOf(getItem(itemId).type)
+    if (index < 0) throw new Error(`Unknown item type for item ${UInt16.from(itemId).toNumber()}`)
+    return index
+}
+
 export function typeLabel(type: ItemType | number): string {
     if (typeof type === 'number') {
         const t = TYPE_BY_INDEX[type]

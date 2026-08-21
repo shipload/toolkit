@@ -1,8 +1,11 @@
 import {
     Action,
+    Asset,
+    type AssetType,
     Bytes,
     Checksum256,
     type Checksum256Type,
+    ExtendedAsset,
     Int64,
     type Int64Type,
     Name,
@@ -18,7 +21,7 @@ import {
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {Coordinates, PRECISION, type ClusterSlotType, type CoordinatesType} from '../types'
-import {ServerContract} from '../contracts'
+import {ServerContract, TokenContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
 
@@ -164,6 +167,8 @@ export type EntityRefInput = {
 export type WaypointInput = {x: Int64Type; y: Int64Type}
 
 export class ActionsManager extends BaseManager {
+    private tokenContracts = new Map<string, TokenContract.Contract>()
+
     travel(shipId: UInt64Type, destination: CoordinatesType, recharge = true): Action {
         const x = Int64.from(destination.x)
         const y = Int64.from(destination.y)
@@ -694,6 +699,88 @@ export class ActionsManager extends BaseManager {
             module_index: moduleIndex,
             module_ref: moduleRef,
         })
+    }
+
+    open(owner: NameType, tokenContract: NameType, tokenSymbol: Asset.SymbolType): Action {
+        return this.platform.action('open', {
+            owner: Name.from(owner),
+            token_contract: Name.from(tokenContract),
+            token_symbol: Asset.Symbol.from(tokenSymbol),
+        })
+    }
+
+    close(owner: NameType, tokenContract: NameType, tokenSymbol: Asset.SymbolType): Action {
+        return this.platform.action('close', {
+            owner: Name.from(owner),
+            token_contract: Name.from(tokenContract),
+            token_symbol: Asset.Symbol.from(tokenSymbol),
+        })
+    }
+
+    withdraw(
+        owner: NameType,
+        quantity: AssetType,
+        tokenContract: NameType,
+        memo = 'withdraw'
+    ): Action {
+        return this.platform.action('withdraw', {
+            owner: Name.from(owner),
+            quantity: ExtendedAsset.from({
+                quantity: Asset.from(quantity),
+                contract: Name.from(tokenContract),
+            }),
+            memo,
+        })
+    }
+
+    tokenContract(account: NameType): TokenContract.Contract {
+        const name = Name.from(account)
+        const key = String(name)
+        let contract = this.tokenContracts.get(key)
+        if (!contract) {
+            contract = new TokenContract.Contract({client: this.client, account: name})
+            this.tokenContracts.set(key, contract)
+        }
+        return contract
+    }
+
+    tokenTransfer(
+        from: NameType,
+        to: NameType,
+        quantity: AssetType,
+        tokenContract: NameType,
+        memo = ''
+    ): Action {
+        return this.tokenContract(tokenContract).action('transfer', {
+            from: Name.from(from),
+            to: Name.from(to),
+            quantity: Asset.from(quantity),
+            memo,
+        })
+    }
+
+    // `open` is an idempotent no-op; omitting it is what produces the "call open first" abort.
+    deposit(
+        owner: NameType,
+        quantity: AssetType,
+        tokenContract: NameType,
+        opts: {memo?: string; open?: boolean} = {}
+    ): Action[] {
+        const amount = Asset.from(quantity)
+        const actions: Action[] = []
+        if (opts.open !== false) {
+            actions.push(this.open(owner, tokenContract, amount.symbol))
+        }
+        actions.push(
+            this.tokenTransfer(
+                owner,
+                this.platform.account,
+                amount,
+                tokenContract,
+                opts.memo ?? 'deposit'
+            )
+        )
+        return actions
     }
 
     async wrap(

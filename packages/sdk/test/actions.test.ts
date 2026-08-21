@@ -1,7 +1,7 @@
 import {expect, test} from 'bun:test'
 import {Chains} from '@wharfkit/common'
 import {Shipload} from '../src'
-import {ServerContract} from '../src/contracts'
+import {PlatformContract, ServerContract, TokenContract} from '../src/contracts'
 import {ATOMICASSETS_ABI} from '../src/nft/atomicassets'
 import {ITEM_PROSPECTOR_T2A_PACKED} from '../src/data/item-ids'
 
@@ -376,4 +376,59 @@ test('sendAsset defaults to an empty memo', () => {
     const action = sl.actions.sendAsset('alice', 'bob', 7)
     const data = action.decodeData(ATOMICASSETS_ABI)
     expect(String(data.memo)).toBe('')
+})
+
+test('open builds a nex.shipload::open action for the owner and token', () => {
+    const action = sl.actions.open('alice', 'scrap.gm', '0,SCRAP')
+    expect(String(action.account)).toBe('nex.shipload')
+    expect(String(action.name)).toBe('open')
+    const data = action.decodeData(PlatformContract.abi)
+    expect(String(data.owner)).toBe('alice')
+    expect(String(data.token_contract)).toBe('scrap.gm')
+    expect(String(data.token_symbol)).toBe('0,SCRAP')
+})
+
+test('close builds a nex.shipload::close action', () => {
+    const action = sl.actions.close('alice', 'scrap.gm', '0,SCRAP')
+    expect(String(action.name)).toBe('close')
+    const data = action.decodeData(PlatformContract.abi)
+    expect(String(data.token_symbol)).toBe('0,SCRAP')
+})
+
+test('withdraw carries the token contract in the extended asset', () => {
+    const action = sl.actions.withdraw('alice', '5 SCRAP', 'scrap.gm')
+    expect(String(action.account)).toBe('nex.shipload')
+    expect(String(action.name)).toBe('withdraw')
+    const data = action.decodeData(PlatformContract.abi)
+    expect(String(data.owner)).toBe('alice')
+    expect(String(data.quantity.quantity)).toBe('5 SCRAP')
+    expect(String(data.quantity.contract)).toBe('scrap.gm')
+    expect(String(data.memo)).toBe('withdraw')
+})
+
+test('deposit pairs open with a transfer to the platform', () => {
+    const actions = sl.actions.deposit('alice', '5 SCRAP', 'scrap.gm')
+    expect(actions.length).toBe(2)
+    expect(String(actions[0].account)).toBe('nex.shipload')
+    expect(String(actions[0].name)).toBe('open')
+    const openData = actions[0].decodeData(PlatformContract.abi)
+    expect(String(openData.token_symbol)).toBe('0,SCRAP')
+    expect(String(actions[1].account)).toBe('scrap.gm')
+    expect(String(actions[1].name)).toBe('transfer')
+    expect(String(actions[1].authorization[0])).toBe(String(actions[0].authorization[0]))
+})
+
+test('deposit can omit the open action for an already-opened balance', () => {
+    const actions = sl.actions.deposit('alice', '5 SCRAP', 'scrap.gm', {open: false})
+    expect(actions.length).toBe(1)
+    expect(String(actions[0].name)).toBe('transfer')
+})
+
+test('deposit transfer targets the platform account with a deposit memo', () => {
+    const [, transfer] = sl.actions.deposit('alice', '5 SCRAP', 'scrap.gm')
+    const data = transfer.decodeData(TokenContract.abi)
+    expect(String(data.from)).toBe('alice')
+    expect(String(data.to)).toBe('nex.shipload')
+    expect(String(data.quantity)).toBe('5 SCRAP')
+    expect(String(data.memo)).toBe('deposit')
 })

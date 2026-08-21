@@ -11,6 +11,7 @@ import {EpochsManager} from './epochs'
 import {ActionsManager} from './actions'
 import {ClusterManager} from './cluster'
 import {NftManager} from './nft'
+import {BalancesManager} from './balances'
 import {JobsManager} from './jobs'
 import {InfluenceManager} from './influence'
 import {SubscriptionsManager} from '../subscriptions/manager'
@@ -24,6 +25,7 @@ export class GameContext {
     private _actions?: ActionsManager
     private _clusters?: ClusterManager
     private _nft?: NftManager
+    private _balances?: BalancesManager
     private _jobs?: JobsManager
     private _influence?: InfluenceManager
     private _subscriptions?: SubscriptionsManager
@@ -93,6 +95,13 @@ export class GameContext {
             this._nft = new NftManager(this)
         }
         return this._nft
+    }
+
+    get balances(): BalancesManager {
+        if (!this._balances) {
+            this._balances = new BalancesManager(this)
+        }
+        return this._balances
     }
 
     get jobs(): JobsManager {

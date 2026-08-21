@@ -50,6 +50,7 @@ export {
     ClusterManager,
     computeFreeCells,
     NftManager,
+    BalancesManager,
     ConstructionManager,
     JobsManager,
     InfluenceManager,
@@ -68,6 +69,11 @@ export type {
     PlayerRosterEntry,
     LocationStratum,
     NftConfigForItem,
+    WrapConfig,
+    WrapGate,
+    DepositConfig,
+    PlatformBalance,
+    TokenBalance,
     BuildableTarget,
     BuildState,
     SourceEntityRef,
@@ -87,7 +93,7 @@ export type {
     LaunchStatsInput,
 } from './managers/actions'
 export type {WrapDeposit} from './managers/nft'
-export {resolveLockedAmount} from './managers/nft'
+export {resolveLockedAmount, wrapCostKey} from './managers/nft'
 
 export {
     getItem,
@@ -98,6 +104,7 @@ export {
     getModules,
     getEntityItems,
     resolveItemCategory,
+    itemTypeIndex,
     typeLabel,
     categoryLabel,
     categoryFromIndex,
