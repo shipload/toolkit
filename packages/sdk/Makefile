@@ -91,15 +91,19 @@ CODEGEN_URL      ?= https://jungle4.greymass.com
 PLATFORM_ACCOUNT ?= nex.shipload
 SERVER_ACCOUNT   ?= eon.shipload
 FUND_ACCOUNT     ?= fnd.shipload
+TOKEN_ACCOUNT    ?= eosio.token
 
 .PHONY: codegen
-codegen: codegen/platform codegen/server
+codegen: codegen/platform codegen/server codegen/token
 
 codegen/platform:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/platform.ts $(PLATFORM_ACCOUNT)
 
 codegen/server:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
+
+codegen/token:
+	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/token.ts $(TOKEN_ACCOUNT)
 
 SERVER_ABI_LOCAL   ?= ../../../contracts/src/server/build/server.abi
 PLATFORM_ABI_LOCAL ?= ../../../contracts/src/platform/build/platform.abi
