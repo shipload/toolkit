@@ -1,5 +1,38 @@
 # @shipload/cli
 
+## 1.0.0-next.68
+
+### Patch Changes
+
+- 6e1de42: - Add deposit balance readers and action builders
+  - Default wrap RAM claiming to on
+  - Generate the eosio.token contract binding
+  - Add craftjob command
+  - Improve oracle loop error descriptions
+  - Fix nftinfo rendering of typed chain rows
+  - Fix recipe list pagination overflow
+  - Expand citizenry name variety
+  - Wire oracle maintenance ticks into the CLI beacon
+- 6f1c96a: - Add the voteready ballot settlement tick
+  - Add mintready, charterready and tend heartbeat ticks
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Update the CLI wrap test for the default RAM claim
+  - Add craftjob command
+  - Improve oracle loop error descriptions
+  - Fix nftinfo rendering of typed chain rows
+  - Fix recipe list pagination overflow
+  - Add deposit balance readers and action builders
+  - Default wrap RAM claiming to on
+  - Generate the eosio.token contract binding
+  - Expand citizenry name variety
+- Updated dependencies [6e1de42]
+- Updated dependencies [6f1c96a]
+  - @shipload/sdk@1.0.0-next.64
+  - @shipload/oracle@0.0.1-next.54
+
 ## 1.0.0-next.67
 
 ### Patch Changes

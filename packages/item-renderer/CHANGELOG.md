@@ -1,5 +1,28 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.64
+
+### Patch Changes
+
+- 6f1c96a: - Add the voteready ballot settlement tick
+  - Add mintready, charterready and tend heartbeat ticks
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Update the CLI wrap test for the default RAM claim
+  - Add craftjob command
+  - Improve oracle loop error descriptions
+  - Fix nftinfo rendering of typed chain rows
+  - Fix recipe list pagination overflow
+  - Add deposit balance readers and action builders
+  - Default wrap RAM claiming to on
+  - Generate the eosio.token contract binding
+  - Expand citizenry name variety
+- Updated dependencies [6e1de42]
+- Updated dependencies [6f1c96a]
+  - @shipload/sdk@1.0.0-next.64
+
 ## 1.0.0-next.63
 
 ### Patch Changes
