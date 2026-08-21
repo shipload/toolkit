@@ -714,8 +714,8 @@ export class ActionsManager extends BaseManager {
                 quantity: UInt64.from(quantity),
             }),
         ]
-        const claimRam =
-            opts.claimRam ?? (this.atomicAssetsAccount ?? 'atomicassets') !== 'atomicassets'
+        // setlastpayer is what fires logrampayer and clears the wrap gate; skipping it strands it.
+        const claimRam = opts.claimRam ?? true
         if (claimRam) {
             actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
         }
@@ -749,8 +749,8 @@ export class ActionsManager extends BaseManager {
                 nexus_id: UInt64.from(nexusId),
             }),
         ]
-        const claimRam =
-            opts.claimRam ?? (this.atomicAssetsAccount ?? 'atomicassets') !== 'atomicassets'
+        // setlastpayer is what fires logrampayer and clears the wrap gate; skipping it strands it.
+        const claimRam = opts.claimRam ?? true
         if (claimRam) {
             actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
         }

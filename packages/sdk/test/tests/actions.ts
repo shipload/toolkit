@@ -84,8 +84,8 @@ describe('ActionsManager', () => {
             return new ActionsManager(context)
         }
 
-        test('returns a single wrapcargo action (mint is inline on-chain)', async () => {
-            const actions = await makeStubManager().wrap('alice', 42, 7, 99, 5)
+        test('returns the wrapcargo action alone when claimRam is off (mint is inline on-chain)', async () => {
+            const actions = await makeStubManager().wrap('alice', 42, 7, 99, 5, {claimRam: false})
             assert.equal(actions.length, 1)
             assert.equal(actions[0].name.toString(), 'wrapcargo')
             assert.equal(actions[0].account.toString(), 'nex.shipload')
@@ -109,8 +109,8 @@ describe('ActionsManager', () => {
             return new ActionsManager(context)
         }
 
-        test('returns a single wrapentity action (mint is inline on-chain)', async () => {
-            const actions = await makeStubManager().wrapEntity('alice', 50, 7)
+        test('returns the wrapentity action alone when claimRam is off (mint is inline on-chain)', async () => {
+            const actions = await makeStubManager().wrapEntity('alice', 50, 7, {claimRam: false})
             assert.equal(actions.length, 1)
             assert.equal(actions[0].name.toString(), 'wrapentity')
             assert.equal(actions[0].account.toString(), 'nex.shipload')

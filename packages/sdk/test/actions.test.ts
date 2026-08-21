@@ -119,8 +119,15 @@ test('wrap bundles setlastpayer when claimRam is set', async () => {
     expect(String(actions[1].authorization[0].actor)).toBe('alice')
 })
 
-test('wrap omits setlastpayer by default', async () => {
+test('wrap bundles setlastpayer by default', async () => {
     const actions = await sl.actions.wrap('alice', 1, 2, 3, 4)
+    expect(actions.length).toBe(2)
+    expect(String(actions[0].name)).toBe('wrapcargo')
+    expect(String(actions[1].name)).toBe('setlastpayer')
+})
+
+test('wrap omits setlastpayer when claimRam is explicitly false', async () => {
+    const actions = await sl.actions.wrap('alice', 1, 2, 3, 4, {claimRam: false})
     expect(actions.length).toBe(1)
     expect(String(actions[0].name)).toBe('wrapcargo')
 })
@@ -132,8 +139,15 @@ test('wrapEntity bundles setlastpayer when claimRam is set', async () => {
     expect(String(actions[1].name)).toBe('setlastpayer')
 })
 
-test('wrapEntity omits setlastpayer by default', async () => {
+test('wrapEntity bundles setlastpayer by default', async () => {
     const actions = await sl.actions.wrapEntity('alice', 1, 2)
+    expect(actions.length).toBe(2)
+    expect(String(actions[0].name)).toBe('wrapentity')
+    expect(String(actions[1].name)).toBe('setlastpayer')
+})
+
+test('wrapEntity omits setlastpayer when claimRam is explicitly false', async () => {
+    const actions = await sl.actions.wrapEntity('alice', 1, 2, {claimRam: false})
     expect(actions.length).toBe(1)
 })
 
