@@ -65,7 +65,7 @@ type CraftCliOptions = WaitableOptions & {
     target?: bigint
 }
 
-async function validateRecipeSlotTotals(
+export async function validateRecipeSlotTotals(
     recipeId: number,
     quantity: number,
     resolved: ResolvedCargoInput[]

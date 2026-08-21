@@ -7,6 +7,7 @@ import * as buildplot from './commands/action/buildplot'
 import * as cancel from './commands/action/cancel'
 import * as claimplot from './commands/action/claimplot'
 import * as craft from './commands/action/craft'
+import * as craftjob from './commands/action/craftjob'
 import * as demolish from './commands/action/demolish'
 import * as deploy from './commands/action/deploy'
 import * as foundcompany from './commands/action/foundcompany'
@@ -140,6 +141,7 @@ export function build(): Command {
     registerEntitySubcommand(unload.SUBCOMMAND)
     registerEntitySubcommand(recharge.SUBCOMMAND)
     registerEntitySubcommand(craft.SUBCOMMAND)
+    registerEntitySubcommand(craftjob.SUBCOMMAND)
     registerEntitySubcommand(blend.SUBCOMMAND)
     registerEntitySubcommand(deploy.SUBCOMMAND)
     registerEntitySubcommand(claimplot.SUBCOMMAND)
