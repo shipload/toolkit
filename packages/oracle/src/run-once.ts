@@ -10,16 +10,20 @@ export type RevealOutcome =
     | 'waiting-for-finality'
     | 'missing-secret'
 
+export type TickEta = {kind: 'boundary' | 'finality'; seconds: number}
+
 export interface TickResult {
     target: number
     currentHeight: number
     commit: CommitOutcome
     reveal: RevealOutcome
+    eta?: TickEta
 }
 
 export interface EpochReads {
     getFinalizedEpoch(): Promise<UInt64>
     getCurrentHeight(): Promise<UInt64>
+    getTimeRemaining(): Promise<number>
     getCommitsFor(epoch: number): Promise<{oracle_id: Name}[]>
     getRevealsFor(epoch: number): Promise<{oracle_id: Name}[]>
     getEpochThreshold(epoch: number): Promise<number>
@@ -74,7 +78,7 @@ export async function runOnce(deps: OracleDeps): Promise<TickResult> {
         commit = 'posted'
     }
 
-    const reveal = await resolveReveal(
+    const {reveal, eta} = await resolveReveal(
         deps,
         target,
         currentHeight,
@@ -82,7 +86,7 @@ export async function runOnce(deps: OracleDeps): Promise<TickResult> {
         alreadyCommitted
     )
 
-    return {target, currentHeight, commit, reveal}
+    return {target, currentHeight, commit, reveal, eta}
 }
 
 async function resolveReveal(
@@ -91,19 +95,25 @@ async function resolveReveal(
     currentHeight: number,
     commitCount: number,
     alreadyCommitted: boolean
-): Promise<RevealOutcome> {
+): Promise<{reveal: RevealOutcome; eta?: TickEta}> {
     const {epochs, actions, session, oracleId, store} = deps
-    if (currentHeight < target) return 'waiting-for-height'
-    if (!alreadyCommitted) return 'just-committed'
+    if (currentHeight < target) {
+        const remaining = await epochs.getTimeRemaining()
+        return {
+            reveal: 'waiting-for-height',
+            eta: {kind: 'boundary', seconds: Math.max(0, Math.round(remaining / 1000))},
+        }
+    }
+    if (!alreadyCommitted) return {reveal: 'just-committed'}
 
     const reveals = await epochs.getRevealsFor(target)
-    if (reveals.some((r) => r.oracle_id.equals(oracleId))) return 'already-revealed'
+    if (reveals.some((r) => r.oracle_id.equals(oracleId))) return {reveal: 'already-revealed'}
 
     const threshold = await epochs.getEpochThreshold(target)
-    if (commitCount < threshold) return 'waiting-for-commits'
+    if (commitCount < threshold) return {reveal: 'waiting-for-commits'}
 
     const secret = store.getReveal(target)
-    if (!secret) return 'missing-secret'
+    if (!secret) return {reveal: 'missing-secret'}
 
     let block = store.getCommitBlock(target)
     const info = await epochs.getChainInfo()
@@ -111,8 +121,13 @@ async function resolveReveal(
         block = info.headBlock
         store.recordCommitBlock(target, block)
     }
-    if (info.libBlock < block) return 'waiting-for-finality'
+    if (info.libBlock < block) {
+        return {
+            reveal: 'waiting-for-finality',
+            eta: {kind: 'finality', seconds: Math.max(0, Math.ceil((block - info.libBlock) / 2))},
+        }
+    }
 
     await session.transact({action: actions.reveal(oracleId, target, secret)})
-    return 'posted'
+    return {reveal: 'posted'}
 }

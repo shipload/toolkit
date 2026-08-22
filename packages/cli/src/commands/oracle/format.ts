@@ -38,8 +38,20 @@ export interface OracleStatusView {
     mine?: OraclePersonal
 }
 
+export function formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.round(seconds / 60)
+    if (minutes < 60) return `${minutes}m`
+    const hours = Math.floor(minutes / 60)
+    const rest = minutes % 60
+    return rest === 0 ? `${hours}h` : `${hours}h${rest}m`
+}
+
 export function formatTick(r: TickResult): string {
-    return `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal} (h=${r.currentHeight})`
+    const detail = r.eta
+        ? `h=${r.currentHeight}, ${r.eta.kind} in ${formatDuration(r.eta.seconds)}`
+        : `h=${r.currentHeight}`
+    return `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal} (${detail})`
 }
 
 export function formatClean(r: CleanResult): string {
@@ -60,14 +72,14 @@ export function formatCharterReady(r: CharterReadyResult): string {
     if (r.kind === 'completed') {
         return `charter sweep: completed ${r.worlds.length} world(s)`
     }
-    return `charter sweep: nothing buildable (${r.examined} examined)`
+    return 'charter sweep: nothing buildable'
 }
 
 export function formatVoteReady(r: VoteReadyResult): string {
     if (r.kind === 'settled') {
         return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxBallots})`
     }
-    return `ballot sweep: none due (${r.pending} pending)`
+    return 'ballot sweep: none due'
 }
 
 export function formatTend(r: TendResult): string {

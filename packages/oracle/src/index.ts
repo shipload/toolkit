@@ -8,8 +8,10 @@ export {
     type RevealOutcome,
     type SecretStoreLike,
     type SessionLike,
+    type TickEta,
     type TickResult,
 } from './run-once'
+export {shouldLogTick, tickSignature, type TickLogState} from './tick-log'
 export {
     cleanOldestReserveScope,
     type CleanResult,

@@ -1,4 +1,5 @@
 import type {Command} from 'commander'
+import {shouldLogTick, tickSignature, type TickLogState} from '@shipload/oracle'
 import {describeLoopError} from '../../lib/errors'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
 import {formatClean, formatTick} from './format'
@@ -20,17 +21,24 @@ export function register(parent: Command): void {
             'seconds between mint/charter/ballot/fund maintenance passes',
             '300'
         )
+        .option(
+            '--heartbeat <seconds>',
+            'seconds before an unchanged beacon state is logged again',
+            '1800'
+        )
         .action(
             async (opts: {
                 interval: string
                 cleanInterval: string
                 cleanRows: string
                 maintenanceInterval: string
+                heartbeat: string
             }) => {
                 const intervalMs = Math.max(1, Number(opts.interval)) * 1000
                 const cleanIntervalMs = Math.max(1, Number(opts.cleanInterval)) * 1000
                 const cleanRows = Math.max(1, Number(opts.cleanRows))
                 const maintenanceIntervalMs = Math.max(1, Number(opts.maintenanceInterval)) * 1000
+                const heartbeatMs = Math.max(1, Number(opts.heartbeat)) * 1000
                 const ctx = await buildOracleContext()
                 let stopping = false
                 let wake: (() => void) | null = null
@@ -52,14 +60,19 @@ export function register(parent: Command): void {
 
                 let lastCleanAt = 0
                 let lastMaintenanceAt = 0
+                let tickLog: TickLogState | null = null
                 console.log(
-                    `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s)`
+                    `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
                 )
                 try {
                     while (!stopping) {
                         try {
                             const result = await tickOnce(ctx)
-                            console.log(`${stamp()} ${formatTick(result)}`)
+                            const now = Date.now()
+                            if (shouldLogTick(result, tickLog, now, heartbeatMs)) {
+                                console.log(`${stamp()} ${formatTick(result)}`)
+                                tickLog = {signature: tickSignature(result), loggedAt: now}
+                            }
                         } catch (err) {
                             console.error(`${stamp()} tick failed: ${describeLoopError(err)}`)
                         }

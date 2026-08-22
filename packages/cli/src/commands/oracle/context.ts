@@ -117,6 +117,7 @@ export async function buildOracleContext(): Promise<OracleContext> {
         epochs: {
             getFinalizedEpoch: () => shipload.epochs.getFinalizedEpoch(true),
             getCurrentHeight: () => shipload.epochs.getCurrentHeight(),
+            getTimeRemaining: () => shipload.epochs.getTimeRemaining(),
             getCommitsFor: (epoch) => shipload.epochs.getCommitsFor(epoch),
             getRevealsFor: (epoch) => shipload.epochs.getRevealsFor(epoch),
             getEpochThreshold: async (epoch) => {

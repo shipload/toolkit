@@ -17,6 +17,7 @@ function fakeDeps(opts: {
     headBlock?: number
     libBlock?: number
     postBlock?: number
+    timeRemainingMs?: number
 }): {
     deps: OracleDeps
     sent: string[]
@@ -34,6 +35,7 @@ function fakeDeps(opts: {
         epochs: {
             getFinalizedEpoch: async () => UInt64.from(opts.finalized),
             getCurrentHeight: async () => UInt64.from(opts.height),
+            getTimeRemaining: async () => opts.timeRemainingMs ?? 0,
             getCommitsFor: async () => commits,
             getRevealsFor: async () => reveals,
             getEpochThreshold: async () => opts.threshold ?? 1,
@@ -185,7 +187,30 @@ test('threshold met but commit not yet irreversible: waiting-for-finality', asyn
     })
     const r = await runOnce(deps)
     expect(r.reveal).toBe('waiting-for-finality')
+    expect(r.eta).toEqual({kind: 'finality', seconds: 50})
     expect(sent).toEqual([])
+})
+
+test('waiting-for-height carries the epoch boundary eta', async () => {
+    const {deps} = fakeDeps({finalized: 41, height: 41, timeRemainingMs: 2_400_000})
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('waiting-for-height')
+    expect(r.eta).toEqual({kind: 'boundary', seconds: 2400})
+})
+
+test('a posted reveal carries no eta', async () => {
+    const {deps} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        threshold: 1,
+        secret: REVEAL,
+        commitBlock: 100,
+        libBlock: 100,
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('posted')
+    expect(r.eta).toBeUndefined()
 })
 
 test('threshold met and commit irreversible: reveal posted', async () => {

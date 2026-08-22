@@ -5,6 +5,7 @@ import {
     formatClean,
     formatMintReady,
     formatTend,
+    formatDuration,
     formatTick,
     formatVoteReady,
     renderStatus,
@@ -37,6 +38,35 @@ test('formatTick describes a fresh commit waiting on height', () => {
     expect(line).toContain('commit: posted')
     expect(line).toContain('reveal: waiting-for-height')
     expect(line).toContain('h=41')
+})
+
+test('formatTick renders a boundary eta alongside the height', () => {
+    const r: TickResult = {
+        target: 17,
+        currentHeight: 16,
+        commit: 'already-committed',
+        reveal: 'waiting-for-height',
+        eta: {kind: 'boundary', seconds: 2460},
+    }
+    expect(formatTick(r)).toContain('(h=16, boundary in 41m)')
+})
+
+test('formatTick renders a finality eta in seconds', () => {
+    const r: TickResult = {
+        target: 17,
+        currentHeight: 17,
+        commit: 'already-committed',
+        reveal: 'waiting-for-finality',
+        eta: {kind: 'finality', seconds: 45},
+    }
+    expect(formatTick(r)).toContain('(h=17, finality in 45s)')
+})
+
+test('formatDuration rolls minutes into hours', () => {
+    expect(formatDuration(30)).toBe('30s')
+    expect(formatDuration(2460)).toBe('41m')
+    expect(formatDuration(3600)).toBe('1h')
+    expect(formatDuration(5400)).toBe('1h30m')
 })
 
 test('formatTick describes a posted reveal', () => {
@@ -294,9 +324,9 @@ test('formatCharterReady describes completed worlds', () => {
     expect(formatCharterReady(r)).toContain('completed 2 world(s)')
 })
 
-test('formatCharterReady describes nothing buildable', () => {
-    const r: CharterReadyResult = {kind: 'nothing-buildable', examined: 5}
-    expect(formatCharterReady(r)).toContain('nothing buildable (5 examined)')
+test('formatCharterReady describes nothing buildable without inventing a count', () => {
+    const r: CharterReadyResult = {kind: 'nothing-buildable', examined: 0}
+    expect(formatCharterReady(r)).toBe('charter sweep: nothing buildable')
 })
 
 test('formatVoteReady describes a settled sweep', () => {
@@ -304,9 +334,9 @@ test('formatVoteReady describes a settled sweep', () => {
     expect(formatVoteReady(r)).toContain('settled 3 due ballot(s)')
 })
 
-test('formatVoteReady describes none due', () => {
-    const r: VoteReadyResult = {kind: 'none-due', pending: 7}
-    expect(formatVoteReady(r)).toContain('none due (7 pending)')
+test('formatVoteReady describes none due without inventing a count', () => {
+    const r: VoteReadyResult = {kind: 'none-due', pending: 0}
+    expect(formatVoteReady(r)).toBe('ballot sweep: none due')
 })
 
 test('fund sweep reports an idle pass', () => {
