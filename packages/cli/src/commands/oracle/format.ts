@@ -50,7 +50,10 @@ export function formatClean(r: CleanResult): string {
 }
 
 export function formatMintReady(r: MintReadyResult): string {
-    return `mint sweep: poked (max ${r.maxMints ?? 'default'})`
+    if (r.kind === 'minted') {
+        return `mint sweep: ${r.ready} pool(s) ready`
+    }
+    return 'mint sweep: nothing ready'
 }
 
 export function formatCharterReady(r: CharterReadyResult): string {
@@ -64,17 +67,14 @@ export function formatVoteReady(r: VoteReadyResult): string {
     if (r.kind === 'settled') {
         return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxBallots})`
     }
-    if (r.kind === 'none-due') {
-        return `ballot sweep: none due (${r.pending} pending)`
-    }
-    return 'ballot sweep: no ballots queued'
+    return `ballot sweep: none due (${r.pending} pending)`
 }
 
 export function formatTend(r: TendResult): string {
     if (r.kind === 'tended') {
-        return `fund sweep: tended (max ${r.maxLots})`
+        return `fund sweep: tended ${r.assetIds.length} lot(s)`
     }
-    return 'fund sweep: no lots to tend'
+    return 'fund sweep: nothing tendable'
 }
 
 function yn(v: boolean): string {

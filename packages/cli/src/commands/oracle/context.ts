@@ -1,7 +1,7 @@
 import {
     cleanOldestReserveScope,
     completeReadyCharters,
-    pokeMintReady,
+    runMintReady,
     runOnce,
     settleReadyBallots,
     tendFund,
@@ -20,7 +20,7 @@ import {
     type VoteReadyResult,
 } from '@shipload/oracle'
 import {FundContract} from '@shipload/sdk'
-import {Name, PrivateKey, UInt32, type PublicKey} from '@wharfkit/antelope'
+import {Name, PrivateKey, UInt32, UInt64, type PublicKey} from '@wharfkit/antelope'
 import {Session} from '@wharfkit/session'
 import {WalletPluginPrivateKey} from '@wharfkit/wallet-plugin-privatekey'
 import {chain, client, fundContractName, gameContractName, getShipload} from '../../lib/client'
@@ -161,12 +161,9 @@ export async function buildOracleContext(): Promise<OracleContext> {
     }
     const influence: InfluenceDeps = {
         reads: {
-            getFoundedWorlds: async () =>
-                (await shipload.influence.getFoundedWorlds()).map((w) => ({x: w.x, y: w.y})),
-            getCharter: async (world) => {
-                const charter = await shipload.influence.getCharter({x: world.x, y: world.y})
-                return {buildable: charter.buildable}
-            },
+            getMintReady: () => shipload.influence.getMintReady(),
+            getCharterReady: async () =>
+                (await shipload.influence.getCharterReady()).map((w) => ({x: w.x, y: w.y})),
         },
         actions: {
             mintready: (maxMints) => shipload.actions.mintready(maxMints),
@@ -176,13 +173,7 @@ export async function buildOracleContext(): Promise<OracleContext> {
     }
     const ballots: BallotDeps = {
         reads: {
-            getBallotQueue: async () =>
-                (await shipload.influence.getBallotQueue()).map((b) => ({
-                    x: b.x,
-                    y: b.y,
-                    epoch: b.epoch,
-                })),
-            getCurrentEpoch: async () => Number(await shipload.epochs.getFinalizedEpoch(true)),
+            getVoteReady: () => shipload.influence.getVoteReady(),
         },
         actions: {
             voteready: (maxBallots) => shipload.actions.voteready(maxBallots),
@@ -191,18 +182,18 @@ export async function buildOracleContext(): Promise<OracleContext> {
     }
     const fund: FundDeps = {
         reads: {
-            getLotCount: async () => {
-                const res = await client.v1.chain.get_table_by_scope({
-                    code: fundContractName,
-                    table: 'lots',
-                    limit: 10,
-                })
-                const row = res.rows.find((r) => String(r.scope) === fundContractName)
-                return row ? Number(row.count) : 0
+            getTendable: async (maxLots) => {
+                const ids = (await fundContract.readonly('gettendable', {
+                    max_lots: UInt32.from(maxLots),
+                })) as UInt64[]
+                return ids.map(Number)
             },
         },
         actions: {
-            tend: (maxLots) => fundContract.action('tend', {max_lots: UInt32.from(maxLots)}),
+            tend: (assetIds) =>
+                fundContract.action('tend', {
+                    asset_ids: assetIds.map((id) => UInt64.from(id)),
+                }),
         },
         session: fundSession,
     }
@@ -217,11 +208,11 @@ export async function cleanOnce(ctx: OracleContext, maxRows: number): Promise<Cl
     return cleanOldestReserveScope(ctx.maintenance, maxRows)
 }
 
-export async function pokeMintReadyOnce(
+export async function mintReadyOnce(
     ctx: OracleContext,
     maxMints?: number
 ): Promise<MintReadyResult> {
-    return pokeMintReady(ctx.influence, maxMints)
+    return runMintReady(ctx.influence, maxMints)
 }
 
 export async function completeReadyChartersOnce(

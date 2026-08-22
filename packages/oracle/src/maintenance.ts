@@ -6,13 +6,9 @@ export interface FoundedWorld {
     y: number
 }
 
-export interface CharterState {
-    buildable: boolean
-}
-
 export interface InfluenceReads {
-    getFoundedWorlds(): Promise<FoundedWorld[]>
-    getCharter(world: FoundedWorld): Promise<CharterState>
+    getMintReady(): Promise<number>
+    getCharterReady(): Promise<FoundedWorld[]>
 }
 
 export interface InfluenceActions {
@@ -26,15 +22,8 @@ export interface InfluenceDeps {
     session: SessionLike
 }
 
-export interface PendingBallot {
-    x: number
-    y: number
-    epoch: number
-}
-
 export interface BallotReads {
-    getBallotQueue(): Promise<PendingBallot[]>
-    getCurrentEpoch(): Promise<number>
+    getVoteReady(): Promise<number>
 }
 
 export interface BallotActions {
@@ -48,11 +37,11 @@ export interface BallotDeps {
 }
 
 export interface FundReads {
-    getLotCount(): Promise<number>
+    getTendable(maxLots: number): Promise<number[]>
 }
 
 export interface FundActions {
-    tend(maxLots: number): Action
+    tend(assetIds: number[]): Action
 }
 
 export interface FundDeps {
@@ -61,7 +50,9 @@ export interface FundDeps {
     session: SessionLike
 }
 
-export type MintReadyResult = {kind: 'poked'; maxMints?: number}
+export type MintReadyResult =
+    | {kind: 'minted'; ready: number; maxMints?: number}
+    | {kind: 'nothing-ready'}
 
 export type CharterReadyResult =
     | {kind: 'completed'; worlds: FoundedWorld[]}
@@ -70,36 +61,32 @@ export type CharterReadyResult =
 export type VoteReadyResult =
     | {kind: 'settled'; due: number; maxBallots: number}
     | {kind: 'none-due'; pending: number}
-    | {kind: 'no-ballots'}
 
-export type TendResult = {kind: 'tended'; maxLots: number} | {kind: 'no-lots'}
+export type TendResult = {kind: 'tended'; assetIds: number[]} | {kind: 'nothing-tendable'}
 
-export async function pokeMintReady(
+export async function runMintReady(
     deps: InfluenceDeps,
     maxMints?: number
 ): Promise<MintReadyResult> {
+    const ready = await deps.reads.getMintReady()
+    if (ready === 0) return {kind: 'nothing-ready'}
     await deps.session.transact({action: deps.actions.mintready(maxMints)})
-    return {kind: 'poked', maxMints}
+    return {kind: 'minted', ready, maxMints}
 }
 
 export async function completeReadyCharters(
     deps: InfluenceDeps,
     opts: {maxWorlds?: number} = {}
 ): Promise<CharterReadyResult> {
-    const worlds = await deps.reads.getFoundedWorlds()
+    const ready = await deps.reads.getCharterReady()
+    if (ready.length === 0) {
+        return {kind: 'nothing-buildable', examined: 0}
+    }
+    const limit = opts.maxWorlds ?? ready.length
     const completed: FoundedWorld[] = []
-    const limit = opts.maxWorlds ?? worlds.length
-
-    for (const world of worlds) {
-        if (completed.length >= limit) break
-        const charter = await deps.reads.getCharter(world)
-        if (!charter.buildable) continue
+    for (const world of ready.slice(0, limit)) {
         await deps.session.transact({action: deps.actions.charterready(world)})
         completed.push(world)
-    }
-
-    if (completed.length === 0) {
-        return {kind: 'nothing-buildable', examined: worlds.length}
     }
     return {kind: 'completed', worlds: completed}
 }
@@ -108,22 +95,15 @@ export async function settleReadyBallots(
     deps: BallotDeps,
     maxBallots = 0
 ): Promise<VoteReadyResult> {
-    const [queue, epoch] = await Promise.all([
-        deps.reads.getBallotQueue(),
-        deps.reads.getCurrentEpoch(),
-    ])
-    if (queue.length === 0) return {kind: 'no-ballots'}
-
-    const due = queue.filter((ballot) => ballot.epoch < epoch)
-    if (due.length === 0) return {kind: 'none-due', pending: queue.length}
-
+    const due = await deps.reads.getVoteReady()
+    if (due === 0) return {kind: 'none-due', pending: 0}
     await deps.session.transact({action: deps.actions.voteready(maxBallots)})
-    return {kind: 'settled', due: due.length, maxBallots}
+    return {kind: 'settled', due, maxBallots}
 }
 
 export async function tendFund(deps: FundDeps, maxLots = 0): Promise<TendResult> {
-    const lots = await deps.reads.getLotCount()
-    if (lots === 0) return {kind: 'no-lots'}
-    await deps.session.transact({action: deps.actions.tend(maxLots)})
-    return {kind: 'tended', maxLots}
+    const assetIds = await deps.reads.getTendable(maxLots)
+    if (assetIds.length === 0) return {kind: 'nothing-tendable'}
+    await deps.session.transact({action: deps.actions.tend(assetIds)})
+    return {kind: 'tended', assetIds}
 }

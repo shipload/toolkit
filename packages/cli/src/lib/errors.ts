@@ -136,6 +136,23 @@ export function describeLoopError(err: unknown): string {
 	return hint ? `${msg} — ${hint}` : msg;
 }
 
+const IDLE_CRANK_MESSAGES = [
+	"no pools are ready to mint",
+	"no ballots are due",
+	"no supplied lots were actionable",
+	"no lots supplied",
+	"world has no mandate set",
+	"charter is already completed at this world",
+	"charter prerequisites are not completed",
+	"world lifetime influence is below the charter cost",
+	"charter refit target not found at this world",
+];
+
+export function isIdleCrankError(err: unknown): boolean {
+	const msg = extractChainError(err);
+	return IDLE_CRANK_MESSAGES.some((m) => msg.includes(m));
+}
+
 export function assertNotBoth(opts: Record<string, unknown>, ...pairs: [string, string][]): void {
 	for (const [a, b] of pairs) {
 		if (opts[a] && opts[b]) {

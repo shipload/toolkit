@@ -1,12 +1,5 @@
 import {expect, test} from 'bun:test'
-import type {
-    CharterReadyResult,
-    CleanResult,
-    MintReadyResult,
-    TendResult,
-    TickResult,
-    VoteReadyResult,
-} from '@shipload/oracle'
+import type {CharterReadyResult, TickResult, VoteReadyResult} from '@shipload/oracle'
 import {
     formatCharterReady,
     formatClean,
@@ -282,14 +275,12 @@ test('formatClean describes an empty pass', () => {
     expect(formatClean({kind: 'nothing-to-clean'})).toMatch(/nothing/i)
 })
 
-test('formatMintReady shows the max-mints cap', () => {
-    const r: MintReadyResult = {kind: 'poked', maxMints: 10}
-    expect(formatMintReady(r)).toContain('max 10')
+test('mint sweep reports an idle pass', () => {
+    expect(formatMintReady({kind: 'nothing-ready'})).toBe('mint sweep: nothing ready')
 })
 
-test('formatMintReady shows "default" when uncapped', () => {
-    const r: MintReadyResult = {kind: 'poked'}
-    expect(formatMintReady(r)).toContain('max default')
+test('mint sweep reports a productive pass', () => {
+    expect(formatMintReady({kind: 'minted', ready: 2})).toBe('mint sweep: 2 pool(s) ready')
 })
 
 test('formatCharterReady describes completed worlds', () => {
@@ -318,17 +309,10 @@ test('formatVoteReady describes none due', () => {
     expect(formatVoteReady(r)).toContain('none due (7 pending)')
 })
 
-test('formatVoteReady describes no ballots', () => {
-    const r: VoteReadyResult = {kind: 'no-ballots'}
-    expect(formatVoteReady(r)).toContain('no ballots queued')
+test('fund sweep reports an idle pass', () => {
+    expect(formatTend({kind: 'nothing-tendable'})).toBe('fund sweep: nothing tendable')
 })
 
-test('formatTend describes a tended sweep', () => {
-    const r: TendResult = {kind: 'tended', maxLots: 0}
-    expect(formatTend(r)).toContain('tended (max 0)')
-})
-
-test('formatTend describes no lots', () => {
-    const r: TendResult = {kind: 'no-lots'}
-    expect(formatTend(r)).toContain('no lots to tend')
+test('fund sweep names the lots it tended', () => {
+    expect(formatTend({kind: 'tended', assetIds: [11, 12]})).toBe('fund sweep: tended 2 lot(s)')
 })

@@ -19,14 +19,13 @@ export {
 } from './clean'
 export {
     completeReadyCharters,
-    pokeMintReady,
+    runMintReady,
     settleReadyBallots,
     tendFund,
     type BallotActions,
     type BallotDeps,
     type BallotReads,
     type CharterReadyResult,
-    type CharterState,
     type FoundedWorld,
     type FundActions,
     type FundDeps,
@@ -35,7 +34,6 @@ export {
     type InfluenceDeps,
     type InfluenceReads,
     type MintReadyResult,
-    type PendingBallot,
     type TendResult,
     type VoteReadyResult,
 } from './maintenance'
