@@ -357,6 +357,7 @@ describe('ActionsManager', () => {
             // read-only get* queries — no builder needed
             'getcharter',
             'getcharttree',
+            'getchrtready',
             'getcluster',
             'getconfig',
             'getdecomp',
@@ -381,6 +382,7 @@ describe('ActionsManager', () => {
             'getlocation',
             'getlocdata',
             'getmintcfg',
+            'getmintready',
             'getmodtypes',
             'getmodules',
             'getnearby',
@@ -400,6 +402,7 @@ describe('ActionsManager', () => {
             'getstratum',
             'getsummaries',
             'getupgjobs',
+            'getvoteready',
             'getvotes',
             // admin / setup actions — contract authority only
             'addnexus',

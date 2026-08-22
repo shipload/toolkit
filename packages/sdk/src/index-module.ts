@@ -61,6 +61,7 @@ export type {
     ContributePreview,
     ContributePreviewRow,
     FoundedWorld,
+    FoundedWorldRef,
     InfluenceStanding,
     PendingBallot,
     VoteCast,

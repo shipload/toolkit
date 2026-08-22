@@ -73,6 +73,12 @@ export interface FoundedWorld {
     founded: number
 }
 
+export interface FoundedWorldRef {
+    x: number
+    y: number
+    mandate: number
+}
+
 export interface VoteOption {
     nodeId: number
     cost: bigint
@@ -245,6 +251,25 @@ export class InfluenceManager extends BaseManager {
 
     async getMintConfig(): Promise<ServerContract.Types.mintcfg_result> {
         return (await this.server.readonly('getmintcfg')) as ServerContract.Types.mintcfg_result
+    }
+
+    async getMintReady(): Promise<number> {
+        return Number(await this.server.readonly('getmintready'))
+    }
+
+    async getVoteReady(): Promise<number> {
+        return Number(await this.server.readonly('getvoteready'))
+    }
+
+    async getCharterReady(): Promise<FoundedWorldRef[]> {
+        const result = (await this.server.readonly(
+            'getchrtready'
+        )) as ServerContract.Types.charterready_result
+        return result.worlds.map((w) => ({
+            x: Number(w.x),
+            y: Number(w.y),
+            mandate: Number(w.mandate),
+        }))
     }
 
     async getVotes(location: CoordinatesType): Promise<VoteStandings> {
