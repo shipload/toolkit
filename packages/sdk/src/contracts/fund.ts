@@ -10,16 +10,23 @@ import {ABI, Asset, Blob, Name, Struct, UInt16, UInt32, UInt64} from '@wharfkit/
 import type {ActionOptions, ContractArgs, PartialBy, Table} from '@wharfkit/contract'
 import {Contract as BaseContract} from '@wharfkit/contract'
 export const abiBlob = Blob.from(
-    'DmVvc2lvOjphYmkvMS4yABALYWNjcnVlZF9yb3cAAgdhY2NvdW50BG5hbWUHYmFsYW5jZQVhc3NldAliZW5lZl9yb3cAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgtiZW5lZmljaWFyeQACB2FjY291bnQEbmFtZQNicHMGdWludDE2BWNsYWltAAETYmVuZWZpY2lhcnlfYWNjb3VudARuYW1lCmN1cnNvcl9yb3cAAQ1uZXh0X2Fzc2V0X2lkBnVpbnQ2NAtnZXR0ZW5kYWJsZQABCG1heF9sb3RzBnVpbnQzMghsb3RzX3JvdwADCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0CXJlc2N1ZW5mdAADCWFzc2V0X2lkcwh1aW50NjRbXQJ0bwRuYW1lBG1lbW8Gc3RyaW5nCHNldGJlbmVmAAEIcmVnaXN0cnkNYmVuZWZpY2lhcnlbXQlzZXRtYXJrZXQAAgZtYXJrZXQEbmFtZRFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRlcm1zAAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyDHNldHRpbmdzX3JvdwAEBm1hcmtldARuYW1lDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbBFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRva2VuAAIOdG9rZW5fY29udHJhY3QEbmFtZQx0b2tlbl9zeW1ib2wGc3ltYm9sBXN3ZWVwAAEIbWF4X2xvdHMGdWludDMyBHRlbmQAAQlhc3NldF9pZHMIdWludDY0W10JdGVybXNfcm93AAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyCQAAAAAA6UxEBWNsYWltAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAGAAAAICl9ETIDaTY0AAALYWNjcnVlZF9yb3cAAAAA4KWmOgNpNjQAAAliZW5lZl9yb3cAAAAAXIqvRgNpNjQAAApjdXJzb3Jfcm93AAAAAACAM40DaTY0AAAIbG90c19yb3cAAACYTZezwgNpNjQAAAxzZXR0aW5nc19yb3cAAAAAACyvygNpNjQAAAl0ZXJtc19yb3cAAAAAAQBUPCZNlbNiCHVpbnQ2NFtd'
+    'DmVvc2lvOjphYmkvMS4yABQLYWNjcnVlZF9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lB2JhbGFuY2UFYXNzZXQIYWRkdG9rZW4AAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wJYmVuZWZfcm93AAIHYWNjb3VudARuYW1lA2JwcwZ1aW50MTYLYmVuZWZpY2lhcnkAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgVjbGFpbQABE2JlbmVmaWNpYXJ5X2FjY291bnQEbmFtZQdjb2xsZWN0AAAKY3Vyc29yX3JvdwABDW5leHRfYXNzZXRfaWQGdWludDY0CGRlbHRva2VuAAEOdG9rZW5fY29udHJhY3QEbmFtZQtnZXR0ZW5kYWJsZQABCG1heF9sb3RzBnVpbnQzMghsb3RzX3JvdwADCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0CXJlc2N1ZW5mdAADCWFzc2V0X2lkcwh1aW50NjRbXQJ0bwRuYW1lBG1lbW8Gc3RyaW5nCHNldGJlbmVmAAEIcmVnaXN0cnkNYmVuZWZpY2lhcnlbXQlzZXRtYXJrZXQAAgZtYXJrZXQEbmFtZRFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRlcm1zAAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyDHNldHRpbmdzX3JvdwAEBm1hcmtldARuYW1lDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbBFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRva2VuAAIOdG9rZW5fY29udHJhY3QEbmFtZQx0b2tlbl9zeW1ib2wGc3ltYm9sBXN3ZWVwAAEIbWF4X2xvdHMGdWludDMyBHRlbmQAAQlhc3NldF9pZHMIdWludDY0W10JdGVybXNfcm93AAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyCXRva2VuX3JvdwACDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbAwAAABTQZpTMghhZGR0b2tlbgAAAAAAAOlMRAVjbGFpbQAAAAAgIxUjRQdjb2xsZWN0AAAAAFNBmqNKCGRlbHRva2VuAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAHAAAAICl9ETIDaTY0AAALYWNjcnVlZF9yb3cAAAAA4KWmOgNpNjQAAAliZW5lZl9yb3cAAAAAXIqvRgNpNjQAAApjdXJzb3Jfcm93AAAAAACAM40DaTY0AAAIbG90c19yb3cAAACYTZezwgNpNjQAAAxzZXR0aW5nc19yb3cAAAAAACyvygNpNjQAAAl0ZXJtc19yb3cAAAAA4KkgzQNpNjQAAAl0b2tlbl9yb3cAAAAAAQBUPCZNlbNiCHVpbnQ2NFtd'
 )
 export const abi = ABI.from(abiBlob)
 export namespace Types {
     @Struct.type('accrued_row')
     export class accrued_row extends Struct {
         @Struct.field(Name)
-        declare account: Name
+        declare token_contract: Name
         @Struct.field(Asset)
         declare balance: Asset
+    }
+    @Struct.type('addtoken')
+    export class addtoken extends Struct {
+        @Struct.field(Name)
+        declare token_contract: Name
+        @Struct.field(Asset.Symbol)
+        declare token_symbol: Asset.Symbol
     }
     @Struct.type('benef_row')
     export class benef_row extends Struct {
@@ -40,10 +47,17 @@ export namespace Types {
         @Struct.field(Name)
         declare beneficiary_account: Name
     }
+    @Struct.type('collect')
+    export class collect extends Struct {}
     @Struct.type('cursor_row')
     export class cursor_row extends Struct {
         @Struct.field(UInt64)
         declare next_asset_id: UInt64
+    }
+    @Struct.type('deltoken')
+    export class deltoken extends Struct {
+        @Struct.field(Name)
+        declare token_contract: Name
     }
     @Struct.type('gettendable')
     export class gettendable extends Struct {
@@ -126,6 +140,13 @@ export namespace Types {
         @Struct.field(UInt32)
         declare duration: UInt32
     }
+    @Struct.type('token_row')
+    export class token_row extends Struct {
+        @Struct.field(Name)
+        declare token_contract: Name
+        @Struct.field(Asset.Symbol)
+        declare token_symbol: Asset.Symbol
+    }
 }
 export const TableMap = {
     accrued: Types.accrued_row,
@@ -134,6 +155,7 @@ export const TableMap = {
     lots: Types.lots_row,
     settings: Types.settings_row,
     terms: Types.terms_row,
+    tokens: Types.token_row,
 }
 export interface TableTypes {
     accrued: Types.accrued_row
@@ -142,6 +164,7 @@ export interface TableTypes {
     lots: Types.lots_row
     settings: Types.settings_row
     terms: Types.terms_row
+    tokens: Types.token_row
 }
 export type RowType<T> = T extends keyof TableTypes ? TableTypes[T] : any
 export type TableNames = keyof TableTypes
@@ -152,8 +175,16 @@ export namespace ActionParams {
             bps: UInt16Type
         }
     }
+    export interface addtoken {
+        token_contract: NameType
+        token_symbol: Asset.SymbolType
+    }
     export interface claim {
         beneficiary_account: NameType
+    }
+    export interface collect {}
+    export interface deltoken {
+        token_contract: NameType
     }
     export interface gettendable {
         max_lots: UInt32Type
@@ -187,7 +218,10 @@ export namespace ActionParams {
     }
 }
 export interface ActionNameParams {
+    addtoken: ActionParams.addtoken
     claim: ActionParams.claim
+    collect: ActionParams.collect
+    deltoken: ActionParams.deltoken
     gettendable: ActionParams.gettendable
     rescuenft: ActionParams.rescuenft
     setbenef: ActionParams.setbenef

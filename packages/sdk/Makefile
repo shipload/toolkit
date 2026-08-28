@@ -94,13 +94,16 @@ FUND_ACCOUNT     ?= fnd.shipload
 TOKEN_ACCOUNT    ?= eosio.token
 
 .PHONY: codegen
-codegen: codegen/platform codegen/server codegen/token
+codegen: codegen/platform codegen/server codegen/fund codegen/token
 
 codegen/platform:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/platform.ts $(PLATFORM_ACCOUNT)
 
 codegen/server:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/server.ts $(SERVER_ACCOUNT)
+
+codegen/fund:
+	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/fund.ts $(FUND_ACCOUNT)
 
 codegen/token:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/token.ts $(TOKEN_ACCOUNT)
