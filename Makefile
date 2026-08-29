@@ -1,4 +1,13 @@
 SHELL := /usr/bin/env bash
+BUN_VERSION ?= $(shell cat .bun-version)
+
+.PHONY: bun/check
+bun/check:
+	@have=$$(bun --version); \
+	if [ "$$have" != "$(BUN_VERSION)" ]; then \
+		echo "bun $$have found, $(BUN_VERSION) required (.bun-version). Override with BUN_VERSION=$$have."; \
+		exit 1; \
+	fi
 
 .PHONY: install check check/sdk check/item-renderer check/image-renderer check/cli check/oracle
 .PHONY: test test/sdk test/item-renderer test/image-renderer test/cli test/oracle test/item-renderer/update
@@ -11,7 +20,7 @@ SHELL := /usr/bin/env bash
 install:
 	bun install
 
-check:
+check: bun/check
 	bun biome check .
 	bun --filter='@shipload/*' run check
 
@@ -21,7 +30,7 @@ check/image-renderer:; $(MAKE) -C packages/image-renderer check
 check/cli:           ; $(MAKE) -C packages/cli check
 check/oracle:        ; $(MAKE) -C packages/oracle check
 
-test:
+test: bun/check
 	bun --filter='@shipload/*' run test
 
 test/sdk:            ; $(MAKE) -C packages/sdk test
