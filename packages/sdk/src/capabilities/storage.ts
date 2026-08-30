@@ -1,4 +1,4 @@
-import {UInt16, UInt32, UInt64, type UInt64Type} from '@wharfkit/antelope'
+import {UInt16, UInt32, UInt64, type UInt32Type, type UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import type {StorageCapability} from '../types/capabilities'
 import {getItem} from '../data/catalog'
@@ -9,11 +9,11 @@ export interface HasCargo {
 }
 
 export interface HasCapacity {
-    capacity: UInt32
+    capacity: UInt32Type
 }
 
 export interface HasCargomass {
-    cargomass: UInt32
+    cargomass: UInt32Type
 }
 
 interface MassInput {
@@ -75,15 +75,15 @@ export function hasSpaceForMass(
     currentMass: UInt64Type,
     additionalMass: UInt64Type
 ): boolean {
-    return UInt64.from(currentMass).adding(additionalMass).lte(capacity)
+    return UInt64.from(currentMass).adding(additionalMass).lte(UInt64.from(capacity))
 }
 
 export function isFull(entity: HasCapacity & HasCargomass): boolean {
-    return UInt64.from(entity.cargomass).gte(entity.capacity)
+    return UInt64.from(entity.cargomass).gte(UInt64.from(entity.capacity))
 }
 
 export function isFullFromMass(capacity: UInt64Type, cargoMass: UInt64Type): boolean {
-    return UInt64.from(cargoMass).gte(capacity)
+    return UInt64.from(cargoMass).gte(UInt64.from(capacity))
 }
 
 export interface CargoStack {
