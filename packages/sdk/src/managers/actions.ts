@@ -982,6 +982,23 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    addFundToken(tokenContract: NameType, tokenSymbol: Asset.SymbolType): Action {
+        return this.fund.action('addtoken', {
+            token_contract: Name.from(tokenContract),
+            token_symbol: Asset.Symbol.from(tokenSymbol),
+        })
+    }
+
+    removeFundToken(tokenContract: NameType): Action {
+        return this.fund.action('deltoken', {
+            token_contract: Name.from(tokenContract),
+        })
+    }
+
+    collectFund(): Action {
+        return this.fund.action('collect', {})
+    }
+
     found(player: NameType, entityId: UInt64Type, location: CoordinatesType): Action {
         return this.server.action('found', {
             player: Name.from(player),

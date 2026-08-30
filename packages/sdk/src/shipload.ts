@@ -1,5 +1,5 @@
 import {APIClient} from '@wharfkit/antelope'
-import {PlatformContract, ServerContract} from './contracts'
+import {FundContract, PlatformContract, ServerContract} from './contracts'
 import type {ChainDefinition} from '@wharfkit/common'
 import {ContractKit, type Contract} from '@wharfkit/contract'
 
@@ -21,6 +21,7 @@ import type {GameState} from './entities/gamestate'
 interface ShiploadOptions {
     platformContractName?: string
     serverContractName?: string
+    fundContractName?: string
     client?: APIClient
     subscriptionsUrl?: string
     atomicAssetsAccount?: string
@@ -29,13 +30,14 @@ interface ShiploadOptions {
 interface ShiploadConstructorOptions extends ShiploadOptions {
     platformContract?: Contract
     serverContract?: Contract
+    fundContract?: Contract
 }
 
 export class Shipload {
     private readonly _context: GameContext
 
     constructor(chain: ChainDefinition, constructorOptions?: ShiploadConstructorOptions) {
-        const {client, platformContract, serverContract} = constructorOptions || {}
+        const {client, platformContract, serverContract, fundContract} = constructorOptions || {}
         const apiClient = client || new APIClient({url: chain.url})
 
         const platform = platformContract
@@ -46,11 +48,14 @@ export class Shipload {
             ? serverContract
             : new ServerContract.Contract({client: apiClient})
 
+        const fund = fundContract ? fundContract : new FundContract.Contract({client: apiClient})
+
         this._context = new GameContext(
             apiClient,
             server,
             platform,
-            constructorOptions?.atomicAssetsAccount ?? 'atomicassets'
+            constructorOptions?.atomicAssetsAccount ?? 'atomicassets',
+            fund
         )
 
         if (constructorOptions?.subscriptionsUrl) {
@@ -80,10 +85,20 @@ export class Shipload {
             server = await contractKit.load(shiploadOptions.serverContractName)
         }
 
+        let fund: Contract = new FundContract.Contract({
+            client: new APIClient({url: chain.url}),
+        })
+        if (shiploadOptions?.fundContractName) {
+            const client = shiploadOptions.client || new APIClient({url: chain.url})
+            const contractKit = new ContractKit({client})
+            fund = await contractKit.load(shiploadOptions.fundContractName)
+        }
+
         return new Shipload(chain, {
             ...shiploadOptions,
             platformContract: platform,
             serverContract: server,
+            fundContract: fund,
         })
     }
 
@@ -101,6 +116,10 @@ export class Shipload {
 
     get platform(): Contract {
         return this._context.platform
+    }
+
+    get fund(): Contract {
+        return this._context.fund
     }
 
     get entities(): EntitiesManager {

@@ -15,6 +15,10 @@ export abstract class BaseManager {
         return this.context.platform
     }
 
+    protected get fund() {
+        return this.context.fund
+    }
+
     protected get atomicAssetsAccount() {
         return this.context.atomicAssetsAccount
     }

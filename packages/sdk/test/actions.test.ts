@@ -1,7 +1,7 @@
 import {expect, test} from 'bun:test'
 import {Chains} from '@wharfkit/common'
 import {Shipload} from '../src'
-import {PlatformContract, ServerContract, TokenContract} from '../src/contracts'
+import {FundContract, PlatformContract, ServerContract, TokenContract} from '../src/contracts'
 import {ATOMICASSETS_ABI} from '../src/nft/atomicassets'
 import {ITEM_PROSPECTOR_T2A_PACKED} from '../src/data/item-ids'
 
@@ -431,4 +431,28 @@ test('deposit transfer targets the platform account with a deposit memo', () => 
     expect(String(data.to)).toBe('nex.shipload')
     expect(String(data.quantity)).toBe('5 SCRAP')
     expect(String(data.memo)).toBe('deposit')
+})
+
+test('addFundToken builds an fnd.shipload::addtoken action', () => {
+    const action = sl.actions.addFundToken('scrap.gm', '0,SCRAP')
+    expect(String(action.account)).toBe('fnd.shipload')
+    expect(String(action.name)).toBe('addtoken')
+    const data = action.decodeData(FundContract.abi)
+    expect(String(data.token_contract)).toBe('scrap.gm')
+    expect(String(data.token_symbol)).toBe('0,SCRAP')
+})
+
+test('removeFundToken builds an fnd.shipload::deltoken action', () => {
+    const action = sl.actions.removeFundToken('scrap.gm')
+    expect(String(action.account)).toBe('fnd.shipload')
+    expect(String(action.name)).toBe('deltoken')
+    const data = action.decodeData(FundContract.abi)
+    expect(String(data.token_contract)).toBe('scrap.gm')
+})
+
+test('collectFund builds an fnd.shipload::collect action with no fields', () => {
+    const action = sl.actions.collectFund()
+    expect(String(action.account)).toBe('fnd.shipload')
+    expect(String(action.name)).toBe('collect')
+    expect(String(action.data)).toBe('')
 })

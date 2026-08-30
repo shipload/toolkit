@@ -1,6 +1,7 @@
 import type {APIClient} from '@wharfkit/antelope'
 import type {Contract} from '@wharfkit/contract'
 import type {PlatformContract} from '../contracts'
+import {FundContract} from '../contracts'
 import {GameState} from '../entities/gamestate'
 
 import {EntitiesManager} from './entities'
@@ -38,7 +39,8 @@ export class GameContext {
         public readonly client: APIClient,
         public readonly server: Contract,
         public readonly platform: Contract,
-        public readonly atomicAssetsAccount: string = 'atomicassets'
+        public readonly atomicAssetsAccount: string = 'atomicassets',
+        public readonly fund: Contract = new FundContract.Contract({client})
     ) {}
 
     get entities(): EntitiesManager {

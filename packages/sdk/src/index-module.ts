@@ -8,6 +8,7 @@ export * from './data/recipes-runtime'
 // Preserves both value and type sides through rollup-plugin-dts bundling.
 export {Types as ServerTypes} from './contracts/server'
 export {Types as PlatformTypes} from './contracts/platform'
+export {Types as FundTypes} from './contracts/fund'
 
 import type {ServerContract} from './contracts'
 import type {Entity as EntityType} from './entities/entity'
