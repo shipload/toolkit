@@ -72,6 +72,8 @@ export enum TaskType {
     SHUTTLE = 18,
     REFIT = 19,
     CONTRIBUTE = 20,
+    DEPOT_STORE = 21,
+    DEPOT_TAKE = 22,
 }
 
 export enum RefitOp {

@@ -29,6 +29,7 @@ import {
     subtractFromStacks,
     stackToCargoItem,
 } from '../capabilities/storage'
+import {hydrateEntityLanes} from '../entity/hydrate'
 import {craftCargoOwnership} from './availability'
 import * as schedule from './schedule'
 import type {ScheduleData} from './schedule'
@@ -142,21 +143,6 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
             output_pct: l.outputPct,
         })
 
-    const toGathererLane = (l: {
-        slotIndex: number
-        yield: number
-        drain: number
-        depth: number
-        outputPct: number
-    }): ServerContract.Types.gatherer_lane =>
-        ServerContract.Types.gatherer_lane.from({
-            slot_index: l.slotIndex,
-            yield: l.yield,
-            drain: l.drain,
-            depth: l.depth,
-            output_pct: l.outputPct,
-        })
-
     const toCrafterLane = (l: {
         slotIndex: number
         speed: number
@@ -191,7 +177,7 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
             ? ServerContract.Types.energy_stats.from(caps.generator)
             : undefined,
         loaderLanes: (caps.loaderLanes ?? []).map(toLoaderLane),
-        gathererLanes: (caps.gathererLanes ?? []).map(toGathererLane),
+        gathererLanes: hydrateEntityLanes(caps),
         crafterLanes: (caps.crafterLanes ?? []).map(toCrafterLane),
         builderLanes: (caps.builderLanes ?? []).map(toBuilderLane),
         hauler: caps.hauler

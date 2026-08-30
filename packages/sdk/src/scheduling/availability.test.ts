@@ -202,3 +202,33 @@ describe('clustercraft projection parity', () => {
         expect(eff.added).toEqual([output])
     })
 })
+
+function simpleTask(type: number) {
+    return ServerContract.Types.task.from({
+        type,
+        duration: 60,
+        cancelable: 0,
+        cargo: [cargoItem(401, 0, 100)],
+        couplings: [],
+    })
+}
+
+describe('taskCargoEffect task coverage', () => {
+    test('a contribute removes its cargo', () => {
+        const effect = taskCargoEffect(simpleTask(TaskType.CONTRIBUTE))
+        expect(effect.removed).toHaveLength(1)
+        expect(effect.added).toHaveLength(0)
+    })
+
+    test('a depot store removes its cargo', () => {
+        const effect = taskCargoEffect(simpleTask(TaskType.DEPOT_STORE))
+        expect(effect.removed).toHaveLength(1)
+        expect(effect.added).toHaveLength(0)
+    })
+
+    test('a depot take adds its cargo', () => {
+        const effect = taskCargoEffect(simpleTask(TaskType.DEPOT_TAKE))
+        expect(effect.added).toHaveLength(1)
+        expect(effect.removed).toHaveLength(0)
+    })
+})

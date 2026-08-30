@@ -1,6 +1,7 @@
 import type {ServerContract} from '../contracts'
 import {HoldKind, TaskType} from '../types'
 import * as schedule from './schedule'
+import {taskCargoRule} from './task-effects'
 
 type Task = ServerContract.Types.task
 type Coupling = ServerContract.Types.coupling
@@ -65,19 +66,17 @@ export function calcCounterpartDelivery(task: Task, coupling: Coupling): CargoIt
 }
 
 export function taskCargoEffect(task: Task): CargoEffect {
-    switch (task.type.toNumber()) {
-        case TaskType.LOAD:
-        case TaskType.UNWRAP:
-        case TaskType.UNDEPLOY:
+    switch (taskCargoRule(task.type.toNumber())) {
+        case 'all-in':
+        case 'undeploy':
             return {added: task.cargo, removed: []}
-        case TaskType.UNLOAD:
-        case TaskType.UPGRADE:
+        case 'all-out':
             return {added: [], removed: task.cargo}
-        case TaskType.GATHER:
+        case 'gather':
             return task.couplings.length > 0
                 ? {added: [], removed: []}
                 : {added: task.cargo, removed: []}
-        case TaskType.CRAFT: {
+        case 'craft': {
             if (task.cargo.length === 0) return {added: [], removed: []}
             const {clustered, ownOutput} = craftCargoOwnership(task)
             return {

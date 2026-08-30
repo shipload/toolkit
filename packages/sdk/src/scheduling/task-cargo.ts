@@ -1,5 +1,5 @@
 import type {ServerContract} from '../contracts'
-import {TaskType} from '../types'
+import {type TaskCargoRule, taskCargoRule} from './task-effects'
 
 export type TaskCargoDirection = 'in' | 'out'
 
@@ -10,6 +10,10 @@ export interface TaskCargoChange {
     modules: ServerContract.Types.module_entry[]
     quantity: number
 }
+
+export type TaskCargoResult =
+    | {known: true; changes: TaskCargoChange[]}
+    | {known: false; taskType: number}
 
 function toChange(
     item: ServerContract.Types.cargo_item,
@@ -24,19 +28,18 @@ function toChange(
     }
 }
 
-export function taskCargoChanges(task: ServerContract.Types.task): TaskCargoChange[] {
+function changesForRule(rule: TaskCargoRule, task: ServerContract.Types.task): TaskCargoChange[] {
     const items = task.cargo ?? []
     if (items.length === 0) return []
-    switch (Number(task.type)) {
-        case TaskType.LOAD:
-        case TaskType.UNWRAP:
+    switch (rule) {
+        case 'all-in':
+        case 'undeploy':
             return items.map((i) => toChange(i, 'in'))
-        case TaskType.GATHER:
-            return task.couplings.length > 0 ? [] : items.map((i) => toChange(i, 'in'))
-        case TaskType.UNLOAD:
-        case TaskType.CONTRIBUTE:
+        case 'all-out':
             return items.map((i) => toChange(i, 'out'))
-        case TaskType.CRAFT:
+        case 'gather':
+            return task.couplings.length > 0 ? [] : items.map((i) => toChange(i, 'in'))
+        case 'craft':
             return [
                 ...items.slice(0, -1).map((i) => toChange(i, 'out')),
                 ...(task.couplings.length > 0 ? [] : [toChange(items[items.length - 1], 'in')]),
@@ -44,4 +47,16 @@ export function taskCargoChanges(task: ServerContract.Types.task): TaskCargoChan
         default:
             return []
     }
+}
+
+export function taskCargoChanges(task: ServerContract.Types.task): TaskCargoChange[] {
+    const rule = taskCargoRule(Number(task.type))
+    return rule ? changesForRule(rule, task) : []
+}
+
+export function taskCargoChangesChecked(task: ServerContract.Types.task): TaskCargoResult {
+    const type = Number(task.type)
+    const rule = taskCargoRule(type)
+    if (!rule) return {known: false, taskType: type}
+    return {known: true, changes: changesForRule(rule, task)}
 }

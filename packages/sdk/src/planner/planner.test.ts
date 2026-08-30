@@ -1,14 +1,30 @@
 import {UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {expect, test, describe} from 'bun:test'
 import {ServerContract} from '../contracts'
+import {encodeStats} from '../derivation/crafting'
+import {ITEM_GATHERER_T1} from '../data/item-ids'
 import {
     planParallelTransfer,
+    planSingleGather,
     type GatherPlanEntity,
     gatherEnergyCost,
     splitCost,
     maxQtyForCharge,
     buildGatherPlan,
 } from './index'
+
+type ModuleEntry = ServerContract.Types.module_entry
+type Lane = ServerContract.Types.lane
+
+function makeModuleEntry(itemId: number, stats: bigint): ModuleEntry {
+    return {
+        type: UInt8.from(0),
+        installed: {
+            item_id: UInt16.from(itemId),
+            stats: UInt64.from(stats),
+        },
+    } as unknown as ModuleEntry
+}
 
 function gathererLane(
     slotIndex: number,
@@ -330,5 +346,114 @@ describe('buildGatherPlan', () => {
         const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
         expect(plan.cycles[0].rechargeBefore).toBe(false)
         expect(plan.cycles[0].rechargeSeconds).toBe(0)
+    })
+})
+
+describe('planSingleGather', () => {
+    const STRATUM = 100
+    const ITEM_MASS = 1000
+    const RICHNESS = 500
+    const deepStats = encodeStats([100, 900, 100]) // tol=900 => depth=5000 for tier1
+
+    test('mirrors the bot hand-assembly: laneKey, quantity, energyCost match selectGatherLane + maxQtyForCharge + splitCost', () => {
+        const modules: ModuleEntry[] = [makeModuleEntry(ITEM_GATHERER_T1, deepStats)]
+        const lane = gathererLane(0, 700, 1_250_000, 5000)
+
+        const result = planSingleGather({
+            modules,
+            entityItemId: ITEM_GATHERER_T1,
+            lanes: [],
+            gathererLanes: [lane],
+            stratum: STRATUM,
+            desiredQuantity: 100,
+            itemMass: ITEM_MASS,
+            richness: RICHNESS,
+            generatorCapacity: 1_000_000,
+            currentEnergy: 1_000_000,
+        })
+
+        const expectedLaneKey = 1
+        const expectedQuantity = maxQtyForCharge(
+            [lane],
+            100,
+            1_000_000,
+            STRATUM,
+            ITEM_MASS,
+            RICHNESS
+        )
+        const expectedCost = splitCost([lane], expectedQuantity, STRATUM, ITEM_MASS, RICHNESS)
+
+        expect(result.laneKey).toBe(expectedLaneKey)
+        expect(result.quantity).toBe(expectedQuantity)
+        expect(result.energyCost).toBe(expectedCost)
+        expect(result.needsRecharge).toBe(false)
+    })
+
+    test('needsRecharge is true when current energy is below the priced cost', () => {
+        const modules: ModuleEntry[] = [makeModuleEntry(ITEM_GATHERER_T1, deepStats)]
+        const lane = gathererLane(0, 700, 1_250_000, 5000)
+
+        const result = planSingleGather({
+            modules,
+            entityItemId: ITEM_GATHERER_T1,
+            lanes: [],
+            gathererLanes: [lane],
+            stratum: STRATUM,
+            desiredQuantity: 100,
+            itemMass: ITEM_MASS,
+            richness: RICHNESS,
+            generatorCapacity: 1_000_000,
+            currentEnergy: 0,
+        })
+
+        expect(result.energyCost).toBeGreaterThan(0)
+        expect(result.needsRecharge).toBe(true)
+    })
+
+    test('caps quantity to what fits one full charge, same boundary as maxQtyForCharge', () => {
+        const modules: ModuleEntry[] = [makeModuleEntry(ITEM_GATHERER_T1, deepStats)]
+        const lane = gathererLane(0, 700, 1_250_000, 5000)
+        const capacity = 40_000
+
+        const result = planSingleGather({
+            modules,
+            entityItemId: ITEM_GATHERER_T1,
+            lanes: [],
+            gathererLanes: [lane],
+            stratum: STRATUM,
+            desiredQuantity: 100_000,
+            itemMass: ITEM_MASS,
+            richness: RICHNESS,
+            generatorCapacity: capacity,
+            currentEnergy: capacity,
+        })
+
+        expect(
+            splitCost([lane], result.quantity, STRATUM, ITEM_MASS, RICHNESS)
+        ).toBeLessThanOrEqual(capacity)
+        expect(
+            splitCost([lane], result.quantity + 1, STRATUM, ITEM_MASS, RICHNESS)
+        ).toBeGreaterThan(capacity)
+    })
+
+    test('throws when no gatherer lane reaches the stratum, same as selectGatherLane', () => {
+        const shallowStats = encodeStats([100, 10, 100]) // depth=550 for tier1
+        const modules: ModuleEntry[] = [makeModuleEntry(ITEM_GATHERER_T1, shallowStats)]
+        const lane = gathererLane(0, 700, 1_250_000, 550)
+
+        expect(() =>
+            planSingleGather({
+                modules,
+                entityItemId: ITEM_GATHERER_T1,
+                lanes: [] as Lane[],
+                gathererLanes: [lane],
+                stratum: 5000,
+                desiredQuantity: 100,
+                itemMass: ITEM_MASS,
+                richness: RICHNESS,
+                generatorCapacity: 1_000_000,
+                currentEnergy: 1_000_000,
+            })
+        ).toThrow('no gatherer reaches this stratum')
     })
 })

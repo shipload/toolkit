@@ -100,6 +100,7 @@ export {resolveLockedAmount, wrapCostKey} from './managers/nft'
 export {
     getItem,
     getItems,
+    tryGetItem,
     itemIds,
     getResources,
     getComponents,
@@ -259,6 +260,12 @@ export type {ReachStats} from './travel/reach'
 export {simulateRoute} from './travel/route-simulator'
 export type {RouteMoverInput, RouteLegSim, RouteSim} from './travel/route-simulator'
 
+export {
+    planRouteWithRetry,
+    contractRouteLegCost,
+    contractRouteHeuristic,
+} from './travel/route-build'
+
 export * as schedule from './scheduling/schedule'
 export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'
 export type {
@@ -305,8 +312,8 @@ export type {
     ProjectionOptions,
 } from './scheduling/projection'
 
-export {taskCargoChanges} from './scheduling/task-cargo'
-export type {TaskCargoChange, TaskCargoDirection} from './scheduling/task-cargo'
+export {taskCargoChanges, taskCargoChangesChecked} from './scheduling/task-cargo'
+export type {TaskCargoChange, TaskCargoDirection, TaskCargoResult} from './scheduling/task-cargo'
 
 export {
     jobsToLanes,
@@ -657,17 +664,29 @@ export {
     gatherEnergyCost,
     maxQtyForCharge,
     planParallelTransfer,
+    planSingleGather,
     splitCost,
 } from './planner'
 export type {
     BuildGatherPlanOpts,
     FillCap,
     GatherCycle,
+    GatherLane,
     GatherLimpet,
     GatherPlan,
     GatherPlanEntity,
     LanePlanEntry,
     PlanTarget,
+    SingleGatherInput,
+    SingleGatherPlan,
 } from './planner'
+
+export {entityToRouteMover, hydrateEntityLanes} from './entity/hydrate'
+export type {
+    GathererLaneSource,
+    RouteMoverCaps,
+    RouteMoverOpts,
+    RouteMoverRow,
+} from './entity/hydrate'
 
 export * from './influence'

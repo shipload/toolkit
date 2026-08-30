@@ -1,6 +1,9 @@
 import {UInt32} from '@wharfkit/antelope'
 import {CRAFT_ENERGY_DIVISOR} from '../types'
 import type {CrafterStats, EntityCapabilities} from '../types/capabilities'
+import type {ServerContract} from '../contracts'
+import {getItem} from '../data/catalog'
+import type {Recipe} from '../data/recipes-runtime'
 
 export interface CrafterCapability {
     crafter: CrafterStats
@@ -37,6 +40,19 @@ export function calcClustercraftDuration(
 export function calc_craft_energy(drain: number, totalInputMass: number): UInt32 {
     const raw = Math.floor((totalInputMass * drain) / CRAFT_ENERGY_DIVISOR)
     return UInt32.from(Math.min(Math.max(raw + 1, 1000), 4294967295))
+}
+
+export function craftEnergyCost(
+    lane: ServerContract.Types.crafter_lane,
+    recipe: Recipe,
+    units: number
+): number {
+    if (units <= 0) return 0
+    const inputMassPerUnit = recipe.inputs.reduce(
+        (sum, input) => sum + getItem(input.itemId).mass * input.quantity,
+        0
+    )
+    return Number(calc_craft_energy(lane.drain.toNumber(), inputMassPerUnit * units))
 }
 
 // Craft-identical today; forked so build balance can diverge from craft without touching it.

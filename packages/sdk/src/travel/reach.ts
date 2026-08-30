@@ -1,21 +1,34 @@
 export interface ReachStats {
-    generator?: {capacity: bigint}
-    engines?: {drain: bigint}
+    generator?: {capacity: bigint | number}
+    engines?: {drain: bigint | number}
+    energy?: bigint | number
+    hasMovement?: boolean
 }
 
-export function computePerLegReach(s: ReachStats): number {
-    const capacity = s.generator?.capacity
+export interface ComputePerLegReachOptions {
+    basis?: 'capacity' | 'current'
+}
+
+export function computePerLegReach(s: ReachStats, opts: ComputePerLegReachOptions = {}): number {
+    const basis = opts.basis ?? 'capacity'
+    const energy =
+        basis === 'capacity' ? s.generator?.capacity : (s.generator?.capacity ?? s.energy)
     const drain = s.engines?.drain
-    if (capacity === undefined || drain === undefined || drain === 0n) {
+    if (energy === undefined || drain === undefined || Number(drain) === 0) {
         throw new Error('entity has no usable engine/generator (cannot compute per-leg reach)')
     }
-    return Number(capacity) / Number(drain)
+    return Number(energy) / Number(drain)
 }
 
-export function computeGroupPerLegReach(participants: ReachStats[]): number {
-    const movers = participants.filter((p) => p.engines !== undefined && p.engines.drain !== 0n)
+export function computeGroupPerLegReach(
+    participants: ReachStats[],
+    opts: ComputePerLegReachOptions = {}
+): number {
+    const movers = participants.filter(
+        (p) => (p.hasMovement ?? true) && p.engines !== undefined && Number(p.engines.drain) !== 0
+    )
     if (movers.length === 0) {
-        throw new Error('group has no moving entity (cannot compute per-leg reach)')
+        return 0
     }
-    return Math.min(...movers.map(computePerLegReach))
+    return Math.min(...movers.map((m) => computePerLegReach(m, opts)))
 }

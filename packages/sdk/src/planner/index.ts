@@ -3,6 +3,9 @@ import type {ServerContract} from '../contracts'
 import {calc_gather_duration, calc_gather_energy} from '../capabilities/gathering'
 import {calc_rechargetime} from '../travel/travel'
 import {projectRemainingAt, type Projectable} from '../scheduling/projection'
+import {selectGatherLane} from '../scheduling/lanes'
+
+export type GatherLane = ServerContract.Types.gatherer_lane
 
 export interface LanePlanEntry {
     slot: number
@@ -222,6 +225,57 @@ export function buildGatherPlan(
         totalLimpets: entity.gatherer_lanes.length,
         warnings,
     }
+}
+
+export interface SingleGatherPlan {
+    laneKey: number
+    quantity: number
+    energyCost: number
+    needsRecharge: boolean
+}
+
+// None of these are PRECISION-scaled: stratum/itemMass/richness/energy fields are plain units, same as maxQtyForCharge/splitCost.
+export interface SingleGatherInput {
+    modules: ServerContract.Types.module_entry[]
+    entityItemId: number
+    lanes: ServerContract.Types.lane[]
+    gathererLanes: GatherLane[]
+    stratum: number
+    desiredQuantity: number
+    itemMass: number
+    richness: number
+    generatorCapacity: number
+    currentEnergy: number
+}
+
+export function planSingleGather(opts: SingleGatherInput): SingleGatherPlan {
+    const {
+        modules,
+        entityItemId,
+        lanes,
+        gathererLanes,
+        stratum,
+        desiredQuantity,
+        itemMass,
+        richness,
+        generatorCapacity,
+        currentEnergy,
+    } = opts
+
+    const laneKey = selectGatherLane(modules, entityItemId, lanes, stratum)
+    const lane = gathererLanes.find((l) => l.slot_index.toNumber() === laneKey - 1)
+    if (!lane) throw new Error('gatherer lane not found for selected slot')
+
+    const quantity = maxQtyForCharge(
+        [lane],
+        desiredQuantity,
+        generatorCapacity,
+        stratum,
+        itemMass,
+        richness
+    )
+    const energyCost = splitCost([lane], quantity, stratum, itemMass, richness)
+    return {laneKey, quantity, energyCost, needsRecharge: currentEnergy < energyCost}
 }
 
 export function planParallelTransfer(
