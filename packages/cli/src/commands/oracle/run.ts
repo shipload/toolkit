@@ -1,5 +1,10 @@
 import type {Command} from 'commander'
-import {shouldLogTick, tickSignature, type TickLogState} from '@shipload/oracle'
+import {
+    shouldLogTick,
+    tickSignature,
+    type MaintenanceLogState,
+    type TickLogState,
+} from '@shipload/oracle'
 import {describeLoopError} from '../../lib/errors'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
 import {formatClean, formatTick} from './format'
@@ -61,6 +66,7 @@ export function register(parent: Command): void {
                 let lastCleanAt = 0
                 let lastMaintenanceAt = 0
                 let tickLog: TickLogState | null = null
+                let maintenanceLog: MaintenanceLogState | null = null
                 console.log(
                     `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
                 )
@@ -88,7 +94,11 @@ export function register(parent: Command): void {
                             lastCleanAt = Date.now()
                         }
                         if (Date.now() - lastMaintenanceAt >= maintenanceIntervalMs) {
-                            await runMaintenancePass(ctx)
+                            maintenanceLog = await runMaintenancePass(
+                                ctx,
+                                maintenanceLog,
+                                heartbeatMs
+                            )
                             lastMaintenanceAt = Date.now()
                         }
                         if (stopping) break

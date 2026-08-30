@@ -1,3 +1,9 @@
+import {
+    planLogged,
+    planMaintenanceLog,
+    type MaintenanceLogState,
+    type SweepOutcome,
+} from '@shipload/oracle'
 import {describeLoopError, isIdleCrankError} from '../../lib/errors'
 import {
     completeReadyChartersOnce,
@@ -12,41 +18,41 @@ function stamp(): string {
     return new Date().toISOString()
 }
 
-export async function runMaintenancePass(ctx: OracleContext): Promise<void> {
+async function sweep<T extends {kind: string}>(
+    label: string,
+    run: () => Promise<T>,
+    productive: T['kind'],
+    format: (r: T) => string
+): Promise<SweepOutcome> {
     try {
-        console.log(`${stamp()} ${formatMintReady(await mintReadyOnce(ctx))}`)
+        const result = await run()
+        if (result.kind !== productive) return {kind: 'idle'}
+        return {kind: 'productive', line: format(result)}
     } catch (err) {
-        if (isIdleCrankError(err)) {
-            console.log(`${stamp()} mint sweep: nothing ready (raced)`)
-        } else {
-            console.error(`${stamp()} mint sweep failed: ${describeLoopError(err)}`)
-        }
+        if (isIdleCrankError(err)) return {kind: 'idle'}
+        return {kind: 'failed', line: `${label} sweep failed: ${describeLoopError(err)}`}
     }
-    try {
-        console.log(`${stamp()} ${formatCharterReady(await completeReadyChartersOnce(ctx))}`)
-    } catch (err) {
-        if (isIdleCrankError(err)) {
-            console.log(`${stamp()} charter sweep: nothing ready (raced)`)
-        } else {
-            console.error(`${stamp()} charter sweep failed: ${describeLoopError(err)}`)
-        }
-    }
-    try {
-        console.log(`${stamp()} ${formatVoteReady(await settleReadyBallotsOnce(ctx))}`)
-    } catch (err) {
-        if (isIdleCrankError(err)) {
-            console.log(`${stamp()} ballot sweep: nothing ready (raced)`)
-        } else {
-            console.error(`${stamp()} ballot sweep failed: ${describeLoopError(err)}`)
-        }
-    }
-    try {
-        console.log(`${stamp()} ${formatTend(await tendFundOnce(ctx))}`)
-    } catch (err) {
-        if (isIdleCrankError(err)) {
-            console.log(`${stamp()} fund sweep: nothing ready (raced)`)
-        } else {
-            console.error(`${stamp()} fund sweep failed: ${describeLoopError(err)}`)
-        }
-    }
+}
+
+export async function runMaintenancePass(
+    ctx: OracleContext,
+    prev: MaintenanceLogState | null = null,
+    heartbeatMs = 0,
+    now: number = Date.now()
+): Promise<MaintenanceLogState | null> {
+    const outcomes: SweepOutcome[] = [
+        await sweep('mint', () => mintReadyOnce(ctx), 'minted', formatMintReady),
+        await sweep(
+            'charter',
+            () => completeReadyChartersOnce(ctx),
+            'completed',
+            formatCharterReady
+        ),
+        await sweep('ballot', () => settleReadyBallotsOnce(ctx), 'settled', formatVoteReady),
+        await sweep('fund', () => tendFundOnce(ctx), 'tended', formatTend),
+    ]
+    const plan = planMaintenanceLog(outcomes, prev, now, heartbeatMs)
+    for (const line of plan.out) console.log(`${stamp()} ${line}`)
+    for (const line of plan.err) console.error(`${stamp()} ${line}`)
+    return planLogged(plan) ? {loggedAt: now} : prev
 }

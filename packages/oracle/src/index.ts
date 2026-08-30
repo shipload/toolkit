@@ -13,6 +13,14 @@ export {
 } from './run-once'
 export {shouldLogTick, tickSignature, type TickLogState} from './tick-log'
 export {
+    planLogged,
+    planMaintenanceLog,
+    MAINTENANCE_IDLE_LINE,
+    type MaintenanceLogPlan,
+    type MaintenanceLogState,
+    type SweepOutcome,
+} from './maintenance-log'
+export {
     cleanOldestReserveScope,
     type CleanResult,
     type MaintenanceActions,
