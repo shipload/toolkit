@@ -85,6 +85,14 @@ export function register(program: Command): void {
                 console.error((e as Error).message)
                 process.exit(1)
             }
+            if (perLegReach <= 0) {
+                console.error(
+                    isGroup
+                        ? 'no entity in the group can travel (per-leg reach is zero)'
+                        : 'this entity cannot travel (per-leg reach is zero)'
+                )
+                process.exit(1)
+            }
 
             const plan = planRoute({
                 origin,

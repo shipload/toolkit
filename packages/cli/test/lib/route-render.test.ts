@@ -58,8 +58,8 @@ describe('computeGroupPerLegReach', () => {
         expect(computeGroupPerLegReach([ship, container, container])).toBe(10)
     })
 
-    test('throws when the group has no moving entity', () => {
-        expect(() => computeGroupPerLegReach([{generator: {capacity: 0n}}])).toThrow()
+    test('reports zero reach when the group has no moving entity', () => {
+        expect(computeGroupPerLegReach([{generator: {capacity: 0n}}])).toBe(0)
     })
 })
 
