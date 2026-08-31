@@ -32,19 +32,19 @@ export const charterMetadata: Record<number, CharterMeta> = {
     },
     11: {
         name: 'Depot Shuttle Bay I',
-        summary: 'Moves goods in and out of the depot faster',
+        summary: 'Moves cargo in and out of the depot faster',
     },
     12: {
         name: 'Depot Shuttle Bay II',
-        summary: 'Moves goods in and out of the depot faster',
+        summary: 'Moves cargo in and out of the depot faster',
     },
     13: {
         name: 'Depot Shuttle Bay III',
-        summary: 'Moves goods in and out of the depot faster',
+        summary: 'Moves cargo in and out of the depot faster',
     },
     14: {
         name: 'Depot Shuttle Bay IV',
-        summary: 'Moves goods in and out of the depot faster',
+        summary: 'Moves cargo in and out of the depot faster',
     },
 }
 
