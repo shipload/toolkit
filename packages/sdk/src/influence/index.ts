@@ -38,7 +38,10 @@ export {
     civicLoader,
     contributeDuration,
     contributeDurationForTonnes,
+    depotTransferDuration,
+    DEPOT_LOADER_SLOT,
     type CivicLoaderStats,
+    type DepotTransferParams,
 } from './duration'
 export {citizenryName, citizenryPatternCount} from './citizenry'
 export {
@@ -61,3 +64,14 @@ export {
     type CharterWorld,
     type ChosenCharter,
 } from './charters'
+export {
+    charterMetadata,
+    charterName,
+    charterSignature,
+    charterSummary,
+    romanNumeral,
+    type CharterMeta,
+    type CharterRefitSignature,
+    type CharterSignature,
+    type CharterSpawnSignature,
+} from './charter-metadata'
