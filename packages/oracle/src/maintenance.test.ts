@@ -4,6 +4,8 @@ import {
     runMintReady,
     settleReadyBallots,
     tendFund,
+    collectFund,
+    collectFundFees,
     type BallotDeps,
     type FoundedWorld,
     type FundDeps,
@@ -43,6 +45,14 @@ function fundDeps(assetIds: number[]): {deps: FundDeps; sent: string[]} {
             tend: (ids) => {
                 sent.push(`tend:${ids.join(',')}`)
                 return {name: 'tend'} as never
+            },
+            collect: () => {
+                sent.push('collect')
+                return {name: 'collect'} as never
+            },
+            collectFees: () => {
+                sent.push('collectfees')
+                return {name: 'collectfees'} as never
             },
         },
         session: {transact: async () => ({})},
@@ -147,4 +157,33 @@ test('tend accepts an explicit lot cap', async () => {
     const {deps, sent} = fundDeps([1, 2, 3])
     await tendFund(deps, 5)
     expect(sent).toEqual(['tend:1,2,3'])
+})
+
+test('collect transacts the platform pull', async () => {
+    const {deps, sent} = fundDeps([])
+    expect(await collectFund(deps)).toEqual({kind: 'collected', source: 'platform'})
+    expect(sent).toEqual(['collect'])
+})
+
+test('collectfees transacts the market pull', async () => {
+    const {deps, sent} = fundDeps([])
+    expect(await collectFundFees(deps)).toEqual({kind: 'collected', source: 'market'})
+    expect(sent).toEqual(['collectfees'])
+})
+
+test('collect and collectfees do not read the tendable list', async () => {
+    let reads = 0
+    const {deps} = fundDeps([])
+    const counting = {
+        ...deps,
+        reads: {
+            getTendable: async () => {
+                reads++
+                return []
+            },
+        },
+    }
+    await collectFund(counting)
+    await collectFundFees(counting)
+    expect(reads).toBe(0)
 })

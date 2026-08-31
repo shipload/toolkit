@@ -1,6 +1,7 @@
 import type {
     CharterReadyResult,
     CleanResult,
+    CollectResult,
     MintReadyResult,
     TendResult,
     TickResult,
@@ -80,6 +81,11 @@ export function formatVoteReady(r: VoteReadyResult): string {
         return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxBallots})`
     }
     return 'ballot sweep: none due'
+}
+
+export function formatCollect(r: CollectResult): string {
+    const source = r.source === 'platform' ? 'platform balance' : 'market fees'
+    return `fund collect: pulled ${source}`
 }
 
 export function formatTend(r: TendResult): string {

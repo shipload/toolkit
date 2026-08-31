@@ -28,6 +28,8 @@ export {
     type MaintenanceReads,
 } from './clean'
 export {
+    collectFund,
+    collectFundFees,
     completeReadyCharters,
     runMintReady,
     settleReadyBallots,
@@ -36,6 +38,7 @@ export {
     type BallotDeps,
     type BallotReads,
     type CharterReadyResult,
+    type CollectResult,
     type FoundedWorld,
     type FundActions,
     type FundDeps,

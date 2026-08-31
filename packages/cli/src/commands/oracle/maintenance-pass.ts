@@ -6,13 +6,21 @@ import {
 } from '@shipload/oracle'
 import {describeLoopError, isIdleCrankError} from '../../lib/errors'
 import {
+    collectFundFeesOnce,
+    collectFundOnce,
     completeReadyChartersOnce,
     mintReadyOnce,
     settleReadyBallotsOnce,
     tendFundOnce,
     type OracleContext,
 } from './context'
-import {formatCharterReady, formatMintReady, formatTend, formatVoteReady} from './format'
+import {
+    formatCharterReady,
+    formatCollect,
+    formatMintReady,
+    formatTend,
+    formatVoteReady,
+} from './format'
 
 function stamp(): string {
     return new Date().toISOString()
@@ -55,4 +63,15 @@ export async function runMaintenancePass(
     for (const line of plan.out) console.log(`${stamp()} ${line}`)
     for (const line of plan.err) console.error(`${stamp()} ${line}`)
     return planLogged(plan) ? {loggedAt: now} : prev
+}
+
+export async function runCollectPass(ctx: OracleContext): Promise<void> {
+    const outcomes: SweepOutcome[] = [
+        await sweep('collect', () => collectFundOnce(ctx), 'collected', formatCollect),
+        await sweep('collectfees', () => collectFundFeesOnce(ctx), 'collected', formatCollect),
+    ]
+    for (const outcome of outcomes) {
+        if (outcome.kind === 'productive') console.log(`${stamp()} ${outcome.line}`)
+        if (outcome.kind === 'failed') console.error(`${stamp()} ${outcome.line}`)
+    }
 }

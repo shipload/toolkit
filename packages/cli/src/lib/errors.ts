@@ -146,6 +146,8 @@ const IDLE_CRANK_MESSAGES = [
 	"charter prerequisites are not completed",
 	"world lifetime influence is below the charter cost",
 	"charter refit target not found at this world",
+	"nothing to collect",
+	"no fees to collect",
 ];
 
 export function isIdleCrankError(err: unknown): boolean {

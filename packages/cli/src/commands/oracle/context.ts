@@ -5,10 +5,13 @@ import {
     runOnce,
     settleReadyBallots,
     tendFund,
+    collectFund,
+    collectFundFees,
     SecretStore,
     type BallotDeps,
     type CharterReadyResult,
     type CleanResult,
+    type CollectResult,
     type FundDeps,
     type InfluenceDeps,
     type MaintenanceDeps,
@@ -195,6 +198,8 @@ export async function buildOracleContext(): Promise<OracleContext> {
                 fundContract.action('tend', {
                     asset_ids: assetIds.map((id) => UInt64.from(id)),
                 }),
+            collect: () => fundContract.action('collect', {}),
+            collectFees: () => fundContract.action('collectfees', {}),
         },
         session: fundSession,
     }
@@ -232,4 +237,12 @@ export async function settleReadyBallotsOnce(
 
 export async function tendFundOnce(ctx: OracleContext, maxLots = 0): Promise<TendResult> {
     return tendFund(ctx.fund, maxLots)
+}
+
+export async function collectFundOnce(ctx: OracleContext): Promise<CollectResult> {
+    return collectFund(ctx.fund)
+}
+
+export async function collectFundFeesOnce(ctx: OracleContext): Promise<CollectResult> {
+    return collectFundFees(ctx.fund)
 }

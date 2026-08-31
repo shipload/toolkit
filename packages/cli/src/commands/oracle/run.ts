@@ -8,7 +8,7 @@ import {
 import {describeLoopError} from '../../lib/errors'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
 import {formatClean, formatTick} from './format'
-import {runMaintenancePass} from './maintenance-pass'
+import {runCollectPass, runMaintenancePass} from './maintenance-pass'
 
 function stamp(): string {
     return new Date().toISOString()
@@ -27,6 +27,11 @@ export function register(parent: Command): void {
             '300'
         )
         .option(
+            '--collect-interval <seconds>',
+            'seconds between fund collect/collectfees passes',
+            '21600'
+        )
+        .option(
             '--heartbeat <seconds>',
             'seconds before an unchanged beacon state is logged again',
             '1800'
@@ -37,12 +42,14 @@ export function register(parent: Command): void {
                 cleanInterval: string
                 cleanRows: string
                 maintenanceInterval: string
+                collectInterval: string
                 heartbeat: string
             }) => {
                 const intervalMs = Math.max(1, Number(opts.interval)) * 1000
                 const cleanIntervalMs = Math.max(1, Number(opts.cleanInterval)) * 1000
                 const cleanRows = Math.max(1, Number(opts.cleanRows))
                 const maintenanceIntervalMs = Math.max(1, Number(opts.maintenanceInterval)) * 1000
+                const collectIntervalMs = Math.max(1, Number(opts.collectInterval)) * 1000
                 const heartbeatMs = Math.max(1, Number(opts.heartbeat)) * 1000
                 const ctx = await buildOracleContext()
                 let stopping = false
@@ -65,10 +72,11 @@ export function register(parent: Command): void {
 
                 let lastCleanAt = 0
                 let lastMaintenanceAt = 0
+                let lastCollectAt = 0
                 let tickLog: TickLogState | null = null
                 let maintenanceLog: MaintenanceLogState | null = null
                 console.log(
-                    `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
+                    `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, collect ${collectIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
                 )
                 try {
                     while (!stopping) {
@@ -100,6 +108,10 @@ export function register(parent: Command): void {
                                 heartbeatMs
                             )
                             lastMaintenanceAt = Date.now()
+                        }
+                        if (Date.now() - lastCollectAt >= collectIntervalMs) {
+                            await runCollectPass(ctx)
+                            lastCollectAt = Date.now()
                         }
                         if (stopping) break
                         await sleep(intervalMs)

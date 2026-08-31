@@ -42,6 +42,8 @@ export interface FundReads {
 
 export interface FundActions {
     tend(assetIds: number[]): Action
+    collect(): Action
+    collectFees(): Action
 }
 
 export interface FundDeps {
@@ -63,6 +65,8 @@ export type VoteReadyResult =
     | {kind: 'none-due'; pending: number}
 
 export type TendResult = {kind: 'tended'; assetIds: number[]} | {kind: 'nothing-tendable'}
+
+export type CollectResult = {kind: 'collected'; source: 'platform' | 'market'}
 
 export async function runMintReady(
     deps: InfluenceDeps,
@@ -106,4 +110,14 @@ export async function tendFund(deps: FundDeps, maxLots = 0): Promise<TendResult>
     if (assetIds.length === 0) return {kind: 'nothing-tendable'}
     await deps.session.transact({action: deps.actions.tend(assetIds)})
     return {kind: 'tended', assetIds}
+}
+
+export async function collectFund(deps: FundDeps): Promise<CollectResult> {
+    await deps.session.transact({action: deps.actions.collect()})
+    return {kind: 'collected', source: 'platform'}
+}
+
+export async function collectFundFees(deps: FundDeps): Promise<CollectResult> {
+    await deps.session.transact({action: deps.actions.collectFees()})
+    return {kind: 'collected', source: 'market'}
 }
