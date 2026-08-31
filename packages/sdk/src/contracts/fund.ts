@@ -10,7 +10,7 @@ import {ABI, Asset, Blob, Name, Struct, UInt16, UInt32, UInt64} from '@wharfkit/
 import type {ActionOptions, ContractArgs, PartialBy, Table} from '@wharfkit/contract'
 import {Contract as BaseContract} from '@wharfkit/contract'
 export const abiBlob = Blob.from(
-    'DmVvc2lvOjphYmkvMS4yABQLYWNjcnVlZF9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lB2JhbGFuY2UFYXNzZXQIYWRkdG9rZW4AAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wJYmVuZWZfcm93AAIHYWNjb3VudARuYW1lA2JwcwZ1aW50MTYLYmVuZWZpY2lhcnkAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgVjbGFpbQABE2JlbmVmaWNpYXJ5X2FjY291bnQEbmFtZQdjb2xsZWN0AAAKY3Vyc29yX3JvdwABDW5leHRfYXNzZXRfaWQGdWludDY0CGRlbHRva2VuAAEOdG9rZW5fY29udHJhY3QEbmFtZQtnZXR0ZW5kYWJsZQABCG1heF9sb3RzBnVpbnQzMghsb3RzX3JvdwADCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0CXJlc2N1ZW5mdAADCWFzc2V0X2lkcwh1aW50NjRbXQJ0bwRuYW1lBG1lbW8Gc3RyaW5nCHNldGJlbmVmAAEIcmVnaXN0cnkNYmVuZWZpY2lhcnlbXQlzZXRtYXJrZXQAAgZtYXJrZXQEbmFtZRFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRlcm1zAAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyDHNldHRpbmdzX3JvdwAEBm1hcmtldARuYW1lDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbBFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRva2VuAAIOdG9rZW5fY29udHJhY3QEbmFtZQx0b2tlbl9zeW1ib2wGc3ltYm9sBXN3ZWVwAAEIbWF4X2xvdHMGdWludDMyBHRlbmQAAQlhc3NldF9pZHMIdWludDY0W10JdGVybXNfcm93AAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyCXRva2VuX3JvdwACDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbAwAAABTQZpTMghhZGR0b2tlbgAAAAAAAOlMRAVjbGFpbQAAAAAgIxUjRQdjb2xsZWN0AAAAAFNBmqNKCGRlbHRva2VuAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAHAAAAICl9ETIDaTY0AAALYWNjcnVlZF9yb3cAAAAA4KWmOgNpNjQAAAliZW5lZl9yb3cAAAAAXIqvRgNpNjQAAApjdXJzb3Jfcm93AAAAAACAM40DaTY0AAAIbG90c19yb3cAAACYTZezwgNpNjQAAAxzZXR0aW5nc19yb3cAAAAAACyvygNpNjQAAAl0ZXJtc19yb3cAAAAA4KkgzQNpNjQAAAl0b2tlbl9yb3cAAAAAAQBUPCZNlbNiCHVpbnQ2NFtd'
+    'DmVvc2lvOjphYmkvMS4yABcLYWNjcnVlZF9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lB2JhbGFuY2UFYXNzZXQIYWRkdG9rZW4AAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wJYmVuZWZfcm93AAIHYWNjb3VudARuYW1lA2JwcwZ1aW50MTYLYmVuZWZpY2lhcnkAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgVjbGFpbQABE2JlbmVmaWNpYXJ5X2FjY291bnQEbmFtZQdjb2xsZWN0AAAKY3Vyc29yX3JvdwABDW5leHRfYXNzZXRfaWQGdWludDY0CGRlbHRva2VuAAEOdG9rZW5fY29udHJhY3QEbmFtZQdnZXRsb3RzAAILbG93ZXJfYm91bmQGdWludDY0CG1heF9sb3RzBnVpbnQzMgtnZXR0ZW5kYWJsZQABCG1heF9sb3RzBnVpbnQzMghsb3RfaW5mbwAGCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0B2l0ZW1faWQGdWludDE2CHF1YW50aXR5BnVpbnQzMgVzdGF0cwZ1aW50NjQLbG90c19yZXN1bHQAAgRsb3RzCmxvdF9pbmZvW10EbmV4dAZ1aW50NjQIbG90c19yb3cAAwhhc3NldF9pZAZ1aW50NjQFZ3JhZGUEbmFtZQphdWN0aW9uX2lkBnVpbnQ2NAlyZXNjdWVuZnQAAwlhc3NldF9pZHMIdWludDY0W10CdG8EbmFtZQRtZW1vBnN0cmluZwhzZXRiZW5lZgABCHJlZ2lzdHJ5DWJlbmVmaWNpYXJ5W10Jc2V0bWFya2V0AAIGbWFya2V0BG5hbWURbWFrZXJfbWFya2V0cGxhY2UEbmFtZQhzZXR0ZXJtcwADBWdyYWRlBG5hbWUMc3RhcnRpbmdfYmlkBWFzc2V0CGR1cmF0aW9uBnVpbnQzMgxzZXR0aW5nc19yb3cABAZtYXJrZXQEbmFtZQ50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wRbWFrZXJfbWFya2V0cGxhY2UEbmFtZQhzZXR0b2tlbgACDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbAVzd2VlcAABCG1heF9sb3RzBnVpbnQzMgR0ZW5kAAEJYXNzZXRfaWRzCHVpbnQ2NFtdCXRlcm1zX3JvdwADBWdyYWRlBG5hbWUMc3RhcnRpbmdfYmlkBWFzc2V0CGR1cmF0aW9uBnVpbnQzMgl0b2tlbl9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wNAAAAU0GaUzIIYWRkdG9rZW4AAAAAAADpTEQFY2xhaW0AAAAAICMVI0UHY29sbGVjdAAAAABTQZqjSghkZWx0b2tlbgAAAAAAZxqzYgdnZXRsb3RzAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAHAAAAICl9ETIDaTY0AAALYWNjcnVlZF9yb3cAAAAA4KWmOgNpNjQAAAliZW5lZl9yb3cAAAAAXIqvRgNpNjQAAApjdXJzb3Jfcm93AAAAAACAM40DaTY0AAAIbG90c19yb3cAAACYTZezwgNpNjQAAAxzZXR0aW5nc19yb3cAAAAAACyvygNpNjQAAAl0ZXJtc19yb3cAAAAA4KkgzQNpNjQAAAl0b2tlbl9yb3cAAAAAAgAAAABnGrNiC2xvdHNfcmVzdWx0AFQ8Jk2Vs2IIdWludDY0W10='
 )
 export const abi = ABI.from(abiBlob)
 export namespace Types {
@@ -59,10 +59,39 @@ export namespace Types {
         @Struct.field(Name)
         declare token_contract: Name
     }
+    @Struct.type('getlots')
+    export class getlots extends Struct {
+        @Struct.field(UInt64)
+        declare lower_bound: UInt64
+        @Struct.field(UInt32)
+        declare max_lots: UInt32
+    }
     @Struct.type('gettendable')
     export class gettendable extends Struct {
         @Struct.field(UInt32)
         declare max_lots: UInt32
+    }
+    @Struct.type('lot_info')
+    export class lot_info extends Struct {
+        @Struct.field(UInt64)
+        declare asset_id: UInt64
+        @Struct.field(Name)
+        declare grade: Name
+        @Struct.field(UInt64)
+        declare auction_id: UInt64
+        @Struct.field(UInt16)
+        declare item_id: UInt16
+        @Struct.field(UInt32)
+        declare quantity: UInt32
+        @Struct.field(UInt64)
+        declare stats: UInt64
+    }
+    @Struct.type('lots_result')
+    export class lots_result extends Struct {
+        @Struct.field(lot_info, {array: true})
+        declare lots: lot_info[]
+        @Struct.field(UInt64)
+        declare next: UInt64
     }
     @Struct.type('lots_row')
     export class lots_row extends Struct {
@@ -186,6 +215,10 @@ export namespace ActionParams {
     export interface deltoken {
         token_contract: NameType
     }
+    export interface getlots {
+        lower_bound: UInt64Type
+        max_lots: UInt32Type
+    }
     export interface gettendable {
         max_lots: UInt32Type
     }
@@ -222,6 +255,7 @@ export interface ActionNameParams {
     claim: ActionParams.claim
     collect: ActionParams.collect
     deltoken: ActionParams.deltoken
+    getlots: ActionParams.getlots
     gettendable: ActionParams.gettendable
     rescuenft: ActionParams.rescuenft
     setbenef: ActionParams.setbenef
@@ -233,6 +267,7 @@ export interface ActionNameParams {
 }
 export type ActionNames = keyof ActionNameParams
 export interface ActionReturnValues {
+    getlots: Types.lots_result
     gettendable: UInt64[]
 }
 export type ActionReturnNames = keyof ActionReturnValues
