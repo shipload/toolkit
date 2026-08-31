@@ -15,6 +15,8 @@ export function availableBuildMethods(itemId: number): BuildMethod[] {
     const kindMeta = getKindMeta(template.kind)
     if (!kindMeta) return ['craft+deploy']
 
+    if (kindMeta.classification === EntityClass.PlanetaryStructure) return []
+
     if (
         kindMeta.classification === EntityClass.OrbitalStructure &&
         !kindMeta.kind.equals(ENTITY_HUB)
