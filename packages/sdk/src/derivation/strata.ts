@@ -1,5 +1,5 @@
-import type {Checksum256Type} from '@wharfkit/antelope'
-import type {CoordinatesType} from '../types'
+import {Checksum256, type Checksum256Type} from '@wharfkit/antelope'
+import {Coordinates, type CoordinatesType} from '../types'
 import {deriveLocationStatic} from '../utils/system'
 import {deriveLocationSize} from './location-size'
 import {deriveResourceStats, deriveStratum, type ResourceStats} from './stratum'
@@ -26,9 +26,11 @@ export function deriveStrata(
     if (size === 0) return []
 
     const subtype = Number(loc.subtype)
+    const seed = Checksum256.from(epochSeed)
+    const at = Coordinates.from(coords)
     const out: DerivedStratum[] = []
     for (let i = 0; i < size; i++) {
-        const s = deriveStratum(epochSeed, coords, i, locType, subtype, size)
+        const s = deriveStratum(seed, at, i, locType, subtype, size)
         if (s.reserve === 0) continue
         out.push({
             index: i,
