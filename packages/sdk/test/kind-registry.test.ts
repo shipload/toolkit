@@ -3,6 +3,7 @@ import {Name} from '@wharfkit/antelope'
 import {
     CAP_DEMOLISH,
     CAP_MODULES,
+    CAP_STORE_CARGO,
     CAP_UNDEPLOY,
     CAP_WRAP,
     ENTITY_CONSTRUCTION_DOCK,
@@ -15,6 +16,8 @@ import {
     getTemplateMeta,
     isHub,
     kindCan,
+    canStoreCargo,
+    ALL_ENTITY_TYPES,
     type EntityTypeName,
 } from '../src/data/kind-registry'
 import {
@@ -64,6 +67,14 @@ describe('kind-registry', () => {
         expect(kindCan('container', CAP_WRAP)).toBeTrue()
         expect(kindCan('container', CAP_UNDEPLOY)).toBeTrue()
         expect(kindCan('container', CAP_MODULES)).toBeFalse()
+    })
+
+    test('depot alone stores cargo', () => {
+        expect(kindCan('depot', CAP_STORE_CARGO)).toBeTrue()
+        expect(canStoreCargo('depot')).toBeTrue()
+        for (const kind of ALL_ENTITY_TYPES) {
+            expect(canStoreCargo(kind), kind).toBe(kind === 'depot')
+        }
     })
 
     test('nexus has no capabilities (system kind)', () => {

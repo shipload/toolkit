@@ -87,7 +87,7 @@
     {
       "kind": "depot",
       "classification": "PlanetaryStructure",
-      "capabilityFlags": 0,
+      "capabilityFlags": 32,
       "zCoord": 0,
       "defaultLabel": "Depot"
     }

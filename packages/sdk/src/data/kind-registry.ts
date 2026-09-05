@@ -6,6 +6,7 @@ export const CAP_UNDEPLOY = 0x02
 export const CAP_DEMOLISH = 0x04
 export const CAP_CATCH = 0x08
 export const CAP_MODULES = 0x10
+export const CAP_STORE_CARGO = 0x20
 
 export enum EntityClass {
     OrbitalVessel = 0,
@@ -124,6 +125,10 @@ export function kindCan(kind: NameType | EntityTypeName, cap: number): boolean {
 
 export function canCatch(kind: NameType | EntityTypeName): boolean {
     return kindCan(kind, CAP_CATCH)
+}
+
+export function canStoreCargo(kind: NameType | EntityTypeName): boolean {
+    return kindCan(kind, CAP_STORE_CARGO)
 }
 
 export function getEntityClass(kind: NameType | EntityTypeName): EntityClass {
