@@ -82,7 +82,6 @@ export interface FoundedWorldRef {
 export interface VoteOption {
     nodeId: number
     cost: bigint
-    eligible: boolean
     total: bigint | undefined
 }
 
@@ -294,7 +293,6 @@ export class InfluenceManager extends BaseManager {
             options: result.options.map((option) => ({
                 nodeId: Number(option.node_id),
                 cost: big(option.cost),
-                eligible: Boolean(option.eligible),
                 total: talliesSuppressed ? undefined : big(option.total),
             })),
         }

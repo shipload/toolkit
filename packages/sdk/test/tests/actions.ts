@@ -413,6 +413,7 @@ describe('ActionsManager', () => {
             'fixitemids',
             'forcereveal',
             'genesisfleet',
+            'genesisworld',
             'resolveearly',
             'setcivic',
             'setinfburn',
