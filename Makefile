@@ -2,7 +2,7 @@ SHELL := /usr/bin/env bash
 BUN_VERSION ?= $(shell cat .bun-version)
 
 .PHONY: bun/check
-bun/check:
+bun/check:  ## Assert the installed bun matches .bun-version
 	@have=$$(bun --version); \
 	if [ "$$have" != "$(BUN_VERSION)" ]; then \
 		echo "bun $$have found, $(BUN_VERSION) required (.bun-version). Override with BUN_VERSION=$$have."; \
@@ -15,12 +15,12 @@ bun/check:
 .PHONY: dev/sdk dev/item-renderer dev/image-renderer dev/cli dev/oracle
 .PHONY: format codegen sync/catalog sync/scan
 .PHONY: changeset release-status release publish release/cli
-.PHONY: clean
+.PHONY: clean help
 
-install:
+install:  ## bun install for the whole workspace
 	bun install
 
-check: bun/check
+check: bun/check  ## Biome + per-package type checks
 	bun biome check .
 	bun --filter='@shipload/*' run check
 
@@ -30,7 +30,7 @@ check/image-renderer:; $(MAKE) -C packages/image-renderer check
 check/cli:           ; $(MAKE) -C packages/cli check
 check/oracle:        ; $(MAKE) -C packages/oracle check
 
-test: bun/check
+test: bun/check  ## Run every package's test suite
 	bun --filter='@shipload/*' run test
 
 test/sdk:            ; $(MAKE) -C packages/sdk test
@@ -40,7 +40,7 @@ test/image-renderer: ; $(MAKE) -C packages/image-renderer test
 test/cli:            ; $(MAKE) -C packages/cli test
 test/oracle:         ; $(MAKE) -C packages/oracle test
 
-build:
+build:  ## Build every package (SDK consumers load lib/, so rebuild after src edits)
 	bun --filter='@shipload/*' run build
 
 build/sdk:           ; $(MAKE) -C packages/sdk build
@@ -52,19 +52,19 @@ build/oracle:        ; $(MAKE) -C packages/oracle build
 dev/sdk:             ; $(MAKE) -C packages/sdk dev
 dev/oracle:          ; $(MAKE) -C packages/oracle dev
 
-format:
+format:  ## Biome write
 	bun biome check . --write
 
-codegen:
+codegen:  ## Regenerate SDK contract bindings from the DEPLOYED Jungle 4 ABI (reverts undeployed local bindings; use packages/sdk codegen/local before a deploy)
 	$(MAKE) -C packages/sdk codegen
 
-sync/catalog:
+sync/catalog:  ## Copy items/recipes/entities from contracts/build/catalog into the SDK (rebuild contracts first)
 	$(MAKE) -C packages/sdk sync-catalog CATALOG_SRC=$${CATALOG_SRC:-../../../contracts/build/catalog}
 
-sync/scan:
+sync/scan:  ## Copy the scan WASM from contracts/build/scan into the SDK
 	$(MAKE) -C packages/sdk sync-scan SCAN_SRC=$${SCAN_SRC:-../../../contracts/build/scan/scan.wasm}
 
-changeset:
+changeset:  ## Check, test, then add and commit a changeset generated from git history
 	$(MAKE) check
 	$(MAKE) test
 	@bun changeset add --message="$$(bun scripts/changeset-from-git.ts)"
@@ -83,10 +83,10 @@ changeset:
 	@echo "  3. make publish             — publish npm packages (npm OTP)"
 	@echo "  4. make release/cli         — cut CLI binaries + GitHub release"
 
-release-status:
+release-status:  ## Show pending changesets
 	bun changeset status --verbose
 
-release:
+release:  ## Bump versions from changesets, commit, tag, push
 	@./scripts/preflight-release.sh
 	bun install --frozen-lockfile
 	$(MAKE) check
@@ -120,7 +120,7 @@ release:
 	@echo "Then cut the CLI binary release (uses the version just bumped):"
 	@echo "    make release/cli"
 
-publish:
+publish:  ## Publish public packages to npm (skips private and already-published versions)
 	bun install --frozen-lockfile
 	$(MAKE) check
 	$(MAKE) build
@@ -144,7 +144,7 @@ publish:
 	bun changeset tag
 	git push --follow-tags
 
-release/cli:
+release/cli:  ## Build CLI binaries and cut a GitHub release (VERSION=… or BUMP=… optional)
 	bun install --frozen-lockfile
 	@if [ -n "$(VERSION)" ] || [ -n "$(BUMP)" ]; then \
 		$(MAKE) -C packages/cli release; \
@@ -154,6 +154,10 @@ release/cli:
 		$(MAKE) -C packages/cli release VERSION=$$VER; \
 	fi
 
-clean:
+clean:  ## Clean every package and remove node_modules
 	bun --filter='@shipload/*' run clean || true
 	rm -rf node_modules
+
+help:  ## Show this help
+	@echo "Targets (check/<pkg>, test/<pkg>, build/<pkg> also exist for sdk, cli, item-renderer, image-renderer, oracle):"
+	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_\/-]+:.*## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
