@@ -3,7 +3,7 @@ WORKDIR /app
 
 FROM base AS install
 RUN apt-get update && apt-get install -y --no-install-recommends make && rm -rf /var/lib/apt/lists/*
-COPY package.json bun.lock tsconfig.base.json ./
+COPY package.json bun.lock ./
 COPY packages/sdk/package.json ./packages/sdk/
 COPY packages/cli/package.json ./packages/cli/
 COPY packages/item-renderer/package.json ./packages/item-renderer/
