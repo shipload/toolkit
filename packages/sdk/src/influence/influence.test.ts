@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
-import {Checksum256} from '@wharfkit/antelope'
+import {Checksum256, UInt8, UInt16, UInt64} from '@wharfkit/antelope'
+import type {ServerContract} from '../contracts'
 import {ITEM_ORE_T1, ITEM_PLATE, ITEM_CRYSTAL_T1} from '../data/item-ids'
 import {categoryIndex} from './categories'
 import {
@@ -19,7 +20,7 @@ import {
     popcount5,
 } from './demand'
 import {findDecomp, DECOMP_REGISTRY} from './decomp'
-import {contributeDuration} from './duration'
+import {depotTransferDuration, contributeDuration} from './duration'
 import {getStatCount, statsSumSq} from './quality'
 import {pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
 import {citizenryName, citizenryPatternCount} from './citizenry'
@@ -313,5 +314,71 @@ describe('citizenry names', () => {
 describe('scales', () => {
     test('the need scale divides out against the atomic unit', () => {
         expect(NEED_FP_SCALE % INFLUENCE_ATOMIC_PER_POINT).toBe(0)
+    })
+})
+
+describe('depot transfer duration', () => {
+    type ModuleEntry = ServerContract.Types.module_entry
+    const DEPOT_ITEM = 10219
+    const LOADER_T1 = 10103
+
+    function makeModuleEntry(itemId: number, stats: bigint): ModuleEntry {
+        return {
+            type: UInt8.from(0),
+            installed: {item_id: UInt16.from(itemId), stats: UInt64.from(stats)},
+        } as unknown as ModuleEntry
+    }
+    function emptySlot(): ModuleEntry {
+        return {type: UInt8.from(0)} as unknown as ModuleEntry
+    }
+
+    // A spawned depot: loader in slot 0, four empty bays after it.
+    const depotWithLoader = (): ModuleEntry[] => [
+        makeModuleEntry(LOADER_T1, packStats(500)),
+        emptySlot(),
+        emptySlot(),
+        emptySlot(),
+        emptySlot(),
+    ]
+    const params = (overrides: Record<string, unknown> = {}) => ({
+        depotModules: depotWithLoader(),
+        depotItemId: DEPOT_ITEM,
+        depotKind: 'depot',
+        depotZ: 0,
+        shipKind: 'ship',
+        shipZ: 0,
+        cargoMassKg: 10_000,
+        ...overrides,
+    })
+
+    test('drives off the depot loader, not the ship', () => {
+        expect(depotTransferDuration(params())).toBeGreaterThan(0)
+    })
+
+    test('grows with cargo mass', () => {
+        expect(depotTransferDuration(params({cargoMassKg: 1_000_000}))).toBeGreaterThan(
+            depotTransferDuration(params({cargoMassKg: 10_000}))
+        )
+    })
+
+    test('empty cargo costs nothing', () => {
+        expect(depotTransferDuration(params({cargoMassKg: 0}))).toBe(0)
+    })
+
+    test('a depot with no loader installed cannot transfer', () => {
+        expect(depotTransferDuration(params({depotModules: [emptySlot()]}))).toBe(0)
+    })
+
+    test('co-located transfers are floored at the orbital minimum distance', () => {
+        // max(planetary 100, orbital 200) = 200, so anything under 200 reads as 200
+        const touching = depotTransferDuration(params({shipZ: 0, depotZ: 0}))
+        const under = depotTransferDuration(params({shipZ: 150, depotZ: 0}))
+        const over = depotTransferDuration(params({shipZ: 400, depotZ: 0}))
+        expect(under).toBe(touching)
+        expect(over).toBeGreaterThan(touching)
+    })
+
+    test('never reports zero for real cargo', () => {
+        expect(depotTransferDuration(params({cargoMassKg: 1}))).toBeGreaterThanOrEqual(1)
     })
 })
