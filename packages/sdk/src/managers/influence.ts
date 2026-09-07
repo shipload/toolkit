@@ -34,7 +34,7 @@ export interface CharterProgress {
     locationId: bigint
     lifetime: bigint
     watermark: bigint
-    surplus: bigint
+    unassigned: bigint
     mandate: number
     nextCost: bigint
     prereqsMet: boolean
@@ -44,6 +44,12 @@ export interface CharterProgress {
     ballotId: bigint
     settling: boolean
     queue: QueuedSeat[]
+    funds: NodeFunding[]
+}
+
+export interface NodeFunding {
+    nodeId: number
+    funded: bigint
 }
 
 export interface ContributePreviewRow {
@@ -120,7 +126,7 @@ export interface Ballot {
 export interface QueuedSeat {
     nodeId: number
     cost: bigint
-    cumulative: bigint
+    funded: bigint
     gap: bigint
 }
 
@@ -236,7 +242,7 @@ export class InfluenceManager extends BaseManager {
             locationId: big(result.location_id),
             lifetime: big(result.lifetime),
             watermark: big(result.watermark),
-            surplus: big(result.surplus),
+            unassigned: big(result.unassigned),
             mandate: Number(result.mandate),
             nextCost: big(result.next_cost),
             prereqsMet: Boolean(result.prereqs_met),
@@ -252,9 +258,10 @@ export class InfluenceManager extends BaseManager {
             queue: result.queue.map((seat) => ({
                 nodeId: Number(seat.node_id),
                 cost: big(seat.cost),
-                cumulative: big(seat.cumulative),
+                funded: big(seat.funded),
                 gap: big(seat.gap),
             })),
+            funds: result.funds.map((f) => ({nodeId: Number(f.node_id), funded: big(f.funded)})),
         }
     }
 
