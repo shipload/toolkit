@@ -27,7 +27,7 @@ export interface BallotReads {
 }
 
 export interface BallotActions {
-    voteready(maxBallots: number): Action
+    voteready(maxPages: number): Action
 }
 
 export interface BallotDeps {
@@ -61,7 +61,7 @@ export type CharterReadyResult =
     | {kind: 'nothing-buildable'; examined: number}
 
 export type VoteReadyResult =
-    | {kind: 'settled'; due: number; maxBallots: number}
+    | {kind: 'settled'; due: number; maxPages: number}
     | {kind: 'none-due'; pending: number}
 
 export type TendResult = {kind: 'tended'; assetIds: number[]} | {kind: 'nothing-tendable'}
@@ -95,14 +95,11 @@ export async function completeReadyCharters(
     return {kind: 'completed', worlds: completed}
 }
 
-export async function settleReadyBallots(
-    deps: BallotDeps,
-    maxBallots = 0
-): Promise<VoteReadyResult> {
+export async function settleReadyBallots(deps: BallotDeps, maxPages = 0): Promise<VoteReadyResult> {
     const due = await deps.reads.getVoteReady()
     if (due === 0) return {kind: 'none-due', pending: 0}
-    await deps.session.transact({action: deps.actions.voteready(maxBallots)})
-    return {kind: 'settled', due, maxBallots}
+    await deps.session.transact({action: deps.actions.voteready(maxPages)})
+    return {kind: 'settled', due, maxPages}
 }
 
 export async function tendFund(deps: FundDeps, maxLots = 0): Promise<TendResult> {

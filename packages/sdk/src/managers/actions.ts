@@ -1060,18 +1060,22 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    votecharter(player: NameType, location: CoordinatesType, nodeId: UInt32Type): Action {
-        return this.server.action('votecharter', {
-            player: Name.from(player),
-            x: Int64.from(location.x),
-            y: Int64.from(location.y),
-            node_id: UInt32.from(nodeId),
+    castballot(player: NameType, ballotId: UInt64Type, picks: number[]): Action {
+        return this.server.action('castballot', {
+            player,
+            ballot_id: UInt64.from(ballotId),
+            picks: picks.map((pick) => UInt32.from(pick)),
         })
     }
 
-    voteready(maxBallots: UInt32Type = UInt32.from(0)): Action {
-        return this.server.action('voteready', {
-            max_ballots: UInt32.from(maxBallots),
+    settleballot(ballotId: UInt64Type, maxPages: UInt32Type = UInt32.from(0)): Action {
+        return this.server.action('settleballot', {
+            ballot_id: UInt64.from(ballotId),
+            max_pages: UInt32.from(maxPages),
         })
+    }
+
+    voteready(maxPages: UInt32Type = UInt32.from(0)): Action {
+        return this.server.action('voteready', {max_pages: UInt32.from(maxPages)})
     }
 }

@@ -94,3 +94,12 @@ export const ITEM_NOT_AVAILABLE_AT_LOCATION = 'Item is not tradeable at ship loc
 export const INSUFFICIENT_BALANCE = 'Insufficient balance.'
 export const INSUFFICIENT_ITEM_QUANTITY = 'Insufficient quantity in cargo.'
 export const INSUFFICIENT_ITEM_SUPPLY = 'Insufficient supply of item at location.'
+
+export const VOTE_NOT_CITIZEN = 'player is not a citizen of this world'
+export const BALLOT_SETTLING = 'world is settling the last epoch'
+export const BALLOT_NOT_DUE = 'ballot is not due'
+export const BALLOT_NONE_DUE = 'no ballots are due'
+
+export function isSettling(error: unknown): boolean {
+    return error instanceof Error && error.message.includes(BALLOT_SETTLING)
+}

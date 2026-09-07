@@ -6,7 +6,6 @@ import {
     charterNode,
     charterSingletonMandate,
     charterSpawnNodeFor,
-    effectiveMandate,
     eligibleCharters,
     type BuiltCharter,
     type CharterWorld,
@@ -96,31 +95,5 @@ describe('charter eligibility mirror', () => {
         )
         expect(charterSpawnNodeFor(node(DOCK_TUNEUP).effect.targetItemId)?.nodeId).toBe(DOCK)
         expect(charterSpawnNodeFor(0)).toBeUndefined()
-    })
-})
-
-describe('effective mandate', () => {
-    const forked = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
-
-    test('a stored choice holds inside its own epoch', () => {
-        expect(effectiveMandate({chosen: DOCK, chosenEpoch: 7}, forked, 7)).toBe(DOCK)
-    })
-
-    test('the same stored choice expires one epoch later', () => {
-        expect(effectiveMandate({chosen: DOCK, chosenEpoch: 7}, forked, 8)).toBe(CHARTER_NONE)
-    })
-
-    test('an expired choice falls through to the singleton rule', () => {
-        const unbuilt = world([])
-        expect(effectiveMandate({chosen: NEXUS, chosenEpoch: 7}, unbuilt, 8)).toBe(WORKSHOP)
-    })
-
-    test('a cleared pair reads the singleton rule', () => {
-        expect(effectiveMandate({chosen: CHARTER_NONE, chosenEpoch: 0}, world([]), 3)).toBe(
-            WORKSHOP
-        )
-        expect(effectiveMandate({chosen: CHARTER_NONE, chosenEpoch: 0}, forked, 3)).toBe(
-            CHARTER_NONE
-        )
     })
 })

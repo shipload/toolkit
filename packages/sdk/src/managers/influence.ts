@@ -41,6 +41,9 @@ export interface CharterProgress {
     buildable: boolean
     epoch: number
     built: {nodeId: number; completedEpoch: number; entityId: bigint}[]
+    ballotId: bigint
+    settling: boolean
+    queue: QueuedSeat[]
 }
 
 export interface ContributePreviewRow {
@@ -66,8 +69,7 @@ export interface FoundedWorld {
     lifetime: bigint
     active: bigint
     watermark: bigint
-    chosen: number
-    chosenEpoch: number
+    ballotId: bigint
     mandate: number | undefined
     founder: Name
     founded: number
@@ -82,32 +84,44 @@ export interface FoundedWorldRef {
 export interface VoteOption {
     nodeId: number
     cost: bigint
-    total: bigint | undefined
+    seat: number
+    weight: bigint
+    rank: number
 }
 
 export interface VoteStandings {
     locationId: bigint
+    ballotId: bigint
     epoch: number
-    chosen: number
-    chosenEpoch: number
-    mandate: number
-    ballotEpoch: number | undefined
-    talliesSuppressed: boolean
+    settledEpoch: number
+    seats: number
+    settling: boolean
+    queue: number[]
     options: VoteOption[]
+    picks: number[]
 }
 
-export interface VoteCast {
+export interface BallotVote {
     account: Name
-    epoch: number
-    nodeId: number
-    weight: bigint
+    picks: number[]
 }
 
-export interface PendingBallot {
-    locationId: bigint
-    x: number
-    y: number
-    epoch: number
+export interface Ballot {
+    ballotId: bigint
+    kind: number
+    subject: bigint
+    seats: number
+    settledEpoch: number
+    queue: number[]
+    round: number
+    settling: boolean
+}
+
+export interface QueuedSeat {
+    nodeId: number
+    cost: bigint
+    cumulative: bigint
+    gap: bigint
 }
 
 function big(value: unknown): bigint {
@@ -233,6 +247,14 @@ export class InfluenceManager extends BaseManager {
                 completedEpoch: Number(b.completed_epoch),
                 entityId: big(b.entity_id),
             })),
+            ballotId: big(result.ballot_id),
+            settling: Boolean(result.settling),
+            queue: result.queue.map((seat) => ({
+                nodeId: Number(seat.node_id),
+                cost: big(seat.cost),
+                cumulative: big(seat.cumulative),
+                gap: big(seat.gap),
+            })),
         }
     }
 
@@ -271,50 +293,68 @@ export class InfluenceManager extends BaseManager {
         }))
     }
 
-    async getVotes(location: CoordinatesType): Promise<VoteStandings> {
+    async getVotes(location: CoordinatesType, player?: NameType): Promise<VoteStandings> {
         const result = (await this.server.readonly('getvotes', {
             x: Int64.from(location.x),
             y: Int64.from(location.y),
+            player: Name.from(player ?? ''),
         })) as ServerContract.Types.vote_result
-
-        const epoch = Number(result.epoch)
-        const rawBallotEpoch = Number(result.ballot_epoch)
-        const ballotEpoch = rawBallotEpoch === 0 ? undefined : rawBallotEpoch
-        const talliesSuppressed = ballotEpoch !== undefined && ballotEpoch < epoch
 
         return {
             locationId: big(result.location_id),
-            epoch,
-            chosen: Number(result.chosen),
-            chosenEpoch: Number(result.chosen_epoch),
-            mandate: Number(result.effective),
-            ballotEpoch,
-            talliesSuppressed,
+            ballotId: big(result.ballot_id),
+            epoch: Number(result.epoch),
+            settledEpoch: Number(result.settled_epoch),
+            seats: Number(result.seats),
+            settling: Boolean(result.settling),
+            queue: result.queue.map((n) => Number(n)),
             options: result.options.map((option) => ({
                 nodeId: Number(option.node_id),
                 cost: big(option.cost),
-                total: talliesSuppressed ? undefined : big(option.total),
+                seat: Number(option.seat),
+                weight: big(option.weight),
+                rank: Number(option.rank),
             })),
+            picks: result.picks.map((n) => Number(n)),
         }
     }
 
-    async getVoteCasts(location: CoordinatesType): Promise<VoteCast[]> {
-        const rows = (await this.server
-            .table('infvote', coordsToLocationId(location))
-            .all()) as ServerContract.Types.infvote_row[]
-        return rows.map((row) => ({
-            account: Name.from(row.account),
-            epoch: Number(row.epoch),
-            nodeId: Number(row.node_id),
-            weight: big(row.weight),
-        }))
+    async getBallotId(location: CoordinatesType): Promise<bigint | undefined> {
+        const row = (await this.server
+            .table('infloc')
+            .get(UInt64.from(coordsToLocationId(location)))) as
+            | ServerContract.Types.infloc_row
+            | undefined
+        return row ? big(row.ballot_id) : undefined
     }
 
-    async getVoteTallies(location: CoordinatesType): Promise<{nodeId: number; total: bigint}[]> {
+    async getBallot(ballotId: bigint): Promise<Ballot | undefined> {
+        const row = (await this.server.table('ballot').get(UInt64.from(ballotId))) as
+            | ServerContract.Types.ballot_row
+            | undefined
+        if (!row) return undefined
+        const epoch = Number((await this.getState()).epoch)
+        const settledEpoch = Number(row.settled_epoch)
+        return {
+            ballotId: big(row.ballot_id),
+            kind: Number(row.kind),
+            subject: big(row.subject),
+            seats: Number(row.seats),
+            settledEpoch,
+            queue: row.queue.map((n) => Number(n)),
+            round: Number(row.round),
+            settling: settledEpoch < epoch,
+        }
+    }
+
+    async getBallotVotes(ballotId: bigint): Promise<BallotVote[]> {
         const rows = (await this.server
-            .table('inftally', coordsToLocationId(location))
-            .all()) as ServerContract.Types.inftally_row[]
-        return rows.map((row) => ({nodeId: Number(row.node_id), total: big(row.total)}))
+            .table('ballotvote', UInt64.from(ballotId))
+            .all()) as ServerContract.Types.ballotvote_row[]
+        return rows.map((row) => ({
+            account: Name.from(row.account),
+            picks: row.picks.map((n) => Number(n)),
+        }))
     }
 
     async getBuiltCharters(location: CoordinatesType): Promise<BuiltCharter[]> {
@@ -322,17 +362,6 @@ export class InfluenceManager extends BaseManager {
             .table('charters', coordsToLocationId(location))
             .all()) as ServerContract.Types.charters_row[]
         return rows.map((row) => ({nodeId: Number(row.node_id), entityId: big(row.entity_id)}))
-    }
-
-    async getBallotQueue(): Promise<PendingBallot[]> {
-        const rows = (await this.server
-            .table('infballot')
-            .all()) as ServerContract.Types.infballot_row[]
-        return rows.map((row) => ({
-            locationId: big(row.location_id),
-            ...locationIdToCoords(row.location_id),
-            epoch: Number(row.epoch),
-        }))
     }
 
     async getFoundedWorlds(opts: {withMandate?: boolean} = {}): Promise<FoundedWorld[]> {
@@ -347,8 +376,7 @@ export class InfluenceManager extends BaseManager {
                 Math.max(0, Number(epoch) - Number(row.last_update_epoch))
             ),
             watermark: big(row.watermark),
-            chosen: Number(row.chosen),
-            chosenEpoch: Number(row.chosen_epoch),
+            ballotId: big(row.ballot_id),
             mandate: undefined as number | undefined,
             founder: Name.from(row.founder),
             founded: Number(row.founded),

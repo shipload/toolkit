@@ -78,7 +78,7 @@ export function formatCharterReady(r: CharterReadyResult): string {
 
 export function formatVoteReady(r: VoteReadyResult): string {
     if (r.kind === 'settled') {
-        return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxBallots})`
+        return `ballot sweep: settled ${r.due} due ballot(s) (max ${r.maxPages})`
     }
     return 'ballot sweep: none due'
 }

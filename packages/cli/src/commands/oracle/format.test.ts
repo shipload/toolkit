@@ -330,7 +330,7 @@ test('formatCharterReady describes nothing buildable without inventing a count',
 })
 
 test('formatVoteReady describes a settled sweep', () => {
-    const r: VoteReadyResult = {kind: 'settled', due: 3, maxBallots: 0}
+    const r: VoteReadyResult = {kind: 'settled', due: 3, maxPages: 0}
     expect(formatVoteReady(r)).toContain('settled 3 due ballot(s)')
 })
 

@@ -23,8 +23,9 @@ export type {
     FoundedWorld,
     FoundedWorldRef,
     InfluenceStanding,
-    PendingBallot,
-    VoteCast,
+    Ballot,
+    BallotVote,
+    QueuedSeat,
     VoteOption,
     VoteStandings,
 } from './influence'

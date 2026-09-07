@@ -46,11 +46,6 @@ export interface CharterWorld {
     entityExists?: (entityId: bigint) => boolean
 }
 
-export interface ChosenCharter {
-    chosen: number
-    chosenEpoch: number
-}
-
 function builtCharter(world: CharterWorld, nodeId: number): BuiltCharter | undefined {
     return world.built.find((row) => row.nodeId === nodeId)
 }
@@ -110,11 +105,22 @@ export function charterSingletonMandate(world: CharterWorld): number {
     return only
 }
 
-export function effectiveMandate(
-    stored: ChosenCharter,
+export function charterEligibleChained(
     world: CharterWorld,
-    epoch: number
-): number {
-    if (stored.chosen !== CHARTER_NONE && stored.chosenEpoch === epoch) return stored.chosen
-    return charterSingletonMandate(world)
+    node: CharterNode,
+    seated: number[]
+): boolean {
+    if (builtCharter(world, node.nodeId) !== undefined || seated.includes(node.nodeId)) return false
+    for (const prereq of node.prereqs) {
+        if (prereq === CHARTER_NONE) continue
+        if (builtCharter(world, prereq) === undefined && !seated.includes(prereq)) return false
+    }
+    if (
+        node.effect.kind === CHARTER_EFFECT_REFIT_MODULES &&
+        !charterEffectTargetPresent(world, node)
+    ) {
+        const spawn = charterSpawnNodeFor(node.effect.targetItemId)
+        if (!spawn || !seated.includes(spawn.nodeId)) return false
+    }
+    return true
 }

@@ -48,6 +48,7 @@ export {
     charterEffectTargetEntity,
     charterEffectTargetPresent,
     charterEligible,
+    charterEligibleChained,
     charterIneligible,
     charterNode,
     charterPrereqsMet,
@@ -55,15 +56,21 @@ export {
     charterSpawnNodeFor,
     CHARTER_INELIGIBILITY_MESSAGES,
     CHARTER_REGISTRY,
-    effectiveMandate,
     eligibleCharters,
     type BuiltCharter,
     type CharterEffect,
     type CharterIneligibility,
     type CharterNode,
     type CharterWorld,
-    type ChosenCharter,
 } from './charters'
+export {
+    projectBallot,
+    type BallotInput,
+    type BallotProjection,
+    type BallotVoter,
+    type ProjectedOption,
+    type ProjectedSeat,
+} from './ballot'
 export {
     charterMetadata,
     charterName,

@@ -180,7 +180,7 @@ export async function buildOracleContext(): Promise<OracleContext> {
             getVoteReady: () => shipload.influence.getVoteReady(),
         },
         actions: {
-            voteready: (maxBallots) => shipload.actions.voteready(maxBallots),
+            voteready: (maxPages) => shipload.actions.voteready(maxPages),
         },
         session,
     }
@@ -230,9 +230,9 @@ export async function completeReadyChartersOnce(
 
 export async function settleReadyBallotsOnce(
     ctx: OracleContext,
-    maxBallots = 0
+    maxPages = 0
 ): Promise<VoteReadyResult> {
-    return settleReadyBallots(ctx.ballots, maxBallots)
+    return settleReadyBallots(ctx.ballots, maxPages)
 }
 
 export async function tendFundOnce(ctx: OracleContext, maxLots = 0): Promise<TendResult> {

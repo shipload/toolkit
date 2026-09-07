@@ -113,8 +113,8 @@ function ballotDeps(due: number): {deps: BallotDeps; sent: string[]} {
     const deps: BallotDeps = {
         reads: {getVoteReady: async () => due},
         actions: {
-            voteready: (maxBallots) => {
-                sent.push(`voteready:${maxBallots}`)
+            voteready: (maxPages) => {
+                sent.push(`voteready:${maxPages}`)
                 return {name: 'voteready'} as never
             },
         },
@@ -131,13 +131,13 @@ test('voteready does nothing when nothing is due', async () => {
 
 test('voteready settles once a ballot is due', async () => {
     const {deps, sent} = ballotDeps(1)
-    expect(await settleReadyBallots(deps)).toEqual({kind: 'settled', due: 1, maxBallots: 0})
+    expect(await settleReadyBallots(deps)).toEqual({kind: 'settled', due: 1, maxPages: 0})
     expect(sent).toEqual(['voteready:0'])
 })
 
 test('voteready accepts an explicit cap', async () => {
     const {deps, sent} = ballotDeps(1)
-    expect(await settleReadyBallots(deps, 5)).toEqual({kind: 'settled', due: 1, maxBallots: 5})
+    expect(await settleReadyBallots(deps, 5)).toEqual({kind: 'settled', due: 1, maxPages: 5})
     expect(sent).toEqual(['voteready:5'])
 })
 
