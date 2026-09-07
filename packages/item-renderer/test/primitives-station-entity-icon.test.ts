@@ -17,6 +17,8 @@ test('stationEntityIconKinds covers the station entity types', () => {
         'workshop',
         'mdriver',
         'mcatcher',
+        'depot',
+        'nexus',
     ])
 })
 
@@ -27,6 +29,8 @@ test('stationEntityIconKindForName resolves tier-shared station names', () => {
     expect(stationEntityIconKindForName('Factory')).toBe('factory')
     expect(stationEntityIconKindForName('Mass Driver')).toBe('mdriver')
     expect(stationEntityIconKindForName('Mass Catcher (T1)')).toBe('mcatcher')
+    expect(stationEntityIconKindForName('Depot')).toBe('depot')
+    expect(stationEntityIconKindForName('Nexus')).toBe('nexus')
     expect(stationEntityIconKindForName('Plate')).toBeNull()
 })
 

@@ -9,6 +9,8 @@ export const stationEntityIconKinds = [
     'workshop',
     'mdriver',
     'mcatcher',
+    'depot',
+    'nexus',
 ] as const
 
 export type StationEntityIconKind = (typeof stationEntityIconKinds)[number]
@@ -33,6 +35,8 @@ const stationEntityIconLabels: Record<StationEntityIconKind, string> = {
     workshop: 'Workshop',
     mdriver: 'Mass Driver',
     mcatcher: 'Mass Catcher',
+    depot: 'Depot',
+    nexus: 'Nexus',
 }
 
 const stationEntityIconNames: Record<string, StationEntityIconKind> = {
@@ -49,6 +53,8 @@ const stationEntityIconNames: Record<string, StationEntityIconKind> = {
     mcatcher: 'mcatcher',
     'meteor catcher': 'mcatcher',
     'mass catcher': 'mcatcher',
+    depot: 'depot',
+    nexus: 'nexus',
 }
 
 const kindSet = new Set<string>(stationEntityIconKinds)
@@ -217,6 +223,44 @@ function mcatcherIcon(): string {
     )
 }
 
+function depotIcon(): string {
+    return wrap(
+        [
+            '<path d="M48 30h160l18 18v160l-18 18H48l-18-18V48z" fill="#f7e8a8"/>',
+            '<path d="M58 40h140l16 16v144l-16 16H58l-16-16V56z" fill="#362d53"/>',
+            '<path d="M42 62h172v42H42z" fill="#2a2342"/>',
+            '<path d="M58 70h140v26H58z" fill="#20d8ec"/>',
+            '<path d="M70 83h116" stroke="#75eff8" stroke-width="7"/>',
+            '<path d="M96 62v20M160 62v20" stroke="#19162c" stroke-width="9"/>',
+            '<path d="M66 118h56v40H66zM134 118h56v40h-56z" fill="#eab308"/>',
+            '<path d="M66 166h56v40H66zM134 166h56v40h-56z" fill="#f6c51f"/>',
+            '<path d="M94 118v40M162 118v40M94 166v40M162 166v40" stroke="#9b6a0a" stroke-width="6"/>',
+            '<path d="M66 138h56M134 138h56M66 186h56M134 186h56" stroke="#9b6a0a" stroke-width="6"/>',
+            '<path d="M74 124l8 8M142 124l8 8M74 172l8 8M142 172l8 8" stroke="#fff2bc" stroke-width="5"/>',
+            '<path d="M128 104v112" stroke="#211c35" stroke-width="12"/>',
+            '<path d="M118 108h20" stroke="#f7e8a8" stroke-width="7"/>',
+        ].join('')
+    )
+}
+
+function nexusIcon(): string {
+    return wrap(
+        [
+            '<path d="M128 18l36 22h42l10 10v42l22 36-22 36v42l-10 10h-42l-36 22-36-22H50l-10-10v-42l-22-36 22-36V50l10-10h42z" fill="#f7e8a8"/>',
+            '<path d="M128 31l31 20h36l8 8v36l20 33-20 33v36l-8 8h-36l-31 20-31-20H61l-8-8v-36l-20-33 20-33V59l8-8h36z" fill="#332b50"/>',
+            '<path d="M52 52l40 40M204 52l-40 40M52 204l40-40M204 204l-40-40" stroke="#ffd24c" stroke-width="12"/>',
+            '<circle cx="128" cy="128" r="66" fill="#221c3a"/>',
+            '<circle cx="128" cy="128" r="56" fill="#ffd24c"/>',
+            '<circle cx="128" cy="128" r="42" fill="#3b2f6b"/>',
+            '<circle cx="128" cy="128" r="30" fill="#7b5fd8"/>',
+            '<circle cx="128" cy="128" r="16" fill="#fff5c2"/>',
+            '<path d="M128 64v18M128 174v18M64 128h18M174 128h18" stroke="#fff5c2" stroke-width="8"/>',
+            '<path d="M106 128l22-14v28zM150 128l-22 14v-28z" fill="#3b2f6b" stroke="none"/>',
+            '<path d="M96 96l-10-10M160 96l10-10M96 160l-10 10M160 160l10 10" stroke="#ffffff" stroke-opacity=".6" stroke-width="5"/>',
+        ].join('')
+    )
+}
+
 const iconBodies: Record<StationEntityIconKind, string> = {
     hub: hubIcon(),
     warehouse: warehouseIcon(),
@@ -225,6 +269,8 @@ const iconBodies: Record<StationEntityIconKind, string> = {
     workshop: workshopIcon(),
     mdriver: mdriverIcon(),
     mcatcher: mcatcherIcon(),
+    depot: depotIcon(),
+    nexus: nexusIcon(),
 }
 
 export function stationEntityIconBody(kind: StationEntityIconKind): string {
