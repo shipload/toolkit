@@ -7,13 +7,13 @@ import {
 } from './charters'
 import {projectBallot} from './ballot'
 
-const NEXUS = 2
-const DOCK = 3
-const WORKSHOP_TUNEUP = 4
-const DOCK_TUNEUP = 5
-const DEPOT = 6
+const NEXUS = 20100001
+const DOCK = 30100001
+const WORKSHOP_TUNEUP = 10100201
+const DOCK_TUNEUP = 30100301
+const DEPOT = 40100001
 
-const world: CharterWorld = {built: [{nodeId: 1, entityId: 100n}], entityExists: () => true}
+const world: CharterWorld = {built: [{nodeId: 10001, entityId: 100n}], entityExists: () => true}
 
 describe('charterEligibleChained', () => {
     test('with nothing seated it equals charterEligible', () => {
@@ -47,7 +47,7 @@ describe('projectBallot', () => {
         const tuneup = result.options.find((o) => o.nodeId === DOCK_TUNEUP)!
         expect(tuneup.seat).toBe(0)
         expect(tuneup.weight).toBe(9_000n)
-        expect(result.options.find((o) => o.nodeId === 1)).toBeUndefined()
+        expect(result.options.find((o) => o.nodeId === 10001)).toBeUndefined()
     })
 
     test('two seats: the dock tune-up chains behind the dock', () => {
@@ -68,7 +68,7 @@ describe('projectBallot', () => {
         expect(projectBallot({world, seats: 4, voters}).seats.length).toBe(3)
         expect(projectBallot({world, seats: 1, voters: []}).seats).toEqual([])
         const almostDone: CharterWorld = {
-            built: CHARTER_REGISTRY.filter((n) => n.nodeId !== 14).map((n) => ({
+            built: CHARTER_REGISTRY.filter((n) => n.nodeId !== 40100404).map((n) => ({
                 nodeId: n.nodeId,
                 entityId: 1n,
             })),
@@ -79,9 +79,9 @@ describe('projectBallot', () => {
             projectBallot({
                 world: almostDone,
                 seats: 1,
-                voters: [{account: 'a', weight: 5n, picks: [14]}],
+                voters: [{account: 'a', weight: 5n, picks: [40100404]}],
             }).seats
-        ).toEqual([{nodeId: 14, weight: 5n}])
+        ).toEqual([{nodeId: 40100404, weight: 5n}])
     })
 
     test('the caller picks are ranked on the options', () => {

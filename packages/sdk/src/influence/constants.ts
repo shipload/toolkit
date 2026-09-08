@@ -39,9 +39,9 @@ export const BAR_STEP_UP = BAR_STEP_UNIT * 9
 export const BAR_STEP_DOWN = BAR_STEP_UNIT
 
 export const CHARTER_NONE = 0
-export const CHARTER_WORKSHOP = 1
+export const CHARTER_WORKSHOP = 10001
 export const CIVIC_GRANT_NONE = 0
-export const CIVIC_GRANT_WORKER = 1
+export const CIVIC_GRANT_MODULE = 1
 export const CIVIC_GRANT_RUNG = 2
 export const CIVIC_GRANT_LEVEL_GATE = 3
 export const CIVIC_GRANT_ADVANCEMENT = 4

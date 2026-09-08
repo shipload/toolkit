@@ -76,13 +76,13 @@ describe('charter names agree with the grant they are derived from', () => {
 
 describe('charter signatures', () => {
     test('reads the depot level gate from its grant list', () => {
-        expect(signatureFor(6)).toEqual({kind: 'gate', buildingLabel: 'Depot', level: 1})
+        expect(signatureFor(40100001)).toEqual({kind: 'gate', buildingLabel: 'Depot', level: 1})
     })
 
     test('ranks the depot bays by their prereq chain', () => {
-        expect([7, 8, 9, 10].map(signatureFor)).toEqual(
+        expect([40100101, 40100102, 40100103, 40100104].map(signatureFor)).toEqual(
             [1, 2, 3, 4].map((rank) => ({
-                kind: 'worker',
+                kind: 'module',
                 buildingLabel: 'Depot',
                 count: 1,
                 rank,
@@ -92,7 +92,7 @@ describe('charter signatures', () => {
     })
 
     test('ranks the depot transfer rungs by their prereq chain', () => {
-        expect([11, 12, 13, 14].map(signatureFor)).toEqual([
+        expect([40100401, 40100402, 40100403, 40100404].map(signatureFor)).toEqual([
             {
                 kind: 'rung',
                 buildingLabel: 'Depot',
@@ -125,7 +125,7 @@ describe('charter signatures', () => {
     })
 
     test('treats a lone rung as an unranked tune-up', () => {
-        expect(signatureFor(4)).toEqual({
+        expect(signatureFor(10100201)).toEqual({
             kind: 'rung',
             buildingLabel: 'Workshop',
             statLabel: 'crafting speed',

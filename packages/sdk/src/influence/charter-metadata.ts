@@ -4,8 +4,8 @@ import {
     CIVIC_DEPOT,
     CIVIC_DOCK,
     CIVIC_GRANT_LEVEL_GATE,
+    CIVIC_GRANT_MODULE,
     CIVIC_GRANT_RUNG,
-    CIVIC_GRANT_WORKER,
     CIVIC_NEXUS,
     CIVIC_STAT_BUILD_SPEED,
     CIVIC_STAT_CRAFT_SPEED,
@@ -42,41 +42,41 @@ export interface CharterMeta {
 }
 
 export const charterMetadata: Record<number, CharterMeta> = {
-    1: {name: 'Communal Workshop', summary: 'Shared crafting for anyone at this world'},
-    2: {name: 'Civic Nexus', summary: 'Wrap items for trade and unwrap them here'},
-    3: {name: 'Construction Dock', summary: 'Ships queue here for upgrades'},
-    4: {name: 'Workshop tune-up', summary: "Raises the Workshop's Fabricator stats"},
-    5: {name: 'Dock tune-up', summary: "Raises the Dock's Assembly Arm stats"},
-    6: {name: 'Public Depot', summary: 'Storage at this world for every player'},
-    7: {
+    10001: {name: 'Communal Workshop', summary: 'Shared crafting for anyone at this world'},
+    10100201: {name: 'Workshop tune-up', summary: "Raises the Workshop's Fabricator stats"},
+    20100001: {name: 'Civic Nexus', summary: 'Wrap items for trade and unwrap them here'},
+    30100001: {name: 'Construction Dock', summary: 'Ships queue here for upgrades'},
+    30100301: {name: 'Dock tune-up', summary: "Raises the Dock's Assembly Arm stats"},
+    40100001: {name: 'Public Depot', summary: 'Storage at this world for every player'},
+    40100101: {
         name: 'Depot Cargo Hold I',
         summary: 'Raises what each player can keep at the depot',
     },
-    8: {
+    40100102: {
         name: 'Depot Cargo Hold II',
         summary: 'Raises what each player can keep at the depot',
     },
-    9: {
+    40100103: {
         name: 'Depot Cargo Hold III',
         summary: 'Raises what each player can keep at the depot',
     },
-    10: {
+    40100104: {
         name: 'Depot Cargo Hold IV',
         summary: 'Raises what each player can keep at the depot',
     },
-    11: {
+    40100401: {
         name: 'Depot Shuttle Bay I',
         summary: 'Moves cargo in and out of the depot faster',
     },
-    12: {
+    40100402: {
         name: 'Depot Shuttle Bay II',
         summary: 'Moves cargo in and out of the depot faster',
     },
-    13: {
+    40100403: {
         name: 'Depot Shuttle Bay III',
         summary: 'Moves cargo in and out of the depot faster',
     },
-    14: {
+    40100404: {
         name: 'Depot Shuttle Bay IV',
         summary: 'Moves cargo in and out of the depot faster',
     },
@@ -96,8 +96,8 @@ export interface CharterGateSignature {
     level: number
 }
 
-export interface CharterWorkerSignature {
-    kind: 'worker'
+export interface CharterModuleSignature {
+    kind: 'module'
     buildingLabel: string
     count: number
     rank: number
@@ -112,7 +112,7 @@ export interface CharterRungSignature {
     rankCount: number
 }
 
-export type CharterSignature = CharterGateSignature | CharterWorkerSignature | CharterRungSignature
+export type CharterSignature = CharterGateSignature | CharterModuleSignature | CharterRungSignature
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
@@ -123,7 +123,7 @@ export function romanNumeral(rank: number): string {
 function headlineGrant(node: CharterNode): CharterGrant | undefined {
     return (
         node.grants.find((grant) => grant.kind === CIVIC_GRANT_LEVEL_GATE) ??
-        node.grants.find((grant) => grant.kind === CIVIC_GRANT_WORKER) ??
+        node.grants.find((grant) => grant.kind === CIVIC_GRANT_MODULE) ??
         node.grants.find((grant) => grant.kind === CIVIC_GRANT_RUNG)
     )
 }
@@ -166,9 +166,9 @@ export function charterSignature(node: CharterNode): CharterSignature | undefine
         }
     }
     const siblings = headlineSiblings(grant)
-    if (grant.kind === CIVIC_GRANT_WORKER) {
+    if (grant.kind === CIVIC_GRANT_MODULE) {
         return {
-            kind: 'worker',
+            kind: 'module',
             buildingLabel: civicBuildingLabel(grant.building),
             count: grant.value,
             rank: rungRank(node, siblings),

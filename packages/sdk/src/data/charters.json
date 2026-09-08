@@ -1,7 +1,7 @@
 {
   "nodes": [
     {
-      "nodeId": 1,
+      "nodeId": 10001,
       "cost": "2000000000",
       "prereqs": [],
       "grants": [
@@ -34,10 +34,27 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 2,
+      "nodeId": 10100201,
+      "cost": "2000000000",
+      "prereqs": [
+        10001
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 187
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 20100001,
       "cost": "4000000000",
       "prereqs": [
-        1
+        10001
       ],
       "grants": [
         {
@@ -51,10 +68,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 3,
+      "nodeId": 30100001,
       "cost": "3000000000",
       "prereqs": [
-        1
+        10001
       ],
       "grants": [
         {
@@ -80,27 +97,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 4,
-      "cost": "2000000000",
-      "prereqs": [
-        1
-      ],
-      "grants": [
-        {
-          "kind": 2,
-          "building": 1,
-          "stat": 1,
-          "value": 187
-        }
-      ],
-      "exclusionGroup": 0,
-      "repeatCap": 0
-    },
-    {
-      "nodeId": 5,
+      "nodeId": 30100301,
       "cost": "3000000000",
       "prereqs": [
-        3
+        30100001
       ],
       "grants": [
         {
@@ -114,10 +114,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 6,
+      "nodeId": 40100001,
       "cost": "2500000000",
       "prereqs": [
-        1
+        10001
       ],
       "grants": [
         {
@@ -137,10 +137,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 7,
+      "nodeId": 40100101,
       "cost": "1000000000",
       "prereqs": [
-        6
+        40100001
       ],
       "grants": [
         {
@@ -160,10 +160,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 8,
+      "nodeId": 40100102,
       "cost": "1500000000",
       "prereqs": [
-        7
+        40100101
       ],
       "grants": [
         {
@@ -177,10 +177,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 9,
+      "nodeId": 40100103,
       "cost": "2000000000",
       "prereqs": [
-        8
+        40100102
       ],
       "grants": [
         {
@@ -194,10 +194,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 10,
+      "nodeId": 40100104,
       "cost": "2500000000",
       "prereqs": [
-        9
+        40100103
       ],
       "grants": [
         {
@@ -211,10 +211,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 11,
+      "nodeId": 40100401,
       "cost": "800000000",
       "prereqs": [
-        6
+        40100001
       ],
       "grants": [
         {
@@ -228,10 +228,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 12,
+      "nodeId": 40100402,
       "cost": "1200000000",
       "prereqs": [
-        11
+        40100401
       ],
       "grants": [
         {
@@ -245,10 +245,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 13,
+      "nodeId": 40100403,
       "cost": "1600000000",
       "prereqs": [
-        12
+        40100402
       ],
       "grants": [
         {
@@ -262,10 +262,10 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 14,
+      "nodeId": 40100404,
       "cost": "2000000000",
       "prereqs": [
-        13
+        40100403
       ],
       "grants": [
         {

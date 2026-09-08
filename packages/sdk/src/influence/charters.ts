@@ -2,8 +2,8 @@ import chartersJson from '../data/charters.json'
 import {
     CHARTER_NONE,
     CIVIC_GRANT_LEVEL_GATE,
+    CIVIC_GRANT_MODULE,
     CIVIC_GRANT_RUNG,
-    CIVIC_GRANT_WORKER,
 } from './constants'
 
 export interface CharterGrant {
@@ -90,12 +90,12 @@ export function charterRungValue(world: CharterWorld, building: number, stat: nu
     return total
 }
 
-export function charterWorkerCount(world: CharterWorld, building: number): number {
+export function charterModuleCount(world: CharterWorld, building: number): number {
     let total = 0
     for (const node of CHARTER_REGISTRY) {
         if (builtCharter(world, node.nodeId) === undefined) continue
         for (const grant of node.grants) {
-            if (grant.kind !== CIVIC_GRANT_WORKER) continue
+            if (grant.kind !== CIVIC_GRANT_MODULE) continue
             if (grant.building !== building) continue
             total += grant.value
         }

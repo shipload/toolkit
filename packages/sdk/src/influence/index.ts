@@ -54,7 +54,7 @@ export {
     charterPrereqsMet,
     charterRungValue,
     charterSingletonMandate,
-    charterWorkerCount,
+    charterModuleCount,
     CHARTER_INELIGIBILITY_MESSAGES,
     CHARTER_REGISTRY,
     eligibleCharters,

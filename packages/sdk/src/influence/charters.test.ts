@@ -15,18 +15,18 @@ import {
     charterGateNodeFor,
     charterRungValue,
     charterSingletonMandate,
-    charterWorkerCount,
+    charterModuleCount,
     eligibleCharters,
     type BuiltCharter,
     type CharterWorld,
 } from './charters'
 
-const WORKSHOP = 1
-const NEXUS = 2
-const DOCK = 3
-const WORKSHOP_TUNEUP = 4
-const DOCK_TUNEUP = 5
-const DEPOT = 6
+const WORKSHOP = 10001
+const NEXUS = 20100001
+const DOCK = 30100001
+const WORKSHOP_TUNEUP = 10100201
+const DOCK_TUNEUP = 30100301
+const DEPOT = 40100001
 
 const WORKSHOP_ENTITY = 100n
 const DOCK_ENTITY = 300n
@@ -58,7 +58,7 @@ describe('charter eligibility mirror', () => {
 
     test('completing the root opens the fork and closes the singleton path', () => {
         const built = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
-        expect(eligibleIds(built)).toEqual([NEXUS, DOCK, WORKSHOP_TUNEUP, DEPOT])
+        expect(eligibleIds(built)).toEqual([WORKSHOP_TUNEUP, NEXUS, DOCK, DEPOT])
         expect(charterSingletonMandate(built)).toBe(CHARTER_NONE)
     })
 
@@ -111,10 +111,10 @@ describe('charter eligibility mirror', () => {
         expect(charterRungValue(tuned, CIVIC_DEPOT, CIVIC_STAT_TRANSFER_SPEED)).toBe(0)
     })
 
-    test('workers sum over the completed nodes only', () => {
-        expect(charterWorkerCount(world([]), CIVIC_WORKSHOP)).toBe(0)
+    test('modules sum over the completed nodes only', () => {
+        expect(charterModuleCount(world([]), CIVIC_WORKSHOP)).toBe(0)
         expect(
-            charterWorkerCount(
+            charterModuleCount(
                 world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}]),
                 CIVIC_WORKSHOP
             )
