@@ -24,7 +24,6 @@ import {ServerContract} from '../src/contracts'
 import {makeEntity} from '../src/entities/makers'
 import {
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
@@ -52,7 +51,7 @@ const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {
     warehouse: ITEM_WAREHOUSE_T1_PACKED,
     extractor: ITEM_EXTRACTOR_T1_PACKED,
     factory: ITEM_FACTORY_T1_PACKED,
-    builddock: ITEM_CONSTRUCTION_DOCK_T1_PACKED,
+    builddock: undefined,
     container: ITEM_CONTAINER_T1_PACKED,
     nexus: undefined,
 }

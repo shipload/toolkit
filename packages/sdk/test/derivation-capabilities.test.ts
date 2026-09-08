@@ -13,8 +13,6 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-    ITEM_DEPOT_T1_PACKED,
     ITEM_DREDGER_T2A_PACKED,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
@@ -27,7 +25,6 @@ import {
     ITEM_SHIP_T1_PACKED,
     ITEM_SMITH_T1A_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
 } from '../src/data/item-ids'
 import {getEntityItems} from '../src/data/catalog'
 import {getPackedEntityType} from '../src/data/kind-registry'
@@ -40,28 +37,15 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
     })
 
-    test('extractor, factory, and Construction Dock use the container formula', () => {
+    test('extractor and factory use the container formula', () => {
         const container = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
         expect(computeBaseCapacity(ITEM_EXTRACTOR_T1_PACKED, stats)).toBe(container)
         expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
-        expect(computeBaseCapacity(ITEM_CONSTRUCTION_DOCK_T1_PACKED, stats)).toBe(container)
     })
 
     test('warehouse retains its own 100M base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
             Math.floor(100_000_000 * 6 ** (200 / 1998))
-        )
-    })
-
-    test('depot retains its own 50M base capacity curve', () => {
-        expect(computeBaseCapacity(ITEM_DEPOT_T1_PACKED, stats)).toBe(
-            Math.floor(50_000_000 * 6 ** (200 / 1998))
-        )
-    })
-
-    test('workshop uses its own 5M dual-source base capacity curve', () => {
-        expect(computeBaseCapacity(ITEM_WORKSHOP_T1_PACKED, stats)).toBe(
-            Math.floor(5_000_000 * 6 ** (200 / 1998))
         )
     })
 
@@ -162,7 +146,6 @@ describe('entityDisplayName (kind-registry fallback)', () => {
         expect(entityDisplayName(ITEM_MASS_DRIVER_T1_PACKED)).toBe('Mass Driver')
         expect(entityDisplayName(ITEM_MASS_CATCHER_T1_PACKED)).toBe('Mass Catcher')
         expect(entityDisplayName(ITEM_HUB_T1_PACKED)).toBe('Station Hub')
-        expect(entityDisplayName(ITEM_WORKSHOP_T1_PACKED)).toBe('Workshop')
     })
 
     test('every catalog entity item resolves to a real name', () => {

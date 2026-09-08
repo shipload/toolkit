@@ -233,10 +233,8 @@ export function computeBatteryCapabilities(
 
 import {
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_DEPOT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
 } from '../data/item-ids'
 import {
     getModuleCapabilityType,
@@ -370,7 +368,7 @@ export function computeDepotHullCapabilities(stats: Record<string, number>): {
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_DEPOT_T1_PACKED, stats),
+        hullmass: 0,
         capacity: Math.floor(50000000 * 6 ** exponent),
     }
 }
@@ -382,7 +380,7 @@ export function computeWorkshopHullCapabilities(stats: Record<string, number>): 
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_WORKSHOP_T1_PACKED, stats),
+        hullmass: 0,
         capacity: Math.floor(5000000 * 6 ** exponent),
     }
 }

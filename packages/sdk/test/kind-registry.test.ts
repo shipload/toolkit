@@ -23,7 +23,6 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_HUB_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
@@ -116,7 +115,6 @@ describe('kind-registry', () => {
         expect(getPackedEntityType(ITEM_CONTAINER_T1_PACKED)?.toString()).toBe('container')
         expect(getPackedEntityType(ITEM_CONTAINER_T2_PACKED)?.toString()).toBe('container')
         expect(getPackedEntityType(ITEM_HUB_T1_PACKED)?.toString()).toBe('hub')
-        expect(getPackedEntityType(ITEM_CONSTRUCTION_DOCK_T1_PACKED)?.toString()).toBe('builddock')
         expect(ENTITY_CONSTRUCTION_DOCK.toString()).toBe('builddock')
     })
 

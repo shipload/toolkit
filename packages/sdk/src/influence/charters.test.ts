@@ -1,11 +1,21 @@
 import {describe, expect, test} from 'bun:test'
-import {CHARTER_NONE} from './constants'
+import {
+    CHARTER_NONE,
+    CIVIC_DEPOT,
+    CIVIC_DOCK,
+    CIVIC_STAT_CRAFT_SPEED,
+    CIVIC_STAT_TRANSFER_SPEED,
+    CIVIC_WORKSHOP,
+} from './constants'
 import {
     charterEligible,
     charterIneligible,
     charterNode,
+    charterBuildingEntity,
+    charterGateNodeFor,
+    charterRungValue,
     charterSingletonMandate,
-    charterSpawnNodeFor,
+    charterWorkerCount,
     eligibleCharters,
     type BuiltCharter,
     type CharterWorld,
@@ -62,26 +72,9 @@ describe('charter eligibility mirror', () => {
         expect(charterIneligible(world([]), node(DOCK_TUNEUP))).toBe('prereq-missing')
     })
 
-    test('a refit whose spawned target is gone reports refit-target-missing', () => {
+    test('a rung is eligible as soon as its prereq is complete', () => {
         const built = [{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}]
         expect(charterEligible(world(built, [WORKSHOP_ENTITY]), node(WORKSHOP_TUNEUP))).toBe(true)
-        expect(charterIneligible(world(built, []), node(WORKSHOP_TUNEUP))).toBe(
-            'refit-target-missing'
-        )
-    })
-
-    test('a demolished target can empty an otherwise singleton eligible set', () => {
-        const built = [
-            {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
-            {nodeId: NEXUS, entityId: 200n},
-            {nodeId: DOCK, entityId: DOCK_ENTITY},
-            {nodeId: DOCK_TUNEUP, entityId: 0n},
-            {nodeId: DEPOT, entityId: DEPOT_ENTITY},
-        ]
-        expect(charterSingletonMandate(world(built, [WORKSHOP_ENTITY, DOCK_ENTITY]))).toBe(
-            WORKSHOP_TUNEUP
-        )
-        expect(charterSingletonMandate(world(built, [DOCK_ENTITY]))).toBe(CHARTER_NONE)
     })
 
     test('an absent entity predicate trusts the charter record', () => {
@@ -89,11 +82,42 @@ describe('charter eligibility mirror', () => {
         expect(charterEligible(built, node(WORKSHOP_TUNEUP))).toBe(true)
     })
 
-    test('refit targets resolve through the node that spawns the item', () => {
-        expect(charterSpawnNodeFor(node(WORKSHOP_TUNEUP).effect.targetItemId)?.nodeId).toBe(
-            WORKSHOP
-        )
-        expect(charterSpawnNodeFor(node(DOCK_TUNEUP).effect.targetItemId)?.nodeId).toBe(DOCK)
-        expect(charterSpawnNodeFor(0)).toBeUndefined()
+    test('a level gate is the node that creates its building', () => {
+        expect(charterGateNodeFor(CIVIC_WORKSHOP)?.nodeId).toBe(WORKSHOP)
+        expect(charterGateNodeFor(CIVIC_DOCK)?.nodeId).toBe(DOCK)
+        expect(charterGateNodeFor(CIVIC_DEPOT)?.nodeId).toBe(DEPOT)
+        expect(charterGateNodeFor(99)).toBeUndefined()
+    })
+
+    test('a building resolves to the entity its gate recorded', () => {
+        const built = [
+            {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
+            {nodeId: DOCK, entityId: DOCK_ENTITY},
+        ]
+        expect(charterBuildingEntity(world(built), CIVIC_WORKSHOP)).toBe(WORKSHOP_ENTITY)
+        expect(charterBuildingEntity(world(built, [DOCK_ENTITY]), CIVIC_WORKSHOP)).toBe(0n)
+        expect(charterBuildingEntity(world([]), CIVIC_DEPOT)).toBe(0n)
+    })
+
+    test('rung values sum over the completed nodes only', () => {
+        const gateOnly = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
+        expect(charterRungValue(gateOnly, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(213)
+
+        const tuned = world([
+            {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
+            {nodeId: WORKSHOP_TUNEUP, entityId: 0n},
+        ])
+        expect(charterRungValue(tuned, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(400)
+        expect(charterRungValue(tuned, CIVIC_DEPOT, CIVIC_STAT_TRANSFER_SPEED)).toBe(0)
+    })
+
+    test('workers sum over the completed nodes only', () => {
+        expect(charterWorkerCount(world([]), CIVIC_WORKSHOP)).toBe(0)
+        expect(
+            charterWorkerCount(
+                world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}]),
+                CIVIC_WORKSHOP
+            )
+        ).toBe(5)
     })
 })

@@ -57,25 +57,16 @@ describe('charter metadata', () => {
     })
 })
 
-describe('charter names agree with the effect they are derived from', () => {
+describe('charter names agree with the grant they are derived from', () => {
     for (const node of CHARTER_REGISTRY) {
         const signature = signatureFor(node.nodeId)
         const name = charterName(node.nodeId)
 
-        if (signature.kind === 'spawn') {
-            test(`node ${node.nodeId} names the entity it spawns (${signature.entityLabel})`, () => {
-                expect(sharesWord(name, signature.entityLabel)).toBeTrue()
-            })
-            continue
-        }
-
-        test(`node ${node.nodeId} names its refit target or module`, () => {
-            const named =
-                sharesWord(name, signature.targetLabel) || sharesWord(name, signature.moduleLabel)
-            expect(named).toBeTrue()
+        test(`node ${node.nodeId} names the building it grants (${signature.buildingLabel})`, () => {
+            expect(sharesWord(name, signature.buildingLabel)).toBeTrue()
         })
 
-        if (signature.rankCount > 1) {
+        if (signature.kind === 'rung' && signature.rankCount > 1) {
             test(`node ${node.nodeId} carries rank ${signature.rank} of ${signature.rankCount}`, () => {
                 expect(name.endsWith(` ${romanNumeral(signature.rank)}`)).toBeTrue()
             })
@@ -84,57 +75,81 @@ describe('charter names agree with the effect they are derived from', () => {
 })
 
 describe('charter signatures', () => {
-    test('reads the depot spawn from the chain-synced template registry', () => {
-        expect(signatureFor(6)).toEqual({kind: 'spawn', entityLabel: 'Depot'})
+    test('reads the depot level gate from its grant list', () => {
+        expect(signatureFor(6)).toEqual({kind: 'gate', buildingLabel: 'Depot', level: 1})
     })
 
-    test('ranks the depot storage refits by their prereq chain', () => {
+    test('ranks the depot storage rungs by their prereq chain', () => {
         expect([7, 8, 9, 10].map(signatureFor)).toEqual([
-            {kind: 'refit', targetLabel: 'Depot', moduleLabel: 'Cargo Hold', rank: 1, rankCount: 4},
-            {kind: 'refit', targetLabel: 'Depot', moduleLabel: 'Cargo Hold', rank: 2, rankCount: 4},
-            {kind: 'refit', targetLabel: 'Depot', moduleLabel: 'Cargo Hold', rank: 3, rankCount: 4},
-            {kind: 'refit', targetLabel: 'Depot', moduleLabel: 'Cargo Hold', rank: 4, rankCount: 4},
-        ])
-    })
-
-    test('ranks the depot loader refits by their prereq chain', () => {
-        expect([11, 12, 13, 14].map(signatureFor)).toEqual([
             {
-                kind: 'refit',
-                targetLabel: 'Depot',
-                moduleLabel: 'Shuttle Bay',
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'storage capacity',
                 rank: 1,
                 rankCount: 4,
             },
             {
-                kind: 'refit',
-                targetLabel: 'Depot',
-                moduleLabel: 'Shuttle Bay',
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'storage capacity',
                 rank: 2,
                 rankCount: 4,
             },
             {
-                kind: 'refit',
-                targetLabel: 'Depot',
-                moduleLabel: 'Shuttle Bay',
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'storage capacity',
                 rank: 3,
                 rankCount: 4,
             },
             {
-                kind: 'refit',
-                targetLabel: 'Depot',
-                moduleLabel: 'Shuttle Bay',
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'storage capacity',
                 rank: 4,
                 rankCount: 4,
             },
         ])
     })
 
-    test('treats a lone refit as an unranked tune-up', () => {
+    test('ranks the depot transfer rungs by their prereq chain', () => {
+        expect([11, 12, 13, 14].map(signatureFor)).toEqual([
+            {
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'transfer speed',
+                rank: 1,
+                rankCount: 4,
+            },
+            {
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'transfer speed',
+                rank: 2,
+                rankCount: 4,
+            },
+            {
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'transfer speed',
+                rank: 3,
+                rankCount: 4,
+            },
+            {
+                kind: 'rung',
+                buildingLabel: 'Depot',
+                statLabel: 'transfer speed',
+                rank: 4,
+                rankCount: 4,
+            },
+        ])
+    })
+
+    test('treats a lone rung as an unranked tune-up', () => {
         expect(signatureFor(4)).toEqual({
-            kind: 'refit',
-            targetLabel: 'Workshop',
-            moduleLabel: 'Fabricator',
+            kind: 'rung',
+            buildingLabel: 'Workshop',
+            statLabel: 'crafting speed',
             rank: 1,
             rankCount: 1,
         })

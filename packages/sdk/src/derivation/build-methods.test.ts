@@ -8,13 +8,7 @@ import {
     getKindMeta,
     getTemplateMeta,
 } from '../data/kind-registry'
-import {getRecipe} from '../data/recipes-runtime'
-import {
-    ITEM_DEPOT_T1_PACKED,
-    ITEM_HUB_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
-} from '../data/item-ids'
+import {ITEM_HUB_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
 
 function planetaryStructures(): {itemId: number; capabilityFlags: number}[] {
     const out: {itemId: number; capabilityFlags: number}[] = []
@@ -37,28 +31,26 @@ describe('availableBuildMethods', () => {
         expect(availableBuildMethods(ITEM_HUB_T1_PACKED)).toEqual(['craft+deploy'])
     })
 
-    test('planetary structures are charter-granted and carry no build method', () => {
-        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual([])
-        expect(availableBuildMethods(ITEM_DEPOT_T1_PACKED)).toEqual([])
+    test('an unknown item carries no build method', () => {
+        expect(availableBuildMethods(0)).toEqual([])
     })
 })
 
 describe('planetary structures have no packed form', () => {
-    test('the registry still classifies the Workshop and the Depot as planetary', () => {
-        const ids = planetaryStructures().map((s) => s.itemId)
-        expect(ids).toContain(ITEM_WORKSHOP_T1_PACKED)
-        expect(ids).toContain(ITEM_DEPOT_T1_PACKED)
+    test('no catalog item maps to a planetary-structure kind', () => {
+        expect(planetaryStructures()).toEqual([])
     })
 
-    test('no planetary structure has a recipe', () => {
-        for (const structure of planetaryStructures()) {
-            expect(getRecipe(structure.itemId)).toBeUndefined()
+    test('the Workshop and the Depot kinds are still classified planetary', () => {
+        for (const kind of ['workshop', 'depot']) {
+            expect(getKindMeta(kind)?.classification).toBe(EntityClass.PlanetaryStructure)
         }
     })
 
-    test('no planetary structure can wrap or undeploy', () => {
-        for (const structure of planetaryStructures()) {
-            expect(structure.capabilityFlags & (CAP_WRAP | CAP_UNDEPLOY)).toBe(0)
+    test('no planetary-structure kind can wrap or undeploy', () => {
+        for (const kind of ['workshop', 'depot']) {
+            const meta = getKindMeta(kind)!
+            expect(meta.capabilityFlags & (CAP_WRAP | CAP_UNDEPLOY)).toBe(0)
         }
     })
 })

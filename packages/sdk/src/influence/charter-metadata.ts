@@ -1,6 +1,39 @@
-import {entityDisplayName, moduleDisplayName} from '../nft/description'
-import {CHARTER_REGISTRY, type CharterNode} from './charters'
-import {CHARTER_EFFECT_REFIT_MODULES, CHARTER_EFFECT_SPAWN_ENTITY, CHARTER_NONE} from './constants'
+import {CHARTER_REGISTRY, type CharterGrant, type CharterNode} from './charters'
+import {
+    CHARTER_NONE,
+    CIVIC_DEPOT,
+    CIVIC_DOCK,
+    CIVIC_GRANT_LEVEL_GATE,
+    CIVIC_GRANT_RUNG,
+    CIVIC_NEXUS,
+    CIVIC_STAT_BUILD_SPEED,
+    CIVIC_STAT_CRAFT_SPEED,
+    CIVIC_STAT_STORAGE_CAPACITY,
+    CIVIC_STAT_TRANSFER_SPEED,
+    CIVIC_WORKSHOP,
+} from './constants'
+
+const BUILDING_LABELS: Record<number, string> = {
+    [CIVIC_WORKSHOP]: 'Workshop',
+    [CIVIC_NEXUS]: 'Nexus',
+    [CIVIC_DOCK]: 'Construction Dock',
+    [CIVIC_DEPOT]: 'Depot',
+}
+
+const STAT_LABELS: Record<number, string> = {
+    [CIVIC_STAT_CRAFT_SPEED]: 'crafting speed',
+    [CIVIC_STAT_BUILD_SPEED]: 'build speed',
+    [CIVIC_STAT_TRANSFER_SPEED]: 'transfer speed',
+    [CIVIC_STAT_STORAGE_CAPACITY]: 'storage capacity',
+}
+
+export function civicBuildingLabel(building: number): string {
+    return BUILDING_LABELS[building] ?? `Building ${building}`
+}
+
+export function civicStatLabel(stat: number): string {
+    return STAT_LABELS[stat] ?? `Stat ${stat}`
+}
 
 export interface CharterMeta {
     name: string
@@ -56,20 +89,21 @@ export function charterSummary(nodeId: number): string {
     return charterMetadata[nodeId]?.summary ?? ''
 }
 
-export interface CharterSpawnSignature {
-    kind: 'spawn'
-    entityLabel: string
+export interface CharterGateSignature {
+    kind: 'gate'
+    buildingLabel: string
+    level: number
 }
 
-export interface CharterRefitSignature {
-    kind: 'refit'
-    targetLabel: string
-    moduleLabel: string
+export interface CharterRungSignature {
+    kind: 'rung'
+    buildingLabel: string
+    statLabel: string
     rank: number
     rankCount: number
 }
 
-export type CharterSignature = CharterSpawnSignature | CharterRefitSignature
+export type CharterSignature = CharterGateSignature | CharterRungSignature
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
@@ -77,16 +111,26 @@ export function romanNumeral(rank: number): string {
     return ROMAN[rank - 1] ?? String(rank)
 }
 
-function refitSiblings(node: CharterNode): CharterNode[] {
-    return CHARTER_REGISTRY.filter(
-        (other) =>
-            other.effect.kind === CHARTER_EFFECT_REFIT_MODULES &&
-            other.effect.targetItemId === node.effect.targetItemId &&
-            other.effect.itemId === node.effect.itemId
+function headlineGrant(node: CharterNode): CharterGrant | undefined {
+    return (
+        node.grants.find((grant) => grant.kind === CIVIC_GRANT_LEVEL_GATE) ??
+        node.grants.find((grant) => grant.kind === CIVIC_GRANT_RUNG)
     )
 }
 
-function refitRank(node: CharterNode, siblings: CharterNode[]): number {
+function rungSiblings(building: number, stat: number): CharterNode[] {
+    return CHARTER_REGISTRY.filter((other) => {
+        const grant = headlineGrant(other)
+        return (
+            grant !== undefined &&
+            grant.kind === CIVIC_GRANT_RUNG &&
+            grant.building === building &&
+            grant.stat === stat
+        )
+    })
+}
+
+function rungRank(node: CharterNode, siblings: CharterNode[]): number {
     const byId = new Map(siblings.map((sibling) => [sibling.nodeId, sibling]))
     const seen = new Set<number>([node.nodeId])
     let current: CharterNode | undefined = node
@@ -102,20 +146,23 @@ function refitRank(node: CharterNode, siblings: CharterNode[]): number {
 }
 
 export function charterSignature(node: CharterNode): CharterSignature | undefined {
-    if (node.effect.kind === CHARTER_EFFECT_SPAWN_ENTITY) {
-        return {kind: 'spawn', entityLabel: entityDisplayName(node.effect.itemId)}
-    }
-    if (node.effect.kind === CHARTER_EFFECT_REFIT_MODULES) {
-        const siblings = refitSiblings(node)
+    const grant = headlineGrant(node)
+    if (!grant) return undefined
+    if (grant.kind === CIVIC_GRANT_LEVEL_GATE) {
         return {
-            kind: 'refit',
-            targetLabel: entityDisplayName(node.effect.targetItemId),
-            moduleLabel: moduleDisplayName(node.effect.itemId),
-            rank: refitRank(node, siblings),
-            rankCount: siblings.length,
+            kind: 'gate',
+            buildingLabel: civicBuildingLabel(grant.building),
+            level: grant.value,
         }
     }
-    return undefined
+    const siblings = rungSiblings(grant.building, grant.stat)
+    return {
+        kind: 'rung',
+        buildingLabel: civicBuildingLabel(grant.building),
+        statLabel: civicStatLabel(grant.stat),
+        rank: rungRank(node, siblings),
+        rankCount: siblings.length,
+    }
 }
 
 for (const node of CHARTER_REGISTRY) {

@@ -1,26 +1,34 @@
 import chartersJson from '../data/charters.json'
-import {CHARTER_EFFECT_REFIT_MODULES, CHARTER_EFFECT_SPAWN_ENTITY, CHARTER_NONE} from './constants'
+import {
+    CHARTER_NONE,
+    CIVIC_GRANT_LEVEL_GATE,
+    CIVIC_GRANT_RUNG,
+    CIVIC_GRANT_WORKER,
+} from './constants'
 
-export interface CharterEffect {
+export interface CharterGrant {
     kind: number
-    itemId: number
-    targetItemId: number
-    slotMask: number
+    building: number
     stat: number
+    value: number
 }
 
 export interface CharterNode {
     nodeId: number
     cost: bigint
     prereqs: number[]
-    effect: CharterEffect
+    grants: CharterGrant[]
+    exclusionGroup: number
+    repeatCap: number
 }
 
 export const CHARTER_REGISTRY: CharterNode[] = chartersJson.nodes.map((node) => ({
     nodeId: node.nodeId,
     cost: BigInt(node.cost),
     prereqs: [...node.prereqs],
-    effect: {...node.effect},
+    grants: node.grants.map((grant) => ({...grant})),
+    exclusionGroup: node.exclusionGroup,
+    repeatCap: node.repeatCap,
 }))
 
 export function charterNode(nodeId: number): CharterNode | undefined {
@@ -28,12 +36,11 @@ export function charterNode(nodeId: number): CharterNode | undefined {
     return CHARTER_REGISTRY.find((n) => n.nodeId === nodeId)
 }
 
-export type CharterIneligibility = 'already-taken' | 'prereq-missing' | 'refit-target-missing'
+export type CharterIneligibility = 'already-taken' | 'prereq-missing'
 
 export const CHARTER_INELIGIBILITY_MESSAGES: Record<CharterIneligibility, string> = {
     'already-taken': 'charter is already completed at this world',
     'prereq-missing': 'charter prerequisites are not completed',
-    'refit-target-missing': 'charter refit target not found at this world',
 }
 
 export interface BuiltCharter {
@@ -50,11 +57,50 @@ function builtCharter(world: CharterWorld, nodeId: number): BuiltCharter | undef
     return world.built.find((row) => row.nodeId === nodeId)
 }
 
-export function charterSpawnNodeFor(targetItemId: number): CharterNode | undefined {
-    return CHARTER_REGISTRY.find(
-        (node) =>
-            node.effect.kind === CHARTER_EFFECT_SPAWN_ENTITY && node.effect.itemId === targetItemId
+export function charterGateNodeFor(building: number, level: number = 1): CharterNode | undefined {
+    return CHARTER_REGISTRY.find((node) =>
+        node.grants.some(
+            (grant) =>
+                grant.kind === CIVIC_GRANT_LEVEL_GATE &&
+                grant.building === building &&
+                grant.value === level
+        )
     )
+}
+
+export function charterBuildingEntity(world: CharterWorld, building: number): bigint {
+    const gate = charterGateNodeFor(building)
+    if (!gate) return 0n
+    const record = builtCharter(world, gate.nodeId)
+    if (!record) return 0n
+    if (world.entityExists && !world.entityExists(record.entityId)) return 0n
+    return record.entityId
+}
+
+export function charterRungValue(world: CharterWorld, building: number, stat: number): number {
+    let total = 0
+    for (const node of CHARTER_REGISTRY) {
+        if (builtCharter(world, node.nodeId) === undefined) continue
+        for (const grant of node.grants) {
+            if (grant.kind !== CIVIC_GRANT_RUNG) continue
+            if (grant.building !== building || grant.stat !== stat) continue
+            total += grant.value
+        }
+    }
+    return total
+}
+
+export function charterWorkerCount(world: CharterWorld, building: number): number {
+    let total = 0
+    for (const node of CHARTER_REGISTRY) {
+        if (builtCharter(world, node.nodeId) === undefined) continue
+        for (const grant of node.grants) {
+            if (grant.kind !== CIVIC_GRANT_WORKER) continue
+            if (grant.building !== building) continue
+            total += grant.value
+        }
+    }
+    return total
 }
 
 export function charterPrereqsMet(world: CharterWorld, node: CharterNode): boolean {
@@ -63,27 +109,12 @@ export function charterPrereqsMet(world: CharterWorld, node: CharterNode): boole
     )
 }
 
-export function charterEffectTargetEntity(world: CharterWorld, node: CharterNode): bigint {
-    const spawn = charterSpawnNodeFor(node.effect.targetItemId)
-    if (!spawn) return 0n
-    const record = builtCharter(world, spawn.nodeId)
-    if (!record) return 0n
-    if (world.entityExists && !world.entityExists(record.entityId)) return 0n
-    return record.entityId
-}
-
-export function charterEffectTargetPresent(world: CharterWorld, node: CharterNode): boolean {
-    if (node.effect.kind !== CHARTER_EFFECT_REFIT_MODULES) return true
-    return charterEffectTargetEntity(world, node) !== 0n
-}
-
 export function charterIneligible(
     world: CharterWorld,
     node: CharterNode
 ): CharterIneligibility | undefined {
     if (builtCharter(world, node.nodeId) !== undefined) return 'already-taken'
     if (!charterPrereqsMet(world, node)) return 'prereq-missing'
-    if (!charterEffectTargetPresent(world, node)) return 'refit-target-missing'
     return undefined
 }
 
@@ -114,13 +145,6 @@ export function charterEligibleChained(
     for (const prereq of node.prereqs) {
         if (prereq === CHARTER_NONE) continue
         if (builtCharter(world, prereq) === undefined && !seated.includes(prereq)) return false
-    }
-    if (
-        node.effect.kind === CHARTER_EFFECT_REFIT_MODULES &&
-        !charterEffectTargetPresent(world, node)
-    ) {
-        const spawn = charterSpawnNodeFor(node.effect.targetItemId)
-        if (!spawn || !seated.includes(spawn.nodeId)) return false
     }
     return true
 }

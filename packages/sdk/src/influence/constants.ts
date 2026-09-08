@@ -40,14 +40,30 @@ export const BAR_STEP_DOWN = BAR_STEP_UNIT
 
 export const CHARTER_NONE = 0
 export const CHARTER_WORKSHOP = 1
-export const CHARTER_EFFECT_SPAWN_ENTITY = 1
-export const CHARTER_EFFECT_REFIT_MODULES = 2
+export const CIVIC_GRANT_NONE = 0
+export const CIVIC_GRANT_WORKER = 1
+export const CIVIC_GRANT_RUNG = 2
+export const CIVIC_GRANT_LEVEL_GATE = 3
+export const CIVIC_GRANT_ADVANCEMENT = 4
+
+export const CIVIC_WORLD = 0
+export const CIVIC_WORKSHOP = 1
+export const CIVIC_NEXUS = 2
+export const CIVIC_DOCK = 3
+export const CIVIC_DEPOT = 4
+
+export const CIVIC_STAT_NONE = 0
+export const CIVIC_STAT_CRAFT_SPEED = 1
+export const CIVIC_STAT_BUILD_SPEED = 2
+export const CIVIC_STAT_TRANSFER_SPEED = 3
+export const CIVIC_STAT_STORAGE_CAPACITY = 4
 export const VOTE_READY_DEFAULT_MAX = 20
 export const BALLOT_CHARTER = 1
 export const BALLOT_MAX_PICKS = 8
 export const CHARTER_WORKSHOP_COST = 2_000_000_000n
 export const CHARTER_BASELINE_STAT = 213
 export const CHARTER_MAX_PREREQS = 4
+export const CHARTER_MAX_GRANTS = 4
 
 export const INFLUENCE_D1_SEED = 45_369
 export const DEMAND_TRIPLE_SEED = {peak: 20_000n, base: 10_000n, floor: 1_000n}

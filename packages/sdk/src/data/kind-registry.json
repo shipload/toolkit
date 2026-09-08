@@ -73,14 +73,14 @@
     {
       "kind": "workshop",
       "classification": "PlanetaryStructure",
-      "capabilityFlags": 20,
+      "capabilityFlags": 0,
       "zCoord": 0,
       "defaultLabel": "Workshop"
     },
     {
       "kind": "builddock",
       "classification": "OrbitalStructure",
-      "capabilityFlags": 20,
+      "capabilityFlags": 0,
       "zCoord": 0,
       "defaultLabel": "Construction Dock"
     },
@@ -174,21 +174,6 @@
       "displayLabel": ""
     },
     {
-      "itemId": 10208,
-      "kind": "workshop",
-      "displayLabel": ""
-    },
-    {
-      "itemId": 10209,
-      "kind": "builddock",
-      "displayLabel": ""
-    },
-    {
-      "itemId": 10216,
-      "kind": "nexus",
-      "displayLabel": ""
-    },
-    {
       "itemId": 11212,
       "kind": "ship",
       "displayLabel": "Prospector"
@@ -202,11 +187,6 @@
       "itemId": 11214,
       "kind": "ship",
       "displayLabel": "Dredger"
-    },
-    {
-      "itemId": 10219,
-      "kind": "depot",
-      "displayLabel": ""
     }
   ]
 }

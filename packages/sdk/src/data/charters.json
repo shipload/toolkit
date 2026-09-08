@@ -4,13 +4,34 @@
       "nodeId": 1,
       "cost": "2000000000",
       "prereqs": [],
-      "effect": {
-        "kind": 1,
-        "itemId": 10208,
-        "targetItemId": 0,
-        "slotMask": 0,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 4,
+          "building": 0,
+          "stat": 0,
+          "value": 1
+        },
+        {
+          "kind": 3,
+          "building": 1,
+          "stat": 0,
+          "value": 1
+        },
+        {
+          "kind": 1,
+          "building": 1,
+          "stat": 0,
+          "value": 5
+        },
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 2,
@@ -18,13 +39,16 @@
       "prereqs": [
         1
       ],
-      "effect": {
-        "kind": 1,
-        "itemId": 10216,
-        "targetItemId": 0,
-        "slotMask": 0,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 3,
+          "building": 2,
+          "stat": 0,
+          "value": 1
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 3,
@@ -32,13 +56,28 @@
       "prereqs": [
         1
       ],
-      "effect": {
-        "kind": 1,
-        "itemId": 10209,
-        "targetItemId": 0,
-        "slotMask": 0,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 3,
+          "building": 3,
+          "stat": 0,
+          "value": 1
+        },
+        {
+          "kind": 1,
+          "building": 3,
+          "stat": 0,
+          "value": 1
+        },
+        {
+          "kind": 2,
+          "building": 3,
+          "stat": 2,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 4,
@@ -46,13 +85,16 @@
       "prereqs": [
         1
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10104,
-        "targetItemId": 10208,
-        "slotMask": 0,
-        "stat": 400
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 187
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 5,
@@ -60,13 +102,16 @@
       "prereqs": [
         3
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10110,
-        "targetItemId": 10209,
-        "slotMask": 2,
-        "stat": 400
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 3,
+          "stat": 2,
+          "value": 187
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 6,
@@ -74,13 +119,22 @@
       "prereqs": [
         1
       ],
-      "effect": {
-        "kind": 1,
-        "itemId": 10219,
-        "targetItemId": 0,
-        "slotMask": 1,
-        "stat": 0
-      }
+      "grants": [
+        {
+          "kind": 3,
+          "building": 4,
+          "stat": 0,
+          "value": 1
+        },
+        {
+          "kind": 1,
+          "building": 4,
+          "stat": 0,
+          "value": 1
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 7,
@@ -88,13 +142,16 @@
       "prereqs": [
         6
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10105,
-        "targetItemId": 10219,
-        "slotMask": 2,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 4,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 8,
@@ -102,13 +159,16 @@
       "prereqs": [
         7
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10105,
-        "targetItemId": 10219,
-        "slotMask": 4,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 4,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 9,
@@ -116,13 +176,16 @@
       "prereqs": [
         8
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10105,
-        "targetItemId": 10219,
-        "slotMask": 8,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 4,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 10,
@@ -130,13 +193,16 @@
       "prereqs": [
         9
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10105,
-        "targetItemId": 10219,
-        "slotMask": 16,
-        "stat": 213
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 4,
+          "value": 213
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 11,
@@ -144,13 +210,16 @@
       "prereqs": [
         6
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10103,
-        "targetItemId": 10219,
-        "slotMask": 1,
-        "stat": 100
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 3,
+          "value": 100
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 12,
@@ -158,13 +227,16 @@
       "prereqs": [
         11
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10103,
-        "targetItemId": 10219,
-        "slotMask": 1,
-        "stat": 200
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 3,
+          "value": 100
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 13,
@@ -172,13 +244,16 @@
       "prereqs": [
         12
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10103,
-        "targetItemId": 10219,
-        "slotMask": 1,
-        "stat": 300
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 3,
+          "value": 100
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     },
     {
       "nodeId": 14,
@@ -186,13 +261,16 @@
       "prereqs": [
         13
       ],
-      "effect": {
-        "kind": 2,
-        "itemId": 10103,
-        "targetItemId": 10219,
-        "slotMask": 1,
-        "stat": 400
-      }
+      "grants": [
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 3,
+          "value": 100
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
     }
   ]
 }

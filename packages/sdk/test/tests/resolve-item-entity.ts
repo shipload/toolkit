@@ -8,9 +8,7 @@ import {
     computeWarehouseHullCapabilities,
     encodeStats,
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
-    ITEM_DEPOT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
     resolveItem,
@@ -41,24 +39,8 @@ describe('resolveItem - entity capacity dispatch', () => {
         assert.isAbove(Number(findCapacityAttr(resolved.attributes)), 50_000_000)
     })
 
-    test('depot-t1 uses computeDepotHullCapabilities (NOT warehouse)', () => {
-        const resolved = resolveItem(ITEM_DEPOT_T1_PACKED, defaultPackedStats)
-        const expected = computeDepotHullCapabilities(defaultStatInputs).capacity
-        assert.equal(findCapacityAttr(resolved.attributes), expected)
-        assert.notEqual(
-            findCapacityAttr(resolved.attributes),
-            computeWarehouseHullCapabilities(defaultStatInputs).capacity
-        )
-    })
-
     test('container uses computeContainerCapabilities', () => {
         const resolved = resolveItem(ITEM_CONTAINER_T1_PACKED, defaultPackedStats)
-        const expected = computeContainerCapabilities(defaultStatInputs).capacity
-        assert.equal(findCapacityAttr(resolved.attributes), expected)
-    })
-
-    test('Construction Dock uses computeContainerCapabilities', () => {
-        const resolved = resolveItem(ITEM_CONSTRUCTION_DOCK_T1_PACKED, defaultPackedStats)
         const expected = computeContainerCapabilities(defaultStatInputs).capacity
         assert.equal(findCapacityAttr(resolved.attributes), expected)
     })

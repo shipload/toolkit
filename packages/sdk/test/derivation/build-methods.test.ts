@@ -1,7 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_ENGINE_T1,
     ITEM_EXTRACTOR_T1_PACKED,
     ITEM_FACTORY_T1_PACKED,
@@ -9,7 +8,6 @@ import {
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T1_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
     ITEM_ORE_T1,
 } from '../../src/data/item-ids'
 import {
@@ -28,15 +26,11 @@ describe('availableBuildMethods', () => {
         expect(availableBuildMethods(ITEM_WAREHOUSE_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
         expect(availableBuildMethods(ITEM_FACTORY_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
         expect(availableBuildMethods(ITEM_EXTRACTOR_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
-        expect(availableBuildMethods(ITEM_CONSTRUCTION_DOCK_T1_PACKED)).toEqual([
-            'craft+deploy',
-            'plot',
-        ])
     })
 
-    test('the retired Workshop has no build methods', () => {
-        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual([])
-        expect(isPlotBuildable(ITEM_WORKSHOP_T1_PACKED)).toBe(false)
+    test('a civic building has no packed item and so no build method', () => {
+        expect(availableBuildMethods(0)).toEqual([])
+        expect(isPlotBuildable(0)).toBe(false)
     })
 
     test('orbital vessels return craft+deploy only', () => {
@@ -134,12 +128,7 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
             .map((i) => i.id)
             .sort()
         expect(ids).toEqual(
-            [
-                ITEM_WAREHOUSE_T1_PACKED,
-                ITEM_EXTRACTOR_T1_PACKED,
-                ITEM_FACTORY_T1_PACKED,
-                ITEM_CONSTRUCTION_DOCK_T1_PACKED,
-            ].sort()
+            [ITEM_WAREHOUSE_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED, ITEM_FACTORY_T1_PACKED].sort()
         )
     })
 })
