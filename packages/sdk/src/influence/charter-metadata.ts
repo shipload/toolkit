@@ -5,6 +5,7 @@ import {
     CIVIC_DOCK,
     CIVIC_GRANT_LEVEL_GATE,
     CIVIC_GRANT_RUNG,
+    CIVIC_GRANT_WORKER,
     CIVIC_NEXUS,
     CIVIC_STAT_BUILD_SPEED,
     CIVIC_STAT_CRAFT_SPEED,
@@ -95,6 +96,14 @@ export interface CharterGateSignature {
     level: number
 }
 
+export interface CharterWorkerSignature {
+    kind: 'worker'
+    buildingLabel: string
+    count: number
+    rank: number
+    rankCount: number
+}
+
 export interface CharterRungSignature {
     kind: 'rung'
     buildingLabel: string
@@ -103,7 +112,7 @@ export interface CharterRungSignature {
     rankCount: number
 }
 
-export type CharterSignature = CharterGateSignature | CharterRungSignature
+export type CharterSignature = CharterGateSignature | CharterWorkerSignature | CharterRungSignature
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
@@ -114,18 +123,19 @@ export function romanNumeral(rank: number): string {
 function headlineGrant(node: CharterNode): CharterGrant | undefined {
     return (
         node.grants.find((grant) => grant.kind === CIVIC_GRANT_LEVEL_GATE) ??
+        node.grants.find((grant) => grant.kind === CIVIC_GRANT_WORKER) ??
         node.grants.find((grant) => grant.kind === CIVIC_GRANT_RUNG)
     )
 }
 
-function rungSiblings(building: number, stat: number): CharterNode[] {
+function headlineSiblings(headline: CharterGrant): CharterNode[] {
     return CHARTER_REGISTRY.filter((other) => {
         const grant = headlineGrant(other)
         return (
             grant !== undefined &&
-            grant.kind === CIVIC_GRANT_RUNG &&
-            grant.building === building &&
-            grant.stat === stat
+            grant.kind === headline.kind &&
+            grant.building === headline.building &&
+            grant.stat === headline.stat
         )
     })
 }
@@ -155,7 +165,16 @@ export function charterSignature(node: CharterNode): CharterSignature | undefine
             level: grant.value,
         }
     }
-    const siblings = rungSiblings(grant.building, grant.stat)
+    const siblings = headlineSiblings(grant)
+    if (grant.kind === CIVIC_GRANT_WORKER) {
+        return {
+            kind: 'worker',
+            buildingLabel: civicBuildingLabel(grant.building),
+            count: grant.value,
+            rank: rungRank(node, siblings),
+            rankCount: siblings.length,
+        }
+    }
     return {
         kind: 'rung',
         buildingLabel: civicBuildingLabel(grant.building),

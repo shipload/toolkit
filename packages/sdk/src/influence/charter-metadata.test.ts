@@ -66,7 +66,7 @@ describe('charter names agree with the grant they are derived from', () => {
             expect(sharesWord(name, signature.buildingLabel)).toBeTrue()
         })
 
-        if (signature.kind === 'rung' && signature.rankCount > 1) {
+        if (signature.kind !== 'gate' && signature.rankCount > 1) {
             test(`node ${node.nodeId} carries rank ${signature.rank} of ${signature.rankCount}`, () => {
                 expect(name.endsWith(` ${romanNumeral(signature.rank)}`)).toBeTrue()
             })
@@ -79,37 +79,16 @@ describe('charter signatures', () => {
         expect(signatureFor(6)).toEqual({kind: 'gate', buildingLabel: 'Depot', level: 1})
     })
 
-    test('ranks the depot storage rungs by their prereq chain', () => {
-        expect([7, 8, 9, 10].map(signatureFor)).toEqual([
-            {
-                kind: 'rung',
+    test('ranks the depot bays by their prereq chain', () => {
+        expect([7, 8, 9, 10].map(signatureFor)).toEqual(
+            [1, 2, 3, 4].map((rank) => ({
+                kind: 'worker',
                 buildingLabel: 'Depot',
-                statLabel: 'storage capacity',
-                rank: 1,
+                count: 1,
+                rank,
                 rankCount: 4,
-            },
-            {
-                kind: 'rung',
-                buildingLabel: 'Depot',
-                statLabel: 'storage capacity',
-                rank: 2,
-                rankCount: 4,
-            },
-            {
-                kind: 'rung',
-                buildingLabel: 'Depot',
-                statLabel: 'storage capacity',
-                rank: 3,
-                rankCount: 4,
-            },
-            {
-                kind: 'rung',
-                buildingLabel: 'Depot',
-                statLabel: 'storage capacity',
-                rank: 4,
-                rankCount: 4,
-            },
-        ])
+            }))
+        )
     })
 
     test('ranks the depot transfer rungs by their prereq chain', () => {

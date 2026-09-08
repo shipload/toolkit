@@ -8,7 +8,13 @@ import {
     getKindMeta,
     getTemplateMeta,
 } from '../data/kind-registry'
-import {ITEM_HUB_T1_PACKED, ITEM_WAREHOUSE_T1_PACKED} from '../data/item-ids'
+import {getRecipe} from '../data/recipes-runtime'
+import {
+    ITEM_DEPOT_T1_PACKED,
+    ITEM_HUB_T1_PACKED,
+    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WORKSHOP_T1_PACKED,
+} from '../data/item-ids'
 
 function planetaryStructures(): {itemId: number; capabilityFlags: number}[] {
     const out: {itemId: number; capabilityFlags: number}[] = []
@@ -31,14 +37,23 @@ describe('availableBuildMethods', () => {
         expect(availableBuildMethods(ITEM_HUB_T1_PACKED)).toEqual(['craft+deploy'])
     })
 
-    test('an unknown item carries no build method', () => {
-        expect(availableBuildMethods(0)).toEqual([])
+    test('planetary structures are charter-granted and carry no build method', () => {
+        expect(availableBuildMethods(ITEM_WORKSHOP_T1_PACKED)).toEqual([])
+        expect(availableBuildMethods(ITEM_DEPOT_T1_PACKED)).toEqual([])
     })
 })
 
-describe('planetary structures have no packed form', () => {
-    test('no catalog item maps to a planetary-structure kind', () => {
-        expect(planetaryStructures()).toEqual([])
+describe('planetary structures are civic hulls', () => {
+    test('the registry classifies the Workshop and the Depot hulls as planetary', () => {
+        const ids = planetaryStructures().map((s) => s.itemId)
+        expect(ids).toContain(ITEM_WORKSHOP_T1_PACKED)
+        expect(ids).toContain(ITEM_DEPOT_T1_PACKED)
+    })
+
+    test('no planetary structure has a recipe', () => {
+        for (const structure of planetaryStructures()) {
+            expect(getRecipe(structure.itemId)).toBeUndefined()
+        }
     })
 
     test('the Workshop and the Depot kinds are still classified planetary', () => {

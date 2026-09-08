@@ -144,6 +144,12 @@
       ],
       "grants": [
         {
+          "kind": 1,
+          "building": 4,
+          "stat": 0,
+          "value": 1
+        },
+        {
           "kind": 2,
           "building": 4,
           "stat": 4,
@@ -161,10 +167,10 @@
       ],
       "grants": [
         {
-          "kind": 2,
+          "kind": 1,
           "building": 4,
-          "stat": 4,
-          "value": 213
+          "stat": 0,
+          "value": 1
         }
       ],
       "exclusionGroup": 0,
@@ -178,10 +184,10 @@
       ],
       "grants": [
         {
-          "kind": 2,
+          "kind": 1,
           "building": 4,
-          "stat": 4,
-          "value": 213
+          "stat": 0,
+          "value": 1
         }
       ],
       "exclusionGroup": 0,
@@ -195,10 +201,10 @@
       ],
       "grants": [
         {
-          "kind": 2,
+          "kind": 1,
           "building": 4,
-          "stat": 4,
-          "value": 213
+          "stat": 0,
+          "value": 1
         }
       ],
       "exclusionGroup": 0,
