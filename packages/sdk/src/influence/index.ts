@@ -85,3 +85,21 @@ export {
     type CharterRungSignature,
     type CharterSignature,
 } from './charter-metadata'
+export {
+    CIVIC_STAT_DEFS,
+    civicBuildingFor,
+    civicBuildingKind,
+    civicHullItem,
+    civicModuleItemFor,
+    civicStatModuleType,
+    emptyCivicModules,
+    findCivicStatDef,
+    fitCivicModules,
+    isCivicEntity,
+    isCivicKind,
+    previewCharterGrants,
+    raiseCivicStat,
+    type CivicBuildingPreview,
+    type CivicStanding,
+    type CivicStatDef,
+} from './civic'

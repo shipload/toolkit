@@ -62,6 +62,9 @@ export const BALLOT_CHARTER = 1
 export const BALLOT_MAX_PICKS = 8
 export const CHARTER_WORKSHOP_COST = 2_000_000_000n
 export const CHARTER_BASELINE_STAT = 213
+export const CHARTER_TUNEUP_STEP = 187
+export const CHARTER_LOADER_STEP = 100
+export const CIVIC_SPEED_CAP = 999
 export const CHARTER_MAX_PREREQS = 4
 export const CHARTER_MAX_GRANTS = 4
 

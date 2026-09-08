@@ -12,6 +12,7 @@ import {
     valueCargoItem,
     type DemandTriple,
     type DemandView,
+    isCivicEntity,
     type ValuedItem,
 } from '../influence'
 import {getItem} from '../data/catalog'
@@ -187,6 +188,17 @@ export class InfluenceManager extends BaseManager {
             coordinates: location,
             triple,
         })
+    }
+
+    async getCivicOwner(): Promise<Name> {
+        const row = (await this.server.table('civicconfig').get()) as
+            | ServerContract.Types.civicconfig_row
+            | undefined
+        return row ? Name.from(row.civic_owner) : Name.from(this.server.account)
+    }
+
+    async isCivic(entity: {owner: NameType}): Promise<boolean> {
+        return isCivicEntity(entity, await this.getCivicOwner())
     }
 
     async getCitizenryName(location: CoordinatesType): Promise<string | undefined> {
