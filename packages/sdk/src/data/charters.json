@@ -27,7 +27,7 @@
           "kind": 2,
           "building": 1,
           "stat": 1,
-          "value": 213
+          "value": 200
         }
       ],
       "exclusionGroup": 0,
@@ -35,7 +35,7 @@
     },
     {
       "nodeId": 10100201,
-      "cost": "2000000000",
+      "cost": "800000000",
       "prereqs": [
         10001
       ],
@@ -44,7 +44,58 @@
           "kind": 2,
           "building": 1,
           "stat": 1,
-          "value": 187
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 10100202,
+      "cost": "1200000000",
+      "prereqs": [
+        10100201
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 10100203,
+      "cost": "1600000000",
+      "prereqs": [
+        10100202
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 10100204,
+      "cost": "2000000000",
+      "prereqs": [
+        10100203
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 1,
+          "stat": 1,
+          "value": 50
         }
       ],
       "exclusionGroup": 0,
@@ -90,7 +141,7 @@
           "kind": 2,
           "building": 3,
           "stat": 2,
-          "value": 213
+          "value": 200
         }
       ],
       "exclusionGroup": 0,
@@ -98,7 +149,7 @@
     },
     {
       "nodeId": 30100301,
-      "cost": "3000000000",
+      "cost": "800000000",
       "prereqs": [
         30100001
       ],
@@ -107,7 +158,58 @@
           "kind": 2,
           "building": 3,
           "stat": 2,
-          "value": 187
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 30100302,
+      "cost": "1200000000",
+      "prereqs": [
+        30100301
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 3,
+          "stat": 2,
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 30100303,
+      "cost": "1600000000",
+      "prereqs": [
+        30100302
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 3,
+          "stat": 2,
+          "value": 50
+        }
+      ],
+      "exclusionGroup": 0,
+      "repeatCap": 0
+    },
+    {
+      "nodeId": 30100304,
+      "cost": "2000000000",
+      "prereqs": [
+        30100303
+      ],
+      "grants": [
+        {
+          "kind": 2,
+          "building": 3,
+          "stat": 2,
+          "value": 50
         }
       ],
       "exclusionGroup": 0,
@@ -131,6 +233,12 @@
           "building": 4,
           "stat": 0,
           "value": 1
+        },
+        {
+          "kind": 2,
+          "building": 4,
+          "stat": 3,
+          "value": 200
         }
       ],
       "exclusionGroup": 0,
@@ -153,7 +261,7 @@
           "kind": 2,
           "building": 4,
           "stat": 4,
-          "value": 213
+          "value": 200
         }
       ],
       "exclusionGroup": 0,
@@ -221,7 +329,7 @@
           "kind": 2,
           "building": 4,
           "stat": 3,
-          "value": 100
+          "value": 50
         }
       ],
       "exclusionGroup": 0,
@@ -238,7 +346,7 @@
           "kind": 2,
           "building": 4,
           "stat": 3,
-          "value": 100
+          "value": 50
         }
       ],
       "exclusionGroup": 0,
@@ -255,7 +363,7 @@
           "kind": 2,
           "building": 4,
           "stat": 3,
-          "value": 100
+          "value": 50
         }
       ],
       "exclusionGroup": 0,
@@ -272,7 +380,7 @@
           "kind": 2,
           "building": 4,
           "stat": 3,
-          "value": 100
+          "value": 50
         }
       ],
       "exclusionGroup": 0,

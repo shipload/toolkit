@@ -34,8 +34,7 @@ import {
 } from './civic'
 import {
     CHARTER_BASELINE_STAT,
-    CHARTER_LOADER_STEP,
-    CHARTER_TUNEUP_STEP,
+    CHARTER_RUNG_STEP,
     CIVIC_DEPOT,
     CIVIC_DOCK,
     CIVIC_GRANT_RUNG,
@@ -48,9 +47,10 @@ import {
 import {getStatCount} from './quality'
 
 const NODE_WORKSHOP = 10001
-const NODE_WORKSHOP_TUNEUP = 10100201
+const NODE_WORKSHOP_TUNEUPS = [10100201, 10100202, 10100203, 10100204]
+const NODE_WORKSHOP_TUNEUP = NODE_WORKSHOP_TUNEUPS[0]
 const NODE_DOCK = 30100001
-const NODE_DOCK_TUNEUP = 30100301
+const NODE_DOCK_TUNEUPS = [30100301, 30100302, 30100303, 30100304]
 const NODE_DEPOT = 40100001
 const NODE_DEPOT_BAYS = [40100101, 40100102, 40100103, 40100104]
 const NODE_DEPOT_LOADERS = [40100401, 40100402, 40100403, 40100404]
@@ -137,30 +137,44 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
         }
     })
 
-    test('the Workshop tune-up raises every crafter by the tune-up step', () => {
-        const standing = complete({}, NODE_WORKSHOP)
-        const [workshop] = previewCharterGrants(node(NODE_WORKSHOP_TUNEUP), standing)
-        expect(workshop.spawned).toBe(false)
-        const raised = CHARTER_BASELINE_STAT + CHARTER_TUNEUP_STEP
-        for (let slot = 0; slot < 5; slot++) {
-            expect(stats(workshop, slot).stats).toEqual([raised, raised])
+    test('each Workshop tune-up raises every crafter by one rung step, reaching 400', () => {
+        let standing = complete({}, NODE_WORKSHOP)
+        let raised = CHARTER_BASELINE_STAT
+        for (const tuneup of NODE_WORKSHOP_TUNEUPS) {
+            const [workshop] = previewCharterGrants(node(tuneup), standing)
+            expect(workshop.spawned).toBe(false)
+            raised += CHARTER_RUNG_STEP
+            for (let slot = 0; slot < 5; slot++) {
+                expect(stats(workshop, slot).stats).toEqual([raised, raised])
+            }
+            standing = complete(standing, tuneup)
         }
+        expect(raised).toBe(400)
     })
 
-    test('the Dock node fits one builder and its tune-up reaches 400', () => {
-        const standing = complete(complete({}, NODE_WORKSHOP), NODE_DOCK)
+    test('the Dock node fits one builder and its four tune-ups reach 400', () => {
+        let standing = complete(complete({}, NODE_WORKSHOP), NODE_DOCK)
         expect(stats({modules: standing[CIVIC_DOCK]!}, 0)).toEqual({
             itemId: ITEM_BUILDER_T1,
             stats: [CHARTER_BASELINE_STAT, CHARTER_BASELINE_STAT],
         })
-        const [dock] = previewCharterGrants(node(NODE_DOCK_TUNEUP), standing)
-        expect(stats(dock, 0).stats).toEqual([400, 400])
+        let raised = CHARTER_BASELINE_STAT
+        for (const tuneup of NODE_DOCK_TUNEUPS) {
+            const [dock] = previewCharterGrants(node(tuneup), standing)
+            raised += CHARTER_RUNG_STEP
+            expect(stats(dock, 0).stats).toEqual([raised, raised])
+            standing = complete(standing, tuneup)
+        }
+        expect(raised).toBe(400)
     })
 
-    test('the Depot node fits a zero-stat loader and leaves the bays empty', () => {
+    test('the Depot node fits a baseline loader and leaves the bays empty', () => {
         const standing = complete(complete({}, NODE_WORKSHOP), NODE_DEPOT)
         const depot = {modules: standing[CIVIC_DEPOT]!}
-        expect(stats(depot, 0)).toEqual({itemId: ITEM_LOADER_T1, stats: [0, 0]})
+        expect(stats(depot, 0)).toEqual({
+            itemId: ITEM_LOADER_T1,
+            stats: [CHARTER_BASELINE_STAT, CHARTER_BASELINE_STAT],
+        })
         for (let slot = 1; slot <= 4; slot++) expect(depot.modules[slot].installed).toBeUndefined()
     })
 
@@ -187,12 +201,12 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
         }
     })
 
-    test('the four loader rungs step the slot-0 loader by 100 each', () => {
+    test('the four loader rungs step the slot-0 loader by one rung each, reaching 400', () => {
         let standing = complete(complete({}, NODE_WORKSHOP), NODE_DEPOT)
         for (let i = 0; i < NODE_DEPOT_LOADERS.length; i++) {
             standing = complete(standing, NODE_DEPOT_LOADERS[i])
             const depot = {modules: standing[CIVIC_DEPOT]!}
-            const stat = CHARTER_LOADER_STEP * (i + 1)
+            const stat = CHARTER_BASELINE_STAT + CHARTER_RUNG_STEP * (i + 1)
             expect(stats(depot, 0)).toEqual({itemId: ITEM_LOADER_T1, stats: [stat, stat]})
             for (let slot = 1; slot <= 4; slot++)
                 expect(depot.modules[slot].installed).toBeUndefined()

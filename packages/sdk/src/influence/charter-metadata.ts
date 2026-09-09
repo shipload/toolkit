@@ -43,10 +43,16 @@ export interface CharterMeta {
 
 export const charterMetadata: Record<number, CharterMeta> = {
     10001: {name: 'Communal Workshop', summary: 'Shared crafting for anyone at this world'},
-    10100201: {name: 'Workshop tune-up', summary: "Raises the Workshop's Fabricator stats"},
+    10100201: {name: 'Workshop tune-up I', summary: "Raises the Workshop's Fabricator stats"},
+    10100202: {name: 'Workshop tune-up II', summary: "Raises the Workshop's Fabricator stats"},
+    10100203: {name: 'Workshop tune-up III', summary: "Raises the Workshop's Fabricator stats"},
+    10100204: {name: 'Workshop tune-up IV', summary: "Raises the Workshop's Fabricator stats"},
     20100001: {name: 'Civic Nexus', summary: 'Wrap items for trade and unwrap them here'},
     30100001: {name: 'Construction Dock', summary: 'Ships queue here for upgrades'},
-    30100301: {name: 'Dock tune-up', summary: "Raises the Dock's Assembly Arm stats"},
+    30100301: {name: 'Dock tune-up I', summary: "Raises the Dock's Assembly Arm stats"},
+    30100302: {name: 'Dock tune-up II', summary: "Raises the Dock's Assembly Arm stats"},
+    30100303: {name: 'Dock tune-up III', summary: "Raises the Dock's Assembly Arm stats"},
+    30100304: {name: 'Dock tune-up IV', summary: "Raises the Dock's Assembly Arm stats"},
     40100001: {name: 'Public Depot', summary: 'Storage at this world for every player'},
     40100101: {
         name: 'Depot Cargo Hold I',

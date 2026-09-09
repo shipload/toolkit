@@ -101,13 +101,13 @@ describe('charter eligibility mirror', () => {
 
     test('rung values sum over the completed nodes only', () => {
         const gateOnly = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
-        expect(charterRungValue(gateOnly, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(213)
+        expect(charterRungValue(gateOnly, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(200)
 
         const tuned = world([
             {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
             {nodeId: WORKSHOP_TUNEUP, entityId: 0n},
         ])
-        expect(charterRungValue(tuned, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(400)
+        expect(charterRungValue(tuned, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(250)
         expect(charterRungValue(tuned, CIVIC_DEPOT, CIVIC_STAT_TRANSFER_SPEED)).toBe(0)
     })
 

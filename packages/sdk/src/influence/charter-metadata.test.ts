@@ -124,13 +124,13 @@ describe('charter signatures', () => {
         ])
     })
 
-    test('treats a lone rung as an unranked tune-up', () => {
-        expect(signatureFor(10100201)).toEqual({
+    test('ranks the Workshop tune-ups as a four-rung ladder', () => {
+        expect(signatureFor(10100203)).toEqual({
             kind: 'rung',
             buildingLabel: 'Workshop',
             statLabel: 'crafting speed',
-            rank: 1,
-            rankCount: 1,
+            rank: 3,
+            rankCount: 4,
         })
     })
 })
