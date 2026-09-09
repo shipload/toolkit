@@ -6,6 +6,7 @@ import {
     type CargoInput,
     hasIncomingCoupling,
     hasSourceCoupling,
+    incomingSources,
     type IncomingSource,
     projectedCargoAvailableAt,
     taskCargoEffect,
@@ -230,5 +231,87 @@ describe('taskCargoEffect task coverage', () => {
         const effect = taskCargoEffect(simpleTask(TaskType.DEPOT_TAKE))
         expect(effect.added).toHaveLength(1)
         expect(effect.removed).toHaveLength(0)
+    })
+})
+
+describe('incomingSources', () => {
+    const RECEIVER = 1
+    const SENDER = 2
+
+    function receiver(holds: {id: number; kind: number; from: number; until: string}[]) {
+        const e = entity([])
+        return ServerContract.Types.entity_info.from({
+            ...JSON.parse(JSON.stringify(e)),
+            id: RECEIVER,
+            holds: holds.map((h) => ({
+                id: h.id,
+                kind: h.kind,
+                counterpart: {entity_type: 'ship', entity_id: h.from},
+                until: h.until,
+                incoming_mass: 100,
+            })),
+        })
+    }
+
+    function sender(tasks: ReturnType<typeof craftTask>[]) {
+        const e = entity([], [])
+        return ServerContract.Types.entity_info.from({
+            ...JSON.parse(JSON.stringify(e)),
+            id: SENDER,
+            lanes: [{lane_key: 0, schedule: {started: T0, tasks}}],
+        })
+    }
+
+    function coupledTo(hold: number, entityId: number, kind: number) {
+        return ServerContract.Types.coupling.from({
+            counterpart: {entity_type: 'ship', entity_id: entityId},
+            hold,
+            kind,
+        })
+    }
+
+    test('a coupled craft output resolves to the receiving hold', () => {
+        const to = receiver([{id: 1, kind: HoldKind.GATHER, from: SENDER, until: T0}])
+        const from = sender([
+            craftTask(
+                [cargoItem(7, 0, 4), cargoItem(9, 0, 1)],
+                [coupledTo(1, RECEIVER, HoldKind.GATHER)]
+            ),
+        ])
+        const sources = incomingSources(to, () => from)
+        expect(sources).toHaveLength(1)
+        // A craft delivers its output slot alone, never its inputs.
+        expect(sources[0].items).toHaveLength(1)
+        expect(sources[0].items[0].item_id.toNumber()).toBe(9)
+        expect(sources[0].holdId).toBe('1')
+    })
+
+    test('a hold whose counterpart is unknown yields nothing', () => {
+        const to = receiver([{id: 1, kind: HoldKind.GATHER, from: SENDER, until: T0}])
+        expect(incomingSources(to, () => undefined)).toHaveLength(0)
+    })
+
+    test('an excluded hold is skipped', () => {
+        const to = receiver([{id: 1, kind: HoldKind.GATHER, from: SENDER, until: T0}])
+        const from = sender([
+            craftTask([cargoItem(9, 0, 1)], [coupledTo(1, RECEIVER, HoldKind.GATHER)]),
+        ])
+        expect(incomingSources(to, () => from, ['1'])).toHaveLength(0)
+    })
+
+    test('a coupling naming another hold does not fill this one', () => {
+        const to = receiver([{id: 1, kind: HoldKind.GATHER, from: SENDER, until: T0}])
+        const from = sender([
+            craftTask([cargoItem(9, 0, 1)], [coupledTo(2, RECEIVER, HoldKind.GATHER)]),
+        ])
+        expect(incomingSources(to, () => from)).toHaveLength(0)
+    })
+
+    test('an outgoing hold kind is not an incoming source', () => {
+        const to = receiver([{id: 1, kind: HoldKind.PULL, from: SENDER, until: T0}])
+        const from = sender([
+            craftTask([cargoItem(9, 0, 1)], [coupledTo(1, RECEIVER, HoldKind.GATHER)]),
+        ])
+        expect(incomingSources(to, () => from)).toHaveLength(0)
     })
 })

@@ -356,12 +356,13 @@ export {
     cargoReadyAt,
     taskCargoEffect,
     calcCounterpartDelivery,
+    incomingSources,
     cargoKey,
     cargoInputKey,
     hasSourceCoupling,
     hasIncomingCoupling,
 } from './scheduling/availability'
-export type {CargoInput, IncomingSource} from './scheduling/availability'
+export type {CargoInput, IncomingHoldEntity, IncomingSource} from './scheduling/availability'
 
 export {clusterStockAvailable} from './scheduling/cluster-stock'
 

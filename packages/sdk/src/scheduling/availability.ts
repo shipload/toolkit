@@ -65,6 +65,47 @@ export function calcCounterpartDelivery(task: Task, coupling: Coupling): CargoIt
     return task.cargo
 }
 
+export interface IncomingHoldEntity extends schedule.ScheduleData {
+    id: {toString(): string}
+    holds?: ServerContract.Types.hold[]
+}
+
+// Mirrors incoming_sources: each incoming hold resolved through the counterpart task that will fill it.
+export function incomingSources(
+    entity: IncomingHoldEntity,
+    findCounterpart: (entityId: string) => schedule.ScheduleData | undefined,
+    excludedHoldIds: readonly string[] = []
+): IncomingSource[] {
+    const out: IncomingSource[] = []
+    const excluded = new Set(excludedHoldIds.map((id) => String(id)))
+    const selfId = entity.id.toString()
+    for (const hold of entity.holds ?? []) {
+        if (!isIncomingCouplingKind(hold.kind.toNumber())) continue
+        const holdId = hold.id.toString()
+        if (excluded.has(holdId)) continue
+        const counterpart = findCounterpart(hold.counterpart.entity_id.toString())
+        if (!counterpart) continue
+        let matched = false
+        for (const lane of counterpart.lanes ?? []) {
+            if (matched) break
+            for (const task of lane.schedule.tasks) {
+                if (matched) break
+                for (const coupling of task.couplings) {
+                    if (coupling.hold.toString() !== holdId) continue
+                    if (coupling.counterpart.entity_id.toString() !== selfId) continue
+                    const items = calcCounterpartDelivery(task, coupling)
+                    if (items.length > 0) {
+                        out.push({holdId, until: hold.until.toDate(), items})
+                    }
+                    matched = true
+                    break
+                }
+            }
+        }
+    }
+    return out
+}
+
 export function taskCargoEffect(task: Task): CargoEffect {
     switch (taskCargoRule(task.type.toNumber())) {
         case 'all-in':
