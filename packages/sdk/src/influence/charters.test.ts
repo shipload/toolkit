@@ -22,7 +22,7 @@ import {
 } from './charters'
 
 const WORKSHOP = 10001
-const NEXUS = 20100001
+const NEXUS = 20001
 const DOCK = 30100001
 const WORKSHOP_TUNEUP = 10100201
 const DOCK_TUNEUP = 30100301

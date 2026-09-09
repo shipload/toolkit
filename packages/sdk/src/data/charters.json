@@ -102,12 +102,18 @@
       "repeatCap": 0
     },
     {
-      "nodeId": 20100001,
+      "nodeId": 20001,
       "cost": "4000000000",
       "prereqs": [
         10001
       ],
       "grants": [
+        {
+          "kind": 4,
+          "building": 0,
+          "stat": 0,
+          "value": 2
+        },
         {
           "kind": 3,
           "building": 2,
