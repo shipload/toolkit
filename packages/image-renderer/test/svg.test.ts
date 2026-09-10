@@ -25,6 +25,25 @@ describe('GET /item/<payload>.svg', () => {
         expect(body).toContain('Crude Ore')
     })
 
+    it('pads the card when ?pad is asked for and leaves it flush when it is not', async () => {
+        const url = `https://item.shiploadgame.com/item/${oreT1Payload()}.svg`
+        const bare = await (await SELF.fetch(url)).text()
+        expect(bare).toContain('width="280"')
+        expect(bare).not.toContain('translate(28 28)')
+
+        const padded = await (await SELF.fetch(`${url}?pad=28`)).text()
+        expect(padded).toContain('width="336"')
+        expect(padded).toContain('translate(28 28)')
+        expect(padded).toContain('#050c24')
+    })
+
+    it('clamps an out of range ?pad instead of rejecting it', async () => {
+        const url = `https://item.shiploadgame.com/item/${oreT1Payload()}.svg`
+        const res = await SELF.fetch(`${url}?pad=9000`)
+        expect(res.status).toBe(200)
+        expect(await res.text()).toContain('translate(64 64)')
+    })
+
     it('returns 400 for malformed payload', async () => {
         const res = await SELF.fetch('https://item.shiploadgame.com/item/!!!not-valid!!!.svg')
         expect(res.status).toBe(400)

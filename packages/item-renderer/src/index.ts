@@ -104,6 +104,9 @@ export type {
 export {renderItemCell, itemCellGroup, abbreviateQuantity} from './templates/item-cell.ts'
 export type {ItemCellProps, ItemCellGroupProps} from './templates/item-cell.ts'
 
+// Padding primitive
+export {padSvg, clampPad, MIN_PAD, MAX_PAD} from './primitives/pad.ts'
+
 // Social card template (1200x630 OG image)
 export {
     socialCardSvg,

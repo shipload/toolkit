@@ -3,11 +3,12 @@ import type {CargoItem} from '../payload/codec.ts'
 import {renderByType} from './index.ts'
 import {STARDUST_BASE64} from '../assets/stardust-base64.ts'
 import {svgDimensions} from '../meta.ts'
+import {tokens} from '../tokens/index.ts'
 
 export const SOCIAL_CARD_WIDTH = 1200
 export const SOCIAL_CARD_HEIGHT = 630
 
-const SPACE_DEEP = '#050c24'
+const SPACE_DEEP = tokens.colors.surface.spaceDeep
 const STARDUST_TILE = 512
 const ITEM_MAX_WIDTH_RATIO = 0.35
 const ITEM_MAX_HEIGHT_RATIO = 0.82

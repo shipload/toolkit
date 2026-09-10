@@ -1,4 +1,10 @@
-import {decodeNftPayload, renderItem, resolveItem, socialCardSvg} from '@shipload/item-renderer'
+import {
+    decodeNftPayload,
+    padSvg,
+    renderItem,
+    resolveItem,
+    socialCardSvg,
+} from '@shipload/item-renderer'
 import {CACHE_TTL_SECONDS, MAX_PAYLOAD_CHARS} from './config.ts'
 import {type ErrorCode, errorSvgResponse, errorTextResponse} from './errors.ts'
 import {renderPng} from './render-png.ts'
@@ -42,10 +48,15 @@ function decodeAndResolve(payload: string): DecodeError | DecodeOk {
     }
 }
 
-async function handleItem(payload: string, ext: Ext, scale: number): Promise<Response> {
+async function handleItem(
+    payload: string,
+    ext: Ext,
+    scale: number,
+    pad: number
+): Promise<Response> {
     const r = decodeAndResolve(payload)
     if ('status' in r) return errorSvgResponse(r.status)
-    const svg = renderItem(r.cargoItem, r.resolved, {location: r.location})
+    const svg = padSvg(renderItem(r.cargoItem, r.resolved, {location: r.location}), pad)
     if (ext === 'svg') {
         // SVG is resolution-independent — density scaling only applies to raster.
         return new Response(svg, {headers: immutableHeaders('image/svg+xml')})
@@ -71,10 +82,13 @@ export default {
         // Optional pixel-density for raster output (default 1x; clamped in renderPng).
         const scale = Number(url.searchParams.get('scale') ?? '1')
 
+        // Optional margin in unscaled panel coordinates (default 0; clamped in padSvg).
+        const pad = Number(url.searchParams.get('pad') ?? '0')
+
         const itemMatch = pathname.match(/^\/item\/([A-Za-z0-9_-]+)\.(png|svg)$/)
         if (itemMatch) {
             const [, payload, ext] = itemMatch
-            return handleItem(payload!, ext as Ext, scale)
+            return handleItem(payload!, ext as Ext, scale, pad)
         }
         if (pathname.match(/^\/item\/.+\.(png|svg)$/)) return errorSvgResponse(400)
 

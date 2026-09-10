@@ -3,6 +3,7 @@ import {categoryColors, tierColors} from '@shipload/sdk'
 export const colors = {
     surface: {
         background: '#0a0a0c',
+        spaceDeep: '#050c24',
         panel: '#11141a',
         panelBorder: '#1e242e',
         panelBorderBright: '#2a3340',
