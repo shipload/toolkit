@@ -142,7 +142,7 @@ describe('PlotManager.canBuild', () => {
 
 describe('PlotManager.timeToComplete', () => {
     test('divides capacity by speed, minimum 1', () => {
-        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 14400000)
+        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 144000)
         const crafter: CrafterStats = {
             speed: UInt16.from(14400),
             drain: UInt32.from(0),

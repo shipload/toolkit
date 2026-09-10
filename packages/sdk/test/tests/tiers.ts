@@ -62,11 +62,11 @@ describe('tier utilities', () => {
 
 describe('reserve tiers', () => {
     test('tier constants match spec', () => {
-        assert.deepEqual(RESERVE_TIERS.small, {min: 3_600_000, max: 14_400_000})
-        assert.deepEqual(RESERVE_TIERS.medium, {min: 24_000_000, max: 48_000_000})
-        assert.deepEqual(RESERVE_TIERS.large, {min: 96_000_000, max: 168_000_000})
-        assert.deepEqual(RESERVE_TIERS.massive, {min: 240_000_000, max: 600_000_000})
-        assert.deepEqual(RESERVE_TIERS.motherlode, {min: 960_000_000, max: 2_400_000_000})
+        assert.deepEqual(RESERVE_TIERS.small, {min: 36_000, max: 144_000})
+        assert.deepEqual(RESERVE_TIERS.medium, {min: 240_000, max: 480_000})
+        assert.deepEqual(RESERVE_TIERS.large, {min: 960_000, max: 1_680_000})
+        assert.deepEqual(RESERVE_TIERS.massive, {min: 2_400_000, max: 6_000_000})
+        assert.deepEqual(RESERVE_TIERS.motherlode, {min: 9_600_000, max: 24_000_000})
     })
 
     test('rollTier at shallow distributes ~80/19.2/0.8/0.005/0.0004', () => {

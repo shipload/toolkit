@@ -20,9 +20,9 @@ describe('unwrap duration mirror', () => {
     })
 
     test('transit floors distance then flight time', () => {
-        // distance = floor(sqrt(3^2+4^2)*10000)=50000; accel=400/mass*10000; flight=floor(2*sqrt(d/accel))
+        // distance = floor(sqrt(3^2+4^2)*10000)=50000; accel=400/(mass*100)*10000; flight=floor(2*sqrt(d/accel))
         const mass = 1000
-        const accel = (400 / mass) * 10000
+        const accel = (400 / (mass * 100)) * 10000
         const expected = Math.floor(2 * Math.sqrt(50000 / accel))
         expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 3, y: 4})).toBe(expected)
     })
@@ -30,7 +30,7 @@ describe('unwrap duration mirror', () => {
     test('load uses altitude z, adds loader mass, divides by quantity', () => {
         const loaders = {mass: 1200, thrust: 30, quantity: 2}
         const itemMass = 800
-        const accel = (30 / (itemMass + 1200)) * 10000
+        const accel = (30 / ((itemMass + 1200) * 100)) * 10000
         const flight = Math.floor(2 * Math.sqrt(3000 / accel))
         expect(unwrapLoadDuration(loaders, itemMass, 3000)).toBe(Math.floor(flight / 2))
     })

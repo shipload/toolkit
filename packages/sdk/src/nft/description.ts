@@ -28,7 +28,7 @@ import {
     BATTERY_CAPACITY_TIER_PCT,
 } from '../derivation/capabilities'
 import {getItem, tryGetItem} from '../data/catalog'
-import type {ModuleType} from '../types'
+import {MASS_UNITS_PER_TONNE, type ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
@@ -41,9 +41,8 @@ export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
 }
 
-export function formatMassTonnes(kg: number): string {
-    const tenths = idiv(kg + 50, 100)
-    return `${idiv(tenths, 10)}.${tenths % 10} t`
+export function formatMassTonnes(mass: number): string {
+    return `${idiv(mass, MASS_UNITS_PER_TONNE)}.${mass % MASS_UNITS_PER_TONNE} t`
 }
 
 function isShipHull(itemId: number): boolean {
@@ -67,27 +66,27 @@ export function computeBaseHullmass(itemId: number, stats: bigint): number {
 }
 
 export function computeBaseCapacityShip(stats: bigint): number {
-    return Math.floor(5_000_000 * 6 ** (sumPackedShipChannels(stats) / 4995))
+    return Math.floor(50_000 * 6 ** (sumPackedShipChannels(stats) / 4995))
 }
 
 export function computeBaseCapacityContainer(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(22_000_000 * 6 ** (s / 1998))
+    return Math.floor(220_000 * 6 ** (s / 1998))
 }
 
 export function computeBaseCapacityWarehouse(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(100_000_000 * 6 ** (s / 1998))
+    return Math.floor(1_000_000 * 6 ** (s / 1998))
 }
 
 export function computeBaseCapacityWorkshop(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(5_000_000 * 6 ** (s / 1998))
+    return Math.floor(50_000 * 6 ** (s / 1998))
 }
 
 export function computeBaseCapacityDepot(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(50_000_000 * 6 ** (s / 1998))
+    return Math.floor(500_000 * 6 ** (s / 1998))
 }
 
 const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
@@ -131,7 +130,7 @@ export const computeGathererDrain = (con: number): number =>
     2 * Math.max(250_000, 1_250_000 - con * 1250)
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
-export const computeLoaderMass = (ins: number): number => Math.max(200, 2000 - ins * 2)
+export const computeLoaderMass = (ins: number): number => Math.max(2, 20 - idiv(ins, 50))
 export const computeLoaderThrust = (pla: number, tier: number): number =>
     idiv((1 + idiv(pla * pla, 10000)) * moduleTierPct(LOADER_THRUST_TIER_PCT, tier), 100)
 export const computeCrafterSpeed = (rea: number, tier: number): number =>
@@ -164,7 +163,7 @@ export const computeCargoBayCapacity = (
     tier: number
 ): number =>
     idiv(
-        (10_000_000 + idiv((strength + density + hardness) * 50_000_000, 2997)) *
+        (100_000 + idiv((strength + density + hardness) * 500_000, 2997)) *
             moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, tier),
         100
     )

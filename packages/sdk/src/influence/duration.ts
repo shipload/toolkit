@@ -4,7 +4,7 @@ import {getEntityClass} from '../data/kind-registry'
 import {computeLoaderMass, computeLoaderThrust} from '../nft/description'
 import {laneKeyForModule, resolveLaneLoader} from '../scheduling/lanes'
 import {calc_onesided_duration} from '../travel/travel'
-import {PRECISION} from '../types'
+import {MASS_STAT_SCALE, MASS_UNITS_PER_TONNE, PRECISION} from '../types'
 import {CIVIC_LOADER_STAT, CIVIC_LOADER_TIER, DEFAULT_ORBITAL_Z} from './constants'
 
 export interface CivicLoaderStats {
@@ -21,7 +21,7 @@ export function civicLoader(): CivicLoaderStats {
 
 function acceleration(thrust: number, mass: number): number {
     if (mass <= 0) return 0
-    return (thrust / mass) * PRECISION
+    return (thrust / (mass * MASS_STAT_SCALE)) * PRECISION
 }
 
 function flightTime(distance: number, accel: number): number {
@@ -29,15 +29,15 @@ function flightTime(distance: number, accel: number): number {
     return Math.floor(2 * Math.sqrt(distance / accel))
 }
 
-export function contributeDuration(totalMassKg: number, altitudeZ = 0): number {
+export function contributeDuration(totalMass: number, altitudeZ = 0): number {
     const loader = civicLoader()
-    const totalMass = totalMassKg + loader.mass
+    const mass = totalMass + loader.mass
     const z = Math.max(altitudeZ, DEFAULT_ORBITAL_Z)
-    return flightTime(z, acceleration(loader.thrust, totalMass))
+    return flightTime(z, acceleration(loader.thrust, mass))
 }
 
 export function contributeDurationForTonnes(tonnes: number, altitudeZ = 0): number {
-    return contributeDuration(Math.floor(tonnes * 1000), altitudeZ)
+    return contributeDuration(Math.floor(tonnes * MASS_UNITS_PER_TONNE), altitudeZ)
 }
 
 export const DEPOT_LOADER_SLOT = 0
@@ -49,7 +49,7 @@ export interface DepotTransferParams {
     depotZ: number
     shipKind: NameType
     shipZ: number
-    cargoMassKg: number
+    cargoMass: number
 }
 
 // Mirrors depot.cpp: the depot's slot-0 loader drives the transfer; 0 when no loader is installed.
@@ -67,6 +67,6 @@ export function depotTransferDuration(params: DepotTransferParams): number {
         params.depotZ,
         getEntityClass(params.shipKind),
         getEntityClass(params.depotKind),
-        params.cargoMassKg
+        params.cargoMass
     )
 }

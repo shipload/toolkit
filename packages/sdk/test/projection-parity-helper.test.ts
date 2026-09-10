@@ -56,7 +56,7 @@ describe('assertProjectionEquals', () => {
 
     test('cargo merge-order independence', () => {
         const contract = makeContractState({
-            cargomass: UInt32.from(5000),
+            cargomass: UInt32.from(50),
             cargo: [
                 ServerContract.Types.cargo_view.from({
                     id: 1,

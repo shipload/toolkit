@@ -59,13 +59,13 @@ export interface ContributePreviewRow {
     quantity: number
     stats: bigint
     valueAtomic: bigint
-    massKg: number
+    mass: number
 }
 
 export interface ContributePreview {
     rows: ContributePreviewRow[]
     totalAtomic: bigint
-    totalMassKg: number
+    totalMass: number
     durationSeconds: number
     demand: DemandView
 }
@@ -226,20 +226,20 @@ export class InfluenceManager extends BaseManager {
         )
 
         let totalAtomic = 0n
-        let totalMassKg = 0
+        let totalMass = 0
         const rows = bundle.map((item) => {
             const valueAtomic = valueCargoItem(item, demand, pricing)
-            const massKg = getItem(item.itemId).mass * item.quantity
+            const mass = getItem(item.itemId).mass * item.quantity
             totalAtomic += valueAtomic
-            totalMassKg += massKg
-            return {...item, valueAtomic, massKg}
+            totalMass += mass
+            return {...item, valueAtomic, mass}
         })
 
         return {
             rows,
             totalAtomic,
-            totalMassKg,
-            durationSeconds: contributeDuration(totalMassKg, opts.altitudeZ ?? 0),
+            totalMass,
+            durationSeconds: contributeDuration(totalMass, opts.altitudeZ ?? 0),
             demand,
         }
     }

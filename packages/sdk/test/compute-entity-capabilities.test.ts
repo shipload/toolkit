@@ -52,7 +52,7 @@ function cargoBayStats(str: number, den: number, hrd: number, coh: number): bigi
 }
 
 function cargoBayCapacity(str: number, den: number, hrd: number): number {
-    return 10_000_000 + Math.floor(((str + den + hrd) * 50_000_000) / 2997)
+    return 100_000 + Math.floor(((str + den + hrd) * 500_000) / 2997)
 }
 
 describe('computeEntityCapabilities', () => {
@@ -81,7 +81,7 @@ describe('computeEntityCapabilities', () => {
             {strength: 999, density: 999, hardness: 999, cohesion: 999},
             1
         )
-        expect(low.capacity).toBe(60_000_000)
+        expect(low.capacity).toBe(600_000)
         expect(high.capacity).toBe(low.capacity)
         expect(high.drain).toBeLessThan(low.drain)
     })
@@ -200,11 +200,11 @@ describe('computeEntityCapabilities', () => {
             [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: cargoBayStats(0, 0, 0, 0)}],
             SHIP_LAYOUT
         )
-        expect(withCargoBay.capacity).toBe(base.capacity + 10_000_000)
+        expect(withCargoBay.capacity).toBe(base.capacity + 100_000)
         expect((withCargoBay as any).storage).toBeUndefined()
     })
 
-    test('excellent Cargo Bay adds 60,000,000 raw cargo capacity', () => {
+    test('excellent Cargo Bay adds 600,000 raw cargo capacity', () => {
         const base = computeEntityCapabilities(
             SAMPLE_STATS_RECORD,
             ITEM_SHIP_T1_PACKED,
@@ -217,7 +217,7 @@ describe('computeEntityCapabilities', () => {
             [{slotIndex: 0, itemId: ITEM_STORAGE_T1, stats: cargoBayStats(999, 999, 999, 999)}],
             SHIP_LAYOUT
         )
-        expect(withCargoBay.capacity).toBe(base.capacity + 60_000_000)
+        expect(withCargoBay.capacity).toBe(base.capacity + 600_000)
     })
 
     test('Cargo Bay respects slot output percentage', () => {

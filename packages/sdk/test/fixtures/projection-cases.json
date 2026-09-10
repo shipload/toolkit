@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "50e02c4a475f5c3fde5c5a0591397c48fabe9357d9afe66c5051178d8ac5c2a8",
-  "generated_at": "2026-09-10T05:59:37.228Z",
+  "catalog_hash": "eee9d17eba5e3ef49aebf5aeaa920b36147c0f66ec6e827327fa2131f00c2cbb",
+  "generated_at": "2026-09-10T19:39:58.356Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -91,8 +91,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -122,7 +122,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -219,8 +219,8 @@
         "energy": 451649,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -250,7 +250,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -342,8 +342,8 @@
         "energy": 900683,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -373,7 +373,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -465,8 +465,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -496,7 +496,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -609,8 +609,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -640,7 +640,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -751,7 +751,7 @@
           "z": 800
         },
         "energy": 1125200,
-        "cargomass": 5000,
+        "cargomass": 50,
         "cargo": [
           {
             "item_id": 301,
@@ -761,8 +761,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -792,7 +792,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -897,8 +897,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -928,7 +928,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -1031,7 +1031,7 @@
           "z": 800
         },
         "energy": 1124200,
-        "cargomass": 1000,
+        "cargomass": 10,
         "cargo": [
           {
             "item_id": 401,
@@ -1041,8 +1041,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1072,7 +1072,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -1095,7 +1095,7 @@
           "z": 800
         },
         "energy": 1125200,
-        "cargomass": 10000,
+        "cargomass": 100,
         "modules": [
           {
             "type": 0,
@@ -1183,7 +1183,7 @@
           "z": 800
         },
         "energy": 1125200,
-        "cargomass": 10000,
+        "cargomass": 100,
         "cargo": [
           {
             "item_id": 101,
@@ -1193,8 +1193,8 @@
             "id": 1000000
           }
         ],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1224,7 +1224,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -1247,7 +1247,7 @@
           "z": 800
         },
         "energy": 1125200,
-        "cargomass": 10000,
+        "cargomass": 100,
         "modules": [
           {
             "type": 0,
@@ -1335,7 +1335,7 @@
           "z": 800
         },
         "energy": 1123630,
-        "cargomass": 4000,
+        "cargomass": 40,
         "cargo": [
           {
             "item_id": 10001,
@@ -1345,8 +1345,8 @@
             "id": 0
           }
         ],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1376,7 +1376,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }
@@ -1452,8 +1452,8 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 8459200,
-        "capacity": 6787341,
+        "hullmass": 84592,
+        "capacity": 67873,
         "engines": {
           "thrust": 447,
           "drain": 224517
@@ -1483,7 +1483,7 @@
         "loader_lanes": [
           {
             "slot_index": 2,
-            "mass": 1574,
+            "mass": 16,
             "thrust": 4,
             "output_pct": 80
           }

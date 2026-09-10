@@ -23,7 +23,7 @@ describe('gather duration parity matrix', () => {
     for (const c of cases) {
         test(`tonnage=${c.tonnage} stratum=${c.stratum} richness=${c.richness} yield=${c.yield}`, () => {
             const oreT1 = getItem(ITEM_ORE_T1)
-            expect(oreT1.mass).toBe(1000)
+            expect(oreT1.mass).toBe(10)
 
             const gatherer: GathererStats = {
                 yield: UInt16.from(c.yield),
@@ -39,7 +39,7 @@ describe('gather duration parity matrix', () => {
             ).toNumber()
 
             // Hand-computed: floor of the transliterated formula plus the per-gather setup cost.
-            const massFactor = oreT1.mass / GATHER_MASS_DIVISOR
+            const massFactor = (oreT1.mass * 100) / GATHER_MASS_DIVISOR
             const depthPenalty = 1 + c.stratum / DEPTH_PENALTY_DIVISOR
             const richnessMul = c.richness / 1000
             const expected =
@@ -56,8 +56,8 @@ describe('gather duration parity matrix', () => {
 describe('craft duration parity matrix', () => {
     test('single Plate at crafter.speed=200', () => {
         const ore = getItem(ITEM_ORE_T1)
-        const inputMass = 10 * ore.mass // 10 t Ore x 1000 = 10000
-        expect(inputMass).toBe(10000)
+        const inputMass = 10 * ore.mass // 10 t Ore x 10 = 100
+        expect(inputMass).toBe(100)
         const speed = 200
         const duration = calc_craft_duration(speed, inputMass).toNumber()
         expect(duration).toBe(51)
@@ -65,14 +65,14 @@ describe('craft duration parity matrix', () => {
 
     test('batch of 100 Plates at crafter.speed=200', () => {
         const ore = getItem(ITEM_ORE_T1)
-        const inputMass = 100 * 10 * ore.mass // 1,000,000
-        expect(inputMass).toBe(1_000_000)
+        const inputMass = 100 * 10 * ore.mass // 10,000
+        expect(inputMass).toBe(10_000)
         const speed = 200
         const duration = calc_craft_duration(speed, inputMass).toNumber()
         expect(duration).toBe(5001)
     })
 
-    test('computeInputMass(Plate) reflects new catalog (10 t Ore x 1000)', () => {
-        expect(computeInputMass(ITEM_PLATE)).toBe(10000)
+    test('computeInputMass(Plate) reflects new catalog (10 t Ore x 10)', () => {
+        expect(computeInputMass(ITEM_PLATE)).toBe(100)
     })
 })

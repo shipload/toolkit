@@ -2,21 +2,23 @@ import {expect, test, describe} from 'bun:test'
 import {formatMass, formatMassDelta, formatMassScaled, formatLocation} from '../src/format'
 
 test('formatMass displays whole tonnes without decimals', () => {
-    expect(formatMass(30000)).toBe('30 t')
+    expect(formatMass(300)).toBe('30 t')
 })
 
-test('formatMass strips trailing zeros', () => {
-    expect(formatMass(28830)).toBe('28.83 t')
+test('formatMass strips a trailing zero from the decimal digit', () => {
+    expect(formatMass(2883)).toBe('288.3 t')
 })
 
-test('formatMass rounds to 2 decimals max', () => {
-    expect(formatMass(3591050)).toBe('3591.05 t')
+test('formatMass supports one decimal place', () => {
+    expect(formatMass(359105)).toBe('35910.5 t')
 })
 
-test('formatMass rounds in integer kg space to avoid float precision loss', () => {
-    // 46816545 kg = 46816.545 t; float toFixed(2) would silently truncate to
-    // "46816.54" because the float repr is 46816.5449999…
-    expect(formatMass(46816545)).toBe('46816.55 t')
+test('formatMass is exact integer arithmetic, no float precision loss', () => {
+    expect(formatMass(468165)).toBe('46816.5 t')
+})
+
+test('formatMass handles the smallest unit', () => {
+    expect(formatMass(1)).toBe('0.1 t')
 })
 
 test('formatMass handles zero', () => {
@@ -24,11 +26,11 @@ test('formatMass handles zero', () => {
 })
 
 test('formatMassDelta prefixes positive with +', () => {
-    expect(formatMassDelta(15000)).toBe('+15 t')
+    expect(formatMassDelta(150)).toBe('+15 t')
 })
 
 test('formatMassDelta prefixes negative with -', () => {
-    expect(formatMassDelta(-15000)).toBe('-15 t')
+    expect(formatMassDelta(-150)).toBe('-15 t')
 })
 
 describe('formatMassScaled', () => {
@@ -37,33 +39,33 @@ describe('formatMassScaled', () => {
     })
 
     test('plain tonnes below 1k', () => {
-        expect(formatMassScaled(52_000)).toBe('52 t')
-        expect(formatMassScaled(999_000)).toBe('999 t')
+        expect(formatMassScaled(520)).toBe('52 t')
+        expect(formatMassScaled(9_990)).toBe('999 t')
     })
 
     test('preserves fractional tonnes in the plain range', () => {
-        expect(formatMassScaled(28_830)).toBe('28.83 t')
+        expect(formatMassScaled(288)).toBe('28.8 t')
     })
 
     test('switches to k at 1,000 t', () => {
-        expect(formatMassScaled(1_000_000)).toBe('1k t')
-        expect(formatMassScaled(1_500_000)).toBe('1.5k t')
-        expect(formatMassScaled(12_345_000)).toBe('12.3k t')
-        expect(formatMassScaled(999_900_000)).toBe('999.9k t')
+        expect(formatMassScaled(10_000)).toBe('1k t')
+        expect(formatMassScaled(15_000)).toBe('1.5k t')
+        expect(formatMassScaled(123_450)).toBe('12.3k t')
+        expect(formatMassScaled(9_999_000)).toBe('999.9k t')
     })
 
     test('switches to m at 1,000,000 t', () => {
-        expect(formatMassScaled(1_000_000_000)).toBe('1m t')
-        expect(formatMassScaled(2_500_000_000)).toBe('2.5m t')
+        expect(formatMassScaled(10_000_000)).toBe('1m t')
+        expect(formatMassScaled(25_000_000)).toBe('2.5m t')
     })
 
     test('switches to b at 1,000,000,000 t', () => {
-        expect(formatMassScaled(1_000_000_000_000)).toBe('1b t')
+        expect(formatMassScaled(10_000_000_000)).toBe('1b t')
     })
 
     test('handles negative mass', () => {
-        expect(formatMassScaled(-52_000)).toBe('-52 t')
-        expect(formatMassScaled(-1_500_000)).toBe('-1.5k t')
+        expect(formatMassScaled(-520)).toBe('-52 t')
+        expect(formatMassScaled(-15_000)).toBe('-1.5k t')
     })
 })
 

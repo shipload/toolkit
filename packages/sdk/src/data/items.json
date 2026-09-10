@@ -1,756 +1,756 @@
 [
   {
     "id": 101,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 1,
     "category": "ore"
   },
   {
     "id": 102,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 2,
     "category": "ore"
   },
   {
     "id": 103,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 3,
     "category": "ore"
   },
   {
     "id": 104,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 4,
     "category": "ore"
   },
   {
     "id": 105,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 5,
     "category": "ore"
   },
   {
     "id": 106,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 6,
     "category": "ore"
   },
   {
     "id": 107,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 7,
     "category": "ore"
   },
   {
     "id": 108,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 8,
     "category": "ore"
   },
   {
     "id": 109,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 9,
     "category": "ore"
   },
   {
     "id": 110,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 10,
     "category": "ore"
   },
   {
     "id": 201,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 1,
     "category": "crystal"
   },
   {
     "id": 202,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 2,
     "category": "crystal"
   },
   {
     "id": 203,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 3,
     "category": "crystal"
   },
   {
     "id": 204,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 4,
     "category": "crystal"
   },
   {
     "id": 205,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 5,
     "category": "crystal"
   },
   {
     "id": 206,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 6,
     "category": "crystal"
   },
   {
     "id": 207,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 7,
     "category": "crystal"
   },
   {
     "id": 208,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 8,
     "category": "crystal"
   },
   {
     "id": 209,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 9,
     "category": "crystal"
   },
   {
     "id": 210,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 10,
     "category": "crystal"
   },
   {
     "id": 301,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 1,
     "category": "gas"
   },
   {
     "id": 302,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 2,
     "category": "gas"
   },
   {
     "id": 303,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 3,
     "category": "gas"
   },
   {
     "id": 304,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 4,
     "category": "gas"
   },
   {
     "id": 305,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 5,
     "category": "gas"
   },
   {
     "id": 306,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 6,
     "category": "gas"
   },
   {
     "id": 307,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 7,
     "category": "gas"
   },
   {
     "id": 308,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 8,
     "category": "gas"
   },
   {
     "id": 309,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 9,
     "category": "gas"
   },
   {
     "id": 310,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 10,
     "category": "gas"
   },
   {
     "id": 401,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 1,
     "category": "regolith"
   },
   {
     "id": 402,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 2,
     "category": "regolith"
   },
   {
     "id": 403,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 3,
     "category": "regolith"
   },
   {
     "id": 404,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 4,
     "category": "regolith"
   },
   {
     "id": 405,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 5,
     "category": "regolith"
   },
   {
     "id": 406,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 6,
     "category": "regolith"
   },
   {
     "id": 407,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 7,
     "category": "regolith"
   },
   {
     "id": 408,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 8,
     "category": "regolith"
   },
   {
     "id": 409,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 9,
     "category": "regolith"
   },
   {
     "id": 410,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 10,
     "category": "regolith"
   },
   {
     "id": 501,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 1,
     "category": "biomass"
   },
   {
     "id": 502,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 2,
     "category": "biomass"
   },
   {
     "id": 503,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 3,
     "category": "biomass"
   },
   {
     "id": 504,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 4,
     "category": "biomass"
   },
   {
     "id": 505,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 5,
     "category": "biomass"
   },
   {
     "id": 506,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 6,
     "category": "biomass"
   },
   {
     "id": 507,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 7,
     "category": "biomass"
   },
   {
     "id": 508,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 8,
     "category": "biomass"
   },
   {
     "id": 509,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 9,
     "category": "biomass"
   },
   {
     "id": 510,
-    "mass": 1000,
+    "mass": 10,
     "type": "resource",
     "tier": 10,
     "category": "biomass"
   },
   {
     "id": 10001,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10002,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10003,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10004,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10005,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10006,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10007,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10008,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10009,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10010,
-    "mass": 4000,
+    "mass": 40,
     "type": "component",
     "tier": 1
   },
   {
     "id": 10100,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "engine"
   },
   {
     "id": 10101,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "generator"
   },
   {
     "id": 10102,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "gatherer"
   },
   {
     "id": 10103,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "loader"
   },
   {
     "id": 10104,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "crafter"
   },
   {
     "id": 10105,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "storage"
   },
   {
     "id": 10106,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "hauler"
   },
   {
     "id": 10107,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "warp"
   },
   {
     "id": 10108,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "battery"
   },
   {
     "id": 10109,
-    "mass": 1000000,
+    "mass": 10000,
     "type": "module",
     "tier": 1,
     "subtype": "launcher"
   },
   {
     "id": 10110,
-    "mass": 960000,
+    "mass": 9600,
     "type": "module",
     "tier": 1,
     "subtype": "builder"
   },
   {
     "id": 10200,
-    "mass": 1900000,
+    "mass": 19000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10201,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10202,
-    "mass": 3200000,
+    "mass": 32000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10203,
-    "mass": 1900000,
+    "mass": 19000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10204,
-    "mass": 1900000,
+    "mass": 19000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10205,
-    "mass": 8000000,
+    "mass": 80000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10206,
-    "mass": 8000000,
+    "mass": 80000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10207,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10208,
-    "mass": 4800000,
+    "mass": 48000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10209,
-    "mass": 1900000,
+    "mass": 19000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10210,
-    "mass": 1600000,
+    "mass": 16000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10211,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10212,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10213,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10214,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10215,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10216,
-    "mass": 4800000,
+    "mass": 48000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10218,
-    "mass": 2400000,
+    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10219,
-    "mass": 4800000,
+    "mass": 48000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 11001,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11002,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11003,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11004,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11005,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11006,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11007,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11008,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11009,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11010,
-    "mass": 4800,
+    "mass": 48,
     "type": "component",
     "tier": 2
   },
   {
     "id": 11100,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "engine"
   },
   {
     "id": 11101,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "generator"
   },
   {
     "id": 11102,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "gatherer"
   },
   {
     "id": 11103,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "loader"
   },
   {
     "id": 11104,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "crafter"
   },
   {
     "id": 11105,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "storage"
   },
   {
     "id": 11106,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "hauler"
   },
   {
     "id": 11107,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "warp"
   },
   {
     "id": 11108,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "battery"
   },
   {
     "id": 11110,
-    "mass": 1536000,
+    "mass": 15360,
     "type": "module",
     "tier": 2,
     "subtype": "builder"
   },
   {
     "id": 11200,
-    "mass": 3100000,
+    "mass": 31000,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11212,
-    "mass": 4320000,
+    "mass": 43200,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11213,
-    "mass": 5760000,
+    "mass": 57600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11214,
-    "mass": 5760000,
+    "mass": 57600,
     "type": "entity",
     "tier": 2
   }

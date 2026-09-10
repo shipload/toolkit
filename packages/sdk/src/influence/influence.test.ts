@@ -146,7 +146,7 @@ describe('decomposition', () => {
     test('buckets are sorted and hold only raw resources', () => {
         const entry = findDecomp(ITEM_PLATE)
         if (!entry) throw new Error('Plate has no decomposition entry')
-        expect(entry.processedKg).toBeGreaterThan(0)
+        expect(entry.processedMass).toBeGreaterThan(0)
         for (let i = 1; i < entry.buckets.length; i++) {
             const prev = entry.buckets[i - 1]
             const cur = entry.buckets[i]
@@ -251,18 +251,18 @@ describe('valuation', () => {
 
 describe('contribution duration', () => {
     test('grows with mass and never falls below a single tick', () => {
-        expect(contributeDuration(1_000)).toBeGreaterThan(0)
-        expect(contributeDuration(1_000_000)).toBeGreaterThan(contributeDuration(1_000))
+        expect(contributeDuration(10)).toBeGreaterThan(0)
+        expect(contributeDuration(10_000)).toBeGreaterThan(contributeDuration(10))
     })
 
     test('splitting a haul costs more than one trip', () => {
-        const single = contributeDuration(100_000_000)
-        const hundred = contributeDuration(1_000_000) * 100
+        const single = contributeDuration(1_000_000)
+        const hundred = contributeDuration(10_000) * 100
         expect(hundred).toBeGreaterThan(single)
     })
 
     test('ground level is floored at the base orbital climb', () => {
-        expect(contributeDuration(1_000, 0)).toBe(contributeDuration(1_000, 800))
+        expect(contributeDuration(10, 0)).toBe(contributeDuration(10, 800))
     })
 })
 
@@ -347,7 +347,7 @@ describe('depot transfer duration', () => {
         depotZ: 0,
         shipKind: 'ship',
         shipZ: 0,
-        cargoMassKg: 10_000,
+        cargoMass: 100,
         ...overrides,
     })
 
@@ -356,13 +356,13 @@ describe('depot transfer duration', () => {
     })
 
     test('grows with cargo mass', () => {
-        expect(depotTransferDuration(params({cargoMassKg: 1_000_000}))).toBeGreaterThan(
-            depotTransferDuration(params({cargoMassKg: 10_000}))
+        expect(depotTransferDuration(params({cargoMass: 10_000}))).toBeGreaterThan(
+            depotTransferDuration(params({cargoMass: 100}))
         )
     })
 
     test('empty cargo costs nothing', () => {
-        expect(depotTransferDuration(params({cargoMassKg: 0}))).toBe(0)
+        expect(depotTransferDuration(params({cargoMass: 0}))).toBe(0)
     })
 
     test('a depot with no loader installed cannot transfer', () => {
@@ -379,6 +379,6 @@ describe('depot transfer duration', () => {
     })
 
     test('never reports zero for real cargo', () => {
-        expect(depotTransferDuration(params({cargoMassKg: 1}))).toBeGreaterThanOrEqual(1)
+        expect(depotTransferDuration(params({cargoMass: 1}))).toBeGreaterThanOrEqual(1)
     })
 })

@@ -4,10 +4,10 @@ import {assert} from 'chai'
 import {getItem} from '$lib'
 import items from '../../src/data/items.json'
 
-// Resource mass is uniform (1000) since the mass-as-quantity collapse on
+// Resource mass is uniform (10) since the mass-as-quantity collapse on
 // 2026-05-27. Tier identity now lives in depth gating, per-tier recipes, and
 // stat rolls; the per-category mass curves retired with mass-tiers.md.
-const UNIFORM_RESOURCE_MASS = 1000
+const UNIFORM_RESOURCE_MASS = 10
 const CATEGORIES: Array<[number, string]> = [
     [100, 'ore'],
     [200, 'crystal'],

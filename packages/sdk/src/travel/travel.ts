@@ -27,6 +27,7 @@ import {
     type CargoMassInfo,
     type Distance,
     HAULER_EFFICIENCY_DENOM,
+    MASS_STAT_SCALE,
     MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL,
@@ -253,7 +254,7 @@ export function calc_ship_acceleration(ship: ShipLike, mass: UInt64): number {
 }
 
 export function calc_acceleration(thrust: number, mass: number): number {
-    return (thrust / mass) * PRECISION
+    return (thrust / (mass * MASS_STAT_SCALE)) * PRECISION
 }
 
 export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 {

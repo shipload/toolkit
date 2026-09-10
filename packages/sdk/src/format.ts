@@ -1,7 +1,9 @@
-export function formatMass(kg: number): string {
-    if (kg === 0) return '0 t'
-    const sign = kg < 0 ? '-' : ''
-    const centitonnes = Math.round(Math.abs(kg) / 10)
+import {MASS_UNITS_PER_TONNE} from './types'
+
+export function formatMass(mass: number): string {
+    if (mass === 0) return '0 t'
+    const sign = mass < 0 ? '-' : ''
+    const centitonnes = Math.abs(mass) * 10
     const t = Math.floor(centitonnes / 100)
     const frac = centitonnes % 100
     if (frac === 0) return `${sign}${t} t`
@@ -9,10 +11,10 @@ export function formatMass(kg: number): string {
     return `${sign}${t}.${fracStr} t`
 }
 
-export function formatMassDelta(kg: number): string {
-    if (kg === 0) return '0 t'
-    const sign = kg > 0 ? '+' : '-'
-    return `${sign}${formatMass(Math.abs(kg))}`
+export function formatMassDelta(mass: number): string {
+    if (mass === 0) return '0 t'
+    const sign = mass > 0 ? '+' : '-'
+    return `${sign}${formatMass(Math.abs(mass))}`
 }
 
 export function formatLocation(loc: {x: number; y: number}): string {
@@ -23,14 +25,14 @@ function trim(n: number, digits = 1): string {
     return n.toFixed(digits).replace(/\.?0+$/, '')
 }
 
-export function formatMassScaled(kg: number): string {
-    if (kg === 0) return '0 t'
-    const sign = kg < 0 ? '-' : ''
-    const tonnes = Math.abs(kg) / 1000
+export function formatMassScaled(mass: number): string {
+    if (mass === 0) return '0 t'
+    const sign = mass < 0 ? '-' : ''
+    const tonnes = Math.abs(mass) / MASS_UNITS_PER_TONNE
     if (tonnes >= 1_000_000_000) return `${sign}${trim(tonnes / 1_000_000_000)}b t`
     if (tonnes >= 1_000_000) return `${sign}${trim(tonnes / 1_000_000)}m t`
     if (tonnes >= 1_000) return `${sign}${trim(tonnes / 1_000)}k t`
-    return formatMass(kg)
+    return formatMass(mass)
 }
 
 export function formatInfluence(atomic: bigint | number | string): string {

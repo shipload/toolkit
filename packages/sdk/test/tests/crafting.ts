@@ -488,8 +488,8 @@ describe('Crafting', () => {
                 cohesion: 500,
             })
             assert.equal(caps.hullmass, containerHullmass(500))
-            assert.equal(caps.capacity, Math.floor(22000000 * 6 ** (1500 / 2997)))
-            assert.approximately(caps.capacity, 53935000, 1000000)
+            assert.equal(caps.capacity, Math.floor(220000 * 6 ** (1500 / 2997)))
+            assert.approximately(caps.capacity, 539350, 10000)
         })
 
         test('minimum stats produce ceiling hullmass', () => {
@@ -500,10 +500,10 @@ describe('Crafting', () => {
                 cohesion: 1,
             })
             assert.equal(caps.hullmass, containerHullmass(1))
-            assert.isAtLeast(caps.hullmass, 99000)
-            assert.isAtMost(caps.hullmass, 100000)
-            assert.isAtLeast(caps.capacity, 22000000)
-            assert.isAtMost(caps.capacity, 22100000)
+            assert.isAtLeast(caps.hullmass, 990)
+            assert.isAtMost(caps.hullmass, 1000)
+            assert.isAtLeast(caps.capacity, 220000)
+            assert.isAtMost(caps.capacity, 221000)
         })
 
         test('maximum stats produce floor hullmass', () => {
@@ -514,13 +514,13 @@ describe('Crafting', () => {
                 cohesion: 999,
             })
             assert.equal(caps.hullmass, containerHullmass(999))
-            assert.isAtLeast(caps.hullmass, 50000)
-            assert.isAtMost(caps.hullmass, 51000)
-            assert.isAtLeast(caps.capacity, 131000000)
-            assert.isAtMost(caps.capacity, 133000000)
+            assert.isAtLeast(caps.hullmass, 500)
+            assert.isAtMost(caps.hullmass, 510)
+            assert.isAtLeast(caps.capacity, 1310000)
+            assert.isAtMost(caps.capacity, 1330000)
         })
 
-        test('hullmass range is 25k-100k', () => {
+        test('hullmass range is 250-1000', () => {
             const heaviest = computeContainerCapabilities({
                 density: 1,
                 strength: 500,
@@ -533,11 +533,11 @@ describe('Crafting', () => {
                 hardness: 500,
                 cohesion: 500,
             })
-            assert.isAtMost(heaviest.hullmass, 100000)
-            assert.isAtLeast(lightest.hullmass, 25000)
+            assert.isAtMost(heaviest.hullmass, 1000)
+            assert.isAtLeast(lightest.hullmass, 250)
         })
 
-        test('capacity range is 20M-200M', () => {
+        test('capacity range is 200k-2M', () => {
             const min = computeContainerCapabilities({
                 strength: 1,
                 hardness: 1,
@@ -550,8 +550,8 @@ describe('Crafting', () => {
                 cohesion: 999,
                 density: 500,
             })
-            assert.isAtLeast(min.capacity, 20000000)
-            assert.isAtMost(max.capacity, 202000000)
+            assert.isAtLeast(min.capacity, 200000)
+            assert.isAtMost(max.capacity, 2020000)
         })
 
         test('higher density means lighter hull', () => {
@@ -593,19 +593,19 @@ describe('Crafting', () => {
 
     describe('calc_craft_duration', () => {
         test('basic duration calculation', () => {
-            const duration = calc_craft_duration(500, 450000)
+            const duration = calc_craft_duration(500, 4500)
             assert.equal(duration.toNumber(), 901)
         })
 
         test('per-task setup cost keeps splitting no cheaper than batching', () => {
-            const single = calc_craft_duration(500, 450000)
-            const batch = calc_craft_duration(500, 450000 * 8)
+            const single = calc_craft_duration(500, 4500)
+            const batch = calc_craft_duration(500, 4500 * 8)
             assert.isAtMost(batch.toNumber(), single.toNumber() * 8)
         })
 
         test('higher speed reduces duration', () => {
-            const slow = calc_craft_duration(200, 450000)
-            const fast = calc_craft_duration(800, 450000)
+            const slow = calc_craft_duration(200, 4500)
+            const fast = calc_craft_duration(800, 4500)
             assert.isAbove(slow.toNumber(), fast.toNumber())
         })
 
@@ -663,20 +663,20 @@ describe('Crafting', () => {
 
     describe('calc_craft_energy', () => {
         test('basic energy calculation', () => {
-            // Plate: 450K input_mass × drain 17_000 / 150K = 51_000, +1 setup cost = 51_001
-            const energy = calc_craft_energy(17_000, 450000)
+            // Plate: 4.5K input_mass × drain 17_000 / 1.5K = 51_000, +1 setup cost = 51_001
+            const energy = calc_craft_energy(17_000, 4500)
             assert.equal(energy.toNumber(), 51_001)
         })
 
         test('higher drain costs more energy', () => {
-            const low = calc_craft_energy(5_000, 450000)
-            const high = calc_craft_energy(30_000, 450000)
+            const low = calc_craft_energy(5_000, 4500)
+            const high = calc_craft_energy(30_000, 4500)
             assert.isAbove(high.toNumber(), low.toNumber())
         })
 
         test('floors craft energy at 1000 (never free)', () => {
-            // 5_000 mass × 24_000 drain / 150_000 divisor = 800 before flooring
-            const energy = calc_craft_energy(24_000, 5_000)
+            // 50 mass × 24_000 drain / 1_500 divisor = 800 before flooring
+            const energy = calc_craft_energy(24_000, 50)
             assert.equal(energy.toNumber(), 1000)
         })
 
@@ -686,13 +686,13 @@ describe('Crafting', () => {
         })
 
         test('per-task setup cost keeps a batch no pricier than split crafts', () => {
-            const single = calc_craft_energy(17, 450000)
-            const batch = calc_craft_energy(17, 1350000)
+            const single = calc_craft_energy(17, 4500)
+            const batch = calc_craft_energy(17, 13500)
             assert.isAtMost(batch.toNumber(), single.toNumber() * 3)
         })
 
         test('energy exceeds the old uint16 ceiling on oversized input', () => {
-            const energy = calc_craft_energy(30, 450_000_000)
+            const energy = calc_craft_energy(30, 4_500_000)
             assert.equal(energy.toNumber(), 90001)
         })
     })

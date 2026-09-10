@@ -280,7 +280,7 @@ describe('buildImmutableData', () => {
         expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 999])
         expect(findEntry(entries, 'hardness')!.second).toEqual(['uint16', 999])
         expect(findEntry(entries, 'cohesion')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 60_000_000])
+        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 600_000])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
             toWholeEnergy(computeCargoBayDrain(999, 1)),

@@ -233,22 +233,22 @@ describe('gathering', () => {
         })
 
         test('median hydrogen at stratum 600', () => {
-            const duration = calc_gather_duration(gatherer, 15000, 1, 600, 500)
+            const duration = calc_gather_duration(gatherer, 150, 1, 600, 500)
             assert.equal(duration.toNumber(), 22)
         })
 
         test('median copper at stratum 600', () => {
-            const duration = calc_gather_duration(gatherer, 40000, 1, 600, 500)
+            const duration = calc_gather_duration(gatherer, 400, 1, 600, 500)
             assert.equal(duration.toNumber(), 57)
         })
 
         test('exact formula calculation', () => {
-            const itemMass = 15000
+            const itemMass = 150
             const quantity = 3
             const stratum = 600
             const richness = 500
             const yieldValue = gatherer.yield.toNumber()
-            const massFactor = itemMass / 228
+            const massFactor = (itemMass * 100) / 228
             const depthPenalty = 1 + stratum / 5000
             const richnessMul = richness / 1000
             const expected =
@@ -265,8 +265,8 @@ describe('gathering', () => {
                 drain: UInt16.from(25),
                 depth: UInt16.from(1000),
             })
-            const one = calc_gather_duration(linearGatherer, 10000, 1, 5000, 500).toNumber()
-            const ten = calc_gather_duration(linearGatherer, 10000, 10, 5000, 500).toNumber()
+            const one = calc_gather_duration(linearGatherer, 100, 1, 5000, 500).toNumber()
+            const ten = calc_gather_duration(linearGatherer, 100, 10, 5000, 500).toNumber()
             // remove the per-gather setup cost from each, then it is linear in quantity
             assert.equal(ten - 1, (one - 1) * 10)
         })
@@ -277,7 +277,7 @@ describe('gathering', () => {
                 drain: UInt16.from(25),
                 depth: UInt16.from(1000),
             })
-            const rate = calc_gather_rate(rateGatherer, 10000, 5000, 500)
+            const rate = calc_gather_rate(rateGatherer, 100, 5000, 500)
             const expectedSecPerUnit =
                 ((10000 / 228) * 100 * (1 + 5000 / 5000)) / (500 * (500 / 1000))
             assert.closeTo(rate.secPerUnit, expectedSecPerUnit, 1e-9)
@@ -292,7 +292,7 @@ describe('gathering', () => {
                 drain: UInt16.from(25),
                 depth: UInt16.from(950),
             })
-            const rate = calc_gather_rate(gathererT1, 1000, 600, 500)
+            const rate = calc_gather_rate(gathererT1, 10, 600, 500)
             const expectedSecPerUnit =
                 ((1000 / 228) * 100 * (1 + 600 / 5000)) / (700 * (500 / 1000))
             assert.isAbove(expectedSecPerUnit, 1)

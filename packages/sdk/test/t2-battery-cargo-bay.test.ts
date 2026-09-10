@@ -39,11 +39,11 @@ describe('T2 Battery Bank & Cargo Hold tier scaling', () => {
     test('computeStorageCapabilities applies +10% capacity and 90% drain at tier 2', () => {
         const stats = {strength: 500, density: 500, hardness: 500, cohesion: 500}
         expect(computeStorageCapabilities(stats, 1)).toEqual({
-            capacity: 35_025_025,
+            capacity: 350_250,
             drain: 6562,
         })
         expect(computeStorageCapabilities(stats, 2)).toEqual({
-            capacity: 38_527_527,
+            capacity: 385_275,
             drain: 5906,
         })
     })
@@ -75,6 +75,6 @@ describe('T2 Battery Bank & Cargo Hold tier scaling', () => {
             [{slotIndex: 0, itemId: ITEM_STORAGE_T2, stats: encodeStats([500, 500, 500, 500])}],
             SHIP_LAYOUT
         )
-        expect(withBay.capacity - bare.capacity).toBe(38_527_527)
+        expect(withBay.capacity - bare.capacity).toBe(385_275)
     })
 })

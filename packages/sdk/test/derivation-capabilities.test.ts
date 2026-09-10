@@ -43,15 +43,15 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
     })
 
-    test('warehouse retains its own 100M base capacity curve', () => {
+    test('warehouse retains its own 1M base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
-            Math.floor(100_000_000 * 6 ** (200 / 1998))
+            Math.floor(1_000_000 * 6 ** (200 / 1998))
         )
     })
 
-    test('container T1 retains its own 22M base capacity curve', () => {
+    test('container T1 retains its own 220k base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)).toBe(
-            Math.floor(22_000_000 * 6 ** (200 / 1998))
+            Math.floor(220_000 * 6 ** (200 / 1998))
         )
     })
 
@@ -62,8 +62,8 @@ describe('computeBaseCapacity', () => {
         expect(t2).toBeGreaterThan(0)
     })
 
-    test('container T2 formula at stats=100,100,100 = floor(floor(22e6 * 6^(200/1998)) * 1.4)', () => {
-        const base = Math.floor(22000000 * 6 ** (200 / 1998))
+    test('container T2 formula at stats=100,100,100 = floor(floor(220k * 6^(200/1998)) * 1.4)', () => {
+        const base = Math.floor(220000 * 6 ** (200 / 1998))
         const expected = Math.floor(base * CAPACITY_TIER_TABLE[1])
         expect(
             computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, {
@@ -97,12 +97,12 @@ describe('computeBaseCapacity', () => {
 })
 
 describe('computeDepotHullCapabilities (depot hull curve, matches contract compute_base_capacity_depot)', () => {
-    test('stats 0 returns exactly the 50M floor', () => {
-        expect(computeDepotHullCapabilities({strength: 0, hardness: 0}).capacity).toBe(50000000)
+    test('stats 0 returns exactly the 500k floor', () => {
+        expect(computeDepotHullCapabilities({strength: 0, hardness: 0}).capacity).toBe(500000)
     })
 
     test('strength/hardness 213 matches contract-measured hull-only capacity', () => {
-        expect(computeDepotHullCapabilities({strength: 213, hardness: 213}).capacity).toBe(73262567)
+        expect(computeDepotHullCapabilities({strength: 213, hardness: 213}).capacity).toBe(732625)
     })
 })
 
@@ -172,7 +172,7 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
             cohesion: 400,
             density: 100,
         })
-        const expected = Math.floor(5_000_000 * 6 ** (1200 / 4995))
+        const expected = Math.floor(50_000 * 6 ** (1200 / 4995))
         expect(result.capacity).toBe(expected)
     })
 
@@ -186,7 +186,7 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
         }
         const result = computeShipHullCapabilities(stats, ITEM_ROUSTABOUT_T1A_PACKED)
 
-        expect(result).toEqual({hullmass: 2_715_200, capacity: 8_609_656})
+        expect(result).toEqual({hullmass: 27_152, capacity: 86_096})
     })
 
     test('T2 ship capacity applies its existing tier multiplier after five-channel quality', () => {
@@ -198,11 +198,11 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
                 reactivity: 404,
                 resonance: 505,
             })
-        ).toBe(12_053_518)
+        ).toBe(120_534)
     })
 
     test('non-ship hull mass keeps its density-based formula', () => {
-        expect(computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, {density: 500})).toBe(75_000)
+        expect(computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, {density: 500})).toBe(750)
     })
 })
 

@@ -1,22 +1,23 @@
+import {MASS_UNITS_PER_TONNE} from '../types'
+
 export const INFLUENCE_ATOMIC_PER_POINT = 10_000
 export const NEED_FP_SCALE = 10_000
 export const WEIGHT_FP_SCALE = 10_000
-export const MASS_KG_PER_TONNE = 1_000
 
 export const INFLUENCE_WEIGHT_FP_MAX = 1_000_000n
 export const INFLUENCE_NEED_FP_MAX = 1_000_000n
-export const INFLUENCE_MASS_KG_MAX = 1n << 48n
+export const INFLUENCE_MASS_MAX = 1n << 48n
 
 export const DECAY_RETAIN_NUM = 19n
 export const DECAY_RETAIN_DEN = 20n
 export const DECAY_MAX_ITERATIONS = 1_024
 
-export const W_EFF_ATOMIC_PER_KG = BigInt(INFLUENCE_ATOMIC_PER_POINT / MASS_KG_PER_TONNE)
+export const W_EFF_ATOMIC_PER_UNIT = BigInt(INFLUENCE_ATOMIC_PER_POINT / MASS_UNITS_PER_TONNE)
 
 export const DECOMP_MAX_BUCKETS = 12
 export const DECOMP_MAX_DEPTH = 8
-export const DECOMP_RAW_KG_MAX = 100_000_000
-export const DECOMP_PROCESSED_KG_MAX = 100_000_000
+export const DECOMP_RAW_MASS_MAX = 1_000_000
+export const DECOMP_PROCESSED_MASS_MAX = 1_000_000
 
 export const RESOURCE_ORE = 0
 export const RESOURCE_GAS = 1

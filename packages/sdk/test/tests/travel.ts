@@ -34,7 +34,12 @@ import {
     lerp,
     rotation,
 } from 'src/travel'
-import {BASE_ORBITAL_MASS, MAX_ORBITAL_ALTITUDE, MIN_ORBITAL_ALTITUDE} from 'src/types'
+import {
+    BASE_ORBITAL_MASS,
+    MASS_STAT_SCALE,
+    MAX_ORBITAL_ALTITUDE,
+    MIN_ORBITAL_ALTITUDE,
+} from 'src/types'
 import {assert} from 'chai'
 import {Chains} from '@wharfkit/common'
 import {UInt64} from '@wharfkit/antelope'
@@ -262,8 +267,8 @@ describe('travel', () => {
 
     describe('calc_ship_flighttime', () => {
         test('calculates ship flight time', () => {
-            const mockShip = createMockShip({thrust: 1000, hullmass: 100000})
-            const time = calc_ship_flighttime(mockShip, UInt64.from(100000), UInt64.from(60000))
+            const mockShip = createMockShip({thrust: 1000, hullmass: 1000})
+            const time = calc_ship_flighttime(mockShip, UInt64.from(1000), UInt64.from(60000))
             assert.equal(Number(time), 56)
         })
     })
@@ -278,7 +283,7 @@ describe('travel', () => {
 
     describe('calc_acceleration', () => {
         test('calculates acceleration from thrust and mass', () => {
-            const accel = calc_acceleration(1000, 100)
+            const accel = calc_acceleration(1000, 1)
             assert.equal(accel, 100000)
         })
     })
@@ -521,17 +526,17 @@ describe('travel', () => {
         })
 
         test('multi-loader entity: returns the chosen lane value, NOT summed÷count', () => {
-            // BEFORE old summed÷count = 2; AFTER per-lane lowest-slot (thrust=100,mass=50000) = 6
+            // BEFORE old summed÷count = 2; AFTER per-lane lowest-slot (thrust=100,mass=500) = 6
             const sender = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
-                loaderLanes: [lane(100, 50000, 0), lane(300, 80000, 1)],
+                loaderLanes: [lane(100, 500, 0), lane(300, 800, 1)],
             }
             const receiver = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
             }
-            const duration = calc_transfer_duration(sender, receiver, 10000)
+            const duration = calc_transfer_duration(sender, receiver, 100)
             assert.equal(duration, 6)
         })
 
@@ -960,8 +965,8 @@ describe('getInterpolatedPosition', () => {
 describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
     // BEFORE=3 (old summed÷count), AFTER=6 (per-lane single-module thrust, no ÷qty)
     const LOADER_THRUST = 100
-    const LOADER_MASS = 50000
-    const CARGO_MASS = 10000
+    const LOADER_MASS = 500
+    const CARGO_MASS = 100
     const ACTIVE_Z = 800
     const COUNTERPART_Z = 800
 
@@ -975,7 +980,7 @@ describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
         const totalQuantity = 2
         const distance = 200
         const totalMass = CARGO_MASS + totalLoaderMass
-        const accel = (totalThrust / totalMass) * 10000
+        const accel = (totalThrust / (totalMass * MASS_STAT_SCALE)) * 10000
         const old = Math.floor((2 * Math.sqrt(distance / accel)) / totalQuantity)
         assert.equal(old, BEFORE_DURATION)
         assert.notEqual(old, AFTER_DURATION)

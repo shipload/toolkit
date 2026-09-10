@@ -1,14 +1,14 @@
 import {getItem} from '../data/catalog'
+import {MASS_UNITS_PER_TONNE} from '../types'
 import {categoryIndex} from './categories'
 import {
     INFLUENCE_ATOMIC_PER_POINT,
-    INFLUENCE_MASS_KG_MAX,
+    INFLUENCE_MASS_MAX,
     INFLUENCE_NEED_FP_MAX,
     INFLUENCE_WEIGHT_FP_MAX,
-    MASS_KG_PER_TONNE,
     NEED_FP_SCALE,
     WEIGHT_FP_SCALE,
-    W_EFF_ATOMIC_PER_KG,
+    W_EFF_ATOMIC_PER_UNIT,
 } from './constants'
 import {findDecomp} from './decomp'
 import type {DemandView} from './demand'
@@ -29,16 +29,16 @@ export interface ValuedItem {
 }
 
 export function weightedQualityAtomic(
-    weightedKgFp: bigint,
+    weightedMassFp: bigint,
     sumSq: number,
     nStats: number,
     d1: number,
     needFp: bigint
 ): bigint {
     if (nStats <= 0 || d1 <= 0) throw new Error('influence: invalid quality divisor')
-    const num = weightedKgFp * BigInt(sumSq) * needFp
+    const num = weightedMassFp * BigInt(sumSq) * needFp
     const den =
-        (BigInt(MASS_KG_PER_TONNE) *
+        (BigInt(MASS_UNITS_PER_TONNE) *
             BigInt(WEIGHT_FP_SCALE) *
             BigInt(nStats) *
             BigInt(d1) *
@@ -48,34 +48,34 @@ export function weightedQualityAtomic(
 }
 
 export function resourceValueAtomic(
-    massKg: bigint,
+    mass: bigint,
     weightFp: bigint,
     sumSq: number,
     nStats: number,
     d1: number,
     needFp: bigint
 ): bigint {
-    if (massKg > INFLUENCE_MASS_KG_MAX) throw new Error('influence: mass out of range')
+    if (mass > INFLUENCE_MASS_MAX) throw new Error('influence: mass out of range')
     if (weightFp > INFLUENCE_WEIGHT_FP_MAX) throw new Error('influence: weight out of range')
     if (needFp > INFLUENCE_NEED_FP_MAX) throw new Error('influence: need out of range')
-    return weightedQualityAtomic(massKg * weightFp, sumSq, nStats, d1, needFp)
+    return weightedQualityAtomic(mass * weightFp, sumSq, nStats, d1, needFp)
 }
 
 export function componentBaseAtomic(
-    weightedRawKgFp: bigint,
+    weightedRawMassFp: bigint,
     sumSq: number,
     nStats: number,
     d1: number
 ): bigint {
-    return weightedQualityAtomic(weightedRawKgFp, sumSq, nStats, d1, BigInt(NEED_FP_SCALE))
+    return weightedQualityAtomic(weightedRawMassFp, sumSq, nStats, d1, BigInt(NEED_FP_SCALE))
 }
 
-export function componentEffortAtomic(processedKgPerUnit: number, quantity: number): bigint {
-    const processed = BigInt(processedKgPerUnit) * BigInt(quantity)
-    if (processed > INFLUENCE_MASS_KG_MAX) {
+export function componentEffortAtomic(processedMassPerUnit: number, quantity: number): bigint {
+    const processed = BigInt(processedMassPerUnit) * BigInt(quantity)
+    if (processed > INFLUENCE_MASS_MAX) {
         throw new Error('influence: processed mass out of range')
     }
-    return processed * W_EFF_ATOMIC_PER_KG
+    return processed * W_EFF_ATOMIC_PER_UNIT
 }
 
 export function valueCargoItem(
@@ -114,14 +114,14 @@ export function valueCargoItem(
 
     let weighted = 0n
     for (const bucket of entry.buckets) {
-        weighted += BigInt(bucket.rawKg) * pricing.weight(bucket.category, bucket.tier)
+        weighted += BigInt(bucket.rawMass) * pricing.weight(bucket.category, bucket.tier)
     }
 
     const perUnit = componentBaseAtomic(weighted, sumSq, nStats, pricing.d1)
     const total = perUnit * BigInt(item.quantity)
     if (total > UINT64_MAX) throw new Error('influence: component value overflow')
 
-    const withEffort = total + componentEffortAtomic(entry.processedKg, item.quantity)
+    const withEffort = total + componentEffortAtomic(entry.processedMass, item.quantity)
     if (withEffort > UINT64_MAX) throw new Error('influence: component value overflow')
     return withEffort
 }

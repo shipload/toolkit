@@ -25,8 +25,9 @@ import {ServerContract, TokenContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
 
-const CHARGE_K = 1n
-const ENERGY_DIVISOR = 1_000_000n
+const CHARGE_K = 100n
+const ENERGY_DIVISOR = 10n
+const ENERGY_FLOOR = 1_000n
 const UINT32_MAX = 4_294_967_295
 const UINT32_MAX_BIGINT = 4_294_967_295n
 const UINT32_MOD = 4_294_967_296n
@@ -99,6 +100,12 @@ function clampLaunchResult(value: bigint): number {
     return Number(value)
 }
 
+function clampEnergyResult(value: bigint): number {
+    if (value < ENERGY_FLOOR) return Number(ENERGY_FLOOR)
+    if (value > UINT32_MAX_BIGINT) return UINT32_MAX
+    return Number(value)
+}
+
 function toUint32(value: bigint): bigint {
     return value % UINT32_MOD
 }
@@ -133,7 +140,8 @@ function calcPayloadMass(items: ServerContract.ActionParams.Type.cargo_item[]): 
 
 function calcChargeTime(chargeRate: number, mass: bigint): number {
     const rate = BigInt(chargeRate || 1)
-    return clampLaunchResult((mass * CHARGE_K) / rate)
+    const t = (mass * CHARGE_K) / rate
+    return clampLaunchResult(t + 1n)
 }
 
 function calcFlightTime(velocity: number, distance: bigint): number {
@@ -145,7 +153,7 @@ function calcLaunchEnergy(drain: number, mass: bigint, distance: bigint): number
     const e =
         saturatingMul(saturatingMul(mass, distance / PRECISION_BIGINT), BigInt(drain)) /
         ENERGY_DIVISOR
-    return clampLaunchResult(e)
+    return clampEnergyResult(e)
 }
 
 function calcMaxReach(energyBudget: bigint, mass: bigint, drain: number): bigint {

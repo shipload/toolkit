@@ -1,5 +1,5 @@
 import {UInt32} from '@wharfkit/antelope'
-import {CRAFT_ENERGY_DIVISOR} from '../types'
+import {CRAFT_ENERGY_DIVISOR, MASS_STAT_SCALE} from '../types'
 import type {CrafterStats, EntityCapabilities} from '../types/capabilities'
 import type {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
@@ -14,12 +14,11 @@ export function capsHasCrafter(caps: EntityCapabilities): boolean {
 }
 
 export function calc_craft_duration(speed: number, totalInputMass: number): UInt32 {
-    const duration = Math.floor(totalInputMass / speed)
+    const duration = Math.floor((totalInputMass * MASS_STAT_SCALE) / speed)
     return UInt32.from(duration + 1)
 }
 
-// Mirrors contract config.hpp INTAKE_RATE (provisional; a numbers pass will retune it).
-export const INTAKE_RATE = 36000
+export const INTAKE_RATE = 360
 
 // Mirrors calc_cluster_intake: whole seconds of intake for cargo sourced off other cluster members.
 export function calcClusterIntake(sourcedMass: number): number {

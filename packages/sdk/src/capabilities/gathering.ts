@@ -1,6 +1,6 @@
 import {UInt32} from '@wharfkit/antelope'
 import type {GathererStats} from '../types/capabilities'
-import {PRECISION} from '../types'
+import {MASS_STAT_SCALE, PRECISION} from '../types'
 
 const GATHER_TIME_SCALE = 100
 export const GATHER_MASS_DIVISOR = 228
@@ -17,7 +17,7 @@ function gather_duration_raw(
 
     if (yieldValue === 0 || richness === 0) return 0
 
-    const massFactor = itemMass / GATHER_MASS_DIVISOR
+    const massFactor = (itemMass * MASS_STAT_SCALE) / GATHER_MASS_DIVISOR
     const depthPenalty = 1 + stratum / DEPTH_PENALTY_DIVISOR
     const richnessMul = richness / 1000
     return (quantity * massFactor * GATHER_TIME_SCALE * depthPenalty) / (yieldValue * richnessMul)

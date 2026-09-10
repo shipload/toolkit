@@ -1,13 +1,13 @@
 import type {UInt16Type, UInt32Type} from '@wharfkit/antelope'
 import {calcCargoItemMass} from '../capabilities/storage'
 import type {ServerContract} from '../contracts'
-import {PRECISION} from '../types'
+import {MASS_STAT_SCALE, PRECISION} from '../types'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
 import {candidateLaneCompletesAt} from './lanes'
 
 const NFT_TRANSIT_THRUST = 400
-const BASELINE_LOADER: DerivedLoaders = {mass: 2000, thrust: 1, quantity: 1}
+const BASELINE_LOADER: DerivedLoaders = {mass: 20, thrust: 1, quantity: 1}
 // ground-level entities (warehouses, z=0) still incur a base orbital climb of load effort
 const MIN_LOAD_Z = 800
 
@@ -37,7 +37,7 @@ export function derivedLoaders(
 
 function acceleration(thrust: number, mass: number): number {
     if (mass <= 0) return 0
-    return (thrust / mass) * PRECISION
+    return (thrust / (mass * MASS_STAT_SCALE)) * PRECISION
 }
 
 function flightTime(distance: number, accel: number): number {

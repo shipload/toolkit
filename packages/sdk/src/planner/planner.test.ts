@@ -130,7 +130,7 @@ describe('planParallelTransfer', () => {
 
 describe('cost helpers', () => {
     const STRATUM = 100
-    const ITEM_MASS = 1000
+    const ITEM_MASS = 10
     const RICHNESS = 500
 
     test('gatherEnergyCost is 0 for non-positive quantity and positive otherwise', () => {
@@ -168,7 +168,7 @@ describe('buildGatherPlan', () => {
     const STRATUM = 100
     const OPTS = {
         richness: 500,
-        itemMass: 1000,
+        itemMass: 10,
         holdRoom: 1_000_000,
         reserveRemaining: 1_000_000,
         now: NOW,

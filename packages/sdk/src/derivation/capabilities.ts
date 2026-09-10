@@ -2,7 +2,7 @@ import {getEntityLayout} from '../data/recipes-runtime'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEffectiveModuleStat} from './stat-scaling'
 
-export const DEFAULT_BASE_HULLMASS = 100_000
+export const DEFAULT_BASE_HULLMASS = 1_000
 
 export function getBaseHullmassFor(itemId: number): number {
     return getEntityLayout(itemId)?.baseHullmass ?? DEFAULT_BASE_HULLMASS
@@ -35,7 +35,7 @@ export function computeShipHullCapabilities(
     const exponent = statSum / 4995.0
     return {
         hullmass: computeBaseHullmass(itemId, stats),
-        capacity: Math.floor(5000000 * 6 ** exponent),
+        capacity: Math.floor(50000 * 6 ** exponent),
     }
 }
 
@@ -126,7 +126,7 @@ export function computeLoaderCapabilities(
     const insulation = stats.insulation
     const plasticity = stats.plasticity
     return {
-        mass: Math.max(200, 2000 - Math.floor(insulation * 2)),
+        mass: Math.max(2, 20 - Math.floor(insulation / 50)),
         thrust: Math.floor(
             ((1 + Math.floor((plasticity * plasticity) / 10000)) *
                 moduleTierPct(LOADER_THRUST_TIER_PCT, tier)) /
@@ -359,7 +359,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const exponent = statSum / 1998.0
     return {
         hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, stats),
-        capacity: Math.floor(100000000 * 6 ** exponent),
+        capacity: Math.floor(1000000 * 6 ** exponent),
     }
 }
 
@@ -371,7 +371,7 @@ export function computeDepotHullCapabilities(stats: Record<string, number>): {
     const exponent = statSum / 1998.0
     return {
         hullmass: computeBaseHullmass(ITEM_DEPOT_T1_PACKED, stats),
-        capacity: Math.floor(50000000 * 6 ** exponent),
+        capacity: Math.floor(500000 * 6 ** exponent),
     }
 }
 
@@ -383,7 +383,7 @@ export function computeWorkshopHullCapabilities(stats: Record<string, number>): 
     const exponent = statSum / 1998.0
     return {
         hullmass: computeBaseHullmass(ITEM_WORKSHOP_T1_PACKED, stats),
-        capacity: Math.floor(5000000 * 6 ** exponent),
+        capacity: Math.floor(50000 * 6 ** exponent),
     }
 }
 
@@ -702,6 +702,6 @@ export function computeContainerCapabilities(stats: Record<string, number>): {
     const exponent = statSum / 1998.0
     return {
         hullmass: computeBaseHullmass(ITEM_CONTAINER_T1_PACKED, stats),
-        capacity: Math.floor(22000000 * 6 ** exponent),
+        capacity: Math.floor(220000 * 6 ** exponent),
     }
 }

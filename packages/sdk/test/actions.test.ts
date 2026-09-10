@@ -294,11 +294,11 @@ test('getLaunchQuote mirrors contract launch formulas for a deterministic route'
         start
     )
 
-    expect(quote.chargeTime).toBe(2000)
+    expect(quote.chargeTime).toBe(2001)
     expect(quote.flightTime).toBe(1)
-    expect(quote.energyCost).toBe(100)
-    expect(quote.arrival.toISOString()).toBe('2026-06-26T00:33:21.000Z')
-    expect(quote.maxReach).toBe(509999n)
+    expect(quote.energyCost).toBe(100000)
+    expect(quote.arrival.toISOString()).toBe('2026-06-26T00:33:22.000Z')
+    expect(quote.maxReach).toBe(9999n)
 })
 
 test('getLaunchQuote increases charge, flight, and energy with heavier and farther launches', () => {
@@ -343,7 +343,7 @@ test('getLaunchQuote mirrors uint32 payload mass wrapping at item and total boun
         item_id: 101,
         stats: 0n,
         modules: [{type: 0, installed: {item_id: 10109, stats: 0n}}],
-        quantity: 4_294_967,
+        quantity: 429_496_730,
     }
 
     const quote = sl.actions.getLaunchQuote(
@@ -353,10 +353,10 @@ test('getLaunchQuote mirrors uint32 payload mass wrapping at item and total boun
             generator: {capacity: 1000},
         },
         {coordinates: {x: 1, y: 0}},
-        [wrappedItem, cargo(101, 4_294_967)]
+        [wrappedItem, cargo(101, 429_496_730)]
     )
 
-    expect(quote.chargeTime).toBe(999408)
+    expect(quote.chargeTime).toBe(1_000_801)
 })
 
 test('sendAsset builds an atomicassets::transfer to the recipient with the given memo', () => {

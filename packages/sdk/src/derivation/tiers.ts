@@ -8,11 +8,11 @@ export interface TierRange {
 }
 
 export const RESERVE_TIERS: Record<ReserveTier, TierRange> = {
-    small: {min: 3_600_000, max: 14_400_000},
-    medium: {min: 24_000_000, max: 48_000_000},
-    large: {min: 96_000_000, max: 168_000_000},
-    massive: {min: 240_000_000, max: 600_000_000},
-    motherlode: {min: 960_000_000, max: 2_400_000_000},
+    small: {min: 36_000, max: 144_000},
+    medium: {min: 240_000, max: 480_000},
+    large: {min: 960_000, max: 1_680_000},
+    massive: {min: 2_400_000, max: 6_000_000},
+    motherlode: {min: 9_600_000, max: 24_000_000},
 }
 
 const SHALLOW_THRESHOLDS = {
