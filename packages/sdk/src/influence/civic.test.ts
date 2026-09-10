@@ -249,7 +249,7 @@ describe('grant mechanics', () => {
     })
 
     test('a module grant past the layout is refused', () => {
-        const full = fitCivicModules(emptyCivicModules(CIVIC_DOCK), 1)
+        const full = fitCivicModules(emptyCivicModules(CIVIC_DOCK), 2)
         expect(() => fitCivicModules(full, 1)).toThrow('no open slot')
     })
 

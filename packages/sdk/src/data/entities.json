@@ -178,6 +178,11 @@
         "type": "builder",
         "outputPct": 200,
         "maxTier": 1
+      },
+      {
+        "type": "builder",
+        "outputPct": 200,
+        "maxTier": 1
       }
     ],
     "baseHullmass": 100000

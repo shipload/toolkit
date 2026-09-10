@@ -99,7 +99,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'before',
                 'Requires: this entity is co-located with the Workshop, has a Generator with enough ' +
                     'energy, and holds all recipe inputs in cargo. The Workshop crafts on your behalf; ' +
-                    'claim the output later with `claimjob`.\n'
+                    'claim the output later with `claimcraft`.\n'
             )
             .addHelpText(
                 'after',

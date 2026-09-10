@@ -92,7 +92,7 @@ export function splitJobCargo<T>(cargo: readonly T[]): {output: T | null; inputs
 
 export interface OwnedJob {
     id: number
-    workshop: number
+    building: number
     socket: number
     shipId: number
     coords: {x: number; y: number}

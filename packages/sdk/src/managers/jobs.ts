@@ -3,7 +3,7 @@ import {BaseManager} from './base'
 import {jobStatus, splitJobCargo, type OwnedJob} from '../scheduling/jobs'
 import type {ServerContract} from '../contracts'
 
-type JobRow = ServerContract.Types.job_row
+type JobRow = ServerContract.Types.craftjob_row
 
 export class JobsManager extends BaseManager {
     async getOwnedJobs(owner: NameType, opts?: {now?: Date}): Promise<OwnedJob[]> {
@@ -14,7 +14,7 @@ export class JobsManager extends BaseManager {
         try {
             // index_position 'tertiary' = nodeos slot 3 = owner's secondary index; no ABI metadata for it.
             rows = (await this.server
-                .table('jobs')
+                .table('craftjobs')
                 .query({
                     index_position: 'tertiary',
                     key_type: 'i64',
@@ -23,7 +23,7 @@ export class JobsManager extends BaseManager {
                 })
                 .all()) as JobRow[]
         } catch {
-            rows = (await this.server.table('jobs').all()) as JobRow[]
+            rows = (await this.server.table('craftjobs').all()) as JobRow[]
         }
 
         return rows.filter((r) => ownerName.equals(r.owner)).map((r) => this.parseOwnedJob(r, now))
@@ -35,7 +35,7 @@ export class JobsManager extends BaseManager {
         const {output, inputs} = splitJobCargo(r.cargo)
         return {
             id: r.id.toNumber(),
-            workshop: r.workshop.toNumber(),
+            building: r.building.toNumber(),
             socket: r.socket.toNumber(),
             shipId: r.ship_id.toNumber(),
             coords: {x: r.coords.x.toNumber(), y: r.coords.y.toNumber()},

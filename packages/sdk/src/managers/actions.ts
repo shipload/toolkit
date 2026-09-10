@@ -524,58 +524,51 @@ export class ActionsManager extends BaseManager {
         return this.server.action('clustercraft', params)
     }
 
-    claimjob(jobId: UInt64Type, shipId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.claimjob = {
+    claimcraft(jobId: UInt64Type, shipId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.claimcraft = {
             job_id: UInt64.from(jobId),
             ship_id: UInt64.from(shipId),
         }
-        return this.server.action('claimjob', params)
+        return this.server.action('claimcraft', params)
     }
 
-    canceljob(jobId: UInt64Type, shipId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.canceljob = {
+    cancelcraft(jobId: UInt64Type, shipId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.cancelcraft = {
             job_id: UInt64.from(jobId),
             ship_id: UInt64.from(shipId),
         }
-        return this.server.action('canceljob', params)
+        return this.server.action('cancelcraft', params)
     }
 
-    upgradejob(
+    buildjob(
         targetId: UInt64Type,
         dockId: UInt64Type,
+        slot: UInt8Type,
         targetItemId: UInt16Type,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
-        const params: ServerContract.ActionParams.upgradejob = {
+        const params: ServerContract.ActionParams.buildjob = {
             target_id: UInt64.from(targetId),
             dock_id: UInt64.from(dockId),
+            slot: UInt8.from(slot),
             target_item_id: UInt16.from(targetItemId),
             inputs,
         }
-        return this.server.action('upgradejob', params)
+        return this.server.action('buildjob', params)
     }
 
-    claimupgrade(jobId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.claimupgrade = {
+    claimbuild(jobId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.claimbuild = {
             job_id: UInt64.from(jobId),
         }
-        return this.server.action('claimupgrade', params)
+        return this.server.action('claimbuild', params)
     }
 
-    cancelupgrade(jobId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.cancelupgrade = {
+    cancelbuild(jobId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.cancelbuild = {
             job_id: UInt64.from(jobId),
         }
-        return this.server.action('cancelupgrade', params)
-    }
-
-    setsocket(workshopId: UInt64Type, slot: UInt8Type, open: boolean): Action {
-        const params: ServerContract.ActionParams.setsocket = {
-            workshop_id: UInt64.from(workshopId),
-            slot: UInt8.from(slot),
-            open,
-        }
-        return this.server.action('setsocket', params)
+        return this.server.action('cancelbuild', params)
     }
 
     blend(entityId: UInt64Type, inputs: ServerContract.ActionParams.Type.cargo_item[]): Action {

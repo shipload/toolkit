@@ -5,7 +5,7 @@ import {JobsManager} from './jobs'
 const OWNER = 'eggmaple.gm'
 const row = (over: Record<string, unknown> = {}) => ({
     id: {toNumber: () => 7},
-    workshop: {toNumber: () => 42},
+    building: {toNumber: () => 42},
     socket: {toNumber: () => 0},
     owner: Name.from(OWNER),
     ship_id: {toNumber: () => 100},
@@ -33,7 +33,7 @@ describe('JobsManager.getOwnedJobs', () => {
         )
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs).toHaveLength(1)
-        expect(jobs[0]).toMatchObject({id: 7, workshop: 42, quantity: 5, status: 'ready'})
+        expect(jobs[0]).toMatchObject({id: 7, building: 42, quantity: 5, status: 'ready'})
         expect(jobs[0].coords).toEqual({x: 12, y: 34})
         expect(jobs[0].output).toEqual({item: 'out'} as never)
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
