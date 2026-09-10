@@ -16,13 +16,13 @@ function managerWith(rowsByTable: Record<string, unknown[]>) {
 }
 
 describe('InfluenceManager scoped table reads', () => {
-    it('getBallotVotes scopes ballotvote by ballot id and maps fields', async () => {
+    it('getBallotVotes scopes ballotpicks by ballot id and maps fields', async () => {
         const {manager, calls} = managerWith({
-            ballotvote: [{account: Name.from('eggmaple.gm'), picks: [2, 1]}],
+            ballotpicks: [{account: Name.from('eggmaple.gm'), picks: [2, 1]}],
         })
         const rows = await manager.getBallotVotes(7n)
         expect(calls).toHaveLength(1)
-        expect(calls[0].table).toBe('ballotvote')
+        expect(calls[0].table).toBe('ballotpicks')
         expect(UInt64.from(calls[0].scope as never).equals(UInt64.from(7))).toBe(true)
         expect(rows).toEqual([{account: Name.from('eggmaple.gm'), picks: [2, 1]}])
     })

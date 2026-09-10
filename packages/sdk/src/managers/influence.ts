@@ -121,7 +121,6 @@ export interface Ballot {
     seats: number
     settledEpoch: number
     queue: number[]
-    round: number
     settling: boolean
 }
 
@@ -364,15 +363,14 @@ export class InfluenceManager extends BaseManager {
             seats: Number(row.seats),
             settledEpoch,
             queue: row.queue.map((n) => Number(n)),
-            round: Number(row.round),
             settling: settledEpoch < epoch,
         }
     }
 
     async getBallotVotes(ballotId: bigint): Promise<BallotVote[]> {
         const rows = (await this.server
-            .table('ballotvote', UInt64.from(ballotId))
-            .all()) as ServerContract.Types.ballotvote_row[]
+            .table('ballotpicks', UInt64.from(ballotId))
+            .all()) as ServerContract.Types.ballotpicks_row[]
         return rows.map((row) => ({
             account: Name.from(row.account),
             picks: row.picks.map((n) => Number(n)),
