@@ -37,8 +37,8 @@ describe("solveMaxGatherQuantity", () => {
 	test("reserve binds when reserve is the smallest cap", () => {
 		const result = solveMaxGatherQuantity({
 			caps,
-			budget: { energy: 65_535_000, cargoFreeKg: 1_000_000_000 },
-			itemMassKg: 15000,
+			budget: { energy: 65_535_000, cargoFree: 10_000_000 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 500,
 			reserve: 5,
@@ -50,8 +50,8 @@ describe("solveMaxGatherQuantity", () => {
 	test("cargo binds when cargo space is the smallest cap", () => {
 		const result = solveMaxGatherQuantity({
 			caps,
-			budget: { energy: 65_535_000, cargoFreeKg: 30_000 },
-			itemMassKg: 15_000,
+			budget: { energy: 65_535_000, cargoFree: 300 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 500,
 			reserve: 1000,
@@ -64,8 +64,8 @@ describe("solveMaxGatherQuantity", () => {
 		const tightCaps: GathererCaps = { ...caps, drain: 5_000_000 };
 		const result = solveMaxGatherQuantity({
 			caps: tightCaps,
-			budget: { energy: 100_000, cargoFreeKg: 1_000_000_000 },
-			itemMassKg: 15_000,
+			budget: { energy: 100_000, cargoFree: 10_000_000 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 500,
 			reserve: 1000,
@@ -79,12 +79,12 @@ describe("solveMaxGatherQuantity", () => {
 			depth: UInt16.from(tightCaps.depth),
 		};
 		const dur = Number(
-			calc_gather_duration(tightStats, 15_000, result.maxQuantity, 600, 500),
+			calc_gather_duration(tightStats, 150, result.maxQuantity, 600, 500),
 		);
 		const energy = Number(calc_gather_energy(tightStats, dur));
 		expect(energy).toBeLessThanOrEqual(100_000);
 		// And verify q+1 would exceed.
-		const durNext = Number(calc_gather_duration(tightStats, 15_000, result.maxQuantity + 1, 600, 500));
+		const durNext = Number(calc_gather_duration(tightStats, 150, result.maxQuantity + 1, 600, 500));
 		const energyNext = Number(calc_gather_energy(tightStats, durNext));
 		expect(energyNext).toBeGreaterThan(100_000);
 	});
@@ -92,8 +92,8 @@ describe("solveMaxGatherQuantity", () => {
 	test("returns 0 when reserve is empty", () => {
 		const result = solveMaxGatherQuantity({
 			caps,
-			budget: { energy: 65_535_000, cargoFreeKg: 1_000_000_000 },
-			itemMassKg: 15_000,
+			budget: { energy: 65_535_000, cargoFree: 10_000_000 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 500,
 			reserve: 0,
@@ -105,8 +105,8 @@ describe("solveMaxGatherQuantity", () => {
 	test("returns 0 when richness is 0 (non-gatherable)", () => {
 		const result = solveMaxGatherQuantity({
 			caps,
-			budget: { energy: 65_535_000, cargoFreeKg: 1_000_000_000 },
-			itemMassKg: 15_000,
+			budget: { energy: 65_535_000, cargoFree: 10_000_000 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 0,
 			reserve: 1000,
@@ -118,8 +118,8 @@ describe("solveMaxGatherQuantity", () => {
 		const tightCaps: GathererCaps = { ...caps, drain: 5_000_000 };
 		const result = solveMaxGatherQuantity({
 			caps: tightCaps,
-			budget: { energy: 1, cargoFreeKg: 1_000_000_000 },
-			itemMassKg: 15_000,
+			budget: { energy: 1, cargoFree: 10_000_000 },
+			itemMass: 150,
 			stratum: 600,
 			richness: 500,
 			reserve: 1000,
@@ -132,26 +132,26 @@ describe("solveMaxGatherQuantity", () => {
 		// Sweep a range of inputs and confirm: the returned q is always feasible,
 		// and q+1 (when not reserve-bound) would fail at least one constraint.
 		const cases = [
-			{ energy: 350_000, cargoFreeKg: 1_000_000, reserve: 1000 },
-			{ energy: 100, cargoFreeKg: 30_000, reserve: 50 },
-			{ energy: 65_535_000, cargoFreeKg: 100_000, reserve: 200 },
-			{ energy: 50, cargoFreeKg: 1_000_000, reserve: 1000 },
+			{ energy: 350_000, cargoFree: 10_000, reserve: 1000 },
+			{ energy: 100, cargoFree: 300, reserve: 50 },
+			{ energy: 65_535_000, cargoFree: 1_000, reserve: 200 },
+			{ energy: 50, cargoFree: 10_000, reserve: 1000 },
 		];
 		for (const c of cases) {
 			const result = solveMaxGatherQuantity({
 				caps,
-				budget: { energy: c.energy, cargoFreeKg: c.cargoFreeKg },
-				itemMassKg: 15_000,
+				budget: { energy: c.energy, cargoFree: c.cargoFree },
+				itemMass: 150,
 				stratum: 600,
 				richness: 500,
 				reserve: c.reserve,
 			});
 			const q = result.maxQuantity;
 			if (q > 0) {
-				const dur = Number(calc_gather_duration(gathererStats, 15_000, q, 600, 500));
+				const dur = Number(calc_gather_duration(gathererStats, 150, q, 600, 500));
 				const energy = Number(calc_gather_energy(gathererStats, dur));
 				expect(energy).toBeLessThanOrEqual(c.energy);
-				expect(15_000 * q).toBeLessThanOrEqual(c.cargoFreeKg);
+				expect(150 * q).toBeLessThanOrEqual(c.cargoFree);
 				expect(q).toBeLessThanOrEqual(c.reserve);
 			}
 		}
@@ -163,7 +163,7 @@ describe("computeStratumGatherMetrics", () => {
 		const stratum = makeStratum({ richness: 0 });
 		const m = computeStratumGatherMetrics({
 			caps,
-			budget: { energy: 350_000, cargoFreeKg: 1_000_000 },
+			budget: { energy: 350_000, cargoFree: 10_000 },
 			stratum,
 			quantity: 1,
 		});
@@ -177,7 +177,7 @@ describe("computeStratumGatherMetrics", () => {
 		const stratum = makeStratum({ index: 600, richness: 500, reserve: 100 });
 		const m = computeStratumGatherMetrics({
 			caps,
-			budget: { energy: 350_000, cargoFreeKg: 1_000_000 },
+			budget: { energy: 350_000, cargoFree: 10_000 },
 			stratum,
 			quantity: 1,
 		});

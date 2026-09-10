@@ -7,6 +7,7 @@ import {
 	formatMass,
 	formatMassScaled,
 	LocationType,
+	MASS_UNITS_PER_TONNE,
 	PRECISION,
 	RefitOp,
 	resolveItem,
@@ -239,10 +240,10 @@ export function formatResolveHint(
 
 export function formatReserve(reserve: number, reserveMax: number): string {
 	if (reserveMax === 0) return "0 t";
-	const total = formatMassScaled(reserveMax * 1000);
+	const total = formatMassScaled(reserveMax * MASS_UNITS_PER_TONNE);
 	if (reserve === reserveMax) return total;
 	const pct = Math.round((reserve / reserveMax) * 100);
-	return `${formatMassScaled(reserve * 1000)} / ${total} (${pct}%)`;
+	return `${formatMassScaled(reserve * MASS_UNITS_PER_TONNE)} / ${total} (${pct}%)`;
 }
 
 export function formatEntityRef(ref: { entityType: string; entityId: number | bigint }): string {

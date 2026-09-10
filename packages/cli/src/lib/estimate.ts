@@ -20,6 +20,8 @@
 
 import {
 	buildGatherPlan,
+	calc_acceleration,
+	calc_craft_duration,
 	calc_craft_energy,
 	calc_energyusage,
 	calc_ship_flighttime,
@@ -673,9 +675,7 @@ export async function estimateGroupTravel(params: {
 		};
 	}
 
-	// calc_acceleration(thrust, mass) = thrust/mass * PRECISION (sdkv2/src/travel/travel.ts:163)
-	const PRECISION = 10_000;
-	const acceleration = (totalThrust / totalMass) * PRECISION;
+	const acceleration = calc_acceleration(totalThrust, totalMass);
 	const flightSeconds = computeFlightDurationSeconds(Number(distance), acceleration);
 
 	const gameSeed = await getGameSeed();
@@ -793,7 +793,7 @@ export async function estimateCraft(params: {
 		};
 	}
 
-	const duration = Math.max(Math.floor(totalInputMass / speed), 1);
+	const duration = calc_craft_duration(speed, totalInputMass).toNumber();
 	const energy = calc_craft_energy(drain, totalInputMass).toNumber();
 
 	const recharge = params.recharge ?? false;

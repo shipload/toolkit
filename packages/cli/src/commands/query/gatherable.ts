@@ -29,8 +29,8 @@ interface ResolvedEntityState {
     caps: GathererCaps
     energy: number
     energyCapacity: number
-    cargoFreeKg: number
-    cargoCapacityKg: number
+    cargoFree: number
+    cargoCapacity: number
     entityName?: string
 }
 
@@ -58,14 +58,14 @@ function resolveState(
     }
 
     const energyCapacity = Number(raw.generator?.capacity?.toString() ?? '0')
-    const cargoCapacityKg = Number(raw.capacity?.toString() ?? '0')
+    const cargoCapacity = Number(raw.capacity?.toString() ?? '0')
 
     let coords = {
         x: BigInt(raw.coordinates.x.toString()),
         y: BigInt(raw.coordinates.y.toString()),
     }
     let energy = Number(raw.energy?.toString() ?? '0')
-    let cargoFreeKg = cargoCapacityKg - Number(raw.cargomass?.toString() ?? '0')
+    let cargoFree = cargoCapacity - Number(raw.cargomass?.toString() ?? '0')
 
     if (useProjected && schedule.hasSchedule(snap)) {
         try {
@@ -75,7 +75,7 @@ function resolveState(
                 y: BigInt(projection.location.y.toString()),
             }
             energy = Number(projection.energy.toString())
-            cargoFreeKg = cargoCapacityKg - Number(projection.cargoMass.toString())
+            cargoFree = cargoCapacity - Number(projection.cargoMass.toString())
         } catch {
             // fall through to current state
         }
@@ -86,8 +86,8 @@ function resolveState(
         caps,
         energy,
         energyCapacity,
-        cargoFreeKg: Math.max(0, cargoFreeKg),
-        cargoCapacityKg,
+        cargoFree: Math.max(0, cargoFree),
+        cargoCapacity,
         entityName: raw.entity_name,
     }
 }
@@ -107,7 +107,7 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
         const metrics = reachable
             ? computeStratumGatherMetrics({
                   caps: state.caps,
-                  budget: {energy: state.energy, cargoFreeKg: state.cargoFreeKg},
+                  budget: {energy: state.energy, cargoFree: state.cargoFree},
                   stratum,
                   quantity: opts.quantity,
               })
@@ -116,7 +116,7 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
                   energyCost: 0,
                   maxQuantity: 0,
                   maxQuantityBound: null as null,
-                  itemMassKg: 0,
+                  itemMass: 0,
                   gatherable: false,
               }
         return {stratum, reachable, metrics}
@@ -137,9 +137,9 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
         locationTypeLabel: view.locationTypeLabel,
         size: view.size,
         caps: state.caps,
-        budget: {energy: state.energy, cargoFreeKg: state.cargoFreeKg},
+        budget: {energy: state.energy, cargoFree: state.cargoFree},
         energyCapacity: state.energyCapacity,
-        cargoCapacityKg: state.cargoCapacityKg,
+        cargoCapacity: state.cargoCapacity,
         quantity: opts.quantity,
         rows,
         totalStrata: view.strata.length,

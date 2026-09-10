@@ -622,8 +622,8 @@ export interface GatherHeaderOpts {
 	caps: { yield: number; depth: number; drain: number };
 	energy: number;
 	energyCapacity: number;
-	cargoFreeKg: number;
-	cargoCapacityKg: number;
+	cargoFree: number;
+	cargoCapacity: number;
 	quantity: number;
 	locationContext: string;
 	projected: boolean;
@@ -638,7 +638,7 @@ export function renderEntityForGather(opts: GatherHeaderOpts): string {
 	const c = opts.caps;
 	const gatherer = `yield ${c.yield} · depth ${c.depth} · ${c.drain} energy/s`;
 	const energyBudget = `${opts.energy}/${opts.energyCapacity}${projSuffix}`;
-	const cargoBudget = `${formatMass(opts.cargoFreeKg)} / ${formatMass(opts.cargoCapacityKg)} free${projSuffix}`;
+	const cargoBudget = `${formatMass(opts.cargoFree)} / ${formatMass(opts.cargoCapacity)} free${projSuffix}`;
 
 	return [
 		title,

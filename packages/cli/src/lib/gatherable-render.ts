@@ -28,7 +28,7 @@ export interface GatherableRenderOpts {
 	caps: GathererCaps;
 	budget: GatherBudget;
 	energyCapacity: number;
-	cargoCapacityKg: number;
+	cargoCapacity: number;
 	quantity: number;
 	rows: GatherableRow[];
 	totalStrata: number;
@@ -46,8 +46,8 @@ function header(opts: GatherableRenderOpts): string {
 		caps: opts.caps,
 		energy: opts.budget.energy,
 		energyCapacity: opts.energyCapacity,
-		cargoFreeKg: opts.budget.cargoFreeKg,
-		cargoCapacityKg: opts.cargoCapacityKg,
+		cargoFree: opts.budget.cargoFree,
+		cargoCapacity: opts.cargoCapacity,
 		quantity: opts.quantity,
 		locationContext: `${opts.locationTypeLabel}, ${opts.size} strata`,
 		projected: opts.projected,
@@ -163,14 +163,14 @@ export function gatherableToJsonShape(opts: GatherableRenderOpts): unknown {
 			gatherer: opts.caps,
 			energy: opts.budget.energy,
 			energy_capacity: opts.energyCapacity,
-			cargo_free_kg: opts.budget.cargoFreeKg,
-			cargo_capacity_kg: opts.cargoCapacityKg,
+			cargo_free: opts.budget.cargoFree,
+			cargo_capacity: opts.cargoCapacity,
 		},
 		quantity: opts.quantity,
 		strata: opts.rows.map((r) => ({
 			index: r.stratum.index,
 			item_id: r.stratum.itemId,
-			item_mass_kg: r.metrics.itemMassKg,
+			item_mass: r.metrics.itemMass,
 			reserve: r.stratum.reserve,
 			reserve_max: r.stratum.reserveMax,
 			richness: r.stratum.richness,

@@ -80,14 +80,14 @@ test('renderDetail does not repeat id in output line', () => {
 test('renderDetail shows output mass in tonnes not kg', () => {
     const r = {
         output_item_id: 10001,
-        output_mass: 50000,
+        output_mass: 500,
         inputs: [{item_id: 101, quantity: 15}],
         stat_slots: [],
         blend_weights: [],
     }
     const out = renderDetail(r as any)
     expect(out).toContain('50 t')
-    expect(out).not.toContain('50000')
+    expect(out).not.toContain('mass 500')
 })
 
 test('fetchAllRecipes pages with numeric lower_bound when ids decode as UInt16', async () => {

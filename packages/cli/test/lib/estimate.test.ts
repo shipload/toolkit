@@ -567,7 +567,7 @@ describe("estimateGatherFromStratum — gatherplan model", () => {
 		expect(overReserve.feasibility.ok).toBe(false);
 		expect(overReserve.feasibility.issues.some((i) => i.code.includes("reserve"))).toBe(true);
 
-		const overCargo = estimate({ capacity: 1000n }, 100, true);
+		const overCargo = estimate({ capacity: 10n }, 100, true);
 		expect(overCargo.feasibility.ok).toBe(false);
 		expect(overCargo.feasibility.issues.some((i) => i.code.includes("cargo"))).toBe(true);
 	});
@@ -600,6 +600,39 @@ describe("craft sufficiency keys match SDK availability keys", () => {
 			expect(avail.get(cargoInputKey(input))).toBe(4n);
 		});
 	}
+});
+
+describe("estimateCraft — duration matches the SDK's calc_craft_duration", () => {
+	test("mass 100 units at speed 500 -> floor(100*100/500)+1 = 21s", async () => {
+		// item 101 (ore T1) mass = 10 units; 10 units of input -> totalInputMass = 100.
+		const est = await estimateCraft({
+			entityId: 5n,
+			recipeId: 10003,
+			quantity: 1,
+			inputs: [{ itemId: 101, stackId: 0n, quantity: 10, modules: [] }],
+			snapshot: {
+				type: "ship",
+				id: 5n,
+				owner: "agent.gm",
+				entity_name: "Test Crafter",
+				coordinates: { x: 0n, y: 0n },
+				cargomass: 0n,
+				cargo: [],
+				capacity: 10_000_000n,
+				energy: 10_000_000n,
+				generator: { capacity: 10_000_000n, recharge: 1n },
+				crafter_lanes: [{ speed: 500, drain: 1 }],
+				gatherer_lanes: [],
+				builder_lanes: [],
+				loader_lanes: [],
+				is_idle: true,
+				lanes: [],
+				// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+			} as any,
+			recipe: { output_item_id: 10003, inputs: [{ item_id: 101, quantity: 10 }] },
+		});
+		expect(est.duration_s).toBe(21);
+	});
 });
 
 describe("estimateCraft — incoming cargo availability", () => {

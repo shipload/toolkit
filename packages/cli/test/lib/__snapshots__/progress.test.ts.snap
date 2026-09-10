@@ -4,7 +4,7 @@ exports[`makeProgressRenderer busy tick frame is stable 1`] = `
 "\x1B[?25l
 \x1B[2KStardust  ·  ship 3
 
-\x1B[2K  (102, 45)  ·  ⚡ 8510/10000  ·  cargo 0.31 t / 0.5 t
+\x1B[2K  (102, 45)  ·  ⚡ 8510/10000  ·  cargo 0.3 t / 0.5 t
 
 \x1B[2K  ▶ Travel                          mob  1m
 
@@ -24,7 +24,7 @@ exports[`makeProgressRenderer idle-with-pending-resolve frame is stable 1`] = `
 "\x1B[?25l
 \x1B[2KStardust  ·  ship 3
 
-\x1B[2K  (110, 50)  ·  ⚡ 9320/10000  ·  cargo 0.31 t / 0.5 t
+\x1B[2K  (110, 50)  ·  ⚡ 9320/10000  ·  cargo 0.3 t / 0.5 t
 
 \x1B[2K  ◌ idle  ·  3 task(s) awaiting resolve  ·  refresh in 1s
 \x1B[3A

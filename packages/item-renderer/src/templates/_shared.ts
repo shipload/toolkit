@@ -4,8 +4,8 @@ import {text} from '../primitives/text.ts'
 import {divider} from '../primitives/divider.ts'
 import {tokens} from '../tokens/index.ts'
 
-export function formatMass(kg: number): string {
-    return formatMassScaled(kg)
+export function formatMass(mass: number): string {
+    return formatMassScaled(mass)
 }
 
 export function tierBorder(tier: number): string {
