@@ -4,6 +4,7 @@ import type {ServerContract} from '../contracts'
 import {coordsToLocationId, locationIdToCoords, type CoordinatesType} from '../types'
 import {
     type BuiltCharter,
+    type WorldBuilding,
     citizenryName,
     contributeDuration,
     decayActive,
@@ -19,13 +20,13 @@ import {getItem} from '../data/catalog'
 
 export interface InfluenceStanding {
     epoch: number
-    playerLifetime: bigint
-    playerActive: bigint
     standingLifetime: bigint
     standingActive: bigint
+    citizenshipLifetime: bigint
+    citizenshipActive: bigint
     locationLifetime: bigint
     locationActive: bigint
-    watermark: bigint
+    spent: bigint
     mandate: number
     founder: Name
     founded: number
@@ -34,23 +35,23 @@ export interface InfluenceStanding {
 export interface CharterProgress {
     locationId: bigint
     lifetime: bigint
-    watermark: bigint
+    spent: bigint
     unassigned: bigint
     mandate: number
     nextCost: bigint
     prereqsMet: boolean
     buildable: boolean
     epoch: number
-    built: {nodeId: number; completedEpoch: number; entityId: bigint}[]
+    built: BuiltCharter[]
     ballotId: bigint
     settling: boolean
     queue: QueuedSeat[]
-    funds: NodeFunding[]
+    progress: NodeProgress[]
 }
 
-export interface NodeFunding {
+export interface NodeProgress {
     nodeId: number
-    funded: bigint
+    amount: bigint
 }
 
 export interface ContributePreviewRow {
@@ -75,7 +76,7 @@ export interface FoundedWorld {
     y: number
     lifetime: bigint
     active: bigint
-    watermark: bigint
+    spent: bigint
     ballotId: bigint
     mandate: number | undefined
     founder: Name
@@ -127,7 +128,7 @@ export interface Ballot {
 export interface QueuedSeat {
     nodeId: number
     cost: bigint
-    funded: bigint
+    progress: bigint
     gap: bigint
 }
 
@@ -145,13 +146,13 @@ export class InfluenceManager extends BaseManager {
 
         return {
             epoch: Number(result.epoch),
-            playerLifetime: big(result.player_lifetime),
-            playerActive: big(result.player_active),
             standingLifetime: big(result.standing_lifetime),
             standingActive: big(result.standing_active),
+            citizenshipLifetime: big(result.citizenship_lifetime),
+            citizenshipActive: big(result.citizenship_active),
             locationLifetime: big(result.location_lifetime),
             locationActive: big(result.location_active),
-            watermark: big(result.watermark),
+            spent: big(result.spent),
             mandate: Number(result.mandate),
             founder: Name.from(result.founder),
             founded: Number(result.founded),
@@ -253,7 +254,7 @@ export class InfluenceManager extends BaseManager {
         return {
             locationId: big(result.location_id),
             lifetime: big(result.lifetime),
-            watermark: big(result.watermark),
+            spent: big(result.spent),
             unassigned: big(result.unassigned),
             mandate: Number(result.mandate),
             nextCost: big(result.next_cost),
@@ -262,18 +263,20 @@ export class InfluenceManager extends BaseManager {
             epoch: Number(result.epoch),
             built: result.built.map((b) => ({
                 nodeId: Number(b.node_id),
-                completedEpoch: Number(b.completed_epoch),
-                entityId: big(b.entity_id),
+                repeats: Number(b.repeats),
             })),
             ballotId: big(result.ballot_id),
             settling: Boolean(result.settling),
             queue: result.queue.map((seat) => ({
                 nodeId: Number(seat.node_id),
                 cost: big(seat.cost),
-                funded: big(seat.funded),
+                progress: big(seat.progress),
                 gap: big(seat.gap),
             })),
-            funds: result.funds.map((f) => ({nodeId: Number(f.node_id), funded: big(f.funded)})),
+            progress: result.progress.map((p) => ({
+                nodeId: Number(p.node_id),
+                amount: big(p.amount),
+            })),
         }
     }
 
@@ -340,9 +343,9 @@ export class InfluenceManager extends BaseManager {
 
     async getBallotId(location: CoordinatesType): Promise<bigint | undefined> {
         const row = (await this.server
-            .table('infloc')
+            .table('worlds')
             .get(UInt64.from(coordsToLocationId(location)))) as
-            | ServerContract.Types.infloc_row
+            | ServerContract.Types.worlds_row
             | undefined
         return row ? big(row.ballot_id) : undefined
     }
@@ -378,13 +381,20 @@ export class InfluenceManager extends BaseManager {
 
     async getBuiltCharters(location: CoordinatesType): Promise<BuiltCharter[]> {
         const rows = (await this.server
-            .table('charters', coordsToLocationId(location))
-            .all()) as ServerContract.Types.charters_row[]
-        return rows.map((row) => ({nodeId: Number(row.node_id), entityId: big(row.entity_id)}))
+            .table('mandates', coordsToLocationId(location))
+            .all()) as ServerContract.Types.mandates_row[]
+        return rows.map((row) => ({nodeId: Number(row.node_id), repeats: Number(row.repeats)}))
+    }
+
+    async getBuildings(location: CoordinatesType): Promise<WorldBuilding[]> {
+        const rows = (await this.server
+            .table('buildings', coordsToLocationId(location))
+            .all()) as ServerContract.Types.buildings_row[]
+        return rows.map((row) => ({entityId: big(row.entity_id), building: Number(row.building)}))
     }
 
     async getFoundedWorlds(opts: {withMandate?: boolean} = {}): Promise<FoundedWorld[]> {
-        const rows = (await this.server.table('infloc').all()) as ServerContract.Types.infloc_row[]
+        const rows = (await this.server.table('worlds').all()) as ServerContract.Types.worlds_row[]
         const epoch = (await this.getState()).epoch
         const worlds = rows.map((row) => ({
             locationId: big(row.location_id),
@@ -392,9 +402,9 @@ export class InfluenceManager extends BaseManager {
             lifetime: big(row.lifetime),
             active: decayActive(
                 big(row.active),
-                Math.max(0, Number(epoch) - Number(row.last_update_epoch))
+                Math.max(0, Number(epoch) - Number(row.active_epoch))
             ),
-            watermark: big(row.watermark),
+            spent: big(row.spent),
             ballotId: big(row.ballot_id),
             mandate: undefined as number | undefined,
             founder: Name.from(row.founder),
@@ -411,7 +421,7 @@ export class InfluenceManager extends BaseManager {
 
     async isFounded(location: CoordinatesType): Promise<boolean> {
         const id = coordsToLocationId(location)
-        const row = await this.server.table('infloc').get(UInt64.from(id))
+        const row = await this.server.table('worlds').get(UInt64.from(id))
         return row !== undefined
     }
 }

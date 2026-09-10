@@ -63,6 +63,7 @@ export {
     type CharterIneligibility,
     type CharterNode,
     type CharterWorld,
+    type WorldBuilding,
 } from './charters'
 export {
     projectBallot,

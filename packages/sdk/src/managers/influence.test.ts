@@ -27,19 +27,30 @@ describe('InfluenceManager scoped table reads', () => {
         expect(rows).toEqual([{account: Name.from('eggmaple.gm'), picks: [2, 1]}])
     })
 
-    it('getBuiltCharters scopes charters by location and maps fields', async () => {
+    it('getBuiltCharters scopes mandates by location and maps fields', async () => {
         const {manager, calls} = managerWith({
-            charters: [{node_id: 1, entity_id: '9001'}],
+            mandates: [{node_id: 1, repeats: 2}],
         })
         const rows = await manager.getBuiltCharters(LOCATION)
-        expect(calls[0].table).toBe('charters')
+        expect(calls[0].table).toBe('mandates')
         expect(UInt64.from(calls[0].scope as never).equals(coordsToLocationId(LOCATION))).toBe(true)
-        expect(rows).toEqual([{nodeId: 1, entityId: 9001n}])
+        expect(rows).toEqual([{nodeId: 1, repeats: 2}])
+    })
+
+    it('getBuildings scopes buildings by location and maps fields', async () => {
+        const {manager, calls} = managerWith({
+            buildings: [{entity_id: '9001', building: 3}],
+        })
+        const rows = await manager.getBuildings(LOCATION)
+        expect(calls[0].table).toBe('buildings')
+        expect(UInt64.from(calls[0].scope as never).equals(coordsToLocationId(LOCATION))).toBe(true)
+        expect(rows).toEqual([{entityId: 9001n, building: 3}])
     })
 
     it('returns an empty array when the scope has no rows', async () => {
         const {manager} = managerWith({})
         expect(await manager.getBallotVotes(7n)).toEqual([])
         expect(await manager.getBuiltCharters(LOCATION)).toEqual([])
+        expect(await manager.getBuildings(LOCATION)).toEqual([])
     })
 })

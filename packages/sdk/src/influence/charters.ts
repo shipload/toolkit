@@ -45,12 +45,16 @@ export const CHARTER_INELIGIBILITY_MESSAGES: Record<CharterIneligibility, string
 
 export interface BuiltCharter {
     nodeId: number
-    entityId: bigint
+    repeats: number
 }
 
 export interface CharterWorld {
     built: BuiltCharter[]
-    entityExists?: (entityId: bigint) => boolean
+}
+
+export interface WorldBuilding {
+    entityId: bigint
+    building: number
 }
 
 function builtCharter(world: CharterWorld, nodeId: number): BuiltCharter | undefined {
@@ -68,13 +72,9 @@ export function charterGateNodeFor(building: number, level: number = 1): Charter
     )
 }
 
-export function charterBuildingEntity(world: CharterWorld, building: number): bigint {
-    const gate = charterGateNodeFor(building)
-    if (!gate) return 0n
-    const record = builtCharter(world, gate.nodeId)
-    if (!record) return 0n
-    if (world.entityExists && !world.entityExists(record.entityId)) return 0n
-    return record.entityId
+export function charterBuildingEntity(buildings: WorldBuilding[], building: number): bigint {
+    const record = buildings.find((row) => row.building === building)
+    return record ? record.entityId : 0n
 }
 
 export function charterRungValue(world: CharterWorld, building: number, stat: number): number {

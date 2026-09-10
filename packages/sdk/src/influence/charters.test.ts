@@ -19,6 +19,7 @@ import {
     eligibleCharters,
     type BuiltCharter,
     type CharterWorld,
+    type WorldBuilding,
 } from './charters'
 
 const WORKSHOP = 10001
@@ -30,11 +31,9 @@ const DEPOT = 40100001
 
 const WORKSHOP_ENTITY = 100n
 const DOCK_ENTITY = 300n
-const DEPOT_ENTITY = 600n
 
-function world(built: BuiltCharter[], present?: bigint[]): CharterWorld {
-    if (!present) return {built}
-    return {built, entityExists: (id) => present.includes(id)}
+function world(built: BuiltCharter[]): CharterWorld {
+    return {built}
 }
 
 function node(nodeId: number) {
@@ -57,13 +56,13 @@ describe('charter eligibility mirror', () => {
     })
 
     test('completing the root opens the fork and closes the singleton path', () => {
-        const built = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
+        const built = world([{nodeId: WORKSHOP, repeats: 0}])
         expect(eligibleIds(built)).toEqual([WORKSHOP_TUNEUP, NEXUS, DOCK, DEPOT])
         expect(charterSingletonMandate(built)).toBe(CHARTER_NONE)
     })
 
     test('a completed charter reports already-taken', () => {
-        const built = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
+        const built = world([{nodeId: WORKSHOP, repeats: 0}])
         expect(charterIneligible(built, node(WORKSHOP))).toBe('already-taken')
     })
 
@@ -73,12 +72,7 @@ describe('charter eligibility mirror', () => {
     })
 
     test('a rung is eligible as soon as its prereq is complete', () => {
-        const built = [{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}]
-        expect(charterEligible(world(built, [WORKSHOP_ENTITY]), node(WORKSHOP_TUNEUP))).toBe(true)
-    })
-
-    test('an absent entity predicate trusts the charter record', () => {
-        const built = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
+        const built = world([{nodeId: WORKSHOP, repeats: 0}])
         expect(charterEligible(built, node(WORKSHOP_TUNEUP))).toBe(true)
     })
 
@@ -89,23 +83,23 @@ describe('charter eligibility mirror', () => {
         expect(charterGateNodeFor(99)).toBeUndefined()
     })
 
-    test('a building resolves to the entity its gate recorded', () => {
-        const built = [
-            {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
-            {nodeId: DOCK, entityId: DOCK_ENTITY},
+    test('a building resolves to the entity recorded for its kind', () => {
+        const buildings: WorldBuilding[] = [
+            {entityId: WORKSHOP_ENTITY, building: CIVIC_WORKSHOP},
+            {entityId: DOCK_ENTITY, building: CIVIC_DOCK},
         ]
-        expect(charterBuildingEntity(world(built), CIVIC_WORKSHOP)).toBe(WORKSHOP_ENTITY)
-        expect(charterBuildingEntity(world(built, [DOCK_ENTITY]), CIVIC_WORKSHOP)).toBe(0n)
-        expect(charterBuildingEntity(world([]), CIVIC_DEPOT)).toBe(0n)
+        expect(charterBuildingEntity(buildings, CIVIC_WORKSHOP)).toBe(WORKSHOP_ENTITY)
+        expect(charterBuildingEntity(buildings, CIVIC_DEPOT)).toBe(0n)
+        expect(charterBuildingEntity([], CIVIC_DEPOT)).toBe(0n)
     })
 
     test('rung values sum over the completed nodes only', () => {
-        const gateOnly = world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}])
+        const gateOnly = world([{nodeId: WORKSHOP, repeats: 0}])
         expect(charterRungValue(gateOnly, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(200)
 
         const tuned = world([
-            {nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY},
-            {nodeId: WORKSHOP_TUNEUP, entityId: 0n},
+            {nodeId: WORKSHOP, repeats: 0},
+            {nodeId: WORKSHOP_TUNEUP, repeats: 0},
         ])
         expect(charterRungValue(tuned, CIVIC_WORKSHOP, CIVIC_STAT_CRAFT_SPEED)).toBe(250)
         expect(charterRungValue(tuned, CIVIC_DEPOT, CIVIC_STAT_TRANSFER_SPEED)).toBe(0)
@@ -113,11 +107,6 @@ describe('charter eligibility mirror', () => {
 
     test('modules sum over the completed nodes only', () => {
         expect(charterModuleCount(world([]), CIVIC_WORKSHOP)).toBe(0)
-        expect(
-            charterModuleCount(
-                world([{nodeId: WORKSHOP, entityId: WORKSHOP_ENTITY}]),
-                CIVIC_WORKSHOP
-            )
-        ).toBe(5)
+        expect(charterModuleCount(world([{nodeId: WORKSHOP, repeats: 0}]), CIVIC_WORKSHOP)).toBe(5)
     })
 })

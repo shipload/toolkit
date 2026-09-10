@@ -13,7 +13,7 @@ const WORKSHOP_TUNEUP = 10100201
 const DOCK_TUNEUP = 30100301
 const DEPOT = 40100001
 
-const world: CharterWorld = {built: [{nodeId: 10001, entityId: 100n}], entityExists: () => true}
+const world: CharterWorld = {built: [{nodeId: 10001, repeats: 0}]}
 
 describe('charterEligibleChained', () => {
     test('with nothing seated it equals charterEligible', () => {
@@ -70,9 +70,8 @@ describe('projectBallot', () => {
         const almostDone: CharterWorld = {
             built: CHARTER_REGISTRY.filter((n) => n.nodeId !== 40100404).map((n) => ({
                 nodeId: n.nodeId,
-                entityId: 1n,
+                repeats: 0,
             })),
-            entityExists: () => true,
         }
         expect(projectBallot({world: almostDone, seats: 1, voters: []}).seats).toEqual([])
         expect(
