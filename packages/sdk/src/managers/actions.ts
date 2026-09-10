@@ -844,6 +844,12 @@ export class ActionsManager extends BaseManager {
         return actions
     }
 
+    setunwrapmin(assetId: UInt64Type): Action {
+        return this.server.action('setunwrapmin', {
+            asset_id: UInt64.from(assetId),
+        })
+    }
+
     placecargo(owner: NameType, hostId: UInt64Type, assetId: UInt64Type): Action {
         return this.server.action('placecargo', {
             owner: Name.from(owner),
