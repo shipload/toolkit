@@ -444,6 +444,7 @@ describe('ActionsManager', () => {
             'dbgcredit',
             'dbgmandate',
             'dbgpagerows',
+            'dbgpurge',
             'dbgseats',
             'descentity',
             'hash',
