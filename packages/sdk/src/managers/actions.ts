@@ -366,6 +366,28 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    civicshuttle(
+        buildingId: UInt64Type,
+        fromId: UInt64Type,
+        toId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('civicshuttle', {
+            building: UInt64.from(buildingId),
+            from_id: UInt64.from(fromId),
+            to_id: UInt64.from(toId),
+            items,
+        })
+    }
+
+    cancelcivic(buildingId: UInt64Type, laneKey: UInt8Type, fromId: UInt64Type): Action {
+        return this.server.action('cancelcivic', {
+            building: UInt64.from(buildingId),
+            lane_key: UInt8.from(laneKey),
+            from_id: UInt64.from(fromId),
+        })
+    }
+
     launch(
         launcherId: UInt64Type,
         catcherId: UInt64Type,

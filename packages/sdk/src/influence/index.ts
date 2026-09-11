@@ -43,6 +43,16 @@ export {
     type CivicLoaderStats,
     type DepotTransferParams,
 } from './duration'
+export {
+    civicShuttleBays,
+    civicTransfersAtCap,
+    civicTransfersFrom,
+    pendingCivicTransfers,
+    selectCivicShuttleBay,
+    CIVIC_TRANSFER_PER_PLAYER_CAP,
+    type CivicShuttleBay,
+    type PendingCivicTransfer,
+} from './civic-shuttle'
 export {citizenryName, citizenryPatternCount} from './citizenry'
 export {
     charterBuildingEntity,
