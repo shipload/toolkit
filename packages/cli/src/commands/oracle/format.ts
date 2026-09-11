@@ -51,12 +51,44 @@ export function formatDuration(seconds: number): string {
     return rest === 0 ? `${hours}h` : `${hours}h${rest}m`
 }
 
+function raceLines(r: TickResult): string[] | null {
+    if (r.commit === 'window-closed') {
+        return [
+            'A reveal for this epoch landed before your commit, so the commit window is',
+            'shut. Your beacon commits again for the next epoch.',
+        ]
+    }
+    if (r.commit === 'epoch-closed') {
+        return [
+            'The epoch finalized before your commit landed. Your beacon commits for the',
+            'next epoch on the next pass.',
+        ]
+    }
+    if (r.reveal === 'epoch-finalized') {
+        return [
+            'The seed was composed before your reveal landed. Only the fastest reveals up to',
+            'the threshold count, so this is an ordinary outcome.',
+        ]
+    }
+    if (r.close === 'raced') {
+        return ['Another oracle closed this epoch first.']
+    }
+    return null
+}
+
+export function raceNote(r: TickResult): string | null {
+    const lines = raceLines(r)
+    return lines ? lines.join('\n  ') : null
+}
+
 export function formatTick(r: TickResult): string {
     const detail = r.eta
         ? `h=${r.currentHeight}, ${r.eta.kind} in ${formatDuration(r.eta.seconds)}`
         : `h=${r.currentHeight}`
     const close = r.close === 'not-due' ? '' : ` · close: ${r.close}`
-    return `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal}${close} (${detail})`
+    const line = `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal}${close} (${detail})`
+    const note = raceNote(r)
+    return note ? `${line}\n  ${note}` : line
 }
 
 export function formatClean(r: CleanResult): string {
@@ -97,6 +129,11 @@ export function formatTend(r: TendResult): string {
         return `fund sweep: tended ${r.assetIds.length} lot(s)`
     }
     return 'fund sweep: nothing tendable'
+}
+
+function formatThreshold(view: OracleStatusView): string {
+    if (view.threshold <= 0) return 'not set'
+    return `${view.threshold} of ${view.oracles.length} (the fastest ${view.threshold} reveals compose the seed; later reveals bounce)`
 }
 
 function yn(v: boolean): string {
@@ -195,7 +232,7 @@ export function renderStatus(view: OracleStatusView): string {
         lines.push(`Oracle quorum:     not deployed (no oracles table on ${view.serverAccount})`)
     } else {
         lines.push(
-            `Threshold:         ${view.threshold > 0 ? view.threshold : 'not set'}`,
+            `Threshold:         ${formatThreshold(view)}`,
             `Oracles:           ${view.oracles.length} registered`
         )
     }

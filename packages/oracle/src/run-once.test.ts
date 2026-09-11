@@ -19,6 +19,8 @@ function fakeDeps(opts: {
     postBlock?: number
     timeRemainingMs?: number
     secondsUntilClose?: number
+    epochFinalized?: boolean
+    throwOn?: Record<string, unknown>
 }): {
     deps: OracleDeps
     sent: string[]
@@ -39,7 +41,10 @@ function fakeDeps(opts: {
             getTimeRemaining: async () => opts.timeRemainingMs ?? 0,
             getCommitsFor: async () => commits,
             getRevealsFor: async () => reveals,
-            getEpochThreshold: async () => opts.threshold ?? 1,
+            getEpochState: async () => ({
+                threshold: opts.threshold ?? 1,
+                finalized: opts.epochFinalized ?? false,
+            }),
             getSecondsUntilClose: async () => opts.secondsUntilClose ?? 3600,
             getChainInfo: async () => ({headBlock, libBlock}),
         },
@@ -59,7 +64,10 @@ function fakeDeps(opts: {
         },
         session: {
             transact: async ({action}) => {
-                sent.push((action as unknown as {name: string}).name)
+                const name = (action as unknown as {name: string}).name
+                sent.push(name)
+                const failure = opts.throwOn?.[name]
+                if (failure) throw failure
                 return {block_num: opts.postBlock ?? 100}
             },
         },
@@ -315,4 +323,139 @@ test('no close on the tick that posts a reveal', async () => {
     expect(r.reveal).toBe('posted')
     expect(r.close).toBe('not-due')
     expect(sent).toEqual(['reveal'])
+})
+
+function chainError(message: string): unknown {
+    return {
+        message: `assertion failure with message: ${message}`,
+        response: {json: {error: {details: [{message}]}}},
+    }
+}
+
+test('a reveal that lost the race reports epoch-finalized, not a throw', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        threshold: 1,
+        secret: REVEAL,
+        commitBlock: 50,
+        libBlock: 100,
+        throwOn: {reveal: chainError('Epoch already finalized.')},
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('epoch-finalized')
+    expect(r.close).toBe('not-due')
+    expect(sent).toEqual(['reveal'])
+})
+
+test('a finalized epoch skips the reveal instead of sending one', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        threshold: 1,
+        secret: REVEAL,
+        commitBlock: 50,
+        libBlock: 100,
+        epochFinalized: true,
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('epoch-finalized')
+    expect(sent).toEqual([])
+})
+
+test('an open reveal window skips the commit instead of sending one', async () => {
+    const OTHER = Name.from('greymass2')
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [OTHER],
+        revealedBy: [OTHER],
+        threshold: 1,
+    })
+    const r = await runOnce(deps)
+    expect(r.commit).toBe('window-closed')
+    expect(r.reveal).toBe('no-commit')
+    expect(sent).toEqual([])
+})
+
+test('a commit that lost the window race reports window-closed', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        throwOn: {
+            commit: chainError(
+                'Commit window closed: a reveal for this epoch has already been submitted.'
+            ),
+        },
+    })
+    const r = await runOnce(deps)
+    expect(r.commit).toBe('window-closed')
+    expect(r.reveal).toBe('no-commit')
+    expect(sent).toEqual(['commit'])
+})
+
+test('a commit against a rolled epoch reports epoch-closed', async () => {
+    const {deps} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        throwOn: {commit: chainError('Commit must target next epoch (state.epoch + 1).')},
+    })
+    const r = await runOnce(deps)
+    expect(r.commit).toBe('epoch-closed')
+    expect(r.reveal).toBe('epoch-finalized')
+    expect(r.close).toBe('not-due')
+})
+
+test('an unrelated commit failure still throws', async () => {
+    const {deps} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        throwOn: {commit: chainError('reached account cpu limit')},
+    })
+    await expect(runOnce(deps)).rejects.toThrow()
+})
+
+test('an unrelated reveal failure still throws', async () => {
+    const {deps} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        threshold: 1,
+        secret: REVEAL,
+        commitBlock: 50,
+        libBlock: 100,
+        throwOn: {reveal: chainError('reached account cpu limit')},
+    })
+    await expect(runOnce(deps)).rejects.toThrow()
+})
+
+test('a close that lost the race reports raced, not failed', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+        throwOn: {closeepoch: chainError('Epoch already finalized.')},
+    })
+    const r = await runOnce(deps)
+    expect(r.close).toBe('raced')
+    expect(sent).toEqual(['closeepoch'])
+})
+
+test('a close that failed for another reason still reports failed', async () => {
+    const {deps} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+        throwOn: {closeepoch: chainError('Epoch deadline has not passed.')},
+    })
+    const r = await runOnce(deps)
+    expect(r.close).toBe('failed')
 })

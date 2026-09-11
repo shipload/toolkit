@@ -1,9 +1,16 @@
-import {UInt64, type UInt64Type} from '@wharfkit/antelope'
+import {Checksum256, UInt64, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
 import type {ServerContract} from '../contracts'
 
 export const DEFAULT_EPOCH_DEADLINE = 10800
+
+const EMPTY_SEED = Checksum256.from('0'.repeat(64))
+
+export interface EpochQuorumState {
+    threshold: number
+    finalized: boolean
+}
 
 export class EpochsManager extends BaseManager {
     async getCurrentHeight(): Promise<UInt64> {
@@ -56,6 +63,12 @@ export class EpochsManager extends BaseManager {
     async getEpochRow(epoch: UInt64Type): Promise<ServerContract.Types.epoch_row | undefined> {
         const target = UInt64.from(epoch)
         return this.server.table('epoch').get(target)
+    }
+
+    async getEpochState(epoch: UInt64Type): Promise<EpochQuorumState> {
+        const row = await this.getEpochRow(epoch)
+        if (!row) return {threshold: 0, finalized: false}
+        return {threshold: Number(row.threshold), finalized: !row.seed.equals(EMPTY_SEED)}
     }
 
     async getActiveEpochInfo(): Promise<ServerContract.Types.epoch_row | undefined> {

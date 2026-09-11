@@ -112,10 +112,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
             getCommitsFor: (epoch) => shipload.epochs.getCommitsFor(epoch),
             getRevealsFor: (epoch) => shipload.epochs.getRevealsFor(epoch),
             getSecondsUntilClose: (epoch) => shipload.epochs.getSecondsUntilClose(epoch),
-            getEpochThreshold: async (epoch) => {
-                const row = await shipload.epochs.getEpochRow(epoch)
-                return row ? Number(row.threshold) : 0
-            },
+            getEpochState: (epoch) => shipload.epochs.getEpochState(epoch),
             getChainInfo: async () => {
                 const info = await client.v1.chain.get_info()
                 return {

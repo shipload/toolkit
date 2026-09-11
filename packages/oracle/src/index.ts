@@ -2,8 +2,10 @@ export {SecretStore, type Secret} from './secret-store'
 export {
     runOnce,
     type ActionBuilders,
+    type CloseOutcome,
     type CommitOutcome,
     type EpochReads,
+    type EpochState,
     type OracleDeps,
     type RevealOutcome,
     type SecretStoreLike,
@@ -11,6 +13,14 @@ export {
     type TickEta,
     type TickResult,
 } from './run-once'
+export {
+    classifyCloseRace,
+    classifyCommitRace,
+    classifyRevealRace,
+    type CloseRace,
+    type CommitRace,
+    type RevealRace,
+} from './race'
 export {shouldLogTick, tickSignature, type TickLogState} from './tick-log'
 export {
     planLogged,

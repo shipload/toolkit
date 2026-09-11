@@ -8,6 +8,7 @@ import {
     formatTend,
     formatDuration,
     formatTick,
+    raceNote,
     formatVoteReady,
     formatWaiting,
     formatWaitingBrief,
@@ -496,4 +497,80 @@ test('status shows the operator status line under the You block', () => {
         mine: {...personal, keyWired: true, registered: false},
     })
     expect(out).toContain('Status:          key wired, waiting to be added to the oracle registry')
+})
+
+test('a lost reveal race reads as an ordinary outcome, not a failure', () => {
+    const r: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'already-committed',
+        reveal: 'epoch-finalized',
+        close: 'not-due',
+    }
+    const line = formatTick(r)
+    expect(line).toContain('reveal: epoch-finalized')
+    expect(line).toContain('Only the fastest reveals up to')
+    expect(line).not.toContain('failed')
+    expect(line).not.toContain('error')
+})
+
+test('a shut commit window explains itself and outranks the reveal note', () => {
+    const r: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'window-closed',
+        reveal: 'no-commit',
+        close: 'not-due',
+    }
+    expect(formatTick(r)).toContain('the commit window is')
+})
+
+test('a rolled epoch explains the commit that missed it', () => {
+    const r: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'epoch-closed',
+        reveal: 'epoch-finalized',
+        close: 'not-due',
+    }
+    expect(raceNote(r)).toContain('The epoch finalized before your commit landed.')
+})
+
+test('a raced close is reported as a race, not a failure', () => {
+    const r: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'already-committed',
+        reveal: 'already-revealed',
+        close: 'raced',
+    }
+    const line = formatTick(r)
+    expect(line).toContain('close: raced')
+    expect(line).toContain('Another oracle closed this epoch first.')
+})
+
+test('an ordinary tick carries no race note', () => {
+    const r: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'already-committed',
+        reveal: 'posted',
+        close: 'not-due',
+    }
+    expect(raceNote(r)).toBeNull()
+    expect(formatTick(r)).not.toContain('\n')
+})
+
+test('renderStatus explains the threshold as a race', () => {
+    const out = renderStatus({
+        ...base,
+        threshold: 2,
+        oracles: [
+            {handle: 'alpha', committed: true, revealed: true},
+            {handle: 'beta', committed: true, revealed: false},
+            {handle: 'gamma', committed: true, revealed: false},
+        ],
+    })
+    expect(out).toMatch(/Threshold:\s+2 of 3/)
+    expect(out).toContain('the fastest 2 reveals compose the seed; later reveals bounce')
 })
