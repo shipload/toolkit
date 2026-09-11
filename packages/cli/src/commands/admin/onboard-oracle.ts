@@ -10,25 +10,32 @@ import {
     assertAvailableHandle,
     assertPublicKey,
     MembershipAbort,
+    type OnboardPlan,
     ORACLE_PARENT_PERMISSION,
     planOnboard,
     renderOnboardSummary,
 } from './membership'
+import {buildSetThreshold} from './set-threshold'
 
-export function buildOnboardActions(handle: string, pubkey: string): Action[] {
+export function buildOnboardActions(handle: string, pubkey: string, plan: OnboardPlan): Action[] {
     const auth = [contractAuthority()]
-    return [
-        buildUpdateAuth(
-            {
-                account: gameContractName,
-                permission: handle,
-                parent: ORACLE_PARENT_PERMISSION,
-                pubkey,
-            },
-            auth
-        ),
-        buildAddOracle(handle),
-    ]
+    const actions: Action[] = []
+    if (plan.sendUpdateAuth) {
+        actions.push(
+            buildUpdateAuth(
+                {
+                    account: gameContractName,
+                    permission: handle,
+                    parent: ORACLE_PARENT_PERMISSION,
+                    pubkey,
+                },
+                auth
+            )
+        )
+    }
+    actions.push(buildAddOracle(handle))
+    if (plan.setThreshold !== undefined) actions.push(buildSetThreshold(plan.setThreshold))
+    return actions
 }
 
 export function register(parent: Command): void {
@@ -47,13 +54,12 @@ export function register(parent: Command): void {
                 const snap = await readRegistry(handle)
                 const plan = planOnboard(handle, pubkey, snap)
                 for (const line of plan.checks) console.log(line)
-                actions = plan.sendUpdateAuth
-                    ? buildOnboardActions(handle, pubkey)
-                    : [buildAddOracle(handle)]
+                actions = buildOnboardActions(handle, pubkey, plan)
+                const names = plan.sendUpdateAuth ? ['updateauth', 'addoracle'] : ['addoracle']
                 const verb = proposing ? 'Proposed' : 'Signed'
-                description = plan.sendUpdateAuth
-                    ? `${verb} updateauth ${handle}, addoracle ${handle}.`
-                    : `${verb} addoracle ${handle}.`
+                description = `${verb} ${names.map((n) => `${n} ${handle}`).join(', ')}${
+                    plan.setThreshold === undefined ? '' : `, setthreshold ${plan.setThreshold}`
+                }.`
             } catch (err) {
                 if (err instanceof MembershipAbort) return reportAbort(err)
                 throw err

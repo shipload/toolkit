@@ -31,6 +31,8 @@ export interface OnboardPlan {
     checks: string[]
     /** False when the permission already exists carrying exactly this key. */
     sendUpdateAuth: boolean
+    /** Undefined when the policy threshold already matches the registry. */
+    setThreshold?: number
 }
 
 export interface OffboardPlan {
@@ -38,6 +40,16 @@ export interface OffboardPlan {
     /** False when the handle permission is already gone. */
     sendDeleteAuth: boolean
     setThreshold?: number
+}
+
+/** The testnet quorum policy: two thirds of the oracles, and never fewer than two. */
+export function policyThreshold(oracles: number): number {
+    return Math.min(oracles, Math.max(2, Math.ceil((2 * oracles) / 3)))
+}
+
+function thresholdMove(from: number, to: number, oracles: number): string {
+    const move = from === to ? `threshold ${from} holds` : `threshold ${from} -> ${to}`
+    return `${move} for ${oracleCount(oracles)}`
 }
 
 function oracleCount(n: number): string {
@@ -84,9 +96,15 @@ export function planOnboard(handle: string, pubkey: string, snap: RegistrySnapsh
             `Nothing was sent. This command does not change the key on a live handle.\nTo give ${handle} a new key, offboard the handle and onboard it again.`
         )
     }
+    const resulting = snap.oracles.length + 1
+    const target = policyThreshold(resulting)
+    const setThreshold = target === snap.threshold ? undefined : target
     if (snap.permissionKeys === undefined) {
         checks.push(checkLine('Checking handle', `'${handle}' is free`))
-        return {checks, sendUpdateAuth: true}
+        checks.push(
+            checkLine('Checking threshold', thresholdMove(snap.threshold, target, resulting))
+        )
+        return {checks, sendUpdateAuth: true, setThreshold}
     }
     const sameKey =
         snap.permissionKeys.length === 1 && PublicKey.from(snap.permissionKeys[0]).equals(key)
@@ -97,7 +115,8 @@ export function planOnboard(handle: string, pubkey: string, snap: RegistrySnapsh
         )
     }
     checks.push(checkLine('Checking handle', `${snap.contract}@${handle} already carries this key`))
-    return {checks, sendUpdateAuth: false}
+    checks.push(checkLine('Checking threshold', thresholdMove(snap.threshold, target, resulting)))
+    return {checks, sendUpdateAuth: false, setThreshold}
 }
 
 export function planOffboard(
@@ -119,10 +138,14 @@ export function planOffboard(
         )
     }
     const remaining = snap.oracles.length - 1
-    if (remaining === 0) {
+    if (remaining < 2) {
+        const line =
+            remaining === 0
+                ? `'${handle}' is the only oracle`
+                : `removing '${handle}' leaves ${oracleCount(remaining)}`
         throw new MembershipAbort(
-            checkLine('Checking removal', `'${handle}' is the only oracle`),
-            'Nothing was sent. A quorum needs at least one oracle. Admit a replacement first.'
+            checkLine('Checking removal', line),
+            'Nothing was sent. A quorum needs at least two oracles. Admit a replacement first.'
         )
     }
     if (setThreshold !== undefined) {
@@ -146,22 +169,16 @@ export function planOffboard(
         )
         return {checks, sendDeleteAuth: snap.permissionKeys !== undefined, setThreshold}
     }
-    if (remaining < snap.threshold) {
-        throw new MembershipAbort(
-            checkLine(
-                'Checking removal',
-                `removing '${handle}' leaves ${oracleCount(remaining)}, below the threshold of ${snap.threshold}`
-            ),
-            `Nothing was sent. Re-run with --set-threshold ${remaining} to lower the quorum in the\nsame transaction, or admit a replacement oracle first.`
-        )
-    }
+    const target = policyThreshold(remaining)
     checks.push(
-        checkLine(
-            'Checking removal',
-            `${oracleCount(remaining)} ${remainWord(remaining)}, threshold ${snap.threshold} holds`
-        )
+        checkLine('Checking removal', `${oracleCount(remaining)} ${remainWord(remaining)}`),
+        checkLine('Checking threshold', thresholdMove(snap.threshold, target, remaining))
     )
-    return {checks, sendDeleteAuth: snap.permissionKeys !== undefined}
+    return {
+        checks,
+        sendDeleteAuth: snap.permissionKeys !== undefined,
+        setThreshold: target === snap.threshold ? undefined : target,
+    }
 }
 
 export function renderOnboardSummary(args: {

@@ -1,11 +1,14 @@
 import {expect, test} from 'bun:test'
 import {PermissionLevel, PrivateKey} from '@wharfkit/antelope'
 import {buildDeleteAuth, buildUpdateAuth} from './eosio-auth'
+import {buildOffboardActions} from './offboard-oracle'
+import {buildOnboardActions} from './onboard-oracle'
 import {
     MembershipAbort,
     type RegistrySnapshot,
     planOffboard,
     planOnboard,
+    policyThreshold,
     renderOffboardSummary,
     renderOnboardSummary,
 } from './membership'
@@ -70,6 +73,32 @@ test('a free handle onboards with updateauth and addoracle', () => {
     expect(plan.sendUpdateAuth).toBe(true)
     expect(plan.checks[0]).toContain('eon.shipload, epoch 413, 2 oracles, threshold 2')
     expect(plan.checks[1]).toContain("'mycoolnode' is free")
+    expect(plan.checks[2]).toContain('threshold 2 holds for 3 oracles')
+    expect(plan.setThreshold).toBeUndefined()
+})
+
+test('the two-thirds policy rounds up and never asks for fewer than two', () => {
+    const table: Array<[number, number]> = [
+        [1, 1],
+        [2, 2],
+        [3, 2],
+        [4, 3],
+        [5, 4],
+        [6, 4],
+        [7, 5],
+        [8, 6],
+        [9, 6],
+        [10, 7],
+    ]
+    for (const [oracles, threshold] of table) {
+        expect(policyThreshold(oracles)).toBe(threshold)
+    }
+})
+
+test('onboarding raises the threshold to the policy value and prints the move', () => {
+    const plan = planOnboard('mycoolnode', KEY, snapshot({oracles: ['a', 'b', 'c'], threshold: 2}))
+    expect(plan.setThreshold).toBe(3)
+    expect(plan.checks[2]).toContain('threshold 2 -> 3 for 4 oracles')
 })
 
 test('a permission that already carries the same key onboards with addoracle alone', () => {
@@ -106,7 +135,26 @@ test('offboarding sends removeoracle and deleteauth when the threshold still hol
     const plan = planOffboard('mycoolnode', snap)
     expect(plan.sendDeleteAuth).toBe(true)
     expect(plan.setThreshold).toBeUndefined()
-    expect(plan.checks[1]).toContain('2 oracles remain, threshold 2 holds')
+    expect(plan.checks[1]).toContain('2 oracles remain')
+    expect(plan.checks[2]).toContain('threshold 2 holds for 2 oracles')
+})
+
+test('offboarding lowers the threshold to the policy value for the remaining oracles', () => {
+    const snap = snapshot({oracles: ['a', 'b', 'c', 'mycoolnode'], threshold: 3})
+    const plan = planOffboard('mycoolnode', snap)
+    expect(plan.setThreshold).toBe(2)
+    expect(plan.checks[2]).toContain('threshold 3 -> 2 for 3 oracles')
+})
+
+test('offboarding refuses a removal that would leave one oracle', () => {
+    const err = abort(() => planOffboard('oracle1', snapshot()))
+    expect(err.line).toContain("removing 'oracle1' leaves 1 oracle")
+    expect(err.advice).toContain('A quorum needs at least two oracles')
+})
+
+test('the two-oracle floor holds even with an explicit threshold', () => {
+    const err = abort(() => planOffboard('oracle1', snapshot(), 1))
+    expect(err.advice).toContain('A quorum needs at least two oracles')
 })
 
 test('offboarding skips deleteauth when the permission is already gone', () => {
@@ -114,26 +162,25 @@ test('offboarding skips deleteauth when the permission is already gone', () => {
     expect(planOffboard('mycoolnode', snap).sendDeleteAuth).toBe(false)
 })
 
-test('offboarding refuses a removal that drops below the threshold', () => {
-    const err = abort(() => planOffboard('oracle1', snapshot({threshold: 2})))
-    expect(err.line).toContain('leaves 1 oracle, below the threshold of 2')
-    expect(err.advice).toContain('--set-threshold 1')
-})
-
-test('--set-threshold permits the removal and lowers the quorum in the same transaction', () => {
-    const plan = planOffboard('oracle1', snapshot({threshold: 2, permissionKeys: [KEY]}), 1)
+test('--set-threshold overrides the policy value in the same transaction', () => {
+    const snap = snapshot({oracles: ['oracle1', 'oracle2', 'oracle3'], permissionKeys: [KEY]})
+    const plan = planOffboard('oracle1', snap, 1)
     expect(plan.setThreshold).toBe(1)
     expect(plan.sendDeleteAuth).toBe(true)
-    expect(plan.checks[1]).toContain('1 oracle remains, threshold set to 1')
+    expect(plan.checks[1]).toContain('2 oracles remain, threshold set to 1')
 })
 
 test('--set-threshold refuses a value the remaining oracles cannot reach', () => {
-    const err = abort(() => planOffboard('oracle1', snapshot(), 3))
+    const err = abort(() =>
+        planOffboard('oracle1', snapshot({oracles: ['oracle1', 'oracle2', 'oracle3']}), 3)
+    )
     expect(err.advice).toContain('--set-threshold 3 is not reachable')
 })
 
 test('--set-threshold refuses a value below one', () => {
-    const err = abort(() => planOffboard('oracle1', snapshot(), 0))
+    const err = abort(() =>
+        planOffboard('oracle1', snapshot({oracles: ['oracle1', 'oracle2', 'oracle3']}), 0)
+    )
     expect(err.advice).toContain('a quorum needs a threshold of at least 1')
 })
 
@@ -145,6 +192,7 @@ test('offboarding refuses an unregistered handle', () => {
 test('offboarding refuses to retire the only oracle', () => {
     const err = abort(() => planOffboard('oracle1', snapshot({oracles: ['oracle1'], threshold: 1})))
     expect(err.line).toContain("'oracle1' is the only oracle")
+    expect(err.advice).toContain('A quorum needs at least two oracles')
 })
 
 test('the onboard summary says which epoch the handle becomes responsible for', () => {
@@ -171,4 +219,21 @@ test('the offboard summary says the handle rides out the epoch already under way
     })
     expect(out).toContain('mycoolnode is retired and its permission is deleted.')
     expect(out).toContain("epoch 413's fixed oracle set and drops out from epoch 414")
+})
+
+test('onboarding sends setthreshold after addoracle', () => {
+    const plan = planOnboard('mycoolnode', KEY, snapshot({oracles: ['a', 'b', 'c'], threshold: 2}))
+    const names = buildOnboardActions('mycoolnode', KEY, plan).map((a) => String(a.name))
+    expect(names).toEqual(['updateauth', 'addoracle', 'setthreshold'])
+})
+
+test('offboarding sends setthreshold before removeoracle', () => {
+    const snap = snapshot({
+        oracles: ['a', 'b', 'c', 'mycoolnode'],
+        threshold: 3,
+        permissionKeys: [KEY],
+    })
+    const plan = planOffboard('mycoolnode', snap)
+    const names = buildOffboardActions('mycoolnode', plan).map((a) => String(a.name))
+    expect(names).toEqual(['setthreshold', 'removeoracle', 'deleteauth'])
 })

@@ -23,11 +23,11 @@ export function buildOffboardActions(handle: string, plan: OffboardPlan): Action
 }
 
 function describe(handle: string, plan: OffboardPlan, proposing: boolean): string {
-    const names = ['removeoracle']
-    if (plan.setThreshold !== undefined) names.unshift('setthreshold')
-    if (plan.sendDeleteAuth) names.push('deleteauth')
+    const names = [`removeoracle ${handle}`]
+    if (plan.setThreshold !== undefined) names.unshift(`setthreshold ${plan.setThreshold}`)
+    if (plan.sendDeleteAuth) names.push(`deleteauth ${handle}`)
     const verb = proposing ? 'Proposed' : 'Signed'
-    return `${verb} ${names.map((n) => `${n} ${handle}`).join(', ')}.`
+    return `${verb} ${names.join(', ')}.`
 }
 
 export function register(parent: Command): void {
@@ -36,7 +36,7 @@ export function register(parent: Command): void {
         .argument('<handle>', 'oracle handle to retire')
         .option(
             '--set-threshold <m>',
-            'threshold to leave the quorum at, required when the removal would drop it below the current value',
+            'threshold to leave the quorum at, overriding the two-thirds policy value',
             parseUint8
         )
         .action(async (handle: string, opts: {setThreshold?: number}, command: Command) => {
