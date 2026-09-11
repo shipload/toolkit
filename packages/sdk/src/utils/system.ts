@@ -161,7 +161,12 @@ export function isLocationBuildable(
     gameSeed: Checksum256Type,
     coordinates: CoordinatesType
 ): boolean {
-    return getLocationType(gameSeed, coordinates) === LocationType.PLANET
+    const type = getLocationType(gameSeed, coordinates)
+    return (
+        type === LocationType.ASTEROID ||
+        type === LocationType.NEBULA ||
+        type === LocationType.ICE_FIELD
+    )
 }
 
 export function deriveLocation(

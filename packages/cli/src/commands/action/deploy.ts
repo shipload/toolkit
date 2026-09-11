@@ -80,7 +80,7 @@ export async function runDeploy(
                 const locType = getLocationType(gameSeed, coords)
                 const locLabel = getLocationTypeName(locType)
                 throw new ValidationError(
-                    `Cannot deploy ${packedEntityType} at (${coords.x}, ${coords.y}): location is ${locLabel}, not a Planet. Buildings can only be deployed at planets — travel to a planet first.`
+                    `Cannot deploy ${packedEntityType} at (${coords.x}, ${coords.y}): location is ${locLabel}. Structures can only be deployed at an asteroid, nebula, or ice field; travel to one first.`
                 )
             }
         }

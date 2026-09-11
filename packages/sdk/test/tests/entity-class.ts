@@ -91,20 +91,20 @@ describe('getPackedEntityType', () => {
 })
 
 describe('isLocationBuildable', () => {
-    test('planet coords return true', () => {
-        assert.isTrue(isLocationBuildable(testGameSeed, {x: 1, y: 17}))
+    test('planet coords return false', () => {
+        assert.isFalse(isLocationBuildable(testGameSeed, {x: 1, y: 17}))
     })
 
-    test('asteroid coords return false', () => {
-        assert.isFalse(isLocationBuildable(testGameSeed, {x: 0, y: 1}))
+    test('asteroid coords return true', () => {
+        assert.isTrue(isLocationBuildable(testGameSeed, {x: 0, y: 1}))
     })
 
-    test('nebula coords return false', () => {
-        assert.isFalse(isLocationBuildable(testGameSeed, {x: 0, y: -3}))
+    test('nebula coords return true', () => {
+        assert.isTrue(isLocationBuildable(testGameSeed, {x: 0, y: -3}))
     })
 
-    test('ice field coords return false', () => {
-        assert.isFalse(isLocationBuildable(testGameSeed, {x: -9, y: -5}))
+    test('ice field coords return true', () => {
+        assert.isTrue(isLocationBuildable(testGameSeed, {x: -9, y: -5}))
     })
 
     test('empty coords return false', () => {
