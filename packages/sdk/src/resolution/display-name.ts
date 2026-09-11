@@ -50,7 +50,7 @@ export function displayName(item: DisplayNameInput): string {
 export interface DescribeOptions {
     translate?: (key: string) => string
     formatNumber?: (n: number) => string
-    formatMass?: (kg: number) => string
+    formatMass?: (mass: number) => string
 }
 
 export function describeItem(resolved: ResolvedItem, opts?: DescribeOptions): string {
