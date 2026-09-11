@@ -6,7 +6,7 @@ export interface TickLogState {
 }
 
 export function tickSignature(r: TickResult): string {
-    return `${r.target}|${r.commit}|${r.reveal}`
+    return `${r.target}|${r.commit}|${r.reveal}|${r.close}`
 }
 
 export function shouldLogTick(

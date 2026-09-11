@@ -52,7 +52,8 @@ export function formatTick(r: TickResult): string {
     const detail = r.eta
         ? `h=${r.currentHeight}, ${r.eta.kind} in ${formatDuration(r.eta.seconds)}`
         : `h=${r.currentHeight}`
-    return `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal} (${detail})`
+    const close = r.close === 'not-due' ? '' : ` · close: ${r.close}`
+    return `epoch ${r.target} · commit: ${r.commit} · reveal: ${r.reveal}${close} (${detail})`
 }
 
 export function formatClean(r: CleanResult): string {

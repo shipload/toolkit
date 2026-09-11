@@ -10,6 +10,7 @@ function tick(over: Partial<TickResult> = {}): TickResult {
         currentHeight: 16,
         commit: 'already-committed',
         reveal: 'waiting-for-height',
+        close: 'not-due',
         eta: {kind: 'boundary', seconds: 2400},
         ...over,
     }

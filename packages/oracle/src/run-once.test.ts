@@ -18,6 +18,7 @@ function fakeDeps(opts: {
     libBlock?: number
     postBlock?: number
     timeRemainingMs?: number
+    secondsUntilClose?: number
 }): {
     deps: OracleDeps
     sent: string[]
@@ -39,6 +40,7 @@ function fakeDeps(opts: {
             getCommitsFor: async () => commits,
             getRevealsFor: async () => reveals,
             getEpochThreshold: async () => opts.threshold ?? 1,
+            getSecondsUntilClose: async () => opts.secondsUntilClose ?? 3600,
             getChainInfo: async () => ({headBlock, libBlock}),
         },
         actions: {
@@ -49,6 +51,10 @@ function fakeDeps(opts: {
             reveal: (oracle, epoch, hash) => {
                 calls.push({kind: 'reveal', oracle: String(oracle), epoch, hash: String(hash)})
                 return {name: 'reveal'} as never
+            },
+            closeepoch: (epoch) => {
+                calls.push({kind: 'closeepoch', oracle: '', epoch, hash: ''})
+                return {name: 'closeepoch'} as never
             },
         },
         session: {
@@ -264,4 +270,49 @@ test('records the commit block when posting a fresh commit', async () => {
     const {deps, recorded} = fakeDeps({finalized: 41, height: 41, postBlock: 777})
     await runOnce(deps)
     expect(recorded.get(42)).toBe(777)
+})
+
+test('overdue stalled epoch is closed on the normal tick', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('already-revealed')
+    expect(r.close).toBe('posted')
+    expect(sent).toEqual(['closeepoch'])
+})
+
+test('no close while the deadline is still ahead', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 30,
+    })
+    const r = await runOnce(deps)
+    expect(r.close).toBe('not-due')
+    expect(sent).toEqual([])
+})
+
+test('no close on the tick that posts a reveal', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        threshold: 1,
+        secret: REVEAL,
+        commitBlock: 10,
+        secondsUntilClose: 0,
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('posted')
+    expect(r.close).toBe('not-due')
+    expect(sent).toEqual(['reveal'])
 })

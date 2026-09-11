@@ -982,6 +982,18 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    setdeadline(deadline: UInt32Type): Action {
+        return this.server.action('setdeadline', {
+            deadline: UInt32.from(deadline),
+        })
+    }
+
+    closeepoch(epoch: UInt64Type): Action {
+        return this.server.action('closeepoch', {
+            epoch: UInt64.from(epoch),
+        })
+    }
+
     cleanrsvp(epoch: UInt64Type, maxRows: UInt64Type): Action {
         return this.server.action('cleanrsvp', {
             epoch: UInt64.from(epoch),

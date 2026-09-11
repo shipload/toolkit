@@ -123,6 +123,7 @@ export async function buildOracleContext(): Promise<OracleContext> {
             getTimeRemaining: () => shipload.epochs.getTimeRemaining(),
             getCommitsFor: (epoch) => shipload.epochs.getCommitsFor(epoch),
             getRevealsFor: (epoch) => shipload.epochs.getRevealsFor(epoch),
+            getSecondsUntilClose: (epoch) => shipload.epochs.getSecondsUntilClose(epoch),
             getEpochThreshold: async (epoch) => {
                 const row = await shipload.epochs.getEpochRow(epoch)
                 return row ? Number(row.threshold) : 0
@@ -138,6 +139,7 @@ export async function buildOracleContext(): Promise<OracleContext> {
         actions: {
             commit: (id, epoch, commit) => shipload.actions.commit(id, epoch, commit),
             reveal: (id, epoch, reveal) => shipload.actions.reveal(id, epoch, reveal),
+            closeepoch: (epoch) => shipload.actions.closeepoch(epoch),
         },
         session,
         oracleId,

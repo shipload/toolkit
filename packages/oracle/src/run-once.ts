@@ -10,6 +10,8 @@ export type RevealOutcome =
     | 'waiting-for-finality'
     | 'missing-secret'
 
+export type CloseOutcome = 'not-due' | 'posted' | 'failed'
+
 export type TickEta = {kind: 'boundary' | 'finality'; seconds: number}
 
 export interface TickResult {
@@ -17,6 +19,7 @@ export interface TickResult {
     currentHeight: number
     commit: CommitOutcome
     reveal: RevealOutcome
+    close: CloseOutcome
     eta?: TickEta
 }
 
@@ -27,12 +30,14 @@ export interface EpochReads {
     getCommitsFor(epoch: number): Promise<{oracle_id: Name}[]>
     getRevealsFor(epoch: number): Promise<{oracle_id: Name}[]>
     getEpochThreshold(epoch: number): Promise<number>
+    getSecondsUntilClose(epoch: number): Promise<number>
     getChainInfo(): Promise<{headBlock: number; libBlock: number}>
 }
 
 export interface ActionBuilders {
     commit(oracleId: Name, epoch: number, commit: Checksum256): Action
     reveal(oracleId: Name, epoch: number, reveal: Checksum256): Action
+    closeepoch(epoch: number): Action
 }
 
 export interface SessionLike {
@@ -86,7 +91,25 @@ export async function runOnce(deps: OracleDeps): Promise<TickResult> {
         alreadyCommitted
     )
 
-    return {target, currentHeight, commit, reveal, eta}
+    const close = await resolveClose(deps, target, reveal)
+
+    return {target, currentHeight, commit, reveal, close, eta}
+}
+
+async function resolveClose(
+    deps: OracleDeps,
+    target: number,
+    reveal: RevealOutcome
+): Promise<CloseOutcome> {
+    if (reveal === 'posted' || reveal === 'waiting-for-height') return 'not-due'
+    const {epochs, actions, session} = deps
+    if ((await epochs.getSecondsUntilClose(target)) > 0) return 'not-due'
+    try {
+        await session.transact({action: actions.closeepoch(target)})
+        return 'posted'
+    } catch {
+        return 'failed'
+    }
 }
 
 async function resolveReveal(

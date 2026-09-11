@@ -32,6 +32,7 @@ test('formatTick describes a fresh commit waiting on height', () => {
         currentHeight: 41,
         commit: 'posted',
         reveal: 'waiting-for-height',
+        close: 'not-due',
     }
     const line = formatTick(r)
     expect(line).toContain('epoch 42')
@@ -46,6 +47,7 @@ test('formatTick renders a boundary eta alongside the height', () => {
         currentHeight: 16,
         commit: 'already-committed',
         reveal: 'waiting-for-height',
+        close: 'not-due',
         eta: {kind: 'boundary', seconds: 2460},
     }
     expect(formatTick(r)).toContain('(h=16, boundary in 41m)')
@@ -57,6 +59,7 @@ test('formatTick renders a finality eta in seconds', () => {
         currentHeight: 17,
         commit: 'already-committed',
         reveal: 'waiting-for-finality',
+        close: 'not-due',
         eta: {kind: 'finality', seconds: 45},
     }
     expect(formatTick(r)).toContain('(h=17, finality in 45s)')
@@ -75,6 +78,7 @@ test('formatTick describes a posted reveal', () => {
         currentHeight: 42,
         commit: 'already-committed',
         reveal: 'posted',
+        close: 'not-due',
     }
     expect(formatTick(r)).toContain('reveal: posted')
 })
@@ -285,6 +289,7 @@ test('formatTick renders the new reveal outcomes verbatim', () => {
         currentHeight: 42,
         commit: 'already-committed',
         reveal: 'waiting-for-commits',
+        close: 'not-due',
     }
     expect(formatTick(waiting)).toContain('reveal: waiting-for-commits')
     const finality: TickResult = {
@@ -292,6 +297,7 @@ test('formatTick renders the new reveal outcomes verbatim', () => {
         currentHeight: 42,
         commit: 'already-committed',
         reveal: 'waiting-for-finality',
+        close: 'not-due',
     }
     expect(formatTick(finality)).toContain('reveal: waiting-for-finality')
 })
@@ -345,4 +351,24 @@ test('fund sweep reports an idle pass', () => {
 
 test('fund sweep names the lots it tended', () => {
     expect(formatTend({kind: 'tended', assetIds: [11, 12]})).toBe('fund sweep: tended 2 lot(s)')
+})
+
+test('formatTick reports a close only when one was attempted', () => {
+    const quiet: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'already-committed',
+        reveal: 'already-revealed',
+        close: 'not-due',
+    }
+    expect(formatTick(quiet)).not.toContain('close:')
+
+    const closed: TickResult = {
+        target: 42,
+        currentHeight: 42,
+        commit: 'already-committed',
+        reveal: 'already-revealed',
+        close: 'posted',
+    }
+    expect(formatTick(closed)).toContain('close: posted')
 })

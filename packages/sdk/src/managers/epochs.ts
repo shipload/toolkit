@@ -3,6 +3,8 @@ import {BaseManager} from './base'
 import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch'
 import type {ServerContract} from '../contracts'
 
+export const DEFAULT_EPOCH_DEADLINE = 10800
+
 export class EpochsManager extends BaseManager {
     async getCurrentHeight(): Promise<UInt64> {
         const game = await this.getGame()
@@ -71,6 +73,22 @@ export class EpochsManager extends BaseManager {
     async getThreshold(): Promise<number> {
         const cfg = await this.server.table('oraclecfg').get()
         return cfg ? Number(cfg.threshold) : 0
+    }
+
+    async getDeadline(): Promise<number> {
+        const cfg = await this.server.table('oraclecfg').get()
+        return cfg ? Number(cfg.deadline) : DEFAULT_EPOCH_DEADLINE
+    }
+
+    async getCloseDueAt(epoch: UInt64Type): Promise<Date> {
+        const info = await this.getByHeight(epoch)
+        const deadline = await this.getDeadline()
+        return new Date(info.start.getTime() + deadline * 1000)
+    }
+
+    async getSecondsUntilClose(epoch: UInt64Type): Promise<number> {
+        const dueAt = await this.getCloseDueAt(epoch)
+        return Math.ceil((dueAt.getTime() - Date.now()) / 1000)
     }
 
     async getCommitsFor(epoch: UInt64Type): Promise<ServerContract.Types.commit_row[]> {
