@@ -54,6 +54,8 @@ const NODE_DOCK_TUNEUPS = [30100301, 30100302, 30100303, 30100304]
 const NODE_DEPOT = 40100001
 const NODE_DEPOT_BAYS = [40100101, 40100102, 40100103, 40100104]
 const NODE_DEPOT_LOADERS = [40100401, 40100402, 40100403, 40100404]
+const DEPOT_LOADER_SLOTS = [0, 1]
+const DEPOT_BAY_SLOTS = [2, 3, 4, 5]
 
 function node(nodeId: number): CharterNode {
     const found = charterNode(nodeId)
@@ -168,14 +170,16 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
         expect(raised).toBe(400)
     })
 
-    test('the Depot node fits a baseline loader and leaves the bays empty', () => {
+    test('the Depot node fits two baseline loaders and leaves the bays empty', () => {
         const standing = complete(complete({}, NODE_WORKSHOP), NODE_DEPOT)
         const depot = {modules: standing[CIVIC_DEPOT]!}
-        expect(stats(depot, 0)).toEqual({
-            itemId: ITEM_LOADER_T1,
-            stats: [CHARTER_BASELINE_STAT, CHARTER_BASELINE_STAT],
-        })
-        for (let slot = 1; slot <= 4; slot++) expect(depot.modules[slot].installed).toBeUndefined()
+        for (const slot of DEPOT_LOADER_SLOTS) {
+            expect(stats(depot, slot)).toEqual({
+                itemId: ITEM_LOADER_T1,
+                stats: [CHARTER_BASELINE_STAT, CHARTER_BASELINE_STAT],
+            })
+        }
+        for (const slot of DEPOT_BAY_SLOTS) expect(depot.modules[slot].installed).toBeUndefined()
     })
 
     test('the four bays fill the storage slots in order at the baseline stat', () => {
@@ -183,8 +187,9 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
         for (let i = 0; i < NODE_DEPOT_BAYS.length; i++) {
             standing = complete(standing, NODE_DEPOT_BAYS[i])
             const depot = {modules: standing[CIVIC_DEPOT]!}
-            for (let slot = 1; slot <= 4; slot++) {
-                if (slot <= i + 1) {
+            for (let bay = 0; bay < DEPOT_BAY_SLOTS.length; bay++) {
+                const slot = DEPOT_BAY_SLOTS[bay]
+                if (bay <= i) {
                     expect(stats(depot, slot)).toEqual({
                         itemId: ITEM_STORAGE_T1,
                         stats: [
@@ -201,14 +206,16 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
         }
     })
 
-    test('the four loader rungs step the slot-0 loader by one rung each, reaching 400', () => {
+    test('the four loader rungs step both loaders by one rung each, reaching 400', () => {
         let standing = complete(complete({}, NODE_WORKSHOP), NODE_DEPOT)
         for (let i = 0; i < NODE_DEPOT_LOADERS.length; i++) {
             standing = complete(standing, NODE_DEPOT_LOADERS[i])
             const depot = {modules: standing[CIVIC_DEPOT]!}
             const stat = CHARTER_BASELINE_STAT + CHARTER_RUNG_STEP * (i + 1)
-            expect(stats(depot, 0)).toEqual({itemId: ITEM_LOADER_T1, stats: [stat, stat]})
-            for (let slot = 1; slot <= 4; slot++)
+            for (const slot of DEPOT_LOADER_SLOTS) {
+                expect(stats(depot, slot)).toEqual({itemId: ITEM_LOADER_T1, stats: [stat, stat]})
+            }
+            for (const slot of DEPOT_BAY_SLOTS)
                 expect(depot.modules[slot].installed).toBeUndefined()
         }
     })
@@ -223,8 +230,10 @@ describe('grant mechanics', () => {
             stat: CIVIC_STAT_TRANSFER_SPEED,
             value: 50,
         })
-        const withBay = fitCivicModules(raised, 1)
-        expect(stats({modules: withBay}, 1).stats).toEqual([0, 0, 0, 0])
+        const withSecondLoader = fitCivicModules(raised, 1)
+        expect(stats({modules: withSecondLoader}, 1).stats).toEqual([50, 50])
+        const withBay = fitCivicModules(withSecondLoader, 1)
+        expect(stats({modules: withBay}, 2).stats).toEqual([0, 0, 0, 0])
         const withSecondBay = fitCivicModules(
             raiseCivicStat(withBay, {
                 kind: CIVIC_GRANT_RUNG,
@@ -234,7 +243,7 @@ describe('grant mechanics', () => {
             }),
             1
         )
-        expect(stats({modules: withSecondBay}, 2).stats).toEqual([7, 7, 7, 7])
+        expect(stats({modules: withSecondBay}, 3).stats).toEqual([7, 7, 7, 7])
     })
 
     test('a rung caps at the civic speed cap', () => {

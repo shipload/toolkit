@@ -334,7 +334,7 @@ export const itemMetadata: Record<number, ItemMetadata> = {
     },
     10219: {
         name: 'Depot',
-        description: 'Planetary storage facility with a loader module slot and four cargo slots.',
+        description: 'Planetary storage facility with two shuttle bays and four cargo slots.',
         color: '#EAB308',
     },
 
@@ -497,7 +497,14 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     },
     10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
     10219: {
-        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
+        moduleSlotLabels: [
+            'Shuttle Bay',
+            'Shuttle Bay',
+            'Cargo Hold',
+            'Cargo Hold',
+            'Cargo Hold',
+            'Cargo Hold',
+        ],
     },
     11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
     11213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
