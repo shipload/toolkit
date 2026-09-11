@@ -1,6 +1,7 @@
 import {expect, test} from 'bun:test'
 import type {CharterReadyResult, TickResult, VoteReadyResult} from '@shipload/oracle'
 import {
+    formatAdmitted,
     formatCharterReady,
     formatClean,
     formatMintReady,
@@ -8,6 +9,9 @@ import {
     formatDuration,
     formatTick,
     formatVoteReady,
+    formatWaiting,
+    formatWaitingBrief,
+    operatorStatus,
     renderStatus,
     type OracleStatusView,
 } from './format'
@@ -371,4 +375,125 @@ test('formatTick reports a close only when one was attempted', () => {
         close: 'posted',
     }
     expect(formatTick(closed)).toContain('close: posted')
+})
+
+test('the waiting message names the permission the deployer must create', () => {
+    const out = formatWaiting({
+        handle: 'mycoolnode',
+        actor: 'eon.shipload',
+        permission: 'mycoolnode',
+        state: 'no-permission',
+    })
+    expect(out).toContain('oracle mycoolnode waiting: handle not admitted yet.')
+    expect(out).toContain('eon.shipload@mycoolnode')
+    expect(out).toContain('Nothing to do until they do.')
+})
+
+test('the waiting message distinguishes an unwired key from a missing permission', () => {
+    const out = formatWaiting({
+        handle: 'mycoolnode',
+        actor: 'eon.shipload',
+        permission: 'mycoolnode',
+        state: 'key-not-wired',
+    })
+    expect(out).toContain('waiting: handle not admitted yet.')
+    expect(out).toContain('your oracle key is not wired to it')
+})
+
+test('the repeated wait line is one line carrying how long it has waited', () => {
+    expect(
+        formatWaitingBrief({handle: 'mycoolnode', state: 'no-permission', waitingFor: 1800})
+    ).toBe('oracle mycoolnode still waiting (30m).')
+    expect(formatWaitingBrief({handle: 'mycoolnode', state: 'no-permission'})).toBe(
+        'oracle mycoolnode waiting: handle not admitted yet.'
+    )
+    expect(formatWaitingBrief({handle: 'mycoolnode', state: 'unreachable'})).toBe(
+        'oracle mycoolnode waiting: cannot reach the chain.'
+    )
+})
+
+test('an unreachable chain reads as a wait, not a failure', () => {
+    const out = formatWaiting({
+        handle: 'mycoolnode',
+        actor: 'eon.shipload',
+        permission: 'mycoolnode',
+        state: 'unreachable',
+        detail: 'connect ECONNREFUSED',
+    })
+    expect(out).toContain('waiting: cannot reach the chain')
+    expect(out).toContain('connect ECONNREFUSED')
+})
+
+test('admission names the first epoch the handle is responsible for', () => {
+    const out = formatAdmitted({
+        handle: 'mycoolnode',
+        registered: true,
+        target: 413,
+        responsible: 414,
+        secondsAway: 8040,
+    })
+    expect(out).toContain('admitted: key wired, registered.')
+    expect(out).toContain('Epoch 413 is already under way')
+    expect(out).toContain('responsible from epoch 414, about 2h14m away')
+})
+
+test('admission during an epoch that already includes the handle says so', () => {
+    const out = formatAdmitted({
+        handle: 'mycoolnode',
+        registered: true,
+        target: 413,
+        responsible: 413,
+        secondsAway: 0,
+    })
+    expect(out).toContain('responsible from epoch 413, the epoch under way now')
+})
+
+const personal = {
+    handle: 'mycoolnode',
+    pubkey: 'PUB_K1_x',
+    keyWired: false,
+    registered: false,
+    secretStored: false,
+    storePath: '/tmp/x.sqlite',
+}
+
+test('the operator status line tracks the admission gate', () => {
+    expect(operatorStatus(personal)).toBe('waiting for the deployer to admit this handle')
+    expect(operatorStatus({...personal, keyWired: true})).toBe(
+        'key wired, waiting to be added to the oracle registry'
+    )
+    expect(
+        operatorStatus({
+            ...personal,
+            keyWired: true,
+            registered: true,
+            responsible: {epoch: 414, secondsAway: 8040},
+        })
+    ).toBe('active from epoch 414, about 2h14m away')
+    expect(
+        operatorStatus({
+            ...personal,
+            keyWired: true,
+            registered: true,
+            responsible: {epoch: 413, secondsAway: 0},
+        })
+    ).toBe('active')
+})
+
+test('status shows the operator status line under the You block', () => {
+    const out = renderStatus({
+        serverAccount: 'eon.shipload',
+        stateInitialized: true,
+        enabled: true,
+        epoch: 412,
+        gameStarted: true,
+        epochClockSet: true,
+        currentHeight: 413,
+        target: 413,
+        quorumDeployed: true,
+        threshold: 2,
+        oracles: [{handle: 'beacon', committed: true, revealed: false}],
+        mine: {...personal, keyWired: true, registered: false},
+    })
+    expect(out).toContain('Status:          key wired, waiting to be added to the oracle registry')
 })

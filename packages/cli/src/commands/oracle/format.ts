@@ -15,6 +15,8 @@ export interface OracleRow {
     revealed: boolean
 }
 
+export type AdmissionState = 'admitted' | 'no-permission' | 'key-not-wired' | 'unreachable'
+
 export interface OraclePersonal {
     handle: string
     pubkey: string
@@ -22,6 +24,7 @@ export interface OraclePersonal {
     registered: boolean
     secretStored: boolean
     storePath: string
+    responsible?: {epoch: number; secondsAway: number}
 }
 
 export interface OracleStatusView {
@@ -100,6 +103,81 @@ function yn(v: boolean): string {
     return v ? 'yes' : 'no'
 }
 
+export function formatWaiting(opts: {
+    handle: string
+    actor: string
+    permission: string
+    state: AdmissionState
+    detail?: string
+}): string {
+    const perm = `${opts.actor}@${opts.permission}`
+    if (opts.state === 'unreachable') {
+        return [
+            `oracle ${opts.handle} waiting: cannot reach the chain.`,
+            `  ${opts.detail ?? 'the node did not answer'}. Nothing is signed until it answers.`,
+        ].join('\n')
+    }
+    if (opts.state === 'key-not-wired') {
+        return [
+            `oracle ${opts.handle} waiting: handle not admitted yet.`,
+            `  ${perm} exists, but your oracle key is not wired to it.`,
+            '  Nothing to do until the deployer wires it.',
+        ].join('\n')
+    }
+    return [
+        `oracle ${opts.handle} waiting: handle not admitted yet.`,
+        `  The deployer has not created ${perm} or added it to the`,
+        '  oracle registry. Nothing to do until they do.',
+    ].join('\n')
+}
+
+export function formatWaitingBrief(opts: {
+    handle: string
+    state: AdmissionState
+    waitingFor?: number
+}): string {
+    if (opts.waitingFor !== undefined) {
+        return `oracle ${opts.handle} still waiting (${formatDuration(opts.waitingFor)}).`
+    }
+    if (opts.state === 'unreachable') {
+        return `oracle ${opts.handle} waiting: cannot reach the chain.`
+    }
+    return `oracle ${opts.handle} waiting: handle not admitted yet.`
+}
+
+export function formatAdmitted(opts: {
+    handle: string
+    registered: boolean
+    target: number
+    responsible: number
+    secondsAway: number
+}): string {
+    const head = `oracle ${opts.handle} admitted: key wired, ${
+        opts.registered ? 'registered' : 'not in the oracle registry yet'
+    }.`
+    if (opts.responsible <= opts.target) {
+        return `${head}\n  You are responsible from epoch ${opts.responsible}, the epoch under way now.`
+    }
+    return [
+        head,
+        `  Epoch ${opts.target} is already under way with a fixed oracle set that does not`,
+        `  include you. You are responsible from epoch ${opts.responsible}, about ${formatDuration(
+            opts.secondsAway
+        )} away.`,
+    ].join('\n')
+}
+
+export function operatorStatus(mine: OraclePersonal): string {
+    if (!mine.keyWired) return 'waiting for the deployer to admit this handle'
+    if (!mine.registered) return 'key wired, waiting to be added to the oracle registry'
+    if (mine.responsible && mine.responsible.secondsAway > 0) {
+        return `active from epoch ${mine.responsible.epoch}, about ${formatDuration(
+            mine.responsible.secondsAway
+        )} away`
+    }
+    return 'active'
+}
+
 export function renderStatus(view: OracleStatusView): string {
     const gameStartedLabel = !view.stateInitialized
         ? 'unknown (state not initialized)'
@@ -128,6 +206,7 @@ export function renderStatus(view: OracleStatusView): string {
             `  Public key:      ${view.mine.pubkey}`,
             `  Key wired:       ${yn(view.mine.keyWired)}`,
             `  Registered:      ${yn(view.mine.registered)}`,
+            `  Status:          ${operatorStatus(view.mine)}`,
             `  Secret stored:   ${view.target !== undefined ? yn(view.mine.secretStored) : '—'}`,
             `  Store path:      ${view.mine.storePath}`
         )

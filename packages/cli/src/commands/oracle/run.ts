@@ -6,9 +6,13 @@ import {
     type TickLogState,
 } from '@shipload/oracle'
 import {describeLoopError} from '../../lib/errors'
+import {loadOracleConfig} from '../../lib/config'
+import {checkAdmission, isRegistered, resolveResponsibility} from './admission'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
-import {formatClean, formatTick} from './format'
+import {formatAdmitted, formatClean, formatTick, formatWaiting, formatWaitingBrief} from './format'
 import {runCollectPass, runMaintenancePass} from './maintenance-pass'
+
+const ADMISSION_POLL_MS = 60_000
 
 function stamp(): string {
     return new Date().toISOString()
@@ -51,7 +55,7 @@ export function register(parent: Command): void {
                 const maintenanceIntervalMs = Math.max(1, Number(opts.maintenanceInterval)) * 1000
                 const collectIntervalMs = Math.max(1, Number(opts.collectInterval)) * 1000
                 const heartbeatMs = Math.max(1, Number(opts.heartbeat)) * 1000
-                const ctx = await buildOracleContext()
+                const cfg = loadOracleConfig()
                 let stopping = false
                 let wake: (() => void) | null = null
                 const stop = () => {
@@ -76,8 +80,56 @@ export function register(parent: Command): void {
                 let tickLog: TickLogState | null = null
                 let maintenanceLog: MaintenanceLogState | null = null
                 console.log(
-                    `${stamp()} oracle ${ctx.cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, collect ${collectIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
+                    `${stamp()} oracle ${cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, collect ${collectIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
                 )
+                const waitStartedAt = Date.now()
+                let lastWaitLogAt = 0
+                while (!stopping) {
+                    const admission = await checkAdmission(cfg)
+                    if (admission.state === 'admitted') {
+                        try {
+                            const [responsibility, registered] = await Promise.all([
+                                resolveResponsibility(cfg.handle),
+                                isRegistered(cfg.handle),
+                            ])
+                            console.log(
+                                `${stamp()} ${formatAdmitted({handle: cfg.handle, registered, ...responsibility})}`
+                            )
+                        } catch (err) {
+                            console.log(
+                                `${stamp()} oracle ${cfg.handle} admitted: key wired (could not read the epoch registry: ${describeLoopError(err)})`
+                            )
+                        }
+                        break
+                    }
+                    if (lastWaitLogAt === 0) {
+                        console.log(
+                            `${stamp()} ${formatWaiting({
+                                handle: cfg.handle,
+                                actor: cfg.actor,
+                                permission: cfg.permission,
+                                state: admission.state,
+                                detail: admission.detail,
+                            })}`
+                        )
+                        lastWaitLogAt = Date.now()
+                    } else if (Date.now() - lastWaitLogAt >= heartbeatMs) {
+                        console.log(
+                            `${stamp()} ${formatWaitingBrief({
+                                handle: cfg.handle,
+                                state: admission.state,
+                                waitingFor: Math.round((Date.now() - waitStartedAt) / 1000),
+                            })}`
+                        )
+                        lastWaitLogAt = Date.now()
+                    }
+                    await sleep(ADMISSION_POLL_MS)
+                }
+                if (stopping) {
+                    console.log(`${stamp()} oracle ${cfg.handle} stopped`)
+                    return
+                }
+                const ctx = await buildOracleContext({verify: false})
                 try {
                     while (!stopping) {
                         try {

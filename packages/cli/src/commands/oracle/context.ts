@@ -23,12 +23,13 @@ import {
     type VoteReadyResult,
 } from '@shipload/oracle'
 import {FundContract} from '@shipload/sdk'
-import {Name, PrivateKey, UInt32, UInt64, type PublicKey} from '@wharfkit/antelope'
+import {Name, UInt32, UInt64} from '@wharfkit/antelope'
 import {Session} from '@wharfkit/session'
 import {WalletPluginPrivateKey} from '@wharfkit/wallet-plugin-privatekey'
 import {chain, client, fundContractName, gameContractName, getShipload} from '../../lib/client'
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
 import {ValidationError} from '../../lib/validate'
+import {checkAdmission} from './admission'
 
 export interface OracleContext {
     cfg: OracleConfig
@@ -55,43 +56,30 @@ function wrapSession(rawSession: Session): SessionLike {
     }
 }
 
-async function verifyOraclePermission(cfg: OracleConfig): Promise<void> {
-    let pub: PublicKey
-    try {
-        pub = PrivateKey.from(cfg.privateKey).toPublic()
-    } catch {
-        throw new ValidationError(
-            'The oracle private_key in your config is not a valid Antelope key.',
-            'Regenerate it with `shiploadcli oracle keygen`, or fix the [oracle] private_key value.'
-        )
-    }
-    let account: Awaited<ReturnType<typeof client.v1.chain.get_account>>
-    try {
-        account = await client.v1.chain.get_account(cfg.actor)
-    } catch (err) {
+async function requireAdmission(cfg: OracleConfig): Promise<void> {
+    const admission = await checkAdmission(cfg)
+    if (admission.state === 'admitted') return
+    if (admission.state === 'unreachable') {
         console.warn(
-            `${new Date().toISOString()} warning: could not verify ${cfg.actor}@${cfg.permission} (${(err as Error).message}); proceeding`
+            `${new Date().toISOString()} warning: could not verify ${cfg.actor}@${cfg.permission} (${admission.detail}); proceeding`
         )
         return
     }
-    const perm = account.permissions.find((p) => String(p.perm_name) === cfg.permission)
-    if (!perm) {
+    if (admission.state === 'no-permission') {
         throw new ValidationError(
             `Permission ${cfg.actor}@${cfg.permission} does not exist on chain.`,
-            'Create the permission and wire your oracle key (updateauth + linkauth the commit/reveal/cleanrsvp actions), then run `shiploadcli oracle status` to confirm.'
+            'The deployer admits your handle with `shiploadcli admin onboard-oracle`. Run `shiploadcli oracle status` to confirm.'
         )
     }
-    if (!perm.required_auth.keys.some((k) => k.key.equals(pub))) {
-        throw new ValidationError(
-            `Oracle key ${pub} is not wired to ${cfg.actor}@${cfg.permission}.`,
-            'Add the key with updateauth (and linkauth the commit/reveal/cleanrsvp actions), then run `shiploadcli oracle status` to confirm.'
-        )
-    }
+    throw new ValidationError(
+        `Your oracle key is not wired to ${cfg.actor}@${cfg.permission}.`,
+        'Send the deployer the public key from `shiploadcli oracle setup`, then run `shiploadcli oracle status` to confirm.'
+    )
 }
 
-export async function buildOracleContext(): Promise<OracleContext> {
+export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise<OracleContext> {
     const cfg = loadOracleConfig()
-    await verifyOraclePermission(cfg)
+    if (opts.verify !== false) await requireAdmission(cfg)
     const shipload = await getShipload()
     const rawSession = new Session(
         {

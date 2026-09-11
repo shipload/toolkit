@@ -5,6 +5,7 @@ import {PrivateKey, type PublicKey} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {client, gameContractName, getShipload, platform, server} from '../../lib/client'
 import {hasOracleConfig, loadOracleConfig} from '../../lib/config'
+import {responsibleEpoch} from './admission'
 import {renderStatus, type OraclePersonal, type OracleRow, type OracleStatusView} from './format'
 
 async function isKeyWired(actor: string, permission: string, pubkey: PublicKey): Promise<boolean> {
@@ -20,7 +21,8 @@ async function isKeyWired(actor: string, permission: string, pubkey: PublicKey):
 
 async function loadPersonal(
     target: number | undefined,
-    registeredHandles: string[]
+    registeredHandles: string[],
+    epochOracleIds: string[] | undefined
 ): Promise<OraclePersonal | undefined> {
     if (!hasOracleConfig()) return undefined
     const cfg = loadOracleConfig()
@@ -37,14 +39,27 @@ async function loadPersonal(
         secretStored = store.getReveal(target) !== undefined
         store.close()
     }
-    return {
+    const registered = registeredHandles.includes(cfg.handle)
+    const personal: OraclePersonal = {
         handle: cfg.handle,
         pubkey,
         keyWired,
-        registered: registeredHandles.includes(cfg.handle),
+        registered,
         secretStored,
         storePath: cfg.storePath,
     }
+    if (registered && target !== undefined) {
+        const epoch = responsibleEpoch({handle: cfg.handle, target, epochOracleIds})
+        try {
+            const shipload = await getShipload()
+            const info = await shipload.epochs.getByHeight(epoch)
+            personal.responsible = {
+                epoch,
+                secondsAway: Math.max(0, Math.ceil((info.start.getTime() - Date.now()) / 1000)),
+            }
+        } catch {}
+    }
+    return personal
 }
 
 export function register(parent: Command): void {
@@ -81,7 +96,10 @@ export function register(parent: Command): void {
 
             let committed = new Set<string>()
             let revealed = new Set<string>()
+            let epochOracleIds: string[] | undefined
             if (quorumDeployed && target !== undefined) {
+                const epochRow = await shipload.epochs.getEpochRow(target).catch(() => undefined)
+                if (epochRow) epochOracleIds = epochRow.oracle_ids.map(String)
                 const [commitsR, revealsR] = await Promise.allSettled([
                     shipload.epochs.getCommitsFor(target),
                     shipload.epochs.getRevealsFor(target),
@@ -114,7 +132,8 @@ export function register(parent: Command): void {
             }
             const mine = await loadPersonal(
                 target,
-                oracles.map((o) => String(o.id))
+                oracles.map((o) => String(o.id)),
+                epochOracleIds
             )
             if (mine) view.mine = mine
             console.log(renderStatus(view))
