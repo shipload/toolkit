@@ -348,6 +348,11 @@
         "maxTier": 1
       },
       {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 1
+      },
+      {
         "type": "storage",
         "outputPct": 100,
         "maxTier": 1
