@@ -206,6 +206,13 @@ export function reltime(d: Date, now: Date): string {
 	return diffMs >= 0 ? `${label} left` : `${label} ago`;
 }
 
+const CHECK_LABEL_WIDTH = 18;
+
+/** A preflight line: a padded label, an ellipsis, and what the check found. */
+export function checkLine(label: string, detail: string): string {
+	return `${label.padEnd(CHECK_LABEL_WIDTH)}... ${detail}`;
+}
+
 export function formatDuration(seconds: number): string {
 	if (seconds < 60) return `${seconds}s`;
 	const m = Math.floor(seconds / 60);

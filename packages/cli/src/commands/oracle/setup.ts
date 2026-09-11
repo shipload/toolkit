@@ -1,6 +1,7 @@
 import type {Command} from 'commander'
 import {assertOracleHandle, loadOracleConfig} from '../../lib/config'
 import {client, gameContractName, getShipload, server} from '../../lib/client'
+import {checkLine} from '../../lib/format'
 import {
     defaultStorePath,
     hasExistingOracleKey,
@@ -11,8 +12,6 @@ import {
 
 export const ORACLE_GUIDE_URL = 'https://shiploadgame.com/guide/oracles'
 
-const LABEL_WIDTH = 18
-
 class SetupAbort extends Error {
     constructor(
         public readonly line: string,
@@ -21,10 +20,6 @@ class SetupAbort extends Error {
         super(advice)
         this.name = 'SetupAbort'
     }
-}
-
-export function checkLine(label: string, detail: string): string {
-    return `${label.padEnd(LABEL_WIDTH)}... ${detail}`
 }
 
 export function renderPasteBlock(handle: string, pubkey: string): string {

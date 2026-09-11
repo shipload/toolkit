@@ -2,8 +2,9 @@ import {expect, test} from 'bun:test'
 import {mkdtempSync, readFileSync, statSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import {checkLine} from '../../lib/format'
 import {hasExistingOracleKey, writeOracleKey} from './keygen'
-import {ORACLE_GUIDE_URL, checkLine, renderPasteBlock} from './setup'
+import {ORACLE_GUIDE_URL, renderPasteBlock} from './setup'
 
 test('writes the generated key into a fresh config at mode 0600', () => {
     const dir = mkdtempSync(join(tmpdir(), 'oracle-setup-'))
