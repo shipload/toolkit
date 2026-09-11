@@ -4,7 +4,9 @@ import {classifyCloseRace, classifyCommitRace, classifyRevealRace, errorMessages
 function apiError(message: string): unknown {
     return {
         message: `assertion failure with message: ${message}`,
-        response: {json: {error: {what: 'eosio_assert_message assertion failure', details: [{message}]}}},
+        response: {
+            json: {error: {what: 'eosio_assert_message assertion failure', details: [{message}]}},
+        },
     }
 }
 
