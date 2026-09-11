@@ -1,5 +1,6 @@
 import type {Command} from 'commander'
 import {buildOracleContext, tickOnce} from './context'
+import {describeLoopError} from '../../lib/errors'
 import {formatTick} from './format'
 import {runMaintenancePass} from './maintenance-pass'
 
@@ -16,6 +17,9 @@ export function register(parent: Command): void {
                 if (opts.maintenance) {
                     await runMaintenancePass(ctx)
                 }
+            } catch (err) {
+                console.error(`tick failed: ${describeLoopError(err)}`)
+                process.exitCode = 1
             } finally {
                 ctx.close()
             }

@@ -10,6 +10,7 @@ export interface EpochInfo {
 export function getCurrentEpoch(game: PlatformContract.Types.game_row): UInt64 {
     const current = new Date().getTime()
     const difference = (current - game.config.start.toMilliseconds()) / 1000
+    if (difference < 0) return UInt64.from(0)
     const epoch = Math.floor(difference / Number(game.config.epochtime)) + 1
     return UInt64.from(epoch)
 }

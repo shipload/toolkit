@@ -64,6 +64,22 @@ describe('epoch', () => {
             const epoch = getCurrentEpoch(game)
             assert.equal(epoch.toNumber(), 6)
         })
+
+        test('returns epoch 0 before a future start', () => {
+            const nowSec = Math.floor(Date.now() / 1000)
+            const epochtime = 3600
+            const game = createMockGame((nowSec + 60) * 1000, epochtime)
+
+            assert.equal(getCurrentEpoch(game).toNumber(), 0)
+        })
+
+        test('returns epoch 0 more than one epoch before start', () => {
+            const nowSec = Math.floor(Date.now() / 1000)
+            const epochtime = 3600
+            const game = createMockGame((nowSec + epochtime * 30) * 1000, epochtime)
+
+            assert.equal(getCurrentEpoch(game).toNumber(), 0)
+        })
     })
 
     describe('getEpochInfo', () => {

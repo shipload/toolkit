@@ -1,14 +1,11 @@
 import {existsSync} from 'node:fs'
 import {SecretStore} from '@shipload/oracle'
+import {getCurrentEpoch} from '@shipload/sdk'
 import {PrivateKey, type PublicKey} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {client, gameContractName, getShipload, platform, server} from '../../lib/client'
 import {hasOracleConfig, loadOracleConfig} from '../../lib/config'
 import {renderStatus, type OraclePersonal, type OracleRow, type OracleStatusView} from './format'
-
-function epochHeight(startMs: number, epochSeconds: number, nowMs: number): number {
-    return Math.floor((nowMs - startMs) / (Math.max(1, epochSeconds) * 1000)) + 1
-}
 
 async function isKeyWired(actor: string, permission: string, pubkey: PublicKey): Promise<boolean> {
     try {
@@ -79,11 +76,7 @@ export function register(parent: Command): void {
             let currentHeight: number | undefined
             if (gameRow) {
                 epochClockSet = true
-                currentHeight = epochHeight(
-                    gameRow.config.start.toMilliseconds(),
-                    Number(gameRow.config.epochtime),
-                    Date.now()
-                )
+                currentHeight = Number(getCurrentEpoch(gameRow))
             }
 
             let committed = new Set<string>()
