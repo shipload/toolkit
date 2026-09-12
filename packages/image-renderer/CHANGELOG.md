@@ -1,5 +1,31 @@
 # @shipload/image-renderer
 
+## 1.0.0-next.69
+
+### Patch Changes
+
+- 84ce8cb: - Format the oracle race classifier test
+  - Treat a lost reveal race as a normal beacon outcome
+  - Close an overdue epoch from the oracle beacon tick
+  - Mirror the ranked ballot in the SDK and page the oracle settlement
+  - Inline the base tsconfig into every package
+  - Collect fund income and market fees on a slow interval
+  - Collapse an all-idle maintenance pass into one log line
+  - Log beacon ticks on change and show the next boundary
+  - Gate the oracle maintenance sweeps on contract reads
+  - Add the voteready ballot settlement tick
+  - Add mintready, charterready and tend heartbeat ticks
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Continue client projection from the response anchor
+  - Carry projected_at through the generated entity type
+  - Assert client projection is the identity at the anchor
+- Updated dependencies [84ce8cb]
+  - @shipload/item-renderer@1.0.0-next.69
+  - @shipload/sdk@1.0.0-next.69
+
 ## 1.0.0-next.68
 
 ### Patch Changes
