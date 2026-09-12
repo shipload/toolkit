@@ -470,6 +470,7 @@ interface FixturePayload {
     catalog_hash: string
     generated_at: string
     cases: Array<{name: string; input: unknown; task_count: number; expected: unknown}>
+    anchor_cases?: Array<{name: string; entity: unknown; idle_at_anchor: boolean}>
 }
 
 const FIXTURE_PATH = resolve(__dirname, '../fixtures/projection-cases.json')
@@ -724,4 +725,52 @@ describe('projection — anchor', () => {
         assert.equal(getStack(end.cargo, 101)?.quantity.toNumber(), 1598)
         assert.equal(projectEntity(ship).cargoMass.toNumber(), cargoMass, 'idempotent')
     })
+})
+
+describe('projection — anchor identity', () => {
+    let payload: FixturePayload
+    try {
+        payload = JSON.parse(readFileSync(FIXTURE_PATH, 'utf8')) as FixturePayload
+    } catch (e) {
+        test('fixture file present (regenerate with `make -C contracts build/projection-fixtures`)', () => {
+            throw new Error(`Cannot read ${FIXTURE_PATH}: ${(e as Error).message}`)
+        })
+        return
+    }
+
+    const anchorCases = payload.anchor_cases ?? []
+
+    test('fixture carries anchor cases (regenerate with `make -C contracts build/projection-fixtures`)', () => {
+        assert.isAbove(anchorCases.length, 0)
+    })
+
+    for (const c of anchorCases) {
+        test(c.name, () => {
+            const entity = ServerContract.Types.entity_info.from(
+                c.entity as Record<string, unknown>
+            )
+            const at = new Date(Number(entity.projected_at.toMilliseconds()))
+            const projected = projectEntityAt(entity, at)
+
+            for (const stack of entity.cargo) {
+                assert.equal(
+                    getStack(
+                        projected.cargo,
+                        stack.item_id.toNumber(),
+                        Number(stack.stats)
+                    )?.quantity.toNumber(),
+                    stack.quantity.toNumber(),
+                    `item ${stack.item_id} doubled at the anchor`
+                )
+            }
+            assert.equal(projected.cargo.length, entity.cargo.length, 'no phantom stacks')
+            assert.equal(projected.cargoMass.toNumber(), entity.cargomass.toNumber())
+
+            if (c.idle_at_anchor) {
+                assert.equal(projected.energy.toNumber(), entity.energy?.toNumber() ?? 0)
+                assert.equal(Number(projected.location.x), entity.coordinates.x.toNumber())
+                assert.equal(Number(projected.location.y), entity.coordinates.y.toNumber())
+            }
+        })
+    }
 })
