@@ -22,10 +22,25 @@ export interface CivicShuttleBay {
     full: boolean
 }
 
+// a landed booking clears during the next civicshuttle, so only unfinished tasks occupy a bay
+function unfinishedTasks(lane: Lane | undefined, now: Date): number {
+    if (!lane) return 0
+    const startedMs = lane.schedule.started.toDate().getTime()
+    const nowMs = now.getTime()
+    let endSec = 0
+    let count = 0
+    for (const task of lane.schedule.tasks) {
+        endSec += task.duration.toNumber()
+        if (startedMs + endSec * 1000 > nowMs) count++
+    }
+    return count
+}
+
 export function civicShuttleBays(
     modules: ModuleEntry[],
     entityItemId: number,
-    lanes: Lane[]
+    lanes: Lane[],
+    now: Date = new Date()
 ): CivicShuttleBay[] {
     const bays: CivicShuttleBay[] = []
     for (let slotIndex = 0; slotIndex < modules.length; slotIndex++) {
@@ -35,7 +50,7 @@ export function civicShuttleBays(
         const laneKey = laneKeyForModule(slotIndex)
         const loader = resolveLaneLoader(modules, entityItemId, laneKey)
         const lane = lanes.find((l) => l.lane_key.toNumber() === laneKey)
-        const queued = lane ? lane.schedule.tasks.length : 0
+        const queued = unfinishedTasks(lane, now)
         bays.push({
             laneKey,
             slotIndex,
@@ -53,9 +68,10 @@ export function civicShuttleBays(
 export function selectCivicShuttleBay(
     modules: ModuleEntry[],
     entityItemId: number,
-    lanes: Lane[]
+    lanes: Lane[],
+    now: Date = new Date()
 ): CivicShuttleBay | undefined {
-    const bays = civicShuttleBays(modules, entityItemId, lanes)
+    const bays = civicShuttleBays(modules, entityItemId, lanes, now)
     return bays.find((bay) => bay.queued === 0) ?? bays[0]
 }
 
@@ -68,10 +84,14 @@ export interface PendingCivicTransfer {
     startsAt: Date
     completesAt: Date
     isTail: boolean
+    complete: boolean
     callable: boolean
 }
 
-export function pendingCivicTransfers(entity: ScheduleData): PendingCivicTransfer[] {
+export function pendingCivicTransfers(
+    entity: ScheduleData,
+    now: Date = new Date()
+): PendingCivicTransfer[] {
     const tailIndex = new Map<number, number>()
     for (const l of entity.lanes ?? []) {
         tailIndex.set(l.lane_key.toNumber(), l.schedule.tasks.length - 1)
@@ -83,6 +103,7 @@ export function pendingCivicTransfers(entity: ScheduleData): PendingCivicTransfe
         const push = entry.task.couplings.find((c) => c.kind.toNumber() === HoldKind.PUSH)
         if (!pull || !push) continue
         const isTail = tailIndex.get(entry.laneKey) === entry.taskIndex
+        const complete = entry.completesAt.getTime() <= now.getTime()
         out.push({
             laneKey: entry.laneKey,
             taskIndex: entry.taskIndex,
@@ -92,7 +113,8 @@ export function pendingCivicTransfers(entity: ScheduleData): PendingCivicTransfe
             startsAt: entry.startsAt,
             completesAt: entry.completesAt,
             isTail,
-            callable: isTail && !entry.task.entitygroup,
+            complete,
+            callable: isTail && !complete && !entry.task.entitygroup,
         })
     }
     return out
@@ -101,15 +123,20 @@ export function pendingCivicTransfers(entity: ScheduleData): PendingCivicTransfe
 // Mirrors civic_transfers_for: the sender side of every shuttle the building holds, by owner.
 export function civicTransfersFrom(
     entity: ScheduleData,
-    senderIds: Array<UInt64 | string | number>
+    senderIds: Array<UInt64 | string | number>,
+    now: Date = new Date()
 ): PendingCivicTransfer[] {
     const owned = new Set(senderIds.map((id) => String(id)))
-    return pendingCivicTransfers(entity).filter((t) => owned.has(String(t.senderId)))
+    return pendingCivicTransfers(entity, now).filter((t) => owned.has(String(t.senderId)))
 }
 
 export function civicTransfersAtCap(
     entity: ScheduleData,
-    senderIds: Array<UInt64 | string | number>
+    senderIds: Array<UInt64 | string | number>,
+    now: Date = new Date()
 ): boolean {
-    return civicTransfersFrom(entity, senderIds).length >= CIVIC_TRANSFER_PER_PLAYER_CAP
+    return (
+        civicTransfersFrom(entity, senderIds, now).filter((t) => !t.complete).length >=
+        CIVIC_TRANSFER_PER_PLAYER_CAP
+    )
 }

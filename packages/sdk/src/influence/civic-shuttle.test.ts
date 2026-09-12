@@ -72,7 +72,7 @@ function makeLane(laneKey: number, tasks: Task[]): Lane {
 
 test('civicShuttleBays lists both Depot bays with their queue depth', () => {
     const lanes = [makeLane(1, [shuttleTask(20, 21)])]
-    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes)
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, T0)
     expect(bays.map((b) => b.laneKey)).toEqual([1, 2])
     expect(bays.map((b) => b.slotIndex)).toEqual([0, 1])
     expect(bays[0].queued).toBe(1)
@@ -83,25 +83,68 @@ test('civicShuttleBays lists both Depot bays with their queue depth', () => {
 
 test('a bay is full at the job queue cap', () => {
     const filled = Array.from({length: JOB_QUEUE_CAP}, () => shuttleTask(20, 21))
-    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, [makeLane(1, filled)])
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, [makeLane(1, filled)], T0)
     expect(bays[0].full).toBe(true)
     expect(bays[1].full).toBe(false)
 })
 
+const AFTER = new Date(T0.getTime() + 3_600_000)
+
+test('a landed booking leaves the bay free, since booking clears it', () => {
+    const filled = Array.from({length: JOB_QUEUE_CAP}, () => shuttleTask(20, 21))
+    const lanes = [makeLane(1, filled)]
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)
+    expect(bays[0].queued).toBe(0)
+    expect(bays[0].full).toBe(false)
+    expect(selectCivicShuttleBay(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)?.laneKey).toBe(
+        1
+    )
+})
+
+test('a bay part-way through its queue counts only what is still unfinished', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21), shuttleTask(22, 23), shuttleTask(24, 25)])]
+    const bays = civicShuttleBays(
+        depotModules(),
+        ITEM_DEPOT_T1_PACKED,
+        lanes,
+        new Date(T0.getTime() + 90_000)
+    )
+    expect(bays[0].queued).toBe(2)
+})
+
+test('a landed transfer is listed for settling but is not callable', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21)])]
+    const [transfer] = pendingCivicTransfers({lanes} as never, AFTER)
+    expect(transfer.isTail).toBe(true)
+    expect(transfer.complete).toBe(true)
+    expect(transfer.callable).toBe(false)
+})
+
+test('landed transfers do not count against the per-player cap', () => {
+    const mine = Array.from({length: CIVIC_TRANSFER_PER_PLAYER_CAP}, (_, i) =>
+        shuttleTask(20 + i, 50)
+    )
+    const senderIds = mine.map((_, i) => 20 + i)
+    const at = {lanes: [makeLane(1, mine)]} as never
+    expect(civicTransfersAtCap(at, senderIds, T0)).toBe(true)
+    expect(civicTransfersAtCap(at, senderIds, AFTER)).toBe(false)
+    expect(civicTransfersFrom(at, senderIds, AFTER).length).toBe(CIVIC_TRANSFER_PER_PLAYER_CAP)
+})
+
 test('selectCivicShuttleBay takes the first free bay, then the lowest occupied one', () => {
     const modules = depotModules()
-    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [])?.laneKey).toBe(1)
+    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [], T0)?.laneKey).toBe(1)
 
     const firstBusy = [makeLane(1, [shuttleTask(20, 21)])]
-    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, firstBusy)?.laneKey).toBe(2)
+    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, firstBusy, T0)?.laneKey).toBe(2)
 
     const bothBusy = [makeLane(1, [shuttleTask(20, 21)]), makeLane(2, [shuttleTask(22, 23)])]
-    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, bothBusy)?.laneKey).toBe(1)
+    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, bothBusy, T0)?.laneKey).toBe(1)
 })
 
 test('selectCivicShuttleBay returns nothing when the building has no loaders', () => {
     const modules = [makeModuleEntry(ITEM_STORAGE_T1, storageStats)]
-    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [])).toBeUndefined()
+    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [], T0)).toBeUndefined()
 })
 
 test('pendingCivicTransfers reports the bay, both counterparties, and the tail', () => {
@@ -109,7 +152,7 @@ test('pendingCivicTransfers reports the bay, both counterparties, and the tail',
         makeLane(1, [shuttleTask(20, 21), shuttleTask(22, 23)]),
         makeLane(2, [shuttleTask(24, 25)]),
     ]
-    const transfers = pendingCivicTransfers({lanes} as never)
+    const transfers = pendingCivicTransfers({lanes} as never, T0)
     expect(transfers.length).toBe(3)
 
     const first = transfers.find((t) => String(t.senderId) === '20')!
@@ -131,7 +174,7 @@ test('pendingCivicTransfers reports the bay, both counterparties, and the tail',
 
 test('a grouped tail transfer is not callable', () => {
     const lanes = [makeLane(1, [shuttleTask(20, 21, 7)])]
-    const [transfer] = pendingCivicTransfers({lanes} as never)
+    const [transfer] = pendingCivicTransfers({lanes} as never, T0)
     expect(transfer.isTail).toBe(true)
     expect(transfer.callable).toBe(false)
 })
@@ -142,9 +185,9 @@ test('civicTransfersFrom counts only the ships a player sends from', () => {
         makeLane(2, [shuttleTask(22, 23)]),
     ]
     const entity = {lanes} as never
-    expect(civicTransfersFrom(entity, [20, 22]).length).toBe(2)
-    expect(civicTransfersFrom(entity, [30]).length).toBe(1)
-    expect(civicTransfersFrom(entity, [99]).length).toBe(0)
+    expect(civicTransfersFrom(entity, [20, 22], T0).length).toBe(2)
+    expect(civicTransfersFrom(entity, [30], T0).length).toBe(1)
+    expect(civicTransfersFrom(entity, [99], T0).length).toBe(0)
 })
 
 test('civicTransfersAtCap trips at the per-player cap', () => {
@@ -154,6 +197,6 @@ test('civicTransfersAtCap trips at the per-player cap', () => {
     const senderIds = mine.map((_, i) => 20 + i)
     const under = {lanes: [makeLane(1, mine.slice(0, -1))]} as never
     const at = {lanes: [makeLane(1, mine)]} as never
-    expect(civicTransfersAtCap(under, senderIds)).toBe(false)
-    expect(civicTransfersAtCap(at, senderIds)).toBe(true)
+    expect(civicTransfersAtCap(under, senderIds, T0)).toBe(false)
+    expect(civicTransfersAtCap(at, senderIds, T0)).toBe(true)
 })
