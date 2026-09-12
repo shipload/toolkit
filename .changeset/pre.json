@@ -9,6 +9,7 @@
     "@shipload/oracle": "0.0.0"
   },
   "changesets": [
+    "afraid-tables-wash",
     "big-files-accept",
     "breezy-clowns-accept",
     "busy-coins-refuse",
