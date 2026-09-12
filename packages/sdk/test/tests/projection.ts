@@ -9,6 +9,7 @@ import {
     ITEM_PLATE,
     ITEM_PLASMA_CELL,
     projectEntity,
+    projectEntityAt,
     projectRemainingAt,
     RECIPE_INPUTS_EXCESS,
     RECIPE_INPUTS_INSUFFICIENT,
@@ -545,4 +546,182 @@ describe('projection — fixture replay', () => {
             assertProjectionEquals(expected, sdk, {step: c.task_count})
         })
     }
+})
+
+describe('projection — anchor', () => {
+    test('does not re-apply a gather the anchor already covers', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({
+            cargo: [
+                {item_id: 101, quantity: 2000, stats: 0},
+                {item_id: 401, quantity: 2000, stats: 0},
+            ],
+        })
+        const gathers = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 402, stats: 0}],
+                    duration: 60,
+                }),
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 401, quantity: 1126, stats: 0}],
+                    duration: 60,
+                }),
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 401, quantity: 874, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: gathers})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 240_000)
+
+        const projected = projectEntityAt(ship, new Date(startedMs + 240_000))
+
+        assert.equal(getStack(projected.cargo, 101)?.quantity.toNumber(), 2000)
+        assert.equal(getStack(projected.cargo, 401)?.quantity.toNumber(), 2000)
+    })
+
+    test('skips a task completing exactly at the anchor', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: [{item_id: 101, quantity: 1598, stats: 0}]})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 60_000)
+
+        const projected = projectEntityAt(ship, new Date(startedMs + 300_000))
+
+        assert.equal(getStack(projected.cargo, 101)?.quantity.toNumber(), 1598)
+    })
+
+    test('applies a task completing one millisecond after the anchor', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: [{item_id: 101, quantity: 0, stats: 0}]})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 60_000 - 1)
+
+        const projected = projectEntityAt(ship, new Date(startedMs + 300_000))
+
+        assert.equal(getStack(projected.cargo, 101)?.quantity.toNumber(), 1598)
+    })
+
+    test('projectRemainingAt takes the anchor skip', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: [{item_id: 101, quantity: 1598, stats: 0}]})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 402, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 60_000)
+
+        const projected = projectRemainingAt(ship, new Date(startedMs + 300_000))
+
+        assert.equal(getStack(projected.cargo, 101)?.quantity.toNumber(), 2000)
+    })
+
+    test('projectEntity to schedule end takes the anchor skip', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: [{item_id: 101, quantity: 1598, stats: 0}]})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 402, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 60_000)
+
+        assert.equal(getStack(projectEntity(ship).cargo, 101)?.quantity.toNumber(), 2000)
+        assert.equal(
+            getStack(projectEntity(ship, {upToTaskIndex: 1}).cargo, 101)?.quantity.toNumber(),
+            1598,
+            'upToTaskIndex stays an index into the full ordered list'
+        )
+    })
+
+    test('an entity with no anchor replays the whole schedule', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: []})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        const row = {
+            coordinates: ship.coordinates,
+            cargo: [],
+            cargomass: ship.cargomass,
+            lanes: [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})],
+            holds: [],
+        }
+
+        const projected = projectEntityAt(row as never, new Date(startedMs + 300_000))
+
+        assert.equal(getStack(projected.cargo, 101)?.quantity.toNumber(), 1598)
+    })
+
+    test('schedule-end capability snapshots see the anchor skip once', () => {
+        const startedMs = Date.now() - 600_000
+        const ship = makeShipFixture({cargo: [{item_id: 101, quantity: 1598, stats: 0}]})
+        const sched = ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(startedMs),
+            tasks: [
+                makeTask(TaskType.GATHER, {
+                    cargo: [{item_id: 101, quantity: 1598, stats: 0}],
+                    duration: 60,
+                }),
+            ],
+        })
+        ship.lanes = [ServerContract.Types.lane.from({lane_key: 4, schedule: sched})]
+        ship.projected_at = TimePoint.fromMilliseconds(startedMs + 60_000)
+
+        const end = projectEntity(ship)
+        const cargoMass = end.cargoMass.toNumber()
+
+        assert.equal(getStack(end.cargo, 101)?.quantity.toNumber(), 1598)
+        assert.equal(projectEntity(ship).cargoMass.toNumber(), cargoMass, 'idempotent')
+    })
 })

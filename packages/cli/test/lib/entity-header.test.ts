@@ -9,6 +9,7 @@ import {
 } from "../../src/lib/entity-header";
 
 const idleShip = {
+	projected_at: 0,
 	type: "ship",
 	id: 1n,
 	owner: "agent.gm",
@@ -156,6 +157,7 @@ describe("renderEntityFull live energy", () => {
 
 describe("renderEntityFull holds", () => {
 	const base = {
+		projected_at: 0,
 		type: "warehouse",
 		id: 2,
 		owner: "agent.gm",

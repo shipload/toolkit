@@ -112,6 +112,7 @@ function multiLaneInfoArgs(at: Date) {
     const startedMobility = new Date(at.getTime() - 120_000).toISOString().slice(0, 23)
     const startedWorker = new Date(at.getTime() - 60_000).toISOString().slice(0, 23)
     return {
+        projected_at: 0,
         type: 'ship',
         id: 42,
         owner: 'alice',

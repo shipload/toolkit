@@ -426,6 +426,18 @@ export interface ProjectionOptions {
     upToTaskIndex?: number
 }
 
+// Mirrors the contract's completed_task_count_at: inclusive at the anchor.
+function anchoredSkipCount(entity: Projectable, ordered: readonly schedule.OrderedTask[]): number {
+    const anchor = entity.projected_at
+    if (anchor === undefined) return 0
+    const anchorMs = Number(anchor.toMilliseconds())
+    let count = 0
+    for (const {completesAt} of ordered) {
+        if (completesAt.getTime() <= anchorMs) count++
+    }
+    return count
+}
+
 export function projectEntity(entity: Projectable, options?: ProjectionOptions): ProjectedEntity {
     const projected = createProjectedEntity(entity)
     const ordered = schedule.orderedTasks(entity)
@@ -436,17 +448,17 @@ export function projectEntity(entity: Projectable, options?: ProjectionOptions):
             ? Math.max(0, Math.min(options.upToTaskIndex, ordered.length))
             : ordered.length
 
-    for (let i = 0; i < taskCount; i++) {
+    for (let i = anchoredSkipCount(entity, ordered); i < taskCount; i++) {
         applyTask(projected, ordered[i].task)
     }
     return projected
 }
 
 export function projectRemainingAt(entity: Projectable, _now: Date): ProjectedEntity {
-    // Resolve is lazy/entity-global: completed tasks are unsettled until resolve, so replay all.
     const projected = createProjectedEntity(entity)
-    for (const {task} of schedule.orderedTasks(entity)) {
-        applyTask(projected, task)
+    const ordered = schedule.orderedTasks(entity)
+    for (let i = anchoredSkipCount(entity, ordered); i < ordered.length; i++) {
+        applyTask(projected, ordered[i].task)
     }
     return projected
 }
@@ -534,8 +546,10 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
     }
 
     const nowMs = now.getTime()
+    const skip = anchoredSkipCount(entity, ordered)
 
-    for (const {task, startsAt} of ordered) {
+    for (let i = skip; i < ordered.length; i++) {
+        const {task, startsAt} = ordered[i]
         const duration = task.duration.toNumber()
         const elapsed = Math.min(
             Math.max(0, Math.floor((nowMs - startsAt.getTime()) / 1000)),

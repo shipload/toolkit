@@ -257,6 +257,7 @@ function stack(
 function gatherOnWorkerLane(at: Date) {
 	const started = new Date(at.getTime() - 60_000).toISOString().slice(0, 23);
 	return {
+		projected_at: 0,
 		type: "ship", id: 7, owner: "alice", entity_name: "Gatherer",
 		coordinates: { x: 0, y: 0, z: 800 }, item_id: 0, cargomass: 0, cargo: [],
 		modules: [], is_idle: false, current_task_elapsed: 0, current_task_remaining: 0,
