@@ -21,6 +21,7 @@ function entity(
     startedISO = T0
 ) {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: 1,
         owner: 'player.gm',

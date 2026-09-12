@@ -74,6 +74,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
 
     function makeShipWithLoader(id: number, owner: Name, coords: ServerContract.Types.coordinates) {
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             id: UInt64.from(id),
             type: Name.from('ship'),
             item_id: UInt16.from(1000),
@@ -162,6 +163,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         const target = mgr.getTarget(plot, [])!
 
         const container = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             id: UInt64.from(20),
             type: Name.from('container'),
             item_id: UInt16.from(2000),
@@ -259,6 +261,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
         speed: number
     ) {
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             id: UInt64.from(id),
             type: Name.from('ship'),
             item_id: UInt16.from(1000),

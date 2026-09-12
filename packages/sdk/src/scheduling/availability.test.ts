@@ -56,6 +56,7 @@ function entity(
     startedISO = T0
 ) {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: 1,
         owner: 'player.gm',
@@ -241,6 +242,7 @@ describe('incomingSources', () => {
     function receiver(holds: {id: number; kind: number; from: number; until: string}[]) {
         const e = entity([])
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             ...JSON.parse(JSON.stringify(e)),
             id: RECEIVER,
             holds: holds.map((h) => ({
@@ -256,6 +258,7 @@ describe('incomingSources', () => {
     function sender(tasks: ReturnType<typeof craftTask>[]) {
         const e = entity([], [])
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             ...JSON.parse(JSON.stringify(e)),
             id: SENDER,
             lanes: [{lane_key: 0, schedule: {started: T0, tasks}}],

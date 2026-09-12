@@ -304,6 +304,7 @@ describe('waitForFleetAvailable — errors', () => {
 test('a worker-lane-busy, mobility-idle entity reads as unavailable', () => {
 	const at = new Date('2026-06-11T12:00:00.000Z')
 	const ei = ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: 'ship', id: 9, owner: 'alice', entity_name: 'Worker',
 		coordinates: {x: 0, y: 0, z: 800}, item_id: 0, cargomass: 0, cargo: [],
 		modules: [], is_idle: true, current_task_elapsed: 0, current_task_remaining: 0,

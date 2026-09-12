@@ -16,6 +16,7 @@ function busyTick(remaining_s: number, elapsed_s: number): ProgressTick {
 	const now = new Date();
 	const started = new Date(now.getTime() - elapsed_s * 1000).toISOString().slice(0, 23);
 	const ei = ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: "ship",
 		id: 3,
 		owner: "alice",
@@ -69,6 +70,7 @@ function idleTick(completedTasks: number): ProgressTick {
 		couplings: [],
 	}));
 	const ei = ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: "ship",
 		id: 3,
 		owner: "alice",
@@ -136,6 +138,7 @@ describe("composeBlock multi-lane", () => {
 	test("busy tick with mobility travel done and worker gather+craft renders lane tags", () => {
 		const at = new Date();
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			type: "ship",
 			id: 7,
 			owner: "bob",

@@ -22,6 +22,7 @@ const noMessageWithin = (fake: FakeWebSocketServer, ms = 10): Promise<boolean> =
 describe('subscriptions/mappers', () => {
     test('mapEntity returns Entity for type=ship', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'alice',
@@ -47,6 +48,7 @@ describe('subscriptions/mappers', () => {
 
     test('mapEntity returns Entity for type=warehouse', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'warehouse',
             id: 2,
             owner: 'alice',
@@ -72,6 +74,7 @@ describe('subscriptions/mappers', () => {
 
     test('mapEntity returns Entity for type=container', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'container',
             id: 3,
             owner: 'alice',
@@ -97,6 +100,7 @@ describe('subscriptions/mappers', () => {
 
     test('mapEntity returns Entity for type=nexus', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'nexus',
             id: 4,
             owner: 'shipload.gm',
@@ -165,6 +169,7 @@ describe('SubscriptionsManager', () => {
                 {
                     type: 1,
                     type_name: 'ship',
+                    projected_at: '1970-01-01T00:00:00.000',
                     id: '1',
                     owner: 'alice',
                     entity_name: 'Test',
@@ -315,6 +320,7 @@ describe('SubscriptionsManager', () => {
             entity: {
                 type: 1,
                 type_name: 'ship',
+                projected_at: '1970-01-01T00:00:00.000',
                 id: '5',
                 owner: 'alice',
                 entity_name: 'Test',

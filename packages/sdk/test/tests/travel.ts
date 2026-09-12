@@ -69,6 +69,7 @@ function createMockShip(
     }> = {}
 ) {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         id: UInt64.from(1),
         type: 'ship',
         owner: 'testplayer',

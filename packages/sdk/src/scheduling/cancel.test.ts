@@ -18,6 +18,7 @@ function task(over: Partial<{type: number; duration: number; cancelable: number;
 
 function entity(tasks: ReturnType<typeof task>[], startedISO = T0) {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: 1,
         owner: 'player.gm',
@@ -155,6 +156,7 @@ describe('cancelEligibility — effects', () => {
         const lt = loadTask('warehouse', 6, 1, 4)
         const upcoming = new Date('2026-06-18T23:59:50.000Z')
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -188,6 +190,7 @@ describe('cancelEligibility — effects', () => {
         const lt = loadTask('warehouse', 6, 1, 4)
         const upcoming = new Date('2026-06-18T23:59:50.000Z')
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -220,6 +223,7 @@ describe('cancelEligibility — effects', () => {
     test('uncoupled task emits no releasedHolds entry', () => {
         const upcoming = new Date('2026-06-18T23:59:50.000Z')
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -272,6 +276,7 @@ describe('cancelEligibility — feasibility', () => {
             couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -318,6 +323,7 @@ describe('cancelEligibility — feasibility', () => {
             couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -357,6 +363,7 @@ describe('cancelEligibility — feasibility', () => {
             couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'player.gm',
@@ -397,6 +404,7 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
         }[] = []
     ) {
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id,
             owner: 'player.gm',

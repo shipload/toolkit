@@ -134,6 +134,7 @@ describe('Entity unification — registry-driven', () => {
             gatherers?: {slot_index: number; yield: number; drain: number; depth: number}[]
         }) {
             return ServerContract.Types.entity_info.from({
+                projected_at: 0,
                 id: 1n,
                 type: 'ship',
                 item_id: 1000,

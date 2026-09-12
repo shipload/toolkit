@@ -140,6 +140,7 @@ describe('partitionSources netting against reservations', () => {
         schedule?: InstanceType<typeof ServerContract.Types.schedule>
     ) {
         return ServerContract.Types.entity_info.from({
+            projected_at: 0,
             id: UInt64.from(id),
             type: Name.from('ship'),
             item_id: UInt16.from(1000),

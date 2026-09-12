@@ -144,6 +144,7 @@ function snapshotTick(snap: EntitySnapshot): SnapshotTick {
 
 function multiLane(at: Date): ServerContract.Types.entity_info {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: 42,
         owner: 'alice',

@@ -78,6 +78,7 @@ function multiLaneInfoArgs(at: Date) {
 describe('entityInfoToSnapshot', () => {
     test('produces primitive-typed fields', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'alice',
@@ -115,6 +116,7 @@ describe('entityInfoToSnapshot', () => {
 
     test('value equality holds for identically-valued names from distinct instances', () => {
         const a = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 1,
             owner: 'alice',
@@ -136,6 +138,7 @@ describe('entityInfoToSnapshot', () => {
             holds: [],
         })
         const b = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 2,
             owner: 'alice',
@@ -166,6 +169,7 @@ describe('entityInfoToSnapshot', () => {
 
     test('maps optional fields when present', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 7,
             owner: 'alice',
@@ -207,6 +211,7 @@ describe('entityInfoToSnapshot', () => {
 
     test('carries entity_id from an individuated cargo_view', () => {
         const ei = ServerContract.Types.entity_info.from({
+            projected_at: 0,
             type: 'ship',
             id: 7,
             owner: 'alice',

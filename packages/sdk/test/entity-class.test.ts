@@ -8,6 +8,7 @@ function bareEntityInfo(
     overrides: Partial<Record<string, unknown>> = {}
 ): ServerContract.Types.entity_info {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         id: UInt64.from(1),
         owner: Name.from('alice'),
         type: ENTITY_SHIP,

@@ -16,6 +16,7 @@ function makeEntity(opts: {
     const started = new Date(Date.now() - 1000).toISOString().slice(0, 23)
     const lanes = tasks.length > 0 ? [{lane_key: 0, schedule: {started, tasks}}] : []
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: 1,
         owner: 'alice',

@@ -121,6 +121,7 @@ describe("renderEntityFull live energy", () => {
 	test("busy entity with elapsed task renders live-projected energy with arrow", () => {
 		const started = new Date(Date.now() - 10_000).toISOString().slice(0, 23);
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			type: "ship",
 			id: 1,
 			owner: "agent.gm",
@@ -174,6 +175,7 @@ describe("renderEntityFull holds", () => {
 	test("incoming push hold renders a player-facing incoming transfer line", () => {
 		const until = new Date(Date.now() + 30_000).toISOString().slice(0, 23);
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			...base,
 			holds: [
 				{
@@ -195,6 +197,7 @@ describe("renderEntityFull holds", () => {
 	test("outgoing pull hold renders an outgoing transfer line with an in-flight note", () => {
 		const until = new Date(Date.now() + 30_000).toISOString().slice(0, 23);
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			...base,
 			holds: [
 				{
@@ -216,6 +219,7 @@ describe("renderEntityFull holds", () => {
 	test("build hold renders under construction with the builder", () => {
 		const until = new Date(Date.now() + 120_000).toISOString().slice(0, 23);
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			...base,
 			type: "plot",
 			holds: [
@@ -331,6 +335,7 @@ describe("renderEntityHeader", () => {
 	test("includes Task row when busy", () => {
 		const started = new Date(Date.now() - 30_000).toISOString().slice(0, 23);
 		const busy = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			type: "ship",
 			id: 1,
 			owner: "agent.gm",
@@ -393,6 +398,7 @@ function makeInventoryEntity(opts: {
 	const started = new Date(Date.now() - 1000).toISOString().slice(0, 23);
 	const lanes = tasks.length > 0 ? [{ lane_key: 0, schedule: { started, tasks } }] : [];
 	return ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: "ship",
 		id: 1,
 		owner: "alice",
@@ -529,6 +535,7 @@ function makeBusyEntity(opts: {
 	);
 	const started = new Date(startedMs).toISOString().slice(0, 23);
 	return ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: "ship",
 		id: 7,
 		owner: "alice",
@@ -646,6 +653,7 @@ describe("renderEntityFull worker-lane schedule", () => {
 	test("whenDone + pending reflect worker lanes", () => {
 		const at = new Date();
 		const ei = ServerContract.Types.entity_info.from({
+			projected_at: 0,
 			type: "ship",
 			id: 9,
 			owner: "alice",

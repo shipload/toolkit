@@ -34,6 +34,7 @@ function makePlotInfo(
     capacity?: number
 ): ServerContract.Types.entity_info {
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         id: UInt64.from(42),
         owner: Name.from('alice'),
         type: Name.from('plot'),

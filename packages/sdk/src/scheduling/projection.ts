@@ -1,4 +1,4 @@
-import {Name, type UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, type TimePoint, type UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, TaskType} from '../types'
 import {
@@ -75,6 +75,7 @@ export interface Projectable extends ScheduleData {
     capacity?: UInt32
     cargo: ServerContract.Types.cargo_item[]
     cargomass: UInt32
+    projected_at?: TimePoint
     owner?: Name
     stats?: bigint
     item_id?: number | UInt16

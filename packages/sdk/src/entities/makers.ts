@@ -1,4 +1,4 @@
-import {Name, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope'
+import {Name, TimePoint, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope'
 import type {NameType, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Entity} from './entity'
@@ -32,6 +32,7 @@ export interface EntityStateInput {
     schedule?: ServerContract.Types.schedule
     lanes?: ServerContract.Types.lane[]
     cargo?: ServerContract.Types.cargo_item[]
+    projectedAt?: Date
 }
 
 function assignModulesToSlots(
@@ -110,6 +111,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         cargo: state.cargo || [],
         lanes,
         holds: [],
+        projected_at: TimePoint.fromMilliseconds(state.projectedAt?.getTime() ?? 0),
     }
 
     if (state.energy !== undefined) info.energy = UInt32.from(state.energy)

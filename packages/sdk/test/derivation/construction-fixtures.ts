@@ -91,6 +91,7 @@ function mobilityLanes(tasks: TaskStruct[], scheduleStart?: TimePoint) {
 export function makeHauler(opts: MakeHaulerOpts): EntityInfoStruct {
     const tasks = opts.tasks ?? []
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         id: UInt64.from(opts.id),
         type: Name.from('ship'),
         item_id: UInt16.from(1000),
@@ -133,6 +134,7 @@ export function makePlot(opts: MakePlotOpts): EntityInfoStruct {
         ? [makeBuildHold({builderId: opts.build.builderId, completesAt: opts.build.completesAt})]
         : []
     return ServerContract.Types.entity_info.from({
+        projected_at: 0,
         id: UInt64.from(opts.id),
         type: Name.from('plot'),
         item_id: UInt16.from(2000),

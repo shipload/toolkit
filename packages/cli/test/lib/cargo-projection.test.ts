@@ -22,6 +22,7 @@ function makeShip(opts: {
 		? [{ lane_key: 0, schedule: { started, tasks } }]
 		: [];
 	const ei = ServerContract.Types.entity_info.from({
+		projected_at: 0,
 		type: "ship",
 		id: 1,
 		owner: "alice",

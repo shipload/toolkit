@@ -30,6 +30,7 @@ function makeShip(opts: {
     }>
 }) {
     const entity = ServerContract.Types.entity_info.from({
+        projected_at: 0,
         type: 'ship',
         id: opts.id ?? 1,
         owner: opts.owner ?? 'agent.gm',
