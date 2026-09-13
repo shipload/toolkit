@@ -33,6 +33,7 @@ export class JobsManager extends BaseManager {
         const startsAt = r.starts_at.toDate()
         const completesAt = r.completes_at.toDate()
         const {output, inputs} = splitJobCargo(r.cargo)
+        const deposited = jobDeposited(r.deposited)
         return {
             id: r.id.toNumber(),
             building: r.building.toNumber(),
@@ -43,8 +44,8 @@ export class JobsManager extends BaseManager {
             completesAt,
             recipeId: r.recipe_id.toNumber(),
             quantity: r.quantity.toNumber(),
-            status: jobStatus({startsAt, completesAt}, now),
-            deposited: jobDeposited(r.deposited),
+            status: jobStatus({startsAt, completesAt, deposited}, now),
+            deposited,
             output,
             inputs,
             outputStats: output?.stats === undefined ? undefined : BigInt(output.stats.toString()),

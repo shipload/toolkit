@@ -334,6 +334,7 @@ export {
     socketTail,
     JOB_QUEUE_CAP,
     jobStatus,
+    jobStatusLabel,
     jobDeposited,
     splitJobCargo,
 } from './scheduling/jobs'

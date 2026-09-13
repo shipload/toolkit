@@ -39,6 +39,22 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })
 
+    it('reports a job In Line rather than ready, whatever its zero window says', async () => {
+        const inLine = row({
+            starts_at: {toDate: () => new Date(0)},
+            completes_at: {toDate: () => new Date(0)},
+            deposited: false,
+            cargo: [{item: 'in'}],
+        })
+        const m = managerWith(
+            async () => [inLine],
+            async () => []
+        )
+        const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
+        expect(jobs[0].status).toBe('inline')
+        expect(jobs[0].deposited).toBe(false)
+    })
+
     it('drops rows whose owner does not match (positional-index safety re-filter)', async () => {
         const other = row({owner: Name.from('someoneelse.gm')})
         const m = managerWith(

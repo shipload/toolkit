@@ -78,12 +78,28 @@ export function pickFabricator(
     return best
 }
 
-export type JobStatus = 'waiting' | 'crafting' | 'ready'
+export type JobStatus = 'inline' | 'waiting' | 'crafting' | 'ready'
 
-export function jobStatus(job: {startsAt: Date; completesAt: Date}, now: Date): JobStatus {
+// A job In Line has no window yet, so the window alone would read it as long since ready.
+export function jobStatus(
+    job: {startsAt: Date; completesAt: Date; deposited?: boolean},
+    now: Date
+): JobStatus {
+    if (job.deposited === false) return 'inline'
     if (now < job.startsAt) return 'waiting'
     if (now < job.completesAt) return 'crafting'
     return 'ready'
+}
+
+const JOB_STATUS_LABELS: Record<JobStatus, string> = {
+    inline: 'In Line',
+    waiting: 'Waiting',
+    crafting: 'Crafting',
+    ready: 'Ready for Pickup',
+}
+
+export function jobStatusLabel(status: JobStatus): string {
+    return JOB_STATUS_LABELS[status]
 }
 
 // A row written before the deposited flag existed reads as undefined; those jobs were all deposited.

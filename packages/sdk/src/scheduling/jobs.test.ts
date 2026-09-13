@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'bun:test'
-import {jobStatus, splitJobCargo} from './jobs'
+import {jobStatus, jobStatusLabel, splitJobCargo} from './jobs'
 
 const at = (s: string) => new Date(s)
 
@@ -14,6 +14,18 @@ describe('jobStatus', () => {
     it('is ready at or after completesAt', () => {
         expect(jobStatus(job, at('2026-07-26T11:00:00Z'))).toBe('ready')
         expect(jobStatus(job, at('2026-07-26T12:00:00Z'))).toBe('ready')
+    })
+    it('is inline while the drop-off is still in the air', () => {
+        const booked = {
+            startsAt: at('1970-01-01T00:00:00Z'),
+            completesAt: at('1970-01-01T00:00:00Z'),
+        }
+        expect(jobStatus({...booked, deposited: false}, at('2026-07-26T10:00:00Z'))).toBe('inline')
+        expect(jobStatus({...job, deposited: true}, at('2026-07-26T10:30:00Z'))).toBe('crafting')
+    })
+    it('labels every state', () => {
+        expect(jobStatusLabel('inline')).toBe('In Line')
+        expect(jobStatusLabel('ready')).toBe('Ready for Pickup')
     })
 })
 
