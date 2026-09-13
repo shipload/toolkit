@@ -1,6 +1,6 @@
 import {Name, type NameType} from '@wharfkit/antelope'
 import {BaseManager} from './base'
-import {jobStatus, splitJobCargo, type OwnedJob} from '../scheduling/jobs'
+import {jobDeposited, jobStatus, splitJobCargo, type OwnedJob} from '../scheduling/jobs'
 import type {ServerContract} from '../contracts'
 
 type JobRow = ServerContract.Types.craftjob_row
@@ -44,6 +44,7 @@ export class JobsManager extends BaseManager {
             recipeId: r.recipe_id.toNumber(),
             quantity: r.quantity.toNumber(),
             status: jobStatus({startsAt, completesAt}, now),
+            deposited: jobDeposited(r.deposited),
             output,
             inputs,
             outputStats: output?.stats === undefined ? undefined : BigInt(output.stats.toString()),

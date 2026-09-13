@@ -437,6 +437,8 @@ describe('ActionsManager', () => {
             'importplayer',
             'importreserve',
             'importstate',
+            'dbgoldjobs',
+            'migratejobs',
             // internal / notification actions — not player-initiated
             'configlog',
             'notify',

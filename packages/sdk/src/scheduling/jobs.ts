@@ -10,6 +10,8 @@ export interface JobWindow {
     completesAt: Date
     recipeId: number
     quantity: number
+    /** False while the job is In Line: booked, with its inputs still in transit to the building. */
+    deposited: boolean
     /** Packed stat roll of the job's output, when the source carried the job's cargo. */
     outputStats?: bigint
 }
@@ -84,6 +86,12 @@ export function jobStatus(job: {startsAt: Date; completesAt: Date}, now: Date): 
     return 'ready'
 }
 
+// A row written before the deposited flag existed reads as undefined; those jobs were all deposited.
+export function jobDeposited(value: unknown): boolean {
+    if (value === undefined || value === null) return true
+    return Boolean(value)
+}
+
 // Generic in the element so raw chain JSON (readonly actions) splits by the same rule as decoded rows.
 export function splitJobCargo<T>(cargo: readonly T[]): {output: T | null; inputs: T[]} {
     if (cargo.length === 0) return {output: null, inputs: []}
@@ -101,6 +109,7 @@ export interface OwnedJob {
     recipeId: number
     quantity: number
     status: JobStatus
+    deposited: boolean
     output: CargoItem | null
     inputs: CargoItem[]
     /** Packed stat roll of `output`, so every job shape answers this the same way. */
