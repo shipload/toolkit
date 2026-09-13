@@ -405,9 +405,16 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             break
         case TaskType.LOAD:
         case TaskType.UNWRAP:
+        case TaskType.DEPOT_TAKE:
             applyAddCargoTask(projected, task)
             break
         case TaskType.UNLOAD:
+        case TaskType.CONTRIBUTE:
+        case TaskType.DEPOT_STORE:
+            applyRemoveCargoTask(projected, task)
+            break
+        case TaskType.UPGRADE:
+            applyEnergyCost(projected, task)
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.GATHER:
@@ -417,6 +424,8 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyCraftTask(projected, task)
             break
         case TaskType.UNDEPLOY:
+            applyAddCargoTask(projected, task)
+            break
         case TaskType.DEMOLISH:
             break
     }
@@ -573,21 +582,8 @@ export function projectEntityAt(entity: Projectable, now: Date): ProjectedEntity
             case TaskType.TRANSIT:
                 applyFlightTask(projected, task, {complete: taskComplete, progress})
                 break
-            case TaskType.LOAD:
-            case TaskType.UNWRAP:
-                if (taskComplete) applyAddCargoTask(projected, task)
-                break
-            case TaskType.UNLOAD:
-                if (taskComplete) applyRemoveCargoTask(projected, task)
-                break
-            case TaskType.GATHER:
-                if (taskComplete) applyGatherTask(projected, task, {complete: true})
-                break
-            case TaskType.CRAFT:
-                if (taskComplete) applyCraftTask(projected, task)
-                break
-            case TaskType.UNDEPLOY:
-            case TaskType.DEMOLISH:
+            default:
+                if (taskComplete) applyTask(projected, task)
                 break
         }
     }
