@@ -410,7 +410,10 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             break
         case TaskType.UNLOAD:
         case TaskType.CONTRIBUTE:
+            applyRemoveCargoTask(projected, task)
+            break
         case TaskType.CIVIC_DEPOSIT:
+            applyEnergyCost(projected, task)
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.UPGRADE:
