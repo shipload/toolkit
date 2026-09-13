@@ -35,6 +35,13 @@ export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
 export type craftjob_row = ServerContract.Types.craftjob_row
 export type buildjob_row = ServerContract.Types.buildjob_row
+export type booking_receipt = ServerContract.Types.booking_receipt
+export {
+    decodeBookingReceipt,
+    bookingReceiptLandsAtMs,
+    bookingReceiptRuntimeSeconds,
+} from './receipts'
+export type {BookingReceipt} from './receipts'
 
 export type location_static = ServerContract.Types.location_static
 export type location_derived = ServerContract.Types.location_derived
