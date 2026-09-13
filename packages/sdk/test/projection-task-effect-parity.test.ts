@@ -42,7 +42,7 @@ function shipWith(task: ServerContract.Types.task, cargoQty: number) {
 
 describe('projectRemainingAt mirrors calc_task_effect cargo deltas', () => {
     test('pending depot store removes its bundle from projected cargo', () => {
-        const task = makeTask(TaskType.DEPOT_STORE, {cargo: [{item_id: 201, quantity: 100}]})
+        const task = makeTask(TaskType.CIVIC_DEPOSIT, {cargo: [{item_id: 201, quantity: 100}]})
         const projected = projectRemainingAt(shipWith(task, 100) as never, NOW)
         expect(projected.cargo).toEqual([])
         expect(projected.cargoMass.toNumber()).toBe(0)
@@ -61,14 +61,14 @@ describe('projectRemainingAt mirrors calc_task_effect cargo deltas', () => {
     })
 
     test('pending depot take adds its bundle to projected cargo', () => {
-        const task = makeTask(TaskType.DEPOT_TAKE, {cargo: [{item_id: 201, quantity: 100}]})
+        const task = makeTask(TaskType.CIVIC_WITHDRAW, {cargo: [{item_id: 201, quantity: 100}]})
         const projected = projectRemainingAt(shipWith(task, 0) as never, NOW)
         expect(projected.cargo.length).toBe(1)
         expect(projected.cargo[0].quantity.toNumber()).toBe(100)
     })
 
     test('projectEntityAt drops a completed depot store from projected cargo', () => {
-        const task = makeTask(TaskType.DEPOT_STORE, {
+        const task = makeTask(TaskType.CIVIC_DEPOSIT, {
             duration: 60,
             cargo: [{item_id: 201, quantity: 100}],
         })

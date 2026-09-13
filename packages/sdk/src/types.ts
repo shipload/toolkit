@@ -74,8 +74,12 @@ export enum TaskType {
     SHUTTLE = 18,
     REFIT = 19,
     CONTRIBUTE = 20,
+    /** @deprecated Renamed to CIVIC_DEPOSIT. */
     DEPOT_STORE = 21,
+    /** @deprecated Renamed to CIVIC_WITHDRAW. */
     DEPOT_TAKE = 22,
+    CIVIC_DEPOSIT = 21,
+    CIVIC_WITHDRAW = 22,
 }
 
 export enum RefitOp {

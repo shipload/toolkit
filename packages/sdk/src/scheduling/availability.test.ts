@@ -223,13 +223,13 @@ describe('taskCargoEffect task coverage', () => {
     })
 
     test('a depot store removes its cargo', () => {
-        const effect = taskCargoEffect(simpleTask(TaskType.DEPOT_STORE))
+        const effect = taskCargoEffect(simpleTask(TaskType.CIVIC_DEPOSIT))
         expect(effect.removed).toHaveLength(1)
         expect(effect.added).toHaveLength(0)
     })
 
     test('a depot take adds its cargo', () => {
-        const effect = taskCargoEffect(simpleTask(TaskType.DEPOT_TAKE))
+        const effect = taskCargoEffect(simpleTask(TaskType.CIVIC_WITHDRAW))
         expect(effect.added).toHaveLength(1)
         expect(effect.removed).toHaveLength(0)
     })

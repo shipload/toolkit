@@ -44,9 +44,14 @@ describe('taskCargoChanges', () => {
 })
 
 describe('TaskType', () => {
-    test('covers the depot task types the contract defines', () => {
-        expect(TaskType.DEPOT_STORE).toBe(21)
-        expect(TaskType.DEPOT_TAKE).toBe(22)
+    test('covers the civic transfer task types the contract defines', () => {
+        expect(TaskType.CIVIC_DEPOSIT).toBe(21)
+        expect(TaskType.CIVIC_WITHDRAW).toBe(22)
+    })
+
+    test('keeps the former depot names as aliases of the civic transfer types', () => {
+        expect(TaskType.DEPOT_STORE).toBe(TaskType.CIVIC_DEPOSIT)
+        expect(TaskType.DEPOT_TAKE).toBe(TaskType.CIVIC_WITHDRAW)
     })
 })
 
@@ -62,13 +67,13 @@ function simpleTask(type: number) {
 
 describe('taskCargoChanges task coverage', () => {
     test('a depot store moves cargo out of the entity', () => {
-        const changes = taskCargoChanges(simpleTask(TaskType.DEPOT_STORE))
+        const changes = taskCargoChanges(simpleTask(TaskType.CIVIC_DEPOSIT))
         expect(changes).toHaveLength(1)
         expect(changes[0].direction).toBe('out')
     })
 
     test('a depot take moves cargo into the entity', () => {
-        const changes = taskCargoChanges(simpleTask(TaskType.DEPOT_TAKE))
+        const changes = taskCargoChanges(simpleTask(TaskType.CIVIC_WITHDRAW))
         expect(changes).toHaveLength(1)
         expect(changes[0].direction).toBe('in')
     })
@@ -88,7 +93,7 @@ describe('taskCargoChanges task coverage', () => {
 
 describe('taskCargoChangesChecked', () => {
     test('reports a known task type with its changes', () => {
-        const result = taskCargoChangesChecked(simpleTask(TaskType.DEPOT_TAKE))
+        const result = taskCargoChangesChecked(simpleTask(TaskType.CIVIC_WITHDRAW))
         expect(result.known).toBe(true)
         if (result.known) expect(result.changes[0].direction).toBe('in')
     })

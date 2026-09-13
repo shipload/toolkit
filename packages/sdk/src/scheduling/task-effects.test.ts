@@ -7,13 +7,13 @@ describe('taskCargoRule', () => {
         expect(taskCargoRule(TaskType.UNLOAD)).toBe('all-out')
         expect(taskCargoRule(TaskType.UPGRADE)).toBe('all-out')
         expect(taskCargoRule(TaskType.CONTRIBUTE)).toBe('all-out')
-        expect(taskCargoRule(TaskType.DEPOT_STORE)).toBe('all-out')
+        expect(taskCargoRule(TaskType.CIVIC_DEPOSIT)).toBe('all-out')
     })
 
     test('maps the task types that move cargo into the entity', () => {
         expect(taskCargoRule(TaskType.LOAD)).toBe('all-in')
         expect(taskCargoRule(TaskType.UNWRAP)).toBe('all-in')
-        expect(taskCargoRule(TaskType.DEPOT_TAKE)).toBe('all-in')
+        expect(taskCargoRule(TaskType.CIVIC_WITHDRAW)).toBe('all-in')
     })
 
     test('maps the conditional task types to their own rules', () => {
