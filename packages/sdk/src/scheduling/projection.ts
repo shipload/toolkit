@@ -435,16 +435,8 @@ export interface ProjectionOptions {
     upToTaskIndex?: number
 }
 
-// Mirrors the contract's completed_task_count_at: inclusive at the anchor.
 function anchoredSkipCount(entity: Projectable, ordered: readonly schedule.OrderedTask[]): number {
-    const anchor = entity.projected_at
-    if (anchor === undefined) return 0
-    const anchorMs = Number(anchor.toMilliseconds())
-    let count = 0
-    for (const {completesAt} of ordered) {
-        if (completesAt.getTime() <= anchorMs) count++
-    }
-    return count
+    return schedule.appliedTaskCount(entity, ordered)
 }
 
 export function projectEntity(entity: Projectable, options?: ProjectionOptions): ProjectedEntity {

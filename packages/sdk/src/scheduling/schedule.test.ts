@@ -1,6 +1,13 @@
 import {describe, expect, test} from 'bun:test'
 import {ServerContract, TaskType} from '../index-module'
-import {hasPendingCapper, hasResolvable, isCapperTaskType} from './schedule'
+import {
+    appliedTaskCount,
+    hasPendingCapper,
+    hasResolvable,
+    isCapperTaskType,
+    orderedTasks,
+    unappliedTasks,
+} from './schedule'
 
 const T0 = '2026-06-19T00:00:00'
 const NOW = new Date('2026-06-19T00:01:00.000Z')
@@ -116,5 +123,41 @@ describe('hasResolvable — capper gating', () => {
     test('an in-progress front is not resolvable regardless of holds', () => {
         const e = entity([task({type: TaskType.DEMOLISH, duration: 3600})])
         expect(hasResolvable(e, NOW)).toBe(false)
+    })
+})
+
+function anchoredEntity(anchorISO: string) {
+    const e = entity([
+        task({type: TaskType.TRAVEL, duration: 30}),
+        task({type: TaskType.TRAVEL, duration: 30}),
+        task({type: TaskType.TRAVEL, duration: 30}),
+    ])
+    return ServerContract.Types.entity_info.from({
+        ...ServerContract.Types.entity_info.from(e),
+        projected_at: anchorISO,
+    })
+}
+
+describe('appliedTaskCount / unappliedTasks', () => {
+    test('no anchor leaves every task unapplied', () => {
+        const e = entity([task({duration: 30}), task({duration: 30})])
+        expect(appliedTaskCount({lanes: e.lanes}, orderedTasks(e))).toBe(0)
+        expect(unappliedTasks({lanes: e.lanes})).toHaveLength(2)
+    })
+
+    test('tasks completed at or before the anchor are already applied', () => {
+        const e = anchoredEntity('2026-06-19T00:01:00')
+        expect(appliedTaskCount(e, orderedTasks(e))).toBe(2)
+        expect(unappliedTasks(e)).toHaveLength(1)
+    })
+
+    test('the anchor is inclusive, mirroring completed_task_count_at', () => {
+        const e = anchoredEntity('2026-06-19T00:00:30')
+        expect(appliedTaskCount(e, orderedTasks(e))).toBe(1)
+    })
+
+    test('a whole schedule finished before the anchor leaves nothing unapplied', () => {
+        const e = anchoredEntity('2026-06-19T12:00:00')
+        expect(unappliedTasks(e)).toHaveLength(0)
     })
 })

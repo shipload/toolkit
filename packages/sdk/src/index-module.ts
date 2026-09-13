@@ -33,6 +33,8 @@ export type task = ServerContract.Types.task
 export type coupling = ServerContract.Types.coupling
 export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
+export type craftjob_row = ServerContract.Types.craftjob_row
+export type buildjob_row = ServerContract.Types.buildjob_row
 
 export type location_static = ServerContract.Types.location_static
 export type location_derived = ServerContract.Types.location_derived
@@ -270,7 +272,9 @@ export {
 
 export * as schedule from './scheduling/schedule'
 export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'
+export {appliedTaskCount, unappliedTasks} from './scheduling/schedule'
 export type {
+    AnchoredScheduleData,
     ScheduleData,
     LaneView,
     OrderedTask,
@@ -323,6 +327,7 @@ export {
     socketTail,
     JOB_QUEUE_CAP,
     jobStatus,
+    jobDeposited,
     splitJobCargo,
 } from './scheduling/jobs'
 export type {JobWindow, JobLane, JobLaneEntry, JobStatus, OwnedJob} from './scheduling/jobs'

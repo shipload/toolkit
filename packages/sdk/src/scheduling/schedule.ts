@@ -1,3 +1,4 @@
+import type {TimePoint} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 import {TaskType} from '../types'
 import * as core from './lane-core'
@@ -13,6 +14,10 @@ export const LANE_BARRIER = 255
 export interface ScheduleData {
     lanes?: Lane[]
     holds?: Hold[]
+}
+
+export interface AnchoredScheduleData extends ScheduleData {
+    projected_at?: TimePoint
 }
 
 export interface LaneView {
@@ -238,6 +243,27 @@ export function orderedTasks(entity: ScheduleData): OrderedTask[] {
     }
     out.sort(frontPrecedes)
     return out
+}
+
+// Mirrors the contract's completed_task_count_at: inclusive at the anchor.
+export function appliedTaskCount(
+    entity: AnchoredScheduleData,
+    ordered: readonly OrderedTask[]
+): number {
+    const anchor = entity.projected_at
+    if (anchor === undefined) return 0
+    const anchorMs = Number(anchor.toMilliseconds())
+    let count = 0
+    for (const {completesAt} of ordered) {
+        if (completesAt.getTime() <= anchorMs) count++
+    }
+    return count
+}
+
+// Tasks an entity_info snapshot has NOT yet folded into its cargo and state.
+export function unappliedTasks(entity: AnchoredScheduleData): OrderedTask[] {
+    const ordered = orderedTasks(entity)
+    return ordered.slice(appliedTaskCount(entity, ordered))
 }
 
 export function laneRemainingOf(entity: ScheduleData, laneKey: number, now: Date): number {
