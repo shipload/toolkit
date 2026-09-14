@@ -20,7 +20,7 @@ import {
     popcount5,
 } from './demand'
 import {findDecomp, DECOMP_REGISTRY} from './decomp'
-import {depotTransferDuration, contributeDuration} from './duration'
+import {civicDropoffDuration, depotTransferDuration, contributeDuration} from './duration'
 import {getStatCount, statsSumSq} from './quality'
 import {pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
 import {citizenryName, citizenryPatternCount} from './citizenry'
@@ -380,5 +380,71 @@ describe('depot transfer duration', () => {
 
     test('never reports zero for real cargo', () => {
         expect(depotTransferDuration(params({cargoMass: 1}))).toBeGreaterThanOrEqual(1)
+    })
+})
+
+describe('civic drop-off duration', () => {
+    type ModuleEntry = ServerContract.Types.module_entry
+    const DEPOT_ITEM = 10219
+    const WORKSHOP_ITEM = 10208
+    const LOADER_T1 = 10103
+
+    function makeModuleEntry(itemId: number, stats: bigint): ModuleEntry {
+        return {
+            type: UInt8.from(0),
+            installed: {item_id: UInt16.from(itemId), stats: UInt64.from(stats)},
+        } as unknown as ModuleEntry
+    }
+    function emptySlot(): ModuleEntry {
+        return {type: UInt8.from(0)} as unknown as ModuleEntry
+    }
+
+    const withLoader = () => ({
+        buildingModules: [makeModuleEntry(LOADER_T1, packStats(500)), emptySlot()],
+        buildingItemId: DEPOT_ITEM,
+        buildingKind: 'depot',
+        buildingZ: 0,
+        shipKind: 'ship',
+        shipZ: 400,
+        cargoMass: 100,
+    })
+    const withoutLoader = () => ({
+        buildingModules: [] as ModuleEntry[],
+        buildingItemId: WORKSHOP_ITEM,
+        buildingKind: 'workshop',
+        buildingZ: 0,
+        shipKind: 'ship',
+        shipZ: 400,
+        cargoMass: 100,
+    })
+
+    test('a building with a slot-0 loader prices off that loader', () => {
+        const p = withLoader()
+        expect(civicDropoffDuration(p)).toBe(
+            depotTransferDuration({
+                depotModules: p.buildingModules,
+                depotItemId: p.buildingItemId,
+                depotKind: p.buildingKind,
+                depotZ: p.buildingZ,
+                shipKind: p.shipKind,
+                shipZ: p.shipZ,
+                cargoMass: p.cargoMass,
+            })
+        )
+    })
+
+    test('a building with no loader falls back to the civic loader', () => {
+        const p = withoutLoader()
+        expect(civicDropoffDuration(p)).toBe(contributeDuration(p.cargoMass, p.shipZ))
+        expect(civicDropoffDuration(p)).toBeGreaterThan(0)
+    })
+
+    test('grows with cargo mass on both paths', () => {
+        expect(civicDropoffDuration({...withLoader(), cargoMass: 10_000})).toBeGreaterThan(
+            civicDropoffDuration(withLoader())
+        )
+        expect(civicDropoffDuration({...withoutLoader(), cargoMass: 10_000})).toBeGreaterThan(
+            civicDropoffDuration(withoutLoader())
+        )
     })
 })

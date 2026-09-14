@@ -70,3 +70,32 @@ export function depotTransferDuration(params: DepotTransferParams): number {
         params.cargoMass
     )
 }
+
+export interface CivicDropoffParams {
+    buildingModules: ServerContract.Types.module_entry[]
+    buildingItemId: number
+    buildingKind: NameType
+    buildingZ: number
+    shipKind: NameType
+    shipZ: number
+    cargoMass: number
+}
+
+// Mirrors jobs.cpp craftjob: the building's slot-0 loader when one is installed, the civic loader when none is.
+export function civicDropoffDuration(params: CivicDropoffParams): number {
+    const loader = resolveLaneLoader(
+        params.buildingModules,
+        params.buildingItemId,
+        laneKeyForModule(DEPOT_LOADER_SLOT)
+    )
+    if (!loader.valid) return contributeDuration(params.cargoMass, params.shipZ)
+    return calc_onesided_duration(
+        loader.thrust,
+        loader.mass,
+        params.shipZ,
+        params.buildingZ,
+        getEntityClass(params.shipKind),
+        getEntityClass(params.buildingKind),
+        params.cargoMass
+    )
+}

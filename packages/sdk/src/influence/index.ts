@@ -35,11 +35,13 @@ export {
     type ValuedItem,
 } from './valuation'
 export {
+    civicDropoffDuration,
     civicLoader,
     contributeDuration,
     contributeDurationForTonnes,
     depotTransferDuration,
     DEPOT_LOADER_SLOT,
+    type CivicDropoffParams,
     type CivicLoaderStats,
     type DepotTransferParams,
 } from './duration'
