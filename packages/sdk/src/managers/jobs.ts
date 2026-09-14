@@ -32,8 +32,8 @@ export class JobsManager extends BaseManager {
     private parseOwnedJob(r: JobRow, now: Date): OwnedJob {
         const startsAt = r.starts_at.toDate()
         const completesAt = r.completes_at.toDate()
-        const {output, inputs} = splitJobCargo(r.cargo)
         const deposited = jobDeposited(r.deposited)
+        const {output, inputs} = splitJobCargo(r.cargo, deposited)
         return {
             id: r.id.toNumber(),
             building: r.building.toNumber(),

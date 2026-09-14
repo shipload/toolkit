@@ -30,15 +30,20 @@ describe('jobStatus', () => {
 })
 
 describe('splitJobCargo', () => {
-    it('takes the last element as output, the rest as inputs', () => {
-        const cargo = [{n: 'a'}, {n: 'b'}, {n: 'out'}] as unknown as Parameters<
-            typeof splitJobCargo
-        >[0]
-        const {output, inputs} = splitJobCargo(cargo)
-        expect(output).toEqual({n: 'out'} as never)
+    it('reads an In Line row as inputs with no output', () => {
+        const cargo = [{n: 'a'}, {n: 'b'}] as unknown as Parameters<typeof splitJobCargo>[0]
+        const {output, inputs} = splitJobCargo(cargo, false)
+        expect(output).toBeNull()
         expect(inputs).toEqual([{n: 'a'}, {n: 'b'}] as never)
     })
+    it('reads a landed row as the output with no inputs', () => {
+        const cargo = [{n: 'out'}] as unknown as Parameters<typeof splitJobCargo>[0]
+        const {output, inputs} = splitJobCargo(cargo, true)
+        expect(output).toEqual({n: 'out'} as never)
+        expect(inputs).toEqual([] as never)
+    })
     it('returns null output for empty cargo', () => {
-        expect(splitJobCargo([])).toEqual({output: null, inputs: []})
+        expect(splitJobCargo([], true)).toEqual({output: null, inputs: []})
+        expect(splitJobCargo([], false)).toEqual({output: null, inputs: []})
     })
 })

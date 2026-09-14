@@ -108,10 +108,14 @@ export function jobDeposited(value: unknown): boolean {
     return Boolean(value)
 }
 
-// Generic in the element so raw chain JSON (readonly actions) splits by the same rule as decoded rows.
-export function splitJobCargo<T>(cargo: readonly T[]): {output: T | null; inputs: T[]} {
+// A job row holds the inputs while In Line and the output once its drop-off has landed.
+export function splitJobCargo<T>(
+    cargo: readonly T[],
+    deposited: boolean
+): {output: T | null; inputs: T[]} {
     if (cargo.length === 0) return {output: null, inputs: []}
-    return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
+    if (!deposited) return {output: null, inputs: [...cargo]}
+    return {output: cargo[0], inputs: []}
 }
 
 export interface OwnedJob {

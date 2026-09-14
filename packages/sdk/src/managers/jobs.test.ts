@@ -15,7 +15,7 @@ const row = (over: Record<string, unknown> = {}) => ({
     recipe_id: {toNumber: () => 10001},
     quantity: {toNumber: () => 5},
     energy_paid: {toNumber: () => 0},
-    cargo: [{item: 'in'}, {item: 'out'}],
+    cargo: [{item: 'out'}],
     ...over,
 })
 
@@ -26,7 +26,7 @@ function managerWith(queryImpl: () => Promise<unknown[]>, allImpl: () => Promise
 }
 
 describe('JobsManager.getOwnedJobs', () => {
-    it('parses owner rows: output = last cargo, inputs = rest, status derived', async () => {
+    it('parses a landed row: cargo is the output, no inputs, status derived', async () => {
         const m = managerWith(
             async () => [row()],
             async () => []
@@ -36,7 +36,7 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs[0]).toMatchObject({id: 7, building: 42, quantity: 5, status: 'ready'})
         expect(jobs[0].coords).toEqual({x: 12, y: 34})
         expect(jobs[0].output).toEqual({item: 'out'} as never)
-        expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
+        expect(jobs[0].inputs).toEqual([] as never)
     })
 
     it('reports a job In Line rather than ready, whatever its zero window says', async () => {
@@ -53,6 +53,8 @@ describe('JobsManager.getOwnedJobs', () => {
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs[0].status).toBe('inline')
         expect(jobs[0].deposited).toBe(false)
+        expect(jobs[0].output).toBeNull()
+        expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })
 
     it('drops rows whose owner does not match (positional-index safety re-filter)', async () => {

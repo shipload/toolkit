@@ -562,14 +562,6 @@ export class ActionsManager extends BaseManager {
         return this.server.action('claimcraft', params)
     }
 
-    cancelcraft(jobId: UInt64Type, shipId: UInt64Type): Action {
-        const params: ServerContract.ActionParams.cancelcraft = {
-            job_id: UInt64.from(jobId),
-            ship_id: UInt64.from(shipId),
-        }
-        return this.server.action('cancelcraft', params)
-    }
-
     buildjob(
         targetId: UInt64Type,
         dockId: UInt64Type,
