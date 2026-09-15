@@ -339,6 +339,7 @@ export {
     JOB_QUEUE_CAP,
     jobStatus,
     jobStatusLabel,
+    jobDropoffTask,
     jobDeposited,
     splitJobCargo,
     workshopAvailability,

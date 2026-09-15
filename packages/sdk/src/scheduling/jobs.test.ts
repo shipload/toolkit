@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'bun:test'
 import type {OrderedTask} from './schedule'
 import {
+    jobDropoffTask,
     jobStatus,
     jobStatusLabel,
     pickupsInFlight,
@@ -96,6 +97,23 @@ describe('jobStatus', () => {
             }),
         ]
         expect(jobStatus(inFlight, at('2026-07-26T09:05:00Z'), tasks)).toBe('booked')
+    })
+    it('finds the Drop-off task the card reads its landing time from', () => {
+        const dropoff = task({
+            type: 21,
+            building: 42,
+            startsAt: at('2026-07-26T09:30:00Z'),
+            completesAt: at('2026-07-26T09:50:00Z'),
+        })
+        const other = task({
+            type: 22,
+            building: 42,
+            startsAt: at('2026-07-26T09:00:00Z'),
+            completesAt: at('2026-07-26T09:10:00Z'),
+        })
+        expect(jobDropoffTask(inFlight, [other, dropoff])).toBe(dropoff)
+        expect(jobDropoffTask(inFlight, [other])).toBeUndefined()
+        expect(jobDropoffTask(inFlight, undefined)).toBeUndefined()
     })
     it('reads an undeposited row as dropping off when no schedule is given', () => {
         expect(jobStatus(inFlight, at('2026-07-26T09:00:00Z'))).toBe('dropping')

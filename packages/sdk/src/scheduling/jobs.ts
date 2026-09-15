@@ -16,6 +16,10 @@ export interface JobWindow {
     deposited: boolean
     /** Packed stat roll of the job's output, when the source carried the job's cargo. */
     outputStats?: bigint
+    /** Ship that booked the job; lets a caller find its Drop-off on that ship's schedule. */
+    shipId?: number
+    /** Inputs the Drop-off carries; matched against the task cargo to find the right Drop-off. */
+    inputs?: CargoItem[]
 }
 
 export interface JobLaneEntry {
@@ -127,12 +131,21 @@ function matchesJob(t: OrderedTask, job: JobStatusInput): boolean {
     return true
 }
 
+export function jobDropoffTask(
+    job: JobStatusInput,
+    tasks: readonly OrderedTask[] | undefined
+): OrderedTask | undefined {
+    return tasks?.find((t) => Number(t.task.type) === TaskType.CIVIC_DEPOSIT && matchesJob(t, job))
+}
+
 // Without the ship's schedule an undeposited row reads as Dropping off: the transfer usually starts at once.
-export function jobStatus(job: JobStatusInput, now: Date, tasks?: OrderedTask[]): JobStatus {
+export function jobStatus(
+    job: JobStatusInput,
+    now: Date,
+    tasks?: readonly OrderedTask[]
+): JobStatus {
     if (job.deposited === false) {
-        const dropoff = tasks?.find(
-            (t) => Number(t.task.type) === TaskType.CIVIC_DEPOSIT && matchesJob(t, job)
-        )
+        const dropoff = jobDropoffTask(job, tasks)
         return dropoff && now < dropoff.startsAt ? 'booked' : 'dropping'
     }
     if (job.quantity === 0) return 'ready'
