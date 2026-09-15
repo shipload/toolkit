@@ -27,7 +27,6 @@ export interface CraftjobOpts {
     entityType: EntityTypeName
     entityId: bigint
     workshopId: bigint
-    slot: number
     recipeId: number
     quantity: number
     inputs: ResolvedCargoInput[]
@@ -46,7 +45,6 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
     return sl.actions.craftjob(
         opts.entityId,
         opts.workshopId,
-        opts.slot,
         opts.recipeId,
         opts.quantity,
         cargoInputs
@@ -56,7 +54,6 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
 export async function runCraftjob(
     ctx: EntityContext,
     workshopId: bigint,
-    slot: number,
     recipeId: number,
     quantity: number,
     inputs: ParsedCargoInput[],
@@ -73,7 +70,6 @@ export async function runCraftjob(
             entityType: ctx.entityType,
             entityId: ctx.entityId,
             workshopId,
-            slot,
             recipeId,
             quantity,
             inputs: resolved,
@@ -81,7 +77,7 @@ export async function runCraftjob(
         const result = await transact(
             {action},
             {
-                description: `Booking craft job for recipe ${recipeId} x${quantity} at workshop ${workshopId} socket ${slot}`,
+                description: `Booking craft job for recipe ${recipeId} x${quantity} at workshop ${workshopId}`,
             }
         )
         await maybeAwaitAndPrint(ctx.entityId, options, result)
@@ -90,31 +86,31 @@ export async function runCraftjob(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'craftjob',
-    description: 'Book a craft job at a Workshop service socket',
+    description: 'Book a craft job at a Workshop',
     appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('craftjob')
-            .description('Book a craft job at a Workshop service socket')
+            .description('Book a craft job at a Workshop')
             .addHelpText(
                 'before',
                 'Requires: this entity is co-located with the Workshop, has a Generator with enough ' +
-                    'energy, and holds all recipe inputs in cargo. The Workshop crafts on your behalf; ' +
-                    'claim the output later with `claimcraft`.\n'
+                    'energy, and holds all recipe inputs in cargo. The Workshop assigns the Fabricator ' +
+                    'and the time window at booking; the receipt states when the job starts and when ' +
+                    'it is done. Claim the output later with `claimcraft`.\n'
             )
             .addHelpText(
                 'after',
                 `
 Examples:
-  # Book 1× Plate T1 (10 Ore) at Workshop 1001, socket 0
-  shiploadcli ship 1003 craftjob 1001 0 10001 1 101:413333752:10
+  # Book 1× Plate T1 (10 Ore) at Workshop 1001
+  shiploadcli ship 1003 craftjob 1001 10001 1 101:413333752:10
 
   # Book 5× Plasma Cell T1 drawing Gas from two stacks (32 × 5 = 160 total)
-  shiploadcli ship 1 craftjob 1001 0 10003 5 301:214202522:11 301:888888888:149
+  shiploadcli ship 1 craftjob 1001 10003 5 301:214202522:11 301:888888888:149
 
-Find sockets with \`shiploadcli workshop N show\` and stack ids with \`shiploadcli ship N cargo\`.`
+See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids with \`shiploadcli ship N cargo\`.`
             )
             .argument('<workshop-id>', 'entity id of the Workshop', parseUint64)
-            .argument('<slot>', 'service socket index on the Workshop', parseUint16)
             .argument('<recipe-id>', 'output item id from the recipe command', parseUint16)
             .argument('<quantity>', 'number of times to run the recipe', parseUint32)
             .argument(
@@ -127,21 +123,12 @@ Find sockets with \`shiploadcli workshop N show\` and stack ids with \`shiploadc
             .action(
                 async (
                     workshopId: bigint,
-                    slot: number,
                     recipeId: number,
                     quantity: number,
                     inputs: ParsedCargoInput[],
                     opts: WaitableOptions
                 ) => {
-                    await runCraftjob(
-                        ctx,
-                        workshopId,
-                        Number(slot),
-                        recipeId,
-                        quantity,
-                        inputs,
-                        opts
-                    )
+                    await runCraftjob(ctx, workshopId, recipeId, quantity, inputs, opts)
                 }
             ),
 }

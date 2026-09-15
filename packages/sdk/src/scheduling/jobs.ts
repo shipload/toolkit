@@ -1,4 +1,6 @@
 import type {ServerContract} from '../contracts'
+import {TaskType} from '../types'
+import type {OrderedTask} from './schedule'
 
 type CargoItem = ServerContract.Types.cargo_item
 
@@ -10,7 +12,7 @@ export interface JobWindow {
     completesAt: Date
     recipeId: number
     quantity: number
-    /** False while the job is In Line: booked, with its inputs still in transit to the building. */
+    /** False while the job's inputs are still in transit to the building. */
     deposited: boolean
     /** Packed stat roll of the job's output, when the source carried the job's cargo. */
     outputStats?: bigint
@@ -59,6 +61,7 @@ export function socketTail(jobs: JobWindow[], socket: number, now: Date): Date {
     return last && last.completesAt > now ? last.completesAt : now
 }
 
+// Display-only estimate of the window a booking would receive; the contract picks the socket.
 export function pickFabricator(
     jobs: JobWindow[],
     sockets: Array<{open: boolean}>,
@@ -78,24 +81,95 @@ export function pickFabricator(
     return best
 }
 
-export type JobStatus = 'inline' | 'waiting' | 'crafting' | 'ready'
-
-// A job In Line has no window yet, so the window alone would read it as long since ready.
-export function jobStatus(
-    job: {startsAt: Date; completesAt: Date; deposited?: boolean},
+export function workshopAvailability(
+    jobs: JobWindow[],
+    socketCount: number,
     now: Date
-): JobStatus {
-    if (job.deposited === false) return 'inline'
-    if (now < job.startsAt) return 'waiting'
+): {open: number; nextOpeningAt: Date | null} {
+    let open = 0
+    let nextOpeningAt: Date | null = null
+    for (let socket = 0; socket < socketCount; socket++) {
+        const tail = socketTail(jobs, socket, now)
+        if (tail <= now) {
+            open++
+        } else if (!nextOpeningAt || tail < nextOpeningAt) {
+            nextOpeningAt = tail
+        }
+    }
+    return {open, nextOpeningAt: open > 0 ? null : nextOpeningAt}
+}
+
+export type JobStatus = 'booked' | 'dropping' | 'queued' | 'crafting' | 'ready' | 'pickingup'
+
+export interface JobStatusInput {
+    startsAt: Date
+    completesAt: Date
+    deposited?: boolean
+    quantity?: number
+    building?: number
+    inputs?: readonly CargoItem[]
+}
+
+function cargoEquals(a: readonly CargoItem[], b: readonly CargoItem[]): boolean {
+    if (a.length !== b.length) return false
+    return a.every(
+        (x, i) =>
+            String(x.item_id) === String(b[i].item_id) &&
+            String(x.stats) === String(b[i].stats) &&
+            String(x.quantity) === String(b[i].quantity)
+    )
+}
+
+function matchesJob(t: OrderedTask, job: JobStatusInput): boolean {
+    const subject = t.task.subject
+    if (job.building !== undefined && Number(subject?.entity_id) !== job.building) return false
+    if (job.inputs !== undefined && !cargoEquals(t.task.cargo, job.inputs)) return false
+    return true
+}
+
+// Without the ship's schedule an undeposited row reads as Dropping off: the transfer usually starts at once.
+export function jobStatus(job: JobStatusInput, now: Date, tasks?: OrderedTask[]): JobStatus {
+    if (job.deposited === false) {
+        const dropoff = tasks?.find(
+            (t) => Number(t.task.type) === TaskType.CIVIC_DEPOSIT && matchesJob(t, job)
+        )
+        return dropoff && now < dropoff.startsAt ? 'booked' : 'dropping'
+    }
+    if (job.quantity === 0) return 'ready'
+    if (now < job.startsAt) return 'queued'
     if (now < job.completesAt) return 'crafting'
     return 'ready'
 }
 
+export interface PickupInFlight {
+    building: number
+    cargo: CargoItem[]
+    startsAt: Date
+    completesAt: Date
+}
+
+export function pickupsInFlight(tasks: OrderedTask[], building?: number): PickupInFlight[] {
+    return tasks
+        .filter(
+            (t) =>
+                Number(t.task.type) === TaskType.CIVIC_WITHDRAW &&
+                (building === undefined || Number(t.task.subject?.entity_id) === building)
+        )
+        .map((t) => ({
+            building: Number(t.task.subject?.entity_id),
+            cargo: [...t.task.cargo],
+            startsAt: t.startsAt,
+            completesAt: t.completesAt,
+        }))
+}
+
 const JOB_STATUS_LABELS: Record<JobStatus, string> = {
-    inline: 'In Line',
-    waiting: 'Waiting',
+    booked: 'Booked',
+    dropping: 'Dropping off',
+    queued: 'Queued',
     crafting: 'Crafting',
     ready: 'Ready for Pickup',
+    pickingup: 'Picking up',
 }
 
 export function jobStatusLabel(status: JobStatus): string {
@@ -108,14 +182,15 @@ export function jobDeposited(value: unknown): boolean {
     return Boolean(value)
 }
 
-// A job row holds the inputs while In Line and the output once its drop-off has landed.
+// A deposited row's output is the cargo tail; a cancelled row (quantity 0) holds only its inputs.
 export function splitJobCargo<T>(
     cargo: readonly T[],
-    deposited: boolean
+    deposited: boolean,
+    quantity: number
 ): {output: T | null; inputs: T[]} {
     if (cargo.length === 0) return {output: null, inputs: []}
-    if (!deposited) return {output: null, inputs: [...cargo]}
-    return {output: cargo[0], inputs: []}
+    if (!deposited || quantity === 0) return {output: null, inputs: [...cargo]}
+    return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
 }
 
 export interface OwnedJob {

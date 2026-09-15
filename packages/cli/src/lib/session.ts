@@ -1,4 +1,4 @@
-import { type Projectable, schedule, ServerTypes } from "@shipload/sdk";
+import { decodeWindowReceipt, type Projectable, schedule, ServerTypes } from "@shipload/sdk";
 import { PrivateKey, type PublicKey } from "@wharfkit/antelope";
 import {
 	Action,
@@ -17,6 +17,7 @@ import {
 	formatDuration,
 	formatResolveAllResults,
 	formatResolveResults,
+	formatWindowReceipt,
 } from "./format";
 import { getEntitySnapshot } from "./snapshot";
 import type { ProposeOptions } from "./msig/options";
@@ -156,6 +157,9 @@ async function formatActionResult(
 	if (CANCEL_ACTIONS.includes(actionName)) {
 		const results = ServerTypes.cancel_results.from(returnData);
 		return formatCancelResults(results);
+	}
+	if (actionName === "craftjob") {
+		return formatWindowReceipt(decodeWindowReceipt(returnData), new Date());
 	}
 	return null;
 }

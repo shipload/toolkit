@@ -39,6 +39,7 @@ import * as entity from './commands/query/entity'
 import * as epoch from './commands/query/epoch'
 import * as history from './commands/query/history'
 import * as inventory from './commands/query/inventory'
+import * as workshop from './commands/query/workshop'
 import * as items from './commands/query/items'
 import * as location from './commands/query/location'
 import * as locationNearby from './commands/query/location-nearby'
@@ -101,6 +102,7 @@ export function build(): Command {
     status.register(program)
     waitCmd.register(program)
     epoch.register(program)
+    workshop.register(program)
     player.register(program)
     players.register(program)
     census.register(program)

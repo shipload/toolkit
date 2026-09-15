@@ -36,12 +36,16 @@ export type entity_row = ServerContract.Types.entity_row
 export type craftjob_row = ServerContract.Types.craftjob_row
 export type buildjob_row = ServerContract.Types.buildjob_row
 export type booking_receipt = ServerContract.Types.booking_receipt
+export type window_receipt = ServerContract.Types.window_receipt
 export {
     decodeBookingReceipt,
     bookingReceiptLandsAtMs,
     bookingReceiptRuntimeSeconds,
+    decodeWindowReceipt,
+    windowReceiptStartsAtMs,
+    windowReceiptCompletesAtMs,
 } from './receipts'
-export type {BookingReceipt} from './receipts'
+export type {BookingReceipt, WindowReceipt} from './receipts'
 
 export type location_static = ServerContract.Types.location_static
 export type location_derived = ServerContract.Types.location_derived
@@ -337,8 +341,18 @@ export {
     jobStatusLabel,
     jobDeposited,
     splitJobCargo,
+    workshopAvailability,
+    pickupsInFlight,
 } from './scheduling/jobs'
-export type {JobWindow, JobLane, JobLaneEntry, JobStatus, OwnedJob} from './scheduling/jobs'
+export type {
+    JobWindow,
+    JobLane,
+    JobLaneEntry,
+    JobStatus,
+    JobStatusInput,
+    OwnedJob,
+    PickupInFlight,
+} from './scheduling/jobs'
 
 export {composeIdleResolve} from './scheduling/idle-resolve'
 export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'

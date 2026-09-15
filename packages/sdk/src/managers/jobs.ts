@@ -33,18 +33,20 @@ export class JobsManager extends BaseManager {
         const startsAt = r.starts_at.toDate()
         const completesAt = r.completes_at.toDate()
         const deposited = jobDeposited(r.deposited)
-        const {output, inputs} = splitJobCargo(r.cargo, deposited)
+        const quantity = r.quantity.toNumber()
+        const building = r.building.toNumber()
+        const {output, inputs} = splitJobCargo(r.cargo, deposited, quantity)
         return {
             id: r.id.toNumber(),
-            building: r.building.toNumber(),
+            building,
             socket: r.socket.toNumber(),
             shipId: r.ship_id.toNumber(),
             coords: {x: r.coords.x.toNumber(), y: r.coords.y.toNumber()},
             startsAt,
             completesAt,
             recipeId: r.recipe_id.toNumber(),
-            quantity: r.quantity.toNumber(),
-            status: jobStatus({startsAt, completesAt, deposited}, now),
+            quantity,
+            status: jobStatus({startsAt, completesAt, deposited, quantity, building, inputs}, now),
             deposited,
             output,
             inputs,

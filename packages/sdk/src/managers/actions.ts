@@ -515,7 +515,6 @@ export class ActionsManager extends BaseManager {
     craftjob(
         shipId: UInt64Type,
         workshopId: UInt64Type,
-        slot: UInt8Type,
         recipeId: UInt16Type,
         quantity: UInt32Type,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
@@ -523,12 +522,18 @@ export class ActionsManager extends BaseManager {
         const params: ServerContract.ActionParams.craftjob = {
             ship_id: UInt64.from(shipId),
             workshop_id: UInt64.from(workshopId),
-            slot: UInt8.from(slot),
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
             inputs,
         }
         return this.server.action('craftjob', params)
+    }
+
+    cancelcraft(jobId: UInt64Type): Action {
+        const params: ServerContract.ActionParams.cancelcraft = {
+            job_id: UInt64.from(jobId),
+        }
+        return this.server.action('cancelcraft', params)
     }
 
     clustercraft(

@@ -26,9 +26,9 @@ function managerWith(queryImpl: () => Promise<unknown[]>, allImpl: () => Promise
 }
 
 describe('JobsManager.getOwnedJobs', () => {
-    it('parses a landed row: cargo is the output, no inputs, status derived', async () => {
+    it('parses a deposited row: inputs then the output tail, status derived', async () => {
         const m = managerWith(
-            async () => [row()],
+            async () => [row({cargo: [{item: 'in'}, {item: 'out'}]})],
             async () => []
         )
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
@@ -36,23 +36,37 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs[0]).toMatchObject({id: 7, building: 42, quantity: 5, status: 'ready'})
         expect(jobs[0].coords).toEqual({x: 12, y: 34})
         expect(jobs[0].output).toEqual({item: 'out'} as never)
-        expect(jobs[0].inputs).toEqual([] as never)
+        expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })
 
-    it('reports a job In Line rather than ready, whatever its zero window says', async () => {
-        const inLine = row({
-            starts_at: {toDate: () => new Date(0)},
-            completes_at: {toDate: () => new Date(0)},
+    it('reports an undeposited row as dropping off, whatever its window says', async () => {
+        const inFlight = row({
             deposited: false,
             cargo: [{item: 'in'}],
         })
         const m = managerWith(
-            async () => [inLine],
+            async () => [inFlight],
             async () => []
         )
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
-        expect(jobs[0].status).toBe('inline')
+        expect(jobs[0].status).toBe('dropping')
         expect(jobs[0].deposited).toBe(false)
+        expect(jobs[0].output).toBeNull()
+        expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
+    })
+
+    it('reports a cancelled row as ready with its inputs held', async () => {
+        const cancelled = row({
+            quantity: {toNumber: () => 0},
+            deposited: true,
+            cargo: [{item: 'in'}],
+        })
+        const m = managerWith(
+            async () => [cancelled],
+            async () => []
+        )
+        const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T09:00:00Z')})
+        expect(jobs[0].status).toBe('ready')
         expect(jobs[0].output).toBeNull()
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })

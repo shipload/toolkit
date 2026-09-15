@@ -213,6 +213,14 @@ export function checkLine(label: string, detail: string): string {
 	return `${label.padEnd(CHECK_LABEL_WIDTH)}... ${detail}`;
 }
 
+export function formatWindowReceipt(receipt: ServerTypes.window_receipt, now: Date): string {
+	const starts = new Date(receipt.starts_at.toMilliseconds());
+	const done = new Date(receipt.completes_at.toMilliseconds());
+	const lead = Math.floor((starts.getTime() - now.getTime()) / 1000);
+	const when = lead > 0 ? `in ${formatDuration(lead)}` : "now";
+	return `Booked. Starts ${formatTimeUTC(starts)} (${when}), done ${formatTimeUTC(done)}.`;
+}
+
 export function formatDuration(seconds: number): string {
 	if (seconds < 60) return `${seconds}s`;
 	const m = Math.floor(seconds / 60);
