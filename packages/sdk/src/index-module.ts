@@ -340,6 +340,8 @@ export {
     jobStatus,
     jobStatusLabel,
     jobDropoffTask,
+    jobCancelRoute,
+    jobCancellable,
     jobDeposited,
     splitJobCargo,
     workshopAvailability,
@@ -351,6 +353,7 @@ export type {
     JobLaneEntry,
     JobStatus,
     JobStatusInput,
+    JobCancelRoute,
     OwnedJob,
     PickupInFlight,
 } from './scheduling/jobs'

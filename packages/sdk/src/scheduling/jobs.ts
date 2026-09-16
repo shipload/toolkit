@@ -154,6 +154,34 @@ export function jobStatus(
     return 'ready'
 }
 
+export function jobCancellable(status: JobStatus): boolean {
+    return status === 'booked' || status === 'dropping' || status === 'queued'
+}
+
+export type JobCancelRoute =
+    | {kind: 'dropoff'; shipId: number; laneKey: number; count: number}
+    | {kind: 'craft'; jobId: number}
+
+// The ship's cancel pops from the lane tail, so the count reaches from the Drop-off through every task queued behind it.
+export function jobCancelRoute(
+    job: JobStatusInput & {id: number; shipId?: number},
+    now: Date,
+    tasks?: readonly OrderedTask[]
+): JobCancelRoute | null {
+    if (!jobCancellable(jobStatus(job, now, tasks))) return null
+    if (job.deposited !== false) return {kind: 'craft', jobId: job.id}
+    if (job.shipId === undefined || !tasks) return null
+    const dropoff = jobDropoffTask(job, tasks)
+    if (!dropoff || dropoff.completesAt <= now) return null
+    const laneLength = tasks.filter((t) => t.laneKey === dropoff.laneKey).length
+    return {
+        kind: 'dropoff',
+        shipId: job.shipId,
+        laneKey: dropoff.laneKey,
+        count: laneLength - dropoff.taskIndex,
+    }
+}
+
 export interface PickupInFlight {
     building: number
     cargo: CargoItem[]

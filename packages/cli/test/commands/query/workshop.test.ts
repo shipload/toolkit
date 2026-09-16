@@ -38,9 +38,26 @@ test('renderWorkshopShow prints one block per Fabricator with its windows in sch
     expect(lines).toContain('Fabricator 1 · Open now')
     expect(lines).toContain('Fabricator 2 · Booked until 15:10:00 UTC')
     const idx = lines.indexOf('Fabricator 2 · Booked until 15:10:00 UTC')
-    expect(lines[idx + 1]).toMatch(/^ {2}start\s+done\s+owner\s+output$/)
-    expect(lines[idx + 2]).toMatch(/^ {2}13:00:00 UTC\s+14:00:00 UTC\s+other\.gm/)
-    expect(lines[idx + 3]).toMatch(/^ {2}14:00:00 UTC\s+15:10:00 UTC\s+eggmaple\.gm/)
+    expect(lines[idx + 1]).toMatch(/^ {2}job\s+start\s+done\s+owner\s+state\s+output$/)
+    expect(lines[idx + 2]).toMatch(/^ {2}1\s+13:00:00 UTC\s+14:00:00 UTC\s+other\.gm\s+Crafting/)
+    expect(lines[idx + 3]).toMatch(/^ {2}2\s+14:00:00 UTC\s+15:10:00 UTC\s+eggmaple\.gm\s+Queued/)
+})
+
+test('renderWorkshopShow names the cancel command and the rule it follows', () => {
+    const out = renderWorkshopShow(
+        {workshopId: 1001n, socketCount: 1, jobs: [win({})]},
+        at('2026-09-15T13:00:00Z')
+    )
+    expect(out).toContain('until the Fabricator starts on it')
+    expect(out).toContain('shiploadcli workshop 1001 cancel <job>')
+})
+
+test('renderWorkshopShow reads an undeposited window as Dropping off', () => {
+    const out = renderWorkshopShow(
+        {workshopId: 1001n, socketCount: 1, jobs: [win({deposited: false})]},
+        at('2026-09-15T13:00:00Z')
+    )
+    expect(out).toMatch(/eggmaple\.gm\s+Dropping off/)
 })
 
 test('renderWorkshopShow omits ended windows', () => {

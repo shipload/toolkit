@@ -1,6 +1,8 @@
 import {describe, expect, it} from 'bun:test'
 import type {OrderedTask} from './schedule'
 import {
+    jobCancelRoute,
+    jobCancellable,
     jobDropoffTask,
     jobStatus,
     jobStatusLabel,
@@ -125,6 +127,75 @@ describe('jobStatus', () => {
         expect(jobStatusLabel('crafting')).toBe('Crafting')
         expect(jobStatusLabel('ready')).toBe('Ready for Pickup')
         expect(jobStatusLabel('pickingup')).toBe('Picking up')
+    })
+})
+
+describe('jobCancelRoute', () => {
+    const job = {
+        id: 7,
+        shipId: 5,
+        startsAt: at('2026-07-26T10:00:00Z'),
+        completesAt: at('2026-07-26T11:00:00Z'),
+        deposited: true,
+        quantity: 1,
+        building: 42,
+        inputs: INPUTS,
+    }
+    const inFlight = {...job, deposited: false}
+    const dropoff = task({
+        type: 21,
+        building: 42,
+        startsAt: at('2026-07-26T09:30:00Z'),
+        completesAt: at('2026-07-26T09:50:00Z'),
+    })
+
+    it('cancels a Booked job through the ship, from the Drop-off to the lane tail', () => {
+        const later = {
+            ...dropoff,
+            taskIndex: 1,
+            task: {...dropoff.task, type: 22},
+        } as unknown as OrderedTask
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [dropoff, later])
+        expect(route).toEqual({kind: 'dropoff', shipId: 5, laneKey: 1, count: 2})
+    })
+    it('cancels a Dropping off job through the ship while the transfer is in flight', () => {
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:40:00Z'), [dropoff])
+        expect(route).toEqual({kind: 'dropoff', shipId: 5, laneKey: 1, count: 1})
+    })
+    it('counts only the Drop-off lane, not tasks on other lanes', () => {
+        const mobility = {
+            ...dropoff,
+            laneKey: 0,
+            taskIndex: 0,
+            task: {...dropoff.task, type: 1},
+        } as unknown as OrderedTask
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [mobility, dropoff])
+        expect(route).toEqual({kind: 'dropoff', shipId: 5, laneKey: 1, count: 1})
+    })
+    it('cancels a Queued job through cancelcraft', () => {
+        expect(jobCancelRoute(job, at('2026-07-26T09:59:59Z'))).toEqual({kind: 'craft', jobId: 7})
+    })
+    it('has no route once crafting has started or the job is ready', () => {
+        expect(jobCancelRoute(job, at('2026-07-26T10:00:00Z'))).toBeNull()
+        expect(jobCancelRoute(job, at('2026-07-26T11:00:00Z'))).toBeNull()
+        expect(jobCancelRoute({...job, quantity: 0}, at('2026-07-26T09:00:00Z'))).toBeNull()
+    })
+    it('has no route for a landed Drop-off that has not resolved yet', () => {
+        expect(jobCancelRoute(inFlight, at('2026-07-26T09:50:00Z'), [dropoff])).toBeNull()
+    })
+    it('has no route for an undeposited job without the ship schedule', () => {
+        expect(jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'))).toBeNull()
+        expect(
+            jobCancelRoute({...inFlight, shipId: undefined}, at('2026-07-26T09:00:00Z'), [dropoff])
+        ).toBeNull()
+    })
+    it('names the three cancellable phases', () => {
+        expect(jobCancellable('booked')).toBe(true)
+        expect(jobCancellable('dropping')).toBe(true)
+        expect(jobCancellable('queued')).toBe(true)
+        expect(jobCancellable('crafting')).toBe(false)
+        expect(jobCancellable('ready')).toBe(false)
+        expect(jobCancellable('pickingup')).toBe(false)
     })
 })
 

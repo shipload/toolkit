@@ -24,6 +24,7 @@ import {Coordinates, PRECISION, type ClusterSlotType, type CoordinatesType} from
 import {ServerContract, TokenContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
+import type {JobCancelRoute} from '../scheduling/jobs'
 
 const CHARGE_K = 100n
 const ENERGY_DIVISOR = 10n
@@ -534,6 +535,11 @@ export class ActionsManager extends BaseManager {
             job_id: UInt64.from(jobId),
         }
         return this.server.action('cancelcraft', params)
+    }
+
+    canceljob(route: JobCancelRoute): Action {
+        if (route.kind === 'dropoff') return this.cancel(route.shipId, route.laneKey, route.count)
+        return this.cancelcraft(route.jobId)
     }
 
     clustercraft(
