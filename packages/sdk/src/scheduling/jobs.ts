@@ -161,15 +161,17 @@ export function jobCancellable(status: JobStatus): boolean {
 export type JobCancelRoute =
     | {kind: 'dropoff'; shipId: number; laneKey: number; count: number}
     | {kind: 'craft'; jobId: number}
+    | {kind: 'build'; jobId: number}
 
 // The ship's cancel pops from the lane tail, so the count reaches from the Drop-off through every task queued behind it.
-export function jobCancelRoute(
+function cancelRoute(
     job: JobStatusInput & {id: number; shipId?: number},
+    queued: 'craft' | 'build',
     now: Date,
     tasks?: readonly OrderedTask[]
 ): JobCancelRoute | null {
     if (!jobCancellable(jobStatus(job, now, tasks))) return null
-    if (job.deposited !== false) return {kind: 'craft', jobId: job.id}
+    if (job.deposited !== false) return {kind: queued, jobId: job.id}
     if (job.shipId === undefined || !tasks) return null
     const dropoff = jobDropoffTask(job, tasks)
     if (!dropoff || dropoff.completesAt <= now) return null
@@ -180,6 +182,23 @@ export function jobCancelRoute(
         laneKey: dropoff.laneKey,
         count: laneLength - dropoff.taskIndex,
     }
+}
+
+export function jobCancelRoute(
+    job: JobStatusInput & {id: number; shipId?: number},
+    now: Date,
+    tasks?: readonly OrderedTask[]
+): JobCancelRoute | null {
+    return cancelRoute(job, 'craft', now, tasks)
+}
+
+// A Build Job's Drop-off rides on the upgrade target itself, so the target plays the ship's part.
+export function buildJobCancelRoute(
+    job: JobStatusInput & {id: number; targetId?: number},
+    now: Date,
+    tasks?: readonly OrderedTask[]
+): JobCancelRoute | null {
+    return cancelRoute({...job, shipId: job.targetId}, 'build', now, tasks)
 }
 
 export interface PickupInFlight {

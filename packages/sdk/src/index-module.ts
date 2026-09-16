@@ -35,17 +35,9 @@ export type cargo_item = ServerContract.Types.cargo_item
 export type entity_row = ServerContract.Types.entity_row
 export type craftjob_row = ServerContract.Types.craftjob_row
 export type buildjob_row = ServerContract.Types.buildjob_row
-export type booking_receipt = ServerContract.Types.booking_receipt
 export type window_receipt = ServerContract.Types.window_receipt
-export {
-    decodeBookingReceipt,
-    bookingReceiptLandsAtMs,
-    bookingReceiptRuntimeSeconds,
-    decodeWindowReceipt,
-    windowReceiptStartsAtMs,
-    windowReceiptCompletesAtMs,
-} from './receipts'
-export type {BookingReceipt, WindowReceipt} from './receipts'
+export {decodeWindowReceipt, windowReceiptStartsAtMs, windowReceiptCompletesAtMs} from './receipts'
+export type {WindowReceipt} from './receipts'
 
 export type location_static = ServerContract.Types.location_static
 export type location_derived = ServerContract.Types.location_derived
@@ -341,6 +333,7 @@ export {
     jobStatusLabel,
     jobDropoffTask,
     jobCancelRoute,
+    buildJobCancelRoute,
     jobCancellable,
     jobDeposited,
     splitJobCargo,

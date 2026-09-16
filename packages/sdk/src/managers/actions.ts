@@ -539,6 +539,7 @@ export class ActionsManager extends BaseManager {
 
     canceljob(route: JobCancelRoute): Action {
         if (route.kind === 'dropoff') return this.cancel(route.shipId, route.laneKey, route.count)
+        if (route.kind === 'build') return this.cancelbuild(route.jobId)
         return this.cancelcraft(route.jobId)
     }
 
@@ -576,14 +577,12 @@ export class ActionsManager extends BaseManager {
     buildjob(
         targetId: UInt64Type,
         dockId: UInt64Type,
-        slot: UInt8Type,
         targetItemId: UInt16Type,
         inputs: ServerContract.ActionParams.Type.cargo_item[]
     ): Action {
         const params: ServerContract.ActionParams.buildjob = {
             target_id: UInt64.from(targetId),
             dock_id: UInt64.from(dockId),
-            slot: UInt8.from(slot),
             target_item_id: UInt16.from(targetItemId),
             inputs,
         }

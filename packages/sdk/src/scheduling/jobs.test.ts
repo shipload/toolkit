@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'bun:test'
 import type {OrderedTask} from './schedule'
 import {
+    buildJobCancelRoute,
     jobCancelRoute,
     jobCancellable,
     jobDropoffTask,
@@ -196,6 +197,58 @@ describe('jobCancelRoute', () => {
         expect(jobCancellable('crafting')).toBe(false)
         expect(jobCancellable('ready')).toBe(false)
         expect(jobCancellable('pickingup')).toBe(false)
+    })
+})
+
+describe('buildJobCancelRoute', () => {
+    const job = {
+        id: 3,
+        targetId: 9,
+        startsAt: at('2026-07-26T10:00:00Z'),
+        completesAt: at('2026-07-26T11:00:00Z'),
+        deposited: true,
+        building: 42,
+        inputs: INPUTS,
+    }
+    const inFlight = {...job, deposited: false}
+    const dropoff = task({
+        type: 21,
+        building: 42,
+        startsAt: at('2026-07-26T09:30:00Z'),
+        completesAt: at('2026-07-26T09:50:00Z'),
+    })
+
+    it('cancels a Booked or Dropping off build through the target, from the Drop-off to the lane tail', () => {
+        expect(buildJobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [dropoff])).toEqual({
+            kind: 'dropoff',
+            shipId: 9,
+            laneKey: 1,
+            count: 1,
+        })
+        expect(buildJobCancelRoute(inFlight, at('2026-07-26T09:40:00Z'), [dropoff])).toEqual({
+            kind: 'dropoff',
+            shipId: 9,
+            laneKey: 1,
+            count: 1,
+        })
+    })
+    it('cancels a Queued build through cancelbuild', () => {
+        expect(buildJobCancelRoute(job, at('2026-07-26T09:59:59Z'))).toEqual({
+            kind: 'build',
+            jobId: 3,
+        })
+    })
+    it('has no route once the build has started or finished', () => {
+        expect(buildJobCancelRoute(job, at('2026-07-26T10:00:00Z'))).toBeNull()
+        expect(buildJobCancelRoute(job, at('2026-07-26T11:00:00Z'))).toBeNull()
+    })
+    it('has no route for an undeposited build without the target schedule', () => {
+        expect(buildJobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'))).toBeNull()
+        expect(
+            buildJobCancelRoute({...inFlight, targetId: undefined}, at('2026-07-26T09:00:00Z'), [
+                dropoff,
+            ])
+        ).toBeNull()
     })
 })
 
