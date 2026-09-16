@@ -3,6 +3,7 @@ import type {OrderedTask} from './schedule'
 import {
     buildJobCancelRoute,
     jobCancelRoute,
+    jobCancellationBlockReason,
     jobCancellable,
     jobDropoffTask,
     jobStatus,
@@ -260,6 +261,20 @@ describe('jobCancelRoute', () => {
     })
     it('cancels a Queued job through cancelcraft', () => {
         expect(jobCancelRoute(job, at('2026-07-26T09:59:59Z'))).toEqual({kind: 'craft', jobId: 7})
+    })
+    it('refuses only deposited positive-quantity output-only legacy jobs', () => {
+        const legacy = {...job, inputs: []}
+        expect(jobCancellationBlockReason(legacy)).toBe('legacy-inputs-unavailable')
+        expect(jobCancelRoute(legacy, at('2026-07-26T09:59:59Z'))).toBeNull()
+        expect(jobCancellationBlockReason({...legacy, deposited: false})).toBeNull()
+        expect(jobCancellationBlockReason({...legacy, quantity: 0})).toBeNull()
+        expect(jobCancellationBlockReason({...legacy, inputs: undefined})).toBeNull()
+        expect(jobCancellationBlockReason({...legacy, inputs: [FULL_INPUTS[0]]})).toBeNull()
+    })
+    it('refuses an existing exact-arrival tie rather than choosing either Drop-off', () => {
+        const tied = {...inFlight, arrivesAt: dropoff.completesAt}
+        expect(jobCancellationBlockReason(tied, [dropoff, {...dropoff}])).toBe('ambiguous-dropoff')
+        expect(jobCancelRoute(tied, at('2026-07-26T09:00:00Z'), [dropoff, {...dropoff}])).toBeNull()
     })
     it('has no route once crafting has started or the job is ready', () => {
         expect(jobCancelRoute(job, at('2026-07-26T10:00:00Z'))).toBeNull()

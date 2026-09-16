@@ -200,6 +200,33 @@ export function jobCancellable(status: JobStatus): boolean {
     return status === 'booked' || status === 'dropping' || status === 'queued'
 }
 
+export type JobCancellationBlockReason = 'legacy-inputs-unavailable' | 'ambiguous-dropoff'
+
+/** A migrated output-only job has no retained inputs that modern cancellation could return. */
+export function jobCancellationBlockReason(
+    job: JobStatusInput,
+    tasks?: readonly OrderedTask[]
+): JobCancellationBlockReason | null {
+    if (
+        job.deposited === true &&
+        (job.quantity ?? 0) > 0 &&
+        job.inputs !== undefined &&
+        job.inputs.length === 0
+    ) {
+        return 'legacy-inputs-unavailable'
+    }
+    if (job.deposited === false && job.arrivesAt !== undefined && tasks) {
+        const matches = tasks.filter(
+            (task) =>
+                Number(task.task.type) === TaskType.CIVIC_DEPOSIT &&
+                matchesJob(task, job) &&
+                task.completesAt.getTime() === job.arrivesAt?.getTime()
+        )
+        if (matches.length > 1) return 'ambiguous-dropoff'
+    }
+    return null
+}
+
 export type JobCancelRoute =
     | {kind: 'dropoff'; shipId: number; laneKey: number; count: number}
     | {kind: 'craft'; jobId: number}
@@ -213,6 +240,7 @@ function cancelRoute(
     tasks?: readonly OrderedTask[]
 ): JobCancelRoute | null {
     if (!jobCancellable(jobStatus(job, now, tasks))) return null
+    if (queued === 'craft' && jobCancellationBlockReason(job, tasks)) return null
     if (job.deposited !== false) return {kind: queued, jobId: job.id}
     if (job.shipId === undefined || !tasks) return null
     const dropoff = jobDropoffTask(job, tasks)

@@ -336,6 +336,7 @@ export {
     jobCancelRoute,
     buildJobCancelRoute,
     jobCancellable,
+    jobCancellationBlockReason,
     jobDeposited,
     splitJobCargo,
     workshopAvailability,
@@ -348,6 +349,7 @@ export type {
     JobStatus,
     JobStatusInput,
     JobCancelRoute,
+    JobCancellationBlockReason,
     OwnedJob,
     PickupInFlight,
 } from './scheduling/jobs'

@@ -1,11 +1,13 @@
 import {
     jobCancelRoute,
+    jobCancellationBlockReason,
     jobDeposited,
     jobsToLanes,
     jobStatus,
     jobStatusLabel,
     type JobCancelRoute,
     type JobWindow,
+    type OrderedTask,
     schedule,
     ServerTypes,
     splitJobCargo,
@@ -23,6 +25,20 @@ export interface WorkshopShowView {
     workshopId: bigint
     socketCount: number
     jobs: JobWindow[]
+}
+
+export function workshopCancelBlockMessage(
+    job: JobWindow,
+    tasks?: readonly OrderedTask[]
+): string | null {
+    switch (jobCancellationBlockReason(job, tasks)) {
+        case 'legacy-inputs-unavailable':
+            return 'This older Workshop job cannot be cancelled because its original inputs are unavailable. It will finish normally, and its output can still be claimed.'
+        case 'ambiguous-dropoff':
+            return 'Cannot identify which booking to cancel. Let the matching deliveries finish; the jobs will continue normally.'
+        default:
+            return null
+    }
 }
 
 export function toJobWindow(r: ServerTypes.craftjob_row): JobWindow {
@@ -104,6 +120,10 @@ export async function loadCancelRoute(
         job.deposited || job.shipId === undefined
             ? undefined
             : schedule.orderedTasks(await getEntityRow(job.shipId))
+    const blocked = workshopCancelBlockMessage(job, tasks)
+    if (blocked) {
+        throw new ValidationError(blocked, 'wait for the job to finish, then claim its output')
+    }
     const route = jobCancelRoute(job, now, tasks)
     if (!route) {
         throw new ValidationError(

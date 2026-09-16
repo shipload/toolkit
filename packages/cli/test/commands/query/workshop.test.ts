@@ -1,6 +1,10 @@
 import {expect, test} from 'bun:test'
 import type {JobWindow} from '@shipload/sdk'
-import {renderWorkshopShow, toJobWindow} from '../../../src/commands/query/workshop'
+import {
+    renderWorkshopShow,
+    toJobWindow,
+    workshopCancelBlockMessage,
+} from '../../../src/commands/query/workshop'
 
 const at = (s: string) => new Date(s)
 const win = (over: Partial<JobWindow>): JobWindow => ({
@@ -103,4 +107,14 @@ test('renderWorkshopShow says when no Fabricator is installed', () => {
         at('2026-09-15T16:00:00Z')
     )
     expect(out).toContain('No Fabricator installed.')
+})
+
+test('legacy output-only jobs explain that cancellation is unavailable while preserving claim', () => {
+    expect(workshopCancelBlockMessage(win({inputs: []}))).toContain(
+        'will finish normally, and its output can still be claimed'
+    )
+    expect(workshopCancelBlockMessage(win({inputs: undefined}))).toBeNull()
+    expect(workshopCancelBlockMessage(win({inputs: [{item_id: 101}] as never}))).toBeNull()
+    expect(workshopCancelBlockMessage(win({inputs: [], quantity: 0}))).toBeNull()
+    expect(workshopCancelBlockMessage(win({inputs: [], deposited: false}))).toBeNull()
 })
