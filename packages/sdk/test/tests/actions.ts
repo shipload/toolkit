@@ -437,12 +437,10 @@ describe('ActionsManager', () => {
             'importplayer',
             'importreserve',
             'importstate',
-            'dbgoldjobs',
             'dbgjobs',
             'dbgpick',
             'dbgplace',
             'dbgrepack',
-            'migratejobs',
             // internal / notification actions — not player-initiated
             'configlog',
             'notify',
