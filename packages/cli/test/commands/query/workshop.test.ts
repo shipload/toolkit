@@ -1,6 +1,6 @@
 import {expect, test} from 'bun:test'
 import type {JobWindow} from '@shipload/sdk'
-import {renderWorkshopShow} from '../../../src/commands/query/workshop'
+import {renderWorkshopShow, toJobWindow} from '../../../src/commands/query/workshop'
 
 const at = (s: string) => new Date(s)
 const win = (over: Partial<JobWindow>): JobWindow => ({
@@ -13,6 +13,35 @@ const win = (over: Partial<JobWindow>): JobWindow => ({
     quantity: 1,
     deposited: true,
     ...over,
+})
+
+test('toJobWindow preserves arrival and complete input identity for cancellation matching', () => {
+    const cargo = [
+        {
+            item_id: 101,
+            stats: '413333752',
+            modules: [{type: 1, installed: {item_id: 301, stats: '9'}}],
+            quantity: 10,
+            entity_id: '77',
+        },
+    ]
+    const number = (value: number) => ({toNumber: () => value})
+    const date = (value: string) => ({toDate: () => at(value)})
+    const job = toJobWindow({
+        id: number(2),
+        socket: number(0),
+        owner: {toString: () => 'eggmaple.gm'},
+        starts_at: date('2026-09-15T14:00:00Z'),
+        completes_at: date('2026-09-15T15:00:00Z'),
+        arrives_at: date('2026-09-15T13:45:00Z'),
+        recipe_id: number(10001),
+        quantity: number(1),
+        deposited: false,
+        ship_id: number(5),
+        cargo,
+    } as never)
+    expect(job.arrivesAt).toEqual(at('2026-09-15T13:45:00Z'))
+    expect(job.inputs).toEqual(cargo as never)
 })
 
 test('renderWorkshopShow prints one block per Fabricator with its windows in schedule order', () => {

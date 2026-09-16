@@ -10,6 +10,8 @@ export interface JobWindow {
     owner: string
     startsAt: Date
     completesAt: Date
+    /** Contract-recorded completion of the input Drop-off. */
+    arrivesAt?: Date
     recipeId: number
     quantity: number
     /** False while the job's inputs are still in transit to the building. */
@@ -108,20 +110,47 @@ export type JobStatus = 'booked' | 'dropping' | 'queued' | 'crafting' | 'ready' 
 export interface JobStatusInput {
     startsAt: Date
     completesAt: Date
+    /** Contract-recorded completion of the input Drop-off. */
+    arrivesAt?: Date
     deposited?: boolean
     quantity?: number
     building?: number
     inputs?: readonly CargoItem[]
 }
 
+function modulesEqual(a: CargoItem['modules'], b: CargoItem['modules']): boolean {
+    const length = Math.max(a?.length ?? 0, b?.length ?? 0)
+    for (let i = 0; i < length; i++) {
+        const installed = a?.[i]?.installed
+        const other = b?.[i]?.installed
+        if (Boolean(installed) !== Boolean(other)) return false
+        if (
+            installed &&
+            other &&
+            (String(installed.item_id) !== String(other.item_id) ||
+                String(installed.stats) !== String(other.stats))
+        ) {
+            return false
+        }
+    }
+    return true
+}
+
 function cargoEquals(a: readonly CargoItem[], b: readonly CargoItem[]): boolean {
     if (a.length !== b.length) return false
-    return a.every(
-        (x, i) =>
-            String(x.item_id) === String(b[i].item_id) &&
-            String(x.stats) === String(b[i].stats) &&
-            String(x.quantity) === String(b[i].quantity)
-    )
+    return a.every((x, i) => {
+        const y = b[i]
+        if (
+            String(x.item_id) !== String(y.item_id) ||
+            String(x.stats) !== String(y.stats) ||
+            String(x.quantity) !== String(y.quantity) ||
+            String(x.entity_id ?? 0) !== String(y.entity_id ?? 0) ||
+            !modulesEqual(x.modules, y.modules)
+        ) {
+            return false
+        }
+        return true
+    })
 }
 
 function matchesJob(t: OrderedTask, job: JobStatusInput): boolean {
@@ -135,7 +164,13 @@ export function jobDropoffTask(
     job: JobStatusInput,
     tasks: readonly OrderedTask[] | undefined
 ): OrderedTask | undefined {
-    return tasks?.find((t) => Number(t.task.type) === TaskType.CIVIC_DEPOSIT && matchesJob(t, job))
+    const matches = tasks?.filter(
+        (t) =>
+            Number(t.task.type) === TaskType.CIVIC_DEPOSIT &&
+            matchesJob(t, job) &&
+            (job.arrivesAt === undefined || t.completesAt.getTime() === job.arrivesAt.getTime())
+    )
+    return matches?.length === 1 ? matches[0] : undefined
 }
 
 // Without the ship's schedule an undeposited row reads as Dropping off: the transfer usually starts at once.
@@ -261,6 +296,7 @@ export interface OwnedJob {
     coords: {x: number; y: number}
     startsAt: Date
     completesAt: Date
+    arrivesAt: Date
     recipeId: number
     quantity: number
     status: JobStatus

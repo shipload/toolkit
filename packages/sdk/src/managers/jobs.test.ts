@@ -12,6 +12,7 @@ const row = (over: Record<string, unknown> = {}) => ({
     coords: {x: {toNumber: () => 12}, y: {toNumber: () => 34}},
     starts_at: {toDate: () => new Date('2026-07-26T10:00:00Z')},
     completes_at: {toDate: () => new Date('2026-07-26T11:00:00Z')},
+    arrives_at: {toDate: () => new Date('2026-07-26T09:45:00Z')},
     recipe_id: {toNumber: () => 10001},
     quantity: {toNumber: () => 5},
     energy_paid: {toNumber: () => 0},
@@ -34,6 +35,7 @@ describe('JobsManager.getOwnedJobs', () => {
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs).toHaveLength(1)
         expect(jobs[0]).toMatchObject({id: 7, building: 42, quantity: 5, status: 'ready'})
+        expect(jobs[0].arrivesAt).toEqual(new Date('2026-07-26T09:45:00Z'))
         expect(jobs[0].coords).toEqual({x: 12, y: 34})
         expect(jobs[0].output).toEqual({item: 'out'} as never)
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)

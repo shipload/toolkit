@@ -16,6 +16,14 @@ import {
 const at = (s: string) => new Date(s)
 
 const INPUTS = [{item_id: 101, stats: '413333752', quantity: 10}] as never
+const FULL_INPUT = {
+    item_id: 101,
+    stats: '413333752',
+    modules: [{type: 1, installed: {item_id: 301, stats: '9'}}],
+    quantity: 10,
+    entity_id: '77',
+}
+const FULL_INPUTS = [FULL_INPUT] as never
 
 function task(over: {
     type: number
@@ -118,6 +126,63 @@ describe('jobStatus', () => {
         expect(jobDropoffTask(inFlight, [other])).toBeUndefined()
         expect(jobDropoffTask(inFlight, undefined)).toBeUndefined()
     })
+    it('uses the authoritative arrival to select one of two identical Drop-offs', () => {
+        const first = task({
+            type: 21,
+            building: 42,
+            startsAt: at('2026-07-26T09:10:00Z'),
+            completesAt: at('2026-07-26T09:20:00Z'),
+        })
+        const second = {
+            ...task({
+                type: 21,
+                building: 42,
+                startsAt: at('2026-07-26T09:20:00Z'),
+                completesAt: at('2026-07-26T09:30:00Z'),
+            }),
+            taskIndex: 1,
+        }
+        expect(jobDropoffTask({...inFlight, arrivesAt: second.completesAt}, [first, second])).toBe(
+            second
+        )
+    })
+    it('matches modules and entity identity and refuses an ambiguous match', () => {
+        const exact = task({
+            type: 21,
+            building: 42,
+            cargo: FULL_INPUTS,
+            startsAt: at('2026-07-26T09:10:00Z'),
+            completesAt: at('2026-07-26T09:20:00Z'),
+        })
+        const differentEntity = task({
+            type: 21,
+            building: 42,
+            cargo: [{...FULL_INPUT, entity_id: '78'}],
+            startsAt: exact.startsAt,
+            completesAt: exact.completesAt,
+        })
+        expect(jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [differentEntity, exact])).toBe(exact)
+        expect(jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [exact, {...exact}])).toBeUndefined()
+    })
+    it('normalizes bare module layouts and absent entity identity like the contract', () => {
+        const bare = task({
+            type: 21,
+            building: 42,
+            cargo: [{item_id: 101, stats: '413333752', modules: [], quantity: 10}],
+            startsAt: at('2026-07-26T09:10:00Z'),
+            completesAt: at('2026-07-26T09:20:00Z'),
+        })
+        const padded = [
+            {
+                item_id: 101,
+                stats: '413333752',
+                modules: [{type: 6, installed: undefined}],
+                quantity: 10,
+                entity_id: 0,
+            },
+        ] as never
+        expect(jobDropoffTask({...inFlight, inputs: padded}, [bare])).toBe(bare)
+    })
     it('reads an undeposited row as dropping off when no schedule is given', () => {
         expect(jobStatus(inFlight, at('2026-07-26T09:00:00Z'))).toBe('dropping')
     })
@@ -158,6 +223,22 @@ describe('jobCancelRoute', () => {
         } as unknown as OrderedTask
         const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [dropoff, later])
         expect(route).toEqual({kind: 'dropoff', shipId: 5, laneKey: 1, count: 2})
+    })
+    it('cancels from the selected identical Drop-off and leaves the earlier booking intact', () => {
+        const first = {...dropoff, completesAt: at('2026-07-26T09:20:00Z')}
+        const second = {
+            ...dropoff,
+            taskIndex: 1,
+            startsAt: at('2026-07-26T09:20:00Z'),
+            completesAt: at('2026-07-26T09:30:00Z'),
+        }
+        expect(
+            jobCancelRoute(
+                {...inFlight, arrivesAt: second.completesAt},
+                at('2026-07-26T09:00:00Z'),
+                [first, second]
+            )
+        ).toEqual({kind: 'dropoff', shipId: 5, laneKey: 1, count: 1})
     })
     it('cancels a Dropping off job through the ship while the transfer is in flight', () => {
         const route = jobCancelRoute(inFlight, at('2026-07-26T09:40:00Z'), [dropoff])

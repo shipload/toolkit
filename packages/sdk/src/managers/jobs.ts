@@ -32,6 +32,7 @@ export class JobsManager extends BaseManager {
     private parseOwnedJob(r: JobRow, now: Date): OwnedJob {
         const startsAt = r.starts_at.toDate()
         const completesAt = r.completes_at.toDate()
+        const arrivesAt = r.arrives_at.toDate()
         const deposited = jobDeposited(r.deposited)
         const quantity = r.quantity.toNumber()
         const building = r.building.toNumber()
@@ -44,6 +45,7 @@ export class JobsManager extends BaseManager {
             coords: {x: r.coords.x.toNumber(), y: r.coords.y.toNumber()},
             startsAt,
             completesAt,
+            arrivesAt,
             recipeId: r.recipe_id.toNumber(),
             quantity,
             status: jobStatus({startsAt, completesAt, deposited, quantity, building, inputs}, now),

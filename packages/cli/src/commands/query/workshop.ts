@@ -25,7 +25,7 @@ export interface WorkshopShowView {
     jobs: JobWindow[]
 }
 
-function toJobWindow(r: ServerTypes.craftjob_row): JobWindow {
+export function toJobWindow(r: ServerTypes.craftjob_row): JobWindow {
     const deposited = jobDeposited(r.deposited)
     const quantity = r.quantity.toNumber()
     return {
@@ -34,6 +34,7 @@ function toJobWindow(r: ServerTypes.craftjob_row): JobWindow {
         owner: r.owner.toString(),
         startsAt: r.starts_at.toDate(),
         completesAt: r.completes_at.toDate(),
+        arrivesAt: r.arrives_at.toDate(),
         recipeId: r.recipe_id.toNumber(),
         quantity,
         deposited,
