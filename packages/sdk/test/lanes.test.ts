@@ -3,6 +3,7 @@ import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {
     ServerContract,
     candidateLaneCompletesAt,
+    candidateCivicDepositWindow,
     getItem,
     laneKeyForModule,
     rawScheduleEnd,
@@ -23,9 +24,9 @@ function moduleEntry(itemId: number): ServerContract.Types.module_entry {
     })
 }
 
-function task(duration: number): ServerContract.Types.task {
+function task(duration: number, type = 0): ServerContract.Types.task {
     return ServerContract.Types.task.from({
-        type: UInt16.from(0),
+        type: UInt16.from(type),
         duration: UInt32.from(duration),
         cancelable: 0,
         cargo: [],
@@ -44,6 +45,13 @@ function lane(laneKey: number, started: string, durations: number[]): ServerCont
     return ServerContract.Types.lane.from({
         lane_key: UInt8.from(laneKey),
         schedule: schedule(started, durations),
+    })
+}
+
+function typedLane(laneKey: number, started: string, tasks: ServerContract.Types.task[]) {
+    return ServerContract.Types.lane.from({
+        lane_key: UInt8.from(laneKey),
+        schedule: ServerContract.Types.schedule.from({started: TimePoint.from(started), tasks}),
     })
 }
 
@@ -116,5 +124,80 @@ describe('worker lane helpers', () => {
         expect(candidateLaneCompletesAt(entity, 2, 45, now)).toEqual(
             new Date('2026-06-11T00:05:45.000Z')
         )
+    })
+
+    test('civic deposit uses the first free loader lane and waits for mobility', () => {
+        const modules = [
+            moduleEntry(GENERATOR_ITEM_ID),
+            moduleEntry(10103),
+            moduleEntry(10103),
+        ]
+        const entity = {
+            modules,
+            lanes: [
+                typedLane(0, STARTED, [task(90, 1)]),
+                lane(2, STARTED, [300]),
+            ],
+        }
+        const now = new Date('2026-06-11T00:00:30.900Z')
+
+        expect(candidateCivicDepositWindow(entity, 45, now)).toEqual({
+            laneKey: 3,
+            startsAt: new Date('2026-06-11T00:01:30.000Z'),
+            completesAt: new Date('2026-06-11T00:02:15.000Z'),
+        })
+    })
+
+    test('civic deposit on busy loaders chooses the lowest lane and waits for recharge', () => {
+        const modules = [moduleEntry(10103), moduleEntry(10103)]
+        const recharge = ServerContract.Types.task.from({
+            type: UInt16.from(2),
+            duration: UInt32.from(80),
+            cancelable: 0,
+            cargo: [],
+            couplings: [],
+        })
+        const entity = {
+            modules,
+            lanes: [
+                lane(1, STARTED, [40]),
+                lane(2, STARTED, [20]),
+                ServerContract.Types.lane.from({
+                    lane_key: UInt8.from(4),
+                    schedule: ServerContract.Types.schedule.from({
+                        started: TimePoint.from(STARTED),
+                        tasks: [recharge],
+                    }),
+                }),
+            ],
+        }
+
+        expect(candidateCivicDepositWindow(entity, 5, new Date(`${STARTED}Z`))).toEqual({
+            laneKey: 1,
+            startsAt: new Date('2026-06-11T00:01:20.000Z'),
+            completesAt: new Date('2026-06-11T00:01:25.000Z'),
+        })
+    })
+
+    test('civic deposit rounds a fractional cargo-ready barrier up from the lane end', () => {
+        const modules = [moduleEntry(10103)]
+        const now = new Date('2026-06-11T00:00:00.500Z')
+        const cargoReady = new Date('2026-06-11T00:00:10.500Z')
+
+        expect(candidateCivicDepositWindow({modules, lanes: []}, 5, now, cargoReady)).toEqual({
+            laneKey: 1,
+            startsAt: new Date('2026-06-11T00:00:11.000Z'),
+            completesAt: new Date('2026-06-11T00:00:16.000Z'),
+        })
+    })
+
+    test('civic deposit falls back to mobility when no loader is installed', () => {
+        expect(
+            candidateCivicDepositWindow(
+                {modules: [moduleEntry(GENERATOR_ITEM_ID)], lanes: []},
+                5,
+                new Date('2026-06-11T00:00:00.500Z')
+            ).laneKey
+        ).toBe(0)
     })
 })

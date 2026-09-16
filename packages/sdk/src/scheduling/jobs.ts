@@ -72,14 +72,21 @@ export function pickFabricator(
     jobs: JobWindow[],
     sockets: Array<{open: boolean}>,
     durationBySocketMinutes: number[],
-    now: Date
+    arrival: Date,
+    now: Date = arrival
 ): {slot: number; startsAt: Date; completesAt: Date} | null {
     let best: {slot: number; startsAt: Date; completesAt: Date} | null = null
     for (let slot = 0; slot < sockets.length; slot++) {
         if (!sockets[slot].open) continue
         if (activeOn(jobs, slot, now).length >= JOB_QUEUE_CAP) continue
-        const startsAt = socketTail(jobs, slot, now)
-        const completesAt = new Date(startsAt.getTime() + durationBySocketMinutes[slot] * 60_000)
+        const durationMs = durationBySocketMinutes[slot] * 60_000
+        let startsAt = arrival
+        for (const job of activeOn(jobs, slot, now)) {
+            if (job.completesAt <= startsAt) continue
+            if (job.startsAt.getTime() - startsAt.getTime() >= durationMs) break
+            startsAt = job.completesAt
+        }
+        const completesAt = new Date(startsAt.getTime() + durationMs)
         if (!best || completesAt < best.completesAt) {
             best = {slot, startsAt, completesAt}
         }

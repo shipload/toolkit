@@ -13,7 +13,7 @@ import {
     computeBuilderSpeed,
     computeBuilderDrain,
 } from '../nft/description'
-import type {ModuleType} from '../types'
+import {TaskType, type ModuleType} from '../types'
 import {getLane, LANE_MOBILITY, type ScheduleData} from './schedule'
 
 type ModuleEntry = ServerContract.Types.module_entry
@@ -224,4 +224,56 @@ export function candidateLaneCompletesAt(
         : now.getTime()
 
     return new Date(startMs + durationSec * 1000)
+}
+
+/** Mirrors append.cpp for the position-bound civic Drop-off queued by craftjob. */
+export function candidateCivicDepositWindow(
+    entity: ScheduleData & {modules: ModuleEntry[]},
+    durationSec: number,
+    now: Date,
+    minStartsAt: Date = now
+): {laneKey: number; startsAt: Date; completesAt: Date} {
+    const lanes = entity.lanes ?? []
+    let lowestLoader: number | undefined
+    let laneKey: number | undefined
+    for (let slotIndex = 0; slotIndex < entity.modules.length; slotIndex++) {
+        const installed = entity.modules[slotIndex].installed
+        if (!installed || getItem(installed.item_id).moduleType !== 'loader') continue
+        const key = laneKeyForModule(slotIndex)
+        if (lowestLoader === undefined) lowestLoader = key
+        if (laneIsFree(lanes, key)) {
+            laneKey = key
+            break
+        }
+    }
+    laneKey ??= lowestLoader ?? LANE_MOBILITY
+    const floorNowMs = Math.floor(now.getTime() / 1000) * 1000
+    const lane = getLane(entity, laneKey)
+    const laneEndMs = lane ? rawScheduleEnd(lane.schedule).getTime() : floorNowMs
+    let barrierMs = minStartsAt.getTime()
+
+    for (const entry of lanes) {
+        let completesMs = entry.schedule.started.toDate().getTime()
+        for (const task of entry.schedule.tasks) {
+            completesMs += task.duration.toNumber() * 1000
+            const type = task.type.toNumber()
+            if (
+                type === TaskType.TRAVEL ||
+                type === TaskType.WARP ||
+                type === TaskType.TRANSIT ||
+                type === TaskType.RECHARGE
+            ) {
+                barrierMs = Math.max(barrierMs, completesMs)
+            }
+        }
+    }
+    let startMs = Math.max(laneEndMs, barrierMs)
+    if (startMs > laneEndMs) {
+        startMs = laneEndMs + Math.ceil((startMs - laneEndMs) / 1000) * 1000
+    }
+    return {
+        laneKey,
+        startsAt: new Date(startMs),
+        completesAt: new Date(startMs + durationSec * 1000),
+    }
 }

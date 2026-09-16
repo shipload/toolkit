@@ -24,6 +24,17 @@ describe('jobsToLanes', () => {
 })
 
 describe('pickFabricator', () => {
+    test('uses the first internal gap after arrival instead of the socket tail', () => {
+        const jobs = [job(0, -120, -60), job(0, 0, 60), job(0, 120, 180)]
+        const pick = pickFabricator(jobs, [{open: true}], [30], at(0), now)
+        expect(pick).toEqual({slot: 0, startsAt: at(60), completesAt: at(90)})
+    })
+
+    test('counts active jobs at actual now rather than the future arrival', () => {
+        const full = Array.from({length: 25}, (_, i) => job(0, i, 300 + i, i))
+        expect(pickFabricator(full, [{open: true}], [30], at(600), now)).toBeNull()
+    })
+
     test('picks earliest completion across open sockets with differing durations', () => {
         const jobs = [job(0, 0, 120)]
         const pick = pickFabricator(jobs, [{open: true}, {open: true}], [30, 45], now)
