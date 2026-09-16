@@ -34,6 +34,7 @@ import {
 	resolveItem,
 	schedule,
 	type ServerTypes,
+	TaskType,
 } from "@shipload/sdk";
 import {
 	type CargoColumn,
@@ -66,6 +67,11 @@ export interface HeaderContext {
 	projectionLabel?: "live" | "projected" | "when done";
 	now?: Date;
 	suppressWhenDone?: boolean;
+	counterparts?: ReadonlyMap<string, ServerTypes.entity_info>;
+}
+
+export function counterpartKey(type: string, id: string | bigint): string {
+	return `${type}:${id}`;
 }
 
 function entityIdentityLine(entity: ServerTypes.entity_info): string {
@@ -433,13 +439,54 @@ function describeHoldKind(kind: number): { label: string; preposition: string } 
 	}
 }
 
-function entityHoldsSection(entity: ServerTypes.entity_info): string | null {
+// A three-party shuttle's hold names the carrier, not the other endpoint.
+function resolveShuttleEndpoint(
+	entity: ServerTypes.entity_info,
+	hold: ServerTypes.entity_info["holds"][number],
+	ctx: HeaderContext,
+): { endpoint: ServerTypes.entity_ref; carrier: ServerTypes.entity_ref } | null {
+	const kind = Number(hold.kind);
+	if (kind !== HoldKind.PULL && kind !== HoldKind.PUSH) return null;
+	const carrierRef = hold.counterpart;
+	const carrier = ctx.counterparts?.get(
+		counterpartKey(String(carrierRef.entity_type), String(carrierRef.entity_id)),
+	);
+	if (!carrier) return null;
+	const holdId = String(hold.id);
+	for (const { schedule: sched } of schedule.getLanes(carrier)) {
+		for (const task of sched.tasks) {
+			const couplings = task.couplings ?? [];
+			if (!couplings.some((c) => String(c.hold) === holdId)) continue;
+			if (Number(task.type) !== TaskType.SHUTTLE) return null;
+			const opposite = kind === HoldKind.PULL ? HoldKind.PUSH : HoldKind.PULL;
+			const other = couplings.find(
+				(c) =>
+					Number(c.kind) === opposite &&
+					!(
+						String(c.counterpart.entity_type) === String(entity.type) &&
+						String(c.counterpart.entity_id) === String(entity.id)
+					),
+			);
+			return other ? { endpoint: other.counterpart, carrier: carrierRef } : null;
+		}
+	}
+	return null;
+}
+
+function entityHoldsSection(
+	entity: ServerTypes.entity_info,
+	ctx: HeaderContext = {},
+): string | null {
 	const holds = entity.holds ?? [];
 	if (holds.length === 0) return null;
 	const now = Date.now();
 	const rows: [string, string][] = holds.map((h) => {
 		const { label, preposition } = describeHoldKind(Number(h.kind));
-		const parts = [`${preposition} ${formatEntityRefShort(h.counterpart)}`];
+		const shuttle = resolveShuttleEndpoint(entity, h, ctx);
+		const parts = [
+			`${preposition} ${formatEntityRefShort(shuttle ? shuttle.endpoint : h.counterpart)}`,
+		];
+		if (shuttle) parts.push(`via ${formatEntityRefShort(shuttle.carrier)}`);
 		const mass = Number(h.incoming_mass);
 		if (mass > 0) parts.push(formatMass(mass));
 		const eta = Math.max(0, Math.round((h.until.toDate().getTime() - now) / 1000));
@@ -511,7 +558,7 @@ export function renderEntityFull(
 	const scheduleSection = entityScheduleSection(entity, ctx);
 	if (scheduleSection) sections.push(scheduleSection);
 
-	const holdsSection = entityHoldsSection(entity);
+	const holdsSection = entityHoldsSection(entity, ctx);
 	if (holdsSection) sections.push(holdsSection);
 
 	return sections.join("\n\n");

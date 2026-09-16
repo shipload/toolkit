@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { encodeStats, HoldKind, ServerContract, TaskType } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import {
+	counterpartKey,
 	type HeaderContext,
 	renderEntityFull,
 	renderEntityHeader,
@@ -237,6 +238,67 @@ describe("renderEntityFull holds", () => {
 		const out = renderEntityFull(ei);
 		expect(out).toContain("Under construction:");
 		expect(out).toContain("by ship 1");
+	});
+
+	test("three-party shuttle names the far endpoint and the carrier", () => {
+		const until = new Date(Date.now() + 30_000).toISOString().slice(0, 23);
+		const carrier = ServerContract.Types.entity_info.from({
+			projected_at: 0,
+			...base,
+			type: "depot",
+			id: 3,
+			entity_name: "Depot (3)",
+			holds: [],
+			lanes: [
+				{
+					lane_key: 1,
+					schedule: {
+						started: new Date(Date.now() - 10_000).toISOString().slice(0, 23),
+						tasks: [
+							{
+								type: TaskType.SHUTTLE,
+								duration: 600,
+								cancelable: 2,
+								cargo: [],
+								couplings: [
+									{
+										counterpart: { entity_type: "ship", entity_id: 5 },
+										hold: 1,
+										kind: HoldKind.PULL,
+									},
+									{
+										counterpart: { entity_type: "ship", entity_id: 15 },
+										hold: 1,
+										kind: HoldKind.PUSH,
+									},
+								],
+							},
+						],
+					},
+				},
+			],
+		});
+		const sender = ServerContract.Types.entity_info.from({
+			projected_at: 0,
+			...base,
+			type: "ship",
+			id: 5,
+			holds: [
+				{
+					id: 1,
+					kind: HoldKind.PULL,
+					counterpart: { entity_type: "depot", entity_id: 3 },
+					until,
+					incoming_mass: 0,
+				},
+			],
+		});
+		const out = renderEntityFull(sender, {
+			counterparts: new Map([[counterpartKey("depot", 3), carrier]]),
+		});
+		expect(out).toContain("Outgoing transfer:");
+		expect(out).toContain("to ship 15");
+		expect(out).toContain("via depot 3");
 	});
 
 	test("no holds renders no reservation lines", () => {
