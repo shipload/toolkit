@@ -161,8 +161,12 @@ describe('jobStatus', () => {
             startsAt: exact.startsAt,
             completesAt: exact.completesAt,
         })
-        expect(jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [differentEntity, exact])).toBe(exact)
-        expect(jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [exact, {...exact}])).toBeUndefined()
+        expect(jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [differentEntity, exact])).toBe(
+            exact
+        )
+        expect(
+            jobDropoffTask({...inFlight, inputs: FULL_INPUTS}, [exact, {...exact}])
+        ).toBeUndefined()
     })
     it('normalizes bare module layouts and absent entity identity like the contract', () => {
         const bare = task({

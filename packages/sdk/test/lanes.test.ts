@@ -127,17 +127,10 @@ describe('worker lane helpers', () => {
     })
 
     test('civic deposit uses the first free loader lane and waits for mobility', () => {
-        const modules = [
-            moduleEntry(GENERATOR_ITEM_ID),
-            moduleEntry(10103),
-            moduleEntry(10103),
-        ]
+        const modules = [moduleEntry(GENERATOR_ITEM_ID), moduleEntry(10103), moduleEntry(10103)]
         const entity = {
             modules,
-            lanes: [
-                typedLane(0, STARTED, [task(90, 1)]),
-                lane(2, STARTED, [300]),
-            ],
+            lanes: [typedLane(0, STARTED, [task(90, 1)]), lane(2, STARTED, [300])],
         }
         const now = new Date('2026-06-11T00:00:30.900Z')
 
