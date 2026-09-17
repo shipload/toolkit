@@ -65,7 +65,7 @@ export async function runMaintenancePass(
     return planLogged(plan) ? {loggedAt: now} : prev
 }
 
-export async function runCollectPass(ctx: OracleContext): Promise<void> {
+export async function runCollectPass(ctx: Pick<OracleContext, 'fund'>): Promise<void> {
     const outcomes: SweepOutcome[] = [
         await sweep('collect', () => collectFundOnce(ctx), 'collected', formatCollect),
         await sweep('collectfees', () => collectFundFeesOnce(ctx), 'collected', formatCollect),

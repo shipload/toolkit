@@ -1,4 +1,5 @@
 import {expect, test} from 'bun:test'
+import {Asset, Name} from '@wharfkit/antelope'
 import {
     completeReadyCharters,
     runMintReady,
@@ -40,7 +41,16 @@ function influenceDeps(opts: {
 function fundDeps(assetIds: number[]): {deps: FundDeps; sent: string[]} {
     const sent: string[] = []
     const deps: FundDeps = {
-        reads: {getTendable: async () => assetIds},
+        reads: {
+            getTendable: async () => assetIds,
+            getUncollected: async () => [
+                {tokenContract: Name.from('scrap.gm'), balance: Asset.from('10 SCRAP')},
+            ],
+            getAcceptedTokens: async () => [
+                {tokenContract: Name.from('scrap.gm'), symbol: Asset.Symbol.from('0,SCRAP')},
+            ],
+            hasBeneficiaries: async () => true,
+        },
         actions: {
             tend: (ids) => {
                 sent.push(`tend:${ids.join(',')}`)
@@ -177,6 +187,7 @@ test('collect and collectfees do not read the tendable list', async () => {
     const counting = {
         ...deps,
         reads: {
+            ...deps.reads,
             getTendable: async () => {
                 reads++
                 return []
@@ -186,4 +197,74 @@ test('collect and collectfees do not read the tendable list', async () => {
     await collectFund(counting)
     await collectFundFees(counting)
     expect(reads).toBe(0)
+})
+
+test('collect skips absent and zero platform balances without reading tokens or signing', async () => {
+    for (const balances of [
+        [],
+        [{tokenContract: Name.from('scrap.gm'), balance: Asset.from('0 SCRAP')}],
+    ]) {
+        const {deps, sent} = fundDeps([])
+        deps.reads.getUncollected = async () => balances
+        deps.reads.getAcceptedTokens = async () => {
+            throw new Error('unnecessary token read')
+        }
+        deps.session.transact = async () => {
+            throw new Error('unexpected transaction')
+        }
+        expect(await collectFund(deps)).toEqual({kind: 'nothing-collectable'})
+        expect(sent).toEqual([])
+    }
+})
+
+test('collect ignores unsupported contracts, symbols and precisions', async () => {
+    for (const [contract, quantity] of [
+        ['other.token', '10 SCRAP'],
+        ['scrap.gm', '10 EOS'],
+        ['scrap.gm', '10.0000 SCRAP'],
+    ]) {
+        const {deps, sent} = fundDeps([])
+        deps.reads.getUncollected = async () => [
+            {tokenContract: Name.from(contract), balance: Asset.from(quantity)},
+        ]
+        expect(await collectFund(deps)).toEqual({kind: 'nothing-collectable'})
+        expect(sent).toEqual([])
+    }
+})
+
+test('collect sends once for mixed balances when at least one token matches', async () => {
+    const {deps, sent} = fundDeps([])
+    deps.reads.getUncollected = async () => [
+        {tokenContract: Name.from('other.token'), balance: Asset.from('99 OTHER')},
+        {tokenContract: Name.from('eosio.token'), balance: Asset.from('0.0000 EOS')},
+        {tokenContract: Name.from('scrap.gm'), balance: Asset.from('10 SCRAP')},
+    ]
+    expect(await collectFund(deps)).toEqual({kind: 'collected', source: 'platform'})
+    expect(sent).toEqual(['collect'])
+})
+
+test('collect preserves fees when there is no beneficiary split', async () => {
+    const {deps, sent} = fundDeps([])
+    deps.reads.hasBeneficiaries = async () => false
+    await expect(collectFund(deps)).rejects.toThrow('no beneficiaries')
+    expect(sent).toEqual([])
+})
+
+test('failed collection reads propagate without building or submitting an action', async () => {
+    for (const read of ['getUncollected', 'getAcceptedTokens', 'hasBeneficiaries'] as const) {
+        const {deps, sent} = fundDeps([])
+        deps.reads[read] = async () => {
+            throw new Error('RPC unavailable')
+        }
+        await expect(collectFund(deps)).rejects.toThrow('RPC unavailable')
+        expect(sent).toEqual([])
+    }
+})
+
+test('collect does not report success if the transaction fails or another collector wins', async () => {
+    const {deps} = fundDeps([])
+    deps.session.transact = async () => {
+        throw new Error('nothing to collect')
+    }
+    await expect(collectFund(deps)).rejects.toThrow('nothing to collect')
 })

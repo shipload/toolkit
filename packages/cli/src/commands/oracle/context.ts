@@ -179,6 +179,14 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
                 })) as UInt64[]
                 return ids.map(Number)
             },
+            getUncollected: () => shipload.balances.getPlatformBalances(fundContract.account),
+            getAcceptedTokens: async () =>
+                (await fundContract.table('tokens', fundContract.account).all()).map((row) => ({
+                    tokenContract: row.token_contract,
+                    symbol: row.token_symbol,
+                })),
+            hasBeneficiaries: async () =>
+                (await fundContract.table('benefs', fundContract.account).all()).length > 0,
         },
         actions: {
             tend: (assetIds) =>
@@ -226,10 +234,12 @@ export async function tendFundOnce(ctx: OracleContext, maxLots = 0): Promise<Ten
     return tendFund(ctx.fund, maxLots)
 }
 
-export async function collectFundOnce(ctx: OracleContext): Promise<CollectResult> {
+export async function collectFundOnce(ctx: Pick<OracleContext, 'fund'>): Promise<CollectResult> {
     return collectFund(ctx.fund)
 }
 
-export async function collectFundFeesOnce(ctx: OracleContext): Promise<CollectResult> {
+export async function collectFundFeesOnce(
+    ctx: Pick<OracleContext, 'fund'>
+): Promise<CollectResult> {
     return collectFundFees(ctx.fund)
 }

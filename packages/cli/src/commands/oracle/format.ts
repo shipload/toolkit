@@ -120,6 +120,7 @@ export function formatVoteReady(r: VoteReadyResult): string {
 }
 
 export function formatCollect(r: CollectResult): string {
+    if (r.kind === 'nothing-collectable') return 'fund collect: nothing collectable'
     const source = r.source === 'platform' ? 'platform balance' : 'market fees'
     return `fund collect: pulled ${source}`
 }

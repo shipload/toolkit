@@ -1,4 +1,4 @@
-import type {Action} from '@wharfkit/antelope'
+import {Int64, type Action, type Asset, type Name} from '@wharfkit/antelope'
 import type {SessionLike} from './run-once'
 
 export interface FoundedWorld {
@@ -38,6 +38,9 @@ export interface BallotDeps {
 
 export interface FundReads {
     getTendable(maxLots: number): Promise<number[]>
+    getUncollected(): Promise<{tokenContract: Name; balance: Asset}[]>
+    getAcceptedTokens(): Promise<{tokenContract: Name; symbol: Asset.Symbol}[]>
+    hasBeneficiaries(): Promise<boolean>
 }
 
 export interface FundActions {
@@ -66,7 +69,9 @@ export type VoteReadyResult =
 
 export type TendResult = {kind: 'tended'; assetIds: number[]} | {kind: 'nothing-tendable'}
 
-export type CollectResult = {kind: 'collected'; source: 'platform' | 'market'}
+export type CollectResult =
+    | {kind: 'collected'; source: 'platform' | 'market'}
+    | {kind: 'nothing-collectable'}
 
 export async function runMintReady(
     deps: InfluenceDeps,
@@ -110,6 +115,25 @@ export async function tendFund(deps: FundDeps, maxLots = 0): Promise<TendResult>
 }
 
 export async function collectFund(deps: FundDeps): Promise<CollectResult> {
+    const balances = (await deps.reads.getUncollected()).filter((row) =>
+        row.balance.units.gt(Int64.from(0))
+    )
+    if (balances.length === 0) return {kind: 'nothing-collectable'}
+    const tokens = await deps.reads.getAcceptedTokens()
+    const collectable = balances.some((row) =>
+        tokens.some(
+            (token) =>
+                token.tokenContract.equals(row.tokenContract) &&
+                token.symbol.equals(row.balance.symbol)
+        )
+    )
+    if (!collectable) return {kind: 'nothing-collectable'}
+    // The contract accepts custody without accruing anything when the split is empty.
+    if (!(await deps.reads.hasBeneficiaries())) {
+        throw new Error(
+            'Fund has no beneficiaries; platform collection skipped to preserve uncollected fees'
+        )
+    }
     await deps.session.transact({action: deps.actions.collect()})
     return {kind: 'collected', source: 'platform'}
 }

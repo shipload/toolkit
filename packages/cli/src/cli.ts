@@ -108,6 +108,8 @@ export function build(): Command {
     census.register(program)
     buildGenericEntityParent(program, parseEntityType, entity.defaultShow)
     for (const type of ALL_ENTITY_TYPES) {
+        // Workshop already has its dedicated query/cancellation command above.
+        if (type === 'workshop') continue
         buildEntityParent(program, type, entity.defaultShow)
     }
     registerEntitySubcommand(entity.SUBCOMMAND)
