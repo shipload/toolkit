@@ -44,3 +44,6 @@ export type {
     ScheduledBuild,
     Reservation,
 } from './construction-types'
+
+export {FundManager} from './fund'
+export type {FundBeneficiary, FundToken, FundAccrued} from './fund'

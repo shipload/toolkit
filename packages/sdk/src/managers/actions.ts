@@ -1038,6 +1038,11 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    /** Pays every nonzero accrued token balance to the beneficiary. */
+    claimFund(beneficiary: NameType): Action {
+        return this.fund.action('claim', {beneficiary_account: Name.from(beneficiary)})
+    }
+
     collectFund(): Action {
         return this.fund.action('collect', {})
     }
