@@ -417,6 +417,7 @@ export {
     ENTITY_NEXUS,
     ENTITY_HUB,
     ENTITY_DEPOT,
+    ENTITY_ASSEMBLY_YARD,
     getEntityClass,
     getPackedEntityType,
     getKindMeta,
@@ -442,6 +443,7 @@ export {
     isPlot,
     isHub,
     isDepot,
+    isAssemblyYard,
 } from './data/kind-registry'
 export type {EntityTypeName, KindMeta, TemplateMeta} from './data/kind-registry'
 export * from './capabilities'

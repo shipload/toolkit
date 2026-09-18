@@ -3,7 +3,7 @@ import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import type {CrafterStats} from '../src/types/capabilities'
 import {ServerContract} from '../src/contracts'
 import {PlotManager} from '../src/managers/plot'
-import {ITEM_PLATE, ITEM_CERAMIC, ITEM_WAREHOUSE_T1_PACKED} from '../src/data/item-ids'
+import {ITEM_PLATE_T2, ITEM_CERAMIC_T2, ITEM_WAREHOUSE_T2_PACKED} from '../src/data/item-ids'
 
 let cargoIdSeq = 1
 
@@ -77,18 +77,18 @@ const manager = new PlotManager({} as any)
 
 describe('PlotManager.progress', () => {
     test('empty plot — all missing', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
         const result = manager.progress(plot, [])
-        expect(result.targetItemId).toBe(ITEM_WAREHOUSE_T1_PACKED)
+        expect(result.targetItemId).toBe(ITEM_WAREHOUSE_T2_PACKED)
         expect(result.rows).toHaveLength(2)
         expect(result.rows[0]).toMatchObject({
-            itemId: ITEM_PLATE,
+            itemId: ITEM_PLATE_T2,
             required: 1000,
             provided: 0,
             missing: 1000,
         })
         expect(result.rows[1]).toMatchObject({
-            itemId: ITEM_CERAMIC,
+            itemId: ITEM_CERAMIC_T2,
             required: 1000,
             provided: 0,
             missing: 1000,
@@ -97,8 +97,8 @@ describe('PlotManager.progress', () => {
     })
 
     test('partial deposit — some missing', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 500)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
+        const cargo = [makeCargoRow(42n, ITEM_PLATE_T2, 500)]
         const result = manager.progress(plot, cargo)
         expect(result.rows[0]).toMatchObject({required: 1000, provided: 500, missing: 500})
         expect(result.rows[1]).toMatchObject({required: 1000, provided: 0, missing: 1000})
@@ -106,16 +106,22 @@ describe('PlotManager.progress', () => {
     })
 
     test('fully loaded plot — isComplete', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
+        const cargo = [
+            makeCargoRow(42n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(42n, ITEM_CERAMIC_T2, 1000),
+        ]
         const result = manager.progress(plot, cargo)
         expect(result.rows.every((r) => r.missing === 0)).toBeTrue()
         expect(result.isComplete).toBeTrue()
     })
 
     test('cargo from other entities is ignored', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(99n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
+        const cargo = [
+            makeCargoRow(99n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(42n, ITEM_CERAMIC_T2, 1000),
+        ]
         const result = manager.progress(plot, cargo)
         expect(result.rows[0].provided).toBe(0)
         expect(result.rows[1].provided).toBe(1000)
@@ -130,20 +136,23 @@ describe('PlotManager.progress', () => {
 
 describe('PlotManager.canBuild', () => {
     test('false when incomplete', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
         expect(manager.canBuild(plot, [])).toBeFalse()
     })
 
     test('true when fully loaded', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED, 0)
-        const cargo = [makeCargoRow(42n, ITEM_PLATE, 1000), makeCargoRow(42n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED, 0)
+        const cargo = [
+            makeCargoRow(42n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(42n, ITEM_CERAMIC_T2, 1000),
+        ]
         expect(manager.canBuild(plot, cargo)).toBeTrue()
     })
 })
 
 describe('PlotManager.timeToComplete', () => {
     test('divides capacity by speed, minimum 1', () => {
-        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 144000)
+        const plot = makePlotInfo(ITEM_WAREHOUSE_T2_PACKED, 0, 144000)
         const crafter: CrafterStats = {
             speed: UInt16.from(14400),
             drain: UInt32.from(0),
@@ -152,7 +161,7 @@ describe('PlotManager.timeToComplete', () => {
     })
 
     test('minimum result is 1', () => {
-        const plot = makePlotInfo(ITEM_WAREHOUSE_T1_PACKED, 0, 1)
+        const plot = makePlotInfo(ITEM_WAREHOUSE_T2_PACKED, 0, 1)
         const crafter: CrafterStats = {
             speed: UInt16.from(65535),
             drain: UInt32.from(0),

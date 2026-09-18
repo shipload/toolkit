@@ -23,9 +23,9 @@ import {
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
-    ITEM_HUB_T1_PACKED,
+    ITEM_HUB_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '../src/data/item-ids'
 
 describe('kind-registry', () => {
@@ -111,10 +111,10 @@ describe('kind-registry', () => {
 
     test('getPackedEntityType resolves item IDs to kinds', () => {
         expect(getPackedEntityType(ITEM_SHIP_T1_PACKED)?.toString()).toBe('ship')
-        expect(getPackedEntityType(ITEM_WAREHOUSE_T1_PACKED)?.toString()).toBe('warehouse')
+        expect(getPackedEntityType(ITEM_WAREHOUSE_T2_PACKED)?.toString()).toBe('warehouse')
         expect(getPackedEntityType(ITEM_CONTAINER_T1_PACKED)?.toString()).toBe('container')
         expect(getPackedEntityType(ITEM_CONTAINER_T2_PACKED)?.toString()).toBe('container')
-        expect(getPackedEntityType(ITEM_HUB_T1_PACKED)?.toString()).toBe('hub')
+        expect(getPackedEntityType(ITEM_HUB_T2_PACKED)?.toString()).toBe('hub')
         expect(ENTITY_CONSTRUCTION_DOCK.toString()).toBe('builddock')
     })
 

@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
-import {ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
+import {ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import {HoldKind, TaskType} from '../../src/types'
 import {
     COORDS,
@@ -13,7 +13,7 @@ import {
     SCHEDULE_START,
 } from './construction-fixtures'
 
-const PLATE = 10001
+const PLATE = 11001
 const FRAME = 10002
 
 describe('ConstructionManager.reservationsFrom', () => {
@@ -122,7 +122,7 @@ describe('partitionSources netting against reservations', () => {
         return ServerContract.Types.entity_row.from({
             id: PLOT_ID,
             kind: Name.from('plot'),
-            item_id: UInt16.from(ITEM_WAREHOUSE_T1_PACKED),
+            item_id: UInt16.from(ITEM_WAREHOUSE_T2_PACKED),
             owner: OWNER,
             name: '',
             stats: UInt64.from(0),

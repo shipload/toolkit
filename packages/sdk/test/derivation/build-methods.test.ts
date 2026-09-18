@@ -1,13 +1,14 @@
 import {describe, expect, test} from 'bun:test'
 import {
+    ITEM_ASSEMBLY_YARD_T2_PACKED,
     ITEM_CONTAINER_T1_PACKED,
     ITEM_ENGINE_T1,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
     ITEM_PLATE,
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
     ITEM_ORE_T1,
 } from '../../src/data/item-ids'
 import {
@@ -23,9 +24,9 @@ const UNKNOWN_ITEM_ID = 65000
 
 describe('availableBuildMethods', () => {
     test('planetary structures return craft+deploy and plot', () => {
-        expect(availableBuildMethods(ITEM_WAREHOUSE_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
-        expect(availableBuildMethods(ITEM_FACTORY_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
-        expect(availableBuildMethods(ITEM_EXTRACTOR_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
+        expect(availableBuildMethods(ITEM_WAREHOUSE_T2_PACKED)).toEqual(['craft+deploy', 'plot'])
+        expect(availableBuildMethods(ITEM_FACTORY_T2_PACKED)).toEqual(['craft+deploy', 'plot'])
+        expect(availableBuildMethods(ITEM_EXTRACTOR_T2_PACKED)).toEqual(['craft+deploy', 'plot'])
     })
 
     test('a civic building has no packed item and so no build method', () => {
@@ -55,7 +56,7 @@ describe('availableBuildMethods', () => {
 
 describe('isBuildable', () => {
     test('true for any item with build methods', () => {
-        expect(isBuildable(ITEM_WAREHOUSE_T1_PACKED)).toBe(true)
+        expect(isBuildable(ITEM_WAREHOUSE_T2_PACKED)).toBe(true)
         expect(isBuildable(ITEM_ROUSTABOUT_T1A_PACKED)).toBe(true)
         expect(isBuildable(ITEM_SHIP_T1_PACKED)).toBe(false)
         expect(isBuildable(ITEM_PLATE)).toBe(true)
@@ -72,9 +73,9 @@ describe('isBuildable', () => {
 
 describe('isPlotBuildable', () => {
     test('true only for planetary structures', () => {
-        expect(isPlotBuildable(ITEM_WAREHOUSE_T1_PACKED)).toBe(true)
-        expect(isPlotBuildable(ITEM_FACTORY_T1_PACKED)).toBe(true)
-        expect(isPlotBuildable(ITEM_EXTRACTOR_T1_PACKED)).toBe(true)
+        expect(isPlotBuildable(ITEM_WAREHOUSE_T2_PACKED)).toBe(true)
+        expect(isPlotBuildable(ITEM_FACTORY_T2_PACKED)).toBe(true)
+        expect(isPlotBuildable(ITEM_EXTRACTOR_T2_PACKED)).toBe(true)
     })
 
     test('false for orbital vessels', () => {
@@ -92,7 +93,7 @@ describe('isPlotBuildable', () => {
 
 describe('filterByBuildMethod', () => {
     const sample = [
-        {itemId: ITEM_WAREHOUSE_T1_PACKED},
+        {itemId: ITEM_WAREHOUSE_T2_PACKED},
         {itemId: ITEM_ROUSTABOUT_T1A_PACKED},
         {itemId: ITEM_SHIP_T1_PACKED},
         {itemId: ITEM_PLATE},
@@ -101,13 +102,13 @@ describe('filterByBuildMethod', () => {
 
     test('plot filter returns only planetary structures', () => {
         const result = filterByBuildMethod(sample, 'plot')
-        expect(result).toEqual([{itemId: ITEM_WAREHOUSE_T1_PACKED}])
+        expect(result).toEqual([{itemId: ITEM_WAREHOUSE_T2_PACKED}])
     })
 
     test('craft+deploy filter returns everything with a recipe', () => {
         const result = filterByBuildMethod(sample, 'craft+deploy')
         expect(result.map((s) => s.itemId).sort()).toEqual(
-            [ITEM_WAREHOUSE_T1_PACKED, ITEM_ROUSTABOUT_T1A_PACKED, ITEM_PLATE].sort()
+            [ITEM_WAREHOUSE_T2_PACKED, ITEM_ROUSTABOUT_T1A_PACKED, ITEM_PLATE].sort()
         )
     })
 })
@@ -116,7 +117,7 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
     test('allBuildableItems excludes raw resources and includes at least the known recipes', () => {
         const list = allBuildableItems()
         const ids = list.map((i) => i.id)
-        expect(ids).toContain(ITEM_WAREHOUSE_T1_PACKED)
+        expect(ids).toContain(ITEM_WAREHOUSE_T2_PACKED)
         expect(ids).toContain(ITEM_ROUSTABOUT_T1A_PACKED)
         expect(ids).not.toContain(ITEM_SHIP_T1_PACKED)
         expect(ids).toContain(ITEM_PLATE)
@@ -128,7 +129,12 @@ describe('allBuildableItems / allPlotBuildableItems', () => {
             .map((i) => i.id)
             .sort()
         expect(ids).toEqual(
-            [ITEM_WAREHOUSE_T1_PACKED, ITEM_EXTRACTOR_T1_PACKED, ITEM_FACTORY_T1_PACKED].sort()
+            [
+                ITEM_WAREHOUSE_T2_PACKED,
+                ITEM_EXTRACTOR_T2_PACKED,
+                ITEM_FACTORY_T2_PACKED,
+                ITEM_ASSEMBLY_YARD_T2_PACKED,
+            ].sort()
         )
     })
 })

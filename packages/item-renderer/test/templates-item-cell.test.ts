@@ -5,7 +5,7 @@ import {
     ITEM_ENGINE_T1,
     ITEM_PLATE,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '@shipload/sdk'
 import {renderItemCell, itemCellGroup, abbreviateQuantity} from '../src/templates/item-cell.ts'
 
@@ -50,7 +50,7 @@ test('container entity cell renders the detailed entity SVG icon', () => {
 })
 
 test('station entity cell renders the detailed station SVG icon', () => {
-    const resolved = resolveItem(ITEM_WAREHOUSE_T1_PACKED)
+    const resolved = resolveItem(ITEM_WAREHOUSE_T2_PACKED)
     const svg = renderItemCell({resolved, size: 48})
     expect(svg).not.toContain('>WH<')
     expect(svg).toContain('data-station-entity="warehouse"')

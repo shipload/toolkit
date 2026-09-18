@@ -48,8 +48,8 @@ describe('SLOT_FORMULAS', () => {
         const hullReservedSlot3 = new Set<SlotConsumerKind>([
             'ship-t1',
             'container-t1',
-            'warehouse-t1',
-            'extractor-t1',
+            'warehouse-t2',
+            'extractor-t2',
             'container-t2',
         ])
 

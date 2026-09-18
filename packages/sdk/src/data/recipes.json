@@ -862,161 +862,6 @@
     "blendWeights": []
   },
   {
-    "outputItemId": 10202,
-    "outputMass": 32000,
-    "inputs": [
-      {
-        "itemId": 10001,
-        "quantity": 1000
-      },
-      {
-        "itemId": 10008,
-        "quantity": 1000
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10203,
-    "outputMass": 19000,
-    "inputs": [
-      {
-        "itemId": 10008,
-        "quantity": 600
-      },
-      {
-        "itemId": 10006,
-        "quantity": 600
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": []
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10204,
-    "outputMass": 19000,
-    "inputs": [
-      {
-        "itemId": 10008,
-        "quantity": 600
-      },
-      {
-        "itemId": 10007,
-        "quantity": 600
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 0
-          }
-        ]
-      },
-      {
-        "sources": []
-      }
-    ],
-    "blendWeights": []
-  },
-  {
-    "outputItemId": 10207,
-    "outputMass": 24000,
-    "inputs": [
-      {
-        "itemId": 10005,
-        "quantity": 200
-      },
-      {
-        "itemId": 10010,
-        "quantity": 200
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
-      }
-    ],
-    "blendWeights": []
-  },
-  {
     "outputItemId": 10210,
     "outputMass": 16000,
     "inputs": [
@@ -2614,6 +2459,200 @@
     ],
     "blendWeights": [],
     "sourceSubclass": 10200
+  },
+  {
+    "outputItemId": 11202,
+    "outputMass": 51200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 1000
+      },
+      {
+        "itemId": 11008,
+        "quantity": 1000
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 11203,
+    "outputMass": 30400,
+    "inputs": [
+      {
+        "itemId": 11008,
+        "quantity": 600
+      },
+      {
+        "itemId": 11006,
+        "quantity": 600
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": []
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 11204,
+    "outputMass": 30400,
+    "inputs": [
+      {
+        "itemId": 11008,
+        "quantity": 600
+      },
+      {
+        "itemId": 11007,
+        "quantity": 600
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": []
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 11207,
+    "outputMass": 38400,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 200
+      },
+      {
+        "itemId": 11010,
+        "quantity": 200
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": []
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ],
+    "blendWeights": []
+  },
+  {
+    "outputItemId": 11209,
+    "outputMass": 30400,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 600
+      },
+      {
+        "itemId": 11003,
+        "quantity": 600
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": []
+      },
+      {
+        "sources": []
+      }
+    ],
+    "blendWeights": []
   },
   {
     "outputItemId": 11212,

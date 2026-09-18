@@ -10,6 +10,7 @@ import {
     computeLoaderCapabilities,
     computeBaseCapacity,
     computeContainerCapabilities,
+    applyCapacityTier,
     GATHERER_YIELD_TIER_TABLE,
     ENGINE_THRUST_TIER_PCT,
     GENERATOR_CAPACITY_TIER_PCT,
@@ -30,10 +31,11 @@ import {
     computeLoaderThrust,
 } from '../nft/description'
 import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
+import {getItem} from '../data/catalog'
 import {encodeStats} from './crafting'
 import {
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_GATHERER_T1,
@@ -74,14 +76,16 @@ function makeBuilderStats(resonance: number, fineness: number): bigint {
 
 test('computeBaseCapacity uses container formula for all container-class entities', () => {
     const stats = {strength: 300, hardness: 400, density: 100}
-    const expected = computeContainerCapabilities(stats).capacity
+    const base = computeContainerCapabilities(stats).capacity
     for (const itemId of [
-        ITEM_EXTRACTOR_T1_PACKED,
-        ITEM_FACTORY_T1_PACKED,
+        ITEM_EXTRACTOR_T2_PACKED,
+        ITEM_FACTORY_T2_PACKED,
         ITEM_MASS_DRIVER_T1_PACKED,
         ITEM_MASS_CATCHER_T1_PACKED,
     ]) {
-        expect(computeBaseCapacity(itemId, stats)).toBe(expected)
+        expect(computeBaseCapacity(itemId, stats)).toBe(
+            applyCapacityTier(base, getItem(itemId).tier)
+        )
     }
 })
 
@@ -117,7 +121,7 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
         {type: 'gatherer', outputPct: 100, maxTier: 1},
     ]
 
-    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T2_PACKED, modules, layout)
 
     // Lane lists must exist
     expect(result.gathererLanes).toBeDefined()
@@ -160,7 +164,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
 
     const layout: EntitySlot[] = [{type: 'crafter', outputPct: 120, maxTier: 1}]
 
-    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T2_PACKED, modules, layout)
 
     expect(result.crafterLanes).toBeDefined()
     expect(result.crafterLanes!.length).toBe(1)
@@ -189,7 +193,7 @@ test('computeEntityCapabilities emits a Builder lane from resonance and fineness
         {slotIndex: 0, itemId: ITEM_BUILDER_T1, stats: makeBuilderStats(500, 330)},
     ]
     const layout: EntitySlot[] = [{type: 'builder', outputPct: 80, maxTier: 1}]
-    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T2_PACKED, modules, layout)
 
     expect(result.builderLanes).toEqual([{slotIndex: 0, speed: 400, drain: 20_000, outputPct: 80}])
     expect(result.builder).toEqual({speed: 400, drain: 20_000})
@@ -202,7 +206,7 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
 
     const layout: EntitySlot[] = [{type: 'loader', outputPct: 80, maxTier: 1}]
 
-    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T1_PACKED, modules, layout)
+    const result = computeEntityCapabilities({}, ITEM_EXTRACTOR_T2_PACKED, modules, layout)
 
     expect(result.loaderLanes).toBeDefined()
     expect(result.loaderLanes!.length).toBe(1)

@@ -14,9 +14,9 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_DREDGER_T2A_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_HUB_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
+    ITEM_HUB_T2_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_PROSPECTOR_T2B_PACKED,
@@ -24,7 +24,7 @@ import {
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_SMITH_T1A_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '../src/data/item-ids'
 import {getEntityItems} from '../src/data/catalog'
 import {getPackedEntityType} from '../src/data/kind-registry'
@@ -38,14 +38,15 @@ describe('computeBaseCapacity', () => {
     })
 
     test('extractor and factory use the container formula', () => {
-        const container = computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)
-        expect(computeBaseCapacity(ITEM_EXTRACTOR_T1_PACKED, stats)).toBe(container)
-        expect(computeBaseCapacity(ITEM_FACTORY_T1_PACKED, stats)).toBe(container)
+        const container = computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats)
+        expect(computeBaseCapacity(ITEM_EXTRACTOR_T2_PACKED, stats)).toBe(container)
+        expect(computeBaseCapacity(ITEM_FACTORY_T2_PACKED, stats)).toBe(container)
     })
 
     test('warehouse retains its own 1M base capacity curve', () => {
-        expect(computeBaseCapacity(ITEM_WAREHOUSE_T1_PACKED, stats)).toBe(
-            Math.floor(1_000_000 * 6 ** (200 / 1998))
+        const base = Math.floor(1_000_000 * 6 ** (200 / 1998))
+        expect(computeBaseCapacity(ITEM_WAREHOUSE_T2_PACKED, stats)).toBe(
+            applyCapacityTier(base, 2)
         )
     })
 
@@ -137,7 +138,7 @@ describe('computeBaseCapacity (kind-driven coverage)', () => {
     })
 
     test('kinds without a capacity function return zero', () => {
-        expect(computeBaseCapacity(ITEM_HUB_T1_PACKED, stats)).toBe(0)
+        expect(computeBaseCapacity(ITEM_HUB_T2_PACKED, stats)).toBe(0)
     })
 })
 
@@ -145,7 +146,7 @@ describe('entityDisplayName (kind-registry fallback)', () => {
     test('names structures that carry no per-template label', () => {
         expect(entityDisplayName(ITEM_MASS_DRIVER_T1_PACKED)).toBe('Mass Driver')
         expect(entityDisplayName(ITEM_MASS_CATCHER_T1_PACKED)).toBe('Mass Catcher')
-        expect(entityDisplayName(ITEM_HUB_T1_PACKED)).toBe('Station Hub')
+        expect(entityDisplayName(ITEM_HUB_T2_PACKED)).toBe('Station Hub')
     })
 
     test('every catalog entity item resolves to a real name', () => {
@@ -202,7 +203,7 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
     })
 
     test('non-ship hull mass keeps its density-based formula', () => {
-        expect(computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, {density: 500})).toBe(750)
+        expect(computeBaseHullmass(ITEM_WAREHOUSE_T2_PACKED, {density: 500})).toBe(750)
     })
 })
 

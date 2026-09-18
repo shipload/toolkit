@@ -32,6 +32,7 @@ import {MASS_UNITS_PER_TONNE, type ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
+import {resolveCapacityFnName, type CapacityFnName} from '../derivation/capacity-fn-registry'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -89,24 +90,18 @@ export function computeBaseCapacityDepot(stats: bigint): number {
     return Math.floor(500_000 * 6 ** (s / 1998))
 }
 
-const CAPACITY_FN_BY_KIND: Record<string, (stats: bigint) => number> = {
+const CAPACITY_FN_BY_NAME: Record<CapacityFnName, (stats: bigint) => number> = {
     ship: computeBaseCapacityShip,
     warehouse: computeBaseCapacityWarehouse,
     workshop: computeBaseCapacityWorkshop,
-    extractor: computeBaseCapacityContainer,
-    factory: computeBaseCapacityContainer,
-    builddock: computeBaseCapacityContainer,
-    mdriver: computeBaseCapacityContainer,
-    mcatcher: computeBaseCapacityContainer,
     container: computeBaseCapacityContainer,
-    nexus: computeBaseCapacityContainer,
     depot: computeBaseCapacityDepot,
 }
 
 export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {
-    const kind = getTemplateMeta(itemId)?.kind
-    if (!kind) return 0
-    return CAPACITY_FN_BY_KIND[kind.toString()]?.(stats) ?? 0
+    const fnName = resolveCapacityFnName(itemId)
+    if (!fnName) return 0
+    return CAPACITY_FN_BY_NAME[fnName](stats)
 }
 
 export const computeEngineThrust = (vol: number, tier: number): number =>

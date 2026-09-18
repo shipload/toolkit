@@ -4,6 +4,7 @@ import {
     EntityClass,
     getEntityClass,
     getKindMeta,
+    isAssemblyYard,
     isContainer,
     isDepot,
     isExtractor,
@@ -23,11 +24,12 @@ import {rollupCrafter, rollupGatherer, rollupLoaders} from '../src/derivation/ro
 import {ServerContract} from '../src/contracts'
 import {makeEntity} from '../src/entities/makers'
 import {
+    ITEM_ASSEMBLY_YARD_T2_PACKED,
     ITEM_CONTAINER_T1_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '../src/data/item-ids'
 
 const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
@@ -44,16 +46,18 @@ const PREDICATE_BY_KIND: Record<string, (e: {type?: any}) => boolean> = {
     mcatcher: isMassCatcher,
     hub: isHub,
     depot: isDepot,
+    asmblyard: isAssemblyYard,
 }
 
 const PACKED_ITEM_BY_KIND: Record<string, number | undefined> = {
     ship: ITEM_SHIP_T1_PACKED,
-    warehouse: ITEM_WAREHOUSE_T1_PACKED,
-    extractor: ITEM_EXTRACTOR_T1_PACKED,
-    factory: ITEM_FACTORY_T1_PACKED,
+    warehouse: ITEM_WAREHOUSE_T2_PACKED,
+    extractor: ITEM_EXTRACTOR_T2_PACKED,
+    factory: ITEM_FACTORY_T2_PACKED,
     builddock: undefined,
     container: ITEM_CONTAINER_T1_PACKED,
     nexus: undefined,
+    asmblyard: ITEM_ASSEMBLY_YARD_T2_PACKED,
 }
 
 const baseState = {

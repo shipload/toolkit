@@ -2,11 +2,16 @@ import {expect, test} from 'bun:test'
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import {resolveItem} from './resolve-item'
 import {encodeStats} from '../derivation/crafting'
-import {computeBaseHullmass, computeContainerCapabilities} from '../derivation/capabilities'
 import {
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
-    ITEM_HUB_T1_PACKED,
+    computeBaseHullmass,
+    computeContainerCapabilities,
+    applyCapacityTier,
+} from '../derivation/capabilities'
+import {getItem} from '../data/catalog'
+import {
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
+    ITEM_HUB_T2_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
     ITEM_MASS_CATCHER_T1_PACKED,
 } from '../data/item-ids'
@@ -16,8 +21,8 @@ function hullStats(strength: number, density: number, hardness: number): UInt64 
 }
 
 const CONTAINER_ENTITIES = [
-    ['factory', ITEM_FACTORY_T1_PACKED],
-    ['extractor', ITEM_EXTRACTOR_T1_PACKED],
+    ['factory', ITEM_FACTORY_T2_PACKED],
+    ['extractor', ITEM_EXTRACTOR_T2_PACKED],
     ['mass driver', ITEM_MASS_DRIVER_T1_PACKED],
     ['mass catcher', ITEM_MASS_CATCHER_T1_PACKED],
 ] as const
@@ -28,21 +33,21 @@ for (const [label, itemId] of CONTAINER_ENTITIES) {
         const resolved = resolveItem(UInt16.from(itemId), stats)
         const hull = resolved.attributes?.find((g) => g.capability === 'Hull')
         const capacity = hull?.attributes.find((a) => a.label === 'Capacity')?.value
-        const expected = computeContainerCapabilities({
+        const base = computeContainerCapabilities({
             strength: 300,
             hardness: 400,
             density: 100,
         }).capacity
-        expect(capacity).toBe(expected)
+        expect(capacity).toBe(applyCapacityTier(base, getItem(itemId).tier))
     })
 }
 
 test('resolveItem resolves the station hub with hullmass and zero cargo capacity', () => {
     const stats = hullStats(300, 100, 400)
-    const resolved = resolveItem(UInt16.from(ITEM_HUB_T1_PACKED), stats)
+    const resolved = resolveItem(UInt16.from(ITEM_HUB_T2_PACKED), stats)
     const hull = resolved.attributes?.find((g) => g.capability === 'Hull')
     expect(hull?.attributes.find((a) => a.label === 'Mass')?.value).toBe(
-        computeBaseHullmass(ITEM_HUB_T1_PACKED, {density: 100})
+        computeBaseHullmass(ITEM_HUB_T2_PACKED, {density: 100})
     )
     expect(hull?.attributes.find((a) => a.label === 'Capacity')?.value).toBe(0)
 })

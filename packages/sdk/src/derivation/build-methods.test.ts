@@ -11,8 +11,8 @@ import {
 import {getRecipe} from '../data/recipes-runtime'
 import {
     ITEM_DEPOT_T1_PACKED,
-    ITEM_HUB_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_HUB_T2_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
     ITEM_WORKSHOP_T1_PACKED,
 } from '../data/item-ids'
 
@@ -30,11 +30,11 @@ function planetaryStructures(): {itemId: number; capabilityFlags: number}[] {
 
 describe('availableBuildMethods', () => {
     test('orbital structures build via craft+deploy or plot', () => {
-        expect(availableBuildMethods(ITEM_WAREHOUSE_T1_PACKED)).toEqual(['craft+deploy', 'plot'])
+        expect(availableBuildMethods(ITEM_WAREHOUSE_T2_PACKED)).toEqual(['craft+deploy', 'plot'])
     })
 
     test('hub is craft+deploy only — excluded from the plot path', () => {
-        expect(availableBuildMethods(ITEM_HUB_T1_PACKED)).toEqual(['craft+deploy'])
+        expect(availableBuildMethods(ITEM_HUB_T2_PACKED)).toEqual(['craft+deploy'])
     })
 
     test('planetary structures are charter-granted and carry no build method', () => {

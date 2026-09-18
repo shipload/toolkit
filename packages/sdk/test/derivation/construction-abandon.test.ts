@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
-import {ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
+import {ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import {HoldKind, TaskType} from '../../src/types'
 import {makeTask} from '../helpers'
 
@@ -20,7 +20,7 @@ describe('ConstructionManager.canAbandon', () => {
         return ServerContract.Types.entity_row.from({
             id: UInt64.from(1),
             kind: Name.from(overrides.kind ?? 'plot'),
-            item_id: UInt16.from(ITEM_WAREHOUSE_T1_PACKED),
+            item_id: UInt16.from(ITEM_WAREHOUSE_T2_PACKED),
             owner: OWNER,
             name: '',
             stats: UInt64.from(0),

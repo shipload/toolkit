@@ -36,6 +36,7 @@ export type EntityTypeName =
     | 'mcatcher'
     | 'hub'
     | 'depot'
+    | 'asmblyard'
 
 export interface KindMeta {
     kind: Name
@@ -49,6 +50,7 @@ export interface TemplateMeta {
     itemId: number
     kind: Name
     displayLabel: string
+    baseCapacityFn: string
 }
 
 interface RawKindEntry {
@@ -63,6 +65,7 @@ interface RawTemplateEntry {
     itemId: number
     kind: string
     displayLabel: string
+    baseCapacityFn: string
 }
 
 const KIND_META: Map<string, KindMeta> = (() => {
@@ -96,6 +99,7 @@ const TEMPLATE_BY_ITEM_ID: Map<number, TemplateMeta> = (() => {
             itemId: r.itemId,
             kind: Name.from(r.kind),
             displayLabel: r.displayLabel,
+            baseCapacityFn: r.baseCapacityFn,
         })
     }
     return m
@@ -112,6 +116,11 @@ export function getKindMeta(kind: NameType | EntityTypeName): KindMeta | undefin
 
 export function getTemplateMeta(itemId: number): TemplateMeta | undefined {
     return TEMPLATE_BY_ITEM_ID.get(itemId)
+}
+
+export function getBaseCapacityFnName(itemId: number): string | undefined {
+    const fn = TEMPLATE_BY_ITEM_ID.get(itemId)?.baseCapacityFn
+    return fn ? fn : undefined
 }
 
 export function getPackedEntityType(itemId: number): Name | null {
@@ -150,6 +159,7 @@ export const ENTITY_MASS_DRIVER = Name.from('mdriver')
 export const ENTITY_MASS_CATCHER = Name.from('mcatcher')
 export const ENTITY_HUB = Name.from('hub')
 export const ENTITY_DEPOT = Name.from('depot')
+export const ENTITY_ASSEMBLY_YARD = Name.from('asmblyard')
 
 export function isShip(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_SHIP) ?? false
@@ -189,4 +199,7 @@ export function isHub(entity: {type?: Name}): boolean {
 }
 export function isDepot(entity: {type?: Name}): boolean {
     return entity.type?.equals(ENTITY_DEPOT) ?? false
+}
+export function isAssemblyYard(entity: {type?: Name}): boolean {
+    return entity.type?.equals(ENTITY_ASSEMBLY_YARD) ?? false
 }

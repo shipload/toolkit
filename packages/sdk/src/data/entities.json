@@ -36,69 +36,6 @@
     "baseHullmass": 40000
   },
   {
-    "entityItemId": 10202,
-    "slots": [
-      {
-        "type": "loader",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "storage",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "storage",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "storage",
-        "outputPct": 100,
-        "maxTier": 1
-      },
-      {
-        "type": "storage",
-        "outputPct": 100,
-        "maxTier": 1
-      }
-    ],
-    "baseHullmass": 1000
-  },
-  {
-    "entityItemId": 10203,
-    "slots": [
-      {
-        "type": "generator",
-        "outputPct": 200,
-        "maxTier": 1
-      },
-      {
-        "type": "gatherer",
-        "outputPct": 200,
-        "maxTier": 1
-      }
-    ],
-    "baseHullmass": 1000
-  },
-  {
-    "entityItemId": 10204,
-    "slots": [
-      {
-        "type": "generator",
-        "outputPct": 200,
-        "maxTier": 1
-      },
-      {
-        "type": "crafter",
-        "outputPct": 200,
-        "maxTier": 1
-      }
-    ],
-    "baseHullmass": 1000
-  },
-  {
     "entityItemId": 10205,
     "slots": [
       {
@@ -133,11 +70,6 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 1000
-  },
-  {
-    "entityItemId": 10207,
-    "slots": [],
     "baseHullmass": 1000
   },
   {
@@ -378,6 +310,90 @@
   {
     "entityItemId": 11200,
     "slots": [],
+    "baseHullmass": 1000
+  },
+  {
+    "entityItemId": 11202,
+    "slots": [
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 1000
+  },
+  {
+    "entityItemId": 11203,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 200,
+        "maxTier": 2
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 200,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 1000
+  },
+  {
+    "entityItemId": 11204,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 200,
+        "maxTier": 2
+      },
+      {
+        "type": "crafter",
+        "outputPct": 200,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 1000
+  },
+  {
+    "entityItemId": 11207,
+    "slots": [],
+    "baseHullmass": 1000
+  },
+  {
+    "entityItemId": 11209,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 200,
+        "maxTier": 2
+      },
+      {
+        "type": "builder",
+        "outputPct": 200,
+        "maxTier": 2
+      }
+    ],
     "baseHullmass": 1000
   },
   {

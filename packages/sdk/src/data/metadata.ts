@@ -474,6 +474,35 @@ export const itemMetadata: Record<number, ItemMetadata> = {
             'A gathering ship that stores what it digs. Its limpet bay works alongside a cargo hold.',
         color: '#4AE898',
     },
+    11202: {
+        name: 'Warehouse',
+        description:
+            'The tier 2 Warehouse. Massive stationary storage facility with a single loader module slot.',
+        color: '#EAB308',
+    },
+    11203: {
+        name: 'Mining Rig',
+        description:
+            'The tier 2 Mining Rig. Planetary resource extraction with generator and gatherer module slots.',
+        color: '#D4726F',
+    },
+    11204: {
+        name: 'Factory',
+        description:
+            'The tier 2 Factory. Planetary fabrication with generator and crafter module slots.',
+        color: '#7BA7D4',
+    },
+    11207: {
+        name: 'Station Hub',
+        description: 'The tier 2 Station Hub. Anchors a player station cluster.',
+        color: '#A0B8D0',
+    },
+    11209: {
+        name: 'Assembly Yard',
+        description:
+            'Orbital construction facility with amplified power core and assembly arm module slots.',
+        color: '#FFB347',
+    },
 }
 
 export const entityMetadata: Record<number, EntityMetadata> = {
@@ -509,6 +538,12 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
     11213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
     11214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
+    11202: {
+        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
+    },
+    11203: {moduleSlotLabels: ['Power Core', 'Limpet Bay']},
+    11204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
+    11209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
 }
 
 for (const item of items as Array<{id: number}>) {

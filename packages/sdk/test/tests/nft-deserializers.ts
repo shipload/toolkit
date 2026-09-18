@@ -10,7 +10,7 @@ import {
     ITEM_ENGINE_T1,
     ITEM_PLATE,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '$lib'
 
 describe('NFT deserializers', () => {
@@ -76,7 +76,7 @@ describe('NFT deserializers', () => {
         assert.isUndefined(result.modules![4].installed)
     })
 
-    test('deserializeEntity warehouse T1: preserves slot types', () => {
+    test('deserializeEntity warehouse T2: preserves slot types', () => {
         const data = {
             quantity: 1,
             stats: '100',
@@ -85,7 +85,7 @@ describe('NFT deserializers', () => {
             module_items: [0, 0, 0, 0, 0],
             module_stats: ['0', '0', '0', '0', '0'],
         }
-        const result = deserializeEntity(data, ITEM_WAREHOUSE_T1_PACKED)
+        const result = deserializeEntity(data, ITEM_WAREHOUSE_T2_PACKED)
         assert.lengthOf(result.modules!, 5)
         assert.notEqual(result.modules![0].type, result.modules![1].type)
         for (const slot of result.modules!) {

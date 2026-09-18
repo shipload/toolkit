@@ -7,6 +7,7 @@ import {
 } from './recipe-usage'
 import {
     ITEM_SENSOR,
+    ITEM_SENSOR_T2,
     ITEM_RESIN,
     ITEM_FRAME,
     ITEM_PLATE,
@@ -14,7 +15,7 @@ import {
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_BUILDER_T1,
-    ITEM_EXTRACTOR_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
@@ -32,12 +33,7 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR)
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
-        [
-            ITEM_CRAFTER_T1,
-            ITEM_BUILDER_T1,
-            ITEM_EXTRACTOR_T1_PACKED,
-            ITEM_ROUSTABOUT_T1A_PACKED,
-        ].sort((a, b) => a - b)
+        [ITEM_CRAFTER_T1, ITEM_BUILDER_T1, ITEM_ROUSTABOUT_T1A_PACKED].sort((a, b) => a - b)
     )
 })
 
@@ -52,8 +48,8 @@ test('Frame feeds the gatherer drain stat', () => {
 })
 
 test('Sensor is a mass-only sink in the Extractor recipe', () => {
-    const consumers = getRecipeConsumers(ITEM_SENSOR)
-    const extractor = consumers.find((c) => c.outputItemId === ITEM_EXTRACTOR_T1_PACKED)
+    const consumers = getRecipeConsumers(ITEM_SENSOR_T2)
+    const extractor = consumers.find((c) => c.outputItemId === ITEM_EXTRACTOR_T2_PACKED)
     expect(extractor).toBeDefined()
     expect(extractor?.statFlows).toHaveLength(0)
 })
@@ -80,9 +76,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by eight recipes', () => {
+test('getComponentDemand reports Resin as consumed by seven recipes', () => {
     const demand = getComponentDemand()
     const resin = demand.find((d) => d.itemId === ITEM_RESIN)
     expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(8)
+    expect(resin?.consumerCount).toBe(7)
 })

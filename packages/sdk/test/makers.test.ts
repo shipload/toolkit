@@ -4,10 +4,10 @@ import {Entity} from '../src/entities/entity'
 import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
-    ITEM_EXTRACTOR_T1_PACKED,
-    ITEM_FACTORY_T1_PACKED,
+    ITEM_EXTRACTOR_T2_PACKED,
+    ITEM_FACTORY_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
 } from '../src/data/item-ids'
 
 const baseState = {
@@ -29,17 +29,17 @@ describe('makeEntity', () => {
     })
 
     test('warehouse template produces type=warehouse', () => {
-        const e = makeEntity(ITEM_WAREHOUSE_T1_PACKED, baseState)
+        const e = makeEntity(ITEM_WAREHOUSE_T2_PACKED, baseState)
         expect(e.type.toString()).toBe('warehouse')
     })
 
     test('extractor template produces type=extractor', () => {
-        const e = makeEntity(ITEM_EXTRACTOR_T1_PACKED, baseState)
+        const e = makeEntity(ITEM_EXTRACTOR_T2_PACKED, baseState)
         expect(e.type.toString()).toBe('extractor')
     })
 
     test('factory template produces type=factory', () => {
-        const e = makeEntity(ITEM_FACTORY_T1_PACKED, baseState)
+        const e = makeEntity(ITEM_FACTORY_T2_PACKED, baseState)
         expect(e.type.toString()).toBe('factory')
     })
 

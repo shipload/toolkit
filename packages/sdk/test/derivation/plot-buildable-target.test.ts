@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {PlotManager} from '../../src/managers/plot'
 import {ServerContract} from '../../src/contracts'
-import {ITEM_PLATE, ITEM_CERAMIC, ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
+import {ITEM_PLATE_T2, ITEM_CERAMIC_T2, ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import type {ScheduledBuild} from '../../src/managers/construction-types'
 
 let cargoIdSeq = 1
@@ -55,7 +55,7 @@ const manager = new PlotManager({} as any)
 
 describe('PlotManager.buildableTarget', () => {
     test('returns BuildableTarget for plot entity with target item and recipe', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED)
 
         const target = manager.buildableTarget(plot, [])
 
@@ -68,8 +68,11 @@ describe('PlotManager.buildableTarget', () => {
     })
 
     test('state is "ready" when all recipe inputs are deposited', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
-        const cargo = [makeCargoRow(101n, ITEM_PLATE, 1000), makeCargoRow(101n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED)
+        const cargo = [
+            makeCargoRow(101n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(101n, ITEM_CERAMIC_T2, 1000),
+        ]
 
         const target = manager.buildableTarget(plot, cargo)
 
@@ -78,16 +81,22 @@ describe('PlotManager.buildableTarget', () => {
     })
 
     test('state is "scheduled" when a queued build targets the plot', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
-        const cargo = [makeCargoRow(101n, ITEM_PLATE, 1000), makeCargoRow(101n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED)
+        const cargo = [
+            makeCargoRow(101n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(101n, ITEM_CERAMIC_T2, 1000),
+        ]
         const target = manager.buildableTarget(plot, cargo, undefined, scheduledBuild(false))
         expect(target.state).toBe('scheduled')
         expect(target.scheduledBuild?.shipName).toBe('Ship #4')
     })
 
     test('state is "finalizing" when the build has started', () => {
-        const plot = makePlotRow(ITEM_WAREHOUSE_T1_PACKED)
-        const cargo = [makeCargoRow(101n, ITEM_PLATE, 1000), makeCargoRow(101n, ITEM_CERAMIC, 1000)]
+        const plot = makePlotRow(ITEM_WAREHOUSE_T2_PACKED)
+        const cargo = [
+            makeCargoRow(101n, ITEM_PLATE_T2, 1000),
+            makeCargoRow(101n, ITEM_CERAMIC_T2, 1000),
+        ]
         const target = manager.buildableTarget(plot, cargo, undefined, scheduledBuild(true))
         expect(target.state).toBe('finalizing')
     })

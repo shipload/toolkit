@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Int64, Name, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
-import {ITEM_WAREHOUSE_T1_PACKED} from '../../src/data/item-ids'
+import {ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import {MODULE_CRAFTER, MODULE_LOADER} from '../../src/capabilities/modules'
 
 describe('ConstructionManager.getTarget', () => {
@@ -11,7 +11,7 @@ describe('ConstructionManager.getTarget', () => {
         const plot = ServerContract.Types.entity_row.from({
             id: UInt64.from(1),
             kind: Name.from('plot'),
-            item_id: UInt16.from(ITEM_WAREHOUSE_T1_PACKED),
+            item_id: UInt16.from(ITEM_WAREHOUSE_T2_PACKED),
             owner: Name.from('alice.gm'),
             name: '',
             stats: UInt64.from(0),
@@ -53,13 +53,13 @@ describe('ConstructionManager.getTarget', () => {
 describe('ConstructionManager.eligibleSources / unreachableSources', () => {
     const OWNER = Name.from('alice.gm')
     const COORDS = ServerContract.Types.coordinates.from({x: Int64.from(4), y: Int64.from(3)})
-    const INPUT_ITEM_ID = 10001
+    const INPUT_ITEM_ID = 11001
 
     function makePlot() {
         return ServerContract.Types.entity_row.from({
             id: UInt64.from(1),
             kind: Name.from('plot'),
-            item_id: UInt16.from(ITEM_WAREHOUSE_T1_PACKED),
+            item_id: UInt16.from(ITEM_WAREHOUSE_T2_PACKED),
             owner: OWNER,
             name: '',
             stats: UInt64.from(0),
@@ -241,7 +241,7 @@ describe('ConstructionManager.eligibleFinalizers', () => {
         return ServerContract.Types.entity_row.from({
             id: UInt64.from(1),
             kind: Name.from('plot'),
-            item_id: UInt16.from(ITEM_WAREHOUSE_T1_PACKED),
+            item_id: UInt16.from(ITEM_WAREHOUSE_T2_PACKED),
             owner: OWNER,
             name: '',
             stats: UInt64.from(0),

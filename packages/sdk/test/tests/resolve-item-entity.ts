@@ -10,7 +10,7 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
     resolveItem,
 } from '$lib'
 
@@ -29,9 +29,10 @@ describe('resolveItem - entity capacity dispatch', () => {
         assert.equal(findCapacityAttr(resolved.attributes), Math.floor(50_000 * 6 ** (2000 / 4995)))
     })
 
-    test('warehouse-t1 uses computeWarehouseHullCapabilities (NOT Container)', () => {
-        const resolved = resolveItem(ITEM_WAREHOUSE_T1_PACKED, defaultPackedStats)
-        const expected = computeWarehouseHullCapabilities(defaultStatInputs).capacity
+    test('warehouse-t2 uses computeWarehouseHullCapabilities (NOT Container)', () => {
+        const resolved = resolveItem(ITEM_WAREHOUSE_T2_PACKED, defaultPackedStats)
+        const base = computeWarehouseHullCapabilities(defaultStatInputs).capacity
+        const expected = applyCapacityTier(base, 2)
         assert.equal(findCapacityAttr(resolved.attributes), expected)
         assert.isAbove(Number(findCapacityAttr(resolved.attributes)), 500_000)
     })

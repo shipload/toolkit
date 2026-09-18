@@ -227,4 +227,5 @@ const PLURAL: Record<EntityTypeName, string> = {
     workshop: 'workshops',
     builddock: 'builddocks',
     depot: 'depots',
+    asmblyard: 'assemblyyards',
 }

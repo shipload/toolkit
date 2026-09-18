@@ -499,24 +499,6 @@
     "tier": 1
   },
   {
-    "id": 10202,
-    "mass": 32000,
-    "type": "entity",
-    "tier": 1
-  },
-  {
-    "id": 10203,
-    "mass": 19000,
-    "type": "entity",
-    "tier": 1
-  },
-  {
-    "id": 10204,
-    "mass": 19000,
-    "type": "entity",
-    "tier": 1
-  },
-  {
     "id": 10205,
     "mass": 80000,
     "type": "entity",
@@ -525,12 +507,6 @@
   {
     "id": 10206,
     "mass": 80000,
-    "type": "entity",
-    "tier": 1
-  },
-  {
-    "id": 10207,
-    "mass": 24000,
     "type": "entity",
     "tier": 1
   },
@@ -733,6 +709,36 @@
   {
     "id": 11200,
     "mass": 31000,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11202,
+    "mass": 51200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11203,
+    "mass": 30400,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11204,
+    "mass": 30400,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11207,
+    "mass": 38400,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11209,
+    "mass": 30400,
     "type": "entity",
     "tier": 2
   },

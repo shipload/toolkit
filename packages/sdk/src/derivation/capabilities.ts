@@ -1,6 +1,7 @@
 import {getEntityLayout} from '../data/recipes-runtime'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEffectiveModuleStat} from './stat-scaling'
+import {resolveCapacityFnName, type CapacityFnName} from './capacity-fn-registry'
 
 export const DEFAULT_BASE_HULLMASS = 1_000
 
@@ -235,7 +236,7 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_DEPOT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
     ITEM_WORKSHOP_T1_PACKED,
 } from '../data/item-ids'
 import {
@@ -314,15 +315,12 @@ export function computeGathererYield(str: number, tier: number): number {
     return Math.floor(((200 + str) * pct) / 100)
 }
 
-const BASE_CAPACITY_FN_BY_KIND: Record<string, (stats: Record<string, number>) => number> = {
+const CAPACITY_FN_BY_NAME: Partial<
+    Record<CapacityFnName, (stats: Record<string, number>) => number>
+> = {
     warehouse: (stats) => computeWarehouseHullCapabilities(stats).capacity,
     depot: (stats) => computeDepotHullCapabilities(stats).capacity,
     workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
-    extractor: (stats) => computeContainerCapabilities(stats).capacity,
-    factory: (stats) => computeContainerCapabilities(stats).capacity,
-    builddock: (stats) => computeContainerCapabilities(stats).capacity,
-    mdriver: (stats) => computeContainerCapabilities(stats).capacity,
-    mcatcher: (stats) => computeContainerCapabilities(stats).capacity,
     container: (stats) => computeContainerCapabilities(stats).capacity,
 }
 
@@ -331,8 +329,8 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
     if (isShipHull(itemId)) {
         base = computeShipHullCapabilities(stats, itemId).capacity
     } else {
-        const kind = getPackedEntityType(itemId)
-        const capacityFn = kind ? BASE_CAPACITY_FN_BY_KIND[kind.toString()] : undefined
+        const fnName = resolveCapacityFnName(itemId)
+        const capacityFn = fnName ? CAPACITY_FN_BY_NAME[fnName] : undefined
         if (!capacityFn) return 0
         base = capacityFn(stats)
     }
@@ -358,7 +356,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T1_PACKED, stats),
+        hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T2_PACKED, stats),
         capacity: Math.floor(1000000 * 6 ** exponent),
     }
 }

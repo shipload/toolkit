@@ -14,7 +14,7 @@ import {
     ITEM_CONTAINER_T1_PACKED,
     ITEM_CONTAINER_T2_PACKED,
     ITEM_SHIP_T1_PACKED,
-    ITEM_WAREHOUSE_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
     ITEM_ORE_T1,
 } from '$lib'
 
@@ -75,8 +75,8 @@ describe('getPackedEntityType', () => {
         assert.equal(result!.toString(), 'container')
     })
 
-    test('ITEM_WAREHOUSE_T1_PACKED returns warehouse entity type', () => {
-        const result = getPackedEntityType(ITEM_WAREHOUSE_T1_PACKED)
+    test('ITEM_WAREHOUSE_T2_PACKED returns warehouse entity type', () => {
+        const result = getPackedEntityType(ITEM_WAREHOUSE_T2_PACKED)
         assert.isNotNull(result)
         assert.equal(result!.toString(), 'warehouse')
     })
