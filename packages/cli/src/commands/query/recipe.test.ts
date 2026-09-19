@@ -4,13 +4,20 @@ import {renderWhereUsed, renderDemand, renderResourceDemand} from './recipe'
 
 const ITEM_SENSOR = 10006
 const ITEM_RESIN = 10010
+const ITEM_REACTOR = 10009
 
-test('renderWhereUsed shows the fabricator drain flow and marks the mining rig as a sink', () => {
+test('renderWhereUsed shows the fabricator drain flow', () => {
     const out = renderWhereUsed(ITEM_SENSOR, getRecipeConsumers(ITEM_SENSOR))
     expect(out).toContain('Sensor')
     expect(out).toContain('Fabricator')
     expect(out).toContain('drain')
-    expect(out).toMatch(/Mining Rig.*sink|sink.*Mining Rig/s)
+})
+
+test('renderWhereUsed marks a mass-only consumer as a sink', () => {
+    const out = renderWhereUsed(ITEM_REACTOR, getRecipeConsumers(ITEM_REACTOR))
+    expect(out).toContain('Reactor')
+    expect(out).toContain('1 sink-only')
+    expect(out).toMatch(/Warp Drive.*sink|sink.*Warp Drive/s)
 })
 
 test('renderWhereUsed shows the hauling efficiency flow fed by Resin', () => {
