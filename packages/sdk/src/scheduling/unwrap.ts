@@ -133,28 +133,44 @@ function cargoListMass(items: CargoItem[]): number {
     return m
 }
 
-export function projectedPeakCargomass(
-    entity: sched.ScheduleData & {cargomass: number | {toNumber(): number}},
+export interface CargomassProjection {
+    used: number
+    peak: number
+}
+
+export function projectCargomass(
+    entity: sched.AnchoredScheduleData & {cargomass: number | {toNumber(): number}},
     at: Date,
     addMass: number,
     removeMass = 0
-): number {
-    const events: {t: number; delta: number}[] = []
-    for (const ordered of sched.orderedTasks(entity)) {
+): CargomassProjection {
+    const events: {t: number; delta: number; candidate: boolean}[] = []
+    for (const ordered of sched.unappliedTasks(entity)) {
         const eff = taskCargoEffect(ordered.task)
         const delta = cargoListMass(eff.added) - cargoListMass(eff.removed)
-        events.push({t: ordered.completesAt.getTime(), delta})
+        events.push({t: ordered.completesAt.getTime(), delta, candidate: false})
     }
-    events.push({t: at.getTime(), delta: addMass - removeMass})
+    events.push({t: at.getTime(), delta: addMass - removeMass, candidate: true})
     events.sort((a, b) => (a.t !== b.t ? a.t - b.t : b.delta - a.delta))
     let running = Number(entity.cargomass)
     let peak = running
+    let used = running
     for (const e of events) {
         running += e.delta
         if (running < 0) running = 0
         if (running > peak) peak = running
+        if (e.candidate) used = running
     }
-    return Math.min(peak, 0xffff_ffff)
+    return {used: Math.min(used, 0xffff_ffff), peak: Math.min(peak, 0xffff_ffff)}
+}
+
+export function projectedPeakCargomass(
+    entity: sched.AnchoredScheduleData & {cargomass: number | {toNumber(): number}},
+    at: Date,
+    addMass: number,
+    removeMass = 0
+): number {
+    return projectCargomass(entity, at, addMass, removeMass).peak
 }
 
 export function receiveFits(

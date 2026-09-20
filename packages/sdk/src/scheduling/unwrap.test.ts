@@ -5,8 +5,14 @@ import {
     unwrapLoadDuration,
     estimateUnwrapDuration,
     incomingHoldMass,
+    projectCargomass,
     projectedPeakCargomass,
 } from './unwrap'
+import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {ServerContract} from '../contracts'
+import {getItem} from '../data/catalog'
+import {ITEM_BEAM} from '../data/item-ids'
+import {TaskType} from '../types'
 
 describe('unwrap duration mirror', () => {
     test('derivedLoaders aggregates lanes like derived_loaders()', () => {
@@ -83,4 +89,58 @@ test('projectedPeakCargomass tracks the running peak from cargomass', () => {
     const entity = {cargomass: 1000, lanes: [], cargo: [], schedule: undefined} as never
     // No pending tasks: peak = base + candidate add.
     expect(projectedPeakCargomass(entity, new Date(0), 500)).toBe(1500)
+})
+
+const DEPOSIT_START = new Date('2026-09-20T07:48:37.000Z')
+const BEAM_QTY = 2_500
+const BEAM_MASS = getItem(ITEM_BEAM).mass
+
+function unloadingShip(projectedAtMs?: number) {
+    const cargo = ServerContract.Types.cargo_item.from({
+        item_id: UInt16.from(ITEM_BEAM),
+        quantity: UInt32.from(BEAM_QTY),
+        stats: UInt64.from(0),
+        modules: [],
+    })
+    const lane = ServerContract.Types.lane.from({
+        lane_key: UInt8.from(0),
+        schedule: ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(DEPOSIT_START.getTime()),
+            tasks: [
+                ServerContract.Types.task.from({
+                    type: UInt8.from(TaskType.CIVIC_DEPOSIT),
+                    duration: UInt32.from(1_309),
+                    cancelable: UInt8.from(2),
+                    cargo: [cargo],
+                    couplings: [],
+                }),
+            ],
+        }),
+    })
+    return {
+        cargomass: BEAM_QTY * BEAM_MASS,
+        lanes: [lane],
+        holds: [],
+        projected_at:
+            projectedAtMs === undefined ? undefined : TimePoint.fromMilliseconds(projectedAtMs),
+    }
+}
+
+const UNLOAD_ENDS = new Date(DEPOSIT_START.getTime() + 1_309_000)
+const AFTER_UNLOAD = new Date(UNLOAD_ENDS.getTime() + 60_000)
+
+test('projectCargomass reports the mass held at the candidate and the peak around it', () => {
+    const plan = projectCargomass(unloadingShip(), AFTER_UNLOAD, 400 * BEAM_MASS)
+    // The queued unload empties the hold before the candidate lands.
+    expect(plan.used).toBe(400 * BEAM_MASS)
+    expect(plan.peak).toBe(BEAM_QTY * BEAM_MASS)
+})
+
+test('a task already applied to a projected row is not replayed', () => {
+    const applied = unloadingShip(UNLOAD_ENDS.getTime())
+    applied.cargomass = 0
+    const plan = projectCargomass(applied, AFTER_UNLOAD, 400 * BEAM_MASS)
+    expect(plan.used).toBe(400 * BEAM_MASS)
+    expect(plan.peak).toBe(400 * BEAM_MASS)
+    expect(projectedPeakCargomass(applied, AFTER_UNLOAD, 400 * BEAM_MASS)).toBe(plan.peak)
 })
