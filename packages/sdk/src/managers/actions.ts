@@ -610,6 +610,18 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    blenddepot(
+        depotId: UInt64Type,
+        owner: NameType,
+        inputs: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action {
+        return this.server.action('blenddepot', {
+            depot_id: UInt64.from(depotId),
+            owner: Name.from(owner),
+            inputs,
+        })
+    }
+
     deploy(
         entityId: UInt64Type,
         ref: ServerContract.ActionParams.Type.cargo_ref,

@@ -456,3 +456,15 @@ test('collectFund builds an fnd.shipload::collect action with no fields', () => 
     expect(String(action.name)).toBe('collect')
     expect(String(action.data)).toBe('')
 })
+
+test('blenddepot builds an eon.shipload::blenddepot action against a locker', () => {
+    const action = sl.actions.blenddepot(42, 'alice', [cargo(101, 10), cargo(101, 5)])
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('blenddepot')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.depot_id)).toBe('42')
+    expect(String(data.owner)).toBe('alice')
+    expect(data.inputs.length).toBe(2)
+    expect(Number(data.inputs[0].item_id)).toBe(101)
+    expect(Number(data.inputs[1].quantity)).toBe(5)
+})
