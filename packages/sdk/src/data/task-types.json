@@ -1,0 +1,184 @@
+{
+  "types": [
+    {
+      "type": 0,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 1,
+      "positionBound": false,
+      "mobility": true,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 2,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 3,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 4,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": true,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 5,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 6,
+      "positionBound": false,
+      "mobility": true,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 7,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": true,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 9,
+      "positionBound": false,
+      "mobility": true,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 10,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 11,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": true,
+      "capsPlan": true,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 12,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 13,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": true,
+      "capsPlan": true,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 15,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 16,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 17,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": true,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 18,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
+    },
+    {
+      "type": 20,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": true,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 21,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": true,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    },
+    {
+      "type": 22,
+      "positionBound": true,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": false
+    }
+  ]
+}

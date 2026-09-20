@@ -33,6 +33,7 @@ sync-catalog:
 	cp $(CATALOG_SRC)/item-ids.ts        src/data/item-ids.ts
 	cp $(CATALOG_SRC)/kind-registry.json src/data/kind-registry.json
 	cp $(CATALOG_SRC)/charters.json      src/data/charters.json
+	cp $(CATALOG_SRC)/task-types.json    src/data/task-types.json
 	@echo "Catalog synced from $(CATALOG_SRC)"
 
 ATOMICASSETS_ABI_SRC ?= ../../../atomicassets-contract/atomicassets.abi
