@@ -4,7 +4,7 @@ import type {ResourceCategory} from '../types'
 import {getItem, getModules} from '../data/catalog'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
-import {entityMetadata, itemMetadata} from '../data/metadata'
+import {entityMetadata, getItemFamily} from '../data/metadata'
 import {
     getModuleCapabilityType,
     isModuleItem,
@@ -370,7 +370,7 @@ function resolveEntity(
                     modName = modItem.name
                     modTier = modItem.tier
                 } catch {
-                    modName = itemMetadata[modItemId]?.name ?? 'Module'
+                    modName = getItemFamily(modItemId)?.name ?? 'Module'
                 }
                 const group = computeCapabilityGroup(modType, decodedStats, modTier, slot.outputPct)
                 return {

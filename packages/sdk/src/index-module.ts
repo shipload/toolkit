@@ -124,6 +124,8 @@ export {
     categoryFromIndex,
     categoryLabelFromIndex,
 } from './data/catalog'
+export {getItemFamily, itemFamilies, itemFamilyKey} from './data/metadata'
+export type {ItemFamily} from './data/metadata'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
 export {

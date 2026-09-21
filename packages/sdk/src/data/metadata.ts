@@ -1,6 +1,6 @@
 import items from './items.json'
 
-export interface ItemMetadata {
+export interface ItemFamily {
     name: string
     description: string
     color: string
@@ -10,503 +10,332 @@ export interface EntityMetadata {
     moduleSlotLabels?: string[]
 }
 
-export const itemMetadata: Record<number, ItemMetadata> = {
-    // === Resources / Ore ===
-    101: {name: 'Ore', description: 'Crude metallic ore.', color: '#C26D3F'},
-    102: {name: 'Ore', description: 'Refined metallic ore with improved purity.', color: '#C26D3F'},
-    103: {
+export const itemFamilies: Record<string, ItemFamily> = {
+    // === Resources ===
+    ore: {
         name: 'Ore',
-        description: 'High-grade metallic ore with exceptional density.',
+        description: 'Refines into Plate and Beam.',
         color: '#C26D3F',
     },
-    104: {name: 'Ore', description: '', color: '#C26D3F'},
-    105: {name: 'Ore', description: '', color: '#C26D3F'},
-    106: {name: 'Ore', description: '', color: '#C26D3F'},
-    107: {name: 'Ore', description: '', color: '#C26D3F'},
-    108: {name: 'Ore', description: '', color: '#C26D3F'},
-    109: {name: 'Ore', description: '', color: '#C26D3F'},
-    110: {name: 'Ore', description: '', color: '#C26D3F'},
-
-    // === Resources / Crystal ===
-    201: {name: 'Crystal', description: 'Raw resonant crystal.', color: '#4ADBFF'},
-    202: {
+    crystal: {
         name: 'Crystal',
-        description: 'Refined resonant crystal with improved clarity.',
+        description: 'Refines into Sensors and Resonators.',
         color: '#4ADBFF',
     },
-    203: {
-        name: 'Crystal',
-        description: 'High-grade resonant crystal with exceptional purity.',
-        color: '#4ADBFF',
-    },
-    204: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    205: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    206: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    207: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    208: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    209: {name: 'Crystal', description: '', color: '#4ADBFF'},
-    210: {name: 'Crystal', description: '', color: '#4ADBFF'},
-
-    // === Resources / Gas ===
-    301: {name: 'Gas', description: 'Raw volatile gas.', color: '#B877FF'},
-    302: {
+    gas: {
         name: 'Gas',
-        description: 'Refined volatile gas with improved reactivity.',
+        description: 'Refines into Plasma Cells and Reactors.',
         color: '#B877FF',
     },
-    303: {
-        name: 'Gas',
-        description: 'High-grade volatile gas with exceptional energy density.',
-        color: '#B877FF',
-    },
-    304: {name: 'Gas', description: '', color: '#B877FF'},
-    305: {name: 'Gas', description: '', color: '#B877FF'},
-    306: {name: 'Gas', description: '', color: '#B877FF'},
-    307: {name: 'Gas', description: '', color: '#B877FF'},
-    308: {name: 'Gas', description: '', color: '#B877FF'},
-    309: {name: 'Gas', description: '', color: '#B877FF'},
-    310: {name: 'Gas', description: '', color: '#B877FF'},
-
-    // === Resources / Regolith ===
-    401: {name: 'Regolith', description: 'Crude regolith dust.', color: '#C4A57B'},
-    402: {
+    regolith: {
         name: 'Regolith',
-        description: 'Refined regolith with improved fineness.',
+        description: 'Refines into Ceramic and Frame.',
         color: '#C4A57B',
     },
-    403: {
-        name: 'Regolith',
-        description: 'High-grade regolith with exceptional uniformity.',
-        color: '#C4A57B',
-    },
-    404: {name: 'Regolith', description: '', color: '#C4A57B'},
-    405: {name: 'Regolith', description: '', color: '#C4A57B'},
-    406: {name: 'Regolith', description: '', color: '#C4A57B'},
-    407: {name: 'Regolith', description: '', color: '#C4A57B'},
-    408: {name: 'Regolith', description: '', color: '#C4A57B'},
-    409: {name: 'Regolith', description: '', color: '#C4A57B'},
-    410: {name: 'Regolith', description: '', color: '#C4A57B'},
-
-    // === Resources / Biomass ===
-    501: {name: 'Biomass', description: 'Crude organic biomass.', color: '#5A8B3E'},
-    502: {
+    biomass: {
         name: 'Biomass',
-        description: 'Refined biomass with improved plasticity.',
+        description: 'Refines into Polymer and Resin.',
         color: '#5A8B3E',
     },
-    503: {
-        name: 'Biomass',
-        description: 'High-grade biomass with exceptional saturation.',
-        color: '#5A8B3E',
-    },
-    504: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    505: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    506: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    507: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    508: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    509: {name: 'Biomass', description: '', color: '#5A8B3E'},
-    510: {name: 'Biomass', description: '', color: '#5A8B3E'},
 
-    // === Components (T1) ===
-    10001: {
+    // === Components ===
+    plate: {
         name: 'Plate',
-        description:
-            'Structural plating formed from ore. Used in hulls, containers, and storage modules.',
+        description: 'Goes into Cargo Holds, Containers, and hulls.',
         color: '#7B8D9E',
     },
-    10002: {
+    frame: {
         name: 'Frame',
-        description:
-            'Composite framing formed from fine regolith bound in biomass polymer. Dense enough to seal cargo holds, flexible enough to absorb vibration.',
+        description: 'Goes into Limpet Bays, Cargo Holds, and hulls.',
         color: '#C4A57B',
     },
-    10003: {
+    'plasma-cell': {
         name: 'Plasma Cell',
-        description:
-            'High-energy gaseous storage cell. Volatile gas held under controlled thermal conditions.',
+        description: 'Goes into Engines, Battery Banks, and hulls.',
         color: '#E86344',
     },
-    10004: {
+    resonator: {
         name: 'Resonator',
-        description:
-            'Crystalline resonance lattice. Stores and releases charge through coherent oscillation.',
+        description: 'Goes into Power Cores, Tractor Beams, Warp Drives, and hulls.',
         color: '#4ADBFF',
     },
-    10005: {
+    beam: {
         name: 'Beam',
-        description:
-            'Heavy-duty structural beam machined from refined ore. Strong enough to bear load, tolerant enough to survive harsh environments.',
+        description: 'Goes into Limpet Bays and hulls.',
         color: '#7B8D9E',
     },
-    10006: {
+    sensor: {
         name: 'Sensor',
-        description:
-            'Crystal-lattice sensing element with conductive and reflective properties. Reads signal and surface alike.',
+        description: 'Goes into Fabricators, Assembly Arms, and hulls.',
         color: '#4ADBFF',
     },
-    10007: {
+    polymer: {
         name: 'Polymer',
-        description:
-            'Pliable biomass-derived polymer with high insulation. Flexible, durable, electrically inert.',
+        description: 'Goes into Shuttle Bays, Battery Banks, and hulls.',
         color: '#5A8B3E',
     },
-    10008: {
+    ceramic: {
         name: 'Ceramic',
-        description:
-            'Hardened fine-grained ceramic refined from regolith. Hard enough to cut, fine enough to finish.',
+        description: 'Goes into Assembly Arms, Containers, and hulls.',
         color: '#C4A57B',
     },
-    10009: {
+    reactor: {
         name: 'Reactor',
-        description:
-            'Gas-pressurized vessel for controlled reactions. Vents heat and contains volatility.',
+        description: 'Goes into Fabricators, Warp Drives, and hulls.',
         color: '#B877FF',
     },
-    10010: {
+    resin: {
         name: 'Resin',
-        description:
-            'Saturated organic binder cured from biomass. A pliable matrix for haulage and field components.',
+        description: 'Goes into Tractor Beams and hulls.',
         color: '#5A8B3E',
     },
 
-    // === Modules (T1) ===
-    10100: {
+    // === Modules ===
+    engine: {
         name: 'Engine',
-        description: 'Basic propulsion system. Converts volatile gases into thrust.',
+        description: 'Moves a ship across the map.',
         color: '#E86344',
     },
-    10101: {
+    generator: {
         name: 'Power Core',
-        description: 'Basic energy system. Stores and recharges energy from resonant crystals.',
+        description: 'Stores and recharges the energy work spends.',
         color: '#4ADBFF',
     },
-    10102: {
+    gatherer: {
         name: 'Limpet Bay',
-        description: 'Basic gathering system. Probes and conduits for raw resources.',
+        description: 'Gathers resources from a deposit.',
         color: '#7B8D9E',
     },
-    10103: {
+    loader: {
         name: 'Shuttle Bay',
-        description: 'Basic cargo handling system. Loads and unloads cargo with articulated arms.',
+        description: 'Moves cargo between entities at the same location.',
         color: '#5A8B3E',
     },
-    10104: {
+    crafter: {
         name: 'Fabricator',
-        description:
-            'Basic crafting system. Processes materials using reaction chambers and cutting tools.',
+        description: 'Turns resources and components into items.',
         color: '#B877FF',
     },
-    10105: {
+    storage: {
         name: 'Cargo Hold',
-        description: 'Expanded cargo storage with reinforced internal holds.',
+        description: 'Adds cargo capacity.',
         color: '#8B7355',
     },
-    10106: {
+    hauler: {
         name: 'Tractor Beam',
-        description:
-            'Projects a haul beam to lock onto and transport containers through group travel.',
+        description: 'Tows entities along with the ship.',
         color: '#4ADBFF',
     },
-    10107: {
+    warp: {
         name: 'Warp Drive',
-        description:
-            'Folds local space-time around the hull, projecting the ship across vast distances in a single discharge of the entire energy reserve.',
+        description: 'Jumps a long distance at once. Needs a full charge and an empty hold.',
         color: '#9be4ff',
     },
-    10108: {
+    battery: {
         name: 'Battery Bank',
-        description: 'Stores additional charge produced by the power core.',
+        description: 'Adds energy capacity.',
         color: '#4ADBFF',
     },
-    10109: {
+    launcher: {
         name: 'Drive Coil',
-        description: 'Accelerates and launches cargo payloads toward a remote mass catcher.',
+        description: 'Launches cargo toward a Mass Catcher.',
         color: '#E86344',
     },
-    10110: {
+    builder: {
         name: 'Assembly Arm',
-        description:
-            'Heavy manipulator arms for on-site construction work. Claims build sites, builds them out, and upgrades ships in place.',
+        description: 'Claims plots, builds them out, and upgrades ships alongside.',
         color: '#FFB347',
     },
 
-    // === Entities (packed, T1) ===
-    10200: {
+    // === Entities ===
+    container: {
         name: 'Container',
-        description: 'Passive floating cargo storage in space. Towed by ships.',
+        description: 'Cargo storage that a Tractor Beam tows.',
         color: '#7B8D9E',
     },
-    10201: {
+    ship: {
         name: 'Ship',
-        description: 'General-purpose vessel with 5 module slots.',
+        description: 'A hull for a mixed loadout.',
         color: '#4AE898',
     },
-    10202: {
+    warehouse: {
         name: 'Warehouse',
-        description: 'Massive stationary storage facility with a single loader module slot.',
+        description: "A station's stockpile.",
         color: '#EAB308',
     },
-    10203: {
+    'mining-rig': {
         name: 'Mining Rig',
-        description:
-            'Planetary resource extraction facility with generator and gatherer module slots.',
+        description: "A station's mine, gathering from the location it stands at.",
         color: '#D4726F',
     },
-    10204: {
+    factory: {
         name: 'Factory',
-        description: 'Planetary fabrication facility with generator and crafter module slots.',
+        description: "A station's production line.",
         color: '#7BA7D4',
     },
-    10205: {
+    'mass-driver': {
         name: 'Mass Driver',
-        description: 'Planetary launch platform with power core and drive coil module slots.',
+        description: "A station's launcher, sending cargo to a Mass Catcher.",
         color: '#E86344',
     },
-    10206: {
+    'mass-catcher': {
         name: 'Mass Catcher',
-        description:
-            'Planetary receiving platform with storage module slots; catches launched payloads.',
+        description: "A station's receiver for Mass Driver payloads.",
         color: '#4AE898',
     },
-    10207: {
+    'station-hub': {
         name: 'Station Hub',
-        description: 'Orbital command structure. Anchors a player station cluster.',
+        description:
+            'Anchors a station; every other building sits on its footprint. One per location, at an asteroid, nebula, or ice field.',
         color: '#A0B8D0',
     },
-    10208: {
-        name: 'Workshop',
-        description:
-            'A station workshop with five independent workers. Visiting ships bring materials and power, and the workshop does the crafting.',
-        color: '#B877FF',
-    },
-    10209: {
-        name: 'Construction Dock',
-        description:
-            'An immobile station construction facility with amplified power core and assembly arm slots.',
+    'assembly-yard': {
+        name: 'Assembly Yard',
+        description: "A station's construction site.",
         color: '#FFB347',
     },
-    10210: {
-        name: 'Roustabout',
-        description:
-            'A basic starter ship. One engine, one power core, and one open slot to fit as you like.',
-        color: '#4AE898',
+    workshop: {
+        name: 'Workshop',
+        description: 'Public Fabricators. Book a job and collect the output when it finishes.',
+        color: '#B877FF',
     },
-    10211: {
-        name: 'Prospector',
-        description: 'A light gathering ship. One engine, one power core, one gathering rig.',
-        color: '#4AE898',
+    'construction-dock': {
+        name: 'Construction Dock',
+        description: 'Public upgrades for ships at the location.',
+        color: '#FFB347',
     },
-    10212: {
-        name: 'Tender',
-        description:
-            'A logistics ship with a shuttle bay for moving cargo between ships and stations.',
-        color: '#4AE898',
-    },
-    10213: {
-        name: 'Wright',
-        description:
-            'A construction ship with an assembly arm for building structures and upgrading ships.',
-        color: '#4AE898',
-    },
-    10214: {
-        name: 'Tug',
-        description:
-            'A logistics ship with a tractor beam for towing containers from place to place.',
-        color: '#4AE898',
-    },
-    10215: {
-        name: 'Porter',
-        description:
-            'A cargo ship built around a large storage hold. The extra mass makes it slower than a Roustabout.',
-        color: '#4AE898',
-    },
-    10216: {
+    nexus: {
         name: 'Nexus',
-        description:
-            'A permanent installation at a world where NFT-backed assets are wrapped, unwrapped, and deployed.',
+        description: 'Where players wrap, unwrap, and deploy assets.',
         color: '#FFD24C',
     },
-    10218: {
-        name: 'Smith',
-        description:
-            'A crafting ship. One engine, one power core, and a fabricator for crafting away from home.',
-        color: '#4AE898',
-    },
-    10219: {
+    depot: {
         name: 'Depot',
-        description: 'Planetary storage facility with two shuttle bays and four cargo slots.',
+        description: 'Public storage and shuttle service at the world.',
         color: '#EAB308',
     },
-
-    // === Components (T2) ===
-    11001: {
-        name: 'Plate',
-        description: 'Advanced structural plating reinforced with tier 2 ore.',
-        color: '#9BADB8',
-    },
-    11002: {
-        name: 'Frame',
-        description:
-            'Advanced composite framing reinforced with tier 2 regolith and biomass polymer.',
-        color: '#C4A57B',
-    },
-    11003: {
-        name: 'Plasma Cell',
-        description: 'Advanced high-energy gaseous storage cell reinforced with tier 2 gas.',
-        color: '#E86344',
-    },
-    11004: {
-        name: 'Resonator',
-        description: 'Advanced crystalline resonance lattice reinforced with tier 2 crystal.',
-        color: '#4ADBFF',
-    },
-    11005: {
-        name: 'Beam',
-        description: 'Advanced heavy-duty structural beam reinforced with tier 2 ore.',
-        color: '#7B8D9E',
-    },
-    11006: {
-        name: 'Sensor',
-        description: 'Advanced crystal-lattice sensing element reinforced with tier 2 crystal.',
-        color: '#4ADBFF',
-    },
-    11007: {
-        name: 'Polymer',
-        description: 'Advanced pliable biomass-derived polymer reinforced with tier 2 biomass.',
-        color: '#5A8B3E',
-    },
-    11008: {
-        name: 'Ceramic',
-        description: 'Advanced hardened ceramic reinforced with tier 2 regolith.',
-        color: '#C4A57B',
-    },
-    11009: {
-        name: 'Reactor',
-        description: 'Advanced gas-pressurized reaction vessel reinforced with tier 2 gas.',
-        color: '#B877FF',
-    },
-    11010: {
-        name: 'Resin',
-        description: 'Advanced saturated organic binder reinforced with tier 2 biomass.',
-        color: '#5A8B3E',
-    },
-
-    // === Modules (T2) ===
-    11100: {
-        name: 'Engine',
-        description: 'Advanced propulsion system. Reinforced thrust chambers for higher velocity.',
-        color: '#E86344',
-    },
-    11101: {
-        name: 'Power Core',
-        description:
-            'Advanced energy system. Higher-density crystal matrix for increased energy throughput.',
-        color: '#4ADBFF',
-    },
-    11102: {
-        name: 'Limpet Bay',
-        description: 'Advanced gathering system. Reinforced probes and conduits for deeper yield.',
-        color: '#7B8D9E',
-    },
-    11103: {
-        name: 'Shuttle Bay',
-        description:
-            'Advanced cargo handling system. Reinforced articulated arms for greater loading throughput.',
-        color: '#5A8B3E',
-    },
-    11104: {
-        name: 'Fabricator',
-        description:
-            'Advanced crafting system. Higher-grade reaction chambers for faster processing.',
-        color: '#B877FF',
-    },
-    11105: {
-        name: 'Cargo Hold',
-        description: 'Advanced cargo storage. Reinforced tier 2 holds carry more mass.',
-        color: '#8B7355',
-    },
-
-    11106: {
-        name: 'Tractor Beam',
-        description:
-            'Advanced haul beam projector reinforced with tier 2 components for greater towing capacity.',
-        color: '#4ADBFF',
-    },
-    11107: {
-        name: 'Warp Drive',
-        description:
-            'Advanced warp system. Reinforced field coils project the hull across greater distances.',
-        color: '#9be4ff',
-    },
-    11108: {
-        name: 'Battery Bank',
-        description:
-            'Advanced battery bank. Higher-density cells store more charge from the power core.',
-        color: '#4ADBFF',
-    },
-    11110: {
-        name: 'Assembly Arm',
-        description:
-            'Advanced construction system. Reinforced manipulator arms for faster build and upgrade work.',
-        color: '#FFB347',
-    },
-
-    // === Entities (packed, T2) ===
-    11200: {
-        name: 'Container',
-        description: 'Advanced cargo container with improved capacity formulas.',
-        color: '#9BADB8',
-    },
-    11212: {
-        name: 'Prospector',
-        description: 'The tier 2 Prospector. The same three systems, ready for tier 2 modules.',
+    roustabout: {
+        name: 'Roustabout',
+        description: 'A hull whose open slot takes any module.',
         color: '#4AE898',
     },
-    11213: {
+    prospector: {
         name: 'Prospector',
-        description:
-            'A tier 2 Prospector with an auxiliary system for extra power, mobility, or endurance.',
+        description: 'A gathering ship.',
         color: '#4AE898',
     },
-    11214: {
+    tender: {
+        name: 'Tender',
+        description: 'A transfer ship, moving cargo between parked entities.',
+        color: '#4AE898',
+    },
+    wright: {
+        name: 'Wright',
+        description: 'A construction ship, claiming and building plots.',
+        color: '#4AE898',
+    },
+    tug: {
+        name: 'Tug',
+        description: 'A towing ship.',
+        color: '#4AE898',
+    },
+    porter: {
+        name: 'Porter',
+        description: 'A cargo ship.',
+        color: '#4AE898',
+    },
+    smith: {
+        name: 'Smith',
+        description: 'A crafting ship.',
+        color: '#4AE898',
+    },
+    dredger: {
         name: 'Dredger',
-        description:
-            'A gathering ship that stores what it digs. Its limpet bay works alongside a cargo hold.',
+        description: 'A gathering ship with a hold for longer runs.',
         color: '#4AE898',
-    },
-    11202: {
-        name: 'Warehouse',
-        description:
-            'The tier 2 Warehouse. Massive stationary storage facility with a single loader module slot.',
-        color: '#EAB308',
-    },
-    11203: {
-        name: 'Mining Rig',
-        description:
-            'The tier 2 Mining Rig. Planetary resource extraction with generator and gatherer module slots.',
-        color: '#D4726F',
-    },
-    11204: {
-        name: 'Factory',
-        description:
-            'The tier 2 Factory. Planetary fabrication with generator and crafter module slots.',
-        color: '#7BA7D4',
-    },
-    11207: {
-        name: 'Station Hub',
-        description: 'The tier 2 Station Hub. Anchors a player station cluster.',
-        color: '#A0B8D0',
-    },
-    11209: {
-        name: 'Assembly Yard',
-        description:
-            'Orbital construction facility with amplified power core and assembly arm module slots.',
-        color: '#FFB347',
     },
 }
 
+const COMPONENT_FAMILIES = [
+    'plate',
+    'frame',
+    'plasma-cell',
+    'resonator',
+    'beam',
+    'sensor',
+    'polymer',
+    'ceramic',
+    'reactor',
+    'resin',
+]
+
+const ENTITY_FAMILIES: Record<number, string> = {
+    10200: 'container',
+    10201: 'ship',
+    10202: 'warehouse',
+    10203: 'mining-rig',
+    10204: 'factory',
+    10205: 'mass-driver',
+    10206: 'mass-catcher',
+    10207: 'station-hub',
+    10208: 'workshop',
+    10209: 'construction-dock',
+    10210: 'roustabout',
+    10211: 'prospector',
+    10212: 'tender',
+    10213: 'wright',
+    10214: 'tug',
+    10215: 'porter',
+    10216: 'nexus',
+    10218: 'smith',
+    10219: 'depot',
+    11200: 'container',
+    11202: 'warehouse',
+    11203: 'mining-rig',
+    11204: 'factory',
+    11207: 'station-hub',
+    11209: 'assembly-yard',
+    11212: 'prospector',
+    11213: 'prospector',
+    11214: 'dredger',
+}
+
+interface RawItem {
+    id: number
+    type: string
+    tier: number
+    category?: string
+    subtype?: string
+}
+
+const rawById = new Map<number, RawItem>((items as RawItem[]).map((raw) => [raw.id, raw]))
+
+export function itemFamilyKey(itemId: number): string | undefined {
+    const entity = ENTITY_FAMILIES[itemId]
+    if (entity) return entity
+    const raw = rawById.get(itemId)
+    if (!raw) return undefined
+    switch (raw.type) {
+        case 'resource':
+            return raw.category
+        case 'module':
+            return raw.subtype
+        case 'component':
+            return COMPONENT_FAMILIES[((itemId - 10000) % 1000) - 1]
+        default:
+            return undefined
+    }
+}
+
+export function getItemFamily(itemId: number): ItemFamily | undefined {
+    const key = itemFamilyKey(itemId)
+    return key === undefined ? undefined : itemFamilies[key]
+}
+
 export const entityMetadata: Record<number, EntityMetadata> = {
-    10201: {moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold']},
+    10201: {
+        moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold'],
+    },
     10210: {moduleSlotLabels: ['Power Core', 'Engine', 'Utility Bay']},
     10211: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
     10212: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
@@ -536,8 +365,12 @@ export const entityMetadata: Record<number, EntityMetadata> = {
         ],
     },
     11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
-    11213: {moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay']},
-    11214: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold']},
+    11213: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay'],
+    },
+    11214: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold'],
+    },
     11202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },
@@ -546,8 +379,9 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     11209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
 }
 
-for (const item of items as Array<{id: number}>) {
-    if (!itemMetadata[item.id]) {
-        throw new Error(`Missing metadata for item ${item.id}. Add an entry to metadata.ts.`)
+for (const raw of items as RawItem[]) {
+    const key = itemFamilyKey(raw.id)
+    if (!key || !itemFamilies[key]) {
+        throw new Error(`Missing family for item ${raw.id}. Add an entry to metadata.ts.`)
     }
 }

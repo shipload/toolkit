@@ -6,7 +6,7 @@ import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import type {EntityTypeName} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
 import type {EntitySlot} from '../data/recipes-runtime'
-import {itemMetadata} from '../data/metadata'
+import {getItemFamily} from '../data/metadata'
 import {getItem} from '../data/catalog'
 import {getModuleCapabilityType, moduleAccepts, moduleSlotTypeToCode} from '../capabilities/modules'
 import {computeEntityCapabilities} from '../derivation/capabilities'
@@ -52,7 +52,7 @@ function assignModulesToSlots(
             try {
                 modName = getItem(mod.itemId).name
             } catch {
-                modName = itemMetadata[mod.itemId]?.name ?? `item ${mod.itemId}`
+                modName = getItemFamily(mod.itemId)?.name ?? `item ${mod.itemId}`
             }
             throw new Error(
                 `No compatible slot for module ${modName} (type ${modType}) on ${entityLabel}`

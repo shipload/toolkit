@@ -1,6 +1,6 @@
 import {UInt16, type UInt16Type} from '@wharfkit/antelope'
 import items from './items.json'
-import {itemMetadata} from './metadata'
+import {getItemFamily, itemFamilyKey} from './metadata'
 import {
     CATEGORY_LABELS,
     type Item,
@@ -12,12 +12,14 @@ import {
 const itemsById = new Map<number, Item>()
 
 for (const raw of items as any[]) {
-    const meta = itemMetadata[raw.id]
-    if (!meta) {
-        throw new Error(`Missing metadata for item ${raw.id}. Add an entry to metadata.ts.`)
+    const family = itemFamilyKey(raw.id)
+    const meta = getItemFamily(raw.id)
+    if (!family || !meta) {
+        throw new Error(`Missing family for item ${raw.id}. Add an entry to metadata.ts.`)
     }
     itemsById.set(raw.id, {
         id: raw.id,
+        family,
         name: meta.name,
         description: meta.description,
         color: meta.color,

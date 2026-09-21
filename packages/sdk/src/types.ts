@@ -208,6 +208,7 @@ export const CATEGORY_LABELS: Record<ResourceCategory, string> = {
 
 export interface Item {
     id: number
+    family: string
     name: string
     description: string
     color: string

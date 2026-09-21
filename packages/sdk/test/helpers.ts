@@ -23,6 +23,7 @@ function ensureTestItem(itemId: number, mass?: number): void {
     }
     registerMockItem({
         id: itemId,
+        family: `test-${itemId}`,
         name: `TestItem-${itemId}`,
         description: 'Synthetic item registered for tests.',
         mass: mass ?? 10,
