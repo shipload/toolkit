@@ -323,6 +323,22 @@ export function splitJobCargo<T>(
     return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
 }
 
+export interface BuildJob {
+    id: number
+    building: number
+    socket: number
+    targetId: number
+    owner: string
+    coords: {x: number; y: number}
+    startsAt: Date
+    completesAt: Date
+    arrivesAt: Date
+    targetItemId: number
+    status: JobStatus
+    deposited: boolean
+    inputs: CargoItem[]
+}
+
 export interface OwnedJob {
     id: number
     building: number

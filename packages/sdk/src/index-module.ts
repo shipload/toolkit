@@ -357,6 +357,7 @@ export type {
     JobCancelRoute,
     JobCancellationBlockReason,
     OwnedJob,
+    BuildJob,
     PickupInFlight,
 } from './scheduling/jobs'
 

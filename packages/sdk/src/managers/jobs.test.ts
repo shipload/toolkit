@@ -94,3 +94,63 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs).toHaveLength(1)
     })
 })
+
+const buildRow = (over: Record<string, unknown> = {}) => ({
+    id: {toNumber: () => 9},
+    building: {toNumber: () => 2},
+    socket: {toNumber: () => 1},
+    target: {toNumber: () => 5},
+    owner: Name.from(OWNER),
+    coords: {x: {toNumber: () => 0}, y: {toNumber: () => 0}},
+    starts_at: {toDate: () => new Date('2026-07-26T10:00:00Z')},
+    completes_at: {toDate: () => new Date('2026-07-26T11:00:00Z')},
+    arrives_at: {toDate: () => new Date('2026-07-26T09:45:00Z')},
+    target_item_id: {toNumber: () => 10212},
+    cargo: [{item: 'in'}],
+    deposited: true,
+    ...over,
+})
+
+function managerWithReadonly(impl: (name: string, data: unknown) => Promise<unknown>) {
+    const ctx = {server: {readonly: impl}} as never
+    return new JobsManager(ctx)
+}
+
+describe('JobsManager.getBuildJobs', () => {
+    it('reads the dock queue through getbuildjobs and parses every row', async () => {
+        let called: unknown = null
+        const m = managerWithReadonly(async (name, data) => {
+            called = {name, data}
+            return {jobs: [buildRow(), buildRow({id: {toNumber: () => 10}, deposited: false})]}
+        })
+        const jobs = await m.getBuildJobs(2, {now: new Date('2026-07-26T11:30:00Z')})
+        expect(called).toMatchObject({name: 'getbuildjobs'})
+        expect(String((called as {data: {building_id: unknown}}).data.building_id)).toBe('2')
+        expect(jobs).toHaveLength(2)
+        expect(jobs[0]).toMatchObject({
+            id: 9,
+            building: 2,
+            socket: 1,
+            targetId: 5,
+            owner: OWNER,
+            targetItemId: 10212,
+            deposited: true,
+            status: 'ready',
+        })
+        expect(jobs[0].coords).toEqual({x: 0, y: 0})
+        expect(jobs[0].arrivesAt).toEqual(new Date('2026-07-26T09:45:00Z'))
+        expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
+        expect(jobs[1].status).toBe('dropping')
+    })
+
+    it('reports a booked row before its window as queued', async () => {
+        const m = managerWithReadonly(async () => ({jobs: [buildRow()]}))
+        const jobs = await m.getBuildJobs(2, {now: new Date('2026-07-26T09:50:00Z')})
+        expect(jobs[0].status).toBe('queued')
+    })
+
+    it('returns an empty list when the result carries no jobs', async () => {
+        const m = managerWithReadonly(async () => ({}))
+        expect(await m.getBuildJobs(2)).toEqual([])
+    })
+})
