@@ -26,12 +26,16 @@ export {
 export {
     componentBaseAtomic,
     componentEffortAtomic,
+    explainCargoItem,
     pricingFromWeights,
     resourceValueAtomic,
     valueCargoItem,
     valueContribution,
     weightedQualityAtomic,
+    type CargoValuation,
+    type ComponentValuation,
     type InfluencePricing,
+    type ResourceValuation,
     type ValuedItem,
 } from './valuation'
 export {

@@ -22,7 +22,8 @@ import {
 import {findDecomp, DECOMP_REGISTRY} from './decomp'
 import {civicDropoffDuration, depotTransferDuration, contributeDuration} from './duration'
 import {getStatCount, statsSumSq} from './quality'
-import {pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
+import {explainCargoItem, pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
+import {getItems} from '../data/catalog'
 import {citizenryName, citizenryPatternCount} from './citizenry'
 import citizenryAdjectives from '../data/citizenry-adjectives.json'
 import citizenryNouns from '../data/citizenry-nouns.json'
@@ -152,6 +153,51 @@ describe('decomposition', () => {
             const cur = entry.buckets[i]
             expect(prev.category < cur.category || prev.tier < cur.tier).toBe(true)
         }
+    })
+})
+
+describe('explainCargoItem', () => {
+    test('factors reproduce valueCargoItem for every valuable catalog item', () => {
+        const acute = buildDemand(0, categoryIndex('regolith'), DEMAND_TRIPLE_SEED)
+        for (const def of getItems()) {
+            if (def.type !== 'resource' && def.type !== 'component') continue
+            const item = {itemId: Number(def.id), quantity: 7, stats: packStats(363, 535, 246)}
+            const explained = explainCargoItem(item, acute, pricing)
+            expect(explained.totalAtomic).toBe(valueCargoItem(item, acute, pricing))
+        }
+    })
+
+    test('a resource explains mass, weight, quality and need', () => {
+        const acute = buildDemand(0, categoryIndex('crystal'), DEMAND_TRIPLE_SEED)
+        const explained = explainCargoItem(
+            {itemId: ITEM_CRYSTAL_T1, quantity: 5000, stats: packStats(PAR)},
+            acute,
+            pricing
+        )
+        if (explained.kind !== 'resource') throw new Error('expected resource')
+        expect(explained.mass).toBe(BigInt(getItems().find((i) => Number(i.id) === ITEM_CRYSTAL_T1)!.mass) * 5000n)
+        expect(explained.weight).toBe(1)
+        expect(explained.quality).toBeCloseTo(1, 6)
+        expect(explained.need).toBe(2)
+        expect(explained.points).toBeCloseTo(
+            Number(explained.mass) / 10 * explained.weight * explained.quality * explained.need,
+            3
+        )
+    })
+
+    test('a component explains raw mass, material weight, quality and effort', () => {
+        const explained = explainCargoItem(
+            {itemId: ITEM_PLATE, quantity: 3, stats: packStats(PAR)},
+            baseDemand,
+            pricing
+        )
+        if (explained.kind !== 'component') throw new Error('expected component')
+        const entry = findDecomp(ITEM_PLATE)!
+        const raw = entry.buckets.reduce((sum, b) => sum + b.rawMass, 0)
+        expect(explained.rawMass).toBe(raw * 3)
+        expect(explained.processedMass).toBe(entry.processedMass * 3)
+        expect(explained.weight).toBeGreaterThanOrEqual(1)
+        expect(explained.baseAtomic + explained.effortAtomic).toBe(explained.totalAtomic)
     })
 })
 

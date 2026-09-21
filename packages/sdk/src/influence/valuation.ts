@@ -126,6 +126,81 @@ export function valueCargoItem(
     return withEffort
 }
 
+export interface ResourceValuation {
+    kind: 'resource'
+    category: number
+    tier: number
+    mass: bigint
+    weight: number
+    quality: number
+    need: number
+    totalAtomic: bigint
+    points: number
+}
+
+export interface ComponentValuation {
+    kind: 'component'
+    rawMass: number
+    processedMass: number
+    weight: number
+    quality: number
+    baseAtomic: bigint
+    effortAtomic: bigint
+    totalAtomic: bigint
+    points: number
+}
+
+export type CargoValuation = ResourceValuation | ComponentValuation
+
+export function explainCargoItem(
+    item: ValuedItem,
+    demand: DemandView,
+    pricing: InfluencePricing
+): CargoValuation {
+    const def = getItem(item.itemId)
+    const totalAtomic = valueCargoItem(item, demand, pricing)
+    const points = Number(totalAtomic) / INFLUENCE_ATOMIC_PER_POINT
+    const nStats = getStatCount(item.itemId)
+    const quality = statsSumSq(item.stats, nStats) / (nStats * pricing.d1)
+
+    if (def.type === 'resource') {
+        if (def.category === undefined) throw new Error('resource has no category')
+        const category = categoryIndex(def.category)
+        return {
+            kind: 'resource',
+            category,
+            tier: def.tier,
+            mass: BigInt(def.mass) * BigInt(item.quantity),
+            weight: Number(pricing.weight(category, def.tier)) / WEIGHT_FP_SCALE,
+            quality,
+            need: Number(needForCategory(demand, category)) / NEED_FP_SCALE,
+            totalAtomic,
+            points,
+        }
+    }
+
+    const entry = findDecomp(item.itemId)
+    if (!entry) throw new Error('item has no decomposition')
+    let rawMass = 0
+    let weighted = 0n
+    for (const bucket of entry.buckets) {
+        rawMass += bucket.rawMass
+        weighted += BigInt(bucket.rawMass) * pricing.weight(bucket.category, bucket.tier)
+    }
+    const effortAtomic = componentEffortAtomic(entry.processedMass, item.quantity)
+    return {
+        kind: 'component',
+        rawMass: rawMass * item.quantity,
+        processedMass: entry.processedMass * item.quantity,
+        weight: rawMass === 0 ? 0 : Number(weighted) / (rawMass * WEIGHT_FP_SCALE),
+        quality,
+        baseAtomic: totalAtomic - effortAtomic,
+        effortAtomic,
+        totalAtomic,
+        points,
+    }
+}
+
 export function valueContribution(
     bundle: ValuedItem[],
     demand: DemandView,
