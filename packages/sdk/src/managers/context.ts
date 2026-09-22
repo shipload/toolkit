@@ -35,7 +35,9 @@ export class GameContext {
     private _subscriptionsUrl?: string
 
     private _gameCache?: PlatformContract.Types.game_row
+    private _gameInflight?: Promise<PlatformContract.Types.game_row>
     private _stateCache?: GameState
+    private _stateInflight?: Promise<GameState>
 
     constructor(
         public readonly client: APIClient,
@@ -149,25 +151,50 @@ export class GameContext {
         if (!reload && this._gameCache) {
             return this._gameCache
         }
-        const game = await this.platform.table('games').get()
-        if (!game) {
-            throw new Error('Game not initialized')
+        if (!reload && this._gameInflight) {
+            return this._gameInflight
         }
-        this._gameCache = game
-        return game
+        const inflight = (async () => {
+            const game = await this.platform.table('games').get()
+            if (!game) {
+                throw new Error('Game not initialized')
+            }
+            this._gameCache = game
+            return game
+        })()
+        this._gameInflight = inflight
+        try {
+            return await inflight
+        } finally {
+            if (this._gameInflight === inflight) {
+                this._gameInflight = undefined
+            }
+        }
     }
 
     async getState(reload = false): Promise<GameState> {
         if (!reload && this._stateCache) {
             return this._stateCache
         }
-        const state = await this.server.table('state').get()
-        if (!state) {
-            throw new Error('Game state not initialized')
+        if (!reload && this._stateInflight) {
+            return this._stateInflight
         }
-        const game = this._gameCache
-        this._stateCache = GameState.from(state, game)
-        return this._stateCache
+        const inflight = (async () => {
+            const state = await this.server.table('state').get()
+            if (!state) {
+                throw new Error('Game state not initialized')
+            }
+            this._stateCache = GameState.from(state, this._gameCache)
+            return this._stateCache
+        })()
+        this._stateInflight = inflight
+        try {
+            return await inflight
+        } finally {
+            if (this._stateInflight === inflight) {
+                this._stateInflight = undefined
+            }
+        }
     }
 
     get cachedGame(): PlatformContract.Types.game_row | undefined {
