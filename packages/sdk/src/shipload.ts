@@ -23,6 +23,9 @@ interface ShiploadOptions {
     platformContractName?: string
     serverContractName?: string
     fundContractName?: string
+    platformContractAccount?: string
+    serverContractAccount?: string
+    fundContractAccount?: string
     client?: APIClient
     subscriptionsUrl?: string
     atomicAssetsAccount?: string
@@ -43,13 +46,24 @@ export class Shipload {
 
         const platform = platformContract
             ? platformContract
-            : new PlatformContract.Contract({client: apiClient})
+            : new PlatformContract.Contract({
+                  client: apiClient,
+                  account: constructorOptions?.platformContractAccount,
+              })
 
         const server = serverContract
             ? serverContract
-            : new ServerContract.Contract({client: apiClient})
+            : new ServerContract.Contract({
+                  client: apiClient,
+                  account: constructorOptions?.serverContractAccount,
+              })
 
-        const fund = fundContract ? fundContract : new FundContract.Contract({client: apiClient})
+        const fund = fundContract
+            ? fundContract
+            : new FundContract.Contract({
+                  client: apiClient,
+                  account: constructorOptions?.fundContractAccount,
+              })
 
         this._context = new GameContext(
             apiClient,
