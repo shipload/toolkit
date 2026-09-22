@@ -7,6 +7,11 @@ export interface DepositConfig {
     symbol: Asset.Symbol
 }
 
+export interface DepositConfigInput {
+    tokenContract: NameType
+    symbol: Asset.SymbolType
+}
+
 export interface PlatformBalance {
     owner: Name
     tokenContract: Name
@@ -21,6 +26,16 @@ export interface TokenBalance {
 
 export class BalancesManager extends BaseManager {
     private depositConfig?: DepositConfig | null
+
+    // A caller holding the config already, from the indexer or its own cache, seeds it here so no balance read reaches the chain for it.
+    setDepositConfig(config: DepositConfigInput | null): void {
+        this.depositConfig = config
+            ? {
+                  tokenContract: Name.from(config.tokenContract),
+                  symbol: Asset.Symbol.from(config.symbol),
+              }
+            : null
+    }
 
     async getDepositConfig(reload = false): Promise<DepositConfig | null> {
         if (!reload && this.depositConfig !== undefined) {

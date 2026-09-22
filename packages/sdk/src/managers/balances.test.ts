@@ -78,6 +78,39 @@ describe('getDepositConfig', () => {
     })
 })
 
+describe('setDepositConfig', () => {
+    test('a seeded config keeps every balance read off the chain', async () => {
+        const {manager, counts} = stubContext({
+            depositConfig: SCRAP,
+            balances: [{token_contract: 'scrap.gm', balance: '5 SCRAP'}],
+            wallet: ['7 SCRAP'],
+        })
+        manager.setDepositConfig({tokenContract: 'scrap.gm', symbol: '0,SCRAP'})
+
+        const config = await manager.getDepositConfig()
+        expect(String(config?.tokenContract)).toBe('scrap.gm')
+        expect(String(config?.symbol)).toBe('0,SCRAP')
+        await manager.getPlatformBalance('alice')
+        await manager.getWalletBalance('alice')
+
+        expect(counts.depositcfg).toBe(0)
+    })
+
+    test('a reload still reaches the chain', async () => {
+        const {manager, counts} = stubContext({depositConfig: SCRAP})
+        manager.setDepositConfig({tokenContract: 'scrap.gm', symbol: '0,SCRAP'})
+        await manager.getDepositConfig(true)
+        expect(counts.depositcfg).toBe(1)
+    })
+
+    test('seeding null records a chain with no deposit token', async () => {
+        const {manager, counts} = stubContext({depositConfig: SCRAP})
+        manager.setDepositConfig(null)
+        expect(await manager.getDepositConfig()).toBeNull()
+        expect(counts.depositcfg).toBe(0)
+    })
+})
+
 describe('getPlatformBalance', () => {
     test('returns null when the owner has never opened a row', async () => {
         const {manager} = stubContext({depositConfig: SCRAP, balances: []})
