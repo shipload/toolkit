@@ -12,6 +12,17 @@ export interface WrapConfig {
     feeAccount: Name
 }
 
+export interface WrapConfigInput {
+    feePctBasisPoints: number
+    feeAccount: NameType
+}
+
+export interface WrapCostInput {
+    itemType: number
+    tier: number
+    units: bigint | string | number
+}
+
 export interface WrapGate {
     owner: Name
     game: Name
@@ -39,6 +50,7 @@ export function wrapCostKey(itemType: number, tier: number): UInt64 {
 export class NftManager extends BaseManager {
     private cache = new Map<string, NftConfigForItem | null>()
     private wrapConfig?: WrapConfig | null
+    private wrapCosts?: Map<string, bigint> | null
 
     async getNftConfigForItem(itemId: UInt64Type): Promise<NftConfigForItem | undefined> {
         const id = UInt64.from(itemId)
@@ -56,6 +68,18 @@ export class NftManager extends BaseManager {
         return result ?? undefined
     }
 
+    setWrapConfig(config: WrapConfigInput | null): void {
+        this.wrapConfig = config
+            ? {feePctBasisPoints: config.feePctBasisPoints, feeAccount: Name.from(config.feeAccount)}
+            : null
+    }
+
+    setWrapCosts(costs: WrapCostInput[] | null): void {
+        this.wrapCosts = costs
+            ? new Map(costs.map((c) => [wrapCostKey(c.itemType, c.tier).toString(), BigInt(c.units)]))
+            : null
+    }
+
     async getWrapConfig(reload = false): Promise<WrapConfig | null> {
         if (!reload && this.wrapConfig !== undefined) {
             return this.wrapConfig
@@ -69,7 +93,11 @@ export class NftManager extends BaseManager {
         return this.wrapConfig
     }
 
-    async getWrapCost(itemType: number, tier: number): Promise<bigint> {
+    async getWrapCost(itemType: number, tier: number, reload = false): Promise<bigint> {
+        if (!reload && this.wrapCosts) {
+            const seeded = this.wrapCosts.get(wrapCostKey(itemType, tier).toString())
+            if (seeded !== undefined) return seeded
+        }
         const row = (await this.server.table('wrapcost').get(wrapCostKey(itemType, tier))) as
             | ServerContract.Types.wrapcost_row
             | undefined
@@ -81,7 +109,7 @@ export class NftManager extends BaseManager {
         tier: number,
         opts: {reload?: boolean} = {}
     ): Promise<WrapDeposit | null> {
-        const cost = await this.getWrapCost(itemType, tier)
+        const cost = await this.getWrapCost(itemType, tier, opts.reload)
         if (cost === 0n) return null
 
         const wrapConfig = await this.getWrapConfig(opts.reload)
