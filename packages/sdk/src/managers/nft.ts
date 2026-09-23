@@ -70,13 +70,18 @@ export class NftManager extends BaseManager {
 
     setWrapConfig(config: WrapConfigInput | null): void {
         this.wrapConfig = config
-            ? {feePctBasisPoints: config.feePctBasisPoints, feeAccount: Name.from(config.feeAccount)}
+            ? {
+                  feePctBasisPoints: config.feePctBasisPoints,
+                  feeAccount: Name.from(config.feeAccount),
+              }
             : null
     }
 
     setWrapCosts(costs: WrapCostInput[] | null): void {
         this.wrapCosts = costs
-            ? new Map(costs.map((c) => [wrapCostKey(c.itemType, c.tier).toString(), BigInt(c.units)]))
+            ? new Map(
+                  costs.map((c) => [wrapCostKey(c.itemType, c.tier).toString(), BigInt(c.units)])
+              )
             : null
     }
 
