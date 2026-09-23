@@ -10,6 +10,7 @@ import {
 	formatReserve,
 	formatResolveHint,
 	formatTaskShort,
+	formatTaskType,
 } from "../../src/lib/format";
 
 describe("formatLocation with reach", () => {
@@ -244,6 +245,16 @@ describe("formatTaskShort", () => {
 
 	test("Demolish is bare verb", () => {
 		expect(formatTaskShort(task({ type: 13 as never }))).toBe("Demolish");
+	});
+});
+
+describe("formatTaskType", () => {
+	test("task type 21 renders as a drop-off", () => {
+		expect(formatTaskType(21)).toBe("Drop-off");
+	});
+
+	test("task type 22 renders as a pickup", () => {
+		expect(formatTaskType(22)).toBe("Pickup");
 	});
 });
 

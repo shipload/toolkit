@@ -74,6 +74,8 @@ const TASK_TYPES: Record<number, string> = {
 	[TaskType.UNDEPLOY]: "Undeploy",
 	[TaskType.DEMOLISH]: "Demolish",
 	[TaskType.REFIT]: "Refit",
+	[TaskType.CIVIC_DEPOSIT]: "Drop-off",
+	[TaskType.CIVIC_WITHDRAW]: "Pickup",
 };
 
 export function formatTaskType(type: number): string {

@@ -23,7 +23,31 @@ test('craftjob builds action with ship, workshop and inputs, no socket', async (
         'recipe_id',
         'quantity',
         'inputs',
+        'carrier',
     ])
+})
+
+test('craftjob buildAction forwards --carrier as the last SDK action argument', async () => {
+    const action = await buildAction(
+        {
+            entityType: 'ship',
+            entityId: 1003n,
+            workshopId: 1001n,
+            recipeId: 10001,
+            quantity: 1,
+            inputs: [{itemId: 101, quantity: 10, stackId: 413333752n}],
+            carrier: 15n,
+        },
+        getLocalShipload()
+    )
+    const decoded = action.decodeData(getLocalShipload().server.abi) as Record<string, unknown>
+    expect(String(decoded.carrier)).toBe('15')
+})
+
+test('craftjob SUBCOMMAND accepts --carrier', () => {
+    const cmd = SUBCOMMAND.build({entityType: 'ship', entityId: 1n})
+    const longs = cmd.options.map((o) => o.long)
+    expect(longs).toContain('--carrier')
 })
 
 test('craftjob buildAction accepts multi-stack inputs', async () => {

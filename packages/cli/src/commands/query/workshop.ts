@@ -1,20 +1,24 @@
 import {
+    HoldKind,
+    hostedDropoff,
     jobCancelRoute,
     jobCancellationBlockReason,
     jobDeposited,
     jobsToLanes,
     jobStatus,
     jobStatusLabel,
-    type JobCancelRoute,
-    type JobWindow,
-    type OrderedTask,
     schedule,
     ServerTypes,
     splitJobCargo,
+    type HostedLeg,
+    type JobCancelRoute,
+    type JobRouteOptions,
+    type JobWindow,
+    type OrderedTask,
 } from '@shipload/sdk'
 import type {Command} from 'commander'
 import {parseUint64} from '../../lib/args'
-import {getShipload, server} from '../../lib/client'
+import {getShipload, gameContractName, server} from '../../lib/client'
 import {withValidation} from '../../lib/errors'
 import {formatItem, formatOutput, formatTimeUTC} from '../../lib/format'
 import {transact} from '../../lib/session'
@@ -25,6 +29,48 @@ export interface WorkshopShowView {
     workshopId: bigint
     socketCount: number
     jobs: JobWindow[]
+    hostedOptions?: Record<string, JobRouteOptions>
+}
+
+export type EntityRowFetcher = (id: bigint | number) => Promise<ServerTypes.entity_row>
+
+async function resolveCivicOwner(): Promise<string> {
+    const sl = await getShipload()
+    return (await sl.influence.getCivicOwner()).toString()
+}
+
+export async function resolveHostedLeg(
+    job: JobWindow,
+    shipRow: ServerTypes.entity_row | undefined,
+    fetchRow: EntityRowFetcher = getEntityRow,
+    civicOwner: string = gameContractName
+): Promise<JobRouteOptions | undefined> {
+    if (!shipRow) return undefined
+    const pullHoldIds = Array.from(
+        new Set(
+            (shipRow.holds ?? [])
+                .filter((h) => h.kind.toNumber() === HoldKind.PULL)
+                .map((h) => h.counterpart.entity_id.toString())
+        )
+    )
+    if (pullHoldIds.length === 0) return undefined
+    const hostRows = new Map<string, ServerTypes.entity_row>()
+    for (const id of pullHoldIds) {
+        try {
+            hostRows.set(id, await fetchRow(BigInt(id)))
+        } catch {}
+    }
+    const hosted: (HostedLeg & {task: OrderedTask}) | undefined = hostedDropoff(
+        shipRow,
+        (id) => hostRows.get(id),
+        job,
+        civicOwner
+    )
+    if (!hosted) return undefined
+    const hostLaneLength = schedule
+        .orderedTasks(hostRows.get(String(hosted.hostId)) ?? {lanes: []})
+        .filter((t) => t.laneKey === hosted.laneKey).length
+    return {hosted, hostedTask: hosted.task, hostLaneLength}
 }
 
 export function workshopCancelBlockMessage(
@@ -77,8 +123,11 @@ export function renderWorkshopShow(view: WorkshopShowView, now: Date): string {
             `  ${'job'.padEnd(6)}  ${'start'.padEnd(12)}  ${'done'.padEnd(12)}  ${'owner'.padEnd(13)}  ${'state'.padEnd(16)}  output`
         )
         for (const w of windows) {
+            const status = jobStatusLabel(
+                jobStatus(w, now, undefined, view.hostedOptions?.[String(w.id)])
+            )
             lines.push(
-                `  ${String(w.id).padEnd(6)}  ${formatTimeUTC(w.startsAt).padEnd(12)}  ${formatTimeUTC(w.completesAt).padEnd(12)}  ${w.owner.padEnd(13)}  ${jobStatusLabel(jobStatus(w, now)).padEnd(16)}  ${formatItem(w.recipeId)}`
+                `  ${String(w.id).padEnd(6)}  ${formatTimeUTC(w.startsAt).padEnd(12)}  ${formatTimeUTC(w.completesAt).padEnd(12)}  ${w.owner.padEnd(13)}  ${status.padEnd(16)}  ${formatItem(w.recipeId)}`
             )
         }
     }
@@ -95,13 +144,59 @@ async function loadJobs(workshopId: bigint): Promise<JobWindow[]> {
     return result.jobs.map(toJobWindow)
 }
 
-export async function loadWorkshopShow(workshopId: bigint): Promise<WorkshopShowView> {
+export async function loadWorkshopShow(
+    workshopId: bigint,
+    fetchRow: EntityRowFetcher = getEntityRow
+): Promise<WorkshopShowView> {
     const snap = await getEntitySnapshot(workshopId)
+    const jobs = await loadJobs(workshopId)
+    const civicOwner = await resolveCivicOwner()
+    const hostedOptions: Record<string, JobRouteOptions> = {}
+    for (const job of jobs) {
+        if (job.deposited !== false || job.shipId === undefined) continue
+        let shipRow: ServerTypes.entity_row | undefined
+        try {
+            shipRow = await fetchRow(job.shipId)
+        } catch {
+            continue
+        }
+        const options = await resolveHostedLeg(job, shipRow, fetchRow, civicOwner)
+        if (options) hostedOptions[String(job.id)] = options
+    }
     return {
         workshopId,
         socketCount: snap.crafter_lanes.length,
-        jobs: await loadJobs(workshopId),
+        jobs,
+        hostedOptions,
     }
+}
+
+export async function resolveCancelRoute(
+    workshopId: bigint,
+    job: JobWindow,
+    now: Date,
+    fetchRow: EntityRowFetcher = getEntityRow,
+    civicOwner: string = gameContractName
+): Promise<JobCancelRoute> {
+    const shipRow =
+        job.deposited || job.shipId === undefined ? undefined : await fetchRow(job.shipId)
+    const tasks = shipRow ? schedule.orderedTasks(shipRow) : undefined
+    const hostedOptions =
+        job.deposited === false
+            ? await resolveHostedLeg(job, shipRow, fetchRow, civicOwner)
+            : undefined
+    const blocked = workshopCancelBlockMessage(job, tasks)
+    if (blocked) {
+        throw new ValidationError(blocked, 'wait for the job to finish, then claim its output')
+    }
+    const route = jobCancelRoute(job, now, tasks, hostedOptions)
+    if (!route) {
+        throw new ValidationError(
+            `job ${job.id} is ${jobStatusLabel(jobStatus(job, now, tasks, hostedOptions))} and can no longer be cancelled.`,
+            'a job cancels until the Fabricator starts on it'
+        )
+    }
+    return route
 }
 
 export async function loadCancelRoute(
@@ -116,22 +211,16 @@ export async function loadCancelRoute(
             `list its jobs with: shiploadcli workshop ${workshopId} show`
         )
     }
-    const tasks =
-        job.deposited || job.shipId === undefined
-            ? undefined
-            : schedule.orderedTasks(await getEntityRow(job.shipId))
-    const blocked = workshopCancelBlockMessage(job, tasks)
-    if (blocked) {
-        throw new ValidationError(blocked, 'wait for the job to finish, then claim its output')
+    return resolveCancelRoute(workshopId, job, now, getEntityRow, await resolveCivicOwner())
+}
+
+async function depotName(id: number): Promise<string> {
+    try {
+        const snap = await getEntitySnapshot(BigInt(id))
+        return snap.entity_name?.trim() || `Depot ${id}`
+    } catch {
+        return `Depot ${id}`
     }
-    const route = jobCancelRoute(job, now, tasks)
-    if (!route) {
-        throw new ValidationError(
-            `job ${jobId} is ${jobStatusLabel(jobStatus(job, now, tasks))} and can no longer be cancelled.`,
-            'a job cancels until the Fabricator starts on it'
-        )
-    }
-    return route
 }
 
 async function runCancel(workshopId: bigint, jobId: bigint): Promise<void> {
@@ -140,7 +229,9 @@ async function runCancel(workshopId: bigint, jobId: bigint): Promise<void> {
     const via =
         route.kind === 'dropoff'
             ? `calling back the Drop-off on ship ${route.shipId}`
-            : 'releasing its materials at the Workshop'
+            : route.kind === 'civic'
+              ? `calling back the Drop-off from ${await depotName(route.buildingId)}`
+              : 'releasing its materials at the Workshop'
     await transact(
         {action: sl.actions.canceljob(route)},
         {description: `Cancelling craft job ${jobId} at Workshop ${workshopId}, ${via}`}

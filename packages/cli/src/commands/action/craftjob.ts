@@ -30,6 +30,7 @@ export interface CraftjobOpts {
     recipeId: number
     quantity: number
     inputs: ResolvedCargoInput[]
+    carrier?: bigint
 }
 
 export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Promise<Action> {
@@ -47,8 +48,13 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
         opts.workshopId,
         opts.recipeId,
         opts.quantity,
-        cargoInputs
+        cargoInputs,
+        opts.carrier
     )
+}
+
+export interface CraftjobCliOptions extends WaitableOptions {
+    carrier?: bigint
 }
 
 export async function runCraftjob(
@@ -57,7 +63,7 @@ export async function runCraftjob(
     recipeId: number,
     quantity: number,
     inputs: ParsedCargoInput[],
-    options: WaitableOptions
+    options: CraftjobCliOptions
 ): Promise<void> {
     await withValidation(async () => {
         const snap = await getEntitySnapshot(ctx.entityId)
@@ -73,6 +79,7 @@ export async function runCraftjob(
             recipeId,
             quantity,
             inputs: resolved,
+            carrier: options.carrier,
         })
         const result = await transact(
             {action},
@@ -118,6 +125,11 @@ See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids w
                 '<item-id>:<stack-id>:<qty> — total units to pull from a specific cargo stack. Repeat once per stack drawn.',
                 accumulateCargoInputs
             )
+            .option(
+                '--carrier <id>',
+                'entity that shuttles the cargo; a depot id uses its shuttle bays',
+                parseUint64
+            )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
             .action(
@@ -126,7 +138,7 @@ See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids w
                     recipeId: number,
                     quantity: number,
                     inputs: ParsedCargoInput[],
-                    opts: WaitableOptions
+                    opts: CraftjobCliOptions
                 ) => {
                     await runCraftjob(ctx, workshopId, recipeId, quantity, inputs, opts)
                 }
