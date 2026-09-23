@@ -41,7 +41,7 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })
 
-    it('reports an undeposited row as dropping off, whatever its window says', async () => {
+    it('reports a legacy undeposited row (inputs only) as dropping off, whatever its window says', async () => {
         const inFlight = row({
             deposited: false,
             cargo: [{item: 'in'}],
@@ -55,6 +55,27 @@ describe('JobsManager.getOwnedJobs', () => {
         expect(jobs[0].deposited).toBe(false)
         expect(jobs[0].output).toBeNull()
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
+    })
+
+    it('reads a booking-time undeposited row whose input is booked as more than one stack', async () => {
+        const inFlight = row({
+            deposited: false,
+            cargo: [
+                {item_id: 101, quantity: 20},
+                {item_id: 101, quantity: 30},
+            ],
+        })
+        const m = managerWith(
+            async () => [inFlight],
+            async () => []
+        )
+        const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
+        expect(jobs[0].status).toBe('dropping')
+        expect(jobs[0].inputs).toEqual([
+            {item_id: 101, quantity: 20},
+            {item_id: 101, quantity: 30},
+        ] as never)
+        expect(jobs[0].output).toBeNull()
     })
 
     it('reports a cancelled row as ready with its inputs held', async () => {

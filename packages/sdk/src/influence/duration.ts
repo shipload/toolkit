@@ -1,5 +1,6 @@
 import type {NameType} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
+import {getItem} from '../data/catalog'
 import {getEntityClass} from '../data/kind-registry'
 import {computeLoaderMass, computeLoaderThrust} from '../nft/description'
 import {laneKeyForModule, resolveLaneLoader} from '../scheduling/lanes'
@@ -42,6 +43,45 @@ export function contributeDurationForTonnes(tonnes: number, altitudeZ = 0): numb
 
 export const DEPOT_LOADER_SLOT = 0
 
+export function civicInternalShuttle(
+    modules: ServerContract.Types.module_entry[],
+    itemId: number
+): {thrust: number; mass: number} | null {
+    for (let slot = 0; slot < modules.length; slot++) {
+        const installed = modules[slot].installed
+        if (!installed) continue
+        if (getItem(installed.item_id).moduleType !== 'loader') continue
+        const loader = resolveLaneLoader(modules, itemId, laneKeyForModule(slot))
+        return {thrust: loader.thrust, mass: loader.mass}
+    }
+    return null
+}
+
+export interface CivicLegParams {
+    buildingModules: ServerContract.Types.module_entry[]
+    buildingItemId: number
+    buildingKind: NameType
+    buildingZ: number
+    entityKind: NameType
+    entityZ: number
+    cargoMass: number
+}
+
+// Mirrors cargo.cpp internal_shuttle_duration.
+export function civicLegDuration(params: CivicLegParams): number {
+    const loader = civicInternalShuttle(params.buildingModules, params.buildingItemId)
+    if (!loader) return contributeDuration(params.cargoMass, params.entityZ)
+    return calc_onesided_duration(
+        loader.thrust,
+        loader.mass,
+        params.entityZ,
+        params.buildingZ,
+        getEntityClass(params.entityKind),
+        getEntityClass(params.buildingKind),
+        params.cargoMass
+    )
+}
+
 export interface DepotTransferParams {
     depotModules: ServerContract.Types.module_entry[]
     depotItemId: number
@@ -52,23 +92,17 @@ export interface DepotTransferParams {
     cargoMass: number
 }
 
-// Mirrors depot.cpp: the depot's slot-0 loader drives the transfer; 0 when no loader is installed.
+/** @deprecated Use civicLegDuration. */
 export function depotTransferDuration(params: DepotTransferParams): number {
-    const loader = resolveLaneLoader(
-        params.depotModules,
-        params.depotItemId,
-        laneKeyForModule(DEPOT_LOADER_SLOT)
-    )
-    if (!loader.valid) return 0
-    return calc_onesided_duration(
-        loader.thrust,
-        loader.mass,
-        params.shipZ,
-        params.depotZ,
-        getEntityClass(params.shipKind),
-        getEntityClass(params.depotKind),
-        params.cargoMass
-    )
+    return civicLegDuration({
+        buildingModules: params.depotModules,
+        buildingItemId: params.depotItemId,
+        buildingKind: params.depotKind,
+        buildingZ: params.depotZ,
+        entityKind: params.shipKind,
+        entityZ: params.shipZ,
+        cargoMass: params.cargoMass,
+    })
 }
 
 export interface CivicDropoffParams {
@@ -81,21 +115,15 @@ export interface CivicDropoffParams {
     cargoMass: number
 }
 
-// Mirrors jobs.cpp craftjob: the building's slot-0 loader when one is installed, the civic loader when none is.
+/** @deprecated Use civicLegDuration. */
 export function civicDropoffDuration(params: CivicDropoffParams): number {
-    const loader = resolveLaneLoader(
-        params.buildingModules,
-        params.buildingItemId,
-        laneKeyForModule(DEPOT_LOADER_SLOT)
-    )
-    if (!loader.valid) return contributeDuration(params.cargoMass, params.shipZ)
-    return calc_onesided_duration(
-        loader.thrust,
-        loader.mass,
-        params.shipZ,
-        params.buildingZ,
-        getEntityClass(params.shipKind),
-        getEntityClass(params.buildingKind),
-        params.cargoMass
-    )
+    return civicLegDuration({
+        buildingModules: params.buildingModules,
+        buildingItemId: params.buildingItemId,
+        buildingKind: params.buildingKind,
+        buildingZ: params.buildingZ,
+        entityKind: params.shipKind,
+        entityZ: params.shipZ,
+        cargoMass: params.cargoMass,
+    })
 }

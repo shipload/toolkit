@@ -12,6 +12,7 @@ import {
     pendingCivicTransfers,
     selectCivicShuttleBay,
     CIVIC_TRANSFER_PER_PLAYER_CAP,
+    type CivicShuttleBay,
 } from './civic-shuttle'
 
 type Lane = ServerContract.Types.lane
@@ -61,6 +62,32 @@ function shuttleTask(senderId: number, receiverId: number, group?: number): Task
         ],
         entitygroup: group === undefined ? undefined : UInt64.from(group),
     } as unknown as Task
+}
+
+function civicTask(type: number, couplings: unknown[]): Task {
+    return {
+        type: UInt8.from(type),
+        duration: UInt32.from(60),
+        cancelable: UInt8.from(2),
+        cargo: [],
+        couplings,
+    } as unknown as Task
+}
+
+function pullCoupling(id: number) {
+    return {
+        counterpart: {entity_id: UInt64.from(id), entity_type: UInt8.from(1)},
+        hold: UInt64.from(1),
+        kind: UInt8.from(HoldKind.PULL),
+    }
+}
+
+function pushCoupling(id: number) {
+    return {
+        counterpart: {entity_id: UInt64.from(id), entity_type: UInt8.from(1)},
+        hold: UInt64.from(1),
+        kind: UInt8.from(HoldKind.PUSH),
+    }
 }
 
 function makeLane(laneKey: number, tasks: Task[]): Lane {
@@ -142,6 +169,13 @@ test('selectCivicShuttleBay takes the first free bay, then the lowest occupied o
     expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, bothBusy, T0)?.laneKey).toBe(1)
 })
 
+test('selectCivicShuttleBay picks the earliest finish, not the first free bay', () => {
+    const modules = depotModules()
+    const lanes = [makeLane(1, [shuttleTask(20, 21)])]
+    const fast = (bay: CivicShuttleBay) => (bay.slotIndex === 0 ? 10 : 500)
+    expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, lanes, T0, fast)?.slotIndex).toBe(0)
+})
+
 test('selectCivicShuttleBay returns nothing when the building has no loaders', () => {
     const modules = [makeModuleEntry(ITEM_STORAGE_T1, storageStats)]
     expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [], T0)).toBeUndefined()
@@ -188,6 +222,30 @@ test('civicTransfersFrom counts only the ships a player sends from', () => {
     expect(civicTransfersFrom(entity, [20, 22], T0).length).toBe(2)
     expect(civicTransfersFrom(entity, [30], T0).length).toBe(1)
     expect(civicTransfersFrom(entity, [99], T0).length).toBe(0)
+})
+
+test('civic legs on bays count toward the player cap', () => {
+    const depot = {
+        lanes: [makeLane(1, [civicTask(TaskType.CIVIC_WITHDRAW, [pushCoupling(7)])])],
+    } as never
+    expect(civicTransfersFrom(depot, [7]).length).toBe(1)
+})
+
+test('a civic deposit leg reports the same player id as sender and receiver', () => {
+    const depot = {
+        lanes: [makeLane(1, [civicTask(TaskType.CIVIC_DEPOSIT, [pullCoupling(7)])])],
+    } as never
+    const [transfer] = pendingCivicTransfers(depot, T0)
+    expect(String(transfer.senderId)).toBe('7')
+    expect(String(transfer.receiverId)).toBe('7')
+})
+
+test('a civic pickup leg is not callable while CANCEL_NEVER', () => {
+    const task = civicTask(TaskType.CIVIC_WITHDRAW, [pushCoupling(7)])
+    ;(task as unknown as {cancelable: unknown}).cancelable = UInt8.from(0)
+    const depot = {lanes: [makeLane(1, [task])]} as never
+    const [transfer] = pendingCivicTransfers(depot, T0)
+    expect(transfer.callable).toBe(false)
 })
 
 test('civicTransfersAtCap trips at the per-player cap', () => {

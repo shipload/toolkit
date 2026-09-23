@@ -281,6 +281,48 @@ test('craft with both target and slot includes both', () => {
     expect(Number(data.slot)).toBe(1)
 })
 
+test('craftjob without a carrier omits the carrier field', () => {
+    const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)])
+    const data = action.decodeData(ServerContract.abi)
+    expect(data.carrier).toBeNull()
+})
+
+test('craftjob with a carrier passes it through', () => {
+    const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)], 5)
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.carrier)).toBe('5')
+})
+
+test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their carrier', () => {
+    expect(String(sl.actions.claimcraft(1, 2, 5).decodeData(ServerContract.abi).carrier)).toBe('5')
+    expect(
+        String(
+            sl.actions.buildjob(1, 2, 10001, [cargo(10201, 1)], 5).decodeData(ServerContract.abi)
+                .carrier
+        )
+    ).toBe('5')
+    expect(String(sl.actions.cancelbuild(1, 5).decodeData(ServerContract.abi).carrier)).toBe('5')
+    expect(
+        String(
+            sl.actions.depotstore(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi).carrier
+        )
+    ).toBe('5')
+    expect(
+        String(
+            sl.actions.depottake(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi).carrier
+        )
+    ).toBe('5')
+})
+
+test('canceljob sends cancelcivic for a bay-hosted drop-off', () => {
+    const action = sl.actions.canceljob({kind: 'civic', buildingId: 90000, laneKey: 1, fromId: 7})
+    expect(String(action.name)).toBe('cancelcivic')
+    const data = action.decodeData(ServerContract.abi)
+    expect(String(data.building)).toBe('90000')
+    expect(Number(data.lane_key)).toBe(1)
+    expect(String(data.from_id)).toBe('7')
+})
+
 test('getLaunchQuote mirrors contract launch formulas for a deterministic route', () => {
     const start = new Date('2026-06-26T00:00:00.000Z')
     const quote = sl.actions.getLaunchQuote(

@@ -1,7 +1,11 @@
 import {describe, expect, it} from 'bun:test'
-import type {OrderedTask} from './schedule'
+import {UInt8, UInt32, UInt64} from '@wharfkit/antelope'
+import {ServerContract} from '../contracts'
+import {HoldKind} from '../types'
+import type {OrderedTask, ScheduleData} from './schedule'
 import {
     buildJobCancelRoute,
+    hostedDropoff,
     jobCancelRoute,
     jobCancellationBlockReason,
     jobCancellable,
@@ -15,6 +19,7 @@ import {
 } from './jobs'
 
 const at = (s: string) => new Date(s)
+const WITH_MODULES = [{item_id: 101, stats: '413333752', quantity: 10, modules: []}] as never
 
 const INPUTS = [{item_id: 101, stats: '413333752', quantity: 10}] as never
 const FULL_INPUT = {
@@ -191,6 +196,28 @@ describe('jobStatus', () => {
     it('reads an undeposited row as dropping off when no schedule is given', () => {
         expect(jobStatus(inFlight, at('2026-07-26T09:00:00Z'))).toBe('dropping')
     })
+    it('finds the Drop-off of a booking-time undeposited job from its inputs-only cargo', () => {
+        const input = {item_id: 1, stats: '0', quantity: 5, modules: [], entity_id: undefined}
+        const {inputs} = splitJobCargo([input], false, 1)
+        const dropoff = task({
+            type: 21,
+            building: 7,
+            cargo: [input],
+            startsAt: at('2026-07-26T00:00:00Z'),
+            completesAt: at('2026-07-26T00:00:01Z'),
+        })
+        expect(
+            jobDropoffTask(
+                {
+                    startsAt: new Date(0),
+                    completesAt: new Date(0),
+                    building: 7,
+                    inputs: inputs as never,
+                },
+                [dropoff]
+            )
+        ).toBe(dropoff)
+    })
     it('labels every phase', () => {
         expect(jobStatusLabel('booked')).toBe('Booked')
         expect(jobStatusLabel('dropping')).toBe('Dropping off')
@@ -261,6 +288,37 @@ describe('jobCancelRoute', () => {
     })
     it('cancels a Queued job through cancelcraft', () => {
         expect(jobCancelRoute(job, at('2026-07-26T09:59:59Z'))).toEqual({kind: 'craft', jobId: 7})
+    })
+    it('routes a bay-hosted drop-off cancel through cancelcivic when the task is the lane tail and not yet completed', () => {
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [], {
+            hosted: {hostId: 90000, laneKey: 1, taskIndex: 0, civic: true},
+            hostedTask: dropoff,
+            hostLaneLength: 1,
+        })
+        expect(route).toEqual({kind: 'civic', buildingId: 90000, laneKey: 1, fromId: 5})
+    })
+    it('refuses a bay-hosted civic cancel once the hosted task has completed', () => {
+        const route = jobCancelRoute(inFlight, at('2026-07-26T10:00:00Z'), [], {
+            hosted: {hostId: 90000, laneKey: 1, taskIndex: 0, civic: true},
+            hostedTask: dropoff,
+            hostLaneLength: 1,
+        })
+        expect(route).toBeNull()
+    })
+    it('refuses a bay-hosted civic cancel when the hosted task is not the lane tail', () => {
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [], {
+            hosted: {hostId: 90000, laneKey: 1, taskIndex: 0, civic: true},
+            hostedTask: dropoff,
+            hostLaneLength: 2,
+        })
+        expect(route).toBeNull()
+    })
+    it('routes a third-party-hosted drop-off cancel through the carrier ship', () => {
+        const route = jobCancelRoute(inFlight, at('2026-07-26T09:00:00Z'), [], {
+            hosted: {hostId: 8, laneKey: 2, taskIndex: 0, civic: false},
+            hostLaneLength: 3,
+        })
+        expect(route).toEqual({kind: 'dropoff', shipId: 8, laneKey: 2, count: 3})
     })
     it('refuses only deposited positive-quantity output-only legacy jobs', () => {
         const legacy = {...job, inputs: []}
@@ -412,6 +470,15 @@ describe('splitJobCargo', () => {
         expect(splitJobCargo([], true, 1)).toEqual({output: null, inputs: []})
         expect(splitJobCargo([], false, 1)).toEqual({output: null, inputs: []})
     })
+    it('reads an undeposited row whose input is booked as more than one stack per recipe slot', () => {
+        const stackA1 = {item_id: 1, quantity: 2}
+        const stackA2 = {item_id: 1, quantity: 1}
+        const stackB = {item_id: 2, quantity: 4}
+        const cargo = [stackA1, stackA2, stackB] as unknown as Parameters<typeof splitJobCargo>[0]
+        const {output, inputs} = splitJobCargo(cargo, false, 1)
+        expect(output).toBeNull()
+        expect(inputs).toEqual([stackA1, stackA2, stackB] as never)
+    })
 })
 
 describe('workshopAvailability', () => {
@@ -444,5 +511,108 @@ describe('workshopAvailability', () => {
     it('ignores ended windows', () => {
         const jobs = [win(0, '2026-07-26T08:00:00Z', '2026-07-26T09:00:00Z')]
         expect(workshopAvailability(jobs, 1, now)).toEqual({open: 1, nextOpeningAt: null})
+    })
+})
+
+describe('hostedDropoff', () => {
+    function hostWithDeposit(
+        entityType: string,
+        building: number,
+        holdId: number,
+        owner = 'nex.shipload'
+    ): ScheduleData & {owner: string} {
+        return {
+            owner,
+            lanes: [
+                ServerContract.Types.lane.from({
+                    lane_key: UInt8.from(1),
+                    schedule: {
+                        started: '2026-07-26T09:00:00.000',
+                        tasks: [
+                            {
+                                type: UInt8.from(21),
+                                duration: UInt32.from(600),
+                                cancelable: UInt8.from(2),
+                                cargo: WITH_MODULES,
+                                couplings: [
+                                    {
+                                        counterpart: {entity_type: 'ship', entity_id: 5},
+                                        hold: holdId,
+                                        kind: HoldKind.PULL,
+                                    },
+                                ],
+                                subject: {entity_type: entityType, entity_id: building},
+                            },
+                        ],
+                    },
+                }),
+            ],
+        }
+    }
+
+    function sourceWithHold(hostId: number, hostType: string, holdId: number): ScheduleData {
+        return {
+            holds: [
+                ServerContract.Types.hold.from({
+                    id: holdId,
+                    kind: HoldKind.PULL,
+                    counterpart: {entity_type: hostType, entity_id: hostId},
+                    until: '2026-07-26T09:50:00.000',
+                    incoming_mass: 0,
+                }),
+            ],
+        }
+    }
+
+    const job = {
+        building: 42,
+        inputs: WITH_MODULES,
+        startsAt: at('2026-07-26T10:00:00Z'),
+        completesAt: at('2026-07-26T11:00:00Z'),
+    }
+
+    it('finds the carrier hosting a bay-hosted Drop-off and flags it civic', () => {
+        const host = hostWithDeposit('depot', 42, 3, 'nex.shipload')
+        const source = sourceWithHold(90000, 'depot', 3)
+        const lookup = (id: string) => (id === '90000' ? host : undefined)
+        const result = hostedDropoff(source, lookup, job, 'nex.shipload')
+        expect(result).toMatchObject({hostId: 90000, laneKey: 1, taskIndex: 0, civic: true})
+    })
+
+    it('does not flag a player-owned Depot civic', () => {
+        const host = hostWithDeposit('depot', 42, 3, 'alice')
+        const source = sourceWithHold(90000, 'depot', 3)
+        const lookup = (id: string) => (id === '90000' ? host : undefined)
+        const result = hostedDropoff(source, lookup, job, 'nex.shipload')
+        expect(result).toMatchObject({hostId: 90000, laneKey: 1, taskIndex: 0, civic: false})
+    })
+
+    it('finds a third-party carrier and does not flag it civic', () => {
+        const host = hostWithDeposit('ship', 42, 3, 'alice')
+        const source = sourceWithHold(8, 'ship', 3)
+        const lookup = (id: string) => (id === '8' ? host : undefined)
+        const result = hostedDropoff(source, lookup, job, 'nex.shipload')
+        expect(result).toMatchObject({hostId: 8, laneKey: 1, taskIndex: 0, civic: false})
+    })
+
+    it('returns undefined when no PULL hold names a matching host task', () => {
+        expect(hostedDropoff({holds: []}, () => undefined, job)).toBeUndefined()
+        const host = hostWithDeposit('depot', 99, 3)
+        const source = sourceWithHold(90000, 'depot', 3)
+        const lookup = (id: string) => (id === '90000' ? host : undefined)
+        expect(hostedDropoff(source, lookup, job)).toBeUndefined()
+    })
+
+    it('does not match a Drop-off whose arrival differs from the job', () => {
+        const host = hostWithDeposit('depot', 42, 3, 'nex.shipload')
+        const source = sourceWithHold(90000, 'depot', 3)
+        const lookup = (id: string) => (id === '90000' ? host : undefined)
+        const result = hostedDropoff(
+            source,
+            lookup,
+            {...job, arrivesAt: at('2026-07-26T12:00:00Z')},
+            'nex.shipload'
+        )
+        expect(result).toBeUndefined()
     })
 })

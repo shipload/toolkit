@@ -30,7 +30,7 @@ import {
     stackToCargoItem,
 } from '../capabilities/storage'
 import {hydrateEntityLanes} from '../entity/hydrate'
-import {craftCargoOwnership} from './availability'
+import {craftCargoOwnership, isHostedCivicLeg} from './availability'
 import * as schedule from './schedule'
 import type {ScheduleData} from './schedule'
 
@@ -394,6 +394,7 @@ function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.t
 }
 
 function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    if (isHostedCivicLeg(task)) return
     switch (task.type.toNumber()) {
         case TaskType.RECHARGE:
             applyRechargeTask(projected, task, {complete: true})

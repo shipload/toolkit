@@ -20,10 +20,18 @@ import {
     popcount5,
 } from './demand'
 import {findDecomp, DECOMP_REGISTRY} from './decomp'
-import {civicDropoffDuration, depotTransferDuration, contributeDuration} from './duration'
+import {
+    civicDropoffDuration,
+    civicLegDuration,
+    depotTransferDuration,
+    contributeDuration,
+} from './duration'
 import {getStatCount, statsSumSq} from './quality'
 import {explainCargoItem, pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
 import {getItems} from '../data/catalog'
+import {getEntityClass} from '../data/kind-registry'
+import {laneKeyForModule, resolveLaneLoader} from '../scheduling/lanes'
+import {calc_onesided_duration} from '../travel/travel'
 import {citizenryName, citizenryPatternCount} from './citizenry'
 import citizenryAdjectives from '../data/citizenry-adjectives.json'
 import citizenryNouns from '../data/citizenry-nouns.json'
@@ -175,12 +183,14 @@ describe('explainCargoItem', () => {
             pricing
         )
         if (explained.kind !== 'resource') throw new Error('expected resource')
-        expect(explained.mass).toBe(BigInt(getItems().find((i) => Number(i.id) === ITEM_CRYSTAL_T1)!.mass) * 5000n)
+        expect(explained.mass).toBe(
+            BigInt(getItems().find((i) => Number(i.id) === ITEM_CRYSTAL_T1)!.mass) * 5000n
+        )
         expect(explained.weight).toBe(1)
         expect(explained.quality).toBeCloseTo(1, 6)
         expect(explained.need).toBe(2)
         expect(explained.points).toBeCloseTo(
-            Number(explained.mass) / 10 * explained.weight * explained.quality * explained.need,
+            (Number(explained.mass) / 10) * explained.weight * explained.quality * explained.need,
             3
         )
     })
@@ -411,8 +421,10 @@ describe('depot transfer duration', () => {
         expect(depotTransferDuration(params({cargoMass: 0}))).toBe(0)
     })
 
-    test('a depot with no loader installed cannot transfer', () => {
-        expect(depotTransferDuration(params({depotModules: [emptySlot()]}))).toBe(0)
+    test('a depot with no loader installed falls back to the civic loader', () => {
+        const d = depotTransferDuration(params({depotModules: [emptySlot()]}))
+        expect(d).toBe(contributeDuration(100, 0))
+        expect(d).toBeGreaterThan(0)
     })
 
     test('co-located transfers are floored at the orbital minimum distance', () => {
@@ -492,5 +504,61 @@ describe('civic drop-off duration', () => {
         expect(civicDropoffDuration({...withoutLoader(), cargoMass: 10_000})).toBeGreaterThan(
             civicDropoffDuration(withoutLoader())
         )
+    })
+})
+
+describe('civicLegDuration', () => {
+    type ModuleEntry = ServerContract.Types.module_entry
+    const DEPOT_ITEM = 10219
+    const WORKSHOP_ITEM = 10208
+    const LOADER_T1 = 10103
+    const CRAFTER_T1 = 10104
+
+    function makeModuleEntry(itemId: number, stats: bigint): ModuleEntry {
+        return {
+            type: UInt8.from(0),
+            installed: {item_id: UInt16.from(itemId), stats: UInt64.from(stats)},
+        } as unknown as ModuleEntry
+    }
+    function emptySlot(): ModuleEntry {
+        return {type: UInt8.from(0)} as unknown as ModuleEntry
+    }
+
+    const base = {
+        buildingItemId: WORKSHOP_ITEM,
+        buildingKind: 'workshop',
+        buildingZ: 0,
+        entityKind: 'ship',
+        entityZ: 3000,
+        cargoMass: 6000,
+    }
+
+    test('ignores a crafter in slot 0 and uses the civic loader', () => {
+        const d = civicLegDuration({
+            ...base,
+            buildingModules: [makeModuleEntry(CRAFTER_T1, packStats(500))],
+        })
+        expect(d).toBe(contributeDuration(6000, 3000))
+    })
+
+    test('uses the first real loader even outside slot 0', () => {
+        const modules = [emptySlot(), makeModuleEntry(LOADER_T1, packStats(500))]
+        const d = civicLegDuration({
+            ...base,
+            buildingItemId: DEPOT_ITEM,
+            buildingKind: 'depot',
+            buildingModules: modules,
+        })
+        const loader = resolveLaneLoader(modules, DEPOT_ITEM, laneKeyForModule(1))
+        const expected = calc_onesided_duration(
+            loader.thrust,
+            loader.mass,
+            3000,
+            0,
+            getEntityClass('ship'),
+            getEntityClass('depot'),
+            6000
+        )
+        expect(d).toBe(expected)
     })
 })

@@ -1,6 +1,8 @@
+import type {NameType} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
-import {TaskType} from '../types'
-import type {OrderedTask} from './schedule'
+import {isCivicEntity} from '../influence/civic'
+import {HoldKind, TaskType} from '../types'
+import {orderedTasks, type OrderedTask, type ScheduleData} from './schedule'
 
 type CargoItem = ServerContract.Types.cargo_item
 
@@ -180,13 +182,31 @@ export function jobDropoffTask(
     return matches?.length === 1 ? matches[0] : undefined
 }
 
+export interface HostedLeg {
+    hostId: number
+    laneKey: number
+    taskIndex: number
+    civic: boolean
+}
+
+export interface JobRouteOptions {
+    hosted?: HostedLeg
+    hostedTask?: OrderedTask
+    hostLaneLength?: number
+}
+
 // Without the ship's schedule an undeposited row reads as Dropping off: the transfer usually starts at once.
 export function jobStatus(
     job: JobStatusInput,
     now: Date,
-    tasks?: readonly OrderedTask[]
+    tasks?: readonly OrderedTask[],
+    options?: JobRouteOptions
 ): JobStatus {
     if (job.deposited === false) {
+        if (options?.hosted) {
+            const start = options.hostedTask?.startsAt
+            return start && now < start ? 'booked' : 'dropping'
+        }
         const dropoff = jobDropoffTask(job, tasks)
         return dropoff && now < dropoff.startsAt ? 'booked' : 'dropping'
     }
@@ -231,18 +251,37 @@ export type JobCancelRoute =
     | {kind: 'dropoff'; shipId: number; laneKey: number; count: number}
     | {kind: 'craft'; jobId: number}
     | {kind: 'build'; jobId: number}
+    | {kind: 'civic'; buildingId: number; laneKey: number; fromId: number}
 
 // The ship's cancel pops from the lane tail, so the count reaches from the Drop-off through every task queued behind it.
 function cancelRoute(
     job: JobStatusInput & {id: number; shipId?: number},
     queued: 'craft' | 'build',
     now: Date,
-    tasks?: readonly OrderedTask[]
+    tasks?: readonly OrderedTask[],
+    options?: JobRouteOptions
 ): JobCancelRoute | null {
-    if (!jobCancellable(jobStatus(job, now, tasks))) return null
+    if (!jobCancellable(jobStatus(job, now, tasks, options))) return null
     if (queued === 'craft' && jobCancellationBlockReason(job, tasks)) return null
     if (job.deposited !== false) return {kind: queued, jobId: job.id}
-    if (job.shipId === undefined || !tasks) return null
+    if (job.shipId === undefined) return null
+    if (options?.hosted) {
+        const {hostId, laneKey, taskIndex, civic} = options.hosted
+        const laneLength = options.hostLaneLength ?? taskIndex + 1
+        if (civic) {
+            const isTail = taskIndex === laneLength - 1
+            const notCompleted = options.hostedTask ? options.hostedTask.completesAt > now : false
+            if (!isTail || !notCompleted) return null
+            return {kind: 'civic', buildingId: hostId, laneKey, fromId: job.shipId}
+        }
+        return {
+            kind: 'dropoff',
+            shipId: hostId,
+            laneKey,
+            count: laneLength - taskIndex,
+        }
+    }
+    if (!tasks) return null
     const dropoff = jobDropoffTask(job, tasks)
     if (!dropoff || dropoff.completesAt <= now) return null
     const laneLength = tasks.filter((t) => t.laneKey === dropoff.laneKey).length
@@ -257,18 +296,59 @@ function cancelRoute(
 export function jobCancelRoute(
     job: JobStatusInput & {id: number; shipId?: number},
     now: Date,
-    tasks?: readonly OrderedTask[]
+    tasks?: readonly OrderedTask[],
+    options?: JobRouteOptions
 ): JobCancelRoute | null {
-    return cancelRoute(job, 'craft', now, tasks)
+    return cancelRoute(job, 'craft', now, tasks, options)
 }
 
 // A Build Job's Drop-off rides on the upgrade target itself, so the target plays the ship's part.
 export function buildJobCancelRoute(
     job: JobStatusInput & {id: number; targetId?: number},
     now: Date,
-    tasks?: readonly OrderedTask[]
+    tasks?: readonly OrderedTask[],
+    options?: JobRouteOptions
 ): JobCancelRoute | null {
-    return cancelRoute({...job, shipId: job.targetId}, 'build', now, tasks)
+    return cancelRoute({...job, shipId: job.targetId}, 'build', now, tasks, options)
+}
+
+export interface HostedDropoffEntity extends ScheduleData {
+    owner?: NameType
+}
+
+// The source entity's HOLD_PULL names the carrier; the carrier's schedule carries the Drop-off task.
+export function hostedDropoff(
+    source: ScheduleData,
+    lookup: (id: string) => HostedDropoffEntity | undefined,
+    job: JobStatusInput,
+    civicOwner?: NameType
+): (HostedLeg & {task: OrderedTask}) | undefined {
+    for (const hold of source.holds ?? []) {
+        if (hold.kind.toNumber() !== HoldKind.PULL) continue
+        const host = lookup(hold.counterpart.entity_id.toString())
+        if (!host) continue
+        for (const entry of orderedTasks(host)) {
+            if (Number(entry.task.type) !== TaskType.CIVIC_DEPOSIT) continue
+            if (!entry.task.couplings.some((c) => c.hold.equals(hold.id))) continue
+            if (!matchesJob(entry, job)) continue
+            if (
+                job.arrivesAt !== undefined &&
+                entry.completesAt.getTime() !== job.arrivesAt.getTime()
+            )
+                continue
+            return {
+                hostId: Number(hold.counterpart.entity_id),
+                laneKey: entry.laneKey,
+                taskIndex: entry.taskIndex,
+                civic:
+                    civicOwner !== undefined &&
+                    host.owner !== undefined &&
+                    isCivicEntity({owner: host.owner}, civicOwner),
+                task: entry,
+            }
+        }
+    }
+    return undefined
 }
 
 export interface PickupInFlight {
@@ -312,15 +392,16 @@ export function jobDeposited(value: unknown): boolean {
     return Boolean(value)
 }
 
-// A deposited row's output is the cargo tail; a cancelled row (quantity 0) holds only its inputs.
+// A deposited row's cargo is its inputs plus the output tail; an undeposited row carries inputs only.
 export function splitJobCargo<T>(
     cargo: readonly T[],
     deposited: boolean,
     quantity: number
 ): {output: T | null; inputs: T[]} {
     if (cargo.length === 0) return {output: null, inputs: []}
-    if (!deposited || quantity === 0) return {output: null, inputs: [...cargo]}
-    return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
+    if (deposited && quantity > 0)
+        return {output: cargo[cargo.length - 1], inputs: cargo.slice(0, -1)}
+    return {output: null, inputs: [...cargo]}
 }
 
 export interface BuildJob {

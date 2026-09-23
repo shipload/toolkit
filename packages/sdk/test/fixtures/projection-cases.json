@@ -1,6 +1,6 @@
 {
   "catalog_hash": "c58710d7afbb9febdf8996f7c2cb00e18332cb94592e107791874506e9bebbfc",
-  "generated_at": "2026-09-18T22:28:27.735Z",
+  "generated_at": "2026-09-23T02:04:05.344Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -1552,7 +1552,7 @@
               "tasks": [
                 {
                   "type": 21,
-                  "duration": 35,
+                  "duration": 27,
                   "cancelable": 2,
                   "coordinates": {
                     "x": -47,
@@ -1707,7 +1707,7 @@
               "tasks": [
                 {
                   "type": 21,
-                  "duration": 35,
+                  "duration": 27,
                   "cancelable": 2,
                   "coordinates": {
                     "x": -47,

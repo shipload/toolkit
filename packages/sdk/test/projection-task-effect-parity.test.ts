@@ -82,4 +82,14 @@ describe('projectRemainingAt mirrors calc_task_effect cargo deltas', () => {
         const projected = projectRemainingAt(shipWith(task, 0) as never, NOW)
         expect(projected.cargo.length).toBe(1)
     })
+
+    test('a hosted civic deposit moves no cargo on its host', () => {
+        const task = makeTask(TaskType.CIVIC_DEPOSIT, {
+            cargo: [{item_id: 201, quantity: 100}],
+            couplings: [{counterpart: {entity_type: 'ship', entity_id: 7}, hold: 1, kind: 1}],
+        })
+        const projected = projectRemainingAt(shipWith(task, 100) as never, NOW)
+        expect(projected.cargo.length).toBe(1)
+        expect(projected.cargo[0].quantity.toNumber()).toBe(100)
+    })
 })

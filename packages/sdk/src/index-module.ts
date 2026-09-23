@@ -341,6 +341,7 @@ export {
     jobDropoffTask,
     jobCancelRoute,
     buildJobCancelRoute,
+    hostedDropoff,
     jobCancellable,
     jobCancellationBlockReason,
     jobDeposited,
@@ -356,6 +357,8 @@ export type {
     JobStatusInput,
     JobCancelRoute,
     JobCancellationBlockReason,
+    JobRouteOptions,
+    HostedLeg,
     OwnedJob,
     BuildJob,
     PickupInFlight,
@@ -401,6 +404,7 @@ export {
     cargoInputKey,
     hasSourceCoupling,
     hasIncomingCoupling,
+    isHostedCivicLeg,
 } from './scheduling/availability'
 export type {CargoInput, IncomingHoldEntity, IncomingSource} from './scheduling/availability'
 
@@ -410,7 +414,8 @@ export {calcClusterIntake, calcClustercraftDuration, INTAKE_RATE} from './capabi
 
 export {maxCraftable} from './capabilities/craftable'
 
-export {energyAtTime} from './scheduling/energy'
+export {energyAtTime, energyDrawsFunded, hostedCraftEnergyFunded} from './scheduling/energy'
+export type {HostedCraftEnergyOptions} from './scheduling/energy'
 
 export * from './types/capabilities'
 export * from './types/entity'

@@ -106,7 +106,17 @@ export function incomingSources(
     return out
 }
 
+// Mirrors for_each_task_cargo's hosted_civic_leg guard: a hosted Drop-off/Pickup moves E's cargo, not the host's.
+export function isHostedCivicLeg(task: Task): boolean {
+    const type = task.type.toNumber()
+    return (
+        (type === TaskType.CIVIC_DEPOSIT || type === TaskType.CIVIC_WITHDRAW) &&
+        task.couplings.length > 0
+    )
+}
+
 export function taskCargoEffect(task: Task): CargoEffect {
+    if (isHostedCivicLeg(task)) return {added: [], removed: []}
     switch (taskCargoRule(task.type.toNumber())) {
         case 'all-in':
         case 'undeploy':

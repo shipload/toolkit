@@ -40,12 +40,15 @@ export {
 } from './valuation'
 export {
     civicDropoffDuration,
+    civicInternalShuttle,
+    civicLegDuration,
     civicLoader,
     contributeDuration,
     contributeDurationForTonnes,
     depotTransferDuration,
     DEPOT_LOADER_SLOT,
     type CivicDropoffParams,
+    type CivicLegParams,
     type CivicLoaderStats,
     type DepotTransferParams,
 } from './duration'

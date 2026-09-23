@@ -4,7 +4,7 @@ import {getItem} from '../data/catalog'
 import {JOB_QUEUE_CAP} from '../scheduling/jobs'
 import {laneKeyForModule, resolveLaneLoader} from '../scheduling/lanes'
 import {orderedTasks, type ScheduleData} from '../scheduling/schedule'
-import {HoldKind, TaskType} from '../types'
+import {HoldKind, TaskCancelable, TaskType} from '../types'
 
 type CargoItem = ServerContract.Types.cargo_item
 type Lane = ServerContract.Types.lane
@@ -22,7 +22,6 @@ export interface CivicShuttleBay {
     full: boolean
 }
 
-// a landed booking clears during the next civicshuttle, so only unfinished tasks occupy a bay
 function unfinishedTasks(lane: Lane | undefined, now: Date): number {
     if (!lane) return 0
     const startedMs = lane.schedule.started.toDate().getTime()
@@ -64,15 +63,38 @@ export function civicShuttleBays(
     return bays
 }
 
-// Mirrors worker_lane_key_or_mobility for loaders: first free bay, else the lowest bay.
+function laneEndMs(lane: Lane | undefined, nowMs: number): number {
+    if (!lane) return nowMs
+    let endSec = 0
+    for (const task of lane.schedule.tasks) endSec += task.duration.toNumber()
+    return Math.max(nowMs, lane.schedule.started.toDate().getTime() + endSec * 1000)
+}
+
+// Mirrors cargo.cpp pick_civic_bay: earliest finish among bays below the queue cap.
 export function selectCivicShuttleBay(
     modules: ModuleEntry[],
     entityItemId: number,
     lanes: Lane[],
-    now: Date = new Date()
+    now: Date = new Date(),
+    durationFor: (bay: CivicShuttleBay) => number = () => 0,
+    minStart?: Date
 ): CivicShuttleBay | undefined {
     const bays = civicShuttleBays(modules, entityItemId, lanes, now)
-    return bays.find((bay) => bay.queued === 0) ?? bays[0]
+    const nowMs = now.getTime()
+    const floorMs = Math.max(nowMs, minStart?.getTime() ?? nowMs)
+    let best: CivicShuttleBay | undefined
+    let bestEnd = Infinity
+    for (const bay of bays) {
+        if (bay.full) continue
+        const lane = lanes.find((l) => l.lane_key.toNumber() === bay.laneKey)
+        const start = Math.max(laneEndMs(lane, nowMs), floorMs)
+        const end = start + durationFor(bay) * 1000
+        if (end < bestEnd) {
+            best = bay
+            bestEnd = end
+        }
+    }
+    return best ?? bays[0]
 }
 
 export interface PendingCivicTransfer {
@@ -98,7 +120,31 @@ export function pendingCivicTransfers(
     }
     const out: PendingCivicTransfer[] = []
     for (const entry of orderedTasks(entity)) {
-        if (entry.task.type.toNumber() !== TaskType.SHUTTLE) continue
+        const type = entry.task.type.toNumber()
+        if (type === TaskType.CIVIC_DEPOSIT || type === TaskType.CIVIC_WITHDRAW) {
+            const side = entry.task.couplings[0]
+            if (!side) continue
+            const isTail = tailIndex.get(entry.laneKey) === entry.taskIndex
+            const complete = entry.completesAt.getTime() <= now.getTime()
+            out.push({
+                laneKey: entry.laneKey,
+                taskIndex: entry.taskIndex,
+                senderId: side.counterpart.entity_id,
+                receiverId: side.counterpart.entity_id,
+                cargo: entry.task.cargo,
+                startsAt: entry.startsAt,
+                completesAt: entry.completesAt,
+                isTail,
+                complete,
+                callable:
+                    isTail &&
+                    !complete &&
+                    !entry.task.entitygroup &&
+                    entry.task.cancelable.toNumber() !== TaskCancelable.NEVER,
+            })
+            continue
+        }
+        if (type !== TaskType.SHUTTLE) continue
         const pull = entry.task.couplings.find((c) => c.kind.toNumber() === HoldKind.PULL)
         const push = entry.task.couplings.find((c) => c.kind.toNumber() === HoldKind.PUSH)
         if (!pull || !push) continue

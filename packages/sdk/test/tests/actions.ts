@@ -401,6 +401,7 @@ describe('ActionsManager', () => {
             'getstratum',
             'getsummaries',
             'getbuildjobs',
+            'gettasktypes',
             'getvoteready',
             'getvotes',
             // admin / setup actions — contract authority only
@@ -443,6 +444,9 @@ describe('ActionsManager', () => {
             'dbgpick',
             'dbgplace',
             'dbgrepack',
+            'dbgappend',
+            'dbgbarrier',
+            'dbgstart',
             // internal / notification actions — not player-initiated
             'configlog',
             'notify',

@@ -332,25 +332,35 @@ export class ActionsManager extends BaseManager {
     depotstore(
         shipId: UInt64Type,
         depotId: UInt64Type,
-        items: ServerContract.ActionParams.Type.cargo_item[]
+        items: ServerContract.ActionParams.Type.cargo_item[],
+        carrier?: UInt64Type
     ): Action {
-        return this.server.action('depotstore', {
+        const params: ServerContract.ActionParams.depotstore = {
             ship_id: UInt64.from(shipId),
             depot_id: UInt64.from(depotId),
             items,
-        })
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
+        }
+        return this.server.action('depotstore', params)
     }
 
     depottake(
         shipId: UInt64Type,
         depotId: UInt64Type,
-        items: ServerContract.ActionParams.Type.cargo_item[]
+        items: ServerContract.ActionParams.Type.cargo_item[],
+        carrier?: UInt64Type
     ): Action {
-        return this.server.action('depottake', {
+        const params: ServerContract.ActionParams.depottake = {
             ship_id: UInt64.from(shipId),
             depot_id: UInt64.from(depotId),
             items,
-        })
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
+        }
+        return this.server.action('depottake', params)
     }
 
     shuttle(
@@ -518,7 +528,8 @@ export class ActionsManager extends BaseManager {
         workshopId: UInt64Type,
         recipeId: UInt16Type,
         quantity: UInt32Type,
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
+        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        carrier?: UInt64Type
     ): Action {
         const params: ServerContract.ActionParams.craftjob = {
             ship_id: UInt64.from(shipId),
@@ -526,6 +537,9 @@ export class ActionsManager extends BaseManager {
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
             inputs,
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
         }
         return this.server.action('craftjob', params)
     }
@@ -540,6 +554,9 @@ export class ActionsManager extends BaseManager {
     canceljob(route: JobCancelRoute): Action {
         if (route.kind === 'dropoff') return this.cancel(route.shipId, route.laneKey, route.count)
         if (route.kind === 'build') return this.cancelbuild(route.jobId)
+        if (route.kind === 'civic') {
+            return this.cancelcivic(route.buildingId, route.laneKey, route.fromId)
+        }
         return this.cancelcraft(route.jobId)
     }
 
@@ -566,10 +583,13 @@ export class ActionsManager extends BaseManager {
         return this.server.action('clustercraft', params)
     }
 
-    claimcraft(jobId: UInt64Type, shipId: UInt64Type): Action {
+    claimcraft(jobId: UInt64Type, shipId: UInt64Type, carrier?: UInt64Type): Action {
         const params: ServerContract.ActionParams.claimcraft = {
             job_id: UInt64.from(jobId),
             ship_id: UInt64.from(shipId),
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
         }
         return this.server.action('claimcraft', params)
     }
@@ -578,13 +598,17 @@ export class ActionsManager extends BaseManager {
         targetId: UInt64Type,
         dockId: UInt64Type,
         targetItemId: UInt16Type,
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
+        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        carrier?: UInt64Type
     ): Action {
         const params: ServerContract.ActionParams.buildjob = {
             target_id: UInt64.from(targetId),
             dock_id: UInt64.from(dockId),
             target_item_id: UInt16.from(targetItemId),
             inputs,
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
         }
         return this.server.action('buildjob', params)
     }
@@ -596,9 +620,12 @@ export class ActionsManager extends BaseManager {
         return this.server.action('claimbuild', params)
     }
 
-    cancelbuild(jobId: UInt64Type): Action {
+    cancelbuild(jobId: UInt64Type, carrier?: UInt64Type): Action {
         const params: ServerContract.ActionParams.cancelbuild = {
             job_id: UInt64.from(jobId),
+        }
+        if (carrier !== undefined) {
+            params.carrier = UInt64.from(carrier)
         }
         return this.server.action('cancelbuild', params)
     }
