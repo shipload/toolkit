@@ -180,11 +180,14 @@ export class GameContext {
             return this._stateInflight
         }
         const inflight = (async () => {
-            const state = await this.server.table('state').get()
+            const [state, game] = await Promise.all([
+                this.server.table('state').get(),
+                this.getGame(),
+            ])
             if (!state) {
                 throw new Error('Game state not initialized')
             }
-            this._stateCache = GameState.from(state, this._gameCache)
+            this._stateCache = GameState.from(state, game)
             return this._stateCache
         })()
         this._stateInflight = inflight
