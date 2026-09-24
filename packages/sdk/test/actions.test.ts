@@ -284,32 +284,38 @@ test('craft with both target and slot includes both', () => {
 test('craftjob without a carrier omits the carrier field', () => {
     const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)])
     const data = action.decodeData(ServerContract.abi)
-    expect(data.carrier).toBeNull()
+    expect(data.shuttled_by).toBeNull()
 })
 
 test('craftjob with a carrier passes it through', () => {
     const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)], 5)
     const data = action.decodeData(ServerContract.abi)
-    expect(String(data.carrier)).toBe('5')
+    expect(String(data.shuttled_by)).toBe('5')
 })
 
 test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their carrier', () => {
-    expect(String(sl.actions.claimcraft(1, 2, 5).decodeData(ServerContract.abi).carrier)).toBe('5')
+    expect(String(sl.actions.claimcraft(1, 2, 5).decodeData(ServerContract.abi).shuttled_by)).toBe(
+        '5'
+    )
     expect(
         String(
             sl.actions.buildjob(1, 2, 10001, [cargo(10201, 1)], 5).decodeData(ServerContract.abi)
-                .carrier
+                .shuttled_by
         )
     ).toBe('5')
-    expect(String(sl.actions.cancelbuild(1, 5).decodeData(ServerContract.abi).carrier)).toBe('5')
+    expect(String(sl.actions.cancelbuild(1, 5).decodeData(ServerContract.abi).shuttled_by)).toBe(
+        '5'
+    )
     expect(
         String(
-            sl.actions.depotstore(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi).carrier
+            sl.actions.depotstore(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi)
+                .shuttled_by
         )
     ).toBe('5')
     expect(
         String(
-            sl.actions.depottake(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi).carrier
+            sl.actions.depottake(1, 2, [cargo(10201, 1)], 5).decodeData(ServerContract.abi)
+                .shuttled_by
         )
     ).toBe('5')
 })

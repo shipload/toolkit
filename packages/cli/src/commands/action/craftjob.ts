@@ -30,7 +30,7 @@ export interface CraftjobOpts {
     recipeId: number
     quantity: number
     inputs: ResolvedCargoInput[]
-    carrier?: bigint
+    shuttledBy?: bigint
 }
 
 export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Promise<Action> {
@@ -49,12 +49,12 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
         opts.recipeId,
         opts.quantity,
         cargoInputs,
-        opts.carrier
+        opts.shuttledBy
     )
 }
 
 export interface CraftjobCliOptions extends WaitableOptions {
-    carrier?: bigint
+    shuttledBy?: bigint
 }
 
 export async function runCraftjob(
@@ -79,7 +79,7 @@ export async function runCraftjob(
             recipeId,
             quantity,
             inputs: resolved,
-            carrier: options.carrier,
+            shuttledBy: options.shuttledBy,
         })
         const result = await transact(
             {action},
@@ -138,8 +138,9 @@ See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids w
                     recipeId: number,
                     quantity: number,
                     inputs: ParsedCargoInput[],
-                    opts: CraftjobCliOptions
+                    rawOpts: WaitableOptions & {carrier?: bigint}
                 ) => {
+                    const opts: CraftjobCliOptions = {...rawOpts, shuttledBy: rawOpts.carrier}
                     await runCraftjob(ctx, workshopId, recipeId, quantity, inputs, opts)
                 }
             ),

@@ -23,7 +23,7 @@ test('craftjob builds action with ship, workshop and inputs, no socket', async (
         'recipe_id',
         'quantity',
         'inputs',
-        'carrier',
+        'shuttled_by',
     ])
 })
 
@@ -36,12 +36,12 @@ test('craftjob buildAction forwards --carrier as the last SDK action argument', 
             recipeId: 10001,
             quantity: 1,
             inputs: [{itemId: 101, quantity: 10, stackId: 413333752n}],
-            carrier: 15n,
+            shuttledBy: 15n,
         },
         getLocalShipload()
     )
     const decoded = action.decodeData(getLocalShipload().server.abi) as Record<string, unknown>
-    expect(String(decoded.carrier)).toBe('15')
+    expect(String(decoded.shuttled_by)).toBe('15')
 })
 
 test('craftjob SUBCOMMAND accepts --carrier', () => {
