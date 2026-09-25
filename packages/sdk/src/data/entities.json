@@ -108,12 +108,12 @@
     "slots": [
       {
         "type": "builder",
-        "outputPct": 200,
+        "outputPct": 75,
         "maxTier": 1
       },
       {
         "type": "builder",
-        "outputPct": 200,
+        "outputPct": 75,
         "maxTier": 1
       }
     ],
