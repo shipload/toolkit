@@ -430,8 +430,7 @@ export {calcClusterIntake, calcClustercraftDuration, INTAKE_RATE} from './capabi
 
 export {maxCraftable} from './capabilities/craftable'
 
-export {energyAtTime, energyDrawsFunded, hostedCraftEnergyFunded} from './scheduling/energy'
-export type {HostedCraftEnergyOptions} from './scheduling/energy'
+export {energyAtTime, energyDrawsFunded} from './scheduling/energy'
 
 export * from './types/capabilities'
 export * from './types/entity'

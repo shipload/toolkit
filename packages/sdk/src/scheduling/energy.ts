@@ -1,7 +1,7 @@
 import type {ServerContract} from '../contracts'
 import {TaskType} from '../types'
-import {createProjectedEntity, projectEntity, type Projectable} from './projection'
-import {orderedTasks, unappliedTasks, type OrderedTask} from './schedule'
+import {createProjectedEntity, type Projectable} from './projection'
+import {orderedTasks, unappliedTasks} from './schedule'
 import {taskEnergyDrawNeedsCoordinates, taskEnergyEffect} from './task-effects'
 
 type Task = ServerContract.Types.task
@@ -98,45 +98,4 @@ export function energyDrawsFunded(entity: Projectable, baseEnergy: number): bool
     const projected = createProjectedEntity(entity)
     const capacity = projected.generator ? Number(projected.generator.capacity) : undefined
     return tasksFundedFrom(unappliedTasks(entity), capacity, baseEnergy)
-}
-
-export interface HostedCraftEnergyOptions {
-    // An appended RECHARGE fills to capacity, so `projected >= cost` reduces to `cost <= capacity`; row/funded-walk are unaffected.
-    rechargeAppended?: boolean
-}
-
-// Mirrors craftjob's hosted-energy gate: resolve_landed_ship_front applies only finished tasks to row energy first, then funds the rest from there.
-export function hostedCraftEnergyFunded(
-    entity: Projectable,
-    cost: number,
-    at: Date,
-    options?: HostedCraftEnergyOptions
-): boolean {
-    const projected = createProjectedEntity(entity)
-    const capacity = projected.generator ? Number(projected.generator.capacity) : undefined
-    if (options?.rechargeAppended) {
-        if (capacity === undefined) return false
-    } else if (Number(projectEntity(entity).energy) < cost) {
-        return false
-    }
-    // entity.energy is already the snapshot's folded value; only walk tasks the snapshot has not folded.
-    const pending: OrderedTask[] = unappliedTasks(entity)
-    const atMs = at.getTime()
-
-    let base = Number(entity.energy ?? 0)
-    let splitIndex = 0
-    for (; splitIndex < pending.length; splitIndex++) {
-        const {task, completesAt} = pending[splitIndex]
-        if (completesAt.getTime() > atMs) break
-        base = applyTaskEnergyEffect(
-            task.type.toNumber(),
-            task.coordinates !== undefined,
-            capacity,
-            taskCost(task),
-            base
-        )
-    }
-
-    if (base < cost) return false
-    return tasksFundedFrom(pending.slice(splitIndex), capacity, base - cost)
 }
