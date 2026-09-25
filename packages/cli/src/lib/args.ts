@@ -140,3 +140,10 @@ export function parseUint64(s: string): bigint {
 	}
 	return BigInt(s);
 }
+
+export function parseUint64List(s: string): bigint[] {
+	if (s.length === 0) {
+		throw new InvalidArgumentError("id list must not be empty");
+	}
+	return s.split(",").map(parseUint64);
+}

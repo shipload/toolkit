@@ -15,12 +15,19 @@ import {
     type JobRouteOptions,
     type JobWindow,
     type OrderedTask,
+    type ShuttleOptions,
 } from '@shipload/sdk'
 import type {Command} from 'commander'
-import {parseUint64} from '../../lib/args'
+import {
+    parseCargoInput,
+    parseUint16,
+    parseUint32,
+    parseUint64,
+    parseUint64List,
+} from '../../lib/args'
 import {getShipload, gameContractName, server} from '../../lib/client'
 import {withValidation} from '../../lib/errors'
-import {formatItem, formatOutput, formatTimeUTC} from '../../lib/format'
+import {formatDateTimeUTC, formatItem, formatOutput, formatTimeUTC, kvTable} from '../../lib/format'
 import {transact} from '../../lib/session'
 import {getEntityRow, getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
@@ -238,25 +245,120 @@ async function runCancel(workshopId: bigint, jobId: bigint): Promise<void> {
     )
 }
 
+export interface ShuttleOptionsView {
+    workshopId: bigint
+    shipId: bigint
+    recipeId: number
+    quantity: number
+    result: ShuttleOptions
+}
+
+function shuttleOptionLabel(o: ShuttleOptions['options'][number]): string {
+    return o.shuttledBy
+        ? `${o.mode} ${o.hostId} (shuttled by ${o.shuttledBy})`
+        : `${o.mode} ${o.hostId}`
+}
+
+export function renderShuttleOptions(view: ShuttleOptionsView): string {
+    const header = `Shuttle options for recipe ${view.recipeId} x${view.quantity} at Workshop ${view.workshopId}`
+    if (view.result.blocked) {
+        return [header, '', `Blocked: ${view.result.blocked.reason}`].join('\n')
+    }
+    if (view.result.options.length === 0) {
+        return [header, '', 'No shuttle can carry this booking.'].join('\n')
+    }
+    const rows: [string, string][] = view.result.options.map((o) => {
+        const label = shuttleOptionLabel(o) + (view.result.auto === o ? '  [auto]' : '')
+        const detail = o.blocked ? o.blocked.reason : `finish ${formatDateTimeUTC(o.finish)}`
+        return [label, detail]
+    })
+    return [header, '', kvTable(rows)].join('\n')
+}
+
+export async function loadShuttleOptions(
+    workshopId: bigint,
+    shipId: bigint,
+    recipeId: number,
+    quantity: number,
+    inputs: {itemId: number; stackId: bigint; quantity: number}[],
+    candidates: bigint[],
+    recharge: boolean
+): Promise<ShuttleOptionsView> {
+    const sl = await getShipload()
+    const cargoInputs = inputs.map((i) =>
+        ServerTypes.cargo_item.from({
+            item_id: i.itemId,
+            quantity: i.quantity,
+            stats: i.stackId,
+            modules: [],
+        })
+    )
+    const result = await sl.shuttle.craft({
+        shipId,
+        workshopId,
+        recipeId,
+        quantity,
+        inputs: cargoInputs,
+        candidates,
+        recharge,
+    })
+    return {workshopId, shipId, recipeId, quantity, result}
+}
+
 export function register(program: Command): void {
     program
         .command('workshop')
         .description(
-            'Workshop operations: `workshop <id> show` prints the Fabricator calendar, `workshop <id> cancel <job>` cancels one of your jobs before it starts crafting.'
+            'Workshop operations: `workshop <id> show` prints the Fabricator calendar, `workshop <id> cancel <job>` cancels one of your jobs before it starts crafting, `workshop <id> shuttle-options` lists what can carry cargo to a craft booking.'
         )
         .argument('<id>', 'entity id of the Workshop', parseUint64)
-        .argument('[action]', 'show | cancel', 'show')
-        .argument('[job]', 'craft job id, for cancel', parseUint64)
+        .argument('[action]', 'show | cancel | shuttle-options', 'show')
+        .argument(
+            '[rest...]',
+            'cancel: <job>. shuttle-options: <item-id>:<stack-id>:<qty> recipe inputs, repeatable.'
+        )
         .option('--json', 'emit JSON instead of formatted text')
+        .option(
+            '--ship <id>',
+            'entity id of the ship booking the job, for shuttle-options',
+            parseUint64
+        )
+        .option(
+            '--recipe <id>',
+            'output item id from the recipe command, for shuttle-options',
+            parseUint16
+        )
+        .option(
+            '--quantity <n>',
+            'number of times to run the recipe, for shuttle-options',
+            parseUint32
+        )
+        .option(
+            '--candidates <ids>',
+            'Depot ids to consider for shuttling, comma separated. The CLI does not look up nearby Depots on its own.',
+            parseUint64List
+        )
+        .option(
+            '--recharge',
+            'allow the pick to recharge partway through its leg, for shuttle-options'
+        )
         .action(
             async (
                 id: bigint,
                 action: string,
-                job: bigint | undefined,
-                options: {json?: boolean}
+                rest: string[],
+                options: {
+                    json?: boolean
+                    ship?: bigint
+                    recipe?: number
+                    quantity?: number
+                    candidates?: bigint[]
+                    recharge?: boolean
+                }
             ) => {
                 await withValidation(async () => {
                     if (action === 'cancel') {
+                        const job = rest[0] !== undefined ? parseUint64(rest[0]) : undefined
                         if (job === undefined) {
                             throw new ValidationError(
                                 'cancel needs a job id.',
@@ -266,9 +368,37 @@ export function register(program: Command): void {
                         await runCancel(id, job)
                         return
                     }
+                    if (action === 'shuttle-options') {
+                        const usage = `shiploadcli workshop ${id} shuttle-options --ship <id> --recipe <id> --quantity <n> <input...>`
+                        if (options.ship === undefined) {
+                            throw new ValidationError('shuttle-options needs --ship.', usage)
+                        }
+                        if (options.recipe === undefined) {
+                            throw new ValidationError('shuttle-options needs --recipe.', usage)
+                        }
+                        if (options.quantity === undefined) {
+                            throw new ValidationError('shuttle-options needs --quantity.', usage)
+                        }
+                        const inputs = rest.map(parseCargoInput)
+                        const view = await loadShuttleOptions(
+                            id,
+                            options.ship,
+                            options.recipe,
+                            options.quantity,
+                            inputs,
+                            options.candidates ?? [],
+                            Boolean(options.recharge)
+                        )
+                        console.log(
+                            formatOutput(view.result, {json: Boolean(options.json)}, () =>
+                                renderShuttleOptions(view)
+                            )
+                        )
+                        return
+                    }
                     if (action !== 'show') {
                         throw new Error(
-                            `Unknown workshop action "${action}". Available: show, cancel`
+                            `Unknown workshop action "${action}". Available: show, cancel, shuttle-options`
                         )
                     }
                     const view = await loadWorkshopShow(id)

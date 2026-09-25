@@ -1,4 +1,4 @@
-import {ServerTypes, type Shipload} from '@shipload/sdk'
+import {shuttleCandidates, ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
@@ -8,6 +8,7 @@ import {
     parseUint16,
     parseUint32,
     parseUint64,
+    parseUint64List,
 } from '../../lib/args'
 import {projectCargoFromSnapshot} from '../../lib/cargo-projection'
 import {
@@ -18,10 +19,16 @@ import {
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
-import {transact} from '../../lib/session'
-import {getEntitySnapshot} from '../../lib/snapshot'
+import {getAccountName, transact} from '../../lib/session'
+import {getEntityRow, getEntitySnapshot} from '../../lib/snapshot'
+import {ValidationError} from '../../lib/validate'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION, type WaitableOptions} from '../../lib/wait'
 import {validateRecipeSlotTotals} from './craft'
+
+export function parseShuttledBy(s: string): 'auto' | bigint {
+    if (s === 'auto') return 'auto'
+    return parseUint64(s)
+}
 
 export interface CraftjobOpts {
     entityType: EntityTypeName
@@ -54,7 +61,60 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
 }
 
 export interface CraftjobCliOptions extends WaitableOptions {
-    shuttledBy?: bigint
+    shuttledBy?: bigint | 'auto'
+    candidates?: bigint[]
+}
+
+export type EntityRowFetcher = (id: bigint | number) => Promise<ServerTypes.entity_row>
+
+export async function resolveAutoShuttledBy(
+    sl: Shipload,
+    ctx: EntityContext,
+    workshopId: bigint,
+    recipeId: number,
+    quantity: number,
+    resolved: ResolvedCargoInput[],
+    candidateIds: bigint[],
+    player: string,
+    fetchRow: EntityRowFetcher = getEntityRow
+): Promise<bigint | undefined> {
+    const cargoInputs = resolved.map((i) =>
+        ServerTypes.cargo_item.from({
+            item_id: i.itemId,
+            quantity: i.quantity,
+            stats: i.stackId,
+            modules: [],
+        })
+    )
+    const [buildingRow, owned, civicOwner] = await Promise.all([
+        fetchRow(workshopId),
+        sl.entities.getEntities(player),
+        sl.influence.getCivicOwner(),
+    ])
+    const ownRows = await Promise.all(owned.map((e) => fetchRow(BigInt(e.id.toString()))))
+    const candidateRows = await Promise.all(candidateIds.map((id) => fetchRow(id)))
+    const candidates = shuttleCandidates(
+        {building: buildingRow, shipId: ctx.entityId, player},
+        [...ownRows, ...candidateRows],
+        civicOwner.toString()
+    )
+    const shuttleOptions = await sl.shuttle.craft({
+        shipId: ctx.entityId,
+        workshopId,
+        recipeId,
+        quantity,
+        inputs: cargoInputs,
+        candidates: candidates.map((id) => BigInt(id)),
+    })
+    if (!shuttleOptions.auto) {
+        throw new ValidationError(
+            shuttleOptions.blocked?.reason ?? 'no shuttle can carry this booking.',
+            "add a Depot id with --candidates, or drop --shuttled-by to use the building's own shuttle"
+        )
+    }
+    return shuttleOptions.auto.shuttledBy !== undefined
+        ? BigInt(shuttleOptions.auto.shuttledBy)
+        : undefined
 }
 
 export async function runCraftjob(
@@ -66,21 +126,38 @@ export async function runCraftjob(
     options: CraftjobCliOptions
 ): Promise<void> {
     await withValidation(async () => {
+        const sl = await getShipload()
         const snap = await getEntitySnapshot(ctx.entityId)
         const resolved = resolveCargoInputs(
             inputs,
             projectCargoFromSnapshot(snap) as unknown as ServerTypes.cargo_item[]
         )
         await validateRecipeSlotTotals(recipeId, quantity, resolved)
-        const action = await buildAction({
-            entityType: ctx.entityType,
-            entityId: ctx.entityId,
-            workshopId,
-            recipeId,
-            quantity,
-            inputs: resolved,
-            shuttledBy: options.shuttledBy,
-        })
+        const shuttledBy =
+            options.shuttledBy === 'auto'
+                ? await resolveAutoShuttledBy(
+                      sl,
+                      ctx,
+                      workshopId,
+                      recipeId,
+                      quantity,
+                      resolved,
+                      options.candidates ?? [],
+                      getAccountName()
+                  )
+                : options.shuttledBy
+        const action = await buildAction(
+            {
+                entityType: ctx.entityType,
+                entityId: ctx.entityId,
+                workshopId,
+                recipeId,
+                quantity,
+                inputs: resolved,
+                shuttledBy,
+            },
+            sl
+        )
         const result = await transact(
             {action},
             {
@@ -126,9 +203,15 @@ See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids w
                 accumulateCargoInputs
             )
             .option(
-                '--carrier <id>',
-                'entity that shuttles the cargo; a depot id uses its shuttle bays',
-                parseUint64
+                '--shuttled-by <id|auto>',
+                'what shuttles the cargo: an entity id, a Depot id for its public bays, or auto ' +
+                    "for the fastest; omitted uses the building's own shuttle",
+                parseShuttledBy
+            )
+            .option(
+                '--candidates <ids>',
+                'Depot ids to consider for auto shuttling, comma separated. The CLI does not look up nearby Depots on its own.',
+                parseUint64List
             )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)
@@ -138,10 +221,9 @@ See the Workshop's calendar with \`shiploadcli workshop N show\` and stack ids w
                     recipeId: number,
                     quantity: number,
                     inputs: ParsedCargoInput[],
-                    rawOpts: WaitableOptions & {carrier?: bigint}
+                    rawOpts: WaitableOptions & {shuttledBy?: 'auto' | bigint; candidates?: bigint[]}
                 ) => {
-                    const opts: CraftjobCliOptions = {...rawOpts, shuttledBy: rawOpts.carrier}
-                    await runCraftjob(ctx, workshopId, recipeId, quantity, inputs, opts)
+                    await runCraftjob(ctx, workshopId, recipeId, quantity, inputs, rawOpts)
                 }
             ),
 }

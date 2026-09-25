@@ -281,13 +281,13 @@ test('craft with both target and slot includes both', () => {
     expect(Number(data.slot)).toBe(1)
 })
 
-test('craftjob without a carrier omits the carrier field', () => {
+test('craftjob without a shuttled by omits the field', () => {
     const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)])
     const data = action.decodeData(ServerContract.abi)
     expect(data.shuttled_by).toBeNull()
 })
 
-test('craftjob with a carrier passes it through', () => {
+test('craftjob with a shuttled by passes it through', () => {
     const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)], 5)
     const data = action.decodeData(ServerContract.abi)
     expect(String(data.shuttled_by)).toBe('5')

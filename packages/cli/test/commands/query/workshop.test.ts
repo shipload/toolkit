@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
-import {HoldKind, ServerContract, TaskType, type JobWindow} from '@shipload/sdk'
+import {HoldKind, ServerContract, TaskType, type JobWindow, type ShuttleOption} from '@shipload/sdk'
 import {
+    renderShuttleOptions,
     renderWorkshopShow,
     resolveCancelRoute,
     resolveHostedLeg,
@@ -145,6 +146,68 @@ test('legacy output-only jobs explain that cancellation is unavailable while pre
     expect(workshopCancelBlockMessage(win({inputs: [{item_id: 101}] as never}))).toBeNull()
     expect(workshopCancelBlockMessage(win({inputs: [], quantity: 0}))).toBeNull()
     expect(workshopCancelBlockMessage(win({inputs: [], deposited: false}))).toBeNull()
+})
+
+describe('renderShuttleOptions', () => {
+    const option = (over: Partial<ShuttleOption>): ShuttleOption => ({
+        mode: 'bays',
+        hostId: '900',
+        laneKey: 0,
+        duration: 600,
+        start: at('2026-09-15T13:00:00Z'),
+        finish: at('2026-09-15T13:10:00Z'),
+        bays: 1,
+        ...over,
+    })
+
+    test('prints the finish time for each option and marks the auto pick', () => {
+        const own = option({shuttledBy: '5', mode: 'own', hostId: '5'})
+        const bays = option({shuttledBy: '900', mode: 'bays', hostId: '900'})
+        const out = renderShuttleOptions({
+            workshopId: 1001n,
+            shipId: 5n,
+            recipeId: 10001,
+            quantity: 1,
+            result: {options: [own, bays], auto: own},
+        })
+        expect(out).toContain('own 5 (shuttled by 5)  [auto]')
+        expect(out).toContain('bays 900 (shuttled by 900)')
+        expect(out).toContain('finish 2026-09-15 13:10:00 UTC')
+        expect(out).not.toMatch(/1970/)
+    })
+
+    test('prints the reason, never a zero epoch, for a blocked option', () => {
+        const blockedOption = option({
+            shuttledBy: '900',
+            start: new Date(0),
+            finish: new Date(0),
+            blocked: {code: 'bays-booked', reason: "the building's shuttle bays are fully booked"},
+        })
+        const out = renderShuttleOptions({
+            workshopId: 1001n,
+            shipId: 5n,
+            recipeId: 10001,
+            quantity: 1,
+            result: {options: [blockedOption]},
+        })
+        expect(out).toContain("the building's shuttle bays are fully booked")
+        expect(out).not.toMatch(/1970/)
+        expect(out).not.toContain('[auto]')
+    })
+
+    test('prints the booking-level block instead of a per-option table', () => {
+        const out = renderShuttleOptions({
+            workshopId: 1001n,
+            shipId: 5n,
+            recipeId: 10001,
+            quantity: 1,
+            result: {
+                options: [],
+                blocked: {code: 'not-equipped', reason: 'workshop has no fabricator installed'},
+            },
+        })
+        expect(out).toContain('Blocked: workshop has no fabricator installed')
+    })
 })
 
 describe('bay-hosted craft drop-offs (no network: fetchRow is injected)', () => {
