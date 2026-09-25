@@ -1,5 +1,39 @@
 # @shipload/sdk
 
+## 1.0.0-next.75
+
+### Patch Changes
+
+- 048c41c: - Add refined and machined component kinds to the SDK, renderer, and CLI
+  - Preflight platform fund collection in oracle maintenance
+  - Format the oracle race classifier test
+  - Treat a lost reveal race as a normal beacon outcome
+  - Close an overdue epoch from the oracle beacon tick
+  - Mirror the ranked ballot in the SDK and page the oracle settlement
+  - Inline the base tsconfig into every package
+  - Collect fund income and market fees on a slow interval
+  - Collapse an all-idle maintenance pass into one log line
+  - Log beacon ticks on change and show the next boundary
+  - Gate the oracle maintenance sweeps on contract reads
+  - Add the voteready ballot settlement tick
+  - Add mintready, charterready and tend heartbeat ticks
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Fold shuttle rejections by code and map every contract string
+  - Mark unresolved shuttle options
+  - List craft shuttle options in the CLI
+  - Rename the civic shuttle parameter to shuttled_by
+  - Accept a carrier for craft jobs in the CLI
+  - Point the CLI tests at the tier 2 catalog
+  - Resync the catalog and resolve capacity formulas from it
+  - Restrict legacy Workshop cancellation
+  - Name the far endpoint and carrier on shuttle holds
+  - Match cancellation to the selected booking
+  - Route job cancellation through the ship or cancelcraft from one helper
+  - Book Workshop jobs without a socket and read the window receipt
+
 ## 1.0.0-next.74
 
 ### Patch Changes
