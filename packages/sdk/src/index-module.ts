@@ -62,6 +62,20 @@ export {
     JobsManager,
     InfluenceManager,
 } from './managers'
+export {
+    ShuttleManager,
+    rankShuttleOptions,
+    shuttleReasonCode,
+    BOOKING_LEVEL_CODES,
+    OMITTED_REASONS,
+} from './managers/shuttle'
+export type {
+    ShuttleMode,
+    ShuttleOption,
+    ShuttleOptions,
+    ShuttleReason,
+    ShuttleReasonCode,
+} from './managers/shuttle'
 export type {GridCell, ClusterCell, Cluster} from './managers'
 export type {
     CharterProgress,

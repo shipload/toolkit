@@ -15,6 +15,20 @@ export type {NftConfigForItem, WrapConfig, WrapGate} from './nft'
 export {BalancesManager} from './balances'
 export type {DepositConfig, PlatformBalance, TokenBalance} from './balances'
 export {JobsManager} from './jobs'
+export {
+    ShuttleManager,
+    rankShuttleOptions,
+    shuttleReasonCode,
+    BOOKING_LEVEL_CODES,
+    OMITTED_REASONS,
+} from './shuttle'
+export type {
+    ShuttleMode,
+    ShuttleOption,
+    ShuttleOptions,
+    ShuttleReason,
+    ShuttleReasonCode,
+} from './shuttle'
 export {InfluenceManager} from './influence'
 export type {
     CharterProgress,

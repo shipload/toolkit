@@ -15,6 +15,7 @@ import {NftManager} from './nft'
 import {BalancesManager} from './balances'
 import {FundManager} from './fund'
 import {JobsManager} from './jobs'
+import {ShuttleManager} from './shuttle'
 import {InfluenceManager} from './influence'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
@@ -30,6 +31,7 @@ export class GameContext {
     private _balances?: BalancesManager
     private _funds?: FundManager
     private _jobs?: JobsManager
+    private _shuttle?: ShuttleManager
     private _influence?: InfluenceManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
@@ -122,6 +124,13 @@ export class GameContext {
             this._jobs = new JobsManager(this)
         }
         return this._jobs
+    }
+
+    get shuttle(): ShuttleManager {
+        if (!this._shuttle) {
+            this._shuttle = new ShuttleManager(this)
+        }
+        return this._shuttle
     }
 
     get influence(): InfluenceManager {
