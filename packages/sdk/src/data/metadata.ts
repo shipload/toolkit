@@ -1,9 +1,12 @@
 import items from './items.json'
 
+export type ComponentProcess = 'refined' | 'machined'
+
 export interface ItemFamily {
     name: string
     description: string
     color: string
+    process?: ComponentProcess
 }
 
 export interface EntityMetadata {
@@ -14,27 +17,27 @@ export const itemFamilies: Record<string, ItemFamily> = {
     // === Resources ===
     ore: {
         name: 'Ore',
-        description: 'Refines into Plate and Beam.',
+        description: 'Goes into Plate and Beam.',
         color: '#C26D3F',
     },
     crystal: {
         name: 'Crystal',
-        description: 'Refines into Sensors and Resonators.',
+        description: 'Goes into Sensors and Resonators.',
         color: '#4ADBFF',
     },
     gas: {
         name: 'Gas',
-        description: 'Refines into Plasma Cells and Reactors.',
+        description: 'Goes into Plasma Cells and Reactors.',
         color: '#B877FF',
     },
     regolith: {
         name: 'Regolith',
-        description: 'Refines into Ceramic and Frame.',
+        description: 'Goes into Ceramic and Frame.',
         color: '#C4A57B',
     },
     biomass: {
         name: 'Biomass',
-        description: 'Refines into Polymer and Resin.',
+        description: 'Goes into Polymer and Resin.',
         color: '#5A8B3E',
     },
 
@@ -43,51 +46,61 @@ export const itemFamilies: Record<string, ItemFamily> = {
         name: 'Plate',
         description: 'Goes into Cargo Holds, Containers, and hulls.',
         color: '#7B8D9E',
+        process: 'refined',
     },
     frame: {
         name: 'Frame',
         description: 'Goes into Limpet Bays, Cargo Holds, and hulls.',
         color: '#C4A57B',
+        process: 'machined',
     },
     'plasma-cell': {
         name: 'Plasma Cell',
         description: 'Goes into Engines, Battery Banks, and hulls.',
         color: '#E86344',
+        process: 'refined',
     },
     resonator: {
         name: 'Resonator',
         description: 'Goes into Power Cores, Tractor Beams, Warp Drives, and hulls.',
         color: '#4ADBFF',
+        process: 'machined',
     },
     beam: {
         name: 'Beam',
         description: 'Goes into Limpet Bays and hulls.',
         color: '#7B8D9E',
+        process: 'machined',
     },
     sensor: {
         name: 'Sensor',
         description: 'Goes into Fabricators, Assembly Arms, and hulls.',
         color: '#4ADBFF',
+        process: 'refined',
     },
     polymer: {
         name: 'Polymer',
         description: 'Goes into Shuttle Bays, Battery Banks, and hulls.',
         color: '#5A8B3E',
+        process: 'refined',
     },
     ceramic: {
         name: 'Ceramic',
         description: 'Goes into Assembly Arms, Containers, and hulls.',
         color: '#C4A57B',
+        process: 'refined',
     },
     reactor: {
         name: 'Reactor',
         description: 'Goes into Fabricators, Warp Drives, and hulls.',
         color: '#B877FF',
+        process: 'machined',
     },
     resin: {
         name: 'Resin',
         description: 'Goes into Tractor Beams and hulls.',
         color: '#5A8B3E',
+        process: 'machined',
     },
 
     // === Modules ===

@@ -141,7 +141,13 @@ export {
     categoryLabelFromIndex,
 } from './data/catalog'
 export {getItemFamily, itemFamilies, itemFamilyKey} from './data/metadata'
-export type {ItemFamily} from './data/metadata'
+export type {ComponentProcess, ItemFamily} from './data/metadata'
+export {
+    COMPONENT_PROCESS_ORDER,
+    completeComponentSet,
+    getComponentProcess,
+} from './data/component-process'
+export type {CompleteComponentSet} from './data/component-process'
 export {getCurrentEpoch, getEpochInfo} from './scheduling/epoch'
 export type {EpochInfo} from './scheduling/epoch'
 export {

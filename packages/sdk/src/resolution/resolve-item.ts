@@ -5,6 +5,8 @@ import {getItem, getModules} from '../data/catalog'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {entityMetadata, getItemFamily} from '../data/metadata'
+import type {ComponentProcess} from '../data/metadata'
+import {getComponentProcess} from '../data/component-process'
 import {
     getModuleCapabilityType,
     isModuleItem,
@@ -75,6 +77,7 @@ export interface ResolvedItem {
     tier: number
     mass: number
     itemType: ResolvedItemType
+    process?: ComponentProcess
     stats?: ResolvedItemStat[]
     attributes?: ResolvedAttributeGroup[]
     moduleSlots?: ResolvedModuleSlot[]
@@ -149,6 +152,7 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
         tier: item.tier,
         mass: item.mass,
         itemType: 'component',
+        process: getComponentProcess(id),
         stats: resolvedStats,
     }
 }

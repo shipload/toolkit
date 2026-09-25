@@ -41,6 +41,10 @@ export {
 } from './primitives/resource-icon.ts'
 export type {ResourceIconInlineOpts, ResourceIconSvgOpts} from './primitives/resource-icon.ts'
 
+// Part glyph primitive
+export {partGlyphKinds, partGlyphSvg} from './primitives/part-glyph.ts'
+export type {PartGlyphKind, PartGlyphSvgOpts} from './primitives/part-glyph.ts'
+
 // Component icon primitive
 export {
     componentIcon,

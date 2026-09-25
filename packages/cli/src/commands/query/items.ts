@@ -2,11 +2,13 @@ import {
     categoryLabel,
     formatMass,
     formatTier,
+    getComponentProcess,
     getComponents,
     getEntityItems,
     getItems,
     getModules,
     getResources,
+    type ComponentProcess,
     type Item,
     type ItemType,
 } from '@shipload/sdk'
@@ -24,6 +26,13 @@ const TYPE_COLUMN: Record<ItemType, string> = {
     entity: 'Entity',
 }
 
+const VALID_PROCESSES: readonly ComponentProcess[] = ['refined', 'machined']
+
+const PROCESS_TYPE_COLUMN: Record<ComponentProcess, string> = {
+    refined: 'Refined component',
+    machined: 'Machined component',
+}
+
 function moduleSubtypeLabel(moduleType: string): string {
     return moduleType.charAt(0).toUpperCase() + moduleType.slice(1)
 }
@@ -32,6 +41,8 @@ function typeColumn(item: Item): string {
     if (item.type === 'module' && item.moduleType) {
         return `${moduleSubtypeLabel(item.moduleType)} module`
     }
+    const process = item.type === 'component' ? getComponentProcess(item.id) : undefined
+    if (process) return PROCESS_TYPE_COLUMN[process]
     return TYPE_COLUMN[item.type]
 }
 
@@ -108,15 +119,35 @@ function filterByType(type?: string, tier?: number): Item[] {
     return items
 }
 
+export function selectItems(options: {type?: string; tier?: number; process?: string}): Item[] {
+    if (options.process === undefined) return filterByType(options.type, options.tier)
+    if (!VALID_PROCESSES.includes(options.process as ComponentProcess)) {
+        throw new Error(
+            `Invalid --process: ${options.process}. Must be one of: ${VALID_PROCESSES.join(', ')}`
+        )
+    }
+    if (options.type !== undefined && options.type !== 'component') {
+        throw new Error(
+            'Invalid --process: only components have a process. Drop --type or use --type component.'
+        )
+    }
+    return filterByType('component', options.tier).filter(
+        (item) => getComponentProcess(item.id) === options.process
+    )
+}
+
 export function register(program: Command): void {
     program
         .command('items')
         .description('List available items (resources, components, modules, entities)')
         .option('--type <type>', 'filter by item type (resource, component, module, entity)')
         .option('--tier <n>', 'filter by tier number', parseUint32)
+        .option('--process <process>', 'filter components by kind (refined, machined)')
         .option('--json', 'emit JSON instead of formatted text')
-        .action(async (options: {type?: string; tier?: number; json?: boolean}) => {
-            const data = filterByType(options.type, options.tier)
-            console.log(formatOutput(data, {json: Boolean(options.json)}, renderPretty))
-        })
+        .action(
+            async (options: {type?: string; tier?: number; process?: string; json?: boolean}) => {
+                const data = selectItems(options)
+                console.log(formatOutput(data, {json: Boolean(options.json)}, renderPretty))
+            }
+        )
 }
