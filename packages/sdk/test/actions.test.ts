@@ -293,7 +293,7 @@ test('craftjob with a shuttled by passes it through', () => {
     expect(String(data.shuttled_by)).toBe('5')
 })
 
-test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their carrier', () => {
+test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their shuttled by', () => {
     expect(String(sl.actions.claimcraft(1, 2, 5).decodeData(ServerContract.abi).shuttled_by)).toBe(
         '5'
     )

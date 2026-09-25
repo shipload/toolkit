@@ -236,9 +236,29 @@ describe('ShuttleManager', () => {
         expect(out.auto?.mode).toBe('ship')
         expect(out.options[0].mode).toBe('ship')
         expect(out.options[0].blocked).toBeUndefined()
-        expect(out.options.filter((o) => o.finish.getTime() === 0).every((o) => o.blocked)).toBe(
-            true
-        )
+        const unresolved = out.options.filter((o) => !o.resolved)
+        expect(unresolved.length).toBe(2)
+        expect(unresolved.every((o) => o.blocked && !o.start && !o.finish)).toBe(true)
+        expect(out.options[0].resolved).toBe(true)
+        expect(out.options[0].finish?.getTime()).toBe(1060 * 1000)
+    })
+
+    it('ranking puts an option with no finish after every timed option', () => {
+        const timed = {
+            mode: 'ship',
+            hostId: '9',
+            finish: new Date(9000),
+            blocked: undefined,
+        } as never
+        const untimed = {
+            mode: 'internal',
+            hostId: '1',
+            finish: undefined,
+            blocked: undefined,
+        } as never
+        expect(
+            [untimed, timed].sort(rankShuttleOptions).map((o: {hostId: string}) => o.hostId)
+        ).toEqual(['9', '1'])
     })
 
     it('an unmapped reason keeps the raw string', () => {

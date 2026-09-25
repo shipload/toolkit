@@ -56,8 +56,9 @@ export interface ShuttleOption {
     hostId: string
     laneKey: number
     duration: number
-    start: Date
-    finish: Date
+    resolved: boolean
+    start?: Date
+    finish?: Date
     bays: number
     window?: {startsAt: Date; completesAt: Date}
     energyCost?: number
@@ -131,10 +132,12 @@ const MODES: ShuttleMode[] = ['internal', 'own', 'ship', 'bays']
 
 const modeRank = (o: ShuttleOption) => (o.mode === 'internal' || o.mode === 'own' ? 0 : 1)
 
+const finishRank = (o: ShuttleOption) => o.finish?.getTime() ?? Number.POSITIVE_INFINITY
+
 export function rankShuttleOptions(a: ShuttleOption, b: ShuttleOption): number {
     const blocked = (o: ShuttleOption) => (o.blocked ? 1 : 0)
     if (blocked(a) !== blocked(b)) return blocked(a) - blocked(b)
-    if (a.finish.getTime() !== b.finish.getTime()) return a.finish.getTime() - b.finish.getTime()
+    if (finishRank(a) !== finishRank(b)) return finishRank(a) < finishRank(b) ? -1 : 1
     if (modeRank(a) !== modeRank(b)) return modeRank(a) - modeRank(b)
     return Number(BigInt(a.hostId) - BigInt(b.hostId))
 }
@@ -143,6 +146,10 @@ type RawOptions = ServerContract.Types.shuttle_options
 
 function toDate(tp: {toDate(): Date} | undefined): Date | undefined {
     return tp ? tp.toDate() : undefined
+}
+
+function wireTime(tp: {toMilliseconds(): number; toDate(): Date}): Date | undefined {
+    return tp.toMilliseconds() === 0 ? undefined : tp.toDate()
 }
 
 function toNum(v: {toNumber(): number} | undefined): number | undefined {
@@ -174,14 +181,17 @@ function mapOptions(raw: RawOptions): ShuttleOptions {
                       completesAt: toDate(o.window_completes_at)!,
                   }
                 : undefined
+        const start = wireTime(o.start)
+        const finish = wireTime(o.finish)
         options.push({
             shuttledBy: o.shuttled_by ? o.shuttled_by.toString() : undefined,
             mode: MODES[o.mode.toNumber()] ?? 'internal',
             hostId: o.host_id.toString(),
             laneKey: o.lane_key.toNumber(),
             duration: o.duration.toNumber(),
-            start: toDate(o.start)!,
-            finish: toDate(o.finish)!,
+            resolved: start !== undefined || finish !== undefined,
+            start,
+            finish,
             bays: o.bays.toNumber(),
             window,
             energyCost: toNum(o.energy_cost),

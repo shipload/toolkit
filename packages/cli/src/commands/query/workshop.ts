@@ -254,6 +254,7 @@ export interface ShuttleOptionsView {
 }
 
 function shuttleOptionLabel(o: ShuttleOptions['options'][number]): string {
+    if (!o.resolved) return o.shuttledBy ? `shuttled by ${o.shuttledBy}` : 'internal'
     return o.shuttledBy
         ? `${o.mode} ${o.hostId} (shuttled by ${o.shuttledBy})`
         : `${o.mode} ${o.hostId}`
@@ -269,7 +270,11 @@ export function renderShuttleOptions(view: ShuttleOptionsView): string {
     }
     const rows: [string, string][] = view.result.options.map((o) => {
         const label = shuttleOptionLabel(o) + (view.result.auto === o ? '  [auto]' : '')
-        const detail = o.blocked ? o.blocked.reason : `finish ${formatDateTimeUTC(o.finish)}`
+        const detail = o.blocked
+            ? o.blocked.reason
+            : o.finish
+              ? `finish ${formatDateTimeUTC(o.finish)}`
+              : 'finish unknown'
         return [label, detail]
     })
     return [header, '', kvTable(rows)].join('\n')
@@ -312,10 +317,17 @@ export function register(program: Command): void {
             'Workshop operations: `workshop <id> show` prints the Fabricator calendar, `workshop <id> cancel <job>` cancels one of your jobs before it starts crafting, `workshop <id> shuttle-options` lists what can carry cargo to a craft booking.'
         )
         .argument('<id>', 'entity id of the Workshop', parseUint64)
+        .usage(
+            [
+                '<id> [show] [--json]',
+                '<id> cancel <job>',
+                '<id> shuttle-options --ship <id> --recipe <id> --quantity <n> [--candidates <ids>] [--recharge] <input...>',
+            ].join('\n       workshop ')
+        )
         .argument('[action]', 'show | cancel | shuttle-options', 'show')
         .argument(
-            '[rest...]',
-            'cancel: <job>. shuttle-options: <item-id>:<stack-id>:<qty> recipe inputs, repeatable.'
+            '[args...]',
+            'cancel: <job>, the craft job id. shuttle-options: <item-id>:<stack-id>:<qty> recipe inputs, repeatable.'
         )
         .option('--json', 'emit JSON instead of formatted text')
         .option(
@@ -335,13 +347,10 @@ export function register(program: Command): void {
         )
         .option(
             '--candidates <ids>',
-            'Depot ids to consider for shuttling, comma separated. The CLI does not look up nearby Depots on its own.',
+            'entity ids (ships or Depots) to consider for shuttling, comma separated, for shuttle-options. The CLI does not look up nearby candidates on its own.',
             parseUint64List
         )
-        .option(
-            '--recharge',
-            'allow the pick to recharge partway through its leg, for shuttle-options'
-        )
+        .option('--recharge', 'a recharge action precedes the booking, for shuttle-options')
         .action(
             async (
                 id: bigint,
@@ -358,12 +367,13 @@ export function register(program: Command): void {
             ) => {
                 await withValidation(async () => {
                     if (action === 'cancel') {
+                        const usage = `shiploadcli workshop ${id} cancel <job>`
+                        if (rest.length > 1) {
+                            throw new ValidationError('cancel takes one job id.', usage)
+                        }
                         const job = rest[0] !== undefined ? parseUint64(rest[0]) : undefined
                         if (job === undefined) {
-                            throw new ValidationError(
-                                'cancel needs a job id.',
-                                `shiploadcli workshop ${id} cancel <job>`
-                            )
+                            throw new ValidationError('cancel needs a job id.', usage)
                         }
                         await runCancel(id, job)
                         return

@@ -1,6 +1,8 @@
 import {describe, expect, test} from 'bun:test'
+import {Command} from 'commander'
 import {HoldKind, ServerContract, TaskType, type JobWindow, type ShuttleOption} from '@shipload/sdk'
 import {
+    register,
     renderShuttleOptions,
     renderWorkshopShow,
     resolveCancelRoute,
@@ -154,6 +156,7 @@ describe('renderShuttleOptions', () => {
         hostId: '900',
         laneKey: 0,
         duration: 600,
+        resolved: true,
         start: at('2026-09-15T13:00:00Z'),
         finish: at('2026-09-15T13:10:00Z'),
         bays: 1,
@@ -179,8 +182,9 @@ describe('renderShuttleOptions', () => {
     test('prints the reason, never a zero epoch, for a blocked option', () => {
         const blockedOption = option({
             shuttledBy: '900',
-            start: new Date(0),
-            finish: new Date(0),
+            resolved: false,
+            start: undefined,
+            finish: undefined,
             blocked: {code: 'bays-booked', reason: "the building's shuttle bays are fully booked"},
         })
         const out = renderShuttleOptions({
@@ -191,6 +195,8 @@ describe('renderShuttleOptions', () => {
             result: {options: [blockedOption]},
         })
         expect(out).toContain("the building's shuttle bays are fully booked")
+        expect(out).toContain('shuttled by 900')
+        expect(out).not.toContain('bays 900')
         expect(out).not.toMatch(/1970/)
         expect(out).not.toContain('[auto]')
     })
@@ -330,4 +336,14 @@ describe('bay-hosted craft drop-offs (no network: fetchRow is injected)', () => 
         )
         expect(out).toMatch(/eggmaple\.gm\s+Booked/)
     })
+})
+
+test('workshop help spells out the cancel usage and the shuttle-options flags', () => {
+    const program = new Command()
+    register(program)
+    const help = program.commands.find((c) => c.name() === 'workshop')!.helpInformation()
+    expect(help).toContain('workshop <id> cancel <job>')
+    expect(help).not.toContain('[rest...]')
+    expect(help).toContain('a recharge action precedes the booking')
+    expect(help).toContain('entity ids (ships or Depots)')
 })
