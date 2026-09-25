@@ -401,6 +401,13 @@ describe('ActionsManager', () => {
             'getstratum',
             'getsummaries',
             'getbuildjobs',
+            // shuttle-option queries — wrapped by ShuttleManager, not ActionsManager
+            'getbuildopts',
+            'getcbldopts',
+            'getclaimopts',
+            'getcraftopts',
+            'getstoreopts',
+            'gettakeopts',
             'gettasktypes',
             'getvoteready',
             'getvotes',
