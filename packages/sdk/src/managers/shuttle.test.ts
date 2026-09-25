@@ -1,11 +1,14 @@
 import {describe, expect, it} from 'bun:test'
-import {TimePoint, UInt16, UInt64} from '@wharfkit/antelope'
-import type {ShuttleReasonCode} from './shuttle'
+import {Name, type NameType, TimePoint, UInt16, UInt64} from '@wharfkit/antelope'
+import {ITEM_LOADER_T1} from '../data/item-ids'
+import {ENTITY_DEPOT, ENTITY_SHIP, ENTITY_WORKSHOP} from '../data/kind-registry'
+import type {CandidateEntity, ShuttleReasonCode} from './shuttle'
 import {
     BOOKING_LEVEL_CODES,
     OMITTED_REASONS,
     rankShuttleOptions,
     ShuttleManager,
+    shuttleCandidates,
     shuttleReasonCode,
 } from './shuttle'
 
@@ -320,5 +323,97 @@ describe('ShuttleManager', () => {
         expect(
             [a, b, c, d].sort(rankShuttleOptions).map((o: {hostId: string}) => o.hostId)
         ).toEqual(['2', '1', '9', '5'])
+    })
+})
+
+describe('shuttleCandidates', () => {
+    const civicOwner = 'nex.shipload'
+    const player = 'alice'
+    const site = {x: 10, y: 20}
+    const elsewhere = {x: 99, y: 99}
+
+    function entity(over: {
+        id: number
+        owner?: NameType
+        kind?: NameType
+        item_id?: number
+        coordinates?: {x: number; y: number}
+        modules?: CandidateEntity['modules']
+    }): CandidateEntity {
+        return {
+            id: UInt64.from(over.id),
+            owner: Name.from(over.owner ?? player),
+            kind: Name.from(over.kind ?? ENTITY_SHIP),
+            item_id: UInt16.from(over.item_id ?? 1),
+            coordinates: (over.coordinates ?? site) as never,
+            modules: over.modules ?? [],
+            lanes: [],
+        }
+    }
+
+    const loaderModule = {installed: {item_id: ITEM_LOADER_T1, stats: 0}} as never
+    const emptyModule = {installed: undefined} as never
+
+    const building = entity({id: 1, owner: civicOwner, kind: ENTITY_WORKSHOP})
+
+    it('includes a same-owner ship with a loader at the site', () => {
+        const ship = entity({id: 2, modules: [loaderModule]})
+        const out = shuttleCandidates({building, shipId: 999, player}, [ship], civicOwner)
+        expect(out).toEqual(['2'])
+    })
+
+    it('excludes a same-owner ship with no loader module', () => {
+        const ship = entity({id: 2, modules: [emptyModule]})
+        const out = shuttleCandidates({building, shipId: 999, player}, [ship], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('excludes a ship at another site', () => {
+        const ship = entity({id: 2, modules: [loaderModule], coordinates: elsewhere})
+        const out = shuttleCandidates({building, shipId: 999, player}, [ship], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('excludes a ship owned by another player', () => {
+        const ship = entity({id: 2, owner: 'mallory', modules: [loaderModule]})
+        const out = shuttleCandidates({building, shipId: 999, player}, [ship], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('includes a Depot at the site regardless of owner', () => {
+        const depot = entity({id: 3, owner: civicOwner, kind: ENTITY_DEPOT})
+        const out = shuttleCandidates({building, shipId: 999, player}, [depot], civicOwner)
+        expect(out).toEqual(['3'])
+    })
+
+    it('excludes a Workshop and any other non-Depot civic building', () => {
+        const otherWorkshop = entity({id: 3, owner: civicOwner, kind: ENTITY_WORKSHOP})
+        const out = shuttleCandidates({building, shipId: 999, player}, [otherWorkshop], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('excludes the building itself', () => {
+        const out = shuttleCandidates({building, shipId: 999, player}, [building], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('excludes the booking ship', () => {
+        const ship = entity({id: 2, modules: [loaderModule]})
+        const out = shuttleCandidates({building, shipId: 2, player}, [ship], civicOwner)
+        expect(out).toEqual([])
+    })
+
+    it('returns unique ids in deterministic order, Depots first then ships ascending, capped at 8', () => {
+        const depotA = entity({id: 20, owner: civicOwner, kind: ENTITY_DEPOT})
+        const depotB = entity({id: 5, owner: civicOwner, kind: ENTITY_DEPOT})
+        const ships = Array.from({length: 9}, (_, i) =>
+            entity({id: 100 + i, modules: [loaderModule]})
+        )
+        const out = shuttleCandidates(
+            {building, shipId: 999, player},
+            [depotA, depotB, ...ships, ships[0]],
+            civicOwner
+        )
+        expect(out).toEqual(['5', '20', '100', '101', '102', '103', '104', '105'])
     })
 })

@@ -1,13 +1,19 @@
 import {
+    Name,
     UInt16,
     UInt32,
     UInt64,
+    type NameType,
     type UInt16Type,
     type UInt32Type,
     type UInt64Type,
 } from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {ServerContract} from '../contracts'
+import {getItem} from '../data/catalog'
+import {ENTITY_DEPOT} from '../data/kind-registry'
+import {isCivicEntity} from '../influence/civic'
+import {projectEntity} from '../scheduling/projection'
 
 export type ShuttleMode = 'internal' | 'own' | 'ship' | 'bays'
 
@@ -192,6 +198,67 @@ function mapOptions(raw: RawOptions): ShuttleOptions {
             : undefined
     const auto = blocked ? undefined : options.find((o) => !o.blocked)
     return {blocked, options, auto}
+}
+
+export type CandidateEntity = Pick<
+    ServerContract.Types.entity_row,
+    'id' | 'owner' | 'kind' | 'coordinates' | 'modules' | 'item_id' | 'lanes'
+>
+
+const SHUTTLE_CANDIDATE_CAP = 8
+
+function siteOf(entity: CandidateEntity) {
+    return projectEntity({...entity, cargo: [], cargomass: UInt32.from(0)}).location
+}
+
+function hasLoaderModule(entity: CandidateEntity): boolean {
+    return entity.modules.some(
+        (m) => m.installed && getItem(m.installed.item_id).moduleType === 'loader'
+    )
+}
+
+export function shuttleCandidates(
+    req: {building: CandidateEntity; shipId: UInt64Type; player: NameType},
+    entities: readonly CandidateEntity[],
+    civicOwner: NameType,
+    now?: Date
+): string[] {
+    void now
+    const {building, shipId, player} = req
+    const buildingId = UInt64.from(building.id)
+    const bookingShipId = UInt64.from(shipId)
+    const playerName = Name.from(player)
+    const site = siteOf(building)
+
+    const depots: UInt64[] = []
+    const ships: UInt64[] = []
+    const seen = new Set<string>()
+
+    for (const entity of entities) {
+        const id = UInt64.from(entity.id)
+        if (id.equals(buildingId) || id.equals(bookingShipId)) continue
+        if (seen.has(id.toString())) continue
+        if (!siteOf(entity).equals(site)) continue
+
+        if (isCivicEntity(entity, civicOwner)) {
+            if (Name.from(entity.kind).equals(ENTITY_DEPOT)) {
+                depots.push(id)
+                seen.add(id.toString())
+            }
+            continue
+        }
+
+        if (!Name.from(entity.owner).equals(playerName)) continue
+        if (!hasLoaderModule(entity)) continue
+        ships.push(id)
+        seen.add(id.toString())
+    }
+
+    const byId = (a: UInt64, b: UInt64) => Number(BigInt(a.toString()) - BigInt(b.toString()))
+    depots.sort(byId)
+    ships.sort(byId)
+
+    return [...depots, ...ships].slice(0, SHUTTLE_CANDIDATE_CAP).map((id) => id.toString())
 }
 
 export class ShuttleManager extends BaseManager {

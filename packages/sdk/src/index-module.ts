@@ -66,6 +66,7 @@ export {
     ShuttleManager,
     rankShuttleOptions,
     shuttleReasonCode,
+    shuttleCandidates,
     BOOKING_LEVEL_CODES,
     OMITTED_REASONS,
 } from './managers/shuttle'
@@ -75,6 +76,7 @@ export type {
     ShuttleOptions,
     ShuttleReason,
     ShuttleReasonCode,
+    CandidateEntity,
 } from './managers/shuttle'
 export type {GridCell, ClusterCell, Cluster} from './managers'
 export type {
