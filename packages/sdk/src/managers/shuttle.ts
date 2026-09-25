@@ -39,6 +39,7 @@ export type ShuttleReasonCode =
     | 'no-capacity'
     | 'schedule-full'
     | 'plot-recipe'
+    | 'not-ready'
     | 'unknown'
 
 export interface ShuttleReason {
@@ -82,6 +83,7 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'dock has no assembly arm installed': 'not-equipped',
     'too many bookings waiting on materials at this building': 'job-cap',
     'upgrade target is busy': 'target-busy',
+    'Entity must be idle to modify modules.': 'target-busy',
     'target cargo would not fit the upgraded capacity': 'cargo-wont-fit',
     'player storage allowance at this depot is exceeded': 'depot-full',
     'player has no such item stored at this depot': 'not-stored',
@@ -105,6 +107,7 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'No recipe found for plot target.': 'plot-recipe',
     'Item is not part of the plot target recipe.': 'plot-recipe',
     'Deposit would exceed plot recipe requirement.': 'plot-recipe',
+    'craft job is not finished yet': 'not-ready',
 }
 
 export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
@@ -117,6 +120,7 @@ export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
     'depot-full',
     'not-stored',
     'no-storage',
+    'not-ready',
 ])
 
 // never-shuttle rejections from resolve_civic_carrier; the query never omits, so the wrapper drops them here
@@ -276,7 +280,8 @@ export function shuttleCandidates(
 }
 
 function chainAssertion(e: unknown): string | undefined {
-    const message = e instanceof Error ? e.message : String(e)
+    const detailsMessage = (e as {details?: {message?: string}[]}).details?.[0]?.message
+    const message = detailsMessage ?? (e instanceof Error ? e.message : String(e))
     const match = message.match(/assertion failure with message:\s*(.*)/i)
     return match ? match[1].trim() : undefined
 }

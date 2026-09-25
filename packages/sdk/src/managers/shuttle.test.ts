@@ -282,6 +282,7 @@ describe('ShuttleManager', () => {
             ['dock has no assembly arm installed', 'not-equipped'],
             ['too many bookings waiting on materials at this building', 'job-cap'],
             ['upgrade target is busy', 'target-busy'],
+            ['Entity must be idle to modify modules.', 'target-busy'],
             ['target cargo would not fit the upgraded capacity', 'cargo-wont-fit'],
             ['player storage allowance at this depot is exceeded', 'depot-full'],
             ['player has no such item stored at this depot', 'not-stored'],
@@ -307,6 +308,7 @@ describe('ShuttleManager', () => {
             ['No recipe found for plot target.', 'plot-recipe'],
             ['Item is not part of the plot target recipe.', 'plot-recipe'],
             ['Deposit would exceed plot recipe requirement.', 'plot-recipe'],
+            ['craft job is not finished yet', 'not-ready'],
         ]
         for (const [reason, code] of table) {
             expect(shuttleReasonCode(reason)).toBe(code)
@@ -333,6 +335,7 @@ describe('ShuttleManager', () => {
             'depot-full',
             'not-stored',
             'no-storage',
+            'not-ready',
         ])
     })
 
@@ -420,7 +423,7 @@ describe('ShuttleManager', () => {
         const out = await m.claim({jobId: 1, shipId: 5, candidates: []})
         expect(out.options).toEqual([])
         expect(out.auto).toBeUndefined()
-        expect(out.blocked?.code).toBe('unknown')
+        expect(out.blocked?.code).toBe('not-ready')
         expect(out.blocked?.reason).toBe('craft job is not finished yet')
     })
 
@@ -429,6 +432,21 @@ describe('ShuttleManager', () => {
             throw new Error('fetch failed')
         })
         await expect(m.claim({jobId: 1, shipId: 5, candidates: []})).rejects.toThrow('fetch failed')
+    })
+
+    it('a chain error surfaces the assertion text from details when message lacks it', async () => {
+        const m = managerWithReadonly(async () => {
+            const err = new Error('unknown error') as Error & {
+                details?: {message?: string}[]
+            }
+            err.details = [
+                {message: 'assertion failure with message: craft job is not finished yet'},
+            ]
+            throw err
+        })
+        const out = await m.claim({jobId: 1, shipId: 5, candidates: []})
+        expect(out.blocked?.code).toBe('not-ready')
+        expect(out.blocked?.reason).toBe('craft job is not finished yet')
     })
 
     it('resolved comes from the wire, not from the times', async () => {
