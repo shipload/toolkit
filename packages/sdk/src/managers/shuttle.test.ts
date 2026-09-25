@@ -34,6 +34,7 @@ function rawOption(over: Record<string, unknown> = {}) {
         window_completes_at: null,
         energy_cost: null,
         rejection: null,
+        resolved: true,
         ...over,
     }
 }
@@ -208,7 +209,13 @@ describe('ShuttleManager', () => {
         }
         const m = managerWithReadonly(async () => ({
             options: [
-                rawOption({start: zero, finish: zero, duration: 0, rejection: rej}),
+                rawOption({
+                    start: zero,
+                    finish: zero,
+                    duration: 0,
+                    rejection: rej,
+                    resolved: false,
+                }),
                 rawOption({
                     shuttled_by: UInt64.from(5),
                     mode: 1,
@@ -216,6 +223,7 @@ describe('ShuttleManager', () => {
                     finish: zero,
                     duration: 0,
                     rejection: rej,
+                    resolved: false,
                 }),
                 rawOption({
                     shuttled_by: UInt64.from(7),
@@ -292,10 +300,13 @@ describe('ShuttleManager', () => {
                 'dropoff-collision',
             ],
             ['cannot append: schedule is capped by a pending plan-capper', 'ship-capped'],
-            ['lane queue is full', 'unknown'],
+            ['lane queue is full', 'schedule-full'],
             ['ship departs before the shuttle completes', 'departs'],
             ['giver has insufficient giveable cargo', 'cargo-not-aboard'],
             ['Entity cargo capacity would be exceeded.', 'no-capacity'],
+            ['No recipe found for plot target.', 'plot-recipe'],
+            ['Item is not part of the plot target recipe.', 'plot-recipe'],
+            ['Deposit would exceed plot recipe requirement.', 'plot-recipe'],
         ]
         for (const [reason, code] of table) {
             expect(shuttleReasonCode(reason)).toBe(code)
@@ -343,6 +354,100 @@ describe('ShuttleManager', () => {
         expect(
             [a, b, c, d].sort(rankShuttleOptions).map((o: {hostId: string}) => o.hostId)
         ).toEqual(['2', '1', '9', '5'])
+    })
+
+    it('two strings under one booking-level code still fold into blocked', async () => {
+        const rej = (reason: string) => ({
+            reason,
+            at: null,
+            until: null,
+            have: null,
+            need: null,
+            cap: null,
+            task_type: null,
+        })
+        const m = managerWithReadonly(async () => ({
+            options: [
+                rawOption({rejection: rej('entity has no storage'), resolved: false}),
+                rawOption({
+                    shuttled_by: UInt64.from(9),
+                    mode: 3,
+                    host_id: UInt64.from(9),
+                    rejection: rej('target entity has no storage'),
+                }),
+            ],
+        }))
+        const out = await m.take({shipId: 5, depotId: 9, items: [], candidates: []})
+        expect(out.blocked?.code).toBe('no-storage')
+        expect(out.auto).toBeUndefined()
+    })
+
+    it('a shared option-level reason never becomes blocked', async () => {
+        const rej = {
+            reason: 'ship departs before the shuttle completes',
+            at: null,
+            until: null,
+            have: null,
+            need: null,
+            cap: null,
+            task_type: null,
+        }
+        const m = managerWithReadonly(async () => ({
+            options: [
+                rawOption({
+                    shuttled_by: UInt64.from(7),
+                    mode: 2,
+                    host_id: UInt64.from(7),
+                    rejection: rej,
+                }),
+                rawOption({
+                    shuttled_by: UInt64.from(9),
+                    mode: 3,
+                    host_id: UInt64.from(9),
+                    rejection: rej,
+                }),
+            ],
+        }))
+        const out = await m.take({shipId: 5, depotId: 9, items: [], candidates: [7, 9]})
+        expect(out.blocked).toBeUndefined()
+        expect(out.options.length).toBe(2)
+    })
+
+    it('a query the chain rejects is a blocked result carrying the assertion text', async () => {
+        const m = managerWithReadonly(async () => {
+            throw new Error('assertion failure with message: craft job is not finished yet')
+        })
+        const out = await m.claim({jobId: 1, shipId: 5, candidates: []})
+        expect(out.options).toEqual([])
+        expect(out.auto).toBeUndefined()
+        expect(out.blocked?.code).toBe('unknown')
+        expect(out.blocked?.reason).toBe('craft job is not finished yet')
+    })
+
+    it('a non-assertion throw from the readonly call is rethrown, not blocked', async () => {
+        const m = managerWithReadonly(async () => {
+            throw new Error('fetch failed')
+        })
+        await expect(m.claim({jobId: 1, shipId: 5, candidates: []})).rejects.toThrow('fetch failed')
+    })
+
+    it('resolved comes from the wire, not from the times', async () => {
+        const m = managerWithReadonly(async () => ({
+            options: [
+                rawOption({start: zero, finish: zero, resolved: true}),
+                rawOption({
+                    shuttled_by: UInt64.from(7),
+                    mode: 2,
+                    host_id: UInt64.from(7),
+                    resolved: false,
+                }),
+            ],
+        }))
+        const out = await m.store({shipId: 5, depotId: 9, items: [], candidates: []})
+        const internal = out.options.find((o) => o.mode === 'internal')
+        const third = out.options.find((o) => o.hostId === '7')
+        expect(internal?.resolved).toBe(true)
+        expect(third?.resolved).toBe(false)
     })
 })
 

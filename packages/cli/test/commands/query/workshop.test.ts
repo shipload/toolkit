@@ -195,8 +195,7 @@ describe('renderShuttleOptions', () => {
             result: {options: [blockedOption]},
         })
         expect(out).toContain("the building's shuttle bays are fully booked")
-        expect(out).toContain('shuttled by 900')
-        expect(out).not.toContain('bays 900')
+        expect(out).toContain('bays 900 (shuttled by 900)')
         expect(out).not.toMatch(/1970/)
         expect(out).not.toContain('[auto]')
     })

@@ -37,6 +37,8 @@ export type ShuttleReasonCode =
     | 'departs'
     | 'cargo-not-aboard'
     | 'no-capacity'
+    | 'schedule-full'
+    | 'plot-recipe'
     | 'unknown'
 
 export interface ShuttleReason {
@@ -71,7 +73,7 @@ export interface ShuttleOptions {
     auto?: ShuttleOption
 }
 
-// contract source strings verbatim from errors.hpp and server/placement.hpp (task-11-report.md has the per-entry mapping)
+// contract strings verbatim from errors.hpp and placement.hpp
 const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'workshop has a pending plan-capper; cannot accept new jobs': 'workshop-capped',
     'ship needs an energy source to book a craft job': 'no-generator',
@@ -99,6 +101,10 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'ship departs before the shuttle completes': 'departs',
     'giver has insufficient giveable cargo': 'cargo-not-aboard',
     'Entity cargo capacity would be exceeded.': 'no-capacity',
+    'lane queue is full': 'schedule-full',
+    'No recipe found for plot target.': 'plot-recipe',
+    'Item is not part of the plot target recipe.': 'plot-recipe',
+    'Deposit would exceed plot recipe requirement.': 'plot-recipe',
 }
 
 export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
@@ -189,7 +195,7 @@ function mapOptions(raw: RawOptions): ShuttleOptions {
             hostId: o.host_id.toString(),
             laneKey: o.lane_key.toNumber(),
             duration: o.duration.toNumber(),
-            resolved: start !== undefined || finish !== undefined,
+            resolved: o.resolved,
             start,
             finish,
             bays: o.bays.toNumber(),
@@ -203,7 +209,7 @@ function mapOptions(raw: RawOptions): ShuttleOptions {
     const blocked =
         first &&
         BOOKING_LEVEL_CODES.has(first.code) &&
-        options.every((o) => o.blocked?.reason === first.reason)
+        options.every((o) => o.blocked?.code === first.code)
             ? first
             : undefined
     const auto = blocked ? undefined : options.find((o) => !o.blocked)
@@ -230,10 +236,8 @@ function hasLoaderModule(entity: CandidateEntity): boolean {
 export function shuttleCandidates(
     req: {building: CandidateEntity; shipId: UInt64Type; player: NameType},
     entities: readonly CandidateEntity[],
-    civicOwner: NameType,
-    now?: Date
+    civicOwner: NameType
 ): string[] {
-    void now
     const {building, shipId, player} = req
     const buildingId = UInt64.from(building.id)
     const bookingShipId = UInt64.from(shipId)
@@ -271,6 +275,12 @@ export function shuttleCandidates(
     return [...depots, ...ships].slice(0, SHUTTLE_CANDIDATE_CAP).map((id) => id.toString())
 }
 
+function chainAssertion(e: unknown): string | undefined {
+    const message = e instanceof Error ? e.message : String(e)
+    const match = message.match(/assertion failure with message:\s*(.*)/i)
+    return match ? match[1].trim() : undefined
+}
+
 export class ShuttleManager extends BaseManager {
     private async query(
         name:
@@ -282,8 +292,19 @@ export class ShuttleManager extends BaseManager {
             | 'gettakeopts',
         data: unknown
     ): Promise<ShuttleOptions> {
-        const raw = (await this.server.readonly(name as never, data as never)) as RawOptions
-        return mapOptions(ServerContract.Types.shuttle_options.from(raw as RawOptions))
+        let raw: RawOptions
+        try {
+            raw = (await this.server.readonly(name as never, data as never)) as RawOptions
+        } catch (e) {
+            const reason = chainAssertion(e)
+            if (reason === undefined) throw e
+            return {
+                blocked: {code: shuttleReasonCode(reason), reason},
+                options: [],
+                auto: undefined,
+            }
+        }
+        return mapOptions(ServerContract.Types.shuttle_options.from(raw))
     }
 
     craft(req: {

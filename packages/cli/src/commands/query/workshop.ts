@@ -254,7 +254,6 @@ export interface ShuttleOptionsView {
 }
 
 function shuttleOptionLabel(o: ShuttleOptions['options'][number]): string {
-    if (!o.resolved) return o.shuttledBy ? `shuttled by ${o.shuttledBy}` : 'internal'
     return o.shuttledBy
         ? `${o.mode} ${o.hostId} (shuttled by ${o.shuttledBy})`
         : `${o.mode} ${o.hostId}`
