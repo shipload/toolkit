@@ -1,5 +1,5 @@
 import { decodeWindowReceipt, type Projectable, schedule, ServerTypes } from "@shipload/sdk";
-import { PrivateKey, type PublicKey } from "@wharfkit/antelope";
+import { type ABI, PermissionLevel, PrivateKey, type PublicKey } from "@wharfkit/antelope";
 import {
 	Action,
 	type AnyAction,
@@ -8,9 +8,11 @@ import {
 	type TransactOptions,
 } from "@wharfkit/session";
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey";
-import { chain, client } from "./client";
+import { chain, client, platform, server } from "./client";
+import { buildSigningLink } from "./auth/signing-link";
+import { hasKeyFile, keyFilePath, readKeyFile } from "./auth/keyfile";
 import { unicoveTransactionUrl } from "./unicove";
-import { loadConfig } from "./config";
+import { ConfigError, loadConfig, type PlayerConfig } from "./config";
 import { extractChainError, printError } from "./errors";
 import {
 	formatCancelResults,
@@ -23,39 +25,51 @@ import { getEntitySnapshot } from "./snapshot";
 import type { ProposeOptions } from "./msig/options";
 import { proposeTransaction } from "./msig/propose";
 
-let cachedSession: Session | null = null;
 let cachedActor: string | null = null;
 let cachedPublicKey: PublicKey | null = null;
+const cachedSessionsByPermission = new Map<string, Session>();
 
-function initialize(): void {
-	if (cachedSession) return;
-	const config = loadConfig();
-	const key = PrivateKey.from(config.privateKey);
-	cachedPublicKey = key.toPublic();
-	cachedActor = config.actor;
-	cachedSession = new Session(
-		{
-			chain,
-			actor: config.actor,
-			permission: config.permission,
-			walletPlugin: new WalletPluginPrivateKey(config.privateKey),
-		},
-		{ fetch },
+function resolveSigningKey(config: PlayerConfig): PrivateKey {
+	if (config.privateKey) return PrivateKey.from(config.privateKey);
+	if (hasKeyFile(config.actor)) return readKeyFile(config.actor);
+	throw new ConfigError(
+		`No private_key in ${config.source} and no key file at ${keyFilePath(config.actor)}; run \`shiploadcli auth create\`.`,
 	);
 }
 
+function sessionForPermission(permission: string): Session {
+	let session = cachedSessionsByPermission.get(permission);
+	if (session) return session;
+	const config = loadConfig();
+	const key = resolveSigningKey(config);
+	if (!cachedActor) {
+		cachedActor = config.actor;
+		cachedPublicKey = key.toPublic();
+	}
+	session = new Session(
+		{
+			chain,
+			actor: config.actor,
+			permission,
+			walletPlugin: new WalletPluginPrivateKey(String(key)),
+		},
+		{ fetch },
+	);
+	cachedSessionsByPermission.set(permission, session);
+	return session;
+}
+
 export function getSession(): Session {
-	initialize();
-	return cachedSession as Session;
+	return sessionForPermission(loadConfig().permission);
 }
 
 export function getAccountName(): string {
-	initialize();
+	getSession();
 	return cachedActor as string;
 }
 
 export function getPublicKey(): PublicKey {
-	initialize();
+	getSession();
 	return cachedPublicKey as PublicKey;
 }
 
@@ -90,6 +104,63 @@ function getActionName(action: Action | AnyAction): string {
 		return action.name.toString();
 	}
 	return String(action.name);
+}
+
+function getActionAccount(action: Action | AnyAction): string {
+	if (action instanceof Action) {
+		return action.account.toString();
+	}
+	return String(action.account);
+}
+
+function withAuthorization(action: Action | AnyAction, authorization: PermissionLevel[]): Action | AnyAction {
+	if (action instanceof Action) {
+		return Action.from({
+			account: action.account,
+			name: action.name,
+			authorization,
+			data: action.data,
+		});
+	}
+	return { ...action, authorization };
+}
+
+function isFullKeyPermission(permission: string): boolean {
+	return permission === "active" || permission === "owner";
+}
+
+type SigningDecision =
+	| { kind: "direct" }
+	| { kind: "restricted"; permission: string }
+	| { kind: "link" };
+
+/** Picks full-key, one restricted permission, or a signing-link handoff for a mixed/uncovered permission. */
+function decideSigning(config: PlayerConfig, actions: (Action | AnyAction)[]): SigningDecision {
+	if (isFullKeyPermission(config.permission)) return { kind: "direct" };
+	const permissions = new Set<string>();
+	for (const action of actions) {
+		const account = getActionAccount(action);
+		if (account === config.atomicAssetsContract) return { kind: "link" };
+		if (account === config.gameContract) {
+			permissions.add(config.permission);
+			continue;
+		}
+		if (account === config.platformContract) {
+			if (!config.platformPermission) return { kind: "link" };
+			permissions.add(config.platformPermission);
+			continue;
+		}
+		return { kind: "link" };
+	}
+	if (permissions.size !== 1) return { kind: "link" };
+	const [permission] = permissions;
+	return { kind: "restricted", permission };
+}
+
+function abiLookup(account: string): ABI | undefined {
+	if (account === server.account.toString()) return server.abi;
+	if (account === platform.account.toString()) return platform.abi;
+	return undefined;
 }
 
 async function formatTaskAddition(
@@ -232,6 +303,28 @@ export async function transact(
 			if (options.description) console.log(options.description);
 			const result = await proposeTransaction(getSession(), args, options.propose);
 			return { txid: result.txid, snapshots: new Map() };
+		}
+		const config = loadConfig();
+		const actions = getActions(args);
+		const decision = actions.length > 0 ? decideSigning(config, actions) : { kind: "direct" as const };
+		if (decision.kind === "link") {
+			if (options?.description) console.log(options.description);
+			const authorization = [PermissionLevel.from(`${config.actor}@active`)];
+			const linked = actions.map((action) => withAuthorization(action, authorization));
+			const { url, summary } = await buildSigningLink(chain.id.toString(), linked, abiLookup);
+			console.log();
+			console.log("This needs a signature this CLI's restricted key cannot provide. Sign it with your wallet:");
+			console.log();
+			console.log(url);
+			console.log();
+			for (const line of summary) console.log(line);
+			return { txid: "", snapshots: new Map() };
+		}
+		if (decision.kind === "restricted") {
+			const authorization = [PermissionLevel.from(`${config.actor}@${decision.permission}`)];
+			const signed = actions.map((action) => withAuthorization(action, authorization));
+			const signedArgs: TransactArgs = signed.length === 1 ? { action: signed[0] } : { actions: signed };
+			return await performTransact(sessionForPermission(decision.permission), signedArgs, options);
 		}
 		return await performTransact(getSession(), args, options);
 	} catch (err) {

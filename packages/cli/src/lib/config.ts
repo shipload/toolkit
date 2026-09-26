@@ -24,9 +24,10 @@ export interface TrackConfig {
 }
 
 export interface PlayerConfig {
-	privateKey: string;
+	privateKey?: string;
 	actor: string;
 	permission: string;
+	platformPermission?: string;
 	/** Absolute path of the config file this was loaded from. */
 	source: string;
 	/** Whether to auto-resolve completed tasks after waiting. Defaults to false. */
@@ -79,10 +80,12 @@ export function getUserConfigDir(): string {
 	return join(homedir(), ".config", "shipload");
 }
 
-interface ParsedSection {
+export interface ParsedSection {
 	privateKey?: string;
 	actor?: string;
 	permission?: string;
+	serverPermission?: string;
+	platformPermission?: string;
 	autoResolve?: boolean;
 	indexerUrl?: string;
 	chainUrl?: string;
@@ -124,6 +127,8 @@ function parseIniFile(path: string): ParsedSection {
 		privateKey: section.private_key as string | undefined,
 		actor: section.actor as string | undefined,
 		permission: section.permission as string | undefined,
+		serverPermission: section.server_permission as string | undefined,
+		platformPermission: section.platform_permission as string | undefined,
 		autoResolve: parseBool(section.auto_resolve),
 		indexerUrl: indexer.url as string | undefined,
 		chainUrl: chain.url as string | undefined,
@@ -143,7 +148,7 @@ function parseIniFile(path: string): ParsedSection {
 	};
 }
 
-function findConfigFile(options: LoadConfigOptions = {}): {
+export function findConfigFile(options: LoadConfigOptions = {}): {
 	fileData: ParsedSection;
 	source: string;
 	userConfigDir: string;
@@ -186,11 +191,6 @@ function findConfigFile(options: LoadConfigOptions = {}): {
 export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 	const {fileData, source} = findConfigFile(options);
 
-	if (!fileData.privateKey) {
-		throw new ConfigError(
-			`Missing 'private_key' in ${source}. Run \`shiploadcli init --force\` to regenerate, or edit the file directly.`,
-		);
-	}
 	if (!fileData.actor) {
 		throw new ConfigError(
 			`Missing 'actor' in ${source}. Run \`shiploadcli init --force\` to regenerate, or edit the file directly.`,
@@ -206,7 +206,8 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 	return {
 		privateKey: fileData.privateKey,
 		actor: fileData.actor,
-		permission: fileData.permission ?? "active",
+		permission: fileData.serverPermission ?? fileData.permission ?? "active",
+		platformPermission: fileData.platformPermission,
 		autoResolve: fileData.autoResolve ?? false,
 		indexerUrl: fileData.indexerUrl ?? DEFAULT_JUNGLE4_INDEXER_URL,
 		chainUrl: fileData.chainUrl,

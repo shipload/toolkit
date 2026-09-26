@@ -101,17 +101,48 @@ describe("loadConfig", () => {
 		}
 	});
 
-	test("throws ConfigError when config file is missing private_key", () => {
+	test("private_key is optional; a restricted-key player resolves it at signing time instead", () => {
 		const iniPath = join(tmpDir, "config.ini");
 		writeFileSync(iniPath, "[default]\nactor=a\n");
 		process.env.PLAYER_CONFIG = iniPath;
 
-		expect(() => loadConfig()).toThrow(ConfigError);
-		try {
-			loadConfig();
-		} catch (err) {
-			expect((err as Error).message).toContain("private_key");
-		}
+		const cfg = loadConfig();
+		expect(cfg.privateKey).toBeUndefined();
+		expect(cfg.actor).toBe("a");
+	});
+
+	test("server_permission wins over the older permission spelling", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nactor=a\npermission=owner\nserver_permission=shipload\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.permission).toBe("shipload");
+	});
+
+	test("permission falls back to the older spelling when server_permission is absent", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nactor=a\npermission=owner\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.permission).toBe("owner");
+	});
+
+	test("platformPermission is read from config and undefined when absent", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(iniPath, "[default]\nactor=a\nplatform_permission=shipload.nex\n");
+		process.env.PLAYER_CONFIG = iniPath;
+
+		expect(loadConfig().platformPermission).toBe("shipload.nex");
+
+		const other = join(tmpDir, "other.ini");
+		writeFileSync(other, "[default]\nactor=a\n");
+		process.env.PLAYER_CONFIG = other;
+		expect(loadConfig().platformPermission).toBeUndefined();
 	});
 
 	test("throws ConfigError when config file is missing actor", () => {
