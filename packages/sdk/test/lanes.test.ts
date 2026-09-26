@@ -184,6 +184,19 @@ describe('worker lane helpers', () => {
         })
     })
 
+    test('civic deposit on a stale loader lane starts at the block second, not at the earlier cargo-ready', () => {
+        const modules = [moduleEntry(10103)]
+        const entity = {modules, lanes: [lane(1, STARTED, [30])]}
+        const now = new Date('2026-06-11T00:05:00.500Z')
+        const cargoReady = new Date('2026-06-11T00:01:00.000Z')
+
+        expect(candidateCivicDepositWindow(entity, 5, now, cargoReady)).toEqual({
+            laneKey: 1,
+            startsAt: new Date('2026-06-11T00:05:00.000Z'),
+            completesAt: new Date('2026-06-11T00:05:05.000Z'),
+        })
+    })
+
     test('civic deposit falls back to mobility when no loader is installed', () => {
         expect(
             candidateCivicDepositWindow(

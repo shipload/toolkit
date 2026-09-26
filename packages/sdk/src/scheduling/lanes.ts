@@ -250,7 +250,7 @@ export function candidateCivicDepositWindow(
     const floorNowMs = Math.floor(now.getTime() / 1000) * 1000
     const lane = getLane(entity, laneKey)
     const laneEndMs = lane ? rawScheduleEnd(lane.schedule).getTime() : floorNowMs
-    let barrierMs = minStartsAt.getTime()
+    let barrierMs = Math.max(minStartsAt.getTime(), floorNowMs)
 
     for (const entry of lanes) {
         let completesMs = entry.schedule.started.toDate().getTime()
