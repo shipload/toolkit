@@ -128,6 +128,10 @@ const HINTS: ChainHint[] = [
 		matches: (m) => m.includes("non-existent permission"),
 		hint: "The signing actor@permission isn't set up on chain yet. Create the permission and wire your key (updateauth + linkauth the relevant actions), then check `shiploadcli oracle status`.",
 	},
+	{
+		matches: (m) => m.includes("already founded a company"),
+		hint: "This account already has a company. If `shiploadcli player` shows [Not in game], run `shiploadcli join`.",
+	},
 ];
 
 export function describeLoopError(err: unknown): string {

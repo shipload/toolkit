@@ -21,10 +21,8 @@ Run these once per account, in order. Each step says what to confirm before movi
 
 2. Register and join:
 
-       shiploadcli foundcompany "<company name>"
+       shiploadcli foundcompany
        shiploadcli join
-
-   Ask the player for the company name. It cannot be changed later.
 
 3. Claim and deploy the starter ship (testnet only; `claimstarter` does not exist on a real network):
 

@@ -21,7 +21,7 @@ const RULES: Rule[] = [
 		!s.player
 			? {
 					reason: "No company registered yet.",
-					command: 'shiploadcli foundcompany "<name>"',
+					command: "shiploadcli foundcompany",
 				}
 			: null,
 	(s) =>

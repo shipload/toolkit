@@ -7,6 +7,7 @@ import {
 	formatInstallHint,
 	formatLocation,
 	formatOutput,
+	formatPlayer,
 	formatReserve,
 	formatResolveHint,
 	formatTaskShort,
@@ -272,5 +273,23 @@ describe("formatDateTimeUTC", () => {
 	test("handles end-of-year boundary", () => {
 		const d = new Date("2026-12-31T23:59:59Z");
 		expect(formatDateTimeUTC(d)).toBe("2026-12-31 23:59:59 UTC");
+	});
+});
+
+describe("formatPlayer", () => {
+	const player = (p: Partial<ServerTypes.player_info>) =>
+		({ owner: "agent.gm", is_player: false, company_name: "", ...p }) as unknown as ServerTypes.player_info;
+
+	test("joined account with an unnamed company reads as onboarded", () => {
+		const out = formatPlayer(player({ is_player: true }));
+		expect(out).toBe("Unnamed company (agent.gm)");
+	});
+
+	test("named joined company prints its name", () => {
+		expect(formatPlayer(player({ is_player: true, company_name: "Acme" }))).toBe("Acme (agent.gm)");
+	});
+
+	test("unjoined account without a name is flagged not in game", () => {
+		expect(formatPlayer(player({}))).toBe("[Not in game]\nNo Company (agent.gm)");
 	});
 });

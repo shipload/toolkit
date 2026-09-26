@@ -52,7 +52,7 @@ The file should be readable only by you. `shiploadcli init` writes it with mode 
 First-run bootstrap (create a company, join the game, and — on testnet — claim a starter ship):
 
 ```bash
-bun run shiploadcli foundcompany "My Company"
+bun run shiploadcli foundcompany
 bun run shiploadcli join
 bun run shiploadcli claimstarter
 ```
@@ -89,7 +89,7 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 
 ### Action (transacting)
 
-- `foundcompany <name>` — create a new company on the platform.
+- `foundcompany` — create a new company on the platform.
 - `join` — join the Shipload game.
 - `claimstarter` — claim the free starter ship (testnet only).
 - `ship <id> travel <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
