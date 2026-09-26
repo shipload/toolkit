@@ -180,7 +180,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'Requires: this entity is co-located with the Workshop, has a Generator with enough ' +
                     'energy, and holds all recipe inputs in cargo. The Workshop assigns the Fabricator ' +
                     'and the time window at booking; the receipt states when the job starts and when ' +
-                    'it is done. Claim the output later with `claimcraft`.\n'
+                    'it is done. Claim the output later with `claimcraft <job>`, using the job id from the receipt.\n'
             )
             .addHelpText(
                 'after',

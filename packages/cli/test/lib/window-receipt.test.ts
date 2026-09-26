@@ -10,7 +10,7 @@ test('formatWindowReceipt states the start and finish as commitments', () => {
     })
     const now = new Date('2026-09-15T12:10:00Z')
     expect(formatWindowReceipt(receipt, now)).toBe(
-        'Booked. Starts 14:20:00 UTC (in 2h 10m), done 16:05:00 UTC.'
+        'Booked job 7. Starts 14:20:00 UTC (in 2h 10m), done 16:05:00 UTC.'
     )
 })
 
@@ -22,6 +22,6 @@ test('formatWindowReceipt reads a window that starts now', () => {
     })
     const now = new Date('2026-09-15T14:20:00Z')
     expect(formatWindowReceipt(receipt, now)).toBe(
-        'Booked. Starts 14:20:00 UTC (now), done 14:50:00 UTC.'
+        'Booked job 7. Starts 14:20:00 UTC (now), done 14:50:00 UTC.'
     )
 })

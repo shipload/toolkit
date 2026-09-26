@@ -220,7 +220,7 @@ export function formatWindowReceipt(receipt: ServerTypes.window_receipt, now: Da
 	const done = new Date(receipt.completes_at.toMilliseconds());
 	const lead = Math.floor((starts.getTime() - now.getTime()) / 1000);
 	const when = lead > 0 ? `in ${formatDuration(lead)}` : "now";
-	return `Booked. Starts ${formatTimeUTC(starts)} (${when}), done ${formatTimeUTC(done)}.`;
+	return `Booked job ${receipt.job_id.toString()}. Starts ${formatTimeUTC(starts)} (${when}), done ${formatTimeUTC(done)}.`;
 }
 
 export function formatDuration(seconds: number): string {

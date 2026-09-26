@@ -86,6 +86,7 @@ const TASK_RESULT_ACTIONS = [
 	"wrap",
 	"addmodule",
 	"rmmodule",
+	"claimcraft",
 ];
 const DEPLOY_ACTIONS = ["deploy"];
 const CLAIM_ACTIONS = ["claimplot"];

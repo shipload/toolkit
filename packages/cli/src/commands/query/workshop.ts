@@ -142,6 +142,7 @@ export function renderWorkshopShow(view: WorkshopShowView, now: Date): string {
     lines.push(
         `A job can be cancelled until the Fabricator starts on it: shiploadcli workshop ${view.workshopId} cancel <job>`
     )
+    lines.push(`Collect a finished job's output: shiploadcli ship <id> claimcraft <job>`)
     return lines.join('\n')
 }
 
