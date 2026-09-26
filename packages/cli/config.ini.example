@@ -1,13 +1,13 @@
 [default]
-; Private key that signs transactions. Treat this file as a secret —
-; it has full spending authority for the account below.
-private_key = PVT_K1_REPLACE_ME
+; Antelope account this CLI acts as. `shiploadcli auth create <account>` sets it.
+; actor = myaccount
 
-; Antelope account this CLI acts as.
-actor = myaccount
-
-; Permission to sign with. Defaults to "active" if omitted.
-permission = active
+; Leave private_key unset to sign with the restricted key from
+; `shiploadcli auth create`, which lives outside this file.
+; To sign with a full key instead, uncomment both lines below and treat
+; this file as a secret: that key has full authority over the account.
+; private_key = PVT_K1_REPLACE_ME
+; permission = active
 
 ; Automatically resolve completed tasks after wait/track finishes. Defaults to false.
 ; auto_resolve = false

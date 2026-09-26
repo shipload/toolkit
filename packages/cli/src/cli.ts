@@ -31,6 +31,7 @@ import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
 import * as wrapentity from './commands/action/wrapentity'
+import * as guide from './commands/guide'
 import * as init from './commands/init'
 import * as census from './commands/query/census'
 import * as cluster from './commands/query/cluster'
@@ -91,13 +92,14 @@ export function build(): Command {
         [
             'Shipload CLI — query state and submit actions.',
             '',
-            'First time?  Run: shiploadcli foundcompany "<name>" && shiploadcli join',
+            'First time, or handing this CLI to a coding agent?  Run: shiploadcli guide',
             '',
             'Commands are grouped as: Query (read-only), Action (transacting), Tools (diagnostics).',
             '',
         ].join('\n')
     )
 
+    guide.register(program)
     init.register(program)
     update.register(program)
     whoami.register(program)

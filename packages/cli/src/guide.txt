@@ -1,0 +1,122 @@
+# Playing Shipload with shiploadcli
+
+This guide is for you, the agent a player has asked to run their Shipload account. Shipload is a game played on an Antelope blockchain: ships and structures take on tasks, the chain keeps time, and every move is a transaction. `shiploadcli <command> --help` covers what each command does, its arguments, and an example. This guide covers when and why to reach for them.
+
+The player needs an Antelope account on the target network and a wallet that can sign for it before any of this works. Creating that account happens outside this guide.
+
+## Bootstrap
+
+Run these once per account, in order. Each step says what to confirm before moving on.
+
+1. Write a config and name the account:
+
+       shiploadcli init --cwd
+       shiploadcli auth create <account>
+
+   `init --cwd` writes `./config.ini` in the current folder. `auth create` generates a restricted key stored outside that folder, adds the permission entries to the config, and prints a signing link. Hand the link to the player to sign in their wallet, then confirm with:
+
+       shiploadcli auth status
+
+   From here the CLI signs game actions with the restricted key. Any action that key cannot sign comes back as a wallet signing link; give it to the player and continue once they report it signed.
+
+2. Register and join:
+
+       shiploadcli foundcompany "<company name>"
+       shiploadcli join
+
+   Ask the player for the company name. It cannot be changed later.
+
+3. Claim and deploy the starter ship (testnet only; `claimstarter` does not exist on a real network):
+
+       shiploadcli claimstarter
+       shiploadcli nft
+       shiploadcli entities --type nexus --all
+       shiploadcli nft deploy <asset-id> <nexus-id>
+
+   `nft` lists the wrapped ship and its asset id. Deploying unwraps it into a live ship that travels to the nexus and recharges.
+
+4. Confirm:
+
+       shiploadcli whoami
+       shiploadcli entities
+
+   `whoami` shows the account and permission in use. `entities` lists what the account owns.
+
+## How the game moves
+
+Every entity owns a queue of tasks: travel, gather, recharge, load, unload, craft. Queuing a task is a transaction that returns at once; the task then runs on chain time. A finished task changes nothing until it is resolved, and resolving is a transaction too. Commands that show an entity report projected state by default, meaning what the entity will hold and where it will be once its queued tasks finish. `inventory --current` shows what is on hand right now.
+
+Resources sit in strata at locations. Each epoch reshuffles which resource sits in which stratum and how much of it remains. Gathering draws down a stratum's reserve, and other players draw on the same reserve.
+
+## The session loop
+
+A pattern that works, which you may improve on:
+
+1. Orient: `whoami`, `entities`, then the state and `tasks` of each entity you plan to use.
+2. Resolve: `resolveall` lands every finished task in one transaction.
+3. Decide: compare the player's objective with what you own and where it is (see "How to think about progress").
+4. Queue: submit the next tasks. Queue several steps per entity when the route is clear; the chain runs them back to back.
+5. Pace: `wait` blocks until an entity becomes free and resolves on the way out.
+6. Report: tell the player what changed when you reach a milestone.
+
+Read `--help` before the first use of any command. It lists preconditions the chain enforces.
+
+## Know your own limits
+
+Waiting costs you as well as the player. Your harness likely caps how long one command may run, your context fills with every output you read, and a long pause may expire your prompt cache. Treat those as costs alongside the game's.
+
+The levers available to you:
+
+- `wait --timeout <seconds>` keeps one blocking call under your command limit. On timeout it names when the next task completes, so the following wait can be sized to it.
+- `--json` on query commands gives compact, parseable output.
+- `<entity-type> <id> tasks` shows when each queued task completes.
+- Your harness may offer its own sleep or scheduled wake-up.
+- You can end the turn and tell the player when to return.
+
+Pick whichever suits the harness and the length of the wait.
+
+## How to think about progress
+
+There is no single right route. What you do next depends on the player's goal, what they already own, and what the current epoch put nearby. Use a model of progress instead of a script.
+
+Productivity comes from four things: how fast you gather, how much you carry, how far you travel on one charge, and how many entities work in parallel. Every useful objective improves one of those or removes a logistics constraint, such as a long haul or an idle entity.
+
+Materials flow through a chain. Strata give raw resources (Ore, Crystal, Gas, Regolith, Biomass). Workshops turn resources into components and components into modules and hulls. Public Workshops at stations let a player with only a ship craft. Resource quality flows into the stats of everything built from it, so gather from the best strata you can reach.
+
+Before acting, answer these in order:
+
+1. What do I own, and where is each entity?
+2. What can each entity gather or carry where it stands?
+3. What is already queued?
+4. What does the player's goal need next?
+5. Which constraint is cheapest to remove right now?
+
+`recipe` shows what an item needs. `tools find` and `tools scan` locate strata that hold a resource. `gatherable` shows what an entity can gather where it stands.
+
+### An example, not the plan
+
+A fresh account owns one Roustabout: a ship with a generator, an engine, and a gatherer, and no crafting module. Suppose the player's goal is a second ship.
+
+`recipe` shows a Roustabout needs 200 each of five refined components (Plate, Ceramic, Polymer, Plasma Cell, Sensor), and each component takes 10 t of one resource. That is 2,000 t each of Ore, Regolith, Biomass, Gas, and Crystal. The ship has no crafting module, so the components come from booking craft jobs at a public Workshop.
+
+The binding constraint is haul: the ship carries far less than 10,000 t, so the route is many gather trips between strata and the Workshop. Good choices are strata of each resource close to the Workshop and to each other, gathered in an order that keeps the ship full on every return leg, with components booked in batches as each resource arrives. Once the second ship exists, two entities gather in parallel and the next goal gets cheaper.
+
+A different goal (the best possible gatherer, a warehouse in a rich region) leads to a different route through the same model.
+
+## Autonomy
+
+Routine steps toward the player's objective are yours to take without asking. Report at milestones, at real choices the player should make, and when you are blocked. Record your reasoning in the notes file so the next session can pick it up.
+
+## The notes file
+
+Keep a `notes.md` beside `config.ini` in the player's folder. It holds the objective as the player last stated it, the current plan and why you chose it, and observations the chain cannot answer, such as a stratum you found thin or a route that worked. Leave out anything a command can answer: positions, cargo, balances, and queues change under you and the chain is always current. Read it at the start of every session, after orienting.
+
+## Pitfalls
+
+These fail without an error, so no message will warn you:
+
+- `wait` watches the whole fleet and returns when any entity frees up; `<entity-type> <id> wait` watches one entity. Use the one that matches what you are waiting for.
+- `tools find` and `tools scan` report reserves as of epoch start and never subtract what has been gathered since. Confirm with `gatherable` on arrival.
+- An entity's cached stats can lag after a contract update. If its numbers no longer match its modules, run `refreshentity` on it while it is idle.
+
+Anything that fails with a clear error belongs in the error message, not here. Read the error and follow it.

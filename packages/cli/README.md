@@ -15,7 +15,7 @@ Download the binary for your platform from the [latest release](https://github.c
 Then:
 
 1. Initialize a config: `./shiploadcli-* init`
-2. Edit the config at the printed path — fill in `private_key` and `actor`.
+2. Set up a restricted signing key: `./shiploadcli-* auth create <account>`, then sign the printed link with your wallet. To use a full key instead, set `actor` and `private_key` in the config at the printed path.
 3. Run: `./shiploadcli-* whoami`
 
 ### From source

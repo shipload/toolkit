@@ -26,7 +26,7 @@ Examples:
   shiploadcli nft deploy 1099511700123 42
 
 Use \`shiploadcli nft\` to list NFTs you own and their asset_ids.
-Use \`shiploadcli nexuses --all\` to list every nexus and pick a destination.`
+Use \`shiploadcli entities --type nexus --all\` to list every nexus and pick a destination.`
         )
         .argument('<asset-id>', 'atomicassets asset id to deploy', parseUint64)
         .argument('<nexus-id>', 'destination nexus id', parseUint64)

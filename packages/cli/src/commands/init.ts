@@ -4,15 +4,15 @@ import type {Command} from 'commander'
 import {getUserConfigDir} from '../lib/config'
 
 const STUB = `[default]
-; Private key that signs transactions. Treat this file as a secret —
-; it has full spending authority for the account below.
-private_key = PVT_K1_REPLACE_ME
+; Antelope account this CLI acts as. \`shiploadcli auth create <account>\` sets it.
+; actor = myaccount
 
-; Antelope account this CLI acts as.
-actor = myaccount
-
-; Permission to sign with. Defaults to "active" if omitted.
-permission = active
+; Leave private_key unset to sign with the restricted key from
+; \`shiploadcli auth create\`, which lives outside this file.
+; To sign with a full key instead, uncomment both lines below and treat
+; this file as a secret: that key has full authority over the account.
+; private_key = PVT_K1_REPLACE_ME
+; permission = active
 
 ; Automatically resolve completed tasks after wait/track finishes. Defaults to false.
 ; auto_resolve = false
@@ -88,9 +88,10 @@ export function register(program: Command): void {
                 console.log(`Wrote stub config to ${result.path}`)
                 console.log('')
                 console.log('Next steps:')
-                console.log(`  1. Edit ${result.path}`)
-                console.log('  2. Replace PVT_K1_REPLACE_ME with your private key')
-                console.log("  3. Replace 'myaccount' with your Antelope account name")
+                console.log(
+                    '  Run `shiploadcli auth create <account>` to set up a restricted signing key,'
+                )
+                console.log(`  or edit ${result.path} to set actor and a full private_key.`)
                 console.log('')
                 console.log('File mode is 0600 (owner read/write only).')
             } catch (err) {
