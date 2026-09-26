@@ -3,7 +3,7 @@
         "path": "https://jungle4.greymass.com/v1/chain/send_read_only_transaction",
         "params": {
             "method": "POST",
-            "body": "{\"transaction\":{\"signatures\":[],\"compression\":1,\"packed_context_free_data\":\"789c63000000010001\",\"packed_trx\":\"789c636040068c13787aaf9af2a88502d90e2d97366432b030a7e5e7330000554a06b6\"}}",
+            "body": "{\"transaction\":{\"signatures\":[],\"compression\":1,\"packed_context_free_data\":\"789c63000000010001\",\"packed_trx\":\"789c636040068c13787aaf9af2a88532303038b45cda90c9c0c29c969fcf0000554a06b6\"}}",
             "headers": {}
         }
     },

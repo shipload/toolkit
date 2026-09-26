@@ -46,7 +46,7 @@
     },
     "dependencies": {
         "@shipload/sdk": "workspace:^",
-        "@wharfkit/antelope": "1.2.0"
+        "@wharfkit/antelope": "4.0.1"
     },
     "devDependencies": {
         "@fontsource/inter": "^5.2.8",

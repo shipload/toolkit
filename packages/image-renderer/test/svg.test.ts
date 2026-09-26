@@ -7,7 +7,7 @@ function oreT1Payload(): string {
         item: ServerContract.Types.cargo_item.from({
             item_id: 101,
             quantity: 1,
-            stats: '0x123456789ABCDEF',
+            stats: '33123456790123455',
             modules: [],
         }),
     })

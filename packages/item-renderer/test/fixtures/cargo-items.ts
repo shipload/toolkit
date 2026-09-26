@@ -15,7 +15,7 @@ export const ITEM_SHIP_T1_PACKED = 10201
 export const MODULE_ENGINE = 1
 export const MODULE_GENERATOR = 2
 
-export function cargoOreT1(stats = '0x123456789ABCDEF', quantity = 1) {
+export function cargoOreT1(stats = '33123456790123455', quantity = 1) {
     return ServerContract.Types.cargo_item.from({
         item_id: ITEM_ORE_T1,
         quantity,
@@ -34,12 +34,12 @@ export function cargoShipT1Packed(opts?: {
     const modules: unknown[] = []
     modules.push({
         type: MODULE_ENGINE,
-        installed: {item_id: ITEM_ENGINE_T1, stats: o.engineStats ?? '0x2A4F6B8C'},
+        installed: {item_id: ITEM_ENGINE_T1, stats: o.engineStats ?? '3330557192'},
     })
     if (!o.onlyEngine) {
         modules.push({
             type: MODULE_GENERATOR,
-            installed: {item_id: ITEM_GENERATOR_T1, stats: o.generatorStats ?? '0x1B2D4F'},
+            installed: {item_id: ITEM_GENERATOR_T1, stats: o.generatorStats ?? '33213355'},
         })
     }
     return ServerContract.Types.cargo_item.from({
@@ -53,19 +53,19 @@ export function cargoShipT1Packed(opts?: {
 export const ITEM_PLATE = 10001
 
 export const FIXTURES = {
-    oreT1: cargoOreT1('0x123456789ABCDEF'),
-    oreT1StackOf50: cargoOreT1('0x123456789ABCDEF', 50),
+    oreT1: cargoOreT1('33123456790123455'),
+    oreT1StackOf50: cargoOreT1('33123456790123455', 50),
     oreT1ZeroStats: cargoOreT1('0'),
     gasT2: ServerContract.Types.cargo_item.from({
         item_id: ITEM_GAS_T2,
         quantity: 1,
-        stats: '0xDEADBEEF1234',
+        stats: '34451425551234',
         modules: [],
     }),
     plate: ServerContract.Types.cargo_item.from({
         item_id: ITEM_PLATE,
         quantity: 1,
-        stats: '0x7FFF',
+        stats: '338665',
         modules: [],
     }),
     engineT1: ServerContract.Types.cargo_item.from({
@@ -107,7 +107,7 @@ export const FIXTURES = {
     haulerT1: ServerContract.Types.cargo_item.from({
         item_id: ITEM_HAULER_T1,
         quantity: 1,
-        stats: '0x3E8',
+        stats: '33448',
         modules: [],
     }),
     shipT1NoModules: ServerContract.Types.cargo_item.from({

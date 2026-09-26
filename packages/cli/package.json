@@ -16,12 +16,12 @@
         "@opentui/core": "^0.1.103",
         "@shipload/oracle": "workspace:^",
         "@shipload/sdk": "workspace:^",
-        "@wharfkit/antelope": "1.2.0",
-        "@wharfkit/common": "1.5.0",
-        "@wharfkit/contract": "1.2.2-rc3",
-        "@wharfkit/session": "1.8.0-rc1",
-        "@wharfkit/signing-request": "3.4.0",
-        "@wharfkit/wallet-plugin-privatekey": "1.1.0",
+        "@wharfkit/antelope": "4.0.1",
+        "@wharfkit/common": "4.0.1",
+        "@wharfkit/contract": "4.0.1",
+        "@wharfkit/session": "4.0.1",
+        "@wharfkit/signing-request": "4.0.1",
+        "@wharfkit/wallet-plugin-privatekey": "4.0.1",
         "cli-table3": "^0.6.5",
         "commander": "^14.0.2",
         "ini": "^6.0.0"
@@ -29,6 +29,6 @@
     "devDependencies": {
         "@types/bun": "latest",
         "@types/ini": "^4.1.1",
-        "@wharfkit/cli": "^1.0.0"
+        "@wharfkit/cli": "^4.0.1"
     }
 }
