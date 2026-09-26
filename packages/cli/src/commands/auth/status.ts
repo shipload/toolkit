@@ -4,6 +4,7 @@ import {client} from '../../lib/client'
 import {loadConfig} from '../../lib/config'
 import {authorityHasKey} from '../../lib/auth/authority'
 import {hasKeyFile, readKeyFile} from '../../lib/auth/keyfile'
+import {isWildcardLink} from '../../lib/auth/plan'
 
 function reportTier(
     account: API.v1.AccountObject,
@@ -32,8 +33,7 @@ function reportTier(
         )
     } else {
         const linked = perm.linked_actions.some(
-            (l: API.v1.AccountLinkedAction) =>
-                String(l.account) === contract && String(l.action) === ''
+            (l: API.v1.AccountLinkedAction) => String(l.account) === contract && isWildcardLink(l)
         )
         lines.push(`${permission}: ${linked ? 'linked' : 'not linked'} to ${contract}`)
     }

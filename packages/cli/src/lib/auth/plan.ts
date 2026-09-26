@@ -2,6 +2,11 @@ import type {API, Action, PermissionLevel, PublicKeyType} from "@wharfkit/antelo
 import {buildLinkAuth, buildUpdateAuth} from "./actions";
 import {mergeKeyIntoAuthority} from "./authority";
 
+export function isWildcardLink(link: API.v1.AccountLinkedAction): boolean {
+	const action = link.action === undefined || link.action === null ? "" : String(link.action);
+	return action === "";
+}
+
 export interface PermissionLinkPlan {
 	updateAuth?: Action;
 	linkAuth?: Action;
@@ -37,7 +42,7 @@ export function planPermissionLink(args: {
 	const linkedActions = existing?.linked_actions;
 	const alreadyLinked =
 		linkedActions?.some(
-			(l: API.v1.AccountLinkedAction) => String(l.account) === args.contract && String(l.action) === "",
+			(l: API.v1.AccountLinkedAction) => String(l.account) === args.contract && isWildcardLink(l),
 		) ?? false;
 	let linkAuth: Action | undefined;
 	if (alreadyLinked) {
