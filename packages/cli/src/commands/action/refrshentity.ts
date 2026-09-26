@@ -24,7 +24,7 @@ export async function runRefrshEntity(ctx: EntityContext): Promise<void> {
 const HELP_BEFORE =
     'Recompute the cached capabilities and cargo mass on an entity. ' +
     "Run it when an entity's stats look stale after a contract update: its numbers no longer match what its modules should give. " +
-    'Anyone can call it; the entity must be idle.\n'
+    'The owner calls it; the entity must be idle.\n'
 
 function buildSubcommand(name: string, description: string): EntitySubcommand {
     return {

@@ -1,5 +1,5 @@
 import { decodeWindowReceipt, type Projectable, schedule, ServerTypes } from "@shipload/sdk";
-import { type ABI, PermissionLevel, PrivateKey, type PublicKey } from "@wharfkit/antelope";
+import { type ABI, Bytes, PermissionLevel, PrivateKey, type PublicKey } from "@wharfkit/antelope";
 import {
 	Action,
 	type AnyAction,
@@ -114,12 +114,13 @@ function getActionAccount(action: Action | AnyAction): string {
 }
 
 function withAuthorization(action: Action | AnyAction, authorization: PermissionLevel[]): Action | AnyAction {
-	if (action instanceof Action) {
+	const data = action.data as { hexString?: string } | undefined;
+	if (typeof data?.hexString === "string") {
 		return Action.from({
-			account: action.account,
-			name: action.name,
+			account: String(action.account),
+			name: String(action.name),
 			authorization,
-			data: action.data,
+			data: Bytes.from(data.hexString),
 		});
 	}
 	return { ...action, authorization };
@@ -321,10 +322,7 @@ export async function transact(
 			return { txid: "", snapshots: new Map() };
 		}
 		if (decision.kind === "restricted") {
-			const authorization = [PermissionLevel.from(`${config.actor}@${decision.permission}`)];
-			const signed = actions.map((action) => withAuthorization(action, authorization));
-			const signedArgs: TransactArgs = signed.length === 1 ? { action: signed[0] } : { actions: signed };
-			return await performTransact(sessionForPermission(decision.permission), signedArgs, options);
+			return await performTransact(sessionForPermission(decision.permission), args, options);
 		}
 		return await performTransact(getSession(), args, options);
 	} catch (err) {
