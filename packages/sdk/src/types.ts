@@ -47,6 +47,7 @@ export interface ShipLike {
     loader_lanes?: ServerContract.Types.loader_lane[]
     hauler?: ServerContract.Types.hauler_stats
     capacity?: UInt32
+    holds?: ServerContract.Types.hold[]
 }
 
 export interface CargoMassInfo {

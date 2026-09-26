@@ -42,6 +42,7 @@ import {hasSystem} from '../utils/system'
 import {WH} from '../derivation/wormhole'
 import * as scheduleModel from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
+import {incomingHoldMass} from '../scheduling/unwrap'
 
 function isPositionalTask(task: ServerContract.Types.task): boolean {
     return task.type.equals(TaskType.TRAVEL) || task.type.equals(TaskType.TRANSIT)
@@ -272,6 +273,9 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
         const cargoMass = getItem(cargo.item_id).mass * Number(UInt32.from(cargo.quantity))
         mass.add(UInt64.from(cargoMass))
     }
+
+    // barrier logic defers a mobility task past max_hold_until, so incoming cargo is aboard by departure
+    mass.add(UInt64.from(incomingHoldMass(ship.holds)))
 
     return mass
 }

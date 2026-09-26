@@ -71,7 +71,8 @@ export function unwrapLoadDuration(
     if (!loaders || itemMass <= 0) return 0
     const total = itemMass + loaders.mass
     const flight = flightTime(Math.max(destZ, MIN_LOAD_Z), acceleration(loaders.thrust, total))
-    return Math.floor(flight / loaders.quantity)
+    const duration = Math.floor(flight / loaders.quantity)
+    return duration === 0 ? 1 : duration
 }
 
 export interface UnwrapItem {
