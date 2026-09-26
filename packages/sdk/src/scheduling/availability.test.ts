@@ -155,16 +155,16 @@ describe('projectedCargoAvailableAt — incoming', () => {
         return [{holdId: '1', until, items: [cargoItem(7, 0, qty)]}]
     }
 
-    test('credits an incoming source strictly before its until', () => {
+    test('credits an incoming source after its until', () => {
         const e = entity([])
         const avail = projectedCargoAvailableAt(e, new Date(until.getTime() + 1), incomingFor(10))
         expect(avail.get('7:0')).toBe(10n)
     })
 
-    test('does not credit an incoming source at exactly its until', () => {
+    test('credits an incoming source at exactly its until', () => {
         const e = entity([])
         const avail = projectedCargoAvailableAt(e, until, incomingFor(10))
-        expect(avail.get('7:0') ?? 0n).toBe(0n)
+        expect(avail.get('7:0')).toBe(10n)
     })
 
     test('does not credit an incoming source before its until', () => {

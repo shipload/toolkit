@@ -180,7 +180,7 @@ export function projectedCargoAvailableAt(
     const tasks = schedule.orderedTasks(entity)
 
     for (const ordered of tasks) {
-        if (ordered.completesAt.getTime() >= at.getTime()) continue
+        if (ordered.completesAt.getTime() > at.getTime()) continue
 
         for (const item of taskCargoEffect(ordered.task).added) {
             const key = cargoKey(item)
@@ -189,7 +189,7 @@ export function projectedCargoAvailableAt(
     }
 
     for (const src of incoming) {
-        if (src.until.getTime() >= at.getTime()) continue
+        if (src.until.getTime() > at.getTime()) continue
         for (const item of src.items) {
             const key = cargoKey(item)
             avail.set(key, (avail.get(key) ?? 0n) + cargoQuantity(item))
@@ -237,8 +237,7 @@ export function cargoReadyAt(
     candidates.sort((a, b) => a - b)
 
     for (const candidateMs of candidates) {
-        // +1ms mirrors the contract's candidate+1µs probe: inclusive at the candidate instant.
-        const available = projectedCargoAvailableAt(entity, new Date(candidateMs + 1), incoming)
+        const available = projectedCargoAvailableAt(entity, new Date(candidateMs), incoming)
         let sufficient = true
         for (const [key, quantity] of demand) {
             if ((available.get(key) ?? 0n) < quantity) {
