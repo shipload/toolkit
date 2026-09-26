@@ -268,13 +268,10 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 }
 
 export function formatPlayer(player:ServerTypes.player_info): string {
-	const lines = [
-		`${player.company_name || (player.is_player ? "Unnamed company" : "No Company")} (${player.owner})`,
-	];
-	if (!player.is_player) {
-		lines.unshift("[Not in game]");
-	}
-	return lines.join("\n");
+	const status = player.is_player
+		? "In game"
+		: "Not in game. Run: shiploadcli foundcompany, then shiploadcli join";
+	return `${player.owner}\n${status}`;
 }
 
 export function formatLocation(

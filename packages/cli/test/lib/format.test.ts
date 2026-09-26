@@ -280,16 +280,17 @@ describe("formatPlayer", () => {
 	const player = (p: Partial<ServerTypes.player_info>) =>
 		({ owner: "agent.gm", is_player: false, company_name: "", ...p }) as unknown as ServerTypes.player_info;
 
-	test("joined account with an unnamed company reads as onboarded", () => {
-		const out = formatPlayer(player({ is_player: true }));
-		expect(out).toBe("Unnamed company (agent.gm)");
+	test("joined account reads as in game", () => {
+		expect(formatPlayer(player({ is_player: true }))).toBe("agent.gm\nIn game");
 	});
 
-	test("named joined company prints its name", () => {
-		expect(formatPlayer(player({ is_player: true, company_name: "Acme" }))).toBe("Acme (agent.gm)");
+	test("company name is not shown", () => {
+		expect(formatPlayer(player({ is_player: true, company_name: "Acme" }))).toBe("agent.gm\nIn game");
 	});
 
-	test("unjoined account without a name is flagged not in game", () => {
-		expect(formatPlayer(player({}))).toBe("[Not in game]\nNo Company (agent.gm)");
+	test("unjoined account points at foundcompany and join", () => {
+		expect(formatPlayer(player({}))).toBe(
+			"agent.gm\nNot in game. Run: shiploadcli foundcompany, then shiploadcli join",
+		);
 	});
 });
