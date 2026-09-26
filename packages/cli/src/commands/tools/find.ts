@@ -144,7 +144,7 @@ export function renderFindResult(
         }
     })()
     const header = `Nearest reachable ${resourceLabel} for ${entityLabel} (${hits.length}):`
-    const preamble = `  origin ${formatCoord(origin)}, gatherer depth ${depth}, radius ${radius}`
+    const preamble = `  origin ${formatCoord(origin)}, gatherer depth ${depth}, radius ${radius}\n  reserves are as of epoch start; gathering this epoch may have drawn them down`
 
     if (hits.length === 0) {
         return [header, preamble, '', '  (no reachable strata found within radius)'].join('\n')
@@ -253,6 +253,10 @@ export function registerSubcommand(tools: Command): void {
     tools
         .command('find')
         .description('Find nearest reachable strata of a given resource')
+        .addHelpText(
+            'before',
+            'Derives strata from the world seed, so reserves are as of epoch start. Confirm what is left with `shiploadcli <entity-type> <id> gatherable` on arrival.\n'
+        )
         .argument('<resource-id>', 'resource item id', parseUint32)
         .option('--entity <ref>', 'scope reachability to this entity (e.g. ship:1)', parseEntityRef)
         .option(

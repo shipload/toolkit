@@ -6,6 +6,7 @@ import {
 	detectCohort,
 	isActionCapable,
 	isAvailable,
+	nextCompletion,
 	waitForFleetAvailable,
 } from '../../src/lib/wait-fleet'
 
@@ -298,6 +299,37 @@ describe('waitForFleetAvailable — errors', () => {
 				owner: 'alice',
 			}),
 		).rejects.toThrow(/no action-capable entities found for alice/)
+	})
+
+	test('timeout names the soonest completing cohort entity', async () => {
+		const soon = snap({id: 1n, is_idle: false, modules: [{} as never], lanes: [laneWith([{type: 5, duration: 900}])]})
+		const later = snap({id: 2n, is_idle: false, modules: [{} as never], lanes: [laneWith([{type: 5, duration: 9000}])]})
+		const stream = fromTicks([tickOf([soon, later])])
+		await expect(
+			waitForFleetAvailable({
+				stream,
+				mode: 'first',
+				autoResolve: false,
+				fetchSnapshot: async () => soon,
+				owner: 'alice',
+			}),
+		).rejects.toThrow(/Timed out waiting for alice fleet \(mode=first\); next task completes in 5m \(ship 1\)/)
+	})
+})
+
+describe('nextCompletion', () => {
+	test('returns undefined when nothing is scheduled', () => {
+		const idle = snap({id: 1n})
+		const snaps = new Map([[entityKeyOf(idle), idle]])
+		expect(nextCompletion(snaps, null, new Date())).toBeUndefined()
+	})
+
+	test('ignores entities outside the cohort', () => {
+		const inCohort = snap({id: 1n, is_idle: false, lanes: [laneWith([{type: 5, duration: 9000}])]})
+		const outside = snap({id: 2n, is_idle: false, lanes: [laneWith([{type: 5, duration: 900}])]})
+		const snaps = new Map([[entityKeyOf(inCohort), inCohort], [entityKeyOf(outside), outside]])
+		const cohort = new Set([entityKeyOf(inCohort)])
+		expect(nextCompletion(snaps, cohort, new Date())?.id).toBe('1')
 	})
 })
 

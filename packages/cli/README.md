@@ -54,9 +54,11 @@ First-run bootstrap (create a company, join the game, and — on testnet — cla
 ```bash
 bun run shiploadcli foundcompany "My Company"
 bun run shiploadcli join
+bun run shiploadcli claimstarter
 ```
 
-Unsure what to do next? Run `bun run shiploadcli next`.
+New to the game, or handing the CLI to a coding agent? Run `bun run shiploadcli guide`.
+It covers the bootstrap sequence, the play loop, and the pitfalls the commands cannot warn about.
 
 ## Commands
 
@@ -84,12 +86,12 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `location <x> <y>` — location metadata for given coordinates.
 - `ship <id> nearby` — systems reachable from a ship.
 - `epoch` — current epoch seed and timing.
-- `next` (alias `hint`) — suggest the next action based on current state.
 
 ### Action (transacting)
 
 - `foundcompany <name>` — create a new company on the platform.
 - `join` — join the Shipload game.
+- `claimstarter` — claim the free starter ship (testnet only).
 - `ship <id> travel <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
 - `grouptravel <entities> <x> <y>` — fly multiple entities together (e.g., `ship:1,container:2`).
 - `<entity-type> <id> warp <x> <y>` — instant-transit via the warp module.
@@ -153,7 +155,7 @@ Tasks move through four states: **scheduled → active → completed → resolve
 ## Recommended agent pattern
 
 ```bash
-bun run shiploadcli next                                       # figure out what to do
+bun run shiploadcli guide                                      # read the play loop once
 bun run shiploadcli <query commands>                           # gather context
 bun run shiploadcli <type> <id> <action> --estimate            # preview cost
 bun run shiploadcli <type> <id> <action> --wait --auto-resolve # submit, wait, verify

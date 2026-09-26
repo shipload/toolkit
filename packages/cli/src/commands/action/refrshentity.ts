@@ -22,9 +22,9 @@ export async function runRefrshEntity(ctx: EntityContext): Promise<void> {
 }
 
 const HELP_BEFORE =
-    'Recompute cached capabilities and cargomass on an entity. ' +
-    'Use after a contract setcode that changes capability formulas — your displayed numbers will refresh to current contract math. ' +
-    'Anyone can call; entity must be idle.\n'
+    'Recompute the cached capabilities and cargo mass on an entity. ' +
+    "Run it when an entity's stats look stale after a contract update: its numbers no longer match what its modules should give. " +
+    'Anyone can call it; the entity must be idle.\n'
 
 function buildSubcommand(name: string, description: string): EntitySubcommand {
     return {

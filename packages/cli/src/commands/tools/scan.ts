@@ -310,6 +310,10 @@ export function registerSubcommand(tools: Command): void {
     tools
         .command('scan')
         .description('Scan resource strata in a radius around the origin')
+        .addHelpText(
+            'before',
+            'Derives strata from the world seed, so reserves are as of epoch start. Confirm what is left with `shiploadcli <entity-type> <id> gatherable` on arrival.\n'
+        )
         .argument('<radius>', 'scan radius in cells', parseUint32)
         .option('--threshold <n>', 'god-roll cutoff', '900')
         .option('--top <n>', 'leaderboard length', '25')

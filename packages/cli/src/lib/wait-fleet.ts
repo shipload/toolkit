@@ -1,5 +1,6 @@
 import {CAP_MODULES, kindCan, schedule} from '@shipload/sdk'
 import type {EntityTypeName} from './args'
+import {formatDuration} from './format'
 import {
 	completedTaskCount,
 	type EntityKey,
@@ -72,10 +73,37 @@ export class NoEligibleEntitiesError extends Error {
 }
 
 export class WaitFleetTimeoutError extends Error {
-	constructor(owner: string | undefined, mode: WaitFleetMode) {
+	constructor(owner: string | undefined, mode: WaitFleetMode, nextCompletion?: NextCompletion) {
 		const target = owner ?? 'self'
-		super(`Timed out waiting for ${target} fleet (mode=${mode})`)
+		const tail = nextCompletion
+			? `; next task completes in ${formatDuration(nextCompletion.remainingMs)} (${nextCompletion.type} ${nextCompletion.id})`
+			: ''
+		super(`Timed out waiting for ${target} fleet (mode=${mode})${tail}`)
 	}
+}
+
+export interface NextCompletion {
+	type: string
+	id: string
+	remainingMs: number
+}
+
+export function nextCompletion(
+	snaps: Map<EntityKey, EntitySnapshot>,
+	cohort: Set<EntityKey> | null,
+	now: Date,
+): NextCompletion | undefined {
+	let best: NextCompletion | undefined
+	for (const [key, s] of snaps) {
+		if (cohort && !cohort.has(key)) continue
+		if (!schedule.hasSchedule(s)) continue
+		const remainingMs = schedule.scheduleRemaining(s, now)
+		if (remainingMs <= 0) continue
+		if (!best || remainingMs < best.remainingMs) {
+			best = { type: String(s.type), id: s.id.toString(), remainingMs }
+		}
+	}
+	return best
 }
 
 const TYPE_RANK: Record<EntityTypeName, number> = {
@@ -115,10 +143,16 @@ export async function waitForFleetAvailable(opts: WaitFleetOpts): Promise<WaitFl
 
 	let cohort: Set<EntityKey> | null = null
 	const matched = new Map<EntityKey, EntitySnapshot>()
+	let lastSnaps: Map<EntityKey, EntitySnapshot> = new Map()
 
 	for await (const tick of opts.stream) {
+		lastSnaps = tick.snaps
 		if (deadline != null && Date.now() >= deadline) {
-			throw new WaitFleetTimeoutError(opts.owner, opts.mode)
+			throw new WaitFleetTimeoutError(
+				opts.owner,
+				opts.mode,
+				nextCompletion(tick.snaps, cohort, new Date()),
+			)
 		}
 		if (cohort === null) {
 			if (tick.snaps.size === 0) continue
@@ -165,5 +199,5 @@ export async function waitForFleetAvailable(opts: WaitFleetOpts): Promise<WaitFl
 		}
 	}
 
-	throw new WaitFleetTimeoutError(opts.owner, opts.mode)
+	throw new WaitFleetTimeoutError(opts.owner, opts.mode, nextCompletion(lastSnaps, cohort, new Date()))
 }

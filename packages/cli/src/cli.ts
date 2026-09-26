@@ -6,6 +6,7 @@ import * as blend from './commands/action/blend'
 import * as buildplot from './commands/action/buildplot'
 import * as cancel from './commands/action/cancel'
 import * as claimplot from './commands/action/claimplot'
+import * as claimstarter from './commands/action/claimstarter'
 import * as craft from './commands/action/craft'
 import * as craftjob from './commands/action/craftjob'
 import * as demolish from './commands/action/demolish'
@@ -135,6 +136,7 @@ export function build(): Command {
 
     foundcompany.register(program)
     join.register(program)
+    claimstarter.register(program)
     registerEntitySubcommand(travel.SUBCOMMAND)
     grouptravel.register(program)
     route.register(program)

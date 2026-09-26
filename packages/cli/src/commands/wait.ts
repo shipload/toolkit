@@ -131,6 +131,12 @@ export function register(program: Command): void {
         )
         .addOption(TIMEOUT_OPTION)
         .option('--json', 'emit JSON instead of formatted text')
+        .addHelpText(
+            'after',
+            `
+On timeout the error names when the next task in the fleet completes, so a follow-up wait can size its --timeout.
+To wait for one entity only, use \`shiploadcli <entity-type> <id> wait\`.`
+        )
         .action(async (ownerArg: string | undefined, opts: WaitCliOptions) => {
             await withValidation(() => runWait(ownerArg, opts))
         })

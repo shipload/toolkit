@@ -55,7 +55,7 @@ export function renderHeader(h: ReportHeader): string {
 		`              asteroids  ${h.locationCounts.asteroids}`,
 		`              nebulas    ${h.locationCounts.nebulas}`,
 		`              ice fields ${h.locationCounts.iceFields}`,
-		`  strata:     ${h.strata} with reserve > 0`,
+		`  strata:     ${h.strata} with reserve > 0 (reserves as of epoch start)`,
 		`  threshold:  ${h.threshold}`,
 	].join("\n");
 }

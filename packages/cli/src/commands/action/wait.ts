@@ -28,6 +28,11 @@ export const SUBCOMMAND: EntitySubcommand = {
             )
             .addOption(TIMEOUT_OPTION)
             .addOption(AUTO_RESOLVE_OPTION)
+            .addHelpText(
+                'after',
+                `
+To pace a whole fleet, use the top-level \`shiploadcli wait\`: it returns when any (or with --all, every) entity is available.`
+            )
             .action(async (opts: {timeout?: number; autoResolve?: boolean}) => {
                 await runWait(ctx, opts)
             }),
