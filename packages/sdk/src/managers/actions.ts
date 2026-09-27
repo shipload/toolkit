@@ -120,15 +120,16 @@ function calcDistance(origin: CoordinatesType, destination: CoordinatesType): bi
 }
 
 function calcCargoItemMassUint32(item: ServerContract.ActionParams.Type.cargo_item): bigint {
-    let mass = toUint32(BigInt(getItem(item.item_id).mass) * toUint32(toBigInt(item.quantity)))
+    let unitMass = BigInt(getItem(item.item_id).mass)
 
     for (const mod of item.modules) {
         if (mod.installed) {
-            mass = toUint32(mass + BigInt(getItem(mod.installed.item_id).mass))
+            unitMass += BigInt(getItem(mod.installed.item_id).mass)
         }
     }
 
-    return mass
+    const mass = unitMass * toBigInt(item.quantity)
+    return mass > UINT32_MAX_BIGINT ? UINT32_MAX_BIGINT : mass
 }
 
 function calcPayloadMass(items: ServerContract.ActionParams.Type.cargo_item[]): bigint {

@@ -23,17 +23,15 @@ interface MassInput {
 }
 
 export function calcCargoItemMass(item: MassInput): UInt64 {
-    const itemDef = getItem(item.item_id)
-    let mass = UInt64.from(itemDef.mass).multiplying(item.quantity)
+    let unitMass = UInt64.from(getItem(item.item_id).mass)
 
     for (const mod of item.modules) {
         if (mod.installed) {
-            const modDef = getItem(mod.installed.item_id)
-            mass = mass.adding(UInt64.from(modDef.mass))
+            unitMass = unitMass.adding(UInt64.from(getItem(mod.installed.item_id).mass))
         }
     }
 
-    return mass
+    return unitMass.multiplying(item.quantity)
 }
 
 export function calcCargoMass(entity: HasCargo): UInt64 {

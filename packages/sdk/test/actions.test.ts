@@ -386,25 +386,26 @@ test('getLaunchQuote clamps saturated energy to uint32 max', () => {
     expect(quote.maxReach).toBe(18446744073709551615n)
 })
 
-test('getLaunchQuote mirrors uint32 payload mass wrapping at item and total boundaries', () => {
-    const wrappedItem = {
+test('getLaunchQuote weighs installed modules per unit and saturates an item past uint32', () => {
+    const launcher = {
+        coordinates: {x: 0, y: 0},
+        launcher: {charge_rate: 1, velocity: 1, drain: 1},
+        generator: {capacity: 1000},
+    }
+    const fitted = (quantity: number) => ({
         item_id: 101,
         stats: 0n,
         modules: [{type: 0, installed: {item_id: 10109, stats: 0n}}],
-        quantity: 429_496_730,
-    }
+        quantity,
+    })
 
-    const quote = sl.actions.getLaunchQuote(
-        {
-            coordinates: {x: 0, y: 0},
-            launcher: {charge_rate: 1, velocity: 1, drain: 1},
-            generator: {capacity: 1000},
-        },
-        {coordinates: {x: 1, y: 0}},
-        [wrappedItem, cargo(101, 429_496_730)]
-    )
+    const perUnit = sl.actions.getLaunchQuote(launcher, {coordinates: {x: 1, y: 0}}, [fitted(2)])
+    expect(perUnit.chargeTime).toBe(2 * (10 + 10_000) * 100 + 1)
 
-    expect(quote.chargeTime).toBe(1_000_801)
+    const saturated = sl.actions.getLaunchQuote(launcher, {coordinates: {x: 1, y: 0}}, [
+        fitted(429_496_730),
+    ])
+    expect(saturated.chargeTime).toBe(4294967295)
 })
 
 test('sendAsset builds an atomicassets::transfer to the recipient with the given memo', () => {
