@@ -67,7 +67,7 @@ export function deriveStratum(
         }
     }
 
-    const tierRoll = ((bytes[18] << 8) | bytes[19]) >>> 0
+    const tierRoll = ((bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19]) >>> 0
     const withinRoll = ((bytes[20] << 8) | bytes[21]) >>> 0
     const tier = rollTier(tierRoll, stratum)
     const selected = getItem(selectedItemId)

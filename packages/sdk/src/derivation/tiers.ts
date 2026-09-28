@@ -29,7 +29,7 @@ const DEEP_THRESHOLDS = {
     massive: 0.99992,
 }
 
-export const TIER_ROLL_MAX = 0x10000 // 65536
+export const TIER_ROLL_MAX = 0x1_0000_0000
 
 function lerp(a: number, b: number, t: number): number {
     return a + (b - a) * t

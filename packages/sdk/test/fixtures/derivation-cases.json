@@ -2,7 +2,7 @@
   "catalog_hash": "590670e61ddfbf4cfdbdd1cd780d62d3ec2499b3279b1045f5c816e12dbe563b",
   "epoch_seed": "0202020202020202020202020202020202020202020202020202020202020202",
   "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
-  "generated_at": "2026-09-25T00:33:31.601Z",
+  "generated_at": "2026-09-28T16:53:14.161Z",
   "stratum": [
     {
       "name": "asteroid: known yielding stratum",
@@ -11,7 +11,7 @@
       "stratum": 8,
       "expected": {
         "item_id": 201,
-        "reserve": 2689080,
+        "reserve": 736360,
         "richness": 604,
         "seed": "18298824793260127225"
       }
@@ -23,7 +23,7 @@
       "stratum": 1107,
       "expected": {
         "item_id": 301,
-        "reserve": 225480,
+        "reserve": 821080,
         "richness": 785,
         "seed": "1104081681788411781"
       }
@@ -35,7 +35,7 @@
       "stratum": 99,
       "expected": {
         "item_id": 201,
-        "reserve": 236040,
+        "reserve": 844560,
         "richness": 501,
         "seed": "4600428321081920569"
       }
@@ -71,7 +71,7 @@
       "stratum": 90,
       "expected": {
         "item_id": 401,
-        "reserve": 630440,
+        "reserve": 139700,
         "richness": 682,
         "seed": "9586363057827563467"
       }

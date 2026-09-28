@@ -12,6 +12,7 @@ import {
     type ReserveTier,
     rollTier,
     rollWithinTier,
+    TIER_ROLL_MAX,
 } from '$lib'
 
 describe('tier utilities', () => {
@@ -69,35 +70,54 @@ describe('reserve tiers', () => {
         assert.deepEqual(RESERVE_TIERS.motherlode, {min: 9_600_000, max: 24_000_000})
     })
 
-    test('rollTier at shallow distributes ~80/19.2/0.8/0.005/0.0004', () => {
-        const counts: Record<ReserveTier, number> = {
-            small: 0,
-            medium: 0,
-            large: 0,
-            massive: 0,
-            motherlode: 0,
+    const TIERS: ReserveTier[] = ['small', 'medium', 'large', 'massive', 'motherlode']
+
+    function tierShares(stratum: number): Record<ReserveTier, number> {
+        const starts = TIERS.map((tier) => {
+            let lo = 0
+            let hi = TIER_ROLL_MAX
+            while (lo < hi) {
+                const mid = Math.floor((lo + hi) / 2)
+                if (TIERS.indexOf(rollTier(mid, stratum)) >= TIERS.indexOf(tier)) hi = mid
+                else lo = mid + 1
+            }
+            return lo
+        })
+        const shares = {} as Record<ReserveTier, number>
+        TIERS.forEach((tier, i) => {
+            shares[tier] = ((starts[i + 1] ?? TIER_ROLL_MAX) - starts[i]) / TIER_ROLL_MAX
+        })
+        return shares
+    }
+
+    test('the highest tier roll is a motherlode at every stratum', () => {
+        for (const stratum of [0, 1, 2443, 9708, 65535]) {
+            assert.equal(rollTier(TIER_ROLL_MAX - 1, stratum), 'motherlode')
         }
-        const N = 1_000_000
-        for (let r = 0; r < N; r++) {
-            const tierRoll = (r * 0xffff) % 0x10000
-            counts[rollTier(tierRoll, 1)]++
-        }
-        // Wide tolerance because tierRoll above is a non-uniform sweep, just sanity:
-        assert.isAtLeast(counts.small, 700_000)
-        assert.isAtMost(counts.small, 850_000)
     })
 
-    test('rollTier at deep yields more large/massive than at shallow', () => {
-        let shallowLargePlus = 0
-        let deepLargePlus = 0
-        for (let r = 0; r < 65536; r++) {
-            const shallow = rollTier(r, 1)
-            const deep = rollTier(r, 65535)
-            if (shallow === 'large' || shallow === 'massive' || shallow === 'motherlode')
-                shallowLargePlus++
-            if (deep === 'large' || deep === 'massive' || deep === 'motherlode') deepLargePlus++
+    test('rollTier at shallow distributes 80/19.1946/0.8/0.005/0.0004', () => {
+        const shares = tierShares(0)
+        const expected = {
+            small: 0.8,
+            medium: 0.191946,
+            large: 0.008,
+            massive: 0.00005,
+            motherlode: 0.000004,
         }
-        assert.isAbove(deepLargePlus, shallowLargePlus * 4)
+        for (const tier of TIERS) assert.closeTo(shares[tier], expected[tier], 1 / 2 ** 31)
+    })
+
+    test('rollTier at deep distributes 50/45.892/4/0.1/0.008', () => {
+        const shares = tierShares(65535)
+        const expected = {
+            small: 0.5,
+            medium: 0.45892,
+            large: 0.04,
+            massive: 0.001,
+            motherlode: 0.00008,
+        }
+        for (const tier of TIERS) assert.closeTo(shares[tier], expected[tier], 1 / 2 ** 31)
     })
 
     test('rollWithinTier is skewed low', () => {
