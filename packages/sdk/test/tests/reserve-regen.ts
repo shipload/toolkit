@@ -56,6 +56,22 @@ describe('getEffectiveReserve', () => {
         )
     })
 
+    test('keeps the fractional regen when last_block resets between reads', () => {
+        const max = EPOCH_SLOTS / 3
+        let remaining = 1000
+        let last = bts(0)
+        for (let i = 1; i <= 30; i++) {
+            const now = bts(i * 1000)
+            remaining = getEffectiveReserve(
+                {remaining, max_reserve: max, last_block: last},
+                now,
+                EPOCH_SECONDS
+            )
+            last = now
+        }
+        assert.equal(remaining, 1000 + Math.floor((max * 60) / EPOCH_SLOTS))
+    })
+
     test('clamps to zero when now is earlier than last_block', () => {
         assert.equal(
             getEffectiveReserve(

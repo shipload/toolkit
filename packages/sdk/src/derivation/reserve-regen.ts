@@ -10,13 +10,6 @@ function toNumber(value: UInt32 | number): number {
     return typeof value === 'number' ? value : Number(value)
 }
 
-function slotsBetween(now: BlockTimestamp, last: BlockTimestamp): number {
-    const nowMs = now.toMilliseconds()
-    const lastMs = last.toMilliseconds()
-    if (nowMs <= lastMs) return 0
-    return Math.floor((nowMs - lastMs) / 500)
-}
-
 export function getEffectiveReserve(
     row: EffectiveReserveInput,
     now: BlockTimestamp,
@@ -27,8 +20,11 @@ export function getEffectiveReserve(
     if (remaining >= max) return max
     const epochSlots = epochSeconds * 2
     if (epochSlots === 0) return remaining
-    const elapsed = slotsBetween(now, row.last_block)
-    const regen = Math.floor((max * elapsed) / epochSlots)
+    const nowSlot = Number(now.value)
+    const lastSlot = Number(row.last_block.value)
+    if (nowSlot <= lastSlot) return remaining
+    const regen =
+        Math.floor((max * nowSlot) / epochSlots) - Math.floor((max * lastSlot) / epochSlots)
     const effective = remaining + regen
     return effective >= max ? max : effective
 }
