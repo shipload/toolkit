@@ -42,9 +42,9 @@
         "test": "make test"
     },
     "dependencies": {
-        "@wharfkit/antelope": "4.0.1",
-        "@wharfkit/common": "4.0.1",
-        "@wharfkit/contract": "4.0.1",
+        "@wharfkit/antelope": "4.0.2",
+        "@wharfkit/common": "4.0.2",
+        "@wharfkit/contract": "4.0.2",
         "tslib": "^2.1.0"
     },
     "devDependencies": {
@@ -60,8 +60,8 @@
         "@types/bun": "latest",
         "@types/chai": "^4.3.1",
         "@types/node": "^18.7.18",
-        "@wharfkit/mock-data": "^4.0.1",
-        "@wharfkit/wallet-plugin-privatekey": "^4.0.1",
+        "@wharfkit/mock-data": "^4.0.2",
+        "@wharfkit/wallet-plugin-privatekey": "^4.0.2",
         "chai": "^4.3.4",
         "gh-pages": "^4.0.0",
         "node-fetch": "^2.6.1",

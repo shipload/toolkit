@@ -13,7 +13,7 @@
         "test": "bun test"
     },
     "dependencies": {
-        "@wharfkit/antelope": "4.0.1"
+        "@wharfkit/antelope": "4.0.2"
     },
     "devDependencies": {
         "@types/bun": "latest",

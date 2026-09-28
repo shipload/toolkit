@@ -17,7 +17,7 @@
         "@resvg/resvg-wasm": "^2.6.0",
         "@shipload/item-renderer": "workspace:^",
         "@shipload/sdk": "workspace:^",
-        "@wharfkit/antelope": "4.0.1"
+        "@wharfkit/antelope": "4.0.2"
     },
     "devDependencies": {
         "@cloudflare/vitest-pool-workers": "^0.5.0",
