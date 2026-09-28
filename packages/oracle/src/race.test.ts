@@ -38,10 +38,8 @@ test('classifyCommitRace separates a shut window from a rolled epoch', () => {
     expect(classifyCommitRace(apiError('Oracle not in epoch responsible set.'))).toBeNull()
 })
 
-test('classifyCloseRace covers both ways another oracle can get there first', () => {
+test('classifyCloseRace reports another oracle getting there first as raced', () => {
     expect(classifyCloseRace(apiError('Epoch already finalized.'))).toBe('raced')
-    expect(
-        classifyCloseRace(apiError('closeepoch targets the epoch the game is waiting on.'))
-    ).toBe('raced')
+    expect(classifyCloseRace(apiError('closeepoch targets the wall-clock epoch.'))).toBeNull()
     expect(classifyCloseRace(apiError('Epoch deadline has not passed.'))).toBeNull()
 })

@@ -1,4 +1,4 @@
-import type {Action, Checksum256, Name, UInt64} from '@wharfkit/antelope'
+import {type Action, Bytes, Checksum256, type Name, type UInt64} from '@wharfkit/antelope'
 import {classifyCloseRace, classifyCommitRace, classifyRevealRace} from './race'
 
 export type CommitOutcome = 'posted' | 'already-committed' | 'window-closed' | 'epoch-closed'
@@ -45,7 +45,7 @@ export interface EpochReads {
 export interface ActionBuilders {
     commit(oracleId: Name, epoch: number, commit: Checksum256): Action
     reveal(oracleId: Name, epoch: number, reveal: Checksum256): Action
-    closeepoch(epoch: number): Action
+    closeepoch(oracleId: Name, epoch: number, entropy: Checksum256): Action
 }
 
 export interface SessionLike {
@@ -86,7 +86,7 @@ export async function runOnce(deps: OracleDeps): Promise<TickResult> {
         commit,
     })
 
-    const close = await resolveClose(deps, target, reveal)
+    const close = await resolveClose(deps, target, currentHeight, reveal)
 
     return {target, currentHeight, commit, reveal, close, eta}
 }
@@ -112,14 +112,16 @@ async function postCommit(deps: OracleDeps, target: number): Promise<CommitOutco
 async function resolveClose(
     deps: OracleDeps,
     target: number,
+    currentHeight: number,
     reveal: RevealOutcome
 ): Promise<CloseOutcome> {
     if (reveal === 'posted' || reveal === 'waiting-for-height') return 'not-due'
     if (reveal === 'epoch-finalized') return 'not-due'
-    const {epochs, actions, session} = deps
+    const {epochs, actions, session, oracleId} = deps
     if ((await epochs.getSecondsUntilClose(target)) > 0) return 'not-due'
+    const entropy = Checksum256.from(Bytes.random(32))
     try {
-        await session.transact({action: actions.closeepoch(target)})
+        await session.transact({action: actions.closeepoch(oracleId, currentHeight, entropy)})
         return 'posted'
     } catch (err) {
         return classifyCloseRace(err) ?? 'failed'

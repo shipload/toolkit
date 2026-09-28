@@ -124,7 +124,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
         actions: {
             commit: (id, epoch, commit) => shipload.actions.commit(id, epoch, commit),
             reveal: (id, epoch, reveal) => shipload.actions.reveal(id, epoch, reveal),
-            closeepoch: (epoch) => shipload.actions.closeepoch(epoch),
+            closeepoch: (id, epoch, entropy) => shipload.actions.closeepoch(id, epoch, entropy),
         },
         session,
         oracleId,

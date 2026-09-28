@@ -57,8 +57,13 @@ function fakeDeps(opts: {
                 calls.push({kind: 'reveal', oracle: String(oracle), epoch, hash: String(hash)})
                 return {name: 'reveal'} as never
             },
-            closeepoch: (epoch) => {
-                calls.push({kind: 'closeepoch', oracle: '', epoch, hash: ''})
+            closeepoch: (oracle, epoch, entropy) => {
+                calls.push({
+                    kind: 'closeepoch',
+                    oracle: String(oracle),
+                    epoch,
+                    hash: String(entropy),
+                })
                 return {name: 'closeepoch'} as never
             },
         },
@@ -293,6 +298,29 @@ test('overdue stalled epoch is closed on the normal tick', async () => {
     expect(r.reveal).toBe('already-revealed')
     expect(r.close).toBe('posted')
     expect(sent).toEqual(['closeepoch'])
+})
+
+test('a stalled close targets the wall-clock epoch with fresh entropy each time', async () => {
+    const opts = {
+        finalized: 41,
+        height: 45,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+    }
+    const first = fakeDeps(opts)
+    const second = fakeDeps(opts)
+    expect((await runOnce(first.deps)).close).toBe('posted')
+    await runOnce(second.deps)
+
+    const [a] = first.calls.filter((c) => c.kind === 'closeepoch')
+    const [b] = second.calls.filter((c) => c.kind === 'closeepoch')
+    expect(a.oracle).toBe(String(ORACLE))
+    expect(a.epoch).toBe(45)
+    expect(a.hash).toHaveLength(64)
+    expect(a.hash).not.toBe(String(REVEAL))
+    expect(a.hash).not.toBe(b.hash)
 })
 
 test('no close while the deadline is still ahead', async () => {

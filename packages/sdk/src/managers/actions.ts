@@ -1052,9 +1052,11 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    closeepoch(epoch: UInt64Type): Action {
+    closeepoch(oracleId: NameType, epoch: UInt64Type, entropy: Checksum256Type): Action {
         return this.server.action('closeepoch', {
+            oracle_id: Name.from(oracleId),
             epoch: UInt64.from(epoch),
+            entropy: Checksum256.from(entropy),
         })
     }
 

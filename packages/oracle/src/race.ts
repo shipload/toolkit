@@ -48,7 +48,5 @@ export function classifyRevealRace(err: unknown): RevealRace | null {
 }
 
 export function classifyCloseRace(err: unknown): CloseRace | null {
-    if (matches(err, 'Epoch already finalized.')) return 'raced'
-    if (matches(err, 'closeepoch targets the epoch the game is waiting on')) return 'raced'
-    return null
+    return matches(err, 'Epoch already finalized.') ? 'raced' : null
 }
