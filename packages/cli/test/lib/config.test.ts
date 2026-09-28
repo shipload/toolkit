@@ -248,6 +248,18 @@ describe("loadConfig", () => {
 		expect(cfg.historyUrl).toBe("https://history.example.test");
 	});
 
+	test("webapp.url parsed when [webapp] section present", () => {
+		const iniPath = join(tmpDir, "config.ini");
+		writeFileSync(
+			iniPath,
+			"[default]\nprivate_key=PVT_K1_x\nactor=a\n\n[webapp]\nurl=http://localhost:5173\n",
+		);
+		process.env.PLAYER_CONFIG = iniPath;
+
+		const cfg = loadConfig();
+		expect(cfg.webappUrl).toBe("http://localhost:5173");
+	});
+
 	test("chainUrl and historyUrl are undefined when sections absent", () => {
 		const iniPath = join(tmpDir, "config.ini");
 		writeFileSync(iniPath, "[default]\nprivate_key=PVT_K1_x\nactor=a\n");

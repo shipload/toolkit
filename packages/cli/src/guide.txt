@@ -2,7 +2,7 @@
 
 This guide is for you, the agent a player has asked to run their Shipload account. Shipload is a game played on an Antelope blockchain: ships and structures take on tasks, the chain keeps time, and every move is a transaction. `shiploadcli <command> --help` covers what each command does, its arguments, and an example. This guide covers when and why to reach for them.
 
-The player needs an Antelope account on the target network and a wallet that can sign for it before any of this works. Creating that account happens outside this guide.
+The player needs an Antelope account on the target network and a wallet that can sign for it before any of this works. A player without one can create it at https://dev.shiploadgame.com/guide/agent.
 
 ## Bootstrap
 

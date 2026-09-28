@@ -35,6 +35,7 @@ export interface PlayerConfig {
 	indexerUrl: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	webappUrl?: string;
 	gameContract: string;
 	platformContract: string;
 	atomicAssetsContract: string;
@@ -90,6 +91,7 @@ export interface ParsedSection {
 	indexerUrl?: string;
 	chainUrl?: string;
 	historyUrl?: string;
+	webappUrl?: string;
 	gameContract?: string;
 	platformContract?: string;
 	atomicAssets?: string;
@@ -120,6 +122,7 @@ function parseIniFile(path: string): ParsedSection {
 	const indexer = (parsed.indexer ?? {}) as Record<string, unknown>;
 	const chain = (parsed.chain ?? {}) as Record<string, unknown>;
 	const history = (parsed.history ?? {}) as Record<string, unknown>;
+	const webapp = (parsed.webapp ?? {}) as Record<string, unknown>;
 	const contracts = (parsed.contracts ?? {}) as Record<string, unknown>;
 	const track = (parsed.track ?? {}) as Record<string, unknown>;
 	const oracle = (parsed.oracle ?? {}) as Record<string, unknown>;
@@ -133,6 +136,7 @@ function parseIniFile(path: string): ParsedSection {
 		indexerUrl: indexer.url as string | undefined,
 		chainUrl: chain.url as string | undefined,
 		historyUrl: history.url as string | undefined,
+		webappUrl: webapp.url as string | undefined,
 		gameContract: contracts.game as string | undefined,
 		platformContract: contracts.platform as string | undefined,
 		atomicAssets: contracts.atomicassets as string | undefined,
@@ -212,6 +216,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		indexerUrl: fileData.indexerUrl ?? DEFAULT_JUNGLE4_INDEXER_URL,
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
+		webappUrl: fileData.webappUrl,
 		gameContract: fileData.gameContract ?? "eon.shipload",
 		platformContract: fileData.platformContract ?? "nex.shipload",
 		atomicAssetsContract: fileData.atomicAssets ?? "atomicassets",

@@ -24,12 +24,6 @@ export function unicoveTransactionUrl(chainId: string, txid: string): string | n
     return `https://${net.host}/en/${net.slug}/transaction/${txid}`
 }
 
-export function unicovePromptUrl(chainId: string, esr: string): string | null {
-    const net = networkFor(chainId)
-    if (!net) return null
-    return `https://${net.host}/en/${net.slug}/prompt/${esr}`
-}
-
 export function unicoveProposalUrl(
     chainId: string,
     proposer: string,

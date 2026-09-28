@@ -313,7 +313,12 @@ export async function transact(
 			if (options?.description) console.log(options.description);
 			const authorization = [PermissionLevel.from(`${config.actor}@active`)];
 			const linked = actions.map((action) => withAuthorization(action, authorization));
-			const { url, summary } = await buildSigningLink(chain.id.toString(), linked, abiLookup);
+			const { url, summary } = await buildSigningLink(
+				chain.id.toString(),
+				linked,
+				abiLookup,
+				config.webappUrl,
+			);
 			console.log();
 			console.log("This needs a signature this CLI's restricted key cannot provide. Sign it with your wallet:");
 			console.log();

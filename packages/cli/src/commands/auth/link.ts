@@ -53,7 +53,8 @@ function registerPlatform(parent: Command): void {
                 const {url, summary} = await buildSigningLink(
                     chain.id.toString(),
                     actions,
-                    abiLookup
+                    abiLookup,
+                    config.webappUrl
                 )
                 console.log()
                 console.log('Sign this with your wallet to finish setup:')

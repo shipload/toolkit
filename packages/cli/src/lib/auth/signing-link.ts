@@ -2,7 +2,7 @@ import {deflateRawSync, inflateRawSync} from "node:zlib";
 import type {ABI, Action, AnyAction} from "@wharfkit/antelope";
 import {Bytes, Serializer} from "@wharfkit/antelope";
 import {SigningRequest} from "@wharfkit/signing-request";
-import {unicovePromptUrl} from "../unicove";
+import {webappSignUrl} from "../webapp";
 
 const zlib = {
 	deflateRaw: (data: Uint8Array): Uint8Array => new Uint8Array(deflateRawSync(data)),
@@ -49,13 +49,14 @@ export async function buildSigningLink(
 	chainId: string,
 	actions: (Action | AnyAction)[],
 	abiLookup?: AbiLookup,
+	webappUrl?: string,
 ): Promise<SigningLinkResult> {
 	const request = await SigningRequest.create(
 		{actions, chainId, broadcast: true},
 		{zlib},
 	);
 	const esr = request.encode(true, false).slice(4);
-	const url = unicovePromptUrl(chainId, esr);
-	if (!url) throw new Error(`No Unicove deployment known for chain ${chainId}`);
+	const url = webappSignUrl(chainId, esr, webappUrl);
+	if (!url) throw new Error(`No Shipload webapp known for chain ${chainId}; set [webapp] url in config.ini`);
 	return {url, summary: summarizeActions(actions, abiLookup)};
 }
