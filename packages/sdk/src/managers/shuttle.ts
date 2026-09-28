@@ -32,6 +32,7 @@ export type ShuttleReasonCode =
     | 'queue-full'
     | 'inputs-unavailable'
     | 'ship-energy'
+    | 'recharge-pending'
     | 'dropoff-collision'
     | 'ship-capped'
     | 'departs'
@@ -97,6 +98,7 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'Insufficient inputs for recipe.': 'inputs-unavailable',
     'Cargo debit exceeds available quantity.': 'inputs-unavailable',
     'Craft requires more energy than entity has.': 'ship-energy',
+    'a hosted craft cannot be booked while a recharge is pending': 'recharge-pending',
     'identical Workshop delivery already scheduled at this time; finish that delivery or change the shipment':
         'dropoff-collision',
     'cannot append: schedule is capped by a pending plan-capper': 'ship-capped',

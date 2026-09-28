@@ -76,6 +76,8 @@ export const BLEND_INPUTS_MUST_MATCH = 'All blend inputs must be the same item.'
 export const GATHER_NOT_ENOUGH_ENERGY = 'Gather requires more energy than entity has.'
 export const GATHER_EXCEEDS_ENERGY_CAPACITY = "Gather drain exceeds entity's energy capacity."
 export const CRAFT_NOT_ENOUGH_ENERGY = 'Craft requires more energy than entity has.'
+export const CRAFT_HOSTED_RECHARGE_PENDING =
+    'a hosted craft cannot be booked while a recharge is pending'
 export const CRAFT_EXCEEDS_ENERGY_CAPACITY = "Craft drain exceeds entity's energy capacity."
 export const BLEND_REQUIRES_MULTIPLE = 'Blend requires at least two input stacks.'
 export const BLEND_STAT_LESS_NOT_SUPPORTED = 'Stat-less items cannot be blended.'
