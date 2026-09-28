@@ -36,6 +36,7 @@ export interface PlayerConfig {
 	chainUrl?: string;
 	historyUrl?: string;
 	webappUrl?: string;
+	resourcesUrl?: string;
 	gameContract: string;
 	platformContract: string;
 	atomicAssetsContract: string;
@@ -92,6 +93,7 @@ export interface ParsedSection {
 	chainUrl?: string;
 	historyUrl?: string;
 	webappUrl?: string;
+	resourcesUrl?: string;
 	gameContract?: string;
 	platformContract?: string;
 	atomicAssets?: string;
@@ -123,6 +125,7 @@ function parseIniFile(path: string): ParsedSection {
 	const chain = (parsed.chain ?? {}) as Record<string, unknown>;
 	const history = (parsed.history ?? {}) as Record<string, unknown>;
 	const webapp = (parsed.webapp ?? {}) as Record<string, unknown>;
+	const resources = (parsed.resources ?? {}) as Record<string, unknown>;
 	const contracts = (parsed.contracts ?? {}) as Record<string, unknown>;
 	const track = (parsed.track ?? {}) as Record<string, unknown>;
 	const oracle = (parsed.oracle ?? {}) as Record<string, unknown>;
@@ -137,6 +140,7 @@ function parseIniFile(path: string): ParsedSection {
 		chainUrl: chain.url as string | undefined,
 		historyUrl: history.url as string | undefined,
 		webappUrl: webapp.url as string | undefined,
+		resourcesUrl: resources.url as string | undefined,
 		gameContract: contracts.game as string | undefined,
 		platformContract: contracts.platform as string | undefined,
 		atomicAssets: contracts.atomicassets as string | undefined,
@@ -217,6 +221,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		chainUrl: fileData.chainUrl,
 		historyUrl: fileData.historyUrl,
 		webappUrl: fileData.webappUrl,
+		resourcesUrl: fileData.resourcesUrl,
 		gameContract: fileData.gameContract ?? "eon.shipload",
 		platformContract: fileData.platformContract ?? "nex.shipload",
 		atomicAssetsContract: fileData.atomicAssets ?? "atomicassets",

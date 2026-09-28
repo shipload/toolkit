@@ -12,6 +12,7 @@ import { chain, client, platform, server } from "./client";
 import { buildSigningLink } from "./auth/signing-link";
 import { hasKeyFile, keyFilePath, readKeyFile } from "./auth/keyfile";
 import { unicoveTransactionUrl } from "./unicove";
+import { resourceProviderPlugin, withJsonContentType } from "./resources";
 import { ConfigError, loadConfig, type PlayerConfig } from "./config";
 import { extractChainError, printError } from "./errors";
 import {
@@ -46,6 +47,7 @@ function sessionForPermission(permission: string): Session {
 		cachedActor = config.actor;
 		cachedPublicKey = key.toPublic();
 	}
+	const provider = resourceProviderPlugin(chain.id.toString(), config.resourcesUrl);
 	session = new Session(
 		{
 			chain,
@@ -53,7 +55,7 @@ function sessionForPermission(permission: string): Session {
 			permission,
 			walletPlugin: new WalletPluginPrivateKey(String(key)),
 		},
-		{ fetch },
+		{ fetch: withJsonContentType(fetch), transactPlugins: [provider] },
 	);
 	cachedSessionsByPermission.set(permission, session);
 	return session;

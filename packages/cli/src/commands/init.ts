@@ -28,6 +28,11 @@ const STUB = `[default]
 ; [chain]
 ; url = https://jungle4.greymass.com
 
+; Optional: override the resource provider that covers CPU/NET for this
+; account's transactions. Default: the Greymass provider for the chain.
+; [resources]
+; url = https://jungle4.greymass.com
+
 ; Uncomment and set this to enable \`shiploadcli debug actions\`, \`debug setcodes\`,
 ; and \`debug trace\`. The URL must point at a Roborovski-compatible
 ; action-history HTTP frontend.

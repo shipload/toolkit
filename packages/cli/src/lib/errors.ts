@@ -1,4 +1,7 @@
 import { ValidationError } from "./validate";
+import { resourceRentalHint } from "./resources";
+
+const JUNGLE4_CHAIN_ID = "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d";
 
 export const EXIT = {
 	SUCCESS: 0,
@@ -118,7 +121,7 @@ const HINTS: ChainHint[] = [
 	},
 	{
 		matches: (m) => m.includes("reached account cpu limit") || m.includes("reached account net limit"),
-		hint: "Your account's staked CPU/NET regenerates over ~24h. Wait 10-30s and retry, stake more EOS, or use a PowerUp to top up temporarily. Batch-submitting many actions back-to-back is the usual trigger.",
+		hint: resourceRentalHint(JUNGLE4_CHAIN_ID),
 	},
 	{
 		matches: (m) => m.includes("irrelevant authority"),
