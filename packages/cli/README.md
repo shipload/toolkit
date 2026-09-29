@@ -26,8 +26,6 @@ Then:
 2. Set up a restricted signing key: `shiploadcli auth create <account>`, then sign the printed link with your wallet. To use a full key instead, set `actor` and `private_key` in the config at the printed path.
 3. Run: `shiploadcli whoami`
 
-Playing through a coding agent? Have it run `shiploadcli guide`.
-
 ### From source
 
 ```bash
