@@ -10,6 +10,7 @@ import {
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey";
 import { chain, client, platform, server } from "./client";
 import { buildSigningLink } from "./auth/signing-link";
+import { withChainAbi } from "./auth/chain-abi";
 import { hasKeyFile, keyFilePath, readKeyFile } from "./auth/keyfile";
 import { unicoveTransactionUrl } from "./unicove";
 import { resourceProviderPlugin, withJsonContentType } from "./resources";
@@ -318,7 +319,7 @@ export async function transact(
 			const { url, summary } = await buildSigningLink(
 				chain.id.toString(),
 				linked,
-				abiLookup,
+				withChainAbi(abiLookup),
 				config.webappUrl,
 			);
 			console.log();

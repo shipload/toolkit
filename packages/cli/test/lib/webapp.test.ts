@@ -1,5 +1,5 @@
 import {expect, test} from 'bun:test'
-import {Action, Name} from '@wharfkit/antelope'
+import {ABI, Action, Name} from '@wharfkit/antelope'
 import {buildSigningLink} from '../../src/lib/auth/signing-link'
 import {webappSignUrl} from '../../src/lib/webapp'
 
@@ -33,4 +33,47 @@ test('signing links carry the esr payload without its scheme', async () => {
     expect(url.startsWith('https://dev.shiploadgame.com/sign/')).toBe(true)
     expect(url).not.toContain('esr:')
     expect(url.split('/sign/')[1].length).toBeGreaterThan(0)
+})
+
+const TRANSFER_ABI = ABI.from({
+    version: 'eosio::abi/1.1',
+    structs: [
+        {
+            name: 'transfer',
+            base: '',
+            fields: [
+                {name: 'from', type: 'name'},
+                {name: 'to', type: 'name'},
+                {name: 'asset_ids', type: 'uint64[]'},
+                {name: 'memo', type: 'string'},
+            ],
+        },
+    ],
+    actions: [{name: 'transfer', type: 'transfer', ricardian_contract: ''}],
+})
+
+const transferAction = Action.from(
+    {
+        account: 'atomicassets',
+        name: 'transfer',
+        authorization: [{actor: 'agent.gm', permission: 'active'}],
+        data: {from: 'agent.gm', to: 'eon.shipload', asset_ids: [1099511627776], memo: 'deploy'},
+    },
+    TRANSFER_ABI
+)
+
+test('signing summaries decode actions through an async abi lookup', async () => {
+    const {summary} = await buildSigningLink(JUNGLE4, [transferAction], async () => TRANSFER_ABI)
+    expect(summary).toEqual([
+        'atomicassets::transfer {"from":"agent.gm","to":"eon.shipload","asset_ids":["1099511627776"],"memo":"deploy"}',
+    ])
+})
+
+test('signing summaries state plainly when an abi cannot be loaded', async () => {
+    const {summary} = await buildSigningLink(JUNGLE4, [transferAction], async () => {
+        throw new Error('offline')
+    })
+    expect(summary).toEqual([
+        "atomicassets::transfer (could not load this contract's ABI, so the action data is not shown)",
+    ])
 })
