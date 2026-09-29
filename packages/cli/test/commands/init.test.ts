@@ -2,7 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {runInit} from '../../src/commands/init'
+import {initNextSteps, runInit} from '../../src/commands/init'
 
 describe('runInit', () => {
     test('writes stub config.ini to target dir when none exists', () => {
@@ -86,5 +86,21 @@ describe('runInit', () => {
         } finally {
             rmSync(dir, {recursive: true, force: true})
         }
+    })
+})
+
+describe('initNextSteps', () => {
+    test('leads with auth create and points at the webapp for an account', () => {
+        const text = initNextSteps('/cfg/config.ini', 'https://dev.shiploadgame.com').join('\n')
+        expect(text).toContain('/cfg/config.ini')
+        expect(text).toContain('shiploadcli auth create <your account>')
+        expect(text).toContain('create one at https://dev.shiploadgame.com')
+        expect(text).not.toContain('private_key')
+    })
+
+    test('omits the account line when the chain has no webapp', () => {
+        const text = initNextSteps('/cfg/config.ini', null).join('\n')
+        expect(text).toContain('shiploadcli auth create <your account>')
+        expect(text).not.toContain('create one at')
     })
 })

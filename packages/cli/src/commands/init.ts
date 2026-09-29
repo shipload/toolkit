@@ -1,7 +1,9 @@
 import {chmodSync, existsSync, mkdirSync, writeFileSync} from 'node:fs'
 import {dirname, join} from 'node:path'
 import type {Command} from 'commander'
+import {chain} from '../lib/client'
 import {getUserConfigDir} from '../lib/config'
+import {webappOrigin} from '../lib/webapp'
 
 const STUB = `[default]
 ; Antelope account this CLI acts as. \`shiploadcli auth create <account>\` sets it.
@@ -66,6 +68,25 @@ export interface InitResult {
     path: string
 }
 
+export function initNextSteps(path: string, origin: string | null): string[] {
+    const lines = [
+        `Wrote config to ${path} (mode 0600, owner read/write only).`,
+        '',
+        'Next step:',
+        '  shiploadcli auth create <your account>',
+        '',
+        'This creates a signing key for the game, writes your account and permission',
+        'into the config, and prints a link to approve the key in your wallet.',
+    ]
+    if (origin) {
+        lines.push(
+            '',
+            `If you don't have an Antelope account, create one at ${origin}, then run auth create.`
+        )
+    }
+    return lines
+}
+
 export function runInit(opts: InitOptions): InitResult {
     if (existsSync(opts.targetPath) && !opts.force) {
         throw new Error(
@@ -90,15 +111,8 @@ export function register(program: Command): void {
                 : join(getUserConfigDir(), 'config.ini')
             try {
                 const result = runInit({targetPath: target, force: options.force})
-                console.log(`Wrote stub config to ${result.path}`)
-                console.log('')
-                console.log('Next steps:')
-                console.log(
-                    '  Run `shiploadcli auth create <account>` to set up a restricted signing key,'
-                )
-                console.log(`  or edit ${result.path} to set actor and a full private_key.`)
-                console.log('')
-                console.log('File mode is 0600 (owner read/write only).')
+                const origin = webappOrigin(chain.id.toString())
+                for (const line of initNextSteps(result.path, origin)) console.log(line)
             } catch (err) {
                 console.error((err as Error).message)
                 process.exitCode = 1
