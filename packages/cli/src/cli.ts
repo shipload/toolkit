@@ -93,7 +93,7 @@ export function build(): Command {
         [
             'Shipload CLI — query state and submit actions.',
             '',
-            'First time, or handing this CLI to a coding agent?  Run: shiploadcli guide',
+            'First time, or handing this CLI to an AI agent?  Run: shiploadcli guide',
             '',
             'Commands are grouped as: Query (read-only), Action (transacting), Tools (diagnostics).',
             '',

@@ -65,7 +65,7 @@ bun run shiploadcli join
 bun run shiploadcli claimstarter
 ```
 
-New to the game, or handing the CLI to a coding agent? Run `bun run shiploadcli guide`.
+New to the game, or handing the CLI to an AI agent? Run `bun run shiploadcli guide`.
 It covers the bootstrap sequence, the play loop, and the pitfalls the commands cannot warn about.
 
 ## Commands
