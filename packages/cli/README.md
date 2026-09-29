@@ -4,19 +4,29 @@ Commander-based CLI (`shiploadcli`) for interacting with the Shipload game contr
 
 ## Quick start
 
-### Using a pre-built binary
+### Install
 
-Download the binary for your platform from the [latest release](https://github.com/shipload/cli/releases/latest):
+On macOS or Linux:
 
-- **macOS (Apple Silicon / Intel)** — `shiploadcli-mac-arm64.zip` / `shiploadcli-mac-x64.zip`. Unzip, then run the extracted binary. macOS builds are signed with a Developer ID and notarized — no `xattr` or Gatekeeper workarounds needed.
-- **Linux (x64 / arm64)** — `shiploadcli-linux-x64` / `shiploadcli-linux-arm64`. `chmod +x` and run.
-- **Windows (x64)** — `shiploadcli-windows-x64.exe`. Run directly.
+```bash
+curl -fsSL https://get.shiploadgame.com | sh
+```
+
+On Windows, in PowerShell:
+
+```powershell
+irm https://get.shiploadgame.com/install.ps1 | iex
+```
+
+The installer downloads the latest [release](https://github.com/shipload/toolkit/releases/latest) for your platform, verifies its checksum, installs `shiploadcli` to `~/.local/bin`, and adds that folder to your PATH. Pass `--no-modify-path` (`curl … | sh -s -- --no-modify-path`) to leave your shell profile unchanged. To install by hand, download your platform's binary from the release page.
 
 Then:
 
-1. Initialize a config: `./shiploadcli-* init`
-2. Set up a restricted signing key: `./shiploadcli-* auth create <account>`, then sign the printed link with your wallet. To use a full key instead, set `actor` and `private_key` in the config at the printed path.
-3. Run: `./shiploadcli-* whoami`
+1. Initialize a config: `shiploadcli init`
+2. Set up a restricted signing key: `shiploadcli auth create <account>`, then sign the printed link with your wallet. To use a full key instead, set `actor` and `private_key` in the config at the printed path.
+3. Run: `shiploadcli whoami`
+
+Playing through a coding agent? Have it run `shiploadcli guide`.
 
 ### From source
 
