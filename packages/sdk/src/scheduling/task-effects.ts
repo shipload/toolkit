@@ -17,6 +17,7 @@ export const TASK_CARGO_EFFECTS: ReadonlyMap<number, TaskCargoRule> = new Map<
     [TaskType.BUILDPLOT, 'none'],
     [TaskType.CHARGE, 'none'],
     [TaskType.SHUTTLE, 'none'],
+    [TaskType.CIVIC_DRAW, 'none'],
     [TaskType.LOAD, 'all-in'],
     [TaskType.UNWRAP, 'all-in'],
     [TaskType.CIVIC_WITHDRAW, 'all-in'],
@@ -60,6 +61,7 @@ export const TASK_ENERGY_EFFECTS: ReadonlyMap<number, TaskEnergyEffect> = new Ma
     [TaskType.CONTRIBUTE, 'none'],
     [TaskType.CIVIC_DEPOSIT, 'draws'],
     [TaskType.CIVIC_WITHDRAW, 'none'],
+    [TaskType.CIVIC_DRAW, 'draws'],
 ])
 
 export function taskEnergyEffect(taskType: number): TaskEnergyEffect {

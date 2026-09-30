@@ -81,6 +81,7 @@ export enum TaskType {
     DEPOT_TAKE = 22,
     CIVIC_DEPOSIT = 21,
     CIVIC_WITHDRAW = 22,
+    CIVIC_DRAW = 23,
 }
 
 export enum RefitOp {

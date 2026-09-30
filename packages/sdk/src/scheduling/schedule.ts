@@ -185,7 +185,15 @@ export interface ResolvedEvent {
     completesAt: Date
 }
 
-// Canonical lane-front order (mirrors contract front_precedes): completion, then RECHARGE-last, then lane key.
+// Mirrors contract tie_rank: a civic draw lands after the recharge it follows.
+function tieRank(task: Task): number {
+    const type = task.type.toNumber()
+    if (type === TaskType.RECHARGE) return 1
+    if (type === TaskType.CIVIC_DRAW) return 2
+    return 0
+}
+
+// Canonical lane-front order (mirrors contract front_precedes): completion, then tie rank, then lane key.
 function frontPrecedes(
     a: {completesAt: Date; task: Task; laneKey: number},
     b: {completesAt: Date; task: Task; laneKey: number}
@@ -193,9 +201,8 @@ function frontPrecedes(
     if (a.completesAt.getTime() !== b.completesAt.getTime()) {
         return a.completesAt.getTime() - b.completesAt.getTime()
     }
-    const aRecharge = a.task.type.toNumber() === TaskType.RECHARGE
-    const bRecharge = b.task.type.toNumber() === TaskType.RECHARGE
-    if (aRecharge !== bRecharge) return aRecharge ? 1 : -1
+    const rank = tieRank(a.task) - tieRank(b.task)
+    if (rank !== 0) return rank
     return a.laneKey - b.laneKey
 }
 

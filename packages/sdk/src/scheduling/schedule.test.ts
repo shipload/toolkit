@@ -161,3 +161,27 @@ describe('appliedTaskCount / unappliedTasks', () => {
         expect(unappliedTasks(e)).toHaveLength(0)
     })
 })
+
+describe('orderedTasks tie order', () => {
+    test('a civic draw landing with a recharge follows it, and ordinary tasks precede both', () => {
+        const e = entity([
+            task({type: TaskType.IDLE, duration: 60}),
+            task({type: TaskType.CIVIC_DRAW, duration: 0}),
+        ])
+        const lanes = [
+            ...e.lanes,
+            ServerContract.Types.lane.from({
+                lane_key: 255,
+                schedule: {started: T0, tasks: [task({type: TaskType.RECHARGE, duration: 60})]},
+            }),
+            ServerContract.Types.lane.from({
+                lane_key: 1,
+                schedule: {started: T0, tasks: [task({type: TaskType.GATHER, duration: 60})]},
+            }),
+        ]
+        const order = orderedTasks({lanes})
+            .filter((t) => t.task.type.toNumber() !== TaskType.IDLE)
+            .map((t) => t.task.type.toNumber())
+        expect(order).toEqual([TaskType.GATHER, TaskType.RECHARGE, TaskType.CIVIC_DRAW])
+    })
+})

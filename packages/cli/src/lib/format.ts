@@ -76,6 +76,7 @@ const TASK_TYPES: Record<number, string> = {
 	[TaskType.REFIT]: "Refit",
 	[TaskType.CIVIC_DEPOSIT]: "Drop-off",
 	[TaskType.CIVIC_WITHDRAW]: "Pickup",
+	[TaskType.CIVIC_DRAW]: "Craft energy",
 };
 
 export function formatTaskType(type: number): string {

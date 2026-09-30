@@ -417,6 +417,9 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyEnergyCost(projected, task)
             applyRemoveCargoTask(projected, task)
             break
+        case TaskType.CIVIC_DRAW:
+            applyEnergyCost(projected, task)
+            break
         case TaskType.UPGRADE:
             applyEnergyCost(projected, task)
             applyRemoveCargoTask(projected, task)
