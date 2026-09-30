@@ -27,6 +27,7 @@ import {
     type CargoStack,
     mergeStacks,
     subtractFromStacks,
+    stackIdentityEqual,
     stackToCargoItem,
 } from '../capabilities/storage'
 import {hydrateEntityLanes} from '../entity/hydrate'
@@ -511,21 +512,19 @@ function validateCraftTask(task: ServerContract.Types.task, projected: Projected
         if (provided !== required) throw new Error(RECIPE_INPUTS_EXCESS)
     }
 
+    const demand: {ref: CargoStack; quantity: bigint}[] = []
     for (const input of inputs) {
-        let found = false
-        for (const pc of projected.cargo) {
-            if (
-                pc.item_id.toNumber() === input.item_id.toNumber() &&
-                pc.stats.toString() === input.stats.toString()
-            ) {
-                if (pc.quantity.toNumber() < input.quantity.toNumber()) {
-                    throw new Error(RECIPE_INPUTS_INSUFFICIENT)
-                }
-                found = true
-                break
-            }
+        const ref = cargoItemToStack(input)
+        const merged = demand.find((d) => stackIdentityEqual(d.ref, ref))
+        if (merged) merged.quantity += BigInt(input.quantity.toString())
+        else demand.push({ref, quantity: BigInt(input.quantity.toString())})
+    }
+    for (const d of demand) {
+        const available = projected.cargo.find((pc) => stackIdentityEqual(pc, d.ref))
+        if (!available) throw new Error(ENTITY_CARGO_NOT_LOADED)
+        if (BigInt(available.quantity.toString()) < d.quantity) {
+            throw new Error(RECIPE_INPUTS_INSUFFICIENT)
         }
-        if (!found) throw new Error(ENTITY_CARGO_NOT_LOADED)
     }
 }
 

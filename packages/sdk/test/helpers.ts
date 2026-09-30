@@ -56,7 +56,14 @@ export function assertAtMost(actual: AnyInt, expected: AnyInt, msg?: string) {
 
 export function makeShipFixture(
     overrides: {
-        cargo?: Array<{item_id: number; quantity: number; stats?: number; mass?: number}>
+        cargo?: Array<{
+            item_id: number
+            quantity: number
+            stats?: number
+            mass?: number
+            modules?: ServerContract.Types.module_entry[]
+            entity_id?: number
+        }>
         capacity?: number
         hullmass?: number
         energy?: number
@@ -68,8 +75,9 @@ export function makeShipFixture(
             item_id: UInt16.from(item.item_id),
             quantity: UInt32.from(item.quantity),
             stats: item.stats !== undefined ? UInt64.from(item.stats) : UInt64.from(0),
-            modules: [],
+            modules: item.modules ?? [],
             id: UInt64.from(idx),
+            entity_id: item.entity_id,
         })
     })
 
@@ -113,7 +121,13 @@ function withScheduleShim<T extends object>(
 export function makeTask(
     type: TaskType,
     overrides: {
-        cargo?: Array<{item_id: number; quantity: number; stats?: number}>
+        cargo?: Array<{
+            item_id: number
+            quantity: number
+            stats?: number
+            modules?: ServerContract.Types.module_entry[]
+            entity_id?: number
+        }>
         coordinates?: {x: number; y: number; z?: number}
         duration?: number
         energy_cost?: number
@@ -131,7 +145,8 @@ export function makeTask(
             item_id: UInt16.from(item.item_id),
             quantity: UInt32.from(item.quantity),
             stats: item.stats !== undefined ? UInt64.from(item.stats) : UInt64.from(0),
-            modules: [],
+            modules: item.modules ?? [],
+            entity_id: item.entity_id,
         })
     })
 

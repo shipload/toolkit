@@ -340,6 +340,111 @@ describe('projectEntity (stack-aware)', () => {
                 assert.throws(() => validateSchedule(ship), ENTITY_CARGO_NOT_LOADED)
             })
 
+            describe('input availability by cargo ref', () => {
+                const engineModule = ServerContract.Types.module_entry.from({
+                    type: 1,
+                    installed: {item_id: 10100, stats: 1},
+                })
+
+                function craftFrom(
+                    cargo: Parameters<typeof makeShipFixture>[0]['cargo'],
+                    inputs: Parameters<typeof makeTask>[1]['cargo']
+                ) {
+                    const ship = makeShipFixture({capacity: 10_000_000, cargo})
+                    ship.schedule = ServerContract.Types.schedule.from({
+                        started: '2024-06-04T23:41:09.000',
+                        tasks: [
+                            makeTask(TaskType.CRAFT, {
+                                cargo: [
+                                    ...(inputs ?? []),
+                                    {item_id: ITEM_PLATE, quantity: 1, stats: 0},
+                                ],
+                            }),
+                        ],
+                    })
+                    return ship
+                }
+
+                test('refuses repeated lines of one stack that together exceed it', () => {
+                    const ship = craftFrom(
+                        [{item_id: 101, quantity: 5, stats: 0}],
+                        [
+                            {item_id: 101, quantity: 5, stats: 0},
+                            {item_id: 101, quantity: 5, stats: 0},
+                        ]
+                    )
+                    assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INSUFFICIENT)
+                })
+
+                test('accepts repeated lines of one stack that together fit it', () => {
+                    const ship = craftFrom(
+                        [{item_id: 101, quantity: HULL_PLATES_QTY, stats: 0}],
+                        [
+                            {item_id: 101, quantity: 4, stats: 0},
+                            {item_id: 101, quantity: 6, stats: 0},
+                        ]
+                    )
+                    assert.doesNotThrow(() => validateSchedule(ship))
+                })
+
+                test('does not match a stack that differs only by modules', () => {
+                    const ship = craftFrom(
+                        [
+                            {
+                                item_id: 101,
+                                quantity: HULL_PLATES_QTY,
+                                stats: 0,
+                                modules: [engineModule],
+                            },
+                        ],
+                        [{item_id: 101, quantity: HULL_PLATES_QTY, stats: 0}]
+                    )
+                    assert.throws(() => validateSchedule(ship), ENTITY_CARGO_NOT_LOADED)
+                })
+
+                test('checks module-differing stacks against their own quantities', () => {
+                    const ship = craftFrom(
+                        [
+                            {item_id: 101, quantity: 5, stats: 0, modules: [engineModule]},
+                            {item_id: 101, quantity: 5, stats: 0},
+                        ],
+                        [
+                            {item_id: 101, quantity: 3, stats: 0, modules: [engineModule]},
+                            {item_id: 101, quantity: 7, stats: 0},
+                        ]
+                    )
+                    assert.throws(() => validateSchedule(ship), RECIPE_INPUTS_INSUFFICIENT)
+                })
+
+                test('does not match a stack that differs only by sequence id', () => {
+                    const ship = craftFrom(
+                        [
+                            {item_id: 101, quantity: 9, stats: 0},
+                            {item_id: 101, quantity: 1, stats: 0, entity_id: 7},
+                        ],
+                        [
+                            {item_id: 101, quantity: 9, stats: 0},
+                            {item_id: 101, quantity: 1, stats: 0, entity_id: 8},
+                        ]
+                    )
+                    assert.throws(() => validateSchedule(ship), ENTITY_CARGO_NOT_LOADED)
+                })
+
+                test('matches an individuated unit by its sequence id', () => {
+                    const ship = craftFrom(
+                        [
+                            {item_id: 101, quantity: 9, stats: 0},
+                            {item_id: 101, quantity: 1, stats: 0, entity_id: 7},
+                        ],
+                        [
+                            {item_id: 101, quantity: 9, stats: 0},
+                            {item_id: 101, quantity: 1, stats: 0, entity_id: 7},
+                        ]
+                    )
+                    assert.doesNotThrow(() => validateSchedule(ship))
+                })
+            })
+
             test('validates itemId-typed recipe slots (Engine from Plasma Cells)', () => {
                 // Engine recipe: [{itemId: ITEM_PLASMA_CELL, quantity: 6}]
                 // Use wrong item (Resonator instead of Plasma Cell) → INVALID

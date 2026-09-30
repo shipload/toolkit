@@ -89,14 +89,17 @@ export interface CargoStack {
     quantity: UInt32
     stats: UInt64
     modules: ServerContract.Types.module_entry[]
+    entity_id?: UInt64
 }
 
 export function cargoItemToStack(item: ServerContract.Types.cargo_item): CargoStack {
+    const identity = cargoIdentity(item.entity_id)
     return {
         item_id: UInt16.from(item.item_id),
         quantity: UInt32.from(item.quantity),
         stats: UInt64.from(item.stats),
         modules: item.modules ?? [],
+        ...(identity ? {entity_id: identity} : {}),
     }
 }
 
@@ -106,19 +109,50 @@ export function stackToCargoItem(stack: CargoStack): ServerContract.Types.cargo_
         quantity: stack.quantity,
         stats: stack.stats,
         modules: stack.modules,
+        entity_id: stack.entity_id,
     })
 }
 
-function statsEquals(a: UInt64, b: UInt64): boolean {
-    return a.equals(b)
+function cargoIdentity(id: UInt64Type | undefined): UInt64 | undefined {
+    if (id === undefined || id === null) return undefined
+    const value = UInt64.from(id)
+    return value.equals(UInt64.from(0)) ? undefined : value
 }
 
-function stackIdentityEqual(a: CargoStack, b: CargoStack): boolean {
-    return a.item_id.equals(b.item_id) && statsEquals(a.stats, b.stats)
+export function cargoModulesEquiv(
+    a: readonly ServerContract.Types.module_entry[],
+    b: readonly ServerContract.Types.module_entry[]
+): boolean {
+    const n = Math.max(a.length, b.length)
+    for (let i = 0; i < n; i++) {
+        const ia = a[i]?.installed
+        const ib = b[i]?.installed
+        if (!ia !== !ib) return false
+        if (ia && ib && !(ia.item_id.equals(ib.item_id) && ia.stats.equals(ib.stats))) return false
+    }
+    return true
+}
+
+function identityEquals(a: UInt64 | undefined, b: UInt64 | undefined): boolean {
+    return (a ?? UInt64.from(0)).equals(b ?? UInt64.from(0))
+}
+
+export function stackIdentityEqual(a: CargoStack, b: CargoStack): boolean {
+    return (
+        a.item_id.equals(b.item_id) &&
+        a.stats.equals(b.stats) &&
+        cargoModulesEquiv(a.modules, b.modules) &&
+        identityEquals(a.entity_id, b.entity_id)
+    )
 }
 
 export function stackKey(s: CargoStack): string {
-    return `${s.item_id.toNumber()}:${s.stats.toString()}`
+    const installed = s.modules
+        .map((m, i) => (m.installed ? `${i}=${m.installed.item_id}.${m.installed.stats}` : ''))
+        .filter((part) => part !== '')
+    const modulesPart = installed.length > 0 ? `:${installed.join(',')}` : ''
+    const identityPart = s.entity_id ? `#${s.entity_id.toString()}` : ''
+    return `${s.item_id.toNumber()}:${s.stats.toString()}${modulesPart}${identityPart}`
 }
 
 export function stacksEqual(a: CargoStack, b: CargoStack): boolean {
@@ -126,6 +160,9 @@ export function stacksEqual(a: CargoStack, b: CargoStack): boolean {
 }
 
 export function mergeStacks(stacks: CargoStack[], add: CargoStack): CargoStack[] {
+    if (add.entity_id) {
+        return [...stacks, {...add}]
+    }
     const idx = stacks.findIndex((s) => stackIdentityEqual(s, add))
     if (idx === -1) {
         return [...stacks, {...add}]
