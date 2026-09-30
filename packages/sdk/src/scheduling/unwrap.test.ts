@@ -11,8 +11,19 @@ import {
 import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
-import {ITEM_BEAM} from '../data/item-ids'
+import {
+    ITEM_BEAM,
+    ITEM_ENGINE_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_ROUSTABOUT_T1A_PACKED,
+} from '../data/item-ids'
+import {getBaseHullmassFor} from '../derivation/capabilities'
 import {TaskType} from '../types'
+
+const REFERENCE_MASS =
+    getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
+    Number(getItem(ITEM_ENGINE_T1).mass) +
+    Number(getItem(ITEM_GENERATOR_T1).mass)
 
 describe('unwrap duration mirror', () => {
     test('derivedLoaders aggregates lanes like derived_loaders()', () => {
@@ -25,12 +36,20 @@ describe('unwrap duration mirror', () => {
         ).toEqual({mass: 1200, thrust: 30, quantity: 2}) // floor(2400/2)=1200, sum thrust, count
     })
 
-    test('transit floors distance then flight time', () => {
-        // distance = floor(sqrt(3^2+4^2)*10000)=50000; accel=400/(mass*100)*10000; flight=floor(2*sqrt(d/accel))
-        const mass = 1000
+    test('transit floors item mass at cruise-transition distance before cruise-capping flight time', () => {
+        // distance 50000 is past the cruise transition; item mass 1000 is under the floor, so accel uses it
+        const accel = (400 / (REFERENCE_MASS * 100)) * 10000
+        const cruiseVelocity = Math.sqrt(accel * 2 * 10000)
+        const expected = Math.floor(50000 / cruiseVelocity + cruiseVelocity / accel)
+        expect(unwrapTransitDuration(1000, {x: 0, y: 0}, {x: 3, y: 4})).toBe(expected)
+    })
+
+    test('transit below cruise transition uses the sqrt curve, and a heavy item skips the mass floor', () => {
+        // distance 5000 is within the cruise transition
+        const mass = REFERENCE_MASS * 2
         const accel = (400 / (mass * 100)) * 10000
-        const expected = Math.floor(2 * Math.sqrt(50000 / accel))
-        expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 3, y: 4})).toBe(expected)
+        const expected = Math.floor(2 * Math.sqrt(5000 / accel))
+        expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 0.3, y: 0.4})).toBe(expected)
     })
 
     test('load uses altitude z, adds loader mass, divides by quantity', () => {

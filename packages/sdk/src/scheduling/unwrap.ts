@@ -2,11 +2,19 @@ import type {UInt16Type, UInt32Type} from '@wharfkit/antelope'
 import {calcCargoItemMass} from '../capabilities/storage'
 import type {ServerContract} from '../contracts'
 import {MASS_STAT_SCALE, PRECISION} from '../types'
+import {getBaseHullmassFor} from '../derivation/capabilities'
+import {getItem} from '../data/catalog'
+import {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../data/item-ids'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
 import {candidateLaneCompletesAt} from './lanes'
 
 const NFT_TRANSIT_THRUST = 400
+const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
+const NFT_TRANSIT_REFERENCE_MASS =
+    getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
+    Number(getItem(ITEM_ENGINE_T1).mass) +
+    Number(getItem(ITEM_GENERATOR_T1).mass)
 const BASELINE_LOADER: DerivedLoaders = {mass: 20, thrust: 1, quantity: 1}
 // ground-level entities (warehouses, z=0) still incur a base orbital climb of load effort
 const MIN_LOAD_Z = 800
@@ -45,6 +53,13 @@ function flightTime(distance: number, accel: number): number {
     return Math.floor(2 * Math.sqrt(distance / accel))
 }
 
+function travelFlightTime(distance: number, accel: number): number {
+    if (accel <= 0 || distance <= 0) return 0
+    if (distance <= CRUISE_TRANSITION_DISTANCE) return flightTime(distance, accel)
+    const cruiseVelocity = Math.sqrt(accel * CRUISE_TRANSITION_DISTANCE)
+    return Math.floor(distance / cruiseVelocity + cruiseVelocity / accel)
+}
+
 function distance2d(ax: number, ay: number, bx: number, by: number): number {
     const dx = ax - bx
     const dy = ay - by
@@ -57,9 +72,9 @@ export function unwrapTransitDuration(
     dest: {x: number; y: number}
 ): number {
     if (itemMass <= 0) return 0
-    return flightTime(
+    return travelFlightTime(
         distance2d(origin.x, origin.y, dest.x, dest.y),
-        acceleration(NFT_TRANSIT_THRUST, itemMass)
+        acceleration(NFT_TRANSIT_THRUST, Math.max(itemMass, NFT_TRANSIT_REFERENCE_MASS))
     )
 }
 
