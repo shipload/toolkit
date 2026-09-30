@@ -18,7 +18,7 @@ export interface Recipe {
     inputs: RecipeInput[]
     statSlots: StatSlot[]
     blendWeights: number[]
-    sourceSubclass?: number
+    sourceSubclasses?: number[]
 }
 
 export interface EntitySlot {

@@ -1022,7 +1022,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 10212,
@@ -1116,7 +1118,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 10213,
@@ -1210,7 +1214,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 10214,
@@ -1304,7 +1310,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 10215,
@@ -1398,7 +1406,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 10218,
@@ -1492,7 +1502,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10210
+    "sourceSubclasses": [
+      10210
+    ]
   },
   {
     "outputItemId": 11001,
@@ -2458,7 +2470,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10200
+    "sourceSubclasses": [
+      10200
+    ]
   },
   {
     "outputItemId": 11202,
@@ -2746,7 +2760,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 10211
+    "sourceSubclasses": [
+      10211
+    ]
   },
   {
     "outputItemId": 11213,
@@ -2840,7 +2856,9 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 11212
+    "sourceSubclasses": [
+      11212
+    ]
   },
   {
     "outputItemId": 11214,
@@ -2934,6 +2952,8 @@
       }
     ],
     "blendWeights": [],
-    "sourceSubclass": 11212
+    "sourceSubclasses": [
+      11212
+    ]
   }
 ]

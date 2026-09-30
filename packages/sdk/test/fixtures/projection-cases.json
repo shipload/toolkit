@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "590670e61ddfbf4cfdbdd1cd780d62d3ec2499b3279b1045f5c816e12dbe563b",
-  "generated_at": "2026-09-25T00:33:31.449Z",
+  "catalog_hash": "036af42da9346b85ccbf364c73c23a8dd8838753e632fab63717ef1a0d3d58dc",
+  "generated_at": "2026-09-30T21:07:28.631Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -1546,7 +1546,7 @@
         ],
         "lanes": [
           {
-            "lane_key": 3,
+            "lane_key": 0,
             "schedule": {
               "started": "2024-01-29T00:00:00.000",
               "tasks": [
@@ -1701,7 +1701,7 @@
         ],
         "lanes": [
           {
-            "lane_key": 3,
+            "lane_key": 0,
             "schedule": {
               "started": "2024-01-29T00:00:00.000",
               "tasks": [
