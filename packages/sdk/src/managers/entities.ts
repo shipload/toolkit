@@ -1,4 +1,4 @@
-import {Name, type NameType, type UInt64Type} from '@wharfkit/antelope'
+import {Name, UInt64, type NameType, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {Entity} from '../entities/entity'
 import type {EntityTypeName} from '../data/kind-registry'
@@ -41,6 +41,13 @@ export class EntitiesManager extends BaseManager {
         }
         const wanted = Name.from(kind)
         return rows.filter((row) => wanted.equals(row.kind))
+    }
+
+    async getHullStats(id: UInt64Type): Promise<UInt64> {
+        const row = (await this.server.table('entity').get(UInt64.from(id))) as
+            | ServerContract.Types.entity_row
+            | undefined
+        return row?.stats ?? UInt64.from(0)
     }
 
     async getSummaries(
