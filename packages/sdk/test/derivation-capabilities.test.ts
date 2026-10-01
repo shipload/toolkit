@@ -2,7 +2,6 @@ import {describe, expect, test} from 'bun:test'
 
 import {
     applyCapacityTier,
-    CAPACITY_TIER_TABLE,
     computeBaseCapacity,
     computeBaseHullmass,
     computeDepotHullCapabilities,
@@ -37,10 +36,10 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
     })
 
-    test('extractor and factory use the container formula', () => {
-        const container = computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats)
-        expect(computeBaseCapacity(ITEM_EXTRACTOR_T2_PACKED, stats)).toBe(container)
-        expect(computeBaseCapacity(ITEM_FACTORY_T2_PACKED, stats)).toBe(container)
+    test('extractor and factory use the structure formula', () => {
+        const structure = applyCapacityTier(Math.floor(220_000 * 6 ** (200 / 1998)), 2)
+        expect(computeBaseCapacity(ITEM_EXTRACTOR_T2_PACKED, stats)).toBe(structure)
+        expect(computeBaseCapacity(ITEM_FACTORY_T2_PACKED, stats)).toBe(structure)
     })
 
     test('warehouse retains its own 1M base capacity curve', () => {
@@ -50,9 +49,9 @@ describe('computeBaseCapacity', () => {
         )
     })
 
-    test('container T1 retains its own 220k base capacity curve', () => {
+    test('container T1 uses its own 141k base capacity curve', () => {
         expect(computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)).toBe(
-            Math.floor(220_000 * 6 ** (200 / 1998))
+            Math.floor(141_000 * 6 ** (200 / 1998))
         )
     })
 
@@ -63,9 +62,9 @@ describe('computeBaseCapacity', () => {
         expect(t2).toBeGreaterThan(0)
     })
 
-    test('container T2 formula at stats=100,100,100 = floor(floor(220k * 6^(200/1998)) * 1.4)', () => {
-        const base = Math.floor(220000 * 6 ** (200 / 1998))
-        const expected = Math.floor(base * CAPACITY_TIER_TABLE[1])
+    test('container T2 formula at stats=100,100,100 = floor(floor(141k * 6^(200/1998)) * 110 / 100)', () => {
+        const base = Math.floor(141000 * 6 ** (200 / 1998))
+        const expected = Math.floor((base * 110) / 100)
         expect(
             computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, {
                 strength: 100,

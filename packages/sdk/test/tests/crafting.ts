@@ -488,8 +488,8 @@ describe('Crafting', () => {
                 cohesion: 500,
             })
             assert.equal(caps.hullmass, containerHullmass(500))
-            assert.equal(caps.capacity, Math.floor(220000 * 6 ** (1500 / 2997)))
-            assert.approximately(caps.capacity, 539350, 10000)
+            assert.equal(caps.capacity, Math.floor(141000 * 6 ** (1500 / 2997)))
+            assert.approximately(caps.capacity, 345687, 1000)
         })
 
         test('minimum stats produce ceiling hullmass', () => {
@@ -500,10 +500,10 @@ describe('Crafting', () => {
                 cohesion: 1,
             })
             assert.equal(caps.hullmass, containerHullmass(1))
-            assert.isAtLeast(caps.hullmass, 990)
-            assert.isAtMost(caps.hullmass, 1000)
-            assert.isAtLeast(caps.capacity, 220000)
-            assert.isAtMost(caps.capacity, 221000)
+            assert.isAtLeast(caps.hullmass, 18990)
+            assert.isAtMost(caps.hullmass, 19000)
+            assert.isAtLeast(caps.capacity, 141000)
+            assert.isAtMost(caps.capacity, 141500)
         })
 
         test('maximum stats produce floor hullmass', () => {
@@ -514,13 +514,13 @@ describe('Crafting', () => {
                 cohesion: 999,
             })
             assert.equal(caps.hullmass, containerHullmass(999))
-            assert.isAtLeast(caps.hullmass, 500)
-            assert.isAtMost(caps.hullmass, 510)
-            assert.isAtLeast(caps.capacity, 1310000)
-            assert.isAtMost(caps.capacity, 1330000)
+            assert.isAtLeast(caps.hullmass, 9500)
+            assert.isAtMost(caps.hullmass, 9510)
+            assert.isAtLeast(caps.capacity, 840000)
+            assert.isAtMost(caps.capacity, 846000)
         })
 
-        test('hullmass range is 250-1000', () => {
+        test('hullmass range is 9,500-19,000', () => {
             const heaviest = computeContainerCapabilities({
                 density: 1,
                 strength: 500,
@@ -533,11 +533,11 @@ describe('Crafting', () => {
                 hardness: 500,
                 cohesion: 500,
             })
-            assert.isAtMost(heaviest.hullmass, 1000)
-            assert.isAtLeast(lightest.hullmass, 250)
+            assert.isAtMost(heaviest.hullmass, 19000)
+            assert.isAtLeast(lightest.hullmass, 9500)
         })
 
-        test('capacity range is 200k-2M', () => {
+        test('capacity range is 141k-846k', () => {
             const min = computeContainerCapabilities({
                 strength: 1,
                 hardness: 1,
@@ -550,8 +550,8 @@ describe('Crafting', () => {
                 cohesion: 999,
                 density: 500,
             })
-            assert.isAtLeast(min.capacity, 200000)
-            assert.isAtMost(max.capacity, 2020000)
+            assert.isAtLeast(min.capacity, 141000)
+            assert.isAtMost(max.capacity, 846000)
         })
 
         test('higher density means lighter hull', () => {
@@ -579,14 +579,12 @@ describe('Crafting', () => {
             assert.isAbove(t2, t1)
         })
 
-        test('T2 container capacity is the plain container base times the tier-2 multiplier', () => {
+        test('T2 container capacity is the plain container base times the Storage tier-2 step', () => {
             const stats = {strength: 400, density: 300, hardness: 600, cohesion: 200}
             const base = computeContainerCapabilities(stats).capacity
-            const expected = applyCapacityTier(base, 2)
-            assert.equal(computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats), expected)
             assert.equal(
                 computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats),
-                Math.floor(base * 1.4)
+                Math.floor((base * 110) / 100)
             )
         })
     })

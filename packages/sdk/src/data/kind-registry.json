@@ -152,13 +152,13 @@
       "itemId": 10205,
       "kind": "mdriver",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 10206,
       "kind": "mcatcher",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 10200,
@@ -182,13 +182,13 @@
       "itemId": 10209,
       "kind": "builddock",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 10216,
       "kind": "nexus",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 11212,
@@ -314,13 +314,13 @@
       "itemId": 11203,
       "kind": "extractor",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 11204,
       "kind": "factory",
       "displayLabel": "",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     },
     {
       "itemId": 11207,
@@ -332,7 +332,7 @@
       "itemId": 11209,
       "kind": "asmblyard",
       "displayLabel": "Assembly Yard",
-      "baseCapacityFn": "container"
+      "baseCapacityFn": "structure"
     }
   ]
 }

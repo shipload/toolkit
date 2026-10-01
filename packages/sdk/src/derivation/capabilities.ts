@@ -322,6 +322,12 @@ const CAPACITY_FN_BY_NAME: Partial<
     depot: (stats) => computeDepotHullCapabilities(stats).capacity,
     workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
     container: (stats) => computeContainerCapabilities(stats).capacity,
+    structure: computeStructureBaseCapacity,
+}
+
+export function computeStructureBaseCapacity(stats: Record<string, number>): number {
+    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
+    return Math.floor(220000 * 6 ** (statSum / 1998.0))
 }
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
@@ -333,6 +339,10 @@ export function computeBaseCapacity(itemId: number, stats: Record<string, number
         const capacityFn = fnName ? CAPACITY_FN_BY_NAME[fnName] : undefined
         if (!capacityFn) return 0
         base = capacityFn(stats)
+        if (fnName === 'container') {
+            const pct = moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, getItem(itemId).tier)
+            return clampUint32(Math.floor((base * pct) / 100))
+        }
     }
     return applyCapacityTier(base, getItem(itemId).tier)
 }
@@ -692,14 +702,17 @@ export function computeEntityCapabilities(
     return result
 }
 
-export function computeContainerCapabilities(stats: Record<string, number>): {
+export function computeContainerCapabilities(
+    stats: Record<string, number>,
+    itemId: number = ITEM_CONTAINER_T1_PACKED
+): {
     hullmass: number
     capacity: number
 } {
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_CONTAINER_T1_PACKED, stats),
-        capacity: Math.floor(220000 * 6 ** exponent),
+        hullmass: computeBaseHullmass(itemId, stats),
+        capacity: Math.floor(141000 * 6 ** exponent),
     }
 }

@@ -10,7 +10,9 @@ import {
     computeLoaderCapabilities,
     computeBaseCapacity,
     computeContainerCapabilities,
+    computeStructureBaseCapacity,
     applyCapacityTier,
+    CARGO_BAY_CAPACITY_TIER_PCT,
     GATHERER_YIELD_TIER_TABLE,
     ENGINE_THRUST_TIER_PCT,
     GENERATOR_CAPACITY_TIER_PCT,
@@ -34,6 +36,8 @@ import {applySlotMultiplier, U16_MAX} from '../entities/slot-multiplier'
 import {getItem} from '../data/catalog'
 import {encodeStats} from './crafting'
 import {
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
     ITEM_EXTRACTOR_T2_PACKED,
     ITEM_FACTORY_T2_PACKED,
     ITEM_MASS_DRIVER_T1_PACKED,
@@ -74,9 +78,9 @@ function makeBuilderStats(resonance: number, fineness: number): bigint {
     return encodeStats([resonance, fineness])
 }
 
-test('computeBaseCapacity uses container formula for all container-class entities', () => {
+test('computeBaseCapacity uses the structure formula for structure entities', () => {
     const stats = {strength: 300, hardness: 400, density: 100}
-    const base = computeContainerCapabilities(stats).capacity
+    const base = computeStructureBaseCapacity(stats)
     for (const itemId of [
         ITEM_EXTRACTOR_T2_PACKED,
         ITEM_FACTORY_T2_PACKED,
@@ -85,6 +89,25 @@ test('computeBaseCapacity uses container formula for all container-class entitie
     ]) {
         expect(computeBaseCapacity(itemId, stats)).toBe(
             applyCapacityTier(base, getItem(itemId).tier)
+        )
+    }
+})
+
+test('containers hold what a Storage module of their tier holds and weigh their packed mass', () => {
+    for (const [base, t1, t2, t2Mass] of [
+        [213, 206_600, 227_260, 27_698],
+        [500, 345_687, 380_255, 23_250],
+    ]) {
+        const stats = {strength: base, density: base, hardness: base}
+        expect(computeBaseCapacity(ITEM_CONTAINER_T1_PACKED, stats)).toBe(t1)
+        expect(computeBaseCapacity(ITEM_CONTAINER_T2_PACKED, stats)).toBe(t2)
+        expect(computeContainerCapabilities(stats, ITEM_CONTAINER_T2_PACKED).hullmass).toBe(t2Mass)
+        expect(t2).toBe(
+            Math.floor(
+                (computeContainerCapabilities(stats).capacity *
+                    moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, 2)) /
+                    100
+            )
         )
     }
 })

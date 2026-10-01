@@ -2,7 +2,7 @@
   {
     "entityItemId": 10200,
     "slots": [],
-    "baseHullmass": 1000
+    "baseHullmass": 19000
   },
   {
     "entityItemId": 10201,
@@ -310,7 +310,7 @@
   {
     "entityItemId": 11200,
     "slots": [],
-    "baseHullmass": 1000
+    "baseHullmass": 31000
   },
   {
     "entityItemId": 11202,
