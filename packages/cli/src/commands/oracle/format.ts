@@ -17,6 +17,12 @@ export interface OracleRow {
 
 export type AdmissionState = 'admitted' | 'no-permission' | 'key-not-wired' | 'unreachable'
 
+export interface OracleStoreChain {
+    chainId: string
+    storedChainIds: string[]
+    usable: boolean
+}
+
 export interface OraclePersonal {
     handle: string
     pubkey: string
@@ -24,6 +30,7 @@ export interface OraclePersonal {
     registered: boolean
     secretStored: boolean
     storePath: string
+    storeChain?: OracleStoreChain
     responsible?: {epoch: number; secondsAway: number}
 }
 
@@ -205,6 +212,13 @@ export function formatAdmitted(opts: {
     ].join('\n')
 }
 
+export function formatStoreChain(storeChain?: OracleStoreChain): string {
+    if (!storeChain) return 'no store yet (none written until the first commit)'
+    if (storeChain.storedChainIds.length === 0) return `${storeChain.chainId} (empty)`
+    if (storeChain.usable) return storeChain.chainId
+    return `${storeChain.storedChainIds.join(', ')} (not this chain, ${storeChain.chainId}; run \`shiploadcli oracle reset\`)`
+}
+
 export function operatorStatus(mine: OraclePersonal): string {
     if (!mine.keyWired) return 'waiting for the deployer to admit this handle'
     if (!mine.registered) return 'key wired, waiting to be added to the oracle registry'
@@ -246,7 +260,8 @@ export function renderStatus(view: OracleStatusView): string {
             `  Registered:      ${yn(view.mine.registered)}`,
             `  Status:          ${operatorStatus(view.mine)}`,
             `  Secret stored:   ${view.target !== undefined ? yn(view.mine.secretStored) : '—'}`,
-            `  Store path:      ${view.mine.storePath}`
+            `  Store path:      ${view.mine.storePath}`,
+            `  Store chain:     ${formatStoreChain(view.mine.storeChain)}`
         )
     }
     if (!view.quorumDeployed) {

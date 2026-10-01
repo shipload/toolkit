@@ -1,6 +1,7 @@
 import type {Command} from 'commander'
 import * as clean from './clean'
 import * as keygen from './keygen'
+import * as reset from './reset'
 import * as run from './run'
 import * as setup from './setup'
 import * as status from './status'
@@ -16,4 +17,5 @@ export function register(program: Command): void {
     status.register(parent)
     clean.register(parent)
     keygen.register(parent)
+    reset.register(parent)
 }

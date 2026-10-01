@@ -26,7 +26,14 @@ import {FundContract} from '@shipload/sdk'
 import {Name, UInt32, UInt64} from '@wharfkit/antelope'
 import {Session} from '@wharfkit/session'
 import {WalletPluginPrivateKey} from '@wharfkit/wallet-plugin-privatekey'
-import {chain, client, fundContractName, gameContractName, getShipload} from '../../lib/client'
+import {
+    chain,
+    client,
+    fundContractName,
+    gameContractName,
+    getChainId,
+    getShipload,
+} from '../../lib/client'
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
 import {ValidationError} from '../../lib/validate'
 import {checkAdmission} from './admission'
@@ -102,7 +109,8 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
     )
     const fundSession = wrapSession(rawFundSession)
     const fundContract = new FundContract.Contract({client, account: Name.from(fundContractName)})
-    const store = new SecretStore(cfg.storePath)
+    const chainId = await getChainId()
+    const store = new SecretStore(cfg.storePath, chainId)
     const oracleId = Name.from(cfg.handle)
     const deps: OracleDeps = {
         epochs: {

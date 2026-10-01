@@ -1,6 +1,7 @@
 import type {Command} from 'commander'
 import {
     shouldLogTick,
+    StaleSecretStoreError,
     tickSignature,
     type MaintenanceLogState,
     type TickLogState,
@@ -140,6 +141,12 @@ export function register(parent: Command): void {
                                 tickLog = {signature: tickSignature(result), loggedAt: now}
                             }
                         } catch (err) {
+                            if (err instanceof StaleSecretStoreError) {
+                                console.error(`${stamp()} ${err.message}`)
+                                stopping = true
+                                process.exitCode = 1
+                                break
+                            }
                             console.error(`${stamp()} tick failed: ${describeLoopError(err)}`)
                         }
                         if (Date.now() - lastCleanAt >= cleanIntervalMs) {

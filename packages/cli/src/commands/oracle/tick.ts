@@ -1,3 +1,4 @@
+import {StaleSecretStoreError} from '@shipload/oracle'
 import type {Command} from 'commander'
 import {loadOracleConfig} from '../../lib/config'
 import {checkAdmission} from './admission'
@@ -28,7 +29,11 @@ export function register(parent: Command): void {
                 }
                 if (opts.collect) await runCollectPass(ctx)
             } catch (err) {
-                console.error(`tick failed: ${describeLoopError(err)}`)
+                if (err instanceof StaleSecretStoreError) {
+                    console.error(err.message)
+                } else {
+                    console.error(`tick failed: ${describeLoopError(err)}`)
+                }
                 process.exitCode = 1
             } finally {
                 ctx.close()

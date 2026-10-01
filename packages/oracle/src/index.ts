@@ -1,4 +1,10 @@
-export {SecretStore, type Secret} from './secret-store'
+export {
+    SecretStore,
+    StaleSecretStoreError,
+    UNKNOWN_CHAIN_ID,
+    type Secret,
+    type SecretStoreDescription,
+} from './secret-store'
 export {
     runOnce,
     type ActionBuilders,

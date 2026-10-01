@@ -62,6 +62,15 @@ export function getGameConfig(): Promise<{
 	return cachedGameConfig;
 }
 
+let cachedChainId: Promise<string> | null = null;
+
+export function getChainId(): Promise<string> {
+	if (!cachedChainId) {
+		cachedChainId = (async () => String((await client.v1.chain.get_info()).chain_id))();
+	}
+	return cachedChainId;
+}
+
 let cachedShipload: Promise<Shipload> | null = null;
 
 export function getShipload(): Promise<Shipload> {

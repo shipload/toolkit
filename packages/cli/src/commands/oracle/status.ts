@@ -3,7 +3,7 @@ import {SecretStore} from '@shipload/oracle'
 import {getCurrentEpoch} from '@shipload/sdk'
 import {PrivateKey, type PublicKey} from '@wharfkit/antelope'
 import type {Command} from 'commander'
-import {client, gameContractName, getShipload, platform, server} from '../../lib/client'
+import {client, gameContractName, getChainId, getShipload, platform, server} from '../../lib/client'
 import {hasOracleConfig, loadOracleConfig} from '../../lib/config'
 import {responsibleEpoch} from './admission'
 import {renderStatus, type OraclePersonal, type OracleRow, type OracleStatusView} from './format'
@@ -22,7 +22,8 @@ async function isKeyWired(actor: string, permission: string, pubkey: PublicKey):
 async function loadPersonal(
     target: number | undefined,
     registeredHandles: string[],
-    epochOracleIds: string[] | undefined
+    epochOracleIds: string[] | undefined,
+    chainId: string
 ): Promise<OraclePersonal | undefined> {
     if (!hasOracleConfig()) return undefined
     const cfg = loadOracleConfig()
@@ -34,9 +35,18 @@ async function loadPersonal(
         keyWired = await isKeyWired(cfg.actor, cfg.permission, pub)
     } catch {}
     let secretStored = false
-    if (target !== undefined && existsSync(cfg.storePath)) {
-        const store = new SecretStore(cfg.storePath)
-        secretStored = store.getReveal(target) !== undefined
+    let storeChain: OraclePersonal['storeChain']
+    if (existsSync(cfg.storePath)) {
+        const store = new SecretStore(cfg.storePath, chainId)
+        const description = store.describe()
+        storeChain = {
+            chainId: description.chainId,
+            storedChainIds: description.storedChainIds,
+            usable: description.usable,
+        }
+        if (description.usable && target !== undefined) {
+            secretStored = store.getReveal(target) !== undefined
+        }
         store.close()
     }
     const registered = registeredHandles.includes(cfg.handle)
@@ -47,6 +57,7 @@ async function loadPersonal(
         registered,
         secretStored,
         storePath: cfg.storePath,
+        storeChain,
     }
     if (registered && target !== undefined) {
         const epoch = responsibleEpoch({handle: cfg.handle, target, epochOracleIds})
@@ -130,10 +141,12 @@ export function register(parent: Command): void {
                 threshold,
                 oracles: rows,
             }
+            const chainId = await getChainId()
             const mine = await loadPersonal(
                 target,
                 oracles.map((o) => String(o.id)),
-                epochOracleIds
+                epochOracleIds,
+                chainId
             )
             if (mine) view.mine = mine
             console.log(renderStatus(view))

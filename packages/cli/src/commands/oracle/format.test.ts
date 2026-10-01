@@ -5,6 +5,7 @@ import {
     formatCharterReady,
     formatClean,
     formatMintReady,
+    formatStoreChain,
     formatTend,
     formatDuration,
     formatTick,
@@ -559,6 +560,47 @@ test('an ordinary tick carries no race note', () => {
     }
     expect(raceNote(r)).toBeNull()
     expect(formatTick(r)).not.toContain('\n')
+})
+
+test('formatStoreChain shows the plain chain id when the store matches it', () => {
+    expect(formatStoreChain({chainId: 'abc123', storedChainIds: ['abc123'], usable: true})).toBe(
+        'abc123'
+    )
+})
+
+test('formatStoreChain names reset when the store is tagged for another chain', () => {
+    const out = formatStoreChain({chainId: 'abc123', storedChainIds: ['unknown'], usable: false})
+    expect(out).toContain('unknown')
+    expect(out).toContain('not this chain, abc123')
+    expect(out).toContain('shiploadcli oracle reset')
+})
+
+test('formatStoreChain reports an empty store without claiming a mismatch', () => {
+    expect(formatStoreChain({chainId: 'abc123', storedChainIds: [], usable: true})).toBe(
+        'abc123 (empty)'
+    )
+})
+
+test('formatStoreChain handles no store written yet', () => {
+    expect(formatStoreChain(undefined)).toContain('no store yet')
+})
+
+test('renderStatus shows the store chain line and names reset when it does not match', () => {
+    const out = renderStatus({
+        ...base,
+        oracles: [{handle: 'greymass', committed: false, revealed: false}],
+        mine: {
+            handle: 'greymass',
+            pubkey: 'PUB_K1_xyz',
+            keyWired: true,
+            registered: true,
+            secretStored: false,
+            storePath: '/tmp/g.sqlite',
+            storeChain: {chainId: 'abc123', storedChainIds: ['unknown'], usable: false},
+        },
+    })
+    expect(out).toContain('Store chain:     unknown (not this chain, abc123')
+    expect(out).toContain('shiploadcli oracle reset')
 })
 
 test('renderStatus explains the threshold as a race', () => {
