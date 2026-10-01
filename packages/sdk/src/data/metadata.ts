@@ -267,6 +267,31 @@ export const itemFamilies: Record<string, ItemFamily> = {
         description: 'A gathering ship with a hold for longer runs.',
         color: '#4AE898',
     },
+    trawler: {
+        name: 'Trawler',
+        description: 'A gathering ship that tows a container for longer runs.',
+        color: '#4AE898',
+    },
+    steward: {
+        name: 'Steward',
+        description: 'A transfer ship with a hold for the cargo it moves.',
+        color: '#4AE898',
+    },
+    wrangler: {
+        name: 'Wrangler',
+        description: 'A transfer ship that also tows.',
+        color: '#4AE898',
+    },
+    artisan: {
+        name: 'Artisan',
+        description: 'A crafting ship with a hold for its materials.',
+        color: '#4AE898',
+    },
+    outfitter: {
+        name: 'Outfitter',
+        description: 'A construction ship with a hold for upgrade materials.',
+        color: '#4AE898',
+    },
 }
 
 const COMPONENT_FAMILIES = [
@@ -321,6 +346,11 @@ const ENTITY_FAMILIES: Record<number, string> = {
     11222: 'porter',
     11223: 'smith',
     11224: 'smith',
+    11225: 'trawler',
+    11226: 'steward',
+    11227: 'wrangler',
+    11228: 'artisan',
+    11229: 'outfitter',
 }
 
 interface RawItem {
@@ -414,6 +444,11 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     11224: {
         moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Fabricator'],
     },
+    11225: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Tractor Beam']},
+    11226: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay', 'Cargo Hold']},
+    11227: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay', 'Tractor Beam']},
+    11228: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator', 'Cargo Hold']},
+    11229: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm', 'Cargo Hold']},
     11202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
     },

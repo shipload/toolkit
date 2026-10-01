@@ -8,6 +8,7 @@ import {
     ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SMITH_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
+    ITEM_TRAWLER_T2A_PACKED,
     ITEM_TUG_T1A_PACKED,
     ITEM_WRIGHT_T1A_PACKED,
     eligibleUpgrades,
@@ -61,9 +62,13 @@ test('Prospector T2 has a single power core, engine, and gatherer slot', () => {
     ])
 })
 
-test('Prospector T2 upgrades into the Prospector T2 AUX and Dredger T2', () => {
+test('Prospector T2 upgrades into the Prospector T2 AUX, Dredger T2, and Trawler T2', () => {
     const childIds = eligibleUpgrades(ITEM_PROSPECTOR_T2A_PACKED).map(
         (recipe) => recipe.outputItemId
     )
-    expect(childIds).toEqual([ITEM_PROSPECTOR_T2B_PACKED, ITEM_DREDGER_T2A_PACKED])
+    expect(childIds).toEqual([
+        ITEM_PROSPECTOR_T2B_PACKED,
+        ITEM_DREDGER_T2A_PACKED,
+        ITEM_TRAWLER_T2A_PACKED,
+    ])
 })

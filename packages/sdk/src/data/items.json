@@ -819,5 +819,35 @@
     "mass": 57600,
     "type": "entity",
     "tier": 2
+  },
+  {
+    "id": 11225,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11226,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11227,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11228,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11229,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
   }
 ]

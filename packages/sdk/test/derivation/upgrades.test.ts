@@ -5,9 +5,18 @@ import {
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
     ITEM_TUG_T1A_PACKED,
+    ITEM_TUG_T2A_PACKED,
     ITEM_PORTER_T1A_PACKED,
     ITEM_SMITH_T1A_PACKED,
     ITEM_PROSPECTOR_T2A_PACKED,
+    ITEM_PROSPECTOR_T2B_PACKED,
+    ITEM_DREDGER_T2A_PACKED,
+    ITEM_STEWARD_T2A_PACKED,
+    ITEM_WRANGLER_T2A_PACKED,
+    ITEM_ARTISAN_T2A_PACKED,
+    ITEM_OUTFITTER_T2A_PACKED,
+    ITEM_PORTER_T2A_PACKED,
+    ITEM_PORTER_T2B_PACKED,
     ITEM_TENDER_T2A_PACKED,
     ITEM_TENDER_T2B_PACKED,
     ITEM_WRIGHT_T1A_PACKED,
@@ -39,6 +48,32 @@ test('eligibleUpgrades returns the immediate branches of a Prospector T1', () =>
 test('eligibleUpgrades returns the tier entry of a Tender T1', () => {
     const targets = eligibleUpgrades(ITEM_TENDER_T1A_PACKED).map((r) => r.outputItemId)
     expect(targets).toEqual([ITEM_TENDER_T2A_PACKED])
+})
+
+test('eligibleUpgrades lists every mutation a Porter T2 donates to', () => {
+    const targets = eligibleUpgrades(ITEM_PORTER_T2A_PACKED)
+        .map((r) => r.outputItemId)
+        .sort()
+    expect(targets).toEqual(
+        [
+            ITEM_PORTER_T2B_PACKED,
+            ITEM_DREDGER_T2A_PACKED,
+            ITEM_STEWARD_T2A_PACKED,
+            ITEM_ARTISAN_T2A_PACKED,
+            ITEM_OUTFITTER_T2A_PACKED,
+        ].sort()
+    )
+})
+
+test('a convergent mutation is one recipe reached from each donor', () => {
+    const fromTender = eligibleUpgrades(ITEM_TENDER_T2A_PACKED).find(
+        (r) => r.outputItemId === ITEM_WRANGLER_T2A_PACKED
+    )
+    const fromTug = eligibleUpgrades(ITEM_TUG_T2A_PACKED).find(
+        (r) => r.outputItemId === ITEM_WRANGLER_T2A_PACKED
+    )
+    expect(fromTender).toBeDefined()
+    expect(fromTender).toBe(fromTug!)
 })
 
 test('eligibleUpgrades is empty for an item with no upgrade edges', () => {

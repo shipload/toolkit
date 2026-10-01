@@ -269,6 +269,36 @@
       "baseCapacityFn": "ship"
     },
     {
+      "itemId": 11225,
+      "kind": "ship",
+      "displayLabel": "Trawler",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11226,
+      "kind": "ship",
+      "displayLabel": "Steward",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11227,
+      "kind": "ship",
+      "displayLabel": "Wrangler",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11228,
+      "kind": "ship",
+      "displayLabel": "Artisan",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11229,
+      "kind": "ship",
+      "displayLabel": "Outfitter",
+      "baseCapacityFn": "ship"
+    },
+    {
       "itemId": 10219,
       "kind": "depot",
       "displayLabel": "",

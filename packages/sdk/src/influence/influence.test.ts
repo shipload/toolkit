@@ -136,7 +136,7 @@ describe('decomposition', () => {
         for (let i = 1; i < DECOMP_REGISTRY.length; i++) {
             expect(DECOMP_REGISTRY[i].itemId).toBeGreaterThan(DECOMP_REGISTRY[i - 1].itemId)
         }
-        expect(DECOMP_REGISTRY.length).toBe(67)
+        expect(DECOMP_REGISTRY.length).toBe(72)
     })
 
     test('the retired Workshop has no decomposition entry', () => {

@@ -703,5 +703,135 @@
       }
     ],
     "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11225,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "gatherer",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11226,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11227,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11228,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "crafter",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11229,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "builder",
+        "outputPct": 100,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
   }
 ]
