@@ -194,7 +194,7 @@ describe('renderShuttleOptions', () => {
             quantity: 1,
             result: {options: [blockedOption]},
         })
-        expect(out).toContain("the building's shuttle bays are fully booked")
+        expect(out).toContain("The building's shuttle bays are fully booked")
         expect(out).toContain('bays 900 (shuttled by 900)')
         expect(out).not.toMatch(/1970/)
         expect(out).not.toContain('[auto]')
@@ -211,7 +211,7 @@ describe('renderShuttleOptions', () => {
                 blocked: {code: 'not-equipped', reason: 'workshop has no fabricator installed'},
             },
         })
-        expect(out).toContain('Blocked: workshop has no fabricator installed')
+        expect(out).toContain('Blocked: The Workshop has no Fabricator installed.')
     })
 })
 

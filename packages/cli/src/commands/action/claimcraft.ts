@@ -7,10 +7,11 @@ import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {formatDateTimeUTC, formatDuration} from '../../lib/format'
 import {getAccountName, transact} from '../../lib/session'
+import type {EntityRowFetcher} from '../../lib/shuttle-candidates'
 import {getEntityRow} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION, type WaitableOptions} from '../../lib/wait'
-import {type EntityRowFetcher, parseShuttledBy} from './craftjob'
+import {parseShuttledBy} from './craftjob'
 
 export interface ClaimcraftOpts {
     entityId: bigint

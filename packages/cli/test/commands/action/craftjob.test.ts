@@ -1,7 +1,8 @@
 import {expect, test} from 'bun:test'
 import {Name} from '@wharfkit/antelope'
-import type {ServerTypes} from '@shipload/sdk'
+import {ServerContract, type ServerTypes} from '@shipload/sdk'
 import {
+    assertCandidatesNeedAuto,
     buildAction,
     parseShuttledBy,
     resolveAutoShuttledBy,
@@ -164,5 +165,83 @@ test('resolveAutoShuttledBy explains it when nothing can shuttle the booking', a
             'eggmaple.gm',
             fetchRow
         )
-    ).rejects.toThrow('workshop has no fabricator installed')
+    ).rejects.toThrow('The Workshop has no Fabricator installed.')
+})
+
+test('assertCandidatesNeedAuto accepts --candidates with --shuttled-by auto', () => {
+    expect(() => assertCandidatesNeedAuto({shuttledBy: 'auto', candidates: [900n]})).not.toThrow()
+})
+
+test('assertCandidatesNeedAuto accepts no --candidates regardless of --shuttled-by', () => {
+    expect(() => assertCandidatesNeedAuto({shuttledBy: 15n})).not.toThrow()
+    expect(() => assertCandidatesNeedAuto({})).not.toThrow()
+})
+
+test('assertCandidatesNeedAuto rejects --candidates without --shuttled-by auto', () => {
+    expect(() => assertCandidatesNeedAuto({candidates: [900n]})).toThrow(
+        '--candidates needs --shuttled-by auto.'
+    )
+    expect(() => assertCandidatesNeedAuto({shuttledBy: 15n, candidates: [900n]})).toThrow(
+        '--candidates needs --shuttled-by auto.'
+    )
+})
+
+test('resolveAutoShuttledBy builds its candidate pool from one getEntities call, not a fetchRow per owned ship', async () => {
+    const sl = getLocalShipload()
+    const rows = new Map<string, ServerTypes.entity_row>()
+    let fetchRowCalls = 0
+    const fetchRow = async (id: bigint | number) => {
+        fetchRowCalls++
+        const row = rows.get(String(id))
+        if (!row) throw new Error(`unexpected fetchRow(${id})`)
+        return row
+    }
+    rows.set('1001', {
+        id: 1001,
+        owner: 'eon.shipload',
+        kind: 'workshop',
+        item_id: 1,
+        coordinates: {x: 0, y: 0},
+    } as never)
+    const owned = [
+        ServerContract.Types.entity_info.from({
+            id: 5001,
+            owner: 'eggmaple.gm',
+            type: 'ship',
+            entity_name: 'Owned Ship',
+            coordinates: {x: 0, y: 0},
+            item_id: 1,
+            cargomass: 0,
+            cargo: [],
+            modules: [{installed: {item_id: 10103, stats: 0}, type: 0}],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            builder_lanes: [],
+            loader_lanes: [],
+            lanes: [],
+            holds: [],
+            projected_at: 0,
+        } as never),
+    ]
+    sl.entities.getEntities = (async () => owned) as typeof sl.entities.getEntities
+    sl.influence.getCivicOwner = (async () =>
+        Name.from('eon.shipload')) as typeof sl.influence.getCivicOwner
+    let craftReq: unknown
+    sl.shuttle.craft = (async (req: unknown) => {
+        craftReq = req
+        return {options: [], auto: undefined, blocked: {code: 'unknown', reason: 'no match'}}
+    }) as typeof sl.shuttle.craft
+    await resolveAutoShuttledBy(
+        sl,
+        {entityType: 'ship', entityId: 1003n},
+        1001n,
+        10001,
+        1,
+        [{itemId: 101, quantity: 10, stackId: 413333752n, modules: []}],
+        [],
+        'eggmaple.gm',
+        fetchRow
+    ).catch(() => {})
+    expect(fetchRowCalls).toBe(1)
+    expect(craftReq).toMatchObject({shipId: 1003n, workshopId: 1001n})
 })

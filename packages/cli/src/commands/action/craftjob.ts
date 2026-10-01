@@ -1,4 +1,4 @@
-import {shuttleCandidates, ServerTypes, type Shipload} from '@shipload/sdk'
+import {ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
@@ -20,6 +20,8 @@ import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {withValidation} from '../../lib/errors'
 import {getAccountName, transact} from '../../lib/session'
+import {resolveShuttleCandidatePool, type EntityRowFetcher} from '../../lib/shuttle-candidates'
+import {formatShuttleReason} from '../../lib/shuttle-reason'
 import {getEntityRow, getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 import {maybeAwaitAndPrint, TRACK_OPTION, WAIT_OPTION, type WaitableOptions} from '../../lib/wait'
@@ -65,8 +67,6 @@ export interface CraftjobCliOptions extends WaitableOptions {
     candidates?: bigint[]
 }
 
-export type EntityRowFetcher = (id: bigint | number) => Promise<ServerTypes.entity_row>
-
 export async function resolveAutoShuttledBy(
     sl: Shipload,
     ctx: EntityContext,
@@ -86,17 +86,13 @@ export async function resolveAutoShuttledBy(
             modules: [],
         })
     )
-    const [buildingRow, owned, civicOwner] = await Promise.all([
-        fetchRow(workshopId),
-        sl.entities.getEntities(player),
-        sl.influence.getCivicOwner(),
-    ])
-    const ownRows = await Promise.all(owned.map((e) => fetchRow(BigInt(e.id.toString()))))
-    const candidateRows = await Promise.all(candidateIds.map((id) => fetchRow(id)))
-    const candidates = shuttleCandidates(
-        {building: buildingRow, shipId: ctx.entityId, player},
-        [...ownRows, ...candidateRows],
-        civicOwner.toString()
+    const candidates = await resolveShuttleCandidatePool(
+        sl,
+        workshopId,
+        ctx.entityId,
+        candidateIds,
+        player,
+        fetchRow
     )
     const shuttleOptions = await sl.shuttle.craft({
         shipId: ctx.entityId,
@@ -104,17 +100,28 @@ export async function resolveAutoShuttledBy(
         recipeId,
         quantity,
         inputs: cargoInputs,
-        candidates: candidates.map((id) => BigInt(id)),
+        candidates,
     })
     if (!shuttleOptions.auto) {
         throw new ValidationError(
-            shuttleOptions.blocked?.reason ?? 'no shuttle can carry this booking.',
+            shuttleOptions.blocked
+                ? formatShuttleReason(shuttleOptions.blocked)
+                : 'No shuttle can carry this booking.',
             "add a Depot id with --candidates, or drop --shuttled-by to use the building's own shuttle"
         )
     }
     return shuttleOptions.auto.shuttledBy !== undefined
         ? BigInt(shuttleOptions.auto.shuttledBy)
         : undefined
+}
+
+export function assertCandidatesNeedAuto(options: CraftjobCliOptions): void {
+    if ((options.candidates?.length ?? 0) > 0 && options.shuttledBy !== 'auto') {
+        throw new ValidationError(
+            '--candidates needs --shuttled-by auto.',
+            'add --shuttled-by auto, or drop --candidates'
+        )
+    }
 }
 
 export async function runCraftjob(
@@ -126,6 +133,7 @@ export async function runCraftjob(
     options: CraftjobCliOptions
 ): Promise<void> {
     await withValidation(async () => {
+        assertCandidatesNeedAuto(options)
         const sl = await getShipload()
         const snap = await getEntitySnapshot(ctx.entityId)
         const resolved = resolveCargoInputs(

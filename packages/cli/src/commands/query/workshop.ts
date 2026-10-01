@@ -28,7 +28,9 @@ import {
 import {getShipload, gameContractName, server} from '../../lib/client'
 import {withValidation} from '../../lib/errors'
 import {formatDateTimeUTC, formatItem, formatOutput, formatTimeUTC, kvTable} from '../../lib/format'
-import {transact} from '../../lib/session'
+import {getAccountName, transact} from '../../lib/session'
+import {resolveShuttleCandidatePool} from '../../lib/shuttle-candidates'
+import {formatShuttleReason} from '../../lib/shuttle-reason'
 import {getEntityRow, getEntitySnapshot} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 
@@ -263,7 +265,7 @@ function shuttleOptionLabel(o: ShuttleOptions['options'][number]): string {
 export function renderShuttleOptions(view: ShuttleOptionsView): string {
     const header = `Shuttle options for recipe ${view.recipeId} x${view.quantity} at Workshop ${view.workshopId}`
     if (view.result.blocked) {
-        return [header, '', `Blocked: ${view.result.blocked.reason}`].join('\n')
+        return [header, '', `Blocked: ${formatShuttleReason(view.result.blocked)}`].join('\n')
     }
     if (view.result.options.length === 0) {
         return [header, '', 'No shuttle can carry this booking.'].join('\n')
@@ -271,7 +273,7 @@ export function renderShuttleOptions(view: ShuttleOptionsView): string {
     const rows: [string, string][] = view.result.options.map((o) => {
         const label = shuttleOptionLabel(o) + (view.result.auto === o ? '  [auto]' : '')
         const detail = o.blocked
-            ? o.blocked.reason
+            ? formatShuttleReason(o.blocked)
             : o.finish
               ? `finish ${formatDateTimeUTC(o.finish)}`
               : 'finish unknown'
@@ -287,7 +289,9 @@ export async function loadShuttleOptions(
     quantity: number,
     inputs: {itemId: number; stackId: bigint; quantity: number}[],
     candidates: bigint[],
-    recharge: boolean
+    recharge: boolean,
+    fetchRow: EntityRowFetcher = getEntityRow,
+    player: string = getAccountName()
 ): Promise<ShuttleOptionsView> {
     const sl = await getShipload()
     const cargoInputs = inputs.map((i) =>
@@ -298,13 +302,21 @@ export async function loadShuttleOptions(
             modules: [],
         })
     )
+    const pool = await resolveShuttleCandidatePool(
+        sl,
+        workshopId,
+        shipId,
+        candidates,
+        player,
+        fetchRow
+    )
     const result = await sl.shuttle.craft({
         shipId,
         workshopId,
         recipeId,
         quantity,
         inputs: cargoInputs,
-        candidates,
+        candidates: pool,
         recharge,
     })
     return {workshopId, shipId, recipeId, quantity, result}
