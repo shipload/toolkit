@@ -311,6 +311,16 @@ const ENTITY_FAMILIES: Record<number, string> = {
     11212: 'prospector',
     11213: 'prospector',
     11214: 'dredger',
+    11215: 'tender',
+    11216: 'tender',
+    11217: 'wright',
+    11218: 'wright',
+    11219: 'tug',
+    11220: 'tug',
+    11221: 'porter',
+    11222: 'porter',
+    11223: 'smith',
+    11224: 'smith',
 }
 
 interface RawItem {
@@ -383,6 +393,26 @@ export const entityMetadata: Record<number, EntityMetadata> = {
     },
     11214: {
         moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold'],
+    },
+    11215: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
+    11216: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Shuttle Bay'],
+    },
+    11217: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm']},
+    11218: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Assembly Arm'],
+    },
+    11219: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
+    11220: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Tractor Beam'],
+    },
+    11221: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
+    11222: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Cargo Hold'],
+    },
+    11223: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator']},
+    11224: {
+        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Fabricator'],
     },
     11202: {
         moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],

@@ -209,6 +209,66 @@
       "baseCapacityFn": "ship"
     },
     {
+      "itemId": 11215,
+      "kind": "ship",
+      "displayLabel": "Tender",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11216,
+      "kind": "ship",
+      "displayLabel": "Tender",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11217,
+      "kind": "ship",
+      "displayLabel": "Wright",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11218,
+      "kind": "ship",
+      "displayLabel": "Wright",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11219,
+      "kind": "ship",
+      "displayLabel": "Tug",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11220,
+      "kind": "ship",
+      "displayLabel": "Tug",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11221,
+      "kind": "ship",
+      "displayLabel": "Porter",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11222,
+      "kind": "ship",
+      "displayLabel": "Porter",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11223,
+      "kind": "ship",
+      "displayLabel": "Smith",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 11224,
+      "kind": "ship",
+      "displayLabel": "Smith",
+      "baseCapacityFn": "ship"
+    },
+    {
       "itemId": 10219,
       "kind": "depot",
       "displayLabel": "",

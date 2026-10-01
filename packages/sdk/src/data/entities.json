@@ -468,5 +468,240 @@
       }
     ],
     "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11215,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 59200
+  },
+  {
+    "entityItemId": 11216,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "aux",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "loader",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11217,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "builder",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 59200
+  },
+  {
+    "entityItemId": 11218,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "aux",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "builder",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11219,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 59200
+  },
+  {
+    "entityItemId": 11220,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "aux",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "hauler",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11221,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 59200
+  },
+  {
+    "entityItemId": 11222,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "aux",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
+  },
+  {
+    "entityItemId": 11223,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 90,
+        "maxTier": 2
+      },
+      {
+        "type": "crafter",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 59200
+  },
+  {
+    "entityItemId": 11224,
+    "slots": [
+      {
+        "type": "generator",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "engine",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "aux",
+        "outputPct": 95,
+        "maxTier": 2
+      },
+      {
+        "type": "crafter",
+        "outputPct": 100,
+        "maxTier": 2
+      }
+    ],
+    "baseHullmass": 73600
   }
 ]

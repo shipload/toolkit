@@ -759,5 +759,65 @@
     "mass": 57600,
     "type": "entity",
     "tier": 2
+  },
+  {
+    "id": 11215,
+    "mass": 43200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11216,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11217,
+    "mass": 43200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11218,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11219,
+    "mass": 43200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11220,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11221,
+    "mass": 43200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11222,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11223,
+    "mass": 43200,
+    "type": "entity",
+    "tier": 2
+  },
+  {
+    "id": 11224,
+    "mass": 57600,
+    "type": "entity",
+    "tier": 2
   }
 ]

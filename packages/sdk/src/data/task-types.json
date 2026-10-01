@@ -179,6 +179,15 @@
       "isTerminal": false,
       "capsPlan": false,
       "cargoEffectResolve": false
+    },
+    {
+      "type": 23,
+      "positionBound": false,
+      "mobility": false,
+      "consumer": false,
+      "isTerminal": false,
+      "capsPlan": false,
+      "cargoEffectResolve": true
     }
   ]
 }

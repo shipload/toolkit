@@ -2955,5 +2955,965 @@
     "sourceSubclasses": [
       11212
     ]
+  },
+  {
+    "outputItemId": 11215,
+    "outputMass": 43200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 200
+      },
+      {
+        "itemId": 11008,
+        "quantity": 200
+      },
+      {
+        "itemId": 11007,
+        "quantity": 200
+      },
+      {
+        "itemId": 11003,
+        "quantity": 200
+      },
+      {
+        "itemId": 11006,
+        "quantity": 200
+      },
+      {
+        "itemId": 10212,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      10212
+    ]
+  },
+  {
+    "outputItemId": 11216,
+    "outputMass": 57600,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 150
+      },
+      {
+        "itemId": 11002,
+        "quantity": 150
+      },
+      {
+        "itemId": 11010,
+        "quantity": 150
+      },
+      {
+        "itemId": 11009,
+        "quantity": 150
+      },
+      {
+        "itemId": 11004,
+        "quantity": 150
+      },
+      {
+        "itemId": 11215,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      11215
+    ]
+  },
+  {
+    "outputItemId": 11217,
+    "outputMass": 43200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 200
+      },
+      {
+        "itemId": 11008,
+        "quantity": 200
+      },
+      {
+        "itemId": 11007,
+        "quantity": 200
+      },
+      {
+        "itemId": 11003,
+        "quantity": 200
+      },
+      {
+        "itemId": 11006,
+        "quantity": 200
+      },
+      {
+        "itemId": 10213,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      10213
+    ]
+  },
+  {
+    "outputItemId": 11218,
+    "outputMass": 57600,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 150
+      },
+      {
+        "itemId": 11002,
+        "quantity": 150
+      },
+      {
+        "itemId": 11010,
+        "quantity": 150
+      },
+      {
+        "itemId": 11009,
+        "quantity": 150
+      },
+      {
+        "itemId": 11004,
+        "quantity": 150
+      },
+      {
+        "itemId": 11217,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      11217
+    ]
+  },
+  {
+    "outputItemId": 11219,
+    "outputMass": 43200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 200
+      },
+      {
+        "itemId": 11008,
+        "quantity": 200
+      },
+      {
+        "itemId": 11007,
+        "quantity": 200
+      },
+      {
+        "itemId": 11003,
+        "quantity": 200
+      },
+      {
+        "itemId": 11006,
+        "quantity": 200
+      },
+      {
+        "itemId": 10214,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      10214
+    ]
+  },
+  {
+    "outputItemId": 11220,
+    "outputMass": 57600,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 150
+      },
+      {
+        "itemId": 11002,
+        "quantity": 150
+      },
+      {
+        "itemId": 11010,
+        "quantity": 150
+      },
+      {
+        "itemId": 11009,
+        "quantity": 150
+      },
+      {
+        "itemId": 11004,
+        "quantity": 150
+      },
+      {
+        "itemId": 11219,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      11219
+    ]
+  },
+  {
+    "outputItemId": 11221,
+    "outputMass": 43200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 200
+      },
+      {
+        "itemId": 11008,
+        "quantity": 200
+      },
+      {
+        "itemId": 11007,
+        "quantity": 200
+      },
+      {
+        "itemId": 11003,
+        "quantity": 200
+      },
+      {
+        "itemId": 11006,
+        "quantity": 200
+      },
+      {
+        "itemId": 10215,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      10215
+    ]
+  },
+  {
+    "outputItemId": 11222,
+    "outputMass": 57600,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 150
+      },
+      {
+        "itemId": 11002,
+        "quantity": 150
+      },
+      {
+        "itemId": 11010,
+        "quantity": 150
+      },
+      {
+        "itemId": 11009,
+        "quantity": 150
+      },
+      {
+        "itemId": 11004,
+        "quantity": 150
+      },
+      {
+        "itemId": 11221,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      11221
+    ]
+  },
+  {
+    "outputItemId": 11223,
+    "outputMass": 43200,
+    "inputs": [
+      {
+        "itemId": 11001,
+        "quantity": 200
+      },
+      {
+        "itemId": 11008,
+        "quantity": 200
+      },
+      {
+        "itemId": 11007,
+        "quantity": 200
+      },
+      {
+        "itemId": 11003,
+        "quantity": 200
+      },
+      {
+        "itemId": 11006,
+        "quantity": 200
+      },
+      {
+        "itemId": 10218,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      10218
+    ]
+  },
+  {
+    "outputItemId": 11224,
+    "outputMass": 57600,
+    "inputs": [
+      {
+        "itemId": 11005,
+        "quantity": 150
+      },
+      {
+        "itemId": 11002,
+        "quantity": 150
+      },
+      {
+        "itemId": 11010,
+        "quantity": 150
+      },
+      {
+        "itemId": 11009,
+        "quantity": 150
+      },
+      {
+        "itemId": 11004,
+        "quantity": 150
+      },
+      {
+        "itemId": 11223,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 3,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 4,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 5,
+            "statIndex": 4
+          }
+        ]
+      }
+    ],
+    "blendWeights": [],
+    "sourceSubclasses": [
+      11223
+    ]
   }
 ]
