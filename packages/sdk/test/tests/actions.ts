@@ -3,7 +3,7 @@ import {assert} from 'chai'
 import {makeClient} from '@wharfkit/mock-data'
 import Shipload, {ActionsManager, PlatformContract, ServerContract} from '$lib'
 import {Chains} from '@wharfkit/common'
-import {Int64, Serializer, UInt64} from '@wharfkit/antelope'
+import {Int64, Name, Serializer, UInt64} from '@wharfkit/antelope'
 
 const client = makeClient('https://jungle4.greymass.com')
 
@@ -115,6 +115,25 @@ describe('ActionsManager', () => {
             assert.equal(actions[0].name.toString(), 'wrapentity')
             assert.equal(actions[0].account.toString(), 'nex.shipload')
             assert.isDefined(actions[0].data)
+        })
+    })
+
+    describe('contribute', () => {
+        const bundle = [{item_id: 101, stats: 12345, modules: [], quantity: 10}]
+
+        test('returns the platform witness followed by the game action', () => {
+            const actions = shipload.actions.contribute('alice', 42, {x: 3, y: -4}, bundle)
+            assert.equal(actions.length, 2)
+            assert.equal(actions[0].account.toString(), 'nex.shipload')
+            assert.equal(actions[0].name.toString(), 'contribute')
+            assert.equal(actions[1].account.toString(), 'eon.shipload')
+            assert.equal(actions[1].name.toString(), 'contribute')
+        })
+
+        test('the witness carries the game account and exactly the game action arguments', () => {
+            const [witness, game] = shipload.actions.contribute('alice', 42, {x: 3, y: -4}, bundle)
+            const gameAccount = Serializer.encode({object: Name.from('eon.shipload')}).hexString
+            assert.equal(witness.data.hexString, gameAccount + game.data.hexString)
         })
     })
 
@@ -474,8 +493,6 @@ describe('ActionsManager', () => {
             'stowentity',
             // admin entity removal
             'delentity',
-            // inline-only, get_sender gated to the platform front door
-            'addcontrib',
         ])
 
         test('every server action has an ActionsManager builder (or is explicitly excluded)', () => {

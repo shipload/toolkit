@@ -1111,27 +1111,17 @@ export class ActionsManager extends BaseManager {
         entityId: UInt64Type,
         location: CoordinatesType,
         bundle: ServerContract.ActionParams.Type.cargo_item[]
-    ): Action {
-        return this.platform.action('contribute', {
-            game: this.server.account,
+    ): Action[] {
+        const args = {
             player: Name.from(player),
             entity_id: UInt64.from(entityId),
             x: Int64.from(location.x),
             y: Int64.from(location.y),
             bundle,
-        })
-    }
-
-    // addcontrib asserts the citizenship rows exist, so naturalize must precede contribute.
-    firstContribution(
-        player: NameType,
-        entityId: UInt64Type,
-        location: CoordinatesType,
-        bundle: ServerContract.ActionParams.Type.cargo_item[]
-    ): Action[] {
+        }
         return [
-            this.naturalize(player, location),
-            this.contribute(player, entityId, location, bundle),
+            this.platform.action('contribute', {game: this.server.account, ...args}),
+            this.server.action('contribute', args),
         ]
     }
 
