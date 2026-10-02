@@ -42,6 +42,11 @@ export type ShuttleReasonCode =
     | 'not-ready'
     | 'unknown'
 
+export interface ShuttleMissingItem {
+    itemId: number
+    quantity: number
+}
+
 export interface ShuttleReason {
     code: ShuttleReasonCode
     reason: string
@@ -51,6 +56,7 @@ export interface ShuttleReason {
     need?: number
     cap?: number
     taskType?: number
+    missing?: ShuttleMissingItem[]
 }
 
 export interface ShuttleOption {
@@ -166,6 +172,16 @@ function toNum(v: {toNumber(): number} | undefined): number | undefined {
     return v === undefined ? undefined : v.toNumber()
 }
 
+function mapMissing(items: ServerContract.Types.cargo_item[]): ShuttleMissingItem[] | undefined {
+    if (items.length === 0) return undefined
+    const byItem = new Map<number, number>()
+    for (const item of items) {
+        const id = item.item_id.toNumber()
+        byItem.set(id, (byItem.get(id) ?? 0) + item.quantity.toNumber())
+    }
+    return [...byItem].map(([itemId, quantity]) => ({itemId, quantity}))
+}
+
 function mapReason(r: ServerContract.Types.shuttle_rejection): ShuttleReason {
     return {
         code: shuttleReasonCode(r.reason),
@@ -176,6 +192,7 @@ function mapReason(r: ServerContract.Types.shuttle_rejection): ShuttleReason {
         need: toNum(r.need),
         cap: toNum(r.cap),
         taskType: toNum(r.task_type),
+        missing: mapMissing(r.missing),
     }
 }
 

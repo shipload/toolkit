@@ -144,6 +144,7 @@ describe('ShuttleManager', () => {
                         need: null,
                         cap: null,
                         task_type: null,
+                        missing: [],
                     },
                 }),
             ],
@@ -151,6 +152,67 @@ describe('ShuttleManager', () => {
         const out = await m.store({shipId: 5, depotId: 9, items: [], candidates: []})
         expect(out.options[0].blocked?.code).toBe('bays-booked')
         expect(out.options[0].blocked?.at?.getTime()).toBe(2000 * 1000)
+    })
+
+    it('an inputs rejection lists the missing items, merged by item', async () => {
+        const cargo = (item_id: number, stats: number, quantity: number) => ({
+            item_id,
+            stats,
+            modules: [],
+            quantity,
+            entity_id: null,
+        })
+        const m = managerWithReadonly(async () => ({
+            options: [
+                rawOption({
+                    rejection: {
+                        reason: 'Insufficient inputs for recipe.',
+                        at: t(2000),
+                        until: null,
+                        have: null,
+                        need: null,
+                        cap: null,
+                        task_type: null,
+                        missing: [cargo(101, 1, 10), cargo(201, 0, 4), cargo(101, 2, 5)],
+                    },
+                }),
+            ],
+        }))
+        const out = await m.craft({
+            shipId: 5,
+            workshopId: 9,
+            recipeId: 10001,
+            quantity: 1,
+            inputs: [],
+            candidates: [],
+        })
+        const blocked = out.options[0].blocked!
+        expect(blocked.code).toBe('inputs-unavailable')
+        expect(blocked.missing).toEqual([
+            {itemId: 101, quantity: 15},
+            {itemId: 201, quantity: 4},
+        ])
+    })
+
+    it('a rejection with nothing missing carries no missing list', async () => {
+        const m = managerWithReadonly(async () => ({
+            options: [
+                rawOption({
+                    rejection: {
+                        reason: 'fabricator queue is full',
+                        at: t(2000),
+                        until: null,
+                        have: null,
+                        need: null,
+                        cap: null,
+                        task_type: null,
+                        missing: [],
+                    },
+                }),
+            ],
+        }))
+        const out = await m.store({shipId: 5, depotId: 9, items: [], candidates: []})
+        expect(out.options[0].blocked?.missing).toBeUndefined()
     })
 
     it('a never-shuttle reason is omitted', async () => {
@@ -167,6 +229,7 @@ describe('ShuttleManager', () => {
                         need: null,
                         cap: null,
                         task_type: null,
+                        missing: [],
                     },
                 }),
             ],
@@ -184,6 +247,7 @@ describe('ShuttleManager', () => {
             need: 200,
             cap: 1000,
             task_type: null,
+            missing: [],
         }
         const m = managerWithReadonly(async () => ({
             options: [
@@ -206,6 +270,7 @@ describe('ShuttleManager', () => {
             need: null,
             cap: null,
             task_type: 3,
+            missing: [],
         }
         const m = managerWithReadonly(async () => ({
             options: [
@@ -368,6 +433,7 @@ describe('ShuttleManager', () => {
             need: null,
             cap: null,
             task_type: null,
+            missing: [],
         })
         const m = managerWithReadonly(async () => ({
             options: [
@@ -394,6 +460,7 @@ describe('ShuttleManager', () => {
             need: null,
             cap: null,
             task_type: null,
+            missing: [],
         }
         const m = managerWithReadonly(async () => ({
             options: [
