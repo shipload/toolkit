@@ -1,6 +1,7 @@
 import type {TimePoint} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
-import {TaskType} from '../types'
+import {ENTITY_CONSTRUCTION_DOCK} from '../data/kind-registry'
+import {HoldKind, TaskType} from '../types'
 import * as core from './lane-core'
 
 type Schedule = ServerContract.Types.schedule
@@ -148,7 +149,16 @@ export function hasResolvable(entity: ScheduleData, now: Date): boolean {
         if (isCapperTaskType(front.type.toNumber()) && hasHolds(entity)) continue
         return true
     }
-    return false
+    return hasFinishedCivicUpgrade(entity, now)
+}
+
+function hasFinishedCivicUpgrade(entity: ScheduleData, now: Date): boolean {
+    return (entity.holds ?? []).some(
+        (h) =>
+            h.kind.equals(HoldKind.UPGRADE) &&
+            h.counterpart.entity_type.equals(ENTITY_CONSTRUCTION_DOCK) &&
+            h.until.toMilliseconds() <= now.getTime()
+    )
 }
 
 export function currentTaskForLane(

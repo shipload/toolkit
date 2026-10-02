@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {ServerContract, TaskType} from '../index-module'
+import {HoldKind, ServerContract, TaskType} from '../index-module'
 import {
     appliedTaskCount,
     hasPendingCapper,
@@ -123,6 +123,30 @@ describe('hasResolvable — capper gating', () => {
     test('an in-progress front is not resolvable regardless of holds', () => {
         const e = entity([task({type: TaskType.DEMOLISH, duration: 3600})])
         expect(hasResolvable(e, NOW)).toBe(false)
+    })
+})
+
+describe('hasResolvable — civic dock upgrade', () => {
+    function dockHold(untilISO: string, counterpartType = 'builddock') {
+        return ServerContract.Types.hold.from({
+            id: 1,
+            kind: HoldKind.UPGRADE,
+            counterpart: {entity_type: counterpartType, entity_id: 9},
+            until: untilISO,
+            incoming_mass: 0,
+        })
+    }
+
+    test('a dock upgrade hold whose window has passed is resolvable with no tasks', () => {
+        expect(hasResolvable(entity([], [dockHold(T0)]), NOW)).toBe(true)
+    })
+
+    test('a dock upgrade hold still inside its window is not resolvable', () => {
+        expect(hasResolvable(entity([], [dockHold('2026-06-19T01:00:00')]), NOW)).toBe(false)
+    })
+
+    test("a builder ship's upgrade hold is not a dock upgrade", () => {
+        expect(hasResolvable(entity([], [dockHold(T0, 'ship')]), NOW)).toBe(false)
     })
 })
 
