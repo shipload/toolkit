@@ -34,7 +34,7 @@ export function taskCargoRule(taskType: number): TaskCargoRule | undefined {
     return TASK_CARGO_EFFECTS.get(taskType)
 }
 
-// Transcribed from TASK_TRAITS in contracts/src/server/include/server/task_traits.hpp.
+// Transcribed from TASK_TRAITS in contracts/src/server/include/server/schedule/task_traits.hpp.
 export type TaskEnergyEffect = 'none' | 'fills' | 'draws' | 'zeroes'
 
 export const TASK_ENERGY_EFFECTS: ReadonlyMap<number, TaskEnergyEffect> = new Map<
