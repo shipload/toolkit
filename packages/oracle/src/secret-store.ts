@@ -8,8 +8,6 @@ export interface Secret {
     reveal: Checksum256
 }
 
-export const UNKNOWN_CHAIN_ID = 'unknown'
-
 interface SecretRow {
     epoch: number
     commitValue: string
@@ -79,24 +77,26 @@ export class SecretStore {
     private migrateLegacySchema(): void {
         const cols = this.db.query<{name: string}, []>('PRAGMA table_info(secrets)').all()
         if (cols.length === 0 || cols.some((c) => c.name === 'chainId')) return
-        if (!cols.some((c) => c.name === 'commitBlock')) {
-            this.db.run('ALTER TABLE secrets ADD COLUMN commitBlock INTEGER')
-        }
-        this.db.run('ALTER TABLE secrets RENAME TO secrets_legacy')
-        this.db.run(`CREATE TABLE secrets (
-            chainId TEXT NOT NULL,
-            epoch INTEGER NOT NULL,
-            commitValue TEXT NOT NULL,
-            revealValue TEXT NOT NULL,
-            commitBlock INTEGER,
-            PRIMARY KEY (chainId, epoch)
-        )`)
-        this.db.run(
-            `INSERT INTO secrets (chainId, epoch, commitValue, revealValue, commitBlock)
-             SELECT ?, epoch, commitValue, revealValue, commitBlock FROM secrets_legacy`,
-            [UNKNOWN_CHAIN_ID]
-        )
-        this.db.run('DROP TABLE secrets_legacy')
+        this.db.transaction(() => {
+            if (!cols.some((c) => c.name === 'commitBlock')) {
+                this.db.run('ALTER TABLE secrets ADD COLUMN commitBlock INTEGER')
+            }
+            this.db.run('ALTER TABLE secrets RENAME TO secrets_legacy')
+            this.db.run(`CREATE TABLE secrets (
+                chainId TEXT NOT NULL,
+                epoch INTEGER NOT NULL,
+                commitValue TEXT NOT NULL,
+                revealValue TEXT NOT NULL,
+                commitBlock INTEGER,
+                PRIMARY KEY (chainId, epoch)
+            )`)
+            this.db.run(
+                `INSERT INTO secrets (chainId, epoch, commitValue, revealValue, commitBlock)
+                 SELECT ?, epoch, commitValue, revealValue, commitBlock FROM secrets_legacy`,
+                [this.chainId]
+            )
+            this.db.run('DROP TABLE secrets_legacy')
+        })()
     }
 
     private refreshChainState(): void {

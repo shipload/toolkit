@@ -4,9 +4,9 @@ import {mkdtempSync, rmSync, statSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {Checksum256} from '@wharfkit/antelope'
-import {SecretStore, StaleSecretStoreError, UNKNOWN_CHAIN_ID} from './secret-store'
+import {SecretStore, StaleSecretStoreError} from './secret-store'
 
-const CHAIN_A = '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4'
+const CHAIN_A = '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d'
 const CHAIN_B = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 const dirs: string[] = []
@@ -124,7 +124,7 @@ test('reset clears every stored secret regardless of chain and makes the store u
     store.close()
 })
 
-test('a legacy epoch-keyed store migrates existing rows to unknown-chain and refuses to use them', () => {
+test('a legacy epoch-keyed store migrates existing rows to the running chain and keeps them usable', () => {
     const dir = mkdtempSync(join(tmpdir(), 'oracle-store-legacy-'))
     dirs.push(dir)
     const path = join(dir, 'legacy.sqlite')
@@ -142,14 +142,18 @@ test('a legacy epoch-keyed store migrates existing rows to unknown-chain and ref
     legacy.close()
 
     const store = new SecretStore(path, CHAIN_A)
-    const description = store.describe()
-    expect(description.usable).toBe(false)
-    expect(description.storedChainIds).toEqual([UNKNOWN_CHAIN_ID])
-    expect(description.rows).toBe(1)
-    expect(() => store.getReveal(1)).toThrow(StaleSecretStoreError)
-
-    store.reset()
-    expect(store.describe().usable).toBe(true)
-    expect(store.getReveal(1)).toBeUndefined()
+    expect(store.describe()).toEqual({
+        chainId: CHAIN_A,
+        storedChainIds: [CHAIN_A],
+        usable: true,
+        rows: 1,
+    })
+    expect(store.getReveal(1)?.hexString).toBe('b'.repeat(64))
+    expect(store.getCommitBlock(1)).toBe(100)
+    expect(store.getOrCreate(1).commit.hexString).toBe('a'.repeat(64))
     store.close()
+
+    const reopened = new SecretStore(path, CHAIN_A)
+    expect(reopened.getReveal(1)?.hexString).toBe('b'.repeat(64))
+    reopened.close()
 })

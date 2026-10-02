@@ -1,7 +1,6 @@
 export {
     SecretStore,
     StaleSecretStoreError,
-    UNKNOWN_CHAIN_ID,
     type Secret,
     type SecretStoreDescription,
 } from './secret-store'
