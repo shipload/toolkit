@@ -1,0 +1,76 @@
+---
+"@shipload/cli": patch
+"@shipload/image-renderer": patch
+"@shipload/item-renderer": patch
+"@shipload/oracle": patch
+"@shipload/sdk": patch
+---
+
+- Register the T2 mutations
+- Move to Wharf 4.0.2
+- Move the toolkit to Wharf 4.0.1
+- Tag legacy oracle secrets with the running chain
+- Key the oracle secret store to the chain
+- Close an overdue epoch as the oracle with fresh entropy
+- Preflight platform fund collection in oracle maintenance
+- Format the oracle race classifier test
+- Treat a lost reveal race as a normal beacon outcome
+- Close an overdue epoch from the oracle beacon tick
+- Mirror the ranked ballot in the SDK and page the oracle settlement
+- Inline the base tsconfig into every package
+- Collect fund income and market fees on a slow interval
+- Collapse an all-idle maintenance pass into one log line
+- Log beacon ticks on change and show the next boundary
+- Gate the oracle maintenance sweeps on contract reads
+- Add the voteready ballot settlement tick
+- Add mintready, charterready and tend heartbeat ticks
+- Multi-oracle epoch system
+- Add script to preseed secret
+- Update Dockerfile
+- Migrated shipload/oracle into toolkit
+- Align the CLI shuttle listing with auto
+- Mirror the civic draw task
+- Update CLI help and README copy
+- Drop the guide line from the CLI README install steps
+- Point the CLI README at the install script
+- Decode every action in CLI signing summaries
+- Point init at account creation and auth create
+- Cover CLI transactions with the free resource provider
+- Point CLI signing links at the webapp sign route
+- Add claimcraft command
+- Show account and join status in player instead of the company name
+- Drop the company name from foundcompany and label unnamed joined companies
+- Add the play guide command and a secret-free init stub
+- Sign restricted actions without rewriting authorization
+- Recognize wildcard links without an action field
+- Add auth commands for a restricted signing key
+- Add claimstarter and play-guide help hints
+- Add refined and machined component kinds to the SDK, renderer, and CLI
+- Fold shuttle rejections by code and map every contract string
+- Mark unresolved shuttle options
+- List craft shuttle options in the CLI
+- Rename the civic shuttle parameter to shuttled_by
+- Accept a carrier for craft jobs in the CLI
+- Point the CLI tests at the tier 2 catalog
+- Resync the catalog and resolve capacity formulas from it
+- Restrict legacy Workshop cancellation
+- Name the far endpoint and carrier on shuttle holds
+- Match cancellation to the selected booking
+- Route job cancellation through the ship or cancelcraft from one helper
+- Book Workshop jobs without a socket and read the window receipt
+- Return the platform witness and game action from contribute
+- Point the task traits note at the moved header
+- Map missing inputs onto shuttle reasons
+- Mirror container Storage parity in the SDK
+- Read an entity's hull stats from its chain row
+- Register the five new T2 ship lines
+- Index upgrades under every donor hull
+- Group craft inputs by cargo ref in the projection
+- Mirror the unwrap transit cruise curve
+- Add recharge-pending shuttle reason
+- Mirror the 32-bit deposit tier roll
+- Mirror the grid-floored reserve regeneration
+- Weigh installed modules per unit in cargo mass
+- Mirror the landed travel mass and the load duration floor
+- Clamp the civic deposit window to the block second
+- Count cargo landing on the block second as available
