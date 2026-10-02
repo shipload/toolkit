@@ -26,6 +26,8 @@ Then:
 2. Set up a restricted signing key: `shiploadcli auth create <account>`, then sign the printed link with your wallet. To use a full key instead, set `actor` and `private_key` in the config at the printed path.
 3. Run: `shiploadcli whoami`
 
+To hand the game to an AI agent such as Claude Code or Codex, follow [Play with an AI agent](https://dev.shiploadgame.com/guide/agent). The agent reads its play guide from `shiploadcli guide`.
+
 ### From source
 
 ```bash

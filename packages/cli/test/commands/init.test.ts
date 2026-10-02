@@ -94,7 +94,7 @@ describe('initNextSteps', () => {
         const text = initNextSteps('/cfg/config.ini', 'https://dev.shiploadgame.com').join('\n')
         expect(text).toContain('/cfg/config.ini')
         expect(text).toContain('shiploadcli auth create <your account>')
-        expect(text).toContain('create one at https://dev.shiploadgame.com')
+        expect(text).toContain('create one at https://dev.shiploadgame.com/guide/agent')
         expect(text).not.toContain('private_key')
     })
 

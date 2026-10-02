@@ -81,7 +81,7 @@ export function initNextSteps(path: string, origin: string | null): string[] {
     if (origin) {
         lines.push(
             '',
-            `If you don't have an Antelope account, create one at ${origin}, then run auth create.`
+            `If you don't have an Antelope account, create one at ${origin}/guide/agent, then run auth create.`
         )
     }
     return lines
