@@ -82,6 +82,7 @@ export const TASK_POSITION_BOUND: ReadonlySet<number> = new Set<number>([
     TaskType.UPGRADE,
     TaskType.CIVIC_DEPOSIT,
     TaskType.CIVIC_WITHDRAW,
+    TaskType.CHARGE,
 ])
 
 export const TASK_MOBILITY: ReadonlySet<number> = new Set<number>([

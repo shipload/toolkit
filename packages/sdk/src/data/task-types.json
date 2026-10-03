@@ -128,7 +128,7 @@
     },
     {
       "type": 16,
-      "positionBound": false,
+      "positionBound": true,
       "mobility": false,
       "consumer": false,
       "isTerminal": false,
