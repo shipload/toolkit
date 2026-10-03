@@ -72,3 +72,28 @@ export function taskEnergyEffect(taskType: number): TaskEnergyEffect {
 export function taskEnergyDrawNeedsCoordinates(taskType: number): boolean {
     return taskType === TaskType.TRAVEL
 }
+
+export const TASK_POSITION_BOUND: ReadonlySet<number> = new Set<number>([
+    TaskType.LOAD,
+    TaskType.UNLOAD,
+    TaskType.GATHER,
+    TaskType.SHUTTLE,
+    TaskType.BUILDPLOT,
+    TaskType.UPGRADE,
+    TaskType.CIVIC_DEPOSIT,
+    TaskType.CIVIC_WITHDRAW,
+])
+
+export const TASK_MOBILITY: ReadonlySet<number> = new Set<number>([
+    TaskType.TRAVEL,
+    TaskType.WARP,
+    TaskType.TRANSIT,
+])
+
+export function isPositionBoundTask(taskType: number): boolean {
+    return TASK_POSITION_BOUND.has(taskType)
+}
+
+export function isMobilityTask(taskType: number): boolean {
+    return TASK_MOBILITY.has(taskType)
+}

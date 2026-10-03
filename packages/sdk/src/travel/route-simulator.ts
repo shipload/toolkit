@@ -1,5 +1,7 @@
 import type {UInt64Type} from '@wharfkit/antelope'
-import {PRECISION, TRAVEL_MAX_DURATION} from '../types'
+import {HoldKind, PRECISION, TaskType, TRAVEL_MAX_DURATION} from '../types'
+import {orderedTasks, type ScheduleData} from '../scheduling/schedule'
+import {isMobilityTask, isPositionBoundTask} from '../scheduling/task-effects'
 import {
     calc_energyusage,
     calc_group_flighttime,
@@ -35,6 +37,61 @@ export interface RouteSim {
     legs: RouteLegSim[]
     totalSeconds: number
     reachable: boolean
+}
+
+export interface RouteBarriers {
+    priorMobilityEnd: number
+    narrowBarrierEnd: number
+    allLanesEnd: number
+}
+
+const RECHARGE_BLOCKING_HOLDS: ReadonlySet<number> = new Set<number>([
+    HoldKind.BUILD,
+    HoldKind.UPGRADE,
+])
+
+function secondsFromNow(ms: number, nowMs: number): number {
+    return Math.max(0, Math.floor(ms / 1000) - Math.floor(nowMs / 1000))
+}
+
+function maxHoldUntilMs(entity: ScheduleData, kinds?: ReadonlySet<number>): number {
+    let latest = 0
+    for (const h of entity.holds ?? []) {
+        if (kinds && !kinds.has(h.kind.toNumber())) continue
+        const untilMs = Number(h.until.toMilliseconds())
+        if (untilMs > latest) latest = untilMs
+    }
+    return latest
+}
+
+// Mirrors task_barrier in contracts/src/server/include/server/schedule/placement.hpp.
+export function routeBarriers(entity: ScheduleData, nowMs: number): RouteBarriers {
+    let allLanesEndMs = 0
+    let recoverMobilityEndMs = 0
+    let recoverPositionEndMs = 0
+
+    for (const {task, completesAt} of orderedTasks(entity)) {
+        const ms = completesAt.getTime()
+        if (ms > allLanesEndMs) allLanesEndMs = ms
+
+        const type = task.type.toNumber()
+        const isRecharge = type === TaskType.RECHARGE
+        if (isRecharge || isMobilityTask(type)) {
+            if (ms > recoverMobilityEndMs) recoverMobilityEndMs = ms
+        }
+        if (isRecharge || isPositionBoundTask(type)) {
+            if (ms > recoverPositionEndMs) recoverPositionEndMs = ms
+        }
+    }
+
+    const allHoldUntilMs = maxHoldUntilMs(entity)
+    const rechargeHoldUntilMs = maxHoldUntilMs(entity, RECHARGE_BLOCKING_HOLDS)
+
+    return {
+        priorMobilityEnd: secondsFromNow(recoverMobilityEndMs, nowMs),
+        narrowBarrierEnd: secondsFromNow(Math.max(recoverPositionEndMs, allHoldUntilMs), nowMs),
+        allLanesEnd: secondsFromNow(Math.max(allLanesEndMs, rechargeHoldUntilMs), nowMs),
+    }
 }
 
 export function simulateRoute(

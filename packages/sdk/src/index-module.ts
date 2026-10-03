@@ -293,8 +293,13 @@ export type {
 export {computePerLegReach, computeGroupPerLegReach} from './travel/reach'
 export type {ReachStats} from './travel/reach'
 
-export {simulateRoute} from './travel/route-simulator'
-export type {RouteMoverInput, RouteLegSim, RouteSim} from './travel/route-simulator'
+export {routeBarriers, simulateRoute} from './travel/route-simulator'
+export type {
+    RouteBarriers,
+    RouteMoverInput,
+    RouteLegSim,
+    RouteSim,
+} from './travel/route-simulator'
 
 export {
     planRouteWithRetry,
