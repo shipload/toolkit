@@ -34,6 +34,7 @@ import {hydrateEntityLanes} from '../entity/hydrate'
 import {craftCargoOwnership, isHostedCivicLeg} from './availability'
 import * as schedule from './schedule'
 import type {ScheduleData} from './schedule'
+import {taskEnergyEffect} from './task-effects'
 
 export interface ProjectedEntity {
     location: Coordinates
@@ -367,20 +368,26 @@ function applyEnergyCost(projected: ProjectedEntity, task: ServerContract.Types.
         : UInt32.from(0)
 }
 
+function applyEnergyEffect(projected: ProjectedEntity, task: ServerContract.Types.task): void {
+    if (taskEnergyEffect(task.type.toNumber()) === 'draws') {
+        applyEnergyCost(projected, task)
+    }
+}
+
 function applyGatherTask(
     projected: ProjectedEntity,
     task: ServerContract.Types.task,
     options: {complete: boolean}
 ): void {
     if (!options.complete) return
-    applyEnergyCost(projected, task)
+    applyEnergyEffect(projected, task)
     if (task.couplings.length === 0) {
         applyAddCargoTask(projected, task)
     }
 }
 
 function applyCraftTask(projected: ProjectedEntity, task: ServerContract.Types.task): void {
-    applyEnergyCost(projected, task)
+    applyEnergyEffect(projected, task)
     if (task.cargo.length === 0) return
 
     const {clustered, ownOutput} = craftCargoOwnership(task)
@@ -415,14 +422,16 @@ function applyTask(projected: ProjectedEntity, task: ServerContract.Types.task):
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.CIVIC_DEPOSIT:
-            applyEnergyCost(projected, task)
+            applyEnergyEffect(projected, task)
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.CIVIC_DRAW:
-            applyEnergyCost(projected, task)
+        case TaskType.CHARGE:
+        case TaskType.BUILDPLOT:
+            applyEnergyEffect(projected, task)
             break
         case TaskType.UPGRADE:
-            applyEnergyCost(projected, task)
+            applyEnergyEffect(projected, task)
             applyRemoveCargoTask(projected, task)
             break
         case TaskType.GATHER:
