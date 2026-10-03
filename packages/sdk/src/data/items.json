@@ -524,37 +524,37 @@
   },
   {
     "id": 10210,
-    "mass": 16000,
+    "mass": 32000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10211,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10212,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10213,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10214,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
   {
     "id": 10215,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
@@ -566,7 +566,7 @@
   },
   {
     "id": 10218,
-    "mass": 24000,
+    "mass": 44000,
     "type": "entity",
     "tier": 1
   },
@@ -744,109 +744,109 @@
   },
   {
     "id": 11212,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11213,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11214,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11215,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11216,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11217,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11218,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11219,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11220,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11221,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11222,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11223,
-    "mass": 43200,
+    "mass": 60800,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11224,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11225,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11226,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11227,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11228,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   },
   {
     "id": 11229,
-    "mass": 57600,
+    "mass": 77600,
     "type": "entity",
     "tier": 2
   }

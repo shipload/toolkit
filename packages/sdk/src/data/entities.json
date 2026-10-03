@@ -159,7 +159,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10212,
@@ -180,7 +180,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10213,
@@ -201,7 +201,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10214,
@@ -222,7 +222,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10215,
@@ -243,7 +243,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10216,
@@ -269,7 +269,7 @@
         "maxTier": 1
       }
     ],
-    "baseHullmass": 40000
+    "baseHullmass": 44000
   },
   {
     "entityItemId": 10219,
@@ -415,7 +415,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11213,
@@ -441,7 +441,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11214,
@@ -467,7 +467,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11215,
@@ -488,7 +488,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11216,
@@ -514,7 +514,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11217,
@@ -535,7 +535,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11218,
@@ -561,7 +561,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11219,
@@ -582,7 +582,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11220,
@@ -608,7 +608,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11221,
@@ -629,7 +629,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11222,
@@ -655,7 +655,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11223,
@@ -676,7 +676,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 59200
+    "baseHullmass": 60800
   },
   {
     "entityItemId": 11224,
@@ -702,7 +702,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11225,
@@ -728,7 +728,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11226,
@@ -754,7 +754,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11227,
@@ -780,7 +780,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11228,
@@ -806,7 +806,7 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   },
   {
     "entityItemId": 11229,
@@ -832,6 +832,6 @@
         "maxTier": 2
       }
     ],
-    "baseHullmass": 73600
+    "baseHullmass": 77600
   }
 ]

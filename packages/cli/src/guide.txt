@@ -95,9 +95,9 @@ Before acting, answer these in order:
 
 A fresh account owns one Roustabout: a ship with a generator, an engine, and a gatherer, and no crafting module. Suppose the player's goal is a second ship.
 
-`recipe` shows a Roustabout needs 200 each of five refined components (Plate, Ceramic, Polymer, Plasma Cell, Sensor), and each component takes 10 t of one resource. That is 2,000 t each of Ore, Regolith, Biomass, Gas, and Crystal. The ship has no crafting module, so the components come from booking craft jobs at a public Workshop.
+`recipe` shows a Roustabout needs 150 each of five refined components (Plate, Ceramic, Polymer, Plasma Cell, Sensor), and each component takes 10 t of one resource. That is 1,500 t each of Ore, Regolith, Biomass, Gas, and Crystal. The ship has no crafting module, so the components come from booking craft jobs at a public Workshop.
 
-The binding constraint is haul: the ship carries far less than 10,000 t, so the route is many gather trips between strata and the Workshop. Good choices are strata of each resource close to the Workshop and to each other, gathered in an order that keeps the ship full on every return leg, with components booked in batches as each resource arrives. Once the second ship exists, two entities gather in parallel and the next goal gets cheaper.
+The binding constraint is haul: the ship carries far less than 7,500 t, so the route is many gather trips between strata and the Workshop. Good choices are strata of each resource close to the Workshop and to each other, gathered in an order that keeps the ship full on every return leg, with components booked in batches as each resource arrives. Once the second ship exists, two entities gather in parallel and the next goal gets cheaper.
 
 A different goal (the best possible gatherer, a warehouse in a rich region) leads to a different route through the same model.
 

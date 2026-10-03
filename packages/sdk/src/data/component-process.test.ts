@@ -65,22 +65,22 @@ describe('completeComponentSet', () => {
         expect(completeComponentSet(inputsOf(ITEM_ROUSTABOUT_T1A_PACKED))).toEqual({
             process: 'refined',
             tier: 1,
-            quantity: 200,
+            quantity: 150,
         })
         expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T1A_PACKED))).toEqual({
             process: 'machined',
             tier: 1,
-            quantity: 100,
+            quantity: 150,
         })
         expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T2A_PACKED))).toEqual({
             process: 'refined',
             tier: 2,
-            quantity: 200,
+            quantity: 175,
         })
         expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T2B_PACKED))).toEqual({
             process: 'machined',
             tier: 2,
-            quantity: 150,
+            quantity: 175,
         })
     })
 

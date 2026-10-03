@@ -863,27 +863,27 @@
   },
   {
     "outputItemId": 10210,
-    "outputMass": 16000,
+    "outputMass": 32000,
     "inputs": [
       {
         "itemId": 10001,
-        "quantity": 200
+        "quantity": 150
       },
       {
         "itemId": 10008,
-        "quantity": 200
+        "quantity": 150
       },
       {
         "itemId": 10007,
-        "quantity": 200
+        "quantity": 150
       },
       {
         "itemId": 10003,
-        "quantity": 200
+        "quantity": 150
       },
       {
         "itemId": 10006,
-        "quantity": 200
+        "quantity": 150
       }
     ],
     "statSlots": [
@@ -932,27 +932,27 @@
   },
   {
     "outputItemId": 10211,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -1028,27 +1028,27 @@
   },
   {
     "outputItemId": 10212,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -1124,27 +1124,27 @@
   },
   {
     "outputItemId": 10213,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -1220,27 +1220,27 @@
   },
   {
     "outputItemId": 10214,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -1316,27 +1316,27 @@
   },
   {
     "outputItemId": 10215,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -1412,27 +1412,27 @@
   },
   {
     "outputItemId": 10218,
-    "outputMass": 24000,
+    "outputMass": 44000,
     "inputs": [
       {
         "itemId": 10005,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10002,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10010,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10009,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10004,
-        "quantity": 100
+        "quantity": 150
       },
       {
         "itemId": 10210,
@@ -2670,27 +2670,27 @@
   },
   {
     "outputItemId": 11212,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10211,
@@ -2766,27 +2766,27 @@
   },
   {
     "outputItemId": 11213,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11212,
@@ -2862,27 +2862,27 @@
   },
   {
     "outputItemId": 11214,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11212,
@@ -2959,27 +2959,27 @@
   },
   {
     "outputItemId": 11215,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10212,
@@ -3055,27 +3055,27 @@
   },
   {
     "outputItemId": 11216,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11215,
@@ -3151,27 +3151,27 @@
   },
   {
     "outputItemId": 11217,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10213,
@@ -3247,27 +3247,27 @@
   },
   {
     "outputItemId": 11218,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11217,
@@ -3343,27 +3343,27 @@
   },
   {
     "outputItemId": 11219,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10214,
@@ -3439,27 +3439,27 @@
   },
   {
     "outputItemId": 11220,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11219,
@@ -3535,27 +3535,27 @@
   },
   {
     "outputItemId": 11221,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10215,
@@ -3631,27 +3631,27 @@
   },
   {
     "outputItemId": 11222,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11221,
@@ -3727,27 +3727,27 @@
   },
   {
     "outputItemId": 11223,
-    "outputMass": 43200,
+    "outputMass": 60800,
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11008,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11007,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11003,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 11006,
-        "quantity": 200
+        "quantity": 175
       },
       {
         "itemId": 10218,
@@ -3823,27 +3823,27 @@
   },
   {
     "outputItemId": 11224,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11223,
@@ -3919,27 +3919,27 @@
   },
   {
     "outputItemId": 11225,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11212,
@@ -4016,27 +4016,27 @@
   },
   {
     "outputItemId": 11226,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11215,
@@ -4113,27 +4113,27 @@
   },
   {
     "outputItemId": 11227,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11215,
@@ -4210,27 +4210,27 @@
   },
   {
     "outputItemId": 11228,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11223,
@@ -4307,27 +4307,27 @@
   },
   {
     "outputItemId": 11229,
-    "outputMass": 57600,
+    "outputMass": 77600,
     "inputs": [
       {
         "itemId": 11005,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11002,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11010,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11009,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11004,
-        "quantity": 150
+        "quantity": 175
       },
       {
         "itemId": 11217,
