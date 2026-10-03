@@ -176,19 +176,19 @@
       "itemId": 10208,
       "kind": "workshop",
       "displayLabel": "",
-      "baseCapacityFn": "workshop"
+      "baseCapacityFn": ""
     },
     {
       "itemId": 10209,
       "kind": "builddock",
       "displayLabel": "",
-      "baseCapacityFn": "structure"
+      "baseCapacityFn": ""
     },
     {
       "itemId": 10216,
       "kind": "nexus",
       "displayLabel": "",
-      "baseCapacityFn": "structure"
+      "baseCapacityFn": ""
     },
     {
       "itemId": 11212,

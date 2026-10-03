@@ -1,13 +1,6 @@
 import {getBaseCapacityFnName} from '../data/kind-registry'
 
-export const CAPACITY_FN_NAMES = [
-    'ship',
-    'warehouse',
-    'depot',
-    'container',
-    'structure',
-    'workshop',
-] as const
+export const CAPACITY_FN_NAMES = ['ship', 'warehouse', 'depot', 'container', 'structure'] as const
 
 export type CapacityFnName = (typeof CAPACITY_FN_NAMES)[number]
 

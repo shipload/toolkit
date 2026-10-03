@@ -237,7 +237,6 @@ import {
     ITEM_DEPOT_T1_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_WAREHOUSE_T2_PACKED,
-    ITEM_WORKSHOP_T1_PACKED,
 } from '../data/item-ids'
 import {
     getModuleCapabilityType,
@@ -320,7 +319,6 @@ const CAPACITY_FN_BY_NAME: Partial<
 > = {
     warehouse: (stats) => computeWarehouseHullCapabilities(stats).capacity,
     depot: (stats) => computeDepotHullCapabilities(stats).capacity,
-    workshop: (stats) => computeWorkshopHullCapabilities(stats).capacity,
     container: (stats) => computeContainerCapabilities(stats).capacity,
     structure: computeStructureBaseCapacity,
 }
@@ -380,18 +378,6 @@ export function computeDepotHullCapabilities(stats: Record<string, number>): {
     return {
         hullmass: computeBaseHullmass(ITEM_DEPOT_T1_PACKED, stats),
         capacity: Math.floor(500000 * 6 ** exponent),
-    }
-}
-
-export function computeWorkshopHullCapabilities(stats: Record<string, number>): {
-    hullmass: number
-    capacity: number
-} {
-    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
-    const exponent = statSum / 1998.0
-    return {
-        hullmass: computeBaseHullmass(ITEM_WORKSHOP_T1_PACKED, stats),
-        capacity: Math.floor(50000 * 6 ** exponent),
     }
 }
 

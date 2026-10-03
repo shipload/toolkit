@@ -118,8 +118,8 @@ describe('entityDisplayName (roster batch 4)', () => {
 describe('computeBaseCapacity (kind-driven coverage)', () => {
     const stats = {strength: 100, hardness: 100, cohesion: 100, density: 100}
 
-    // Hub, Nexus and Plot carry no capacity function in the C++ kind registry.
-    const NO_CAPACITY_KINDS = new Set(['hub', 'nexus', 'plot'])
+    // Hub, Plot and the civic Workshop, Construction Dock and Nexus carry no capacity function in the C++ kind registry.
+    const NO_CAPACITY_KINDS = new Set(['hub', 'nexus', 'plot', 'workshop', 'builddock'])
 
     test('every catalog entity item with a capacity kind returns a positive capacity', () => {
         const items = getEntityItems()
