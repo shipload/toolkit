@@ -314,7 +314,6 @@ export type {
 } from './scheduling/schedule'
 export {
     candidateLaneCompletesAt,
-    candidateCivicDepositWindow,
     laneKeyForModule,
     rawScheduleEnd,
     resolveLaneGatherer,

@@ -1,4 +1,4 @@
-import type {TimePoint} from '@wharfkit/antelope'
+import type {TimePoint, UInt64} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 import {ENTITY_CONSTRUCTION_DOCK} from '../data/kind-registry'
 import {HoldKind, TaskType} from '../types'
@@ -13,9 +13,12 @@ export const LANE_MOBILITY = 0
 export const LANE_BARRIER = 255
 
 export interface ScheduleData {
+    id?: {toString(): string}
     lanes?: Lane[]
     holds?: Hold[]
 }
+
+export type ResolveCounterpartLookup = (entityId: UInt64) => ScheduleData | undefined
 
 export interface AnchoredScheduleData extends ScheduleData {
     projected_at?: TimePoint
@@ -72,6 +75,25 @@ export function isIdle(entity: ScheduleData): boolean {
 // Mirrors is_capper_task_type: demolish/undeploy cap a plan — no further appends once queued.
 export function isCapperTaskType(taskType: number): boolean {
     return taskType === TaskType.UNDEPLOY || taskType === TaskType.DEMOLISH
+}
+
+// Mirrors lane_front_complete's self-subject undeploy refusal.
+function isSelfUndeployMirror(task: Task, selfId: {toString(): string}): boolean {
+    return (
+        task.type.toNumber() === TaskType.UNDEPLOY &&
+        task.subject !== undefined &&
+        task.subject.entity_id.toString() === selfId.toString()
+    )
+}
+
+// Mirrors target_has_only_mirror_front.
+function targetHasOnlyMirrorFront(target: ScheduleData, targetId: {toString(): string}): boolean {
+    for (const l of target.lanes ?? []) {
+        const realTasks = l.schedule.tasks.filter((t) => t.type.toNumber() !== TaskType.IDLE)
+        if (realTasks.length === 0) continue
+        if (!isSelfUndeployMirror(realTasks[0], targetId) || realTasks.length > 1) return false
+    }
+    return true
 }
 
 export function hasPendingCapper(entity: ScheduleData): boolean {
@@ -141,12 +163,32 @@ export function scheduleComplete(entity: ScheduleData, now: Date): boolean {
     return remaining === 0
 }
 
-// Mirrors lane_front_complete && !capper_front_gated for own-entity holds (workshop/undeploy-target gates need cross-entity context this ScheduleData lacks).
-export function hasResolvable(entity: ScheduleData, now: Date): boolean {
+// Mirrors lane_front_complete && !capper_front_gated; the host-side target gate needs lookupCounterpart.
+export function hasResolvable(
+    entity: ScheduleData,
+    now: Date,
+    lookupCounterpart?: ResolveCounterpartLookup
+): boolean {
     for (const l of entity.lanes ?? []) {
-        if (!core.laneTaskComplete(l.schedule, 0, now)) continue
         const front = l.schedule.tasks[0]
-        if (isCapperTaskType(front.type.toNumber()) && hasHolds(entity)) continue
+        if (!front) continue
+        if (entity.id !== undefined && isSelfUndeployMirror(front, entity.id)) continue
+        if (!core.laneTaskComplete(l.schedule, 0, now)) continue
+        if (isCapperTaskType(front.type.toNumber())) {
+            if (hasHolds(entity)) continue
+            if (
+                front.type.toNumber() === TaskType.UNDEPLOY &&
+                front.subject !== undefined &&
+                lookupCounterpart &&
+                (entity.id === undefined || front.subject.entity_id.toString() !== entity.id.toString())
+            ) {
+                const target = lookupCounterpart(front.subject.entity_id)
+                if (target) {
+                    if (hasHolds(target)) continue
+                    if (!targetHasOnlyMirrorFront(target, front.subject.entity_id)) continue
+                }
+            }
+        }
         return true
     }
     return hasFinishedCivicUpgrade(entity, now)
@@ -222,6 +264,8 @@ export function resolveOrder(entity: ScheduleData, now: Date): ResolvedEvent[] {
     for (const l of entity.lanes ?? []) {
         const laneKey = l.lane_key.toNumber()
         const startedMs = l.schedule.started.toDate().getTime()
+        const front = l.schedule.tasks[0]
+        if (front && entity.id !== undefined && isSelfUndeployMirror(front, entity.id)) continue
         let endSec = 0
         for (let i = 0; i < l.schedule.tasks.length; i++) {
             const task = l.schedule.tasks[i]

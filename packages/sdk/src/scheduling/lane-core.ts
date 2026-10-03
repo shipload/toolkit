@@ -87,7 +87,7 @@ export function laneTaskRemaining(schedule: Schedule, index: number, now: Date):
 export function laneTaskComplete(schedule: Schedule, index: number, now: Date): boolean {
     if (index < 0 || index >= schedule.tasks.length) return false
     const taskDuration = schedule.tasks[index].duration.toNumber()
-    return laneTaskElapsed(schedule, index, now) >= taskDuration
+    return laneRawElapsed(schedule, now) >= laneTaskStartTime(schedule, index) + taskDuration
 }
 
 export function laneTaskInProgress(schedule: Schedule, index: number, now: Date): boolean {
