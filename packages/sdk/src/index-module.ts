@@ -394,13 +394,21 @@ export type {
 export {composeIdleResolve} from './scheduling/idle-resolve'
 export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resolve'
 
-export {cancelEligibility, CancelBlockReason} from './scheduling/cancel'
+export {
+    cancelEligibility,
+    CancelBlockReason,
+    CANCEL_REFUSAL_REASONS,
+    cancelRefusalMessage,
+} from './scheduling/cancel'
 export type {
     CancelPlan,
     CancelEffects,
     CancelRefund,
     CancelReleasedHold,
     CancelEligibilityInput,
+    CancelNeeds,
+    CancelHubSite,
+    CancelLookup,
 } from './scheduling/cancel'
 
 export {

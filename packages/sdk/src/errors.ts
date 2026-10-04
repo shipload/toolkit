@@ -54,8 +54,43 @@ export const GROUP_NOT_FOUND = 'Entity group not found.'
 export const GROUP_DUPLICATE_ENTITY = 'Duplicate entity in group.'
 export const GROUP_HAUL_CAPACITY_EXCEEDED =
     'Group travel requires sufficient hauler capacity for all non-self-propelled entities.'
-export const CANCEL_CONTAINS_GROUPED_TASK =
-    'Cannot cancel range containing grouped task - cancel non-grouped tasks first.'
+export const CANCEL_GROUP_IN_RANGE =
+    'Cannot cancel a grouped task together with other tasks; cancel it on its own with a count of 1.'
+export const CANCEL_GROUP_NOT_AT_TAIL =
+    'Cannot cancel: another group member has tasks queued after its grouped task; cancel those first.'
+export const CANCEL_GROUP_BELOW_LATER_TASK =
+    'Cannot cancel: another group member has tasks after the grouped task on this worker lane; cancel those first.'
+export const PLOT_CANCEL_NOT_ALLOWED =
+    'Plots have no schedule to cancel; cancel the builder instead.'
+export const CANCEL_LANE_NOT_FOUND = 'No such worker lane to cancel from.'
+export const CANCEL_TASK_COMPLETE = 'cannot cancel completed task'
+export const CANCEL_TASK_NEVER = 'Cannot cancel: task is non-cancelable.'
+export const CANCEL_WOULD_STRAND = 'Cannot cancel: would strand a dependent task.'
+export const CANCEL_WOULD_OVERFILL = 'Cannot cancel: returning cargo would overfill the giver.'
+export const CANCEL_GIVER_CAPPED =
+    'cannot cancel: the giver has a pending plan-capper; let the pull resolve or cancel the capper first'
+export const CANCEL_PAIRED_NOT_FOUND = 'Paired task missing on counterparty schedule.'
+export const CANCEL_CLUSTER_CANNOT_ABSORB =
+    'clustercraft cancel: cluster cannot absorb returned inputs'
+
+// Every refusal the cancel action can raise for player-reachable state; cancel.test.ts maps each to a CancelBlockReason.
+export const CANCEL_REFUSALS: readonly string[] = [
+    PLOT_CANCEL_NOT_ALLOWED,
+    CANCEL_LANE_NOT_FOUND,
+    SHIP_NO_TASKS_TO_CANCEL,
+    CANCEL_GROUP_IN_RANGE,
+    GROUP_NOT_FOUND,
+    CANCEL_GROUP_NOT_AT_TAIL,
+    CANCEL_GROUP_BELOW_LATER_TASK,
+    CANCEL_TASK_COMPLETE,
+    CANCEL_TASK_NEVER,
+    SHIP_CANNOT_CANCEL_TASK,
+    CANCEL_WOULD_STRAND,
+    CANCEL_GIVER_CAPPED,
+    CANCEL_WOULD_OVERFILL,
+    CANCEL_PAIRED_NOT_FOUND,
+    CANCEL_CLUSTER_CANNOT_ABSORB,
+]
 export const WOULD_STRAND = 'Cancelling this would leave a later task without the cargo it needs.'
 export const WOULD_OVERFILL = 'Cancelling this would overfill the other entity with returned cargo.'
 export const WARP_NO_CAPABILITY = 'Entity does not have warp capability.'

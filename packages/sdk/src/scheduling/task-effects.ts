@@ -91,6 +91,18 @@ export const TASK_MOBILITY: ReadonlySet<number> = new Set<number>([
     TaskType.TRANSIT,
 ])
 
+export const TASK_CONSUMER: ReadonlySet<number> = new Set<number>([
+    TaskType.UNLOAD,
+    TaskType.CRAFT,
+    TaskType.UPGRADE,
+    TaskType.CONTRIBUTE,
+    TaskType.CIVIC_DEPOSIT,
+])
+
+export function isConsumerTask(taskType: number): boolean {
+    return TASK_CONSUMER.has(taskType)
+}
+
 export function isPositionBoundTask(taskType: number): boolean {
     return TASK_POSITION_BOUND.has(taskType)
 }

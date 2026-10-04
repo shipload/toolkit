@@ -1,18 +1,30 @@
 import {describe, expect, test} from 'bun:test'
 import {ServerContract, TaskType, TaskCancelable, HoldKind} from '../index-module'
-import {cancelEligibility, CancelBlockReason} from './cancel'
-import type {IncomingSource} from './availability'
+import {
+    cancelEligibility,
+    CancelBlockReason,
+    CANCEL_REFUSAL_REASONS,
+    cancelRefusalMessage,
+} from './cancel'
+import {CANCEL_REFUSALS} from '../errors'
 
 const T0 = '2026-06-19T00:00:00'
 
-function task(over: Partial<{type: number; duration: number; cancelable: number; group: number}>) {
+function task(
+    over: Partial<{
+        type: number
+        duration: number
+        cancelable: number
+        group: number
+    }>
+) {
     return ServerContract.Types.task.from({
         type: over.type ?? TaskType.TRAVEL,
         duration: over.duration ?? 100,
         cancelable: over.cancelable ?? TaskCancelable.BEFORE_START,
         cargo: [],
         couplings: [],
-        ...(over.group ? {entitygroup: over.group} : {}),
+        ...(over.group !== undefined ? {entitygroup: over.group} : {}),
     })
 }
 
@@ -90,17 +102,38 @@ describe('cancelEligibility — local gates', () => {
     })
 })
 
-describe('cancelEligibility — linked tasks', () => {
+describe('cancelEligibility — grouped tasks', () => {
     const now = new Date('2026-06-19T00:00:10.000Z')
-    test('range containing a linked (entitygroup) task is blocked', () => {
+    test('a range of more than one task containing a grouped task is refused', () => {
         const e = entity([task({}), task({group: 42}), task({})])
         expect(cancelEligibility(e, 0, 0, {now}).blockedReason).toBe(
-            CancelBlockReason.CONTAINS_LINKED_TASK
+            CancelBlockReason.GROUP_IN_RANGE
         )
     })
-    test('task after the linked one cancels normally', () => {
+    test('task after the grouped one cancels normally', () => {
         const e = entity([task({}), task({group: 42}), task({})])
         expect(cancelEligibility(e, 0, 2, {now}).ok).toBe(true)
+    })
+    test('a grouped tail needs the group participants', () => {
+        const e = entity([task({}), task({group: 42})])
+        const plan = cancelEligibility(e, 0, 1, {now})
+        expect(plan.blockedReason).toBe(CancelBlockReason.NEEDS)
+        expect(plan.needs?.groups).toEqual(['42'])
+    })
+    test('a grouped tail whose only participant is the entity cancels alone', () => {
+        const e = entity([task({}), task({group: 42})])
+        const plan = cancelEligibility(e, 0, 1, {
+            now,
+            groupParticipants: new Map([['42', ['1']]]),
+        })
+        expect(plan.ok).toBe(true)
+        expect(plan.cascade).toEqual([])
+    })
+    test('group id 0 is a group', () => {
+        const e = entity([task({}), task({group: 0}), task({})])
+        expect(cancelEligibility(e, 0, 0, {now}).blockedReason).toBe(
+            CancelBlockReason.GROUP_IN_RANGE
+        )
     })
 })
 
@@ -111,7 +144,7 @@ function loadTask(giverType: string, giverId: number, holdId: number, qty: numbe
         type: TaskType.LOAD,
         duration: 100,
         cancelable: TaskCancelable.ALWAYS,
-        cargo: [{item_id: 7, stats: 0, modules: [], quantity: qty}],
+        cargo: [{item_id: 101, stats: 0, modules: [], quantity: qty}],
         couplings: [
             {
                 counterpart: {entity_type: giverType, entity_id: giverId},
@@ -122,12 +155,47 @@ function loadTask(giverType: string, giverId: number, holdId: number, qty: numbe
     })
 }
 
+function giverSix() {
+    const giver = ServerContract.Types.entity_info.from({
+        projected_at: 0,
+        type: 'warehouse',
+        id: 6,
+        owner: 'player.gm',
+        entity_name: 'Warehouse 6',
+        coordinates: {x: 0, y: 0, z: 0},
+        item_id: 1,
+        cargomass: 0,
+        capacity: 1_000_000,
+        cargo: [],
+        modules: [],
+        lanes: [],
+        gatherer_lanes: [],
+        crafter_lanes: [],
+        builder_lanes: [],
+        loader_lanes: [],
+        holds: [
+            {
+                id: 1,
+                kind: HOLD_PULL,
+                counterpart: {entity_type: 'ship', entity_id: 1},
+                until: T0,
+                incoming_mass: 0,
+            },
+        ],
+    })
+    return new Map([['6', giver]])
+}
+
 describe('cancelEligibility — effects', () => {
     const now = new Date('2026-06-19T00:00:10.000Z')
 
     test('abandonsRunning true when the front of range is a running ALWAYS task', () => {
         const e = entity([
-            task({cancelable: TaskCancelable.ALWAYS, type: TaskType.RECHARGE, duration: 100}),
+            task({
+                cancelable: TaskCancelable.ALWAYS,
+                type: TaskType.RECHARGE,
+                duration: 100,
+            }),
         ])
         expect(cancelEligibility(e, 0, 0, {now}).effects.abandonsRunning).toBe(true)
     })
@@ -171,17 +239,12 @@ describe('cancelEligibility — effects', () => {
             crafter_lanes: [],
             builder_lanes: [],
             loader_lanes: [],
-            holds: [
-                {
-                    id: 1,
-                    kind: HOLD_PULL,
-                    counterpart: {entity_type: 'warehouse', entity_id: 6},
-                    until: T0,
-                    incoming_mass: 0,
-                },
-            ],
+            holds: [],
         })
-        const plan = cancelEligibility(e, 0, 0, {now: upcoming})
+        const plan = cancelEligibility(e, 0, 0, {
+            now: upcoming,
+            counterparts: giverSix(),
+        })
         expect(plan.effects.refunds[0]?.giver.entity_id.toNumber()).toBe(6)
         expect(plan.effects.refunds[0]?.cargo[0].quantity.toNumber()).toBe(4)
     })
@@ -205,17 +268,12 @@ describe('cancelEligibility — effects', () => {
             crafter_lanes: [],
             builder_lanes: [],
             loader_lanes: [],
-            holds: [
-                {
-                    id: 1,
-                    kind: HOLD_PULL,
-                    counterpart: {entity_type: 'warehouse', entity_id: 6},
-                    until: T0,
-                    incoming_mass: 0,
-                },
-            ],
+            holds: [],
         })
-        const plan = cancelEligibility(e, 0, 0, {now: upcoming})
+        const plan = cancelEligibility(e, 0, 0, {
+            now: upcoming,
+            counterparts: giverSix(),
+        })
         expect(plan.effects.releasedHolds[0]?.kind).toBe(1)
         expect(plan.effects.releasedHolds[0]?.counterpart.entity_id.toNumber()).toBe(6)
     })
@@ -238,7 +296,12 @@ describe('cancelEligibility — effects', () => {
                     lane_key: 0,
                     schedule: {
                         started: T0,
-                        tasks: [task({cancelable: TaskCancelable.ALWAYS, type: TaskType.LOAD})],
+                        tasks: [
+                            task({
+                                cancelable: TaskCancelable.ALWAYS,
+                                type: TaskType.LOAD,
+                            }),
+                        ],
                     },
                 },
             ],
@@ -262,7 +325,7 @@ describe('cancelEligibility — feasibility', () => {
             type: TaskType.LOAD,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
-            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            cargo: [{item_id: 101, stats: 0, modules: [], quantity: 2}],
             couplings: [],
         })
         const consumer = ServerContract.Types.task.from({
@@ -270,8 +333,8 @@ describe('cancelEligibility — feasibility', () => {
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [
-                {item_id: 7, stats: 0, modules: [], quantity: 2},
-                {item_id: 9, stats: 0, modules: [], quantity: 1},
+                {item_id: 101, stats: 0, modules: [], quantity: 2},
+                {item_id: 10001, stats: 0, modules: [], quantity: 1},
             ],
             couplings: [],
         })
@@ -284,16 +347,23 @@ describe('cancelEligibility — feasibility', () => {
             coordinates: {x: 0, y: 0, z: 0},
             item_id: 1,
             cargomass: 0,
+            capacity: 1_000_000,
             cargo: [],
             modules: [],
             lanes: [
                 {
                     lane_key: 1,
-                    schedule: {started: '2026-06-19T00:00:00', tasks: [producer]},
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [producer],
+                    },
                 },
                 {
                     lane_key: 2,
-                    schedule: {started: '2026-06-19T00:00:00', tasks: [consumer]},
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [consumer],
+                    },
                 },
             ],
             gatherer_lanes: [],
@@ -312,7 +382,7 @@ describe('cancelEligibility — feasibility', () => {
             type: TaskType.LOAD,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
-            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            cargo: [{item_id: 101, stats: 0, modules: [], quantity: 2}],
             couplings: [],
         })
         const independent = ServerContract.Types.task.from({
@@ -331,11 +401,24 @@ describe('cancelEligibility — feasibility', () => {
             coordinates: {x: 0, y: 0, z: 0},
             item_id: 1,
             cargomass: 0,
+            capacity: 1_000_000,
             cargo: [],
             modules: [],
             lanes: [
-                {lane_key: 1, schedule: {started: '2026-06-19T00:00:00', tasks: [producer]}},
-                {lane_key: 2, schedule: {started: '2026-06-19T00:00:00', tasks: [independent]}},
+                {
+                    lane_key: 1,
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [producer],
+                    },
+                },
+                {
+                    lane_key: 2,
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [independent],
+                    },
+                },
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
@@ -347,7 +430,12 @@ describe('cancelEligibility — feasibility', () => {
     })
 
     test('WOULD_STRAND when cancelling producer of a MODULAR cargo the consumer needs', () => {
-        const moduledCargo = {item_id: 7, stats: 0, modules: [{type: 3}], quantity: 2}
+        const moduledCargo = {
+            item_id: 101,
+            stats: 0,
+            modules: [{type: 3}],
+            quantity: 2,
+        }
         const producer = ServerContract.Types.task.from({
             type: TaskType.LOAD,
             duration: 50,
@@ -359,7 +447,7 @@ describe('cancelEligibility — feasibility', () => {
             type: TaskType.CRAFT,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
-            cargo: [moduledCargo, {item_id: 9, stats: 0, modules: [], quantity: 1}],
+            cargo: [moduledCargo, {item_id: 10001, stats: 0, modules: [], quantity: 1}],
             couplings: [],
         })
         const e = ServerContract.Types.entity_info.from({
@@ -371,11 +459,24 @@ describe('cancelEligibility — feasibility', () => {
             coordinates: {x: 0, y: 0, z: 0},
             item_id: 1,
             cargomass: 0,
+            capacity: 1_000_000,
             cargo: [],
             modules: [],
             lanes: [
-                {lane_key: 1, schedule: {started: '2026-06-19T00:00:00', tasks: [producer]}},
-                {lane_key: 2, schedule: {started: '2026-06-19T00:00:00', tasks: [consumer]}},
+                {
+                    lane_key: 1,
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [producer],
+                    },
+                },
+                {
+                    lane_key: 2,
+                    schedule: {
+                        started: '2026-06-19T00:00:00',
+                        tasks: [consumer],
+                    },
+                },
             ],
             gatherer_lanes: [],
             crafter_lanes: [],
@@ -401,7 +502,8 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             stats: number
             modules: never[]
             quantity: number
-        }[] = []
+        }[] = [],
+        holds: unknown[] = []
     ) {
         return ServerContract.Types.entity_info.from({
             projected_at: 0,
@@ -412,6 +514,7 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             coordinates: {x: 0, y: 0, z: 0},
             item_id: 1,
             cargomass: 0,
+            capacity: 1_000_000,
             cargo,
             modules: [],
             lanes: [{lane_key: 0, schedule: {started: T0, tasks}}],
@@ -419,8 +522,16 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             crafter_lanes: [],
             builder_lanes: [],
             loader_lanes: [],
-            holds: [],
+            holds,
         })
+    }
+
+    const pushHold = {
+        id: 1,
+        kind: HoldKind.PUSH,
+        counterpart: {entity_type: 'ship', entity_id: 1},
+        until: '2026-06-19T00:00:50',
+        incoming_mass: 0,
     }
 
     function pushTask() {
@@ -428,9 +539,13 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             type: TaskType.UNLOAD,
             duration: 50,
             cancelable: TaskCancelable.ALWAYS,
-            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            cargo: [{item_id: 101, stats: 0, modules: [], quantity: 2}],
             couplings: [
-                {counterpart: {entity_type: 'ship', entity_id: 2}, hold: 1, kind: HoldKind.PUSH},
+                {
+                    counterpart: {entity_type: 'ship', entity_id: 2},
+                    hold: 1,
+                    kind: HoldKind.PUSH,
+                },
             ],
         })
     }
@@ -441,28 +556,11 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             duration: 100,
             cancelable: TaskCancelable.ALWAYS,
             cargo: [
-                {item_id: 7, stats: 0, modules: [], quantity: 2},
-                {item_id: 9, stats: 0, modules: [], quantity: 1},
+                {item_id: 101, stats: 0, modules: [], quantity: 2},
+                {item_id: 10001, stats: 0, modules: [], quantity: 1},
             ],
             couplings: [],
         })
-    }
-
-    function incoming(): IncomingSource[] {
-        return [
-            {
-                holdId: '1',
-                until: new Date('2026-06-19T00:00:50.000Z'),
-                items: [
-                    ServerContract.Types.cargo_item.from({
-                        item_id: 7,
-                        stats: 0,
-                        modules: [],
-                        quantity: 2,
-                    }),
-                ],
-            },
-        ]
     }
 
     function upgradeConsumerTask() {
@@ -470,18 +568,17 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
             type: TaskType.UPGRADE,
             duration: 100,
             cancelable: TaskCancelable.ALWAYS,
-            cargo: [{item_id: 7, stats: 0, modules: [], quantity: 2}],
+            cargo: [{item_id: 101, stats: 0, modules: [], quantity: 2}],
             couplings: [],
         })
     }
 
     test('blocked: counterpart consumer loses coverage without this delivery', () => {
         const producer = entityWithId(1, [pushTask()])
-        const counterpart = entityWithId(2, [craftConsumerTask()])
+        const counterpart = entityWithId(2, [craftConsumerTask()], [], [pushHold])
         const plan = cancelEligibility(producer, 0, 0, {
             now: upcoming,
             counterparts: new Map([['2', counterpart]]),
-            counterpartIncoming: new Map([['2', incoming()]]),
         })
         expect(plan.ok).toBe(false)
         expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND_COUNTERPART)
@@ -490,11 +587,10 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
 
     test('blocked: counterpart upgrade consumer loses coverage without this delivery', () => {
         const producer = entityWithId(1, [pushTask()])
-        const counterpart = entityWithId(2, [upgradeConsumerTask()])
+        const counterpart = entityWithId(2, [upgradeConsumerTask()], [], [pushHold])
         const plan = cancelEligibility(producer, 0, 0, {
             now: upcoming,
             counterparts: new Map([['2', counterpart]]),
-            counterpartIncoming: new Map([['2', incoming()]]),
         })
         expect(plan.ok).toBe(false)
         expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND_COUNTERPART)
@@ -506,12 +602,12 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
         const counterpart = entityWithId(
             2,
             [upgradeConsumerTask()],
-            [{id: 1, item_id: 7, stats: 0, modules: [], quantity: 2}]
+            [{id: 1, item_id: 101, stats: 0, modules: [], quantity: 2}],
+            [pushHold]
         )
         const plan = cancelEligibility(producer, 0, 0, {
             now: upcoming,
             counterparts: new Map([['2', counterpart]]),
-            counterpartIncoming: new Map([['2', incoming()]]),
         })
         expect(plan.ok).toBe(true)
     })
@@ -521,30 +617,194 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
         const counterpart = entityWithId(
             2,
             [craftConsumerTask()],
-            [{id: 1, item_id: 7, stats: 0, modules: [], quantity: 2}]
+            [{id: 1, item_id: 101, stats: 0, modules: [], quantity: 2}],
+            [pushHold]
         )
         const plan = cancelEligibility(producer, 0, 0, {
             now: upcoming,
             counterparts: new Map([['2', counterpart]]),
-            counterpartIncoming: new Map([['2', incoming()]]),
         })
         expect(plan.ok).toBe(true)
     })
 
-    test('allowed: counterpart data not loaded, check skipped gracefully', () => {
+    test('needs: counterpart data not loaded names the counterpart', () => {
         const producer = entityWithId(1, [pushTask()])
         const plan = cancelEligibility(producer, 0, 0, {now: upcoming})
-        expect(plan.ok).toBe(true)
+        expect(plan.ok).toBe(false)
+        expect(plan.blockedReason).toBe(CancelBlockReason.NEEDS)
+        expect(plan.needs?.entities).toEqual(['2'])
     })
 
     test('allowed: counterpart has no queued consumer', () => {
         const producer = entityWithId(1, [pushTask()])
-        const idleCounterpart = entityWithId(2, [])
+        const idleCounterpart = entityWithId(2, [], [], [pushHold])
         const plan = cancelEligibility(producer, 0, 0, {
             now: upcoming,
             counterparts: new Map([['2', idleCounterpart]]),
-            counterpartIncoming: new Map([['2', incoming()]]),
         })
         expect(plan.ok).toBe(true)
+    })
+})
+
+describe('cancel refusal coverage', () => {
+    test('every contract cancel refusal maps to a CancelBlockReason', () => {
+        for (const message of CANCEL_REFUSALS) {
+            expect({
+                message,
+                reason: CANCEL_REFUSAL_REASONS.get(message),
+            }).toEqual({
+                message,
+                reason: expect.any(String),
+            })
+        }
+    })
+
+    test('every mapped message is a listed refusal and every reason has a message', () => {
+        for (const message of CANCEL_REFUSAL_REASONS.keys())
+            expect(CANCEL_REFUSALS).toContain(message)
+        for (const reason of Object.values(CancelBlockReason)) {
+            if (reason === CancelBlockReason.NEEDS || reason === CancelBlockReason.INCONSISTENT)
+                continue
+            expect({reason, message: cancelRefusalMessage(reason)}).toEqual({
+                reason,
+                message: expect.any(String),
+            })
+        }
+    })
+})
+
+describe('cancelEligibility — returned cargo', () => {
+    const upcoming = new Date('2026-06-18T23:59:50.000Z')
+
+    function row(over: {
+        id: number
+        type?: string
+        capacity?: number
+        cargomass?: number
+        tasks?: ReturnType<typeof ServerContract.Types.task.from>[]
+        holds?: unknown[]
+    }) {
+        return ServerContract.Types.entity_info.from({
+            projected_at: 0,
+            type: over.type ?? 'ship',
+            id: over.id,
+            owner: 'player.gm',
+            entity_name: `E${over.id}`,
+            coordinates: {x: 0, y: 0, z: 0},
+            item_id: 1,
+            cargomass: over.cargomass ?? 0,
+            ...(over.capacity !== undefined ? {capacity: over.capacity} : {}),
+            cargo: [],
+            modules: [],
+            lanes: over.tasks
+                ? [
+                      {
+                          lane_key: 0,
+                          schedule: {started: T0, tasks: over.tasks},
+                      },
+                  ]
+                : [],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            builder_lanes: [],
+            loader_lanes: [],
+            holds: over.holds ?? [],
+        })
+    }
+
+    function clustercraft() {
+        return ServerContract.Types.task.from({
+            type: TaskType.CRAFT,
+            duration: 100,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [
+                {item_id: 101, stats: 0, modules: [], quantity: 2},
+                {item_id: 10001, stats: 0, modules: [], quantity: 1},
+            ],
+            couplings: [
+                {
+                    counterpart: {entity_type: 'warehouse', entity_id: 3},
+                    hold: 5,
+                    kind: HoldKind.SOURCE,
+                },
+            ],
+        })
+    }
+
+    const crafter = () => row({id: 1, tasks: [clustercraft()]})
+    const cluster = {
+        root: 10,
+        cells: [
+            {gx: 1, gy: 0, entity: 1},
+            {gx: 2, gy: 0, entity: 3},
+        ],
+    }
+    const world = (memberCapacity: number) => ({
+        now: upcoming,
+        counterparts: new Map([
+            [
+                '3',
+                row({
+                    id: 3,
+                    type: 'warehouse',
+                    capacity: memberCapacity,
+                    cargomass: 1000,
+                }),
+            ],
+            ['10', row({id: 10, type: 'hub'})],
+        ]),
+        clusters: new Map([['10', cluster]]),
+        hubAt: () => '10',
+    })
+
+    test('a clustercraft cancel the cluster cannot absorb is refused', () => {
+        expect(cancelEligibility(crafter(), 0, 0, world(1000)).blockedReason).toBe(
+            CancelBlockReason.CLUSTER_FULL
+        )
+    })
+
+    test('a clustercraft cancel with room in the origin member is allowed', () => {
+        expect(cancelEligibility(crafter(), 0, 0, world(1_000_000)).ok).toBe(true)
+    })
+
+    test('a clustercraft cancel needs the hub and its cluster', () => {
+        const noHub = cancelEligibility(crafter(), 0, 0, {
+            ...world(1_000_000),
+            hubAt: undefined,
+        })
+        expect(noHub.blockedReason).toBe(CancelBlockReason.NEEDS)
+        expect(noHub.needs?.hubSites).toEqual([{owner: 'player.gm', x: 0, y: 0}])
+        const noCluster = cancelEligibility(crafter(), 0, 0, {
+            ...world(1_000_000),
+            clusters: undefined,
+        })
+        expect(noCluster.needs?.hubs).toEqual(['10'])
+    })
+
+    test('a pull-cancel from a giver with a pending capper is refused', () => {
+        const demolish = ServerContract.Types.task.from({
+            type: TaskType.DEMOLISH,
+            duration: 100,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [],
+            couplings: [],
+        })
+        const puller = row({
+            id: 1,
+            capacity: 1_000_000,
+            tasks: [loadTask('warehouse', 6, 1, 4)],
+        })
+        const giver = row({
+            id: 6,
+            type: 'warehouse',
+            capacity: 1_000_000,
+            tasks: [demolish],
+        })
+        const plan = cancelEligibility(puller, 0, 0, {
+            now: upcoming,
+            counterparts: new Map([['6', giver]]),
+        })
+        expect(plan.blockedReason).toBe(CancelBlockReason.GIVER_CAPPED)
+        expect(plan.blockedByCounterpart?.entity_id.toNumber()).toBe(6)
     })
 })

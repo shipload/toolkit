@@ -1,5 +1,5 @@
-import type {Shipload} from '@shipload/sdk'
-import type {Action} from '@wharfkit/antelope'
+import type {ServerTypes, Shipload} from '@shipload/sdk'
+import {type Action, UInt64} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {
     ALL_ENTITY_TYPES,
@@ -8,11 +8,11 @@ import {
     parseUint32,
     parseUint64,
 } from '../../lib/args'
-import {computeCancelableCount} from '../../lib/cancel-compute'
-import {getShipload} from '../../lib/client'
+import {CancelWorld, type CancelWorldSource, cancelRefusalLine} from '../../lib/cancel-preview'
+import {getShipload, server} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {transact} from '../../lib/session'
-import {getEntityRow, laneSnapshot, lanesWithPendingTasks} from '../../lib/snapshot'
+import {getEntityRow, lanesWithPendingTasks} from '../../lib/snapshot'
 import {ValidationError} from '../../lib/validate'
 
 export interface CancelOpts {
@@ -86,24 +86,60 @@ async function resolveCancel(
     if (countArg !== undefined) {
         return {laneKey, count: countArg, rangeHint: ''}
     }
-    const view = laneSnapshot(row, laneKey, now)
-    const total = view.tasks.length
-    if (flags.all) {
-        const count = computeCancelableCount(view, {kind: 'all'})
-        if (count === 0n) {
-            throw new ValidationError(
-                'no cancelable tasks at the lane tail.',
-                `the last pending task is non-cancelable — review with: shiploadcli ${ctx.entityType} ${ctx.entityId} tasks`
-            )
-        }
-        const first = total - Number(count)
-        const last = total - 1
-        return {laneKey, count, rangeHint: ` (tasks #${first}–#${last})`}
+    const entity = await getEntityInfo(String(ctx.entityId))
+    const world = new CancelWorld(liveCancelSource, now)
+    const mode = flags.all
+        ? ({kind: 'all'} as const)
+        : ({kind: 'from', index: flags.from as number} as const)
+    const {fromTaskIndex, plan} = await world.resolve(entity, laneKey, mode)
+    if (!plan.ok) {
+        throw new ValidationError(
+            `cannot cancel from task #${fromTaskIndex}: ${cancelRefusalLine(plan)}`,
+            `review with: shiploadcli ${ctx.entityType} ${ctx.entityId} tasks`
+        )
     }
-    const idx = flags.from as number
-    const count = computeCancelableCount(view, {kind: 'from', index: idx})
-    const last = total - 1
-    return {laneKey, count, rangeHint: ` (tasks #${idx}–#${last})`}
+    const last = fromTaskIndex + plan.range.count - 1
+    return {
+        laneKey,
+        count: BigInt(plan.range.count),
+        rangeHint: ` (tasks #${fromTaskIndex}–#${last})`,
+    }
+}
+
+async function getEntityInfo(id: string): Promise<ServerTypes.entity_info> {
+    return (await server.readonly('getentity', {entity_id: id})) as ServerTypes.entity_info
+}
+
+const liveCancelSource: CancelWorldSource = {
+    entity: getEntityInfo,
+    async groupParticipants(groupId) {
+        const row = (await server.table('entitygroup').get(UInt64.from(groupId))) as
+            | ServerTypes.entitygroup_row
+            | undefined
+        return (row?.participants ?? []).map((p) => p.entity_id.toString())
+    },
+    async cluster(hubId) {
+        const row = (await server.readonly('getcluster', {
+            hub_id: hubId,
+        })) as ServerTypes.cluster_row
+        return {
+            root: Number(row.root),
+            cells: row.cells.map((c) => ({
+                gx: Number(c.gx),
+                gy: Number(c.gy),
+                entity: Number(c.entity),
+            })),
+        }
+    },
+    async hubAt(owner, x, y) {
+        const hubs = (await server.readonly('getentities', {
+            owner,
+            entity_type: 'hub',
+        })) as ServerTypes.entity_info[]
+        return hubs
+            .find((h) => Number(h.coordinates.x) === x && Number(h.coordinates.y) === y)
+            ?.id.toString()
+    },
 }
 
 export async function runCancel(
@@ -128,8 +164,10 @@ export async function runCancel(
 
 const HELP_BEFORE = `Forms:
   cancel <count>       cancel <count> tasks from the tail
-  cancel --all         cancel every cancelable pending task (stops at first non-cancelable)
+  cancel --all         cancel the longest tail range the game accepts
   cancel --from <idx>  cancel from task index <idx> (0-indexed) through the tail
+
+--all and --from check the cancel first and print why the game would refuse it; <count> is sent as given.
 
 Lane: defaults to the entity's sole active lane; pass --lane <key> when several lanes are busy.
 Requires: pending task that is cancelable.
@@ -144,7 +182,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Cancel pending tasks (by count, --all, or --from <idx>)')
             .addHelpText('before', HELP_BEFORE)
             .argument('[count]', 'number of tasks to cancel (from the tail)', parseUint64)
-            .option('--all', 'cancel every cancelable pending task')
+            .option('--all', 'cancel the longest tail range the game accepts')
             .option(
                 '--from <idx>',
                 'cancel from task index (0-indexed) through the tail',

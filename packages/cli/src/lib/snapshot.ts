@@ -2,7 +2,6 @@ import { type ServerTypes, schedule, rollupGatherer, rollupBuilder,
 	rollupCrafter, rollupLoaders } from "@shipload/sdk";
 import { UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
-import type { LaneTaskView } from "./cancel-compute";
 import { toBigIntOrUndefined } from "./cargo-build";
 import { server } from "./client";
 
@@ -240,18 +239,4 @@ export function lanesWithPendingTasks(
 			return { laneKey: l.laneKey, pending };
 		})
 		.filter((l) => l.pending > 0);
-}
-
-export function laneSnapshot(
-	row: ServerTypes.entity_row,
-	laneKey: number,
-	now: Date,
-): LaneTaskView {
-	const lane = schedule.getLane(row, laneKey);
-	const tasks = (lane?.schedule.tasks ?? []) as ServerTypes.task[];
-	const active = lane ? schedule.currentTaskIndexForLane(lane.schedule, now) : -1;
-	const isIdle = active < 0;
-	const completed = isIdle ? tasks.length : active;
-	const pending = isIdle ? [] : tasks.slice(active + 1);
-	return {tasks, pending, completed, isIdle};
 }
