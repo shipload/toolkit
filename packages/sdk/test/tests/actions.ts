@@ -482,6 +482,7 @@ describe('ActionsManager', () => {
             'dbgpagerows',
             'dbgpurge',
             'dbgseats',
+            'dbgxfer',
             'descentity',
             'fixhubid',
             'hash',
