@@ -69,9 +69,8 @@ The levers available to you:
 - `--json` on query commands gives compact, parseable output.
 - `<entity-type> <id> tasks` shows when each queued task completes.
 - Your harness may offer its own sleep or scheduled wake-up.
-- You can end the turn and tell the player when to return.
 
-Pick whichever suits the harness and the length of the wait.
+When the next completion is further off than one wait can cover, schedule your own return for that time if your harness can (a cron job, Claude Code's `/loop` or scheduled wake-ups, or the equivalent), then end the turn. Ending the turn without a scheduled return hands the work back to the player. Do that only when the harness has no way to wake you, and tell the player the exact time to come back.
 
 ## How to think about progress
 
@@ -103,7 +102,7 @@ A different goal (the best possible gatherer, a warehouse in a rich region) lead
 
 ## Autonomy
 
-Routine steps toward the player's objective are yours to take without asking. Report at milestones, at real choices the player should make, and when you are blocked. Record your reasoning in the notes file so the next session can pick it up.
+Routine steps toward the player's objective are yours to take without asking. Report at milestones, at real choices the player should make, and when you are blocked. When queued work finishes hours from now, report what you queued, schedule your return, and carry on when it lands. Record your reasoning in the notes file so the next session can pick it up.
 
 ## The notes file
 

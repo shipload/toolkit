@@ -180,7 +180,8 @@ export function hasResolvable(
                 front.type.toNumber() === TaskType.UNDEPLOY &&
                 front.subject !== undefined &&
                 lookupCounterpart &&
-                (entity.id === undefined || front.subject.entity_id.toString() !== entity.id.toString())
+                (entity.id === undefined ||
+                    front.subject.entity_id.toString() !== entity.id.toString())
             ) {
                 const target = lookupCounterpart(front.subject.entity_id)
                 if (target) {
