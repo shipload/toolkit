@@ -14,7 +14,7 @@
     },
     "packages/cli": {
       "name": "@shipload/cli",
-      "version": "1.0.0-next.81",
+      "version": "1.0.0-next.82",
       "bin": {
         "shiploadcli": "src/index.ts",
       },
@@ -41,7 +41,7 @@
     },
     "packages/image-renderer": {
       "name": "@shipload/image-renderer",
-      "version": "1.0.0-next.77",
+      "version": "1.0.0-next.78",
       "dependencies": {
         "@resvg/resvg-wasm": "^2.6.0",
         "@shipload/item-renderer": "workspace:^",
@@ -57,7 +57,7 @@
     },
     "packages/item-renderer": {
       "name": "@shipload/item-renderer",
-      "version": "1.0.0-next.77",
+      "version": "1.0.0-next.78",
       "dependencies": {
         "@shipload/sdk": "workspace:^",
         "@wharfkit/antelope": "4.0.2",
@@ -75,7 +75,7 @@
     },
     "packages/oracle": {
       "name": "@shipload/oracle",
-      "version": "0.0.1-next.67",
+      "version": "0.0.1-next.68",
       "dependencies": {
         "@wharfkit/antelope": "4.0.2",
       },
@@ -86,7 +86,7 @@
     },
     "packages/sdk": {
       "name": "@shipload/sdk",
-      "version": "1.0.0-next.77",
+      "version": "1.0.0-next.78",
       "dependencies": {
         "@wharfkit/antelope": "4.0.2",
         "@wharfkit/common": "4.0.2",
