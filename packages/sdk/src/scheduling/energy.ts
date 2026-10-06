@@ -72,16 +72,14 @@ function taskCost(task: Task): number | undefined {
     return task.energy_cost !== undefined ? Number(task.energy_cost) : undefined
 }
 
-// Walks tasks in schedule order, gating on funding at each draw; false on the first shortfall.
-function tasksFundedFrom(
-    tasks: readonly {task: Task}[],
-    capacity: number | undefined,
-    baseEnergy: number
-): boolean {
+// Mirrors server::energy_after_queue (capabilities/energy.cpp): end energy, or undefined on the first unfunded draw.
+export function energyAfterQueue(entity: Projectable, baseEnergy: number): number | undefined {
+    const projected = createProjectedEntity(entity)
+    const capacity = projected.generator ? Number(projected.generator.capacity) : undefined
     let energy = baseEnergy
-    for (const {task} of tasks) {
+    for (const {task} of unappliedTasks(entity)) {
         const cost = taskCost(task)
-        if (cost !== undefined && energy < cost) return false
+        if (cost !== undefined && energy < cost) return undefined
         energy = applyTaskEnergyEffect(
             task.type.toNumber(),
             task.coordinates !== undefined,
@@ -90,12 +88,9 @@ function tasksFundedFrom(
             energy
         )
     }
-    return true
+    return energy
 }
 
-// Mirrors walk_pending_energy(require_funded=true) / energy_draws_funded in projection.cpp.
 export function energyDrawsFunded(entity: Projectable, baseEnergy: number): boolean {
-    const projected = createProjectedEntity(entity)
-    const capacity = projected.generator ? Number(projected.generator.capacity) : undefined
-    return tasksFundedFrom(unappliedTasks(entity), capacity, baseEnergy)
+    return energyAfterQueue(entity, baseEnergy) !== undefined
 }

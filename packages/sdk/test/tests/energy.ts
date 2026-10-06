@@ -2,6 +2,7 @@ import {describe, test} from 'bun:test'
 import {assert} from 'chai'
 import {
     createProjectedEntity,
+    energyAfterQueue,
     energyAtTime,
     energyDrawsFunded,
     ServerContract,
@@ -79,7 +80,7 @@ describe('energyAtTime', () => {
     })
 })
 
-// Parity with energy_draws_funded / walk_pending_energy.
+// Parity with energy_after_queue.
 describe('energyDrawsFunded', () => {
     function shipWithTasks(energy: number, tasks: ServerContract.Types.task[]) {
         const ship = makeShipFixture({energy})
@@ -205,5 +206,42 @@ describe('energyDrawsFunded', () => {
             makeTask(TaskType.CRAFT, {energy_cost: 20}),
         ])
         assert.isTrue(energyDrawsFunded(ship, 50))
+    })
+})
+
+describe('energyAfterQueue', () => {
+    function shipWithTasks(energy: number, tasks: ServerContract.Types.task[]) {
+        const ship = makeShipFixture({energy})
+        ship.schedule = ServerContract.Types.schedule.from({started: STARTED, tasks})
+        return ship
+    }
+
+    test('returns the base energy for an empty schedule', () => {
+        assert.strictEqual(energyAfterQueue(shipWithTasks(70, []), 70), 70)
+    })
+
+    test('returns the energy left after every funded draw', () => {
+        const ship = shipWithTasks(100, [
+            makeTask(TaskType.TRAVEL, {coordinates: {x: 5, y: 5}, energy_cost: 40}),
+            makeTask(TaskType.CRAFT, {energy_cost: 25}),
+        ])
+        assert.strictEqual(energyAfterQueue(ship, 100), 35)
+    })
+
+    test('returns undefined on the first unfunded draw', () => {
+        const ship = shipWithTasks(100, [
+            makeTask(TaskType.TRAVEL, {coordinates: {x: 5, y: 5}, energy_cost: 80}),
+            makeTask(TaskType.CRAFT, {energy_cost: 25}),
+        ])
+        assert.isUndefined(energyAfterQueue(ship, 100))
+    })
+
+    test('a recharge refills to capacity before the draws behind it', () => {
+        const ship = shipWithTasks(10, [
+            makeTask(TaskType.RECHARGE, {duration: 10}),
+            makeTask(TaskType.CRAFT, {energy_cost: 25}),
+        ])
+        const capacity = Number(createProjectedEntity(ship).generator!.capacity)
+        assert.strictEqual(energyAfterQueue(ship, 10), capacity - 25)
     })
 })
