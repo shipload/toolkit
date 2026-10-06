@@ -245,7 +245,17 @@ export type CandidateEntity = Pick<
 const SHUTTLE_CANDIDATE_CAP = 8
 
 function siteOf(entity: CandidateEntity) {
-    return projectEntity({...entity, cargo: [], cargomass: UInt32.from(0)}).location
+    const {id, owner, coordinates, modules, item_id, lanes} = entity
+    return projectEntity({
+        id,
+        owner,
+        coordinates,
+        modules,
+        item_id,
+        lanes,
+        cargo: [],
+        cargomass: UInt32.from(0),
+    }).location
 }
 
 function hasLoaderModule(entity: CandidateEntity): boolean {

@@ -602,6 +602,13 @@ describe('shuttleCandidates', () => {
         expect(out).toEqual([])
     })
 
+    it('accepts a full entity row whose stats is a UInt64', () => {
+        const row = {...building, stats: UInt64.from(119820503)} as CandidateEntity
+        const ship = entity({id: 2, modules: [loaderModule]})
+        const out = shuttleCandidates({building: row, shipId: 999, player}, [ship], civicOwner)
+        expect(out).toEqual(['2'])
+    })
+
     it('excludes the building itself', () => {
         const out = shuttleCandidates({building, shipId: 999, player}, [building], civicOwner)
         expect(out).toEqual([])
