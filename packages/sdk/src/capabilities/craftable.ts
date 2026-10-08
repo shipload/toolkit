@@ -7,9 +7,10 @@ import {
     taskCargoEffect,
     type IncomingSource,
 } from '../scheduling/availability'
-import {candidateLaneCompletesAt, workerLaneKey} from '../scheduling/lanes'
+import {placedStart, workerLaneKey} from '../scheduling/lanes'
 import * as schedule from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
+import {TaskType} from '../types'
 import {calc_craft_duration} from './crafting'
 
 type CargoItem = ServerContract.Types.cargo_item
@@ -58,14 +59,13 @@ export function maxCraftable(
     )
     const perUnitDuration = calc_craft_duration(crafterSpeed, perUnitMass).toNumber()
     const crafterLane = workerLaneKey(entity.modules, 'crafter', entity.lanes ?? [])
-    const naiveCompletesAt = candidateLaneCompletesAt(entity, crafterLane, perUnitDuration, now)
-    const laneStartMs = naiveCompletesAt.getTime() - perUnitDuration * 1000
-    const readyMs = itemReadyAt(
+    const ready = itemReadyAt(
         entity,
         recipe.inputs.map((input) => input.itemId),
         incoming
-    ).getTime()
-    const completesAt = new Date(Math.max(laneStartMs, readyMs) + perUnitDuration * 1000)
+    )
+    const start = placedStart(entity, TaskType.CRAFT, crafterLane, now, ready)
+    const completesAt = new Date(start.getTime() + perUnitDuration * 1000)
     const availability = projectedCargoAvailableAt(entity, completesAt, incoming)
 
     let maxUnits: bigint | undefined
