@@ -479,6 +479,7 @@ describe('ActionsManager', () => {
             // debug / util
             'dbgcredit',
             'dbgmandate',
+            'dbgnftcodec',
             'dbgpagerows',
             'dbgpurge',
             'dbgseats',
