@@ -11,7 +11,7 @@ const SPEC: CargoMoveSpec = {
     name: 'unload',
     summary: 'Unload cargo to a co-located entity you own (pushes cargo off this entity)',
     requires:
-        'Requires: both entities owned by caller and co-located; this entity has loaders; the destination has capacity (or, for a build plot, accepts the recipe inputs).',
+        'Requires: both entities owned by caller and co-located; this entity has loaders; the destination has capacity (or, for a build plot, accepts the recipe inputs). To store cargo at a public Depot, use `depotstore`.',
     counterpartTypeArg: ['<to-type>', 'destination entity type'],
     counterpartIdArg: ['<to-id>', 'destination entity id'],
     cargoArgHint: '<item-id>:<stack-id>:<qty> — cargo to unload.',

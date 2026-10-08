@@ -1,9 +1,11 @@
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, type EntityTypeName} from '../../lib/args'
-import {server} from '../../lib/client'
+import {getShipload, server} from '../../lib/client'
+import {renderDepotStorage} from '../../lib/depot-storage'
 import {counterpartKey, renderEntityFull} from '../../lib/entity-header'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
 import {formatOutput} from '../../lib/format'
+import {getAccountName} from '../../lib/session'
 
 export function render(
     info: unknown,
@@ -50,6 +52,18 @@ export async function runShow(
             render(info, {current: options.current, counterparts})
         )
     )
+    if (ctx.entityType === 'depot' && !options.json) {
+        console.log(`\n${renderDepotStorage(ctx.entityId, await fetchOwnDepotView(ctx.entityId))}`)
+    }
+}
+
+async function fetchOwnDepotView(depotId: bigint) {
+    try {
+        const sl = await getShipload()
+        return await sl.entities.getDepot(depotId, getAccountName())
+    } catch {
+        return undefined
+    }
 }
 
 export async function defaultShow(type: EntityTypeName, id: bigint): Promise<void> {

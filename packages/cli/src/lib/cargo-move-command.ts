@@ -91,6 +91,10 @@ async function runCargoMove(
 		{
 			description: spec.describe(input, ctx, otherType, otherId),
 			errorHint: (msg) => {
+				if (otherType === "depot" && msg.includes("entities must have the same owner")) {
+					const cmd = spec.name === "unload" ? "depotstore" : "depottake";
+					return `Depots are public storage: use \`shiploadcli ${ctx.entityType} ${ctx.entityId} ${cmd} ${otherId} ${input.itemId}:${input.stackId}:${input.quantity}\``;
+				}
 				if (
 					msg.includes("missing cargo") ||
 					msg.includes("insufficient cargo") ||

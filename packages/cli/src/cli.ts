@@ -28,6 +28,7 @@ import * as track from './commands/action/track'
 import * as travel from './commands/action/travel'
 import * as undeploy from './commands/action/undeploy'
 import * as unload from './commands/action/unload'
+import * as depotCargo from './commands/action/depot-cargo'
 import * as wait from './commands/action/wait'
 import * as warp from './commands/action/warp'
 import * as wrap from './commands/action/wrap'
@@ -149,6 +150,8 @@ export function build(): Command {
     registerEntitySubcommand(gather.SUBCOMMAND)
     registerEntitySubcommand(load.SUBCOMMAND)
     registerEntitySubcommand(unload.SUBCOMMAND)
+    registerEntitySubcommand(depotCargo.STORE_SUBCOMMAND)
+    registerEntitySubcommand(depotCargo.TAKE_SUBCOMMAND)
     registerEntitySubcommand(recharge.SUBCOMMAND)
     registerEntitySubcommand(craft.SUBCOMMAND)
     registerEntitySubcommand(craftjob.SUBCOMMAND)

@@ -11,7 +11,7 @@ const SPEC: CargoMoveSpec = {
     name: 'load',
     summary: 'Load cargo from a co-located entity you own (pulls cargo onto this entity)',
     requires:
-        'Requires: both entities owned by caller and co-located; the source has the cargo on hand; this entity has loaders and capacity.',
+        'Requires: both entities owned by caller and co-located; the source has the cargo on hand; this entity has loaders and capacity. To take your stored cargo back from a public Depot, use `depottake`.',
     counterpartTypeArg: ['<from-type>', 'source entity type'],
     counterpartIdArg: ['<from-id>', 'source entity id'],
     cargoArgHint: '<item-id>:<stack-id>:<qty> — cargo to load.',
