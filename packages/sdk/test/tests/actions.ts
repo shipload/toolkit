@@ -477,6 +477,7 @@ describe('ActionsManager', () => {
             'configlog',
             'notify',
             // debug / util
+            'dbgcaps',
             'dbgcredit',
             'dbgmandate',
             'dbgnftcodec',

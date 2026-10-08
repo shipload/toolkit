@@ -1,6 +1,6 @@
 {
   "catalog_hash": "5840ac9f132d380959eb4dac7d0eb0f321e23de6c3e9d287ec15c0c620cb9f81",
-  "generated_at": "2026-10-03T22:32:29.088Z",
+  "generated_at": "2026-10-08T02:29:37.600Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -91,42 +91,44 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -219,42 +221,44 @@
         "energy": 451649,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -342,42 +346,44 @@
         "energy": 900683,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -465,42 +471,44 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -609,42 +617,44 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -761,42 +771,44 @@
             "id": 0
           }
         ],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -897,42 +909,44 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1041,42 +1055,44 @@
             "id": 0
           }
         ],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1193,42 +1209,44 @@
             "id": 1000000
           }
         ],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1345,42 +1363,44 @@
             "id": 0
           }
         ],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1452,42 +1472,44 @@
         "energy": 1125200,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1607,42 +1629,44 @@
             "id": 1000000
           }
         ],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     },
@@ -1754,42 +1778,44 @@
         "energy": 1123630,
         "cargomass": 0,
         "cargo": [],
-        "hullmass": 84592,
-        "capacity": 67873,
-        "engines": {
-          "thrust": 447,
-          "drain": 224517
+        "caps": {
+          "hullmass": 84592,
+          "capacity": 67873,
+          "engines": {
+            "thrust": 447,
+            "drain": 224517
+          },
+          "generator": {
+            "capacity": 1125200,
+            "recharge": 2622
+          },
+          "gatherer_lanes": [
+            {
+              "slot_index": 3,
+              "yield": 330,
+              "drain": 1967500,
+              "depth": 1565,
+              "output_pct": 80
+            }
+          ],
+          "crafter_lanes": [
+            {
+              "slot_index": 4,
+              "speed": 216,
+              "drain": 23546,
+              "output_pct": 80
+            }
+          ],
+          "builder_lanes": [],
+          "loader_lanes": [
+            {
+              "slot_index": 2,
+              "mass": 16,
+              "thrust": 4,
+              "output_pct": 80
+            }
+          ]
         },
-        "generator": {
-          "capacity": 1125200,
-          "recharge": 2622
-        },
-        "gatherer_lanes": [
-          {
-            "slot_index": 3,
-            "yield": 330,
-            "drain": 1967500,
-            "depth": 1565,
-            "output_pct": 80
-          }
-        ],
-        "crafter_lanes": [
-          {
-            "slot_index": 4,
-            "speed": 216,
-            "drain": 23546,
-            "output_pct": 80
-          }
-        ],
-        "builder_lanes": [],
-        "loader_lanes": [
-          {
-            "slot_index": 2,
-            "mass": 16,
-            "thrust": 4,
-            "output_pct": 80
-          }
-        ],
         "tier": 1
       }
     }

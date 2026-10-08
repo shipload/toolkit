@@ -8,25 +8,29 @@ import {makeEntity} from '../src/entities/makers'
 import {ITEM_HAULER_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../src/data/item-ids'
 import {encodeStats} from '../src/derivation/crafting'
 
-function makeContractState(
-    overrides: Partial<ContractProjectedState> = {}
-): ContractProjectedState {
+type CapsFields = ContractProjectedState['caps']
+type FlatOverrides = Partial<Omit<ContractProjectedState, 'caps'> & CapsFields>
+
+function makeContractState(overrides: FlatOverrides = {}): ContractProjectedState {
+    const {hullmass, capacity, engines, generator, hauler, ...rest} = overrides
     return {
         owner: Name.from('alice'),
         coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
         energy: UInt16.from(100),
         cargomass: UInt32.from(0),
         cargo: [],
-        hullmass: UInt32.from(50),
-        engines: undefined,
-        generator: undefined,
-        capacity: undefined,
-        hauler: undefined,
-        gatherer_lanes: [],
-        crafter_lanes: [],
-        builder_lanes: [],
-        loader_lanes: [],
-        ...overrides,
+        caps: {
+            hullmass: hullmass ?? UInt32.from(50),
+            capacity,
+            engines,
+            generator,
+            hauler,
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            builder_lanes: [],
+            loader_lanes: [],
+        },
+        ...rest,
     } as ContractProjectedState
 }
 

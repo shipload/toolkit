@@ -9,14 +9,16 @@ export interface ContractProjectedState {
     energy?: UInt32
     cargomass: UInt32
     cargo: ServerContract.Types.cargo_view[]
-    hullmass?: UInt32
-    capacity?: UInt32
-    engines?: ServerContract.Types.movement_stats
-    generator?: ServerContract.Types.energy_stats
-    hauler?: ServerContract.Types.hauler_stats
-    gatherer_lanes: ServerContract.Types.gatherer_lane[]
-    crafter_lanes: ServerContract.Types.crafter_lane[]
-    loader_lanes: ServerContract.Types.loader_lane[]
+    caps: {
+        hullmass: UInt32
+        capacity: UInt32
+        engines?: ServerContract.Types.movement_stats
+        generator?: ServerContract.Types.energy_stats
+        hauler?: ServerContract.Types.hauler_stats
+        gatherer_lanes: ServerContract.Types.gatherer_lane[]
+        crafter_lanes: ServerContract.Types.crafter_lane[]
+        loader_lanes: ServerContract.Types.loader_lane[]
+    }
 }
 
 export interface ProjectionComparisonOptions {
@@ -53,12 +55,13 @@ export function assertProjectionEquals(
     record('coordinates.y', toNum(contract.coordinates.y), Number(sdk.location.y))
     record('energy', toNum(contract.energy), Number(sdk.energy))
     record('cargomass', toNum(contract.cargomass), Number(sdk.cargoMass))
-    record('hullmass', toNum(contract.hullmass), Number(sdk.shipMass))
-    record('capacity', toNum(contract.capacity), sdk.capacity ? Number(sdk.capacity) : undefined)
+    const caps = contract.caps
+    record('hullmass', toNum(caps.hullmass), Number(sdk.shipMass))
+    record('capacity', toNum(caps.capacity), sdk.capacity ? Number(sdk.capacity) : undefined)
 
-    recordStatBlock('engines', contract.engines, sdk.engines)
-    recordStatBlock('generator', contract.generator, sdk.generator)
-    recordStatBlock('hauler', contract.hauler, sdk.hauler)
+    recordStatBlock('engines', caps.engines, sdk.engines)
+    recordStatBlock('generator', caps.generator, sdk.generator)
+    recordStatBlock('hauler', caps.hauler, sdk.hauler)
 
     const normLane = (l: {slot_index?: unknown; [k: string]: unknown}) =>
         Object.fromEntries(
@@ -79,9 +82,9 @@ export function assertProjectionEquals(
         }
     }
 
-    compareLanes('gatherer_lanes', contract.gatherer_lanes as unknown[], sdk.gathererLanes ?? [])
-    compareLanes('crafter_lanes', contract.crafter_lanes as unknown[], sdk.crafterLanes ?? [])
-    compareLanes('loader_lanes', contract.loader_lanes as unknown[], sdk.loaderLanes ?? [])
+    compareLanes('gatherer_lanes', caps.gatherer_lanes as unknown[], sdk.gathererLanes ?? [])
+    compareLanes('crafter_lanes', caps.crafter_lanes as unknown[], sdk.crafterLanes ?? [])
+    compareLanes('loader_lanes', caps.loader_lanes as unknown[], sdk.loaderLanes ?? [])
 
     if (contract.cargo.length > 0 || sdk.cargo.length > 0) {
         const contractCargo = normaliseCargo(mergeContractCargo(contract.cargo))
