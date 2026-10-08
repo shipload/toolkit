@@ -225,11 +225,13 @@ export function buildModuleImmutable(
         }
         case MODULE_GATHERER: {
             const str = decodeStat(stats, 0)
-            const hrd = decodeStat(stats, 1)
+            const tol = decodeStat(stats, 1)
             const sat = decodeStat(stats, 2)
+            const pla = decodeStat(stats, 3)
             base.push({first: 'strength', second: ['uint16', str]})
-            base.push({first: 'hardness', second: ['uint16', hrd]})
+            base.push({first: 'tolerance', second: ['uint16', tol]})
             base.push({first: 'saturation', second: ['uint16', sat]})
+            base.push({first: 'plasticity', second: ['uint16', pla]})
             base.push({
                 first: 'yield',
                 second: ['uint16', computeGathererYield(str, item.tier)],
@@ -238,7 +240,7 @@ export function buildModuleImmutable(
                 first: 'drain',
                 second: ['uint16', toWholeEnergy(computeGathererDrain(sat))],
             })
-            base.push({first: 'depth', second: ['uint16', computeGathererDepth(hrd, item.tier)]})
+            base.push({first: 'depth', second: ['uint16', computeGathererDepth(tol, item.tier)]})
             break
         }
         case MODULE_LOADER: {
@@ -251,17 +253,17 @@ export function buildModuleImmutable(
             break
         }
         case MODULE_WARP: {
-            const ref = decodeStat(stats, 0)
-            base.push({first: 'reflectivity', second: ['uint16', ref]})
-            base.push({first: 'range', second: ['uint32', computeWarpRange(ref, item.tier)]})
+            const res = decodeStat(stats, 0)
+            base.push({first: 'resonance', second: ['uint16', res]})
+            base.push({first: 'range', second: ['uint32', computeWarpRange(res, item.tier)]})
             break
         }
         case MODULE_CRAFTER: {
-            const fin = decodeStat(stats, 0)
+            const rea = decodeStat(stats, 0)
             const con = decodeStat(stats, 1)
-            base.push({first: 'fineness', second: ['uint16', fin]})
+            base.push({first: 'reactivity', second: ['uint16', rea]})
             base.push({first: 'conductivity', second: ['uint16', con]})
-            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(fin, item.tier)]})
+            base.push({first: 'speed', second: ['uint16', computeCrafterSpeed(rea, item.tier)]})
             base.push({first: 'drain', second: ['uint16', toWholeEnergy(computeCrafterDrain(con))]})
             break
         }

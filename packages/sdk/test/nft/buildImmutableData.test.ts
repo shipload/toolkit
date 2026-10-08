@@ -151,11 +151,11 @@ describe('buildImmutableData', () => {
         ])
     })
 
-    test('module (gatherer) emits 3 stats + 3 computed values in fixed order', () => {
+    test('module (gatherer) emits 4 stats + 3 computed values in fixed order', () => {
         const str = 500
-        const hrd = 600
+        const tol = 600
         const sat = 400
-        const stats = encodeStats([str, hrd, sat])
+        const stats = encodeStats([str, tol, sat])
         const entries = buildModuleImmutable(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
         expect(keys(entries)).toEqual([
@@ -168,8 +168,9 @@ describe('buildImmutableData', () => {
             'deposit_token',
             'deposit_symbol',
             'strength',
-            'hardness',
+            'tolerance',
             'saturation',
+            'plasticity',
             'yield',
             'drain',
             'depth',
@@ -184,19 +185,20 @@ describe('buildImmutableData', () => {
         ])
         expect(findEntry(entries, 'depth')!.second).toEqual([
             'uint16',
-            computeGathererDepth(hrd, 1),
+            computeGathererDepth(tol, 1),
         ])
     })
 
-    test('crafter immutable data uses fineness, not reactivity', () => {
-        const fin = 400
+    test('crafter immutable data names its first stat reactivity, as the v2.crafter schema does', () => {
+        const rea = 400
         const con = 250
-        const stats = encodeStats([fin, con])
+        const stats = encodeStats([rea, con])
         const entries = buildModuleImmutable(ITEM_CRAFTER_T1, 1, stats, 0, 0)
         const names = entries.map((e) => e.first)
-        expect(names).toContain('fineness')
+        expect(names).toContain('reactivity')
         expect(names).toContain('conductivity')
-        expect(names).not.toContain('reactivity')
+        expect(names).not.toContain('fineness')
+        expect(findEntry(entries, 'reactivity')!.second).toEqual(['uint16', rea])
         expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
         expect(findEntry(entries, 'drain')!.second).toEqual([
             'uint16',
