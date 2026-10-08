@@ -320,6 +320,7 @@ export type {
 export {
     candidateLaneCompletesAt,
     laneKeyForModule,
+    placedStart,
     rawScheduleEnd,
     resolveLaneGatherer,
     resolveLaneCrafter,

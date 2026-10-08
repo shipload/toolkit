@@ -1,13 +1,13 @@
 import type {UInt16Type, UInt32Type} from '@wharfkit/antelope'
 import {calcCargoItemMass} from '../capabilities/storage'
 import type {ServerContract} from '../contracts'
-import {MASS_STAT_SCALE, PRECISION} from '../types'
+import {MASS_STAT_SCALE, PRECISION, TaskType} from '../types'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../data/item-ids'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
-import {candidateLaneCompletesAt} from './lanes'
+import {placedStart} from './lanes'
 
 const NFT_TRANSIT_THRUST = 400
 const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
@@ -212,7 +212,8 @@ export function receiveFits(
         })
     )
     const duration = estimateUnwrapDuration(dest, item)
-    const candidateCompletes = candidateLaneCompletesAt(dest, sched.LANE_MOBILITY, duration, now)
+    const start = placedStart(dest, TaskType.UNWRAP, sched.LANE_MOBILITY, now)
+    const candidateCompletes = new Date(start.getTime() + duration * 1000)
     const peak = projectedPeakCargomass(
         dest,
         candidateCompletes,

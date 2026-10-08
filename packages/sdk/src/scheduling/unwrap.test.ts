@@ -7,6 +7,7 @@ import {
     incomingHoldMass,
     projectCargomass,
     projectedPeakCargomass,
+    receiveFits,
 } from './unwrap'
 import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
@@ -162,4 +163,69 @@ test('a task already applied to a projected row is not replayed', () => {
     expect(plan.used).toBe(400 * BEAM_MASS)
     expect(plan.peak).toBe(400 * BEAM_MASS)
     expect(projectedPeakCargomass(applied, AFTER_UNLOAD, 400 * BEAM_MASS)).toBe(plan.peak)
+})
+
+const CRYSTAL = 201
+const CRYSTAL_MASS = getItem(CRYSTAL).mass
+const QUEUED_AT = new Date('2026-09-20T07:00:00.000Z')
+
+function rawTask(type: number, duration: number, cargo: {item: number; quantity: number}[] = []) {
+    return ServerContract.Types.task.from({
+        type: UInt8.from(type),
+        duration: UInt32.from(duration),
+        cancelable: UInt8.from(2),
+        cargo: cargo.map((c) =>
+            ServerContract.Types.cargo_item.from({
+                item_id: UInt16.from(c.item),
+                quantity: UInt32.from(c.quantity),
+                stats: UInt64.from(0),
+                modules: [],
+            })
+        ),
+        couplings: [],
+    })
+}
+
+function rawLane(key: number, tasks: ServerContract.Types.task[]) {
+    return ServerContract.Types.lane.from({
+        lane_key: UInt8.from(key),
+        schedule: ServerContract.Types.schedule.from({
+            started: TimePoint.fromMilliseconds(QUEUED_AT.getTime()),
+            tasks,
+        }),
+    })
+}
+
+describe('receiveFits behind a pending recharge', () => {
+    const dest = {
+        coordinates: {x: 0, y: 0, z: 800},
+        loader_lanes: [{mass: 16, thrust: 4}],
+        cargomass: 6_600 * CRYSTAL_MASS,
+        capacity: 67_873,
+        holds: [],
+    }
+    const item = {itemId: CRYSTAL, quantity: 200, modules: [], originX: 0, originY: 0}
+    const unwrapSeconds = estimateUnwrapDuration(dest, item)
+    const rechargeSeconds = unwrapSeconds * 10
+
+    function withUnloadEndingAfter(unloadSeconds: number) {
+        return {
+            ...dest,
+            lanes: [
+                rawLane(255, [rawTask(TaskType.RECHARGE, rechargeSeconds)]),
+                rawLane(3, [
+                    rawTask(TaskType.IDLE, rechargeSeconds),
+                    rawTask(TaskType.UNLOAD, unloadSeconds, [{item: CRYSTAL, quantity: 100}]),
+                ]),
+            ],
+        }
+    }
+
+    test('counts an unload that completes before the unwrap starts its load', () => {
+        expect(receiveFits(withUnloadEndingAfter(unwrapSeconds - 1), item, QUEUED_AT)).toBe(true)
+    })
+
+    test('refuses when the unload completes after the unwrap', () => {
+        expect(receiveFits(withUnloadEndingAfter(unwrapSeconds + 1), item, QUEUED_AT)).toBe(false)
+    })
 })

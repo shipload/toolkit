@@ -1,5 +1,6 @@
 import type {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
+import taskTypes from '../data/task-types.json'
 import {getEntityLayout} from '../data/recipes-runtime'
 import {decodeStat} from '../derivation/crafting'
 import {gathererDepthForTier, computeGathererYield} from '../derivation/capabilities'
@@ -14,11 +15,16 @@ import {
     computeBuilderDrain,
 } from '../nft/description'
 import {TaskType, type ModuleType} from '../types'
-import {getLane, LANE_MOBILITY, type ScheduleData} from './schedule'
+import {getLane, LANE_BARRIER, LANE_MOBILITY, type ScheduleData} from './schedule'
 
 type ModuleEntry = ServerContract.Types.module_entry
 type Lane = ServerContract.Types.lane
 type Schedule = ServerContract.Types.schedule
+type Hold = ServerContract.Types.hold
+
+const HOLD_BUILD = 4
+const HOLD_UPGRADE = 6
+const TASK_TRAITS = new Map(taskTypes.types.map((t) => [t.type, t]))
 
 export interface ResolvedGathererLane {
     slotIndex: number
@@ -224,4 +230,67 @@ export function candidateLaneCompletesAt(
         : now.getTime()
 
     return new Date(startMs + durationSec * 1000)
+}
+
+function maxHoldUntil(holds: Hold[], rechargeBlockingOnly: boolean): number {
+    let latest = 0
+    for (const h of holds) {
+        const kind = Number(h.kind)
+        if (rechargeBlockingOnly && kind !== HOLD_BUILD && kind !== HOLD_UPGRADE) continue
+        latest = Math.max(latest, h.until.toDate().getTime())
+    }
+    return latest
+}
+
+function taskBarrier(entity: ScheduleData, taskType: number, laneKey: number): number {
+    const lanes = entity.lanes ?? []
+    const holds = entity.holds ?? []
+    const isRecharge = taskType === TaskType.RECHARGE
+    if (isRecharge || laneKey === LANE_BARRIER) {
+        const lanesEnd = lanes.reduce(
+            (latest, l) => Math.max(latest, rawScheduleEnd(l.schedule).getTime()),
+            0
+        )
+        return Math.max(lanesEnd, maxHoldUntil(holds, isRecharge))
+    }
+    const traits = TASK_TRAITS.get(taskType)
+    const afterMoves = traits?.positionBound ?? false
+    const afterBound = traits?.mobility ?? false
+    let barrier = 0
+    for (const l of lanes) {
+        let completesAt = l.schedule.started.toDate().getTime()
+        for (const t of l.schedule.tasks) {
+            completesAt += t.duration.toNumber() * 1000
+            if (completesAt <= barrier) continue
+            const type = Number(t.type)
+            if (type === TaskType.RECHARGE) {
+                barrier = completesAt
+                continue
+            }
+            const pending = TASK_TRAITS.get(type)
+            if ((afterMoves && pending?.mobility) || (afterBound && pending?.positionBound)) {
+                barrier = completesAt
+            }
+        }
+    }
+    return afterBound ? Math.max(barrier, maxHoldUntil(holds, false)) : barrier
+}
+
+export function placedStart(
+    entity: ScheduleData,
+    taskType: number,
+    laneKey: number,
+    now: Date,
+    minStart?: Date
+): Date {
+    const blockSecond = Math.floor(now.getTime() / 1000) * 1000
+    const earliest = Math.max(
+        taskBarrier(entity, taskType, laneKey),
+        minStart?.getTime() ?? 0,
+        blockSecond
+    )
+    const lane = getLane(entity, laneKey)
+    const laneEnd = lane ? rawScheduleEnd(lane.schedule).getTime() : blockSecond
+    if (earliest <= laneEnd) return new Date(laneEnd)
+    return new Date(laneEnd + Math.ceil((earliest - laneEnd) / 1000) * 1000)
 }
