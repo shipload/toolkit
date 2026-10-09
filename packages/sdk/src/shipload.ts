@@ -17,6 +17,7 @@ import type {FundManager} from './managers/fund'
 import type {JobsManager} from './managers/jobs'
 import type {ShuttleManager} from './managers/shuttle'
 import type {InfluenceManager} from './managers/influence'
+import type {SharesManager} from './managers/shares'
 import type {SubscriptionsManager} from './subscriptions/manager'
 import type {GameState} from './entities/gamestate'
 
@@ -188,6 +189,10 @@ export class Shipload {
 
     get influence(): InfluenceManager {
         return this._context.influence
+    }
+
+    get shares(): SharesManager {
+        return this._context.shares
     }
 
     get subscriptions(): SubscriptionsManager {

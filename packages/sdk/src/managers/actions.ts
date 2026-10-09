@@ -25,6 +25,7 @@ import {ServerContract, TokenContract} from '../contracts'
 import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
 import type {JobCancelRoute} from '../scheduling/jobs'
+import type {DepositConfigInput} from './balances'
 
 const CHARGE_K = 100n
 const ENERGY_DIVISOR = 10n
@@ -175,6 +176,12 @@ export type EntityRefInput = {
 }
 
 export type WaypointInput = {x: Int64Type; y: Int64Type}
+
+export type CollectableShare = {
+    x: Int64Type
+    y: Int64Type
+    ready: UInt64Type | bigint
+}
 
 export class ActionsManager extends BaseManager {
     private tokenContracts = new Map<string, TokenContract.Contract>()
@@ -1122,6 +1129,42 @@ export class ActionsManager extends BaseManager {
         return [
             this.platform.action('contribute', {game: this.server.account, ...args}),
             this.server.action('contribute', args),
+        ]
+    }
+
+    collect(player: NameType, location: CoordinatesType): Action {
+        return this.server.action('collect', {
+            player: Name.from(player),
+            x: Int64.from(location.x),
+            y: Int64.from(location.y),
+        })
+    }
+
+    // `open` names the deposit token when the player has no SCRAP balance row; collect aborts without one.
+    collectTx(
+        player: NameType,
+        location: CoordinatesType,
+        opts: {open?: DepositConfigInput} = {}
+    ): Action[] {
+        const actions: Action[] = []
+        if (opts.open) {
+            actions.push(this.open(player, opts.open.tokenContract, opts.open.symbol))
+        }
+        actions.push(this.collect(player, location))
+        return actions
+    }
+
+    collectAllTx(
+        player: NameType,
+        shares: CollectableShare[],
+        opts: {open?: DepositConfigInput} = {}
+    ): Action[] {
+        const ready = shares.filter((share) => BigInt(String(share.ready)) > 0n)
+        if (ready.length === 0) return []
+        const [first, ...rest] = ready
+        return [
+            ...this.collectTx(player, first, opts),
+            ...rest.map((share) => this.collect(player, share)),
         ]
     }
 

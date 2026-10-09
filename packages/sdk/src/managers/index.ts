@@ -44,6 +44,24 @@ export type {
     VoteOption,
     VoteStandings,
 } from './influence'
+export {
+    SharesManager,
+    CIVIC_FP_SCALE,
+    parseCitizenShares,
+    parseCivicEpoch,
+    parseEmissionEpoch,
+    parseWorldEarnings,
+    parseWorldProduction,
+} from './shares'
+export type {
+    CitizenShare,
+    CitizenShares,
+    CivicEpoch,
+    EmissionEpoch,
+    WireEmissionEpoch,
+    WorldEarnings,
+    WorldProduction,
+} from './shares'
 export {PlotManager} from './plot'
 export type {PlotProgress, PlotProgressInputRow} from './plot'
 export {ConstructionManager} from './construction'

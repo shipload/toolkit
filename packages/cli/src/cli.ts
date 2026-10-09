@@ -7,6 +7,7 @@ import * as buildplot from './commands/action/buildplot'
 import * as cancel from './commands/action/cancel'
 import * as claimplot from './commands/action/claimplot'
 import * as claimstarter from './commands/action/claimstarter'
+import * as collect from './commands/action/collect'
 import * as craft from './commands/action/craft'
 import * as claimcraft from './commands/action/claimcraft'
 import * as craftjob from './commands/action/craftjob'
@@ -146,6 +147,7 @@ export function build(): Command {
     grouptravel.register(program)
     route.register(program)
     resolveall.register(program)
+    collect.register(program)
     registerEntitySubcommand(warp.SUBCOMMAND)
     registerEntitySubcommand(gather.SUBCOMMAND)
     registerEntitySubcommand(load.SUBCOMMAND)

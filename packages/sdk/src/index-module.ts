@@ -61,6 +61,13 @@ export {
     ConstructionManager,
     JobsManager,
     InfluenceManager,
+    SharesManager,
+    CIVIC_FP_SCALE,
+    parseCitizenShares,
+    parseCivicEpoch,
+    parseEmissionEpoch,
+    parseWorldEarnings,
+    parseWorldProduction,
 } from './managers'
 export {
     ShuttleManager,
@@ -113,8 +120,16 @@ export type {
     InboundTransfer,
     ScheduledBuild,
     Reservation,
+    CitizenShare,
+    CitizenShares,
+    CivicEpoch,
+    EmissionEpoch,
+    WireEmissionEpoch,
+    WorldEarnings,
+    WorldProduction,
 } from './managers'
 export type {
+    CollectableShare,
     EntityRefInput,
     LaunchNumericInput,
     LaunchQuote,

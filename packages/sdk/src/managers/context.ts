@@ -17,6 +17,7 @@ import {FundManager} from './fund'
 import {JobsManager} from './jobs'
 import {ShuttleManager} from './shuttle'
 import {InfluenceManager} from './influence'
+import {SharesManager} from './shares'
 import {SubscriptionsManager} from '../subscriptions/manager'
 
 export class GameContext {
@@ -33,6 +34,7 @@ export class GameContext {
     private _jobs?: JobsManager
     private _shuttle?: ShuttleManager
     private _influence?: InfluenceManager
+    private _shares?: SharesManager
     private _subscriptions?: SubscriptionsManager
     private _subscriptionsUrl?: string
 
@@ -138,6 +140,13 @@ export class GameContext {
             this._influence = new InfluenceManager(this)
         }
         return this._influence
+    }
+
+    get shares(): SharesManager {
+        if (!this._shares) {
+            this._shares = new SharesManager(this)
+        }
+        return this._shares
     }
 
     setSubscriptionsUrl(url: string) {
