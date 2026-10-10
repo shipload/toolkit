@@ -455,6 +455,7 @@ describe('ActionsManager', () => {
             'setcluster',
             'setcoords',
             'setemitcfg',
+            'setretarget',
             'setnextid',
             'setnftcfg',
             'setwrapcost',
@@ -482,9 +483,11 @@ describe('ActionsManager', () => {
             'dbgbarrier',
             'dbgstart',
             // internal / notification actions — not player-initiated
+            'chkcollect',
             'configlog',
             'notify',
             // debug / util
+            'dbgcancelok',
             'dbgcaps',
             'dbgcivic',
             'dbgcredit',

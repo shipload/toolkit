@@ -150,6 +150,24 @@ describe('civic result parsers', () => {
         expect(rows).toEqual([{epoch: 4, closed: true, earningsFp: 10n, scaledFp: 9n, total: 300n}])
     })
 
+    it('keeps earnings above uint64 exact', () => {
+        const wide = 2n ** 64n + 5n
+        const rows = parseWorldEarnings({
+            rows: [
+                {epoch: 4, closed: true, earnings_fp: wide.toString(), scaled_fp: '9', total: '3'},
+            ],
+        })
+        expect(rows[0].earningsFp).toBe(wide)
+        const decoded = ServerContract.Types.earnings_view.from({
+            epoch: 4,
+            closed: true,
+            earnings_fp: wide.toString(),
+            scaled_fp: '9',
+            total: 3,
+        })
+        expect(parseWorldEarnings({rows: [decoded]})[0].earningsFp).toBe(wide)
+    })
+
     it('reads an emission series row', () => {
         expect(
             parseEmissionEpoch({
