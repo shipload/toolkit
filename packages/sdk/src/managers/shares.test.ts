@@ -3,7 +3,12 @@ import {Chains} from '@wharfkit/common'
 import {Shipload} from '../shipload'
 import {PlatformContract, ServerContract} from '../contracts'
 import type {PlatformBalance} from './balances'
-import {parseCitizenShares, parseEmissionEpoch, parseWorldEarnings} from './shares'
+import {
+    parseCitizenShares,
+    parseEmissionEpoch,
+    parseEmissionSeries,
+    parseWorldEarnings,
+} from './shares'
 
 const PLAYER = 'alice'
 const TOKEN = {tokenContract: 'scrap.gm', symbol: '0,SCRAP'}
@@ -168,6 +173,56 @@ describe('civic result parsers', () => {
             production: 4_150_000n,
             supply: 124_000_000n,
             owed: 81_000n,
+        })
+    })
+
+    it('reads an emission series page with its handover point and curve', () => {
+        const series = parseEmissionSeries({
+            handover: {epoch: 48, supply: 123998644, owed: 0},
+            curve: {
+                bands: [
+                    {below: 300000000, per_epoch: 1245000},
+                    {below: '1000000000', per_epoch: 311250},
+                ],
+                ramp_epochs: 12,
+            },
+            supply: 125000000,
+            owed: '81000',
+            rows: [],
+            next_from: 148,
+        })
+        expect(series).toEqual({
+            handover: {epoch: 48, supply: 123_998_644n, owed: 0n},
+            curve: {
+                bands: [
+                    {below: 300_000_000n, perEpoch: 1_245_000n},
+                    {below: 1_000_000_000n, perEpoch: 311_250n},
+                ],
+                rampEpochs: 12,
+            },
+            supply: 125_000_000n,
+            owed: 81_000n,
+            rows: [],
+            nextFrom: 148,
+        })
+    })
+
+    it('reads an emission series page before the handover', () => {
+        expect(
+            parseEmissionSeries({
+                handover: null,
+                curve: null,
+                supply: 123998644,
+                owed: null,
+                rows: [],
+            })
+        ).toEqual({
+            handover: null,
+            curve: null,
+            supply: 123_998_644n,
+            owed: null,
+            rows: [],
+            nextFrom: null,
         })
     })
 })

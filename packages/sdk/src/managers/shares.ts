@@ -67,6 +67,31 @@ export interface EmissionEpoch {
     owed: bigint
 }
 
+export interface EmissionBand {
+    below: bigint
+    perEpoch: bigint
+}
+
+export interface EmissionCurve {
+    bands: EmissionBand[]
+    rampEpochs: number
+}
+
+export interface EmissionHandover {
+    epoch: number
+    supply: bigint
+    owed: bigint
+}
+
+export interface EmissionSeries {
+    handover: EmissionHandover | null
+    curve: EmissionCurve | null
+    supply: bigint | null
+    owed: bigint | null
+    rows: EmissionEpoch[]
+    nextFrom: number | null
+}
+
 type Wire<T> = {[K in keyof T as T[K] extends (...args: never[]) => unknown ? never : K]: unknown}
 
 export interface WireEmissionEpoch {
@@ -162,6 +187,40 @@ export function parseEmissionEpoch(raw: WireEmissionEpoch): EmissionEpoch {
         production: big(raw.production),
         supply: big(raw.supply),
         owed: big(raw.owed),
+    }
+}
+
+interface WireEmissionSeries {
+    handover?: {epoch: unknown; supply: unknown; owed: unknown} | null
+    curve?: {bands: {below: unknown; per_epoch: unknown}[]; ramp_epochs: unknown} | null
+    supply?: unknown
+    owed?: unknown
+    rows: WireEmissionEpoch[]
+    next_from?: unknown
+}
+
+export function parseEmissionSeries(raw: WireEmissionSeries): EmissionSeries {
+    return {
+        handover: raw.handover
+            ? {
+                  epoch: Number(raw.handover.epoch),
+                  supply: big(raw.handover.supply),
+                  owed: big(raw.handover.owed),
+              }
+            : null,
+        curve: raw.curve
+            ? {
+                  bands: raw.curve.bands.map((band) => ({
+                      below: big(band.below),
+                      perEpoch: big(band.per_epoch),
+                  })),
+                  rampEpochs: Number(raw.curve.ramp_epochs),
+              }
+            : null,
+        supply: raw.supply == null ? null : big(raw.supply),
+        owed: raw.owed == null ? null : big(raw.owed),
+        rows: raw.rows.map(parseEmissionEpoch),
+        nextFrom: typeof raw.next_from === 'number' ? raw.next_from : null,
     }
 }
 
