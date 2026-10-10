@@ -2,6 +2,7 @@ import {ServerContract} from '../contracts'
 import type {Cluster} from '../managers/cluster'
 import {HoldKind, TaskCancelable, TaskType} from '../types'
 import {calcCargoItemMass} from '../capabilities/storage'
+import {ENTITY_CONSTRUCTION_DOCK} from '../data/kind-registry'
 import * as errors from '../errors'
 import {
     taskCargoEffect,
@@ -36,6 +37,7 @@ export enum CancelBlockReason {
     WOULD_OVERFILL = 'WOULD_OVERFILL',
     GIVER_MISSING = 'GIVER_MISSING',
     CLUSTER_FULL = 'CLUSTER_FULL',
+    RECEIVER_LOCKED = 'RECEIVER_LOCKED',
     INCONSISTENT = 'INCONSISTENT',
 }
 
@@ -56,6 +58,7 @@ export const CANCEL_REFUSAL_REASONS: ReadonlyMap<string, CancelBlockReason> = ne
     [errors.CANCEL_WOULD_OVERFILL, CancelBlockReason.WOULD_OVERFILL],
     [errors.CANCEL_PAIRED_NOT_FOUND, CancelBlockReason.GIVER_MISSING],
     [errors.CANCEL_CLUSTER_CANNOT_ABSORB, CancelBlockReason.CLUSTER_FULL],
+    [errors.PLOT_BUILD_PENDING, CancelBlockReason.RECEIVER_LOCKED],
 ])
 
 // The contract message a refusal reason stands for; NEEDS and INCONSISTENT have none.
@@ -267,13 +270,31 @@ function incoming_fits(row: EntityInfo, at: Date, addMass: number, capacity: num
     return projectedPeakCargomass(row, at, addMass + incomingHoldMass(row.holds)) <= capacity
 }
 
+// Mirrors dock_lock_released_by in cancel.cpp.
+function dock_lock_released_by(t: Task): string | undefined {
+    if (
+        t.type.equals(TaskType.CIVIC_DEPOSIT) &&
+        t.subject !== undefined &&
+        t.subject.entity_type.equals(ENTITY_CONSTRUCTION_DOCK)
+    )
+        return t.subject.entity_id.toString()
+    return undefined
+}
+
 // Mirrors cargo_return_refusal in cancel.cpp.
 function cargo_return_refusal(
     row: EntityInfo,
     mass: number,
     capacity: number,
-    now: Date
+    now: Date,
+    releasedBy?: string
 ): CancelBlockReason | undefined {
+    const locked = row.holds.some(
+        (h) =>
+            (h.kind.equals(HoldKind.BUILD) || h.kind.equals(HoldKind.UPGRADE)) &&
+            h.counterpart.entity_id.toString() !== releasedBy
+    )
+    if (locked) return CancelBlockReason.RECEIVER_LOCKED
     if (schedule.hasPendingCapper(row)) return CancelBlockReason.GIVER_CAPPED
     if (!incoming_fits(row, now, mass, capacity)) return CancelBlockReason.WOULD_OVERFILL
     return undefined
@@ -468,6 +489,7 @@ function cancel_entity_impl(
         counterpart: EntityRef
         holdId: string
         cargo: CargoItem[]
+        releasesLockOf: string | undefined
     }[] = []
     const clustercrafts: {
         couplings: Task['couplings']
@@ -510,6 +532,7 @@ function cancel_entity_impl(
                 counterpart: c.counterpart,
                 holdId: c.hold.toString(),
                 cargo: t.cargo,
+                releasesLockOf: dock_lock_released_by(t),
             })
         }
         if (clustercraft)
@@ -595,7 +618,7 @@ function cancel_entity_impl(
         const row = withRow(giver, {
             cargomass: giver.cargomass.toNumber() + prior,
         })
-        const refusal = cargo_return_refusal(row, mass, capacityOf(giver), now)
+        const refusal = cargo_return_refusal(row, mass, capacityOf(giver), now, oc.releasesLockOf)
         if (refusal) return refuse(refusal, oc.counterpart)
         credited.set(id, prior + mass)
     }

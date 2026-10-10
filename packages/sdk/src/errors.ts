@@ -72,6 +72,7 @@ export const CANCEL_GIVER_CAPPED =
 export const CANCEL_PAIRED_NOT_FOUND = 'Paired task missing on counterparty schedule.'
 export const CANCEL_CLUSTER_CANNOT_ABSORB =
     'clustercraft cancel: cluster cannot absorb returned inputs'
+export const PLOT_BUILD_PENDING = 'Plot already has a build in progress.'
 
 // Every refusal the cancel action can raise for player-reachable state; cancel.test.ts maps each to a CancelBlockReason.
 export const CANCEL_REFUSALS: readonly string[] = [
@@ -90,6 +91,7 @@ export const CANCEL_REFUSALS: readonly string[] = [
     CANCEL_WOULD_OVERFILL,
     CANCEL_PAIRED_NOT_FOUND,
     CANCEL_CLUSTER_CANNOT_ABSORB,
+    PLOT_BUILD_PENDING,
 ]
 export const WOULD_STRAND = 'Cancelling this would leave a later task without the cargo it needs.'
 export const WOULD_OVERFILL = 'Cancelling this would overfill the other entity with returned cargo.'
