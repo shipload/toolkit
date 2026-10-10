@@ -147,7 +147,33 @@ describe('civic result parsers', () => {
         const rows = parseWorldEarnings({
             rows: [{epoch: 4, closed: true, earnings_fp: '10', scaled_fp: '9', total: '300'}],
         })
-        expect(rows).toEqual([{epoch: 4, closed: true, earningsFp: 10n, scaledFp: 9n, total: 300n}])
+        expect(rows).toEqual([
+            {epoch: 4, closed: true, earningsFp: 10n, scaledFp: 9n, total: 300n, shareFp: null},
+        ])
+    })
+
+    it('reads a citizen Share from earnings rows that carry one', () => {
+        const rows = parseWorldEarnings({
+            rows: [
+                {
+                    epoch: 4,
+                    closed: true,
+                    earnings_fp: '10',
+                    scaled_fp: '9',
+                    total: '300',
+                    share_fp: '3',
+                },
+                {
+                    epoch: 5,
+                    closed: false,
+                    earnings_fp: '8',
+                    scaled_fp: '8',
+                    total: '300',
+                    share_fp: '0',
+                },
+            ],
+        })
+        expect(rows.map((r) => r.shareFp)).toEqual([3n, 0n])
     })
 
     it('keeps earnings above uint64 exact', () => {

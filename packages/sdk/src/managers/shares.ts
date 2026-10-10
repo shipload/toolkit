@@ -38,6 +38,7 @@ export interface WorldEarnings {
     earningsFp: bigint
     scaledFp: bigint
     total: bigint
+    shareFp: bigint | null
 }
 
 export interface CivicEpoch {
@@ -148,13 +149,14 @@ export function parseWorldProduction(
 
 export function parseWorldEarnings(raw: {rows: unknown[]}): WorldEarnings[] {
     return raw.rows.map((value) => {
-        const row = value as Wire<ServerContract.Types.earnings_view>
+        const row = value as Wire<ServerContract.Types.share_history_view>
         return {
             epoch: Number(row.epoch),
             closed: Boolean(row.closed),
             earningsFp: big(row.earnings_fp),
             scaledFp: big(row.scaled_fp),
             total: big(row.total),
+            shareFp: row.share_fp === undefined ? null : big(row.share_fp),
         }
     })
 }

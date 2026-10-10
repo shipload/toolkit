@@ -432,6 +432,7 @@ describe('ActionsManager', () => {
             'getvotes',
             // civic SCRAP queries — wrapped by SharesManager, not ActionsManager
             'getearnings',
+            'getsharehist',
             'getemitepoch',
             'getshares',
             'getworldprod',
