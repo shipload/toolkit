@@ -737,14 +737,14 @@ export type {
 export {deserializeAtomicData} from './nft/atomicdata'
 export type {SchemaField, RawData} from './nft/atomicdata'
 
+export {buildImmutableData, computeNftImageUrl} from './nft/buildImmutableData'
 export {
-    buildImmutableData,
-    buildResourceImmutable,
-    buildComponentImmutable,
-    buildModuleImmutable,
-    buildEntityImmutable,
-    computeNftImageUrl,
-} from './nft/buildImmutableData'
+    getWrappedSchema,
+    getWrappedSchemas,
+    getWrappedSchemaItemIds,
+    wrappedSchemaStatFields,
+} from './nft/schemas'
+export type {WrappedSchema} from './nft/schemas'
 export type {
     AtomicAttributeType,
     ImmutableEntry,
@@ -773,8 +773,8 @@ export type {
 } from './nft/atomicassets'
 
 export {
-    buildEntityDescription,
-    formatModuleLine,
+    buildEntityLoadout,
+    formatLoadoutLine,
     entityDisplayName,
     moduleDisplayName,
     computeBaseHullmass,

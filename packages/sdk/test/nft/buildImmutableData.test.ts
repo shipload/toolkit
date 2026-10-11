@@ -1,357 +1,179 @@
 import {describe, expect, test} from 'bun:test'
 import {
-    buildComponentImmutable,
-    buildEntityImmutable,
+    buildEntityLoadout,
     buildImmutableData,
-    buildModuleImmutable,
-    buildResourceImmutable,
-    computeBuilderDrain,
-    computeBuilderSpeed,
-    computeCrafterDrain,
-    computeEngineDrain,
-    computeEngineThrust,
-    computeGathererDepth,
-    computeGathererDrain,
-    computeGathererYield,
-    computeHaulerCapacity,
-    computeHaulerEfficiency,
     computeNftImageUrl,
-    computeEffectiveModuleStat,
     decodeStat,
+    encodeStats,
+    getWrappedSchema,
     type ImmutableEntry,
 } from '../../src'
 import {
-    computeCargoBayDrain,
-    computeHaulerDrain as moduleComputeHaulerDrain,
-} from '../../src/nft/description'
+    ITEM_ENGINE_T1,
+    ITEM_GATHERER_T1,
+    ITEM_GENERATOR_T1,
+    ITEM_LOADER_T2,
+    ITEM_ORE_T1,
+    ITEM_PLATE,
+    ITEM_ROUSTABOUT_T1A_PACKED,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
+    ITEM_WORKSHOP_T1_PACKED,
+} from '../../src/data/item-ids'
 
-function toWholeEnergy(milli: number): number {
-    return Math.floor((milli + 500) / 1000)
+function layout(entries: ImmutableEntry[]): [string, string][] {
+    return entries.map((e) => [e.first, e.second[0]])
 }
 
-const ITEM_CRUDE_ORE = 101
-const ITEM_COMPONENT_ORE_BASED = 10001
-const ITEM_ENGINE_T1 = 10100
-const ITEM_GATHERER_T1 = 10102
-const ITEM_CRAFTER_T1 = 10104
-const ITEM_STORAGE_T1 = 10105
-const ITEM_HAULER_T1 = 10106
-const ITEM_BATTERY_T1 = 10108
-const ITEM_BUILDER_T1 = 10110
-const ITEM_SHIP_T1_PACKED = 10201
-
-function encodeStats(values: number[]): bigint {
-    let result = 0n
-    for (let i = 0; i < values.length; i++) {
-        result |= (BigInt(values[i]!) & 0x3ffn) << BigInt(i * 10)
-    }
-    return result
+function value(entries: ImmutableEntry[], key: string): unknown {
+    return entries.find((e) => e.first === key)?.second[1]
 }
 
-function findEntry(entries: ImmutableEntry[], key: string): ImmutableEntry | undefined {
-    return entries.find((e) => e.first === key)
-}
-
-function keys(entries: ImmutableEntry[]): string[] {
-    return entries.map((e) => e.first)
-}
+const COMMON_TAIL: [string, string][] = [
+    ['stats', 'uint64'],
+    ['origin_x', 'int32'],
+    ['origin_y', 'int32'],
+    ['img', 'string'],
+    ['deposit_amount', 'uint64'],
+    ['deposit_token', 'uint64'],
+    ['deposit_symbol', 'uint64'],
+]
 
 describe('buildImmutableData', () => {
-    test('resource (ore) emits common base + 3 category stats in fixed order', () => {
+    test('resource (ore) writes its three stats between quantity and stats', () => {
         const stats = encodeStats([200, 150, 99])
-        const entries = buildResourceImmutable(ITEM_CRUDE_ORE, 10, stats, -5, 7)
+        const entries = buildImmutableData(ITEM_ORE_T1, 10, stats, -5, 7)
 
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'strength',
-            'tolerance',
-            'density',
+        expect(layout(entries)).toEqual([
+            ['quantity', 'uint32'],
+            ['strength', 'uint16'],
+            ['tolerance', 'uint16'],
+            ['density', 'uint16'],
+            ...COMMON_TAIL,
         ])
-
-        expect(findEntry(entries, 'quantity')!.second).toEqual(['uint32', 10])
-        expect(findEntry(entries, 'stats')!.second).toEqual(['uint64', String(stats)])
-        expect(findEntry(entries, 'origin_x')!.second).toEqual(['int32', -5])
-        expect(findEntry(entries, 'origin_y')!.second).toEqual(['int32', 7])
-        expect(findEntry(entries, 'strength')!.second).toEqual(['uint16', 200])
-        expect(findEntry(entries, 'tolerance')!.second).toEqual(['uint16', 150])
-        expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 99])
-
-        const img = findEntry(entries, 'img')!.second
-        expect(img[0]).toBe('string')
-        expect(String(img[1])).toMatch(
+        expect(value(entries, 'quantity')).toBe(10)
+        expect(value(entries, 'stats')).toBe(String(stats))
+        expect(value(entries, 'origin_x')).toBe(-5)
+        expect(value(entries, 'origin_y')).toBe(7)
+        expect(value(entries, 'strength')).toBe(200)
+        expect(value(entries, 'tolerance')).toBe(150)
+        expect(value(entries, 'density')).toBe(99)
+        expect(String(value(entries, 'img'))).toMatch(
             /^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/
         )
     })
 
-    test('resource dispatcher routes through buildImmutableData', () => {
-        const stats = encodeStats([42, 17, 9])
-        const direct = buildResourceImmutable(ITEM_CRUDE_ORE, 3, stats, 0, 0)
-        const dispatched = buildImmutableData(ITEM_CRUDE_ORE, 3, stats, 0, 0)
-        expect(dispatched).toEqual(direct)
+    test('component (plate) names its stats from its recipe', () => {
+        const entries = buildImmutableData(ITEM_PLATE, 1, encodeStats([512, 333, 250]), 0, 0)
+        expect(layout(entries).slice(1, 4)).toEqual([
+            ['strength', 'uint16'],
+            ['density', 'uint16'],
+            ['tolerance', 'uint16'],
+        ])
+        expect(value(entries, 'tolerance')).toBe(250)
     })
 
-    test('component (ore-based) emits decoded crafted stat keys', () => {
-        const stats = encodeStats([512, 333, 250])
-        const entries = buildComponentImmutable(ITEM_COMPONENT_ORE_BASED, 1, stats, 0, 0)
+    test('module layout pins the Limpet Bay T1 raw stats and no derived fields', () => {
+        const stats = encodeStats([500, 600, 400])
+        const entries = buildImmutableData(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'strength',
-            'density',
-            'tolerance',
+        expect(layout(entries)).toEqual([
+            ['quantity', 'uint32'],
+            ['strength', 'uint16'],
+            ['tolerance', 'uint16'],
+            ['saturation', 'uint16'],
+            ...COMMON_TAIL,
         ])
-        expect(findEntry(entries, 'strength')!.second).toEqual(['uint16', 512])
-        expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 333])
-        expect(findEntry(entries, 'tolerance')!.second).toEqual(['uint16', 250])
+        expect(value(entries, 'strength')).toBe(500)
+        expect(value(entries, 'tolerance')).toBe(600)
+        expect(value(entries, 'saturation')).toBe(400)
+        expect(getWrappedSchema(ITEM_GATHERER_T1)?.name).toBe('limpetbay.v1')
     })
 
-    test('module (engine) emits volatility/thermal + computed thrust/drain', () => {
-        const vol = 700
-        const thm = 420
-        const stats = encodeStats([vol, thm])
-        const entries = buildModuleImmutable(ITEM_ENGINE_T1, 1, stats, 0, 0)
-
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'volatility',
-            'thermal',
-            'thrust',
-            'drain',
-        ])
-        expect(findEntry(entries, 'volatility')!.second).toEqual(['uint16', vol])
-        expect(findEntry(entries, 'thermal')!.second).toEqual(['uint16', thm])
-        expect(findEntry(entries, 'thrust')!.second).toEqual([
-            'uint32',
-            computeEngineThrust(computeEffectiveModuleStat(vol), 1),
-        ])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            computeEngineDrain(computeEffectiveModuleStat(thm)),
-        ])
-    })
-
-    test('module (gatherer) emits 4 stats + 3 computed values in fixed order', () => {
-        const str = 500
-        const tol = 600
-        const sat = 400
-        const stats = encodeStats([str, tol, sat])
-        const entries = buildModuleImmutable(ITEM_GATHERER_T1, 1, stats, 0, 0)
-
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'strength',
-            'tolerance',
-            'saturation',
-            'plasticity',
-            'yield',
-            'drain',
-            'depth',
-        ])
-        expect(findEntry(entries, 'yield')!.second).toEqual([
-            'uint16',
-            computeGathererYield(str, 1),
-        ])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            toWholeEnergy(computeGathererDrain(sat)),
-        ])
-        expect(findEntry(entries, 'depth')!.second).toEqual([
-            'uint16',
-            computeGathererDepth(tol, 1),
-        ])
-    })
-
-    test('crafter immutable data names its first stat reactivity, as the v2.crafter schema does', () => {
-        const rea = 400
-        const con = 250
-        const stats = encodeStats([rea, con])
-        const entries = buildModuleImmutable(ITEM_CRAFTER_T1, 1, stats, 0, 0)
-        const names = entries.map((e) => e.first)
-        expect(names).toContain('reactivity')
-        expect(names).toContain('conductivity')
-        expect(names).not.toContain('fineness')
-        expect(findEntry(entries, 'reactivity')!.second).toEqual(['uint16', rea])
-        expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            toWholeEnergy(computeCrafterDrain(con)),
-        ])
-    })
-
-    test('module (hauler) emits 3 stats + 3 computed capabilities', () => {
-        const res = 400
-        const pla = 250
-        const con = 600
-        const stats = encodeStats([res, pla, con])
-        const entries = buildModuleImmutable(ITEM_HAULER_T1, 1, stats, 0, 0)
-
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'resonance',
-            'plasticity',
-            'conductivity',
-            'capacity',
-            'efficiency',
-            'drain',
-        ])
-        expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', res])
-        expect(findEntry(entries, 'conductivity')!.second).toEqual(['uint16', con])
-        expect(findEntry(entries, 'reflectivity')).toBeUndefined()
-        expect(findEntry(entries, 'capacity')!.second).toEqual([
-            'uint8',
-            computeHaulerCapacity(res, 1),
-        ])
-        expect(findEntry(entries, 'efficiency')!.second).toEqual([
-            'uint16',
-            computeHaulerEfficiency(pla),
-        ])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            toWholeEnergy(moduleComputeHaulerDrain(con, 1)),
-        ])
-    })
-
-    test('module (builder) emits resonance/fineness + computed speed/drain', () => {
-        const resonance = 500
-        const fineness = 330
-        const entries = buildModuleImmutable(
-            ITEM_BUILDER_T1,
-            1,
-            encodeStats([resonance, fineness]),
-            0,
-            0
-        )
-
-        expect(keys(entries).slice(-4)).toEqual(['resonance', 'fineness', 'speed', 'drain'])
-        expect(findEntry(entries, 'resonance')!.second).toEqual(['uint16', resonance])
-        expect(findEntry(entries, 'fineness')!.second).toEqual(['uint16', fineness])
-        expect(findEntry(entries, 'cohesion')).toBeUndefined()
-        expect(findEntry(entries, 'tolerance')).toBeUndefined()
-        expect(findEntry(entries, 'speed')!.second).toEqual([
-            'uint16',
-            computeBuilderSpeed(resonance, 1),
-        ])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            toWholeEnergy(computeBuilderDrain(fineness)),
-        ])
-    })
-
-    test('module (storage/Cargo Bay) emits raw capacity as uint32', () => {
-        const stats = encodeStats([999, 999, 999, 999])
-        const entries = buildModuleImmutable(ITEM_STORAGE_T1, 1, stats, 0, 0)
-
-        expect(keys(entries)).toContain('capacity')
-        expect(keys(entries)).not.toContain('capacity_bonus_pct')
-        expect(findEntry(entries, 'strength')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'density')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'hardness')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'cohesion')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 600_000])
-        expect(findEntry(entries, 'drain')!.second).toEqual([
-            'uint16',
-            toWholeEnergy(computeCargoBayDrain(999, 1)),
-        ])
-    })
-
-    test('module (battery/Battery Bank) emits raw capacity as uint32', () => {
-        const stats = encodeStats([999, 999, 999, 999])
-        const entries = buildModuleImmutable(ITEM_BATTERY_T1, 1, stats, 0, 0)
-
-        expect(keys(entries)).toContain('capacity')
-        expect(keys(entries)).not.toContain('capacity_bonus_pct')
-        expect(findEntry(entries, 'volatility')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'thermal')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'plasticity')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'insulation')!.second).toEqual(['uint16', 999])
-        expect(findEntry(entries, 'capacity')!.second).toEqual(['uint32', 10_000])
-    })
-
-    test('entity (ship) emits module vectors and description; pads empty slots with 0', () => {
-        const shipStats = encodeStats([100, 200])
-        const engineStats = encodeStats([700, 420])
+    test('ship layout pins entity_id, the hull stats of its own line, and the loadout', () => {
+        const hull = encodeStats([101, 202, 303, 404, 505])
+        const core = encodeStats([300, 250])
+        const engine = encodeStats([213, 213])
         const modules = [
-            {type: 1, installed: {item_id: ITEM_ENGINE_T1, stats: engineStats}},
-            {type: 1},
-            {type: 1},
-            {type: 1},
-            {type: 1},
+            {type: 0, installed: {item_id: ITEM_GENERATOR_T1, stats: core}},
+            {type: 0, installed: {item_id: ITEM_ENGINE_T1, stats: engine}},
+            {type: 0},
         ]
-        const entries = buildEntityImmutable(ITEM_SHIP_T1_PACKED, 1, shipStats, 0, 0, modules)
+        const entries = buildImmutableData(ITEM_ROUSTABOUT_T1A_PACKED, 1, hull, 3, 4, modules, 77)
 
-        expect(keys(entries)).toEqual([
-            'quantity',
-            'stats',
-            'origin_x',
-            'origin_y',
-            'img',
-            'deposit_amount',
-            'deposit_token',
-            'deposit_symbol',
-            'module_items',
-            'module_stats',
-            'description',
+        expect(layout(entries)).toEqual([
+            ['entity_id', 'uint64'],
+            ['quantity', 'uint32'],
+            ['strength', 'uint16'],
+            ['hardness', 'uint16'],
+            ['plasticity', 'uint16'],
+            ['volatility', 'uint16'],
+            ['conductivity', 'uint16'],
+            ...COMMON_TAIL,
+            ['module_items', 'UINT16_VEC'],
+            ['module_stats', 'UINT64_VEC'],
+            ['loadout', 'string'],
         ])
-        expect(findEntry(entries, 'module_items')!.second).toEqual([
-            'UINT16_VEC',
-            [ITEM_ENGINE_T1, 0, 0, 0, 0],
-        ])
-        expect(findEntry(entries, 'module_stats')!.second).toEqual([
-            'UINT64_VEC',
-            [String(engineStats), '0', '0', '0', '0'],
-        ])
-        const description = findEntry(entries, 'description')!.second
-        expect(description[0]).toBe('string')
-        expect(typeof description[1]).toBe('string')
-        expect((description[1] as string).length).toBeGreaterThan(0)
+        expect(value(entries, 'entity_id')).toBe('77')
+        expect(value(entries, 'conductivity')).toBe(505)
+        expect(value(entries, 'module_items')).toEqual([ITEM_GENERATOR_T1, ITEM_ENGINE_T1, 0])
+        expect(value(entries, 'module_stats')).toEqual([String(core), String(engine), '0'])
+        expect(value(entries, 'loadout')).toBe(
+            [
+                'Slot 1: Power Core T1 (resonance 300, reflectivity 250)',
+                'Slot 2: Engine T1 (volatility 213, thermal 213)',
+                'Slot 3: empty',
+            ].join('\n')
+        )
+        expect(getWrappedSchema(ITEM_ROUSTABOUT_T1A_PACKED)?.name).toBe('ship.v1')
     })
 
-    test('entity dispatcher routes through buildImmutableData', () => {
-        const shipStats = encodeStats([100, 200])
-        const modules = [{type: 1}, {type: 1}, {type: 1}, {type: 1}, {type: 1}]
-        const direct = buildEntityImmutable(ITEM_SHIP_T1_PACKED, 1, shipStats, 0, 0, modules)
-        const dispatched = buildImmutableData(ITEM_SHIP_T1_PACKED, 1, shipStats, 0, 0, modules)
-        expect(dispatched).toEqual(direct)
+    test('structure layout pins the Warehouse hull stats and loadout', () => {
+        const hull = encodeStats([111, 222, 333, 444])
+        const bay = encodeStats([321, 123])
+        const modules = [
+            {type: 0, installed: {item_id: ITEM_LOADER_T2, stats: bay}},
+            {type: 0},
+            {type: 0},
+            {type: 0},
+            {type: 0},
+        ]
+        const entries = buildImmutableData(ITEM_WAREHOUSE_T2_PACKED, 1, hull, 0, 0, modules)
+
+        expect(layout(entries).slice(0, 6)).toEqual([
+            ['entity_id', 'uint64'],
+            ['quantity', 'uint32'],
+            ['strength', 'uint16'],
+            ['density', 'uint16'],
+            ['hardness', 'uint16'],
+            ['fineness', 'uint16'],
+        ])
+        expect(value(entries, 'entity_id')).toBe('0')
+        expect(value(entries, 'fineness')).toBe(444)
+        expect(value(entries, 'loadout')).toBe(
+            [
+                'Slot 1: Shuttle Bay T2 (insulation 321, plasticity 123)',
+                'Slot 2: empty',
+                'Slot 3: empty',
+                'Slot 4: empty',
+                'Slot 5: empty',
+            ].join('\n')
+        )
+        expect(getWrappedSchema(ITEM_WAREHOUSE_T2_PACKED)?.name).toBe('warehouse.v1')
+    })
+
+    test('items without a schema cannot be built', () => {
+        expect(() => buildImmutableData(ITEM_SHIP_T1_PACKED, 1, 0n, 0, 0, [])).toThrow()
+        expect(() => buildImmutableData(ITEM_WORKSHOP_T1_PACKED, 1, 0n, 0, 0, [])).toThrow()
+    })
+
+    test('an entity with no slots writes an empty loadout', () => {
+        expect(buildEntityLoadout([], [])).toBe('')
     })
 
     test('computeNftImageUrl returns a base64url-encoded image link with no padding', () => {
         const url = computeNftImageUrl(
-            {item_id: ITEM_CRUDE_ORE, stats: encodeStats([1, 2, 3]), modules: [], quantity: 1},
+            {item_id: ITEM_ORE_T1, stats: encodeStats([1, 2, 3]), modules: [], quantity: 1},
             0,
             0
         )
@@ -361,7 +183,7 @@ describe('buildImmutableData', () => {
         expect(slug).not.toMatch(/[+/=]/)
     })
 
-    test('decodeStat round-trips through encodeStats helper used in tests', () => {
+    test('decodeStat round-trips through encodeStats', () => {
         const stats = encodeStats([5, 600, 1023, 200])
         expect(decodeStat(stats, 0)).toBe(5)
         expect(decodeStat(stats, 1)).toBe(600)

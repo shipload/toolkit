@@ -1,21 +1,7 @@
-import {
-    getModuleCapabilityType,
-    MODULE_BUILDER,
-    MODULE_CRAFTER,
-    MODULE_ENGINE,
-    MODULE_GATHERER,
-    MODULE_GENERATOR,
-    MODULE_BATTERY,
-    MODULE_HAULER,
-    MODULE_LOADER,
-    MODULE_STORAGE,
-    MODULE_WARP,
-} from '../capabilities/modules'
 import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
-import {decodeStat} from '../derivation/crafting'
+import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {
     gathererDepthForTier,
-    computeGathererYield,
     moduleTierPct,
     ENGINE_THRUST_TIER_PCT,
     GENERATOR_CAPACITY_TIER_PCT,
@@ -28,10 +14,9 @@ import {
     BATTERY_CAPACITY_TIER_PCT,
 } from '../derivation/capabilities'
 import {getItem, tryGetItem} from '../data/catalog'
-import {MASS_UNITS_PER_TONNE, type ModuleType} from '../types'
+import type {ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
-import {computeEffectiveModuleStat} from '../derivation/stat-scaling'
 import {resolveCapacityFnName, type CapacityFnName} from '../derivation/capacity-fn-registry'
 
 function idiv(a: number, b: number): number {
@@ -40,10 +25,6 @@ function idiv(a: number, b: number): number {
 
 export function toWholeEnergy(milli: number): number {
     return idiv(milli + 500, 1000)
-}
-
-export function formatMassTonnes(mass: number): string {
-    return `${idiv(mass, MASS_UNITS_PER_TONNE)}.${mass % MASS_UNITS_PER_TONNE} t`
 }
 
 function isShipHull(itemId: number): boolean {
@@ -202,121 +183,17 @@ export function moduleDisplayName(itemId: number): string {
     return MODULE_DISPLAY_NAME_BY_TYPE[item.moduleType] ?? 'Module'
 }
 
-export function formatModuleLine(slot: number, itemId: number, stats: bigint): string {
-    let out = `Slot ${slot} - `
-    if (itemId === 0) {
-        out += '(empty)'
-        return out
-    }
-
-    out += moduleDisplayName(itemId)
-    const subtype = getModuleCapabilityType(itemId)
-
-    switch (subtype) {
-        case MODULE_ENGINE: {
-            const vol = computeEffectiveModuleStat(decodeStat(stats, 0))
-            const thm = computeEffectiveModuleStat(decodeStat(stats, 1))
-            const tier = getItem(itemId).tier
-            out += `  Thrust ${computeEngineThrust(vol, tier)}  Drain ${computeEngineDrain(thm)}`
-            break
-        }
-        case MODULE_GENERATOR: {
-            const res = computeEffectiveModuleStat(decodeStat(stats, 0))
-            const ref = computeEffectiveModuleStat(decodeStat(stats, 1))
-            const tier = getItem(itemId).tier
-            out += `  Capacity ${toWholeEnergy(computeGeneratorCap(res, tier))}  Recharge ${toWholeEnergy(
-                computeGeneratorRech(ref, tier)
-            )}`
-            break
-        }
-        case MODULE_GATHERER: {
-            const str = decodeStat(stats, 0)
-            const tol = decodeStat(stats, 1)
-            const con = decodeStat(stats, 2)
-            const tier = getItem(itemId).tier
-            out += `  Yield ${computeGathererYield(str, tier)}  Depth ${computeGathererDepth(
-                tol,
-                tier
-            )}  Drain ${toWholeEnergy(computeGathererDrain(con))}`
-            break
-        }
-        case MODULE_LOADER: {
-            const fin = decodeStat(stats, 0)
-            const pla = decodeStat(stats, 1)
-            const tier = getItem(itemId).tier
-            out += `  Mass ${formatMassTonnes(computeLoaderMass(fin))}  Thrust ${computeLoaderThrust(pla, tier)}`
-            break
-        }
-        case MODULE_CRAFTER: {
-            const rea = decodeStat(stats, 0)
-            const con = decodeStat(stats, 1)
-            const tier = getItem(itemId).tier
-            out += `  Speed ${computeCrafterSpeed(rea, tier)}  Drain ${toWholeEnergy(computeCrafterDrain(con))}`
-            break
-        }
-        case MODULE_BUILDER: {
-            const res = decodeStat(stats, 0)
-            const fin = decodeStat(stats, 1)
-            const tier = getItem(itemId).tier
-            out += `  Speed ${computeBuilderSpeed(res, tier)}  Drain ${toWholeEnergy(computeBuilderDrain(fin))}`
-            break
-        }
-        case MODULE_STORAGE: {
-            const str = decodeStat(stats, 0)
-            const den = decodeStat(stats, 1)
-            const hrd = decodeStat(stats, 2)
-            const coh = decodeStat(stats, 3)
-            const tier = getItem(itemId).tier
-            out += `  Cargo Capacity ${formatMassTonnes(computeCargoBayCapacity(str, den, hrd, tier))}  Drain ${toWholeEnergy(computeCargoBayDrain(coh, tier))}`
-            break
-        }
-        case MODULE_HAULER: {
-            const res = decodeStat(stats, 0)
-            const pla = decodeStat(stats, 1)
-            const con = decodeStat(stats, 2)
-            const tier = getItem(itemId).tier
-            out += `  Capacity ${computeHaulerCapacity(res, tier)}  Efficiency ${computeHaulerEfficiency(pla)}  Drain ${toWholeEnergy(computeHaulerDrain(con, tier))}`
-            break
-        }
-        case MODULE_WARP: {
-            const stat = decodeStat(stats, 0)
-            const tier = getItem(itemId).tier
-            out += `  Range ${computeWarpRange(stat, tier)}`
-            break
-        }
-        case MODULE_BATTERY: {
-            const vol = decodeStat(stats, 0)
-            const thm = decodeStat(stats, 1)
-            const pla = decodeStat(stats, 2)
-            const ins = decodeStat(stats, 3)
-            const tier = getItem(itemId).tier
-            out += `  Energy Capacity ${toWholeEnergy(computeBatteryBankCapacity(vol, thm, pla, ins, tier))}`
-            break
-        }
-    }
-    return out
+export function formatLoadoutLine(slot: number, itemId: number, stats: bigint): string {
+    const label = `Slot ${slot + 1}: `
+    if (itemId === 0) return `${label}empty`
+    const named = Object.entries(decodeCraftedItemStats(itemId, stats))
+    const statText =
+        named.length > 0 ? ` (${named.map(([key, value]) => `${key} ${value}`).join(', ')})` : ''
+    return `${label}${moduleDisplayName(itemId)} T${getItem(itemId).tier}${statText}`
 }
 
-export function buildEntityDescription(
-    itemId: number,
-    hullStats: bigint,
-    moduleItems: number[],
-    moduleStats: bigint[]
-): string {
-    const hullMass = computeBaseHullmass(itemId, hullStats)
-    const baseCapacity = computeBaseCapacityForEntity(itemId, hullStats)
-
-    let out = entityDisplayName(itemId)
-    out += ` - Hull ${formatMassTonnes(hullMass)}`
-    if (baseCapacity > 0) {
-        out += ` * ${formatMassTonnes(baseCapacity)} capacity`
-    }
-    out += '\n\n'
-
-    for (let i = 0; i < moduleItems.length; i++) {
-        out += formatModuleLine(i, moduleItems[i], moduleStats[i] ?? 0n)
-        out += '\n'
-    }
-
-    return out
+export function buildEntityLoadout(moduleItems: number[], moduleStats: bigint[]): string {
+    return moduleItems
+        .map((itemId, i) => formatLoadoutLine(i, itemId, moduleStats[i] ?? 0n))
+        .join('\n')
 }

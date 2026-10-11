@@ -1,0 +1,2550 @@
+{
+  "schemas": [
+    {
+      "name": "ore.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "tolerance",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "gas.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "volatility",
+          "type": "uint16"
+        },
+        {
+          "name": "reactivity",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "regolith.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "cohesion",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "biomass.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "insulation",
+          "type": "uint16"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "crystal.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "reflectivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "plate.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "tolerance",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "frame.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "cohesion",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "plasma.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "volatility",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
+          "type": "uint16"
+        },
+        {
+          "name": "reactivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "resonator.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "reflectivity",
+          "type": "uint16"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "beam.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "tolerance",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "sensor.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "reflectivity",
+          "type": "uint16"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "polymer.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "insulation",
+          "type": "uint16"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "ceramic.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "reactor.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "reactivity",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "cohesion",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "resin.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "insulation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "engine.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "volatility",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "powercore.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "reflectivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "limpetbay.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "tolerance",
+          "type": "uint16"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "shuttle.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "insulation",
+          "type": "uint16"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "fabricatr.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "cargohold.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "cohesion",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "tractor.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "asmarm.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "warpdrive.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "reflectivity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "battery.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "volatility",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
+          "type": "uint16"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "insulation",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "ship.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "saturation",
+          "type": "uint16"
+        },
+        {
+          "name": "volatility",
+          "type": "uint16"
+        },
+        {
+          "name": "reactivity",
+          "type": "uint16"
+        },
+        {
+          "name": "conductivity",
+          "type": "uint16"
+        },
+        {
+          "name": "resonance",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "container.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "warehouse.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "miningrig.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "factory.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "fineness",
+          "type": "uint16"
+        },
+        {
+          "name": "hardness",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "station.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "plasticity",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "asmblyard.v1",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "item_id",
+          "type": "uint16"
+        },
+        {
+          "name": "entity_id",
+          "type": "uint64"
+        },
+        {
+          "name": "quantity",
+          "type": "uint32"
+        },
+        {
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "density",
+          "type": "uint16"
+        },
+        {
+          "name": "stats",
+          "type": "uint64"
+        },
+        {
+          "name": "origin_x",
+          "type": "int32"
+        },
+        {
+          "name": "origin_y",
+          "type": "int32"
+        },
+        {
+          "name": "img",
+          "type": "image"
+        },
+        {
+          "name": "deposit_amount",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_token",
+          "type": "uint64"
+        },
+        {
+          "name": "deposit_symbol",
+          "type": "uint64"
+        },
+        {
+          "name": "module_items",
+          "type": "uint16[]"
+        },
+        {
+          "name": "module_stats",
+          "type": "uint64[]"
+        },
+        {
+          "name": "loadout",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "itemId": 101,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 102,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 103,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 104,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 105,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 106,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 107,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 108,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 109,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 110,
+      "schema": "ore.v1"
+    },
+    {
+      "itemId": 201,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 202,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 203,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 204,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 205,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 206,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 207,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 208,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 209,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 210,
+      "schema": "crystal.v1"
+    },
+    {
+      "itemId": 301,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 302,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 303,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 304,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 305,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 306,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 307,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 308,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 309,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 310,
+      "schema": "gas.v1"
+    },
+    {
+      "itemId": 401,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 402,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 403,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 404,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 405,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 406,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 407,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 408,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 409,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 410,
+      "schema": "regolith.v1"
+    },
+    {
+      "itemId": 501,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 502,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 503,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 504,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 505,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 506,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 507,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 508,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 509,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 510,
+      "schema": "biomass.v1"
+    },
+    {
+      "itemId": 10001,
+      "schema": "plate.v1"
+    },
+    {
+      "itemId": 10002,
+      "schema": "frame.v1"
+    },
+    {
+      "itemId": 10003,
+      "schema": "plasma.v1"
+    },
+    {
+      "itemId": 10004,
+      "schema": "resonator.v1"
+    },
+    {
+      "itemId": 10005,
+      "schema": "beam.v1"
+    },
+    {
+      "itemId": 10006,
+      "schema": "sensor.v1"
+    },
+    {
+      "itemId": 10007,
+      "schema": "polymer.v1"
+    },
+    {
+      "itemId": 10008,
+      "schema": "ceramic.v1"
+    },
+    {
+      "itemId": 10009,
+      "schema": "reactor.v1"
+    },
+    {
+      "itemId": 10010,
+      "schema": "resin.v1"
+    },
+    {
+      "itemId": 10100,
+      "schema": "engine.v1"
+    },
+    {
+      "itemId": 10101,
+      "schema": "powercore.v1"
+    },
+    {
+      "itemId": 10102,
+      "schema": "limpetbay.v1"
+    },
+    {
+      "itemId": 10103,
+      "schema": "shuttle.v1"
+    },
+    {
+      "itemId": 10104,
+      "schema": "fabricatr.v1"
+    },
+    {
+      "itemId": 10105,
+      "schema": "cargohold.v1"
+    },
+    {
+      "itemId": 10106,
+      "schema": "tractor.v1"
+    },
+    {
+      "itemId": 10107,
+      "schema": "warpdrive.v1"
+    },
+    {
+      "itemId": 10108,
+      "schema": "battery.v1"
+    },
+    {
+      "itemId": 10110,
+      "schema": "asmarm.v1"
+    },
+    {
+      "itemId": 10200,
+      "schema": "container.v1"
+    },
+    {
+      "itemId": 10210,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10211,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10212,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10213,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10214,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10215,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 10218,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11001,
+      "schema": "plate.v1"
+    },
+    {
+      "itemId": 11002,
+      "schema": "frame.v1"
+    },
+    {
+      "itemId": 11003,
+      "schema": "plasma.v1"
+    },
+    {
+      "itemId": 11004,
+      "schema": "resonator.v1"
+    },
+    {
+      "itemId": 11005,
+      "schema": "beam.v1"
+    },
+    {
+      "itemId": 11006,
+      "schema": "sensor.v1"
+    },
+    {
+      "itemId": 11007,
+      "schema": "polymer.v1"
+    },
+    {
+      "itemId": 11008,
+      "schema": "ceramic.v1"
+    },
+    {
+      "itemId": 11009,
+      "schema": "reactor.v1"
+    },
+    {
+      "itemId": 11010,
+      "schema": "resin.v1"
+    },
+    {
+      "itemId": 11100,
+      "schema": "engine.v1"
+    },
+    {
+      "itemId": 11101,
+      "schema": "powercore.v1"
+    },
+    {
+      "itemId": 11102,
+      "schema": "limpetbay.v1"
+    },
+    {
+      "itemId": 11103,
+      "schema": "shuttle.v1"
+    },
+    {
+      "itemId": 11104,
+      "schema": "fabricatr.v1"
+    },
+    {
+      "itemId": 11105,
+      "schema": "cargohold.v1"
+    },
+    {
+      "itemId": 11106,
+      "schema": "tractor.v1"
+    },
+    {
+      "itemId": 11107,
+      "schema": "warpdrive.v1"
+    },
+    {
+      "itemId": 11108,
+      "schema": "battery.v1"
+    },
+    {
+      "itemId": 11110,
+      "schema": "asmarm.v1"
+    },
+    {
+      "itemId": 11200,
+      "schema": "container.v1"
+    },
+    {
+      "itemId": 11202,
+      "schema": "warehouse.v1"
+    },
+    {
+      "itemId": 11203,
+      "schema": "miningrig.v1"
+    },
+    {
+      "itemId": 11204,
+      "schema": "factory.v1"
+    },
+    {
+      "itemId": 11207,
+      "schema": "station.v1"
+    },
+    {
+      "itemId": 11209,
+      "schema": "asmblyard.v1"
+    },
+    {
+      "itemId": 11212,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11213,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11214,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11215,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11216,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11217,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11218,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11219,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11220,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11221,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11222,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11223,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11224,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11225,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11226,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11227,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11228,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 11229,
+      "schema": "ship.v1"
+    }
+  ]
+}
