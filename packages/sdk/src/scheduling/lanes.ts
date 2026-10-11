@@ -268,7 +268,10 @@ function taskBarrier(entity: ScheduleData, taskType: number, laneKey: number): n
                 continue
             }
             const pending = TASK_TRAITS.get(type)
-            if ((afterMoves && pending?.mobility) || (afterBound && pending?.positionBound)) {
+            const bindsPosition =
+                (pending?.positionBound ?? false) ||
+                (type === TaskType.CRAFT && t.coordinates !== undefined && t.coordinates !== null)
+            if ((afterMoves && pending?.mobility) || (afterBound && bindsPosition)) {
                 barrier = completesAt
             }
         }
