@@ -574,10 +574,14 @@ describe('travel', () => {
             assert.isAbove(duration, 0)
         })
 
-        test('returns 0 when no loaders available', () => {
-            const source = {location: {z: 1000}, entityClass: EntityClass.OrbitalVessel}
-            const dest = {location: {z: 1200}, entityClass: EntityClass.OrbitalVessel}
-            const duration = calc_transfer_duration(source, dest, 10000)
+        test('returns 0 when the carrier has no loader', () => {
+            const carrier = {location: {z: 1000}, entityClass: EntityClass.OrbitalVessel}
+            const counterpart = {
+                location: {z: 1200},
+                entityClass: EntityClass.OrbitalVessel,
+                loaderLanes: oneLoader,
+            }
+            const duration = calc_transfer_duration(carrier, counterpart, 10000)
             assert.equal(duration, 0)
         })
 
@@ -611,26 +615,39 @@ describe('travel', () => {
             assert.isAbove(duration, 0)
         })
 
-        test('handles only source having loaders (source is active)', () => {
-            const source = {
+        test('handles a counterpart without loaders', () => {
+            const carrier = {
                 location: {z: 1000},
                 entityClass: EntityClass.OrbitalVessel,
                 loaderLanes: oneLoader,
             }
-            const dest = {location: {z: 1200}, entityClass: EntityClass.OrbitalVessel}
-            const duration = calc_transfer_duration(source, dest, 10000)
+            const counterpart = {location: {z: 1200}, entityClass: EntityClass.OrbitalVessel}
+            const duration = calc_transfer_duration(carrier, counterpart, 10000)
             assert.isAbove(duration, 0)
         })
 
-        test('handles only dest having loaders (dest is active)', () => {
-            const source = {location: {z: 1000}, entityClass: EntityClass.OrbitalVessel}
-            const dest = {
+        test("uses the carrier's lane when the counterpart also has loaders", () => {
+            const carrier = {
                 location: {z: 1200},
                 entityClass: EntityClass.OrbitalVessel,
-                loaderLanes: oneLoader,
+                loaderLanes: [lane(300, 500)],
             }
-            const duration = calc_transfer_duration(source, dest, 10000)
-            assert.isAbove(duration, 0)
+            const counterpart = {
+                location: {z: 1000},
+                entityClass: EntityClass.PlanetaryStructure,
+                loaderLanes: [lane(50, 50000)],
+            }
+            const expected = calc_onesided_duration(
+                300,
+                500,
+                1200,
+                1000,
+                EntityClass.OrbitalVessel,
+                EntityClass.PlanetaryStructure,
+                10000
+            )
+            assert.equal(calc_transfer_duration(carrier, counterpart, 10000), expected)
+            assert.notEqual(calc_transfer_duration(counterpart, carrier, 10000), expected)
         })
 
         test('orbital floor exceeds planetary floor for co-located transfers', () => {

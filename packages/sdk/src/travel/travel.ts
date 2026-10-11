@@ -604,28 +604,23 @@ export function calc_onesided_duration(
     return flightTime === 0 ? 1 : flightTime
 }
 
-// Mirrors cargo.cpp: the active (loader-bearing) entity's chosen loader lane drives the duration.
+// Mirrors transfer.cpp plan_transfer: the carrier's chosen loader lane drives the duration.
 export function calc_transfer_duration(
-    source: TransferEntity,
-    dest: TransferEntity,
+    carrier: TransferEntity,
+    counterpart: TransferEntity,
     cargoMass: number
 ): number {
-    const active = chosenLoaderLane(source) ? source : dest
-    const counterpart = active === source ? dest : source
-    const lane = chosenLoaderLane(active)
+    const lane = chosenLoaderLane(carrier)
     if (!lane) {
         return 0
     }
 
-    const activeZ = toNum(active.location.z)
-    const counterpartZ = toNum(counterpart.location.z)
-
     return calc_onesided_duration(
         toNum(lane.thrust),
         toNum(lane.mass),
-        activeZ,
-        counterpartZ,
-        active.entityClass,
+        toNum(carrier.location.z),
+        toNum(counterpart.location.z),
+        carrier.entityClass,
         counterpart.entityClass,
         cargoMass
     )
