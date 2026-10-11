@@ -1013,17 +1013,19 @@ describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
         assert.equal(result, 0)
     })
 
-    test('zero loader thrust → 0 (no-loader / LANE_MOBILITY case)', () => {
-        const result = calc_onesided_duration(
-            0,
-            0,
-            ACTIVE_Z,
-            COUNTERPART_Z,
-            EntityClass.OrbitalVessel,
-            EntityClass.OrbitalVessel,
-            CARGO_MASS
-        )
-        assert.equal(result, 0)
+    test('zero loader thrust is priced as thrust 1', () => {
+        const at = (thrust: number) =>
+            calc_onesided_duration(
+                thrust,
+                0,
+                ACTIVE_Z,
+                COUNTERPART_Z,
+                EntityClass.OrbitalVessel,
+                EntityClass.OrbitalVessel,
+                CARGO_MASS
+            )
+        assert.isAbove(at(0), 0)
+        assert.equal(at(0), at(1))
     })
 
     test('non-zero flightTime that rounds to 0 is clamped to 1 (mirrors contract)', () => {

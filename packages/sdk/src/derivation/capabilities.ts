@@ -543,13 +543,14 @@ export function computeEntityCapabilities(
         } else if (modType === MODULE_LOADER) {
             hasLoader = true
             const caps = computeLoaderCapabilities(decodedStats, item.tier)
+            const laneThrust = Math.max(1, applySlotMultiplier(caps.thrust, amp))
             totalLoaderMass += caps.mass
-            totalLoaderThrust += applySlotMultiplier(caps.thrust, amp)
+            totalLoaderThrust += laneThrust
             totalLoaderQuantity += caps.quantity
             loaderLanes.push({
                 slotIndex: mod.slotIndex,
                 mass: caps.mass,
-                thrust: applySlotMultiplier(caps.thrust, amp),
+                thrust: laneThrust,
                 outputPct: amp,
             })
         } else if (modType === MODULE_STORAGE) {

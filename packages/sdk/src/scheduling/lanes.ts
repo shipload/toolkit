@@ -164,7 +164,7 @@ export function resolveLaneLoader(
     const pla = decodeStat(stats, 1)
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
-    const thrust = applySlotMultiplier(computeLoaderThrust(pla, item.tier ?? 1), amp)
+    const thrust = Math.max(1, applySlotMultiplier(computeLoaderThrust(pla, item.tier ?? 1), amp))
     const mass = computeLoaderMass(ins)
     return {slotIndex: idx, thrust, mass, outputPct: amp, valid: true}
 }

@@ -241,7 +241,7 @@ export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: 
 export function calc_loader_acceleration(ship: ShipLike, mass: UInt64): number {
     const lane = shipLoaderLane(ship)
     const thrust = lane ? lane.thrust : 0
-    return calc_acceleration(thrust, Number(mass))
+    return calc_acceleration(Math.max(thrust, 1), Number(mass))
 }
 
 export function calc_ship_flighttime(ship: ShipLike, mass: UInt64, distance: UInt64): UInt32 {
@@ -585,7 +585,7 @@ export function calc_onesided_duration(
     counterpartEntityClass: EntityClass,
     cargoMass: number
 ): number {
-    if (cargoMass === 0 || loaderThrust === 0) {
+    if (cargoMass === 0) {
         return 0
     }
     const rawDistance = Math.abs(activeZ - counterpartZ)
@@ -595,7 +595,7 @@ export function calc_onesided_duration(
     )
     const distance = rawDistance < minDistance ? minDistance : rawDistance
     const totalMass = cargoMass + loaderMass
-    const acceleration = calc_acceleration(loaderThrust, totalMass)
+    const acceleration = calc_acceleration(Math.max(loaderThrust, 1), totalMass)
     const flightTime = Math.floor(2 * Math.sqrt(distance / acceleration))
     return flightTime === 0 ? 1 : flightTime
 }
