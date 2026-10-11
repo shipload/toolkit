@@ -9,6 +9,7 @@ import {
     getEntityClass,
     kindCan,
 } from '../data/kind-registry'
+import {computeLoaderWorkerMass} from '../derivation/capabilities'
 import {InventoryAccessor} from './inventory-accessor'
 import {Location} from './location'
 import {ScheduleAccessor} from '../scheduling/accessor'
@@ -69,7 +70,10 @@ export class Entity extends ServerContract.Types.entity_info {
 
     get totalMass(): UInt64 {
         const hull = this.hullmass ? UInt64.from(this.hullmass) : UInt64.from(0)
-        return hull.adding(this.totalCargoMass)
+        const workers = computeLoaderWorkerMass(
+            (this.loader_lanes ?? []).map((l) => Number(l.mass))
+        )
+        return hull.adding(this.totalCargoMass).adding(workers)
     }
 
     get entityClass(): EntityClass {

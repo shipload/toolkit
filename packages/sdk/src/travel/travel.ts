@@ -43,6 +43,7 @@ import {WH} from '../derivation/wormhole'
 import * as scheduleModel from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
 import {incomingHoldMass} from '../scheduling/unwrap'
+import {computeLoaderWorkerMass} from '../derivation/capabilities'
 
 function isPositionalTask(task: ServerContract.Types.task): boolean {
     return task.type.equals(TaskType.TRAVEL) || task.type.equals(TaskType.TRANSIT)
@@ -207,13 +208,18 @@ export function calc_flighttime(distance: UInt64Type, acceleration: number): UIn
     return UInt32.from(2 * Math.sqrt(Number(distance) / acceleration))
 }
 
+const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
+
+export function calc_cruise_velocity(acceleration: number): number {
+    return Math.sqrt(acceleration * CRUISE_TRANSITION_DISTANCE)
+}
+
 export function calc_travel_flighttime(distance: UInt64Type, acceleration: number): UInt32 {
-    const cruiseTransitionDistance = 2 * PRECISION
-    if (Number(distance) <= cruiseTransitionDistance) {
+    if (Number(distance) <= CRUISE_TRANSITION_DISTANCE) {
         return calc_flighttime(distance, acceleration)
     }
 
-    const cruiseVelocity = Math.sqrt(acceleration * cruiseTransitionDistance)
+    const cruiseVelocity = calc_cruise_velocity(acceleration)
     return UInt32.from(Number(distance) / cruiseVelocity + cruiseVelocity / acceleration)
 }
 
@@ -264,9 +270,7 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     mass.add(ship.hullmass)
 
     if (ship.loader_lanes && ship.loader_lanes.length > 0) {
-        for (const l of ship.loader_lanes) {
-            mass.add(UInt64.from(l.mass))
-        }
+        mass.add(UInt64.from(computeLoaderWorkerMass(ship.loader_lanes.map((l) => Number(l.mass)))))
     }
 
     for (const cargo of cargos) {

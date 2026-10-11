@@ -17,7 +17,7 @@ import {
 } from '../errors'
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
-import {computeEntityCapabilities} from '../derivation/capabilities'
+import {computeEntityCapabilities, computeLoaderWorkerMass} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
 import {lerp} from '../travel/travel'
@@ -202,9 +202,7 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
 }
 
 function loaderLanesTotalMass(lanes: ServerContract.Types.loader_lane[]): UInt64 {
-    let total = 0
-    for (const l of lanes) total += Number(l.mass)
-    return UInt64.from(total)
+    return UInt64.from(computeLoaderWorkerMass(lanes.map((l) => Number(l.mass))))
 }
 
 export function createProjectedEntity(entity: Projectable): ProjectedEntity {

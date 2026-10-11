@@ -441,6 +441,149 @@ export interface ComputedCapabilities {
     launcher?: {chargeRate: number; velocity: number; drain: number}
 }
 
+export type ModuleCapabilities =
+    | {kind: 'engine'; tier: number; thrust: number; thermal: number}
+    | {kind: 'generator'; tier: number; capacity: number; recharge: number}
+    | {kind: 'gatherer'; tier: number; yield: number; drain: number; depth: number}
+    | {kind: 'loader'; tier: number; mass: number; thrust: number; quantity: number}
+    | {kind: 'storage'; tier: number; capacity: number; drain: number}
+    | {kind: 'crafter'; tier: number; speed: number; drain: number}
+    | {kind: 'builder'; tier: number; speed: number; drain: number}
+    | {kind: 'hauler'; tier: number; capacity: number; efficiency: number; drain: number}
+    | {kind: 'warp'; tier: number; range: number}
+    | {kind: 'launcher'; tier: number; chargeRate: number; velocity: number; drain: number}
+    | {kind: 'battery'; tier: number; capacity: number}
+
+export type ModuleCapabilityKind = ModuleCapabilities['kind']
+
+export function computeModuleCapabilities(
+    itemId: number,
+    stats: bigint,
+    outputPct = 100
+): ModuleCapabilities | undefined {
+    const modType = getModuleCapabilityType(itemId)
+    if (modType === 0xff) return undefined
+    const tier = getItem(itemId).tier
+    const decodedStats = decodeCraftedItemStats(itemId, stats)
+
+    switch (modType) {
+        case MODULE_ENGINE: {
+            const caps = computeEngineCapabilities(decodedStats, tier)
+            return {
+                kind: 'engine',
+                tier,
+                thrust: applySlotMultiplier(caps.thrust, outputPct),
+                thermal: computeEffectiveModuleStat(decodedStats.thermal ?? 0),
+            }
+        }
+        case MODULE_GENERATOR: {
+            const caps = computeGeneratorCapabilities(decodedStats, tier)
+            return {
+                kind: 'generator',
+                tier,
+                capacity: applySlotMultiplierUint32(caps.capacity, outputPct),
+                recharge: applySlotMultiplierUint32(caps.recharge, outputPct),
+            }
+        }
+        case MODULE_GATHERER: {
+            const caps = computeGathererCapabilities(
+                {
+                    strength: decodeStat(stats, 0),
+                    tolerance: decodeStat(stats, 1),
+                    saturation: decodeStat(stats, 2),
+                },
+                tier
+            )
+            return {
+                kind: 'gatherer',
+                tier,
+                yield: applySlotMultiplier(caps.yield, outputPct),
+                drain: caps.drain,
+                depth: caps.depth,
+            }
+        }
+        case MODULE_LOADER: {
+            const caps = computeLoaderCapabilities(decodedStats, tier)
+            return {
+                kind: 'loader',
+                tier,
+                mass: caps.mass,
+                thrust: Math.max(1, applySlotMultiplier(caps.thrust, outputPct)),
+                quantity: caps.quantity,
+            }
+        }
+        case MODULE_STORAGE: {
+            const caps = computeStorageCapabilities(decodedStats, tier)
+            return {
+                kind: 'storage',
+                tier,
+                capacity: applySlotMultiplierUint32(caps.capacity, outputPct),
+                drain: caps.drain,
+            }
+        }
+        case MODULE_CRAFTER: {
+            const caps = computeCrafterCapabilities(decodedStats, tier)
+            return {
+                kind: 'crafter',
+                tier,
+                speed: applySlotMultiplier(caps.speed, outputPct),
+                drain: caps.drain,
+            }
+        }
+        case MODULE_BUILDER: {
+            const caps = computeBuilderCapabilities(decodedStats, tier)
+            return {
+                kind: 'builder',
+                tier,
+                speed: applySlotMultiplier(caps.speed, outputPct),
+                drain: caps.drain,
+            }
+        }
+        case MODULE_HAULER: {
+            const caps = computeHaulerCapabilities(decodedStats, tier)
+            return {
+                kind: 'hauler',
+                tier,
+                capacity: caps.capacity,
+                efficiency: applySlotMultiplier(caps.efficiency, outputPct),
+                drain: caps.drain,
+            }
+        }
+        case MODULE_WARP: {
+            const caps = computeWarpCapabilities(decodedStats, tier)
+            return {kind: 'warp', tier, range: applySlotMultiplier(caps.range, outputPct)}
+        }
+        case MODULE_LAUNCHER: {
+            const caps = computeLauncherCapabilities(
+                {
+                    charge_rate: decodedStats.charge_rate ?? decodeStat(stats, 0),
+                    velocity: decodedStats.velocity ?? decodeStat(stats, 1),
+                    drain: decodedStats.drain ?? decodeStat(stats, 2),
+                },
+                outputPct
+            )
+            return {kind: 'launcher', tier, ...caps}
+        }
+        case MODULE_BATTERY: {
+            const caps = computeBatteryCapabilities(decodedStats, tier)
+            return {
+                kind: 'battery',
+                tier,
+                capacity: applySlotMultiplierUint32(caps.capacity, outputPct),
+            }
+        }
+        default:
+            return undefined
+    }
+}
+
+// Mirrors entity_capabilities::loader_mass(): floor(mean) × count.
+export function computeLoaderWorkerMass(laneMasses: readonly number[]): number {
+    if (laneMasses.length === 0) return 0
+    const total = laneMasses.reduce((sum, mass) => sum + mass, 0)
+    return Math.floor(total / laneMasses.length) * laneMasses.length
+}
+
 export function computeEntityCapabilities(
     stats: Record<string, number>,
     itemId: number,
@@ -456,7 +599,7 @@ export function computeEntityCapabilities(
     let totalGenRecharge = 0
     let hasGenerator = false
 
-    let totalLoaderMass = 0
+    const loaderMasses: number[] = []
     let totalLoaderThrust = 0
     let totalLoaderQuantity = 0
     let hasLoader = false
@@ -501,114 +644,82 @@ export function computeEntityCapabilities(
     const loaderLanes: LoaderLaneEntry[] = []
 
     for (const mod of modules) {
-        const item = getItem(mod.itemId)
-        const modType = getModuleCapabilityType(mod.itemId)
         const amp = getSlotAmp(layout, mod.slotIndex)
-        const decodedStats = decodeCraftedItemStats(mod.itemId, mod.stats)
-        installedModuleMass += item.mass
+        installedModuleMass += getItem(mod.itemId).mass
+        const caps = computeModuleCapabilities(mod.itemId, mod.stats, amp)
+        if (!caps) continue
 
-        if (modType === MODULE_ENGINE) {
+        if (caps.kind === 'engine') {
             hasEngine = true
-            const caps = computeEngineCapabilities(decodedStats, item.tier)
-            totalThrust += applySlotMultiplier(caps.thrust, amp)
-            totalEngineThm += computeEffectiveModuleStat(decodedStats.thermal ?? 0)
+            totalThrust += caps.thrust
+            totalEngineThm += caps.thermal
             engineCount += 1
-        } else if (modType === MODULE_GENERATOR) {
+        } else if (caps.kind === 'generator') {
             hasGenerator = true
-            const caps = computeGeneratorCapabilities(decodedStats, item.tier)
-            totalGenCapacity += applySlotMultiplierUint32(caps.capacity, amp)
-            totalGenRecharge += applySlotMultiplierUint32(caps.recharge, amp)
-        } else if (modType === MODULE_GATHERER) {
+            totalGenCapacity += caps.capacity
+            totalGenRecharge += caps.recharge
+        } else if (caps.kind === 'gatherer') {
             hasGatherer = true
-            const tier = item.tier
-            const caps = computeGathererCapabilities(
-                {
-                    strength: decodeStat(mod.stats, 0),
-                    tolerance: decodeStat(mod.stats, 1),
-                    saturation: decodeStat(mod.stats, 2),
-                },
-                tier
-            )
-            const scaledYield = applySlotMultiplier(caps.yield, amp)
-            totalGathYield += scaledYield
+            totalGathYield += caps.yield
             totalGathDrain += caps.drain
             if (caps.depth > maxGathDepth) maxGathDepth = caps.depth
             gathererLanes.push({
                 slotIndex: mod.slotIndex,
-                yield: scaledYield,
+                yield: caps.yield,
                 drain: caps.drain,
                 depth: caps.depth,
                 outputPct: amp,
             })
-        } else if (modType === MODULE_LOADER) {
+        } else if (caps.kind === 'loader') {
             hasLoader = true
-            const caps = computeLoaderCapabilities(decodedStats, item.tier)
-            const laneThrust = Math.max(1, applySlotMultiplier(caps.thrust, amp))
-            totalLoaderMass += caps.mass
-            totalLoaderThrust += laneThrust
+            loaderMasses.push(caps.mass)
+            totalLoaderThrust += caps.thrust
             totalLoaderQuantity += caps.quantity
             loaderLanes.push({
                 slotIndex: mod.slotIndex,
                 mass: caps.mass,
-                thrust: laneThrust,
+                thrust: caps.thrust,
                 outputPct: amp,
             })
-        } else if (modType === MODULE_STORAGE) {
-            const caps = computeStorageCapabilities(decodedStats, item.tier)
-            totalStorageCapacity += applySlotMultiplierUint32(caps.capacity, amp)
+        } else if (caps.kind === 'storage') {
+            totalStorageCapacity += caps.capacity
             totalCargoHoldDrain += caps.drain
-        } else if (modType === MODULE_CRAFTER) {
+        } else if (caps.kind === 'crafter') {
             hasCrafter = true
-            const caps = computeCrafterCapabilities(decodedStats, item.tier)
-            const scaledSpeed = applySlotMultiplier(caps.speed, amp)
-            totalCrafterSpeed += scaledSpeed
+            totalCrafterSpeed += caps.speed
             totalCrafterDrain += caps.drain
             crafterLanes.push({
                 slotIndex: mod.slotIndex,
-                speed: scaledSpeed,
+                speed: caps.speed,
                 drain: caps.drain,
                 outputPct: amp,
             })
-        } else if (modType === MODULE_BUILDER) {
+        } else if (caps.kind === 'builder') {
             hasBuilder = true
-            const caps = computeBuilderCapabilities(decodedStats, item.tier)
-            const scaledSpeed = applySlotMultiplier(caps.speed, amp)
-            totalBuilderSpeed += scaledSpeed
+            totalBuilderSpeed += caps.speed
             totalBuilderDrain += caps.drain
             builderLanes.push({
                 slotIndex: mod.slotIndex,
-                speed: scaledSpeed,
+                speed: caps.speed,
                 drain: caps.drain,
                 outputPct: amp,
             })
-        } else if (modType === MODULE_HAULER) {
+        } else if (caps.kind === 'hauler') {
             hasHauler = true
-            const caps = computeHaulerCapabilities(decodedStats, item.tier)
-            const eff = applySlotMultiplier(caps.efficiency, amp)
             totalHaulerCapacity += caps.capacity
-            haulerCapByTier.set(item.tier, (haulerCapByTier.get(item.tier) ?? 0) + caps.capacity)
-            weightedHaulerEffNum += BigInt(eff) * BigInt(caps.capacity)
+            haulerCapByTier.set(caps.tier, (haulerCapByTier.get(caps.tier) ?? 0) + caps.capacity)
+            weightedHaulerEffNum += BigInt(caps.efficiency) * BigInt(caps.capacity)
             totalHaulerDrain += caps.drain
-        } else if (modType === MODULE_WARP) {
+        } else if (caps.kind === 'warp') {
             hasWarp = true
-            const caps = computeWarpCapabilities(decodedStats, item.tier)
-            totalWarpRange += applySlotMultiplier(caps.range, amp)
-        } else if (modType === MODULE_LAUNCHER) {
+            totalWarpRange += caps.range
+        } else if (caps.kind === 'launcher') {
             hasLauncher = true
-            const caps = computeLauncherCapabilities(
-                {
-                    charge_rate: decodedStats.charge_rate ?? decodeStat(mod.stats, 0),
-                    velocity: decodedStats.velocity ?? decodeStat(mod.stats, 1),
-                    drain: decodedStats.drain ?? decodeStat(mod.stats, 2),
-                },
-                amp
-            )
             totalLauncherChargeRate = clampUint16(totalLauncherChargeRate + caps.chargeRate)
             totalLauncherVelocity = clampUint16(totalLauncherVelocity + caps.velocity)
             totalLauncherDrain = clampUint16(totalLauncherDrain + caps.drain)
-        } else if (modType === MODULE_BATTERY) {
-            const caps = computeBatteryCapabilities(decodedStats, item.tier)
-            totalBatteryCapacity += applySlotMultiplierUint32(caps.capacity, amp)
+        } else if (caps.kind === 'battery') {
+            totalBatteryCapacity += caps.capacity
         }
     }
 
@@ -649,7 +760,7 @@ export function computeEntityCapabilities(
     }
     if (hasLoader) {
         result.loaders = {
-            mass: totalLoaderMass,
+            mass: computeLoaderWorkerMass(loaderMasses),
             thrust: clampUint16(totalLoaderThrust),
             quantity: totalLoaderQuantity,
         }
