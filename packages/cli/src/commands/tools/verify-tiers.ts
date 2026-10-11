@@ -109,7 +109,7 @@ export function registerSubcommand(tools: Command): void {
     tools
         .command('verify-tiers')
         .description('Verify world-gen produces reserves matching RESERVE_TIERS ranges')
-        .option('--radius <n>', 'scan radius', '200')
+        .option('--radius <n>', 'scan radius in cells', '200')
         .action(async (opts: {radius: string}) => {
             const radius = parseUint32(opts.radius)
             const gameSeed = await getGameSeed()

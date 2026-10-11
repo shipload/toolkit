@@ -54,7 +54,7 @@ export function buildInventoryData(
 
 export async function runInventory(
     ctx: EntityContext,
-    opts: {json?: boolean; current?: boolean}
+    opts: {json?: boolean; current?: boolean; raw?: boolean}
 ): Promise<void> {
     const info = (await server.readonly('getentity', {
         entity_id: ctx.entityId,
@@ -64,7 +64,7 @@ export async function runInventory(
         formatOutput(
             data,
             {json: Boolean(opts.json)},
-            () => renderInventoryView(info, {current: opts.current}).text
+            () => renderInventoryView(info, {current: opts.current, raw: opts.raw}).text
         )
     )
 }
@@ -78,7 +78,8 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Show cargo inventory for an entity')
             .option('--json', 'emit JSON instead of formatted text')
             .option('--current', 'show on-chain cargo without applying the pending task queue')
-            .action(async (opts: {json?: boolean; current?: boolean}) => {
+            .option('--raw', 'show module stats as the contract stores them')
+            .action(async (opts: {json?: boolean; current?: boolean; raw?: boolean}) => {
                 await runInventory(ctx, opts)
             }),
 }
@@ -92,7 +93,8 @@ export const SUBCOMMAND_CARGO_ALIAS: EntitySubcommand = {
             .description('Show cargo (alias for inventory)')
             .option('--json', 'emit JSON instead of formatted text')
             .option('--current', 'show on-chain cargo without applying the pending task queue')
-            .action(async (opts: {json?: boolean; current?: boolean}) => {
+            .option('--raw', 'show module stats as the contract stores them')
+            .action(async (opts: {json?: boolean; current?: boolean; raw?: boolean}) => {
                 await runInventory(ctx, opts)
             }),
 }

@@ -25,6 +25,7 @@ export interface CargoTableOptions {
 	indent?: string;
 	columns?: CargoColumn[];
 	deltas?: Map<StackKey, StackDelta>;
+	raw?: boolean;
 }
 
 const DEFAULT_COLUMNS: CargoColumn[] = [
@@ -84,6 +85,7 @@ export function formatCargoRef(itemId: number, stackId?: number | bigint): strin
 function moduleSubRows(
 	modules: ServerTypes.module_entry[] | undefined,
 	columns: CargoColumn[],
+	raw = false,
 ): string[][] {
 	if (!modules || modules.length === 0) return [];
 	const rows: string[][] = [];
@@ -92,7 +94,7 @@ function moduleSubRows(
 		const modItemId = Number(m.installed.item_id.value.toString());
 		const modStats = BigInt(m.installed.stats.toString());
 		const name = `  └ ${safeItemName(modItemId)}`;
-		const capability = formatItemStats(modItemId, modStats);
+		const capability = formatItemStats(modItemId, modStats, { raw });
 		const row: string[] = [];
 		for (const col of columns) {
 			switch (col) {
@@ -138,12 +140,13 @@ function cargoRow(
 	c: CargoLike,
 	columns: CargoColumn[],
 	deltas?: Map<StackKey, StackDelta>,
+	raw = false,
 ): string[] {
 	const itemId = Number(c.item_id);
 	const qty = Number(c.quantity);
 	const stackId = BigInt(c.stats.toString());
 	const name = safeItemName(itemId);
-	const stats = formatItemStats(itemId, stackId);
+	const stats = formatItemStats(itemId, stackId, { raw });
 	let eachMass = "";
 	let totalMass = "";
 	try {
@@ -227,8 +230,8 @@ export function formatCargoTable(
 	});
 
 	for (const c of cargo) {
-		table.push(cargoRow(c, columns, opts.deltas));
-		for (const sub of moduleSubRows(c.modules, columns)) {
+		table.push(cargoRow(c, columns, opts.deltas, opts.raw));
+		for (const sub of moduleSubRows(c.modules, columns, opts.raw)) {
 			table.push(sub);
 		}
 	}

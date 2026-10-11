@@ -163,6 +163,22 @@ export function formatTaskShort(t: ServerTypes.task): string {
 	}
 }
 
+const MILLI_PER_ENERGY = 1000;
+
+export type EnergyRounding = "round" | "ceil" | "floor";
+
+export function wholeEnergy(milli: number, rounding: EnergyRounding = "round"): number {
+	return Math[rounding](milli / MILLI_PER_ENERGY);
+}
+
+export function formatEnergyAmount(milli: number, rounding: EnergyRounding = "round"): string {
+	return wholeEnergy(milli, rounding).toLocaleString("en-US");
+}
+
+export function formatRechargePerMinute(milliPerSecond: number): string {
+	return `${wholeEnergy(milliPerSecond * 60).toLocaleString("en-US")} energy/min`;
+}
+
 export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {
 	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
 }
@@ -443,8 +459,8 @@ export function formatNearby(nearby:ServerTypes.nearby_info, opts: NearbyOpts = 
 
 	const maxEnergy = Number(nearby.max_energy);
 	const lines = [
-		`Current:   ${formatCoordinatePair(nearby.current.coordinates)}  energy ${nearby.current.energy}/${maxEnergy}`,
-		`Projected: ${formatCoordinatePair(nearby.projected.coordinates)}  energy ${nearby.projected.energy}/${maxEnergy}`,
+		`Current:   ${formatCoordinatePair(nearby.current.coordinates)}  energy ${formatEnergyAmount(Number(nearby.current.energy))}/${formatEnergyAmount(maxEnergy)}`,
+		`Projected: ${formatCoordinatePair(nearby.projected.coordinates)}  energy ${formatEnergyAmount(Number(nearby.projected.energy))}/${formatEnergyAmount(maxEnergy)}`,
 		`Can Travel: ${nearby.can_travel ? "Yes" : "No"}`,
 		"",
 		`Nearby (${limited.length}${limited.length < summaries.length ? ` of ${summaries.length}` : ""}, sorted by ${sort}):`,

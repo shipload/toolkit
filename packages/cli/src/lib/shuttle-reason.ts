@@ -1,6 +1,6 @@
 import {formatMass} from '@shipload/sdk'
 import type {ShuttleReason} from '@shipload/sdk'
-import {formatDateTimeUTC} from './format'
+import {formatDateTimeUTC, formatEnergyAmount} from './format'
 
 export function formatShuttleReason(r: ShuttleReason): string {
     const at = r.at ? formatDateTimeUTC(r.at) : undefined
@@ -54,7 +54,7 @@ export function formatShuttleReason(r: ShuttleReason): string {
                 : "The recipe's inputs aren't available."
         case 'ship-energy':
             return r.have !== undefined && r.need !== undefined
-                ? `This job needs ${r.need} energy; the ship will have ${r.have}.`
+                ? `This job needs ${formatEnergyAmount(r.need, "ceil")} energy; the ship will have ${formatEnergyAmount(r.have, "floor")}.`
                 : 'The ship does not have enough energy for this job.'
         case 'dropoff-collision':
             return at

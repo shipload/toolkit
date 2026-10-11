@@ -1,6 +1,7 @@
 import Table from 'cli-table3'
 import type {Coord} from '@shipload/sdk'
-import {computePerLegReach, computeGroupPerLegReach, type ReachStats} from '@shipload/sdk'
+import {computePerLegReach, computeGroupPerLegReach, formatDistance, formatDistanceValue, type ReachStats} from '@shipload/sdk'
+import {formatEnergyAmount} from './figures'
 
 export {computePerLegReach, computeGroupPerLegReach}
 export type {ReachStats}
@@ -90,19 +91,19 @@ export function renderRoutePlan(meta: RouteMeta, legs: LegEstimate[], commands: 
     const header = `Route: ${meta.label}   ${coordStr(meta.origin)} → ${coordStr(meta.dest)}`
 
     const table = new Table({
-        head: ['Leg', 'From', 'To', 'Dist', 'Energy', 'Flight', 'Recharge'],
+        head: ['Leg', 'From', 'To', 'Dist (ly)', 'Energy', 'Flight', 'Recharge'],
         ...BORDERLESS,
     })
 
     for (const leg of legs) {
         const energy = meta.approxPricing
             ? '~'
-            : `${Math.round(leg.energyUsed)}/${leg.energyCap}`
+            : `${formatEnergyAmount(leg.energyUsed)}/${formatEnergyAmount(leg.energyCap)}`
         table.push([
             String(leg.index),
             coordStr(leg.from),
             coordStr(leg.to),
-            leg.distance.toFixed(1),
+            formatDistanceValue(leg.distance),
             energy,
             legDuration(leg.travelSeconds),
             legDuration(leg.rechargeSeconds),
@@ -113,7 +114,7 @@ export function renderRoutePlan(meta: RouteMeta, legs: LegEstimate[], commands: 
     const summary = new Table(BORDERLESS)
     summary.push(
         ['Legs:', String(meta.legs)],
-        ['Distance:', `${meta.totalDistance.toFixed(1)} tiles`],
+        ['Distance:', formatDistance(meta.totalDistance)],
         ['Flight:', formatDuration(Math.round(totals.flightSeconds))],
         ['Recharge:', formatDuration(Math.round(totals.rechargeSeconds))],
         ['Total:', formatDuration(Math.round(totals.totalSeconds))],

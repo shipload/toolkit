@@ -88,7 +88,7 @@ describe("renderEstimate", () => {
 	test("formats travel estimate (no cargo delta)", () => {
 		const out = renderEstimate({
 			duration_s: 47,
-			energy_cost: 43,
+			energy_cost: 43_000,
 			cargo_delta: {},
 			feasibility: { ok: true, issues: [] },
 		});
@@ -97,7 +97,7 @@ describe("renderEstimate", () => {
 	test("formats gather estimate with cargo delta", () => {
 		const out = renderEstimate({
 			duration_s: 120,
-			energy_cost: 30,
+			energy_cost: 30_000,
 			cargo_delta: { 45: 16 },
 			feasibility: { ok: true, issues: [] },
 		});

@@ -1,3 +1,5 @@
+import { formatEnergyAmount } from "./format";
+
 export class ValidationError extends Error {
 	constructor(
 		message: string,
@@ -44,6 +46,6 @@ export function checkDepth(gathererDepth: number, stratumIndex: number): void {
 export function checkEnergy(available: number, required: number): void {
 	if (available >= required) return;
 	throw new ValidationError(
-		`Insufficient energy: have ${available}, need ${required} (short by ${required - available}).`,
+		`Insufficient energy: have ${formatEnergyAmount(available, "floor")}, need ${formatEnergyAmount(required, "ceil")} (short by ${formatEnergyAmount(required - available, "ceil")}).`,
 	);
 }

@@ -29,7 +29,7 @@ describe("checkEnergyCapacity", () => {
 		expect(checkEnergyCapacity(500, 400, "travel")).toBeNull();
 	});
 	test("returns issue when required exceeds capacity", () => {
-		const issue = checkEnergyCapacity(383, 387, "travel");
+		const issue = checkEnergyCapacity(383_000, 387_000, "travel");
 		expect(issue).not.toBeNull();
 		expect(issue?.code).toBe("energy_capacity_exceeded");
 		expect(issue?.severity).toBe("error");
@@ -45,7 +45,7 @@ describe("checkEnergyAvailable", () => {
 		expect(checkEnergyAvailable(400, 400, "gather")).toBeNull();
 	});
 	test("returns issue when current < required", () => {
-		const issue = checkEnergyAvailable(82, 387, "travel");
+		const issue = checkEnergyAvailable(82_000, 387_000, "travel");
 		expect(issue?.code).toBe("insufficient_energy");
 		expect(issue?.message).toContain("travel");
 		expect(issue?.message).toContain("387");
@@ -138,7 +138,7 @@ describe("renderIssues", () => {
 
 describe("checkEnergyAvailable — copy-paste suggestion", () => {
 	test("without entity arg, falls back to short message", () => {
-		const issue = checkEnergyAvailable(82, 690, "gather");
+		const issue = checkEnergyAvailable(82_000, 690_000, "gather");
 		expect(issue?.message).toBe("gather needs 690 energy, entity has 82 — recharge first");
 	});
 	test("with entity arg, includes runnable suggestions", () => {

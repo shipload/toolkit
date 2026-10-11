@@ -1,23 +1,7 @@
 import {
-	computeCrafterDrain,
-	computeCrafterSpeed,
-	computeEngineDrain,
-	computeEngineThrust,
-	computeGathererDepth,
-	computeGathererDrain,
-	computeGathererYield,
-	computeGeneratorCap,
-	computeGeneratorRech,
-	computeHaulerCapacity,
-	computeHaulerEfficiency,
-	computeLoaderMass,
-	computeLoaderThrust,
-	computeWarpRange,
-	decodeStat,
-	displayName,
 	formatMass,
-	getItem,
-	getModuleCapabilityType,
+	formatTonnesRate,
+	gatherDrainPerMinute,
 	HoldKind,
 	MODULE_ANY,
 	MODULE_CRAFTER,
@@ -29,9 +13,8 @@ import {
 	MODULE_LOADER,
 	MODULE_STORAGE,
 	MODULE_WARP,
-	NFT,
 	type ProjectedEntity,
-	resolveItem,
+	referenceYieldPerMinute,
 	schedule,
 	type ServerTypes,
 	TaskType,
@@ -58,6 +41,15 @@ import {
 	kvTable,
 	projectEnergy,
 } from "./format";
+import {
+	entitySheetSection,
+	formatEnergyAmount,
+	formatModuleRaw,
+	formatRechargePerMinute,
+	moduleDisplay,
+	RAW_STATS_NOTE,
+	slotOutputPct,
+} from "./figures";
 import { laneLabel } from "./lane-presentation";
 import { projectRemainingSnapshotAt } from "./projection";
 import { entityInfoToSnapshot } from "./snapshot";
@@ -68,6 +60,7 @@ export interface HeaderContext {
 	now?: Date;
 	suppressWhenDone?: boolean;
 	counterparts?: ReadonlyMap<string, ServerTypes.entity_info>;
+	raw?: boolean;
 }
 
 export function counterpartKey(type: string, id: string | bigint): string {
@@ -113,15 +106,16 @@ function entityEnergyValue(
 	const capacity = Number(entity.generator.capacity);
 	const recharge = Number(entity.generator.recharge);
 	const stored = Number(entity.energy ?? 0);
+	const format = (proj: number | null, label?: string): string =>
+		ctx.raw
+			? rawEnergyValue(stored, proj, capacity, recharge, label)
+			: energyFigureValue(stored, proj, capacity, recharge, label);
 
 	const explicitProjection = ctx.projected?.energy;
 	if (explicitProjection != null) {
 		const proj = Number(explicitProjection.toString());
-		if (proj !== stored) {
-			const label = ctx.projectionLabel ?? "projected";
-			return `${stored} → ${proj}/${capacity} (${label}, recharge: ${recharge}/s)`;
-		}
-		return `${stored}/${capacity} (recharge: ${recharge}/s)`;
+		if (proj !== stored) return format(proj, ctx.projectionLabel ?? "projected");
+		return format(null);
 	}
 
 	const now = ctx.now ?? new Date();
@@ -136,13 +130,35 @@ function entityEnergyValue(
 			: 0;
 		if (elapsed_s > 0) {
 			const proj = projectEnergy(stored, capacity, recharge, 0, elapsed_s);
-			if (proj !== stored) {
-				return `${stored} → ${proj}/${capacity} (live, recharge: ${recharge}/s)`;
-			}
+			if (proj !== stored) return format(proj, "live");
 		}
 	}
 
-	return `${stored}/${capacity} (recharge: ${recharge}/s)`;
+	return format(null);
+}
+
+function rawEnergyValue(
+	stored: number,
+	proj: number | null,
+	capacity: number,
+	recharge: number,
+	label?: string,
+): string {
+	if (proj === null) return `${stored}/${capacity} (recharge: ${recharge}/s)`;
+	return `${stored} → ${proj}/${capacity} (${label}, recharge: ${recharge}/s)`;
+}
+
+function energyFigureValue(
+	stored: number,
+	proj: number | null,
+	capacity: number,
+	recharge: number,
+	label?: string,
+): string {
+	const cap = `${formatEnergyAmount(capacity)} energy`;
+	const rate = `+${formatRechargePerMinute(recharge)}`;
+	if (proj === null) return `${formatEnergyAmount(stored)} / ${cap} (${rate})`;
+	return `${formatEnergyAmount(stored)} → ${formatEnergyAmount(proj)} / ${cap} (${label}, ${rate})`;
 }
 
 function slotTypeLabel(t: number): string {
@@ -150,103 +166,35 @@ function slotTypeLabel(t: number): string {
 		case MODULE_ANY:
 			return "Any";
 		case MODULE_ENGINE:
-			return "Engine";
+			return "Movement";
 		case MODULE_GENERATOR:
-			return "Generator";
+			return "Energy";
 		case MODULE_GATHERER:
-			return "Gatherer";
+			return "Gathering";
 		case MODULE_LOADER:
-			return "Loader";
+			return "Shuttling";
 		case MODULE_WARP:
 			return "Warp";
 		case MODULE_CRAFTER:
-			return "Crafter";
+			return "Crafting";
 		case MODULE_LAUNCHER:
-			return "Launcher";
+			return "Launch";
 		case MODULE_STORAGE:
 			return "Storage";
 		case MODULE_HAULER:
-			return "Hauler";
+			return "Towing";
 		default:
 			return `?${t}`;
 	}
 }
 
-function moduleNameWithTier(itemId: number): string {
-	try {
-		return displayName(resolveItem(itemId));
-	} catch {
-		return `item ${itemId}`;
-	}
-}
-
-function formatModuleStatLine(itemId: number, stats: bigint): string {
-	const capType = getModuleCapabilityType(itemId);
-	switch (capType) {
-		case MODULE_ENGINE: {
-			const vol = decodeStat(stats, 0);
-			const thm = decodeStat(stats, 1);
-			const tier = getItem(itemId).tier;
-			return `thrust ${computeEngineThrust(vol, tier)} · ${computeEngineDrain(thm)} energy/step`;
-		}
-		case MODULE_GENERATOR: {
-			const com = decodeStat(stats, 0);
-			const fin = decodeStat(stats, 1);
-			const tier = getItem(itemId).tier;
-			return `capacity ${computeGeneratorCap(com, tier)} · recharge ${computeGeneratorRech(fin, tier)}/s`;
-		}
-		case MODULE_GATHERER: {
-			const str = decodeStat(stats, 0);
-			const tol = decodeStat(stats, 1);
-			const con = decodeStat(stats, 2);
-			const tier = getItem(itemId).tier;
-			const drainPerMin = (computeGathererDrain(con) / 10000) * 60;
-			return `depth ${computeGathererDepth(tol, tier)} · yield ${computeGathererYield(str, tier)} · ${drainPerMin.toFixed(1)} energy/min`;
-		}
-		case MODULE_LOADER: {
-			const ins = decodeStat(stats, 0);
-			const pla = decodeStat(stats, 1);
-			const tier = getItem(itemId).tier;
-			return `${formatMass(computeLoaderMass(ins))} each · thrust ${computeLoaderThrust(pla, tier)}`;
-		}
-		case MODULE_CRAFTER: {
-			const rea = decodeStat(stats, 0);
-			const fin = decodeStat(stats, 1);
-			const tier = getItem(itemId).tier;
-			const speed = computeCrafterSpeed(rea, tier);
-			const drainPerMin = ((computeCrafterDrain(fin) * speed) / 150000) * 60;
-			return `speed ${speed} · ${drainPerMin.toFixed(1)} energy/min`;
-		}
-		case MODULE_HAULER: {
-			const res = decodeStat(stats, 0);
-			const pla = decodeStat(stats, 1);
-			const con = decodeStat(stats, 2);
-			const tier = getItem(itemId).tier;
-			const drain = NFT.computeHaulerDrain(con, tier) / 1000;
-			return `capacity ${computeHaulerCapacity(res, tier)} · efficiency ${computeHaulerEfficiency(pla)} · ${drain.toFixed(1)} energy/tile`;
-		}
-		case MODULE_WARP: {
-			const res = decodeStat(stats, 0);
-			const tier = getItem(itemId).tier;
-			return `range ${computeWarpRange(res, tier)}`;
-		}
-		case MODULE_STORAGE: {
-			const str = decodeStat(stats, 0);
-			const den = decodeStat(stats, 1);
-			const hrd = decodeStat(stats, 2);
-			const coh = decodeStat(stats, 3);
-			const tier = getItem(itemId).tier;
-			const capacity = NFT.computeCargoBayCapacity(str, den, hrd, tier);
-			const drain = NFT.computeCargoBayDrain(coh, tier) / 1000;
-			return `${formatMass(capacity)} capacity · ${drain.toFixed(1)} energy/tile`;
-		}
-		default:
-			return "";
-	}
+function entityItemId(entity: ServerTypes.entity_info): number {
+	return Number(entity.item_id ?? 0);
 }
 
 function buildModuleRows(
 	entity: ServerTypes.entity_info,
+	ctx: HeaderContext,
 ): [string, string][] {
 	const slots = entity.modules ?? [];
 	if (slots.length === 0) return [];
@@ -256,10 +204,12 @@ function buildModuleRows(
 		if (!m.installed) return [label, "(empty)"];
 		const itemId = Number(m.installed.item_id);
 		const stats = BigInt(m.installed.stats.toString());
-		const name = moduleNameWithTier(itemId);
-		const statLine = formatModuleStatLine(itemId, stats);
-		const value = statLine ? `${name} — ${statLine}` : name;
-		return [label, value];
+		const outputPct = slotOutputPct(entityItemId(entity), idx);
+		const name = moduleDisplay(itemId);
+		const pct = outputPct === 100 ? "" : ` at ${outputPct}%`;
+		if (!ctx.raw) return [label, `${name}${pct}`];
+		const statLine = formatModuleRaw(itemId, stats, outputPct);
+		return [label, statLine ? `${name}${pct} — ${statLine}` : `${name}${pct}`];
 	});
 }
 
@@ -268,7 +218,12 @@ function entitySpecsRows(
 	ctx: HeaderContext = {},
 ): [string, string][] {
 	const rows: [string, string][] = [];
-	if (entity.hullmass) {
+	if (ctx.raw) {
+		const hull: string[] = [];
+		if (entity.hullmass != null) hull.push(`hullmass ${entity.hullmass}`);
+		if (entity.capacity != null) hull.push(`capacity ${entity.capacity}`);
+		if (hull.length > 0) rows.push(["Hull:", hull.join(" · ")]);
+	} else if (entity.hullmass) {
 		rows.push(["Hull:", formatMass(Number(entity.hullmass))]);
 	}
 	const energyValue = entityEnergyValue(entity, ctx);
@@ -276,8 +231,11 @@ function entitySpecsRows(
 	return rows;
 }
 
-function entityModulesSection(entity: ServerTypes.entity_info): string | null {
-	const rows = buildModuleRows(entity);
+function entityModulesSection(
+	entity: ServerTypes.entity_info,
+	ctx: HeaderContext,
+): string | null {
+	const rows = buildModuleRows(entity, ctx);
 	if (rows.length === 0) return null;
 	return ["  Modules:", kvTable(rows, { indent: "    " })].join("\n");
 }
@@ -300,14 +258,18 @@ function entityCargoSection(
 				: `${formatMass(currentMass)} / ${formatMass(cap)}`;
 		const cargoHeader = `  Cargo: ${budget}`;
 		return cargo.length > 0
-			? [cargoHeader, formatCargoTable(cargo, { indent: "  " })].join("\n")
+			? [cargoHeader, formatCargoTable(cargo, { indent: "  ", raw: ctx.raw })].join("\n")
 			: cargoHeader;
 	}
-	if (cargo.length > 0) return formatCargoTable(cargo, { indent: "  " });
+	if (cargo.length > 0) return formatCargoTable(cargo, { indent: "  ", raw: ctx.raw });
 	return null;
 }
 
-function whenDoneBlock(entity: ServerTypes.entity_info, now: Date): string | null {
+function whenDoneBlock(
+	entity: ServerTypes.entity_info,
+	now: Date,
+	raw = false,
+): string | null {
 	if (!schedule.hasSchedule(entity)) return null;
 	let projection: ProjectedEntity;
 	try {
@@ -338,10 +300,17 @@ function whenDoneBlock(entity: ServerTypes.entity_info, now: Date): string | nul
 
 	const rows: [string, string][] = [];
 	if (positionChanged) rows.push(["Position:", `(${projX}, ${projY})`]);
+	const energyText = (milli: number) => (raw ? String(milli) : formatEnergyAmount(milli));
 	if (energyChanged && entity.generator) {
-		rows.push(["Energy:", `${projEnergy}/${entity.generator.capacity}`]);
+		const cap = Number(entity.generator.capacity);
+		rows.push([
+			"Energy:",
+			raw
+				? `${projEnergy}/${cap}`
+				: `${energyText(projEnergy)} / ${energyText(cap)} energy`,
+		]);
 	} else if (energyChanged) {
-		rows.push(["Energy:", String(projEnergy)]);
+		rows.push(["Energy:", raw ? String(projEnergy) : `${energyText(projEnergy)} energy`]);
 	}
 	if (cargoChanged && entity.capacity != null) {
 		rows.push([
@@ -523,7 +492,7 @@ function entityScheduleSection(
 	const callerHasWhenDone =
 		ctx.projectionLabel === "when done" && ctx.projected != null;
 	if (!callerHasWhenDone && !ctx.suppressWhenDone) {
-		const block = whenDoneBlock(entity, now);
+		const block = whenDoneBlock(entity, now, ctx.raw);
 		if (block) sections.push(block);
 	}
 
@@ -549,8 +518,15 @@ export function renderEntityFull(
 	const specs = entitySpecsRows(entity, ctx);
 	if (specs.length > 0) sections.push(kvTable(specs));
 
-	const modulesSection = entityModulesSection(entity);
+	const modulesSection = entityModulesSection(entity, ctx);
 	if (modulesSection) sections.push(modulesSection);
+
+	if (ctx.raw) {
+		if (modulesSection || specs.length > 0) sections.push(RAW_STATS_NOTE);
+	} else {
+		const sheetSection = entitySheetSection(entity);
+		if (sheetSection) sections.push(sheetSection);
+	}
 
 	const cargoSection = entityCargoSection(entity, ctx);
 	if (cargoSection) sections.push(cargoSection);
@@ -577,6 +553,7 @@ export function renderEntityHeader(
 export interface InventoryViewOptions {
 	current?: boolean;
 	columns?: CargoColumn[];
+	raw?: boolean;
 }
 
 export interface InventoryViewResult {
@@ -653,7 +630,7 @@ export function renderInventoryView(
 	}
 
 	const sorted = sortCargoForDisplay(cargoArr as Parameters<typeof sortCargoForDisplay>[0]);
-	const table = formatCargoTable(sorted, { columns, deltas });
+	const table = formatCargoTable(sorted, { columns, deltas, raw: opts.raw });
 	return {
 		text: `${header}\n${table}`,
 		projectionApplied,
@@ -683,14 +660,18 @@ export function renderEntityForGather(opts: GatherHeaderOpts): string {
 	const title = `${opts.entityType} ${opts.entityId}${namePart} — gatherable at (${opts.coords.x}, ${opts.coords.y})${projSuffix}   [${opts.locationContext}]`;
 
 	const c = opts.caps;
-	const gatherer = `yield ${c.yield} · depth ${c.depth} · ${c.drain} energy/s`;
-	const energyBudget = `${opts.energy}/${opts.energyCapacity}${projSuffix}`;
+	const gathering = [
+		`Yield ${formatTonnesRate(referenceYieldPerMinute(c.yield), 1)}`,
+		`Depth ${c.depth.toLocaleString("en-US")} km`,
+		`Drain ${gatherDrainPerMinute(c.drain).toFixed(1)} energy/min`,
+	].join(" · ");
+	const energyBudget = `${formatEnergyAmount(opts.energy)} / ${formatEnergyAmount(opts.energyCapacity)} energy${projSuffix}`;
 	const cargoBudget = `${formatMass(opts.cargoFree)} / ${formatMass(opts.cargoCapacity)} free${projSuffix}`;
 
 	return [
 		title,
-		`  Gatherer:  ${gatherer}`,
-		`  Energy:    ${energyBudget}       Cargo:    ${cargoBudget}`,
-		`  Quantity:  ${opts.quantity}`,
+		`  Gathering:  ${gathering}`,
+		`  Energy:     ${energyBudget}       Cargo:    ${cargoBudget}`,
+		`  Quantity:   ${opts.quantity}`,
 	].join("\n");
 }

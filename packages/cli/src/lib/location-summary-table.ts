@@ -1,5 +1,11 @@
-import { encodeStats, formatMassScaled, MASS_UNITS_PER_TONNE } from "@shipload/sdk";
+import {
+	encodeStats,
+	formatDistanceValue,
+	formatMassScaled,
+	MASS_UNITS_PER_TONNE,
+} from "@shipload/sdk";
 import Table from "cli-table3";
+import { formatEnergyAmount } from "./figures";
 import { formatCoordinatePair, formatDuration, formatItem, jsonStringify } from "./format";
 import { formatItemStats } from "./item-stats";
 import { type LocationSummary, locationSummaryToJson } from "./location-summary";
@@ -30,7 +36,7 @@ const COLUMN_HEADERS: Record<LocationColumn, string> = {
 	type: "Type",
 	subtype: "Subtype",
 	size: "Strata",
-	distance: "Dist",
+	distance: "Dist (ly)",
 	energy: "Energy",
 	time: "Time",
 	resource: "Resource",
@@ -56,8 +62,8 @@ function formatStats(itemId: number, stats: { stat1: number; stat2: number; stat
 }
 
 function formatEnergy(cost: number, max?: number): string {
-	if (max && max > 0) return `${cost}/${max}`;
-	return String(cost);
+	if (max && max > 0) return `${formatEnergyAmount(cost)}/${formatEnergyAmount(max)}`;
+	return formatEnergyAmount(cost);
 }
 
 function formatReachCell(s: LocationSummary): string {
@@ -89,7 +95,7 @@ function summaryRow(
 				row.push(showLocCells ? (s.size > 0 ? String(s.size) : "—") : "");
 				break;
 			case "distance":
-				row.push(showLocCells ? (s.distance !== undefined ? String(s.distance) : "") : "");
+				row.push(showLocCells ? (s.distance !== undefined ? formatDistanceValue(s.distance) : "") : "");
 				break;
 			case "energy":
 				row.push(

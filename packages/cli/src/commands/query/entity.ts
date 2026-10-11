@@ -9,12 +9,13 @@ import {getAccountName} from '../../lib/session'
 
 export function render(
     info: unknown,
-    opts: {current?: boolean; counterparts?: ReadonlyMap<string, any>} = {}
+    opts: {current?: boolean; raw?: boolean; counterparts?: ReadonlyMap<string, any>} = {}
 ): string {
     // biome-ignore lint/suspicious/noExplicitAny: readonly response is loosely typed
     return renderEntityFull(info as any, {
         suppressWhenDone: Boolean(opts.current),
         counterparts: opts.counterparts,
+        raw: Boolean(opts.raw),
     })
 }
 
@@ -41,7 +42,7 @@ async function fetchHoldCounterparts(info: any): Promise<Map<string, any>> {
 
 export async function runShow(
     ctx: EntityContext,
-    options: {json?: boolean; current?: boolean}
+    options: {json?: boolean; current?: boolean; raw?: boolean}
 ): Promise<void> {
     const data = await server.readonly('getentity', {
         entity_id: ctx.entityId,
@@ -49,7 +50,7 @@ export async function runShow(
     const counterparts = options.json ? undefined : await fetchHoldCounterparts(data)
     console.log(
         formatOutput(data, {json: Boolean(options.json)}, (info) =>
-            render(info, {current: options.current, counterparts})
+            render(info, {current: options.current, raw: options.raw, counterparts})
         )
     )
     if (ctx.entityType === 'depot' && !options.json) {
@@ -79,7 +80,8 @@ export const SUBCOMMAND: EntitySubcommand = {
             .description('Show full entity state')
             .option('--json', 'emit JSON instead of formatted text')
             .option('--current', 'show on-chain state without applying the pending task queue')
-            .action(async (opts: {json?: boolean; current?: boolean}) => {
+            .option('--raw', 'show hull and module stats as the contract stores them')
+            .action(async (opts: {json?: boolean; current?: boolean; raw?: boolean}) => {
                 await runShow(ctx, opts)
             }),
 }

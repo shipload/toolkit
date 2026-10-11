@@ -1,4 +1,4 @@
-import {findNearbyPlanets, PRECISION} from '@shipload/sdk'
+import {findNearbyPlanets, formatDistance, PRECISION} from '@shipload/sdk'
 import {Name} from '@wharfkit/antelope'
 import type {Command} from 'commander'
 import {parseEntityRefList, parseInt64} from '../../lib/args'
@@ -38,10 +38,10 @@ function nearestSystemHint(seed: Awaited<ReturnType<typeof getGameSeed>>, dest: 
                 }))
                 .sort((a, b) => a.dist - b.dist)
             const n = sorted[0]
-            return `nearest system is (${n.x},${n.y}), ${n.dist.toFixed(1)} tiles away`
+            return `nearest system is (${n.x},${n.y}), ${formatDistance(n.dist)} away`
         }
     }
-    return 'no system found within 50 tiles'
+    return `no system found within ${formatDistance(50)}`
 }
 
 export function register(program: Command): void {
@@ -55,7 +55,7 @@ export function register(program: Command): void {
         .argument('<x>', 'destination x', parseInt64)
         .argument('<y>', 'destination y', parseInt64)
         .argument('<entities...>', 'entity refs (type:id); the first is the lead')
-        .option('--corridor <tiles>', 'widen the search band when no path is found')
+        .option('--corridor <ly>', 'widen the search band, in light-years, when no path is found')
         .option('--max-legs <n>', 'refuse plans longer than this (default 12)')
         .option('--queue', 'submit the travel/recharge chain on-chain')
         .option('--json', 'emit the plan as JSON')

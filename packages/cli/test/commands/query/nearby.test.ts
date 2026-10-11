@@ -3,15 +3,15 @@ import {formatNearby} from '../../../src/lib/format'
 
 // biome-ignore lint/suspicious/noExplicitAny: nearby_info stub
 const nearby: any = {
-    current: {coordinates: {x: 0n, y: 0n}, energy: 350},
-    projected: {coordinates: {x: 0n, y: 0n}, energy: 350},
-    max_energy: 350,
+    current: {coordinates: {x: 0n, y: 0n}, energy: 350_000},
+    projected: {coordinates: {x: 0n, y: 0n}, energy: 350_000},
+    max_energy: 350_000,
     can_travel: true,
     systems: [
         {
             location: {coords: {x: 0n, y: 4n}, is_system: true},
             distance: 80,
-            energy_cost: 172,
+            energy_cost: 172_000,
             flight_time: 80,
         },
     ],
@@ -47,6 +47,6 @@ test('formatNearby --json emits a parseable structure with travel metrics', () =
     const parsed = JSON.parse(out)
     expect(parsed.systems).toHaveLength(1)
     expect(parsed.systems[0].coords).toEqual({x: 0, y: 4})
-    expect(parsed.systems[0].energy_cost).toBe(172)
+    expect(parsed.systems[0].energy_cost).toBe(172_000)
     expect(parsed.systems[0].flight_time_s).toBe(80)
 })

@@ -40,6 +40,6 @@ describe("checkEnergy", () => {
 		expect(() => checkEnergy(350, 172)).not.toThrow();
 	});
 	test("throws with deficit detail", () => {
-		expect(() => checkEnergy(100, 172)).toThrow(/short by 72/);
+		expect(() => checkEnergy(100_000, 172_000)).toThrow(/short by 72/);
 	});
 });

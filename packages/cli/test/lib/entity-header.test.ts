@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { encodeStats, HoldKind, ServerContract, TaskType } from "@shipload/sdk";
-import { UInt64 } from "@wharfkit/antelope";
+import { UInt16, UInt64 } from "@wharfkit/antelope";
 import {
 	counterpartKey,
 	type HeaderContext,
@@ -29,49 +29,54 @@ const idleShip = {
 } as any;
 
 describe("renderEntityFull modules", () => {
-	test("renders Tractor Beam fixed installed drain per tile", () => {
-		const out = renderEntityFull({
-			...idleShip,
-			modules: [
-				{
-					type: 9,
-					installed: { item_id: 10106, stats: encodeStats([500, 500, 500]) },
-				},
-			],
-		});
-		expect(out).toContain("8.8 energy/tile");
-		expect(out).not.toContain("energy/load");
+	const fitted = (type: number, itemId: number, stats: bigint) => ({
+		type,
+		installed: { item_id: UInt16.from(itemId), stats: UInt64.from(stats) },
 	});
 
-	test("renders Cargo Hold capacity and fixed installed drain", () => {
+	test("renders the Tractor Beam's towing figures on the entity sheet", () => {
 		const out = renderEntityFull({
 			...idleShip,
-			modules: [
-				{
-					type: 8,
-					installed: {
-						item_id: 10105,
-						stats: encodeStats([999, 999, 999, 999]),
-					},
-				},
-			],
+			modules: [fitted(9, 10106, encodeStats([500, 500, 500]))],
 		});
-		expect(out).toContain("60000 t capacity");
-		expect(out).toContain("2.3 energy/tile");
+		expect(out).toMatch(/#0 \(Towing\):\s+Tractor Beam \(T1\)/);
+		expect(out).toContain("Towing:");
+		expect(out).toMatch(/Tows:\s+\d+ containers?, T1 and below/);
+		expect(out).toContain("Handling:");
+		expect(out).not.toContain("energy/tile");
 	});
 
-	test("renders installed module with slot index, accepted type, name, and stats", () => {
+	test("renders Cargo Hold capacity in tonnes on the entity sheet", () => {
 		const out = renderEntityFull({
 			...idleShip,
-			modules: [
-				{ type: 0, installed: { item_id: 10102, stats: 0n } },
-			],
+			modules: [fitted(8, 10105, encodeStats([999, 999, 999, 999]))],
+		});
+		expect(out).toContain("Storage:");
+		expect(out).toMatch(/Capacity:\s+[\d,]+ t/);
+	});
+
+	test("renders installed module with slot index, accepted type, and name", () => {
+		const out = renderEntityFull({
+			...idleShip,
+			modules: [fitted(0, 10102, encodeStats([500, 500, 500]))],
 		});
 		expect(out).toMatch(/Modules:/);
-		expect(out).toMatch(/#0 \(Any\):\s+Limpet Bay \(T1\) — depth \d+ · yield \d+ · \d+\.\d+ energy\/min/);
+		expect(out).toMatch(/#0 \(Any\):\s+Limpet Bay \(T1\)/);
+		expect(out).toMatch(/Depth:\s+[\d,]+ km/);
+		expect(out).toMatch(/Yield:\s+[\d.]+ t\/min/);
 	});
 
-	test("renders empty slot with its accepted type", () => {
+	test("--raw renders capability values as the contract stores them", () => {
+		const out = renderEntityFull(
+			{ ...idleShip, modules: [fitted(0, 10102, encodeStats([500, 500, 500]))] },
+			{ raw: true },
+		);
+		expect(out).toMatch(/Limpet Bay \(T1\) — yield \d+ · drain \d+ · depth \d+/);
+		expect(out).toContain("Values as the contract stores them");
+		expect(out).not.toContain("t/min");
+	});
+
+	test("renders empty slot with its accepted activity", () => {
 		const out = renderEntityFull({
 			...idleShip,
 			modules: [
@@ -79,7 +84,7 @@ describe("renderEntityFull modules", () => {
 				{ type: 8, installed: null },
 			],
 		});
-		expect(out).toMatch(/#0 \(Loader\):\s+\(empty\)/);
+		expect(out).toMatch(/#0 \(Shuttling\):\s+\(empty\)/);
 		expect(out).toMatch(/#1 \(Storage\):\s+\(empty\)/);
 	});
 
@@ -113,10 +118,10 @@ describe("renderEntityFull live energy", () => {
 	test("idle entity renders energy in stored form (no arrow)", () => {
 		const out = renderEntityFull({
 			...idleShip,
-			energy: 200,
-			generator: { capacity: 350, recharge: 10 },
+			energy: 200_000,
+			generator: { capacity: 350_000, recharge: 10_000 },
 		});
-		expect(out).toMatch(/Energy:\s+200\/350 \(recharge: 10\/s\)/);
+		expect(out).toMatch(/Energy:\s+200 \/ 350 energy \(\+600 energy\/min\)/);
 		expect(out).not.toContain("→");
 	});
 
@@ -133,8 +138,8 @@ describe("renderEntityFull live energy", () => {
 			cargomass: 0,
 			cargo: [],
 			modules: [],
-			energy: 200,
-			generator: { capacity: 350, recharge: 10 },
+			energy: 200_000,
+			generator: { capacity: 350_000, recharge: 10_000 },
 			gatherer_lanes: [],
 			crafter_lanes: [],
 			builder_lanes: [],
@@ -152,7 +157,7 @@ describe("renderEntityFull live energy", () => {
 		});
 		const out = renderEntityFull(ei);
 		expect(out).toMatch(/Energy:\s+200 → /);
-		expect(out).toContain("/350 (live, recharge: 10/s)");
+		expect(out).toContain("/ 350 energy (live, +600 energy/min)");
 	});
 });
 
@@ -312,43 +317,55 @@ describe("renderEntityFull holds", () => {
 describe("renderEntityFull projection labels", () => {
 	test("ctx with projected.energy and label='live' renders → with (live, ...)", () => {
 		const ctx: HeaderContext = {
-			projected: { energy: UInt64.from(87) },
+			projected: { energy: UInt64.from(87_000) },
 			projectionLabel: "live",
 		};
 		const out = renderEntityFull(
 			{
 				...idleShip,
-				energy: 100,
-				generator: { capacity: 200, recharge: 5 },
+				energy: 100_000,
+				generator: { capacity: 200_000, recharge: 5_000 },
 			},
 			ctx,
 		);
-		expect(out).toContain("100 → 87/200 (live, recharge: 5/s)");
+		expect(out).toContain("100 → 87 / 200 energy (live, +300 energy/min)");
 	});
 
 	test("ctx with projected.energy and label='projected' renders → with (projected, ...)", () => {
 		const ctx: HeaderContext = {
-			projected: { energy: UInt64.from(50) },
+			projected: { energy: UInt64.from(50_000) },
 			projectionLabel: "projected",
 		};
 		const out = renderEntityFull(
 			{
 				...idleShip,
-				energy: 100,
-				generator: { capacity: 200, recharge: 5 },
+				energy: 100_000,
+				generator: { capacity: 200_000, recharge: 5_000 },
 			},
 			ctx,
 		);
-		expect(out).toContain("100 → 50/200 (projected, recharge: 5/s)");
+		expect(out).toContain("100 → 50 / 200 energy (projected, +300 energy/min)");
 	});
 
 	test("no ctx: idle entity renders static energy", () => {
 		const out = renderEntityFull({
 			...idleShip,
-			energy: 100,
-			generator: { capacity: 200, recharge: 5 },
+			energy: 100_000,
+			generator: { capacity: 200_000, recharge: 5_000 },
 		});
-		expect(out).toContain("100/200 (recharge: 5/s)");
+		expect(out).toContain("100 / 200 energy (+300 energy/min)");
+	});
+
+	test("raw ctx renders energy as the contract stores it", () => {
+		const out = renderEntityFull(
+			{
+				...idleShip,
+				energy: 100_000,
+				generator: { capacity: 200_000, recharge: 5_000 },
+			},
+			{ raw: true },
+		);
+		expect(out).toContain("100000/200000 (recharge: 5000/s)");
 	});
 });
 

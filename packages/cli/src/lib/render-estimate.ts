@@ -1,25 +1,22 @@
 import type { EstimateResult, TravelSummary } from "./estimate";
+import { formatDistance } from "@shipload/sdk";
 import { renderIssues } from "./feasibility";
+import { formatEnergyAmount, wholeEnergy } from "./figures";
 import { formatDuration, formatItem } from "./format";
 
 function signed(n: number): string {
 	return n >= 0 ? `+${n}` : `${n}`;
 }
 
-function tileDistance(origin: { x: number; y: number }, dest: { x: number; y: number }): string {
-	const dx = dest.x - origin.x;
-	const dy = dest.y - origin.y;
-	const d = Math.sqrt(dx * dx + dy * dy);
-	if (d === 0) return "0 tiles";
-	const formatted = d < 10 ? d.toFixed(1) : Math.round(d).toString();
-	return `${formatted} ${d < 1.5 ? "tile" : "tiles"}`;
+function routeDistance(origin: { x: number; y: number }, dest: { x: number; y: number }): string {
+	return formatDistance(Math.hypot(dest.x - origin.x, dest.y - origin.y));
 }
 
 export function renderTravelSummary(t: TravelSummary, shipId: bigint | number): string {
 	const lines = [`Travel: ship ${shipId}`];
 	const originSuffix = t.originIsProjected ? " (after pending tasks)" : "";
 	lines.push(
-		`  Route:    (${t.origin.x}, ${t.origin.y})${originSuffix} → (${t.destination.x}, ${t.destination.y})  ·  ${tileDistance(t.origin, t.destination)}`,
+		`  Route:    (${t.origin.x}, ${t.origin.y})${originSuffix} → (${t.destination.x}, ${t.destination.y})  ·  ${routeDistance(t.origin, t.destination)}`,
 	);
 	if (t.rechargeDuration_s > 0) {
 		const total = t.flightDuration_s + t.rechargeDuration_s;
@@ -29,16 +26,18 @@ export function renderTravelSummary(t: TravelSummary, shipId: bigint | number): 
 	} else {
 		lines.push(`  Duration: ${formatDuration(t.flightDuration_s)}`);
 	}
-	const delta = t.endEnergy - t.startEnergy;
+	const delta = wholeEnergy(t.endEnergy) - wholeEnergy(t.startEnergy);
 	const energySuffix = t.startEnergyIsProjected ? " (after pending tasks)" : "";
-	lines.push(`  Energy:   ${t.startEnergy} → ${t.endEnergy} (${signed(delta)})${energySuffix}`);
+	lines.push(
+		`  Energy:   ${formatEnergyAmount(t.startEnergy)} → ${formatEnergyAmount(t.endEnergy)} energy (${signed(delta)})${energySuffix}`,
+	);
 	return lines.join("\n");
 }
 
 export function renderEstimate(e: EstimateResult): string {
 	const prefix = e.with_recharge ? "Estimate (with recharge):" : "Estimate:";
 	const headerParts: string[] = [`duration ${formatDuration(e.duration_s)}`];
-	if (e.energy_cost !== 0) headerParts.push(`energy ${signed(-e.energy_cost)}`);
+	if (e.energy_cost !== 0) headerParts.push(`energy ${signed(-wholeEnergy(e.energy_cost, "ceil"))}`);
 
 	if (e.craft) {
 		const lines: string[] = [`${prefix} ${headerParts.join(", ")}`];

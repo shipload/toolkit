@@ -94,8 +94,8 @@ export async function fetchNftRows(owner: string): Promise<NftRow[]> {
     return rows
 }
 
-function formatStatsField(itemId: number, stats: bigint): string {
-    const formatted = formatItemStats(itemId, stats)
+function formatStatsField(itemId: number, stats: bigint, raw: boolean): string {
+    const formatted = formatItemStats(itemId, stats, {raw})
     if (formatted) return formatted
     if (stats === 0n) return ''
     try {
@@ -106,7 +106,7 @@ function formatStatsField(itemId: number, stats: bigint): string {
     }
 }
 
-export function renderPretty(owner: string, rows: NftRow[]): string {
+export function renderPretty(owner: string, rows: NftRow[], opts: {raw?: boolean} = {}): string {
     if (rows.length === 0) {
         return `NFTs (${owner}): none in collection '${SHIPLOAD_COLLECTION}'.`
     }
@@ -140,7 +140,7 @@ export function renderPretty(owner: string, rows: NftRow[]): string {
             String(r.quantity),
             formatMass(r.mass),
             `(${r.origin_x}, ${r.origin_y})`,
-            formatStatsField(r.item_id, r.stats),
+            formatStatsField(r.item_id, r.stats, Boolean(opts.raw)),
             r.schema_name,
             String(r.template_id),
         ])
@@ -180,10 +180,11 @@ export function register(program: Command): void {
         .argument('[account]', 'account to inspect (defaults to configured actor)')
         .option('--item <id>', 'filter by item id', parseUint32)
         .option('--json', 'emit JSON instead of formatted text')
+        .option('--raw', 'show module stats as the contract stores them')
         .action(
             async (
                 account: string | undefined,
-                opts: {item?: number; json?: boolean}
+                opts: {item?: number; json?: boolean; raw?: boolean}
             ): Promise<void> => {
                 const owner = account ?? getAccountName()
                 let rows = await fetchNftRows(owner)
@@ -191,7 +192,7 @@ export function register(program: Command): void {
                 if (opts.json) {
                     console.log(jsonStringify(rowsToJson(owner, rows)))
                 } else {
-                    console.log(renderPretty(owner, rows))
+                    console.log(renderPretty(owner, rows, {raw: opts.raw}))
                 }
             }
         )

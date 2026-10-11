@@ -1,7 +1,7 @@
 import { encodeStats, type LocationStratum, type LocationType } from "@shipload/sdk";
 import Table from "cli-table3";
 import { renderEntityForGather } from "./entity-header";
-import { formatDuration, formatItem } from "./format";
+import { formatDuration, formatEnergyAmount, formatItem } from "./format";
 import { formatItemStats } from "./item-stats";
 import type {
 	GatherBudget,
@@ -117,7 +117,7 @@ export function renderGatherableTable(opts: GatherableRenderOpts): string {
 				? formatItemStats(s.itemId, encodeStats([s.stats.stat1, s.stats.stat2, s.stats.stat3]))
 				: "",
 			r.reachable && m.gatherable ? formatDuration(m.timeS) : "—",
-			r.reachable && m.gatherable ? String(m.energyCost) : "—",
+			r.reachable && m.gatherable ? formatEnergyAmount(m.energyCost, "ceil") : "—",
 			r.reachable && m.gatherable ? `${m.maxQuantity}${formatBound(m.maxQuantityBound)}` : "—",
 		];
 		if (showReachCol) cells.push(r.reachable ? "✓" : "OOD");

@@ -8,8 +8,8 @@ test('formatShuttleReason prints the energy values for a ship-energy rejection',
     const reason: ShuttleReason = {
         code: 'ship-energy',
         reason: 'Craft requires more energy than entity has.',
-        have: 40,
-        need: 65,
+        have: 40_000,
+        need: 65_000,
     }
     const out = formatShuttleReason(reason)
     expect(out).toBe('This job needs 65 energy; the ship will have 40.')

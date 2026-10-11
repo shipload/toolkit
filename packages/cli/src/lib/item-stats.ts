@@ -1,29 +1,22 @@
 import {
-	computeCrafterCapabilities,
-	computeEngineCapabilities,
-	computeGathererCapabilities,
-	computeGeneratorCapabilities,
-	computeHaulerCapabilities,
-	computeLoaderCapabilities,
+	computeModuleCapabilities,
 	decodeCraftedItemStats,
 	decodeStat,
+	FIGURE_SECTION_LABELS,
 	formatMass,
 	getItem,
-	getModuleCapabilityType,
 	getStatDefinitions,
 	isModuleItem,
-	MODULE_CRAFTER,
-	MODULE_ENGINE,
-	MODULE_GATHERER,
-	MODULE_GENERATOR,
-	MODULE_HAULER,
-	MODULE_LOADER,
-	MODULE_STORAGE,
-	MODULE_WARP,
+	MODULE_FIGURE_SECTION,
 	resolveItem,
 	resolveItemCategory,
 	type ResourceCategory,
 } from "@shipload/sdk";
+import { formatModuleFigures, formatModuleRaw } from "./figures";
+
+export interface ItemStatsOptions {
+	raw?: boolean;
+}
 
 const ALL_STAT_KEY_TO_ABBR: Map<string, string> = (() => {
 	const map = new Map<string, string>();
@@ -63,48 +56,11 @@ function formatComponentStats(itemId: number, stats: bigint): string {
 	return parts.join(" / ");
 }
 
-function formatModuleCapability(itemId: number, stats: bigint): string {
-	const decoded = decodeCraftedItemStats(itemId, stats);
-	const type = getModuleCapabilityType(itemId);
-	switch (type) {
-		case MODULE_ENGINE: {
-			const c = computeEngineCapabilities(decoded, getItem(itemId).tier);
-			return `Engine: thrust ${c.thrust} · ${c.drain} energy/step`;
-		}
-		case MODULE_GENERATOR: {
-			const c = computeGeneratorCapabilities(decoded, getItem(itemId).tier);
-			return `Generator: capacity ${c.capacity} · recharge ${c.recharge}/s`;
-		}
-		case MODULE_GATHERER: {
-			const c = computeGathererCapabilities(decoded, getItem(itemId).tier);
-			return `Gatherer: depth ${c.depth} · yield ${c.yield} · ${c.drain} energy/s`;
-		}
-		case MODULE_HAULER: {
-			const c = computeHaulerCapabilities(decoded, getItem(itemId).tier);
-			return `Hauler: capacity ${c.capacity} · efficiency ${c.efficiency} · ${c.drain} energy/load`;
-		}
-		case MODULE_CRAFTER: {
-			const c = computeCrafterCapabilities(decoded, getItem(itemId).tier);
-			return `Crafter: speed ${c.speed} · ${c.drain} energy/craft`;
-		}
-		case MODULE_LOADER: {
-			const c = computeLoaderCapabilities(decoded, getItem(itemId).tier);
-			return `Loader: ${formatMass(c.mass)} each · thrust ${c.thrust} · ×${c.quantity}`;
-		}
-		case MODULE_STORAGE: {
-			const str = decoded.strength ?? 500;
-			const hrd = decoded.hardness ?? 500;
-			const sat = decoded.saturation ?? 500;
-			const pct = 10 + Math.floor(((str + hrd + sat) * 10) / 2997);
-			return `Storage: +${pct}% capacity`;
-		}
-		case MODULE_WARP: {
-			const stat = decodeStat(stats, 0);
-			return `Warp: range ${100 + stat * 3}`;
-		}
-		default:
-			return formatComponentStats(itemId, stats);
-	}
+function formatModuleCapability(itemId: number, stats: bigint, raw: boolean): string {
+	if (!raw) return formatModuleFigures(itemId, stats) || formatComponentStats(itemId, stats);
+	const caps = computeModuleCapabilities(itemId, stats);
+	if (!caps) return formatComponentStats(itemId, stats);
+	return `${FIGURE_SECTION_LABELS[MODULE_FIGURE_SECTION[caps.kind]]}: ${formatModuleRaw(itemId, stats)}`;
 }
 
 function formatEntityStats(itemId: number, stats: bigint): string {
@@ -124,7 +80,11 @@ function formatEntityStats(itemId: number, stats: bigint): string {
 	}
 }
 
-export function formatItemStats(itemId: number, stats: bigint): string {
+export function formatItemStats(
+	itemId: number,
+	stats: bigint,
+	opts: ItemStatsOptions = {},
+): string {
 	if (stats === 0n) return "";
 	let item: ReturnType<typeof getItem> | undefined;
 	try {
@@ -133,7 +93,7 @@ export function formatItemStats(itemId: number, stats: bigint): string {
 		return formatComponentStats(itemId, stats);
 	}
 	if (item.type === "module" || isModuleItem(itemId)) {
-		return formatModuleCapability(itemId, stats);
+		return formatModuleCapability(itemId, stats, Boolean(opts.raw));
 	}
 	switch (item.type) {
 		case "resource":

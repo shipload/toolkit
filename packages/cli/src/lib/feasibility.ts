@@ -1,3 +1,5 @@
+import { formatEnergyAmount } from "./format";
+
 export type FeasibilityCode =
 	| "energy_capacity_exceeded"
 	| "insufficient_energy"
@@ -24,7 +26,7 @@ export function checkEnergyCapacity(
 	return {
 		code: "energy_capacity_exceeded",
 		severity: "error",
-		message: `${verb} requires ${required} energy capacity, entity cap is ${capacity}`,
+		message: `${verb} requires ${formatEnergyAmount(required, "ceil")} energy capacity, entity cap is ${formatEnergyAmount(capacity, "floor")}`,
 		detail: { capacity, required },
 	};
 }
@@ -42,7 +44,7 @@ export function checkEnergyAvailable(
 	return {
 		code: "insufficient_energy",
 		severity: "error",
-		message: `${verb} needs ${required} energy, entity has ${current}${suffix}`,
+		message: `${verb} needs ${formatEnergyAmount(required, "ceil")} energy, entity has ${formatEnergyAmount(current, "floor")}${suffix}`,
 		detail: { current, required },
 	};
 }
