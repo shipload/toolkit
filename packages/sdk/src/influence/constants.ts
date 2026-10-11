@@ -35,7 +35,7 @@ export const GRADE_PREMIUM = 1
 export const MINTREADY_DEFAULT_CAP = 10
 
 export const BAR_SEED = 102_363
-export const BAR_STEP_UNIT = 20
+export const BAR_STEP_UNIT = 1
 export const BAR_STEP_UP = BAR_STEP_UNIT * 9
 export const BAR_STEP_DOWN = BAR_STEP_UNIT
 

@@ -1,4 +1,6 @@
 import {getItem} from '../data/catalog'
+import {getRecipe} from '../data/recipes-runtime'
+import {decodeStat} from '../derivation/crafting'
 import {MASS_UNITS_PER_TONNE} from '../types'
 import {categoryIndex} from './categories'
 import {
@@ -14,6 +16,8 @@ import {findDecomp} from './decomp'
 import type {DemandView} from './demand'
 import {needForCategory} from './demand'
 import {getStatCount, statsSumSq} from './quality'
+
+const RESOURCE_STAT_COUNT = 3
 
 const UINT64_MAX = (1n << 64n) - 1n
 
@@ -61,13 +65,43 @@ export function resourceValueAtomic(
     return weightedQualityAtomic(mass * weightFp, sumSq, nStats, d1, needFp)
 }
 
-export function componentBaseAtomic(
-    weightedRawMassFp: bigint,
-    sumSq: number,
-    nStats: number,
-    d1: number
-): bigint {
-    return weightedQualityAtomic(weightedRawMassFp, sumSq, nStats, d1, BigInt(NEED_FP_SCALE))
+export function componentBaseAtomic(weightedKeptSqFp: bigint, d1: number): bigint {
+    return weightedQualityAtomic(
+        weightedKeptSqFp,
+        1,
+        RESOURCE_STAT_COUNT,
+        d1,
+        BigInt(NEED_FP_SCALE)
+    )
+}
+
+interface KeptWeights {
+    weightedKeptSq: bigint
+    weightedMass: bigint
+}
+
+function keptWeights(item: ValuedItem, pricing: InfluencePricing): KeptWeights {
+    const recipe = getRecipe(item.itemId)
+    if (!recipe) throw new Error('item has no decomposition')
+    let weightedKeptSq = 0n
+    let weightedMass = 0n
+    recipe.inputs.forEach((input, i) => {
+        const def = getItem(input.itemId)
+        if (def.category === undefined) throw new Error('component input is not a resource')
+        const weight =
+            BigInt(def.mass) *
+            BigInt(input.quantity) *
+            pricing.weight(categoryIndex(def.category), def.tier)
+        weightedMass += weight
+        let keptSq = 0
+        recipe.statSlots.forEach((slot, k) => {
+            if (slot.sources[0].inputIndex !== i) return
+            const stat = decodeStat(item.stats, k)
+            keptSq += stat * stat
+        })
+        weightedKeptSq += weight * BigInt(keptSq)
+    })
+    return {weightedKeptSq, weightedMass}
 }
 
 export function componentEffortAtomic(processedMassPerUnit: number, quantity: number): bigint {
@@ -88,11 +122,10 @@ export function valueCargoItem(
         throw new Error('item class cannot be valued')
     }
 
-    const nStats = getStatCount(item.itemId)
-    const sumSq = statsSumSq(item.stats, nStats)
-
     if (def.type === 'resource') {
         if (def.category === undefined) throw new Error('resource has no category')
+        const nStats = getStatCount(item.itemId)
+        const sumSq = statsSumSq(item.stats, nStats)
         const category = categoryIndex(def.category)
         const weightFp = pricing.weight(category, def.tier)
         const needFp = needForCategory(demand, category)
@@ -112,12 +145,7 @@ export function valueCargoItem(
     const entry = findDecomp(item.itemId)
     if (!entry) throw new Error('item has no decomposition')
 
-    let weighted = 0n
-    for (const bucket of entry.buckets) {
-        weighted += BigInt(bucket.rawMass) * pricing.weight(bucket.category, bucket.tier)
-    }
-
-    const perUnit = componentBaseAtomic(weighted, sumSq, nStats, pricing.d1)
+    const perUnit = componentBaseAtomic(keptWeights(item, pricing).weightedKeptSq, pricing.d1)
     const total = perUnit * BigInt(item.quantity)
     if (total > UINT64_MAX) throw new Error('influence: component value overflow')
 
@@ -160,11 +188,11 @@ export function explainCargoItem(
     const def = getItem(item.itemId)
     const totalAtomic = valueCargoItem(item, demand, pricing)
     const points = Number(totalAtomic) / INFLUENCE_ATOMIC_PER_POINT
-    const nStats = getStatCount(item.itemId)
-    const quality = statsSumSq(item.stats, nStats) / (nStats * pricing.d1)
 
     if (def.type === 'resource') {
         if (def.category === undefined) throw new Error('resource has no category')
+        const nStats = getStatCount(item.itemId)
+        const quality = statsSumSq(item.stats, nStats) / (nStats * pricing.d1)
         const category = categoryIndex(def.category)
         return {
             kind: 'resource',
@@ -182,17 +210,18 @@ export function explainCargoItem(
     const entry = findDecomp(item.itemId)
     if (!entry) throw new Error('item has no decomposition')
     let rawMass = 0
-    let weighted = 0n
-    for (const bucket of entry.buckets) {
-        rawMass += bucket.rawMass
-        weighted += BigInt(bucket.rawMass) * pricing.weight(bucket.category, bucket.tier)
-    }
+    for (const bucket of entry.buckets) rawMass += bucket.rawMass
+    const {weightedKeptSq, weightedMass} = keptWeights(item, pricing)
+    const quality =
+        weightedMass === 0n
+            ? 0
+            : Number(weightedKeptSq) / (Number(weightedMass) * RESOURCE_STAT_COUNT * pricing.d1)
     const effortAtomic = componentEffortAtomic(entry.processedMass, item.quantity)
     return {
         kind: 'component',
         rawMass: rawMass * item.quantity,
         processedMass: entry.processedMass * item.quantity,
-        weight: rawMass === 0 ? 0 : Number(weighted) / (rawMass * WEIGHT_FP_SCALE),
+        weight: rawMass === 0 ? 0 : Number(weightedMass) / (rawMass * WEIGHT_FP_SCALE),
         quality,
         baseAtomic: totalAtomic - effortAtomic,
         effortAtomic,
