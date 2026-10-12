@@ -1,3 +1,4 @@
+import { TRAVEL_MAX_DURATION } from "@shipload/sdk";
 import { formatEnergyAmount } from "./format";
 
 export type FeasibilityCode =
@@ -83,9 +84,8 @@ export function checkReserve(remaining: number, requested: number): FeasibilityI
 	};
 }
 
-const TRAVEL_MAX_DURATION = 86400;
 export function checkTravelDuration(seconds: number): FeasibilityIssue | null {
-	if (seconds < TRAVEL_MAX_DURATION) return null;
+	if (seconds <= TRAVEL_MAX_DURATION) return null;
 	return {
 		code: "excessive_travel_duration",
 		severity: "error",

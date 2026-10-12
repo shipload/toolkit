@@ -83,9 +83,13 @@ describe("checkTravelDuration", () => {
 	test("null when under limit", () => {
 		expect(checkTravelDuration(3600)).toBeNull();
 	});
-	test("issue when at/over 86400", () => {
-		const issue = checkTravelDuration(86500);
+	test("accepts exactly TRAVEL_MAX_DURATION, as the contract does", () => {
+		expect(checkTravelDuration(86_400)).toBeNull();
+	});
+	test("issue when over 86400", () => {
+		const issue = checkTravelDuration(86_401);
 		expect(issue?.code).toBe("excessive_travel_duration");
+		expect(checkTravelDuration(86_500)?.code).toBe("excessive_travel_duration");
 	});
 });
 

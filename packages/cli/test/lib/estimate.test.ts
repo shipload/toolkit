@@ -33,11 +33,13 @@ describe("computeFlightDurationSeconds", () => {
 		expect(computeFlightDurationSeconds(10_000, 0)).toBe(0);
 		expect(computeFlightDurationSeconds(10_000, -5)).toBe(0);
 	});
-	test("returns non-negative floor(2*sqrt(d/a)) for representative inputs", () => {
-		// 2 * sqrt(10000/100) = 2 * 10 = 20
+	test("uses 2*sqrt(d/a) up to the 2*PRECISION cruise transition", () => {
 		expect(computeFlightDurationSeconds(10_000, 100)).toBe(20);
-		// 2 * sqrt(40000/1) = 2 * 200 = 400
-		expect(computeFlightDurationSeconds(40_000, 1)).toBe(400);
+		expect(computeFlightDurationSeconds(20_000, 1)).toBe(282);
+	});
+	test("adds the cruise phase past 2*PRECISION, matching calc_travel_flighttime", () => {
+		expect(computeFlightDurationSeconds(40_000, 1)).toBe(424);
+		expect(computeFlightDurationSeconds(1_000_000, 100)).toBe(721);
 	});
 	test("accepts bigint distance", () => {
 		expect(computeFlightDurationSeconds(10_000n, 100)).toBe(20);

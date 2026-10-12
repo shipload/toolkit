@@ -25,6 +25,7 @@ import {
 	calc_craft_energy,
 	calc_energyusage,
 	calc_ship_flighttime,
+	calc_travel_flighttime,
 	calc_ship_mass,
 	calc_ship_rechargetime,
 	calcCounterpartDelivery,
@@ -114,17 +115,13 @@ export interface EstimateResult {
 	gather?: GatherPlanSummary;
 }
 
-/**
- * Pure helper — flight seconds for (distance, acceleration).
- * Mirrors contract calc_flighttime (sdkv2/src/travel/travel.ts:138).
- */
 export function computeFlightDurationSeconds(
 	distance: number | bigint,
 	acceleration: number,
 ): number {
 	const d = typeof distance === "bigint" ? Number(distance) : distance;
 	if (acceleration <= 0 || d <= 0) return 0;
-	return Math.floor(2 * Math.sqrt(d / acceleration));
+	return calc_travel_flighttime(d, acceleration).toNumber();
 }
 
 /** Pure helper — gather cargo delta (+qty of item). */
