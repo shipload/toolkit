@@ -191,10 +191,7 @@ export class InfluenceManager extends BaseManager {
     }
 
     async getCivicOwner(): Promise<Name> {
-        const row = (await this.server.table('civicconfig').get()) as
-            | ServerContract.Types.civicconfig_row
-            | undefined
-        return row ? Name.from(row.civic_owner) : Name.from(this.server.account)
+        return Name.from(this.server.account)
     }
 
     async isCivic(entity: {owner: NameType}): Promise<boolean> {
