@@ -38,7 +38,7 @@ export interface JobLane {
     entries: JobLaneEntry[]
 }
 
-export const JOB_QUEUE_CAP = 25
+export const JOB_QUEUE_CAP = 50
 
 function activeOn(jobs: JobWindow[], socket: number, now: Date): JobWindow[] {
     return jobs
@@ -69,6 +69,47 @@ export function socketTail(jobs: JobWindow[], socket: number, now: Date): Date {
     return last && last.completesAt > now ? last.completesAt : now
 }
 
+export interface FabricatorPick {
+    slot: number
+    startsAt: Date
+    completesAt: Date
+    /** Job the chain drops to admit this booking when every open socket is at the cap. */
+    bumped?: number
+}
+
+function firstFitStart(active: JobWindow[], earliest: Date, durationMs: number): Date {
+    let startsAt = earliest
+    for (const job of active) {
+        if (job.completesAt <= startsAt) continue
+        if (job.startsAt.getTime() - startsAt.getTime() >= durationMs) break
+        startsAt = job.completesAt
+    }
+    return startsAt
+}
+
+function bumpTarget(
+    jobs: JobWindow[],
+    sockets: Array<{open: boolean}>,
+    arrival: Date,
+    now: Date
+): {slot: number; job: JobWindow; arrivesAt: Date} | null {
+    let found: {slot: number; job: JobWindow; arrivesAt: Date} | null = null
+    for (let slot = 0; slot < sockets.length; slot++) {
+        if (!sockets[slot].open) continue
+        for (const job of activeOn(jobs, slot, now)) {
+            const arrivesAt = job.arrivesAt
+            if (job.deposited || !arrivesAt) continue
+            if (arrivesAt <= arrival || arrivesAt <= now) continue
+            const later =
+                !found ||
+                arrivesAt > found.arrivesAt ||
+                (arrivesAt.getTime() === found.arrivesAt.getTime() && job.id > found.job.id)
+            if (later) found = {slot, job, arrivesAt}
+        }
+    }
+    return found
+}
+
 // Display-only estimate of the window a booking would receive; the contract picks the socket.
 export function pickFabricator(
     jobs: JobWindow[],
@@ -76,24 +117,32 @@ export function pickFabricator(
     durationBySocketMinutes: number[],
     arrival: Date,
     now: Date = arrival
-): {slot: number; startsAt: Date; completesAt: Date} | null {
-    let best: {slot: number; startsAt: Date; completesAt: Date} | null = null
+): FabricatorPick | null {
+    let best: FabricatorPick | null = null
     for (let slot = 0; slot < sockets.length; slot++) {
         if (!sockets[slot].open) continue
-        if (activeOn(jobs, slot, now).length >= JOB_QUEUE_CAP) continue
+        const active = activeOn(jobs, slot, now)
+        if (active.length >= JOB_QUEUE_CAP) continue
         const durationMs = durationBySocketMinutes[slot] * 60_000
-        let startsAt = arrival
-        for (const job of activeOn(jobs, slot, now)) {
-            if (job.completesAt <= startsAt) continue
-            if (job.startsAt.getTime() - startsAt.getTime() >= durationMs) break
-            startsAt = job.completesAt
-        }
+        const startsAt = firstFitStart(active, arrival, durationMs)
         const completesAt = new Date(startsAt.getTime() + durationMs)
         if (!best || completesAt < best.completesAt) {
             best = {slot, startsAt, completesAt}
         }
     }
-    return best
+    if (best) return best
+
+    const target = bumpTarget(jobs, sockets, arrival, now)
+    if (!target) return null
+    const durationMs = durationBySocketMinutes[target.slot] * 60_000
+    const without = activeOn(jobs, target.slot, now).filter((j) => j.id !== target.job.id)
+    const startsAt = firstFitStart(without, arrival, durationMs)
+    return {
+        slot: target.slot,
+        startsAt,
+        completesAt: new Date(startsAt.getTime() + durationMs),
+        bumped: target.job.id,
+    }
 }
 
 export function workshopAvailability(

@@ -10,8 +10,6 @@ type CargoItem = ServerContract.Types.cargo_item
 type Lane = ServerContract.Types.lane
 type ModuleEntry = ServerContract.Types.module_entry
 
-export const CIVIC_TRANSFER_PER_PLAYER_CAP = 4
-
 export interface CivicShuttleBay {
     laneKey: number
     slotIndex: number
@@ -166,7 +164,7 @@ export function pendingCivicTransfers(
     return out
 }
 
-// Mirrors civic_transfers_for: the sender side of every shuttle the building holds, by owner.
+// The sender side of every transfer the building holds, narrowed to the given senders.
 export function civicTransfersFrom(
     entity: ScheduleData,
     senderIds: Array<UInt64 | string | number>,
@@ -174,15 +172,4 @@ export function civicTransfersFrom(
 ): PendingCivicTransfer[] {
     const owned = new Set(senderIds.map((id) => String(id)))
     return pendingCivicTransfers(entity, now).filter((t) => owned.has(String(t.senderId)))
-}
-
-export function civicTransfersAtCap(
-    entity: ScheduleData,
-    senderIds: Array<UInt64 | string | number>,
-    now: Date = new Date()
-): boolean {
-    return (
-        civicTransfersFrom(entity, senderIds, now).filter((t) => !t.complete).length >=
-        CIVIC_TRANSFER_PER_PLAYER_CAP
-    )
 }

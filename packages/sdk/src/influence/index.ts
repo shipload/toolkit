@@ -46,11 +46,9 @@ export {
 } from './duration'
 export {
     civicShuttleBays,
-    civicTransfersAtCap,
     civicTransfersFrom,
     pendingCivicTransfers,
     selectCivicShuttleBay,
-    CIVIC_TRANSFER_PER_PLAYER_CAP,
     type CivicShuttleBay,
     type PendingCivicTransfer,
 } from './civic-shuttle'

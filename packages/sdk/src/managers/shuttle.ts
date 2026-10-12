@@ -28,6 +28,7 @@ export type ShuttleReasonCode =
     | 'not-stored'
     | 'no-storage'
     | 'bays-booked'
+    | 'bay-not-ready'
     | 'player-cap'
     | 'queue-full'
     | 'inputs-unavailable'
@@ -87,7 +88,6 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'entity cannot recharge': 'no-generator',
     'workshop has no fabricator installed': 'not-equipped',
     'dock has no assembly arm installed': 'not-equipped',
-    'too many bookings waiting on materials at this building': 'job-cap',
     'upgrade target is busy': 'target-busy',
     'Entity must be idle to modify modules.': 'target-busy',
     'target cargo would not fit the upgraded capacity': 'cargo-wont-fit',
@@ -97,7 +97,10 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'entity has no storage': 'no-storage',
     'target entity has no storage': 'no-storage',
     "the building's shuttle bays are fully booked": 'bays-booked',
-    'player already has the most transfers this building takes': 'player-cap',
+    'a shuttle bay only takes cargo that is ready to load now; book this once your ship and its cargo are here, or send it on your own shuttle':
+        'bay-not-ready',
+    'a shuttle bay only takes cargo that is ready to load now; book this once the cargo is here':
+        'bay-not-ready',
     'fabricator queue is full': 'queue-full',
     'Cannot unload cargo that is not loaded.': 'inputs-unavailable',
     'Insufficient inputs for recipe.': 'inputs-unavailable',

@@ -399,6 +399,7 @@ export {
     pickupsInFlight,
 } from './scheduling/jobs'
 export type {
+    FabricatorPick,
     JobWindow,
     JobLane,
     JobLaneEntry,

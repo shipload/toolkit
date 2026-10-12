@@ -7,11 +7,9 @@ import {JOB_QUEUE_CAP} from '../scheduling/jobs'
 import {HoldKind, TaskType} from '../types'
 import {
     civicShuttleBays,
-    civicTransfersAtCap,
     civicTransfersFrom,
     pendingCivicTransfers,
     selectCivicShuttleBay,
-    CIVIC_TRANSFER_PER_PLAYER_CAP,
     type CivicShuttleBay,
 } from './civic-shuttle'
 
@@ -147,15 +145,13 @@ test('a landed transfer is listed for settling but is not callable', () => {
     expect(transfer.callable).toBe(false)
 })
 
-test('landed transfers do not count against the per-player cap', () => {
-    const mine = Array.from({length: CIVIC_TRANSFER_PER_PLAYER_CAP}, (_, i) =>
-        shuttleTask(20 + i, 50)
-    )
+test('landed transfers stay listed for settling and read as complete', () => {
+    const mine = Array.from({length: 4}, (_, i) => shuttleTask(20 + i, 50))
     const senderIds = mine.map((_, i) => 20 + i)
     const at = {lanes: [makeLane(1, mine)]} as never
-    expect(civicTransfersAtCap(at, senderIds, T0)).toBe(true)
-    expect(civicTransfersAtCap(at, senderIds, AFTER)).toBe(false)
-    expect(civicTransfersFrom(at, senderIds, AFTER).length).toBe(CIVIC_TRANSFER_PER_PLAYER_CAP)
+    expect(civicTransfersFrom(at, senderIds, T0).filter((t) => !t.complete).length).toBe(4)
+    expect(civicTransfersFrom(at, senderIds, AFTER).filter((t) => !t.complete).length).toBe(0)
+    expect(civicTransfersFrom(at, senderIds, AFTER).length).toBe(4)
 })
 
 test('selectCivicShuttleBay takes the first free bay, then the lowest occupied one', () => {
@@ -248,13 +244,9 @@ test('a civic pickup leg is not callable while CANCEL_NEVER', () => {
     expect(transfer.callable).toBe(false)
 })
 
-test('civicTransfersAtCap trips at the per-player cap', () => {
-    const mine = Array.from({length: CIVIC_TRANSFER_PER_PLAYER_CAP}, (_, i) =>
-        shuttleTask(20 + i, 50)
-    )
+test('one owner can hold more bay transfers than the retired per-owner cap of four', () => {
+    const mine = Array.from({length: 6}, (_, i) => shuttleTask(20 + i, 50))
     const senderIds = mine.map((_, i) => 20 + i)
-    const under = {lanes: [makeLane(1, mine.slice(0, -1))]} as never
     const at = {lanes: [makeLane(1, mine)]} as never
-    expect(civicTransfersAtCap(under, senderIds, T0)).toBe(false)
-    expect(civicTransfersAtCap(at, senderIds, T0)).toBe(true)
+    expect(civicTransfersFrom(at, senderIds, T0).length).toBe(6)
 })
