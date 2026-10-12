@@ -475,7 +475,7 @@ export function estimateDealTravelTime(
 
 export function hasEnergyForDistance(ship: ShipLike, distance: UInt64Type): boolean {
     if (!ship.engines) return false
-    const energyNeeded = UInt64.from(distance).dividing(PRECISION).multiplying(ship.engines.drain)
+    const energyNeeded = calc_energyusage(distance, ship.engines.drain)
     return UInt64.from(ship.energy ?? 0).gte(energyNeeded)
 }
 
