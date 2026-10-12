@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {
     derivedLoaders,
+    nftTransitDuration,
     unwrapTransitDuration,
     unwrapLoadDuration,
     estimateUnwrapDuration,
@@ -25,6 +26,12 @@ const REFERENCE_MASS =
     getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
     Number(getItem(ITEM_ENGINE_T1).mass) +
     Number(getItem(ITEM_GENERATOR_T1).mass)
+const REFERENCE_DRAIN = 252_491
+const REFERENCE_RECHARGE = 2000
+
+function refillSeconds(distance: number): number {
+    return Math.floor(Math.floor((distance * REFERENCE_DRAIN) / 10000) / REFERENCE_RECHARGE)
+}
 
 describe('unwrap duration mirror', () => {
     test('derivedLoaders aggregates lanes like derived_loaders()', () => {
@@ -42,7 +49,9 @@ describe('unwrap duration mirror', () => {
         const accel = (400 / (REFERENCE_MASS * 100)) * 10000
         const cruiseVelocity = Math.sqrt(accel * 2 * 10000)
         const expected = Math.floor(50000 / cruiseVelocity + cruiseVelocity / accel)
-        expect(unwrapTransitDuration(1000, {x: 0, y: 0}, {x: 3, y: 4})).toBe(expected)
+        expect(unwrapTransitDuration(1000, {x: 0, y: 0}, {x: 3, y: 4})).toBe(
+            expected + refillSeconds(50000)
+        )
     })
 
     test('transit below cruise transition uses the sqrt curve, and a heavy item skips the mass floor', () => {
@@ -50,7 +59,16 @@ describe('unwrap duration mirror', () => {
         const mass = REFERENCE_MASS * 2
         const accel = (400 / (mass * 100)) * 10000
         const expected = Math.floor(2 * Math.sqrt(5000 / accel))
-        expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 0.3, y: 0.4})).toBe(expected)
+        expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 0.3, y: 0.4})).toBe(
+            expected + refillSeconds(5000)
+        )
+    })
+
+    test('transit pays the reference engine energy back at the reference generator rate', () => {
+        // Golden pair from placeentity on chain: a 48,473-mass starter relocated 100 tiles queues 20,563 s.
+        expect(nftTransitDuration(1_000_000, 48_473)).toBe(20_563)
+        expect(nftTransitDuration(1_000_000, 48_473)).toBeGreaterThan(refillSeconds(1_000_000))
+        expect(nftTransitDuration(0, 48_473)).toBe(0)
     })
 
     test('load uses altitude z, adds loader mass, divides by quantity', () => {

@@ -438,6 +438,7 @@ export {
     derivedLoaders,
     estimateUnwrapDuration,
     incomingHoldMass,
+    nftTransitDuration,
     projectCargomass,
     projectedPeakCargomass,
     receiveFits,

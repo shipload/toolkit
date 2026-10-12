@@ -5,11 +5,14 @@ import {MASS_STAT_SCALE, PRECISION, TaskType} from '../types'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../data/item-ids'
+import {computeGeneratorRech, computeTravelDrain} from '../nft/description'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
 import {placedStart} from './lanes'
 
 const NFT_TRANSIT_THRUST = 400
+const NFT_TRANSIT_DRAIN = computeTravelDrain(NFT_TRANSIT_THRUST, 0)
+const NFT_TRANSIT_RECHARGE = computeGeneratorRech(0, 1)
 const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
 const NFT_TRANSIT_REFERENCE_MASS =
     getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
@@ -66,15 +69,22 @@ function distance2d(ax: number, ay: number, bx: number, by: number): number {
     return Math.floor(Math.sqrt(dx * dx + dy * dy) * PRECISION)
 }
 
+// Mirrors nft_transit_duration in nft.hpp: the weakest engine's flight plus the weakest generator's refill.
+export function nftTransitDuration(distance: number, mass: number): number {
+    const flight = travelFlightTime(distance, acceleration(NFT_TRANSIT_THRUST, mass))
+    const energy = Math.floor((distance * NFT_TRANSIT_DRAIN) / PRECISION)
+    return flight + Math.floor(energy / NFT_TRANSIT_RECHARGE)
+}
+
 export function unwrapTransitDuration(
     itemMass: number,
     origin: {x: number; y: number},
     dest: {x: number; y: number}
 ): number {
     if (itemMass <= 0) return 0
-    return travelFlightTime(
+    return nftTransitDuration(
         distance2d(origin.x, origin.y, dest.x, dest.y),
-        acceleration(NFT_TRANSIT_THRUST, Math.max(itemMass, NFT_TRANSIT_REFERENCE_MASS))
+        Math.max(itemMass, NFT_TRANSIT_REFERENCE_MASS)
     )
 }
 
