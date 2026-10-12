@@ -28,8 +28,8 @@ export function formatShuttleReason(r: ShuttleReason): string {
                 : "The target's cargo would not fit the upgraded capacity."
         case 'depot-full':
             return r.have !== undefined && r.need !== undefined && r.cap !== undefined
-                ? `You have ${formatMass(r.have)} stored at this depot; adding ${formatMass(r.need)} would pass the ${formatMass(r.cap)} limit for one player.`
-                : 'This would pass the storage allowance for one player at this depot.'
+                ? `You have ${formatMass(r.have)} stored at this depot; adding ${formatMass(r.need)} would pass the ${formatMass(r.cap)} limit for one account.`
+                : 'This would pass the storage allowance for one account at this depot.'
         case 'not-stored':
             return r.have
                 ? `You only have ${formatMass(r.have)} of that item stored at this depot.`

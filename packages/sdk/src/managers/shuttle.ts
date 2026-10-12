@@ -91,7 +91,7 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'upgrade target is busy': 'target-busy',
     'Entity must be idle to modify modules.': 'target-busy',
     'target cargo would not fit the upgraded capacity': 'cargo-wont-fit',
-    'player storage allowance at this depot is exceeded': 'depot-full',
+    'account storage allowance at this depot is exceeded': 'depot-full',
     'player has no such item stored at this depot': 'not-stored',
     'player has fewer of that item stored at this depot': 'not-stored',
     'entity has no storage': 'no-storage',
