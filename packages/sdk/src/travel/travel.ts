@@ -43,7 +43,15 @@ import {WH} from '../derivation/wormhole'
 import * as scheduleModel from '../scheduling/schedule'
 import type {ScheduleData} from '../scheduling/schedule'
 import {incomingHoldMass} from '../scheduling/unwrap'
+import {taskCargoEffect} from '../scheduling/availability'
+import {calcCargoItemMass} from '../capabilities/storage'
 import {computeLoaderWorkerMass} from '../derivation/capabilities'
+
+function cargoListMass(items: readonly ServerContract.Types.cargo_item[]): number {
+    let total = 0
+    for (const item of items) total += Number(calcCargoItemMass(item))
+    return total
+}
 
 function isPositionalTask(task: ServerContract.Types.task): boolean {
     return task.type.equals(TaskType.TRAVEL) || task.type.equals(TaskType.TRANSIT)
@@ -282,6 +290,23 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     mass.add(UInt64.from(incomingHoldMass(ship.holds)))
 
     return mass
+}
+
+// Mirrors plan_leg: the flight pays for the cargo aboard at departure, never less than the end-of-queue mass.
+export function calc_travel_cargomass(
+    entity: scheduleModel.AnchoredScheduleData & {cargomass: number | {toNumber(): number}},
+    departsAt: Date
+): number {
+    const departsAtMs = departsAt.getTime()
+    let atDeparture = Number(entity.cargomass)
+    let endOfQueue = atDeparture
+    for (const ordered of scheduleModel.unappliedTasks(entity)) {
+        const effect = taskCargoEffect(ordered.task)
+        const delta = cargoListMass(effect.added) - cargoListMass(effect.removed)
+        endOfQueue += delta
+        if (ordered.completesAt.getTime() <= departsAtMs) atDeparture += delta
+    }
+    return Math.max(Math.max(atDeparture, 0), Math.max(endOfQueue, 0))
 }
 
 export function calc_group_flighttime(

@@ -56,6 +56,8 @@ export type RouteMoverCaps = Pick<
 export interface RouteMoverOpts {
     entityType?: string
     hasMovement?: boolean
+    /** The chain prices a flight on the cargo aboard at departure; pass calc_travel_cargomass to match it. */
+    departureCargomass?: number
     priorMobilityEnd?: number
     narrowBarrierEnd?: number
     allLanesEnd?: number
@@ -67,7 +69,8 @@ export function entityToRouteMover(
     opts: RouteMoverOpts = {}
 ): RouteMoverInput {
     const loaderMass = (caps.loaderLanes ?? []).reduce((sum, lane) => sum + Number(lane.mass), 0)
-    const mass = Number(row.cargomass ?? 0) + Number(caps.hullmass ?? 0) + loaderMass
+    const cargomass = opts.departureCargomass ?? Number(row.cargomass ?? 0)
+    const mass = cargomass + Number(caps.hullmass ?? 0) + loaderMass
     return {
         ref: {entityType: opts.entityType ?? 'ship', entityId: row.id},
         hasMovement:

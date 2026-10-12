@@ -67,6 +67,8 @@ export const CANCEL_TASK_COMPLETE = 'cannot cancel completed task'
 export const CANCEL_TASK_NEVER = 'Cannot cancel: task is non-cancelable.'
 export const CANCEL_WOULD_STRAND = 'Cannot cancel: would strand a dependent task.'
 export const CANCEL_WOULD_OVERFILL = 'Cannot cancel: returning cargo would overfill the giver.'
+export const CANCEL_TRAVEL_PRICED =
+    'Cannot cancel: cancel the queued flight first, then this task. The flight was timed without this cargo.'
 export const CANCEL_GIVER_CAPPED =
     'cannot cancel: the giver has a pending plan-capper; let the pull resolve or cancel the capper first'
 export const CANCEL_PAIRED_NOT_FOUND = 'Paired task missing on counterparty schedule.'
@@ -89,6 +91,7 @@ export const CANCEL_REFUSALS: readonly string[] = [
     CANCEL_WOULD_STRAND,
     CANCEL_GIVER_CAPPED,
     CANCEL_WOULD_OVERFILL,
+    CANCEL_TRAVEL_PRICED,
     CANCEL_PAIRED_NOT_FOUND,
     CANCEL_CLUSTER_CANNOT_ABSORB,
     PLOT_BUILD_PENDING,

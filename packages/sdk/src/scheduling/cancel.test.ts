@@ -808,3 +808,47 @@ describe('cancelEligibility — returned cargo', () => {
         expect(plan.blockedByCounterpart?.entity_id.toNumber()).toBe(6)
     })
 })
+
+describe('cancelEligibility — a flight already timed without the cargo', () => {
+    const now = new Date('2026-06-19T00:00:10.000Z')
+    const ORE = 101
+    const ORE_UNITS = 400
+
+    function withUnloadAndTravel(unloadDuration: number) {
+        const unload = ServerContract.Types.task.from({
+            type: TaskType.UNLOAD,
+            duration: unloadDuration,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [{item_id: ORE, quantity: ORE_UNITS, stats: 0, modules: []}],
+            couplings: [],
+        })
+        const e = entity([task({type: TaskType.IDLE, duration: 50}), task({duration: 100})])
+        return ServerContract.Types.entity_info.from({
+            ...JSON.parse(JSON.stringify(e)),
+            lanes: [
+                {
+                    lane_key: 0,
+                    schedule: {
+                        started: T0,
+                        tasks: JSON.parse(JSON.stringify(e.lanes[0].schedule.tasks)),
+                    },
+                },
+                {lane_key: 1, schedule: {started: T0, tasks: [JSON.parse(JSON.stringify(unload))]}},
+            ],
+        })
+    }
+
+    test('an unload that completes before departure cannot be cancelled on its own', () => {
+        const plan = cancelEligibility(withUnloadAndTravel(50), 1, 0, {now})
+        expect(plan.ok).toBe(false)
+        expect(plan.blockedReason).toBe(CancelBlockReason.TRAVEL_PRICED)
+        expect(cancelRefusalMessage(CancelBlockReason.TRAVEL_PRICED)).toContain(
+            'cancel the queued flight first'
+        )
+    })
+
+    test('an unload that completes after departure is already priced in and cancels freely', () => {
+        const plan = cancelEligibility(withUnloadAndTravel(400), 1, 0, {now})
+        expect(plan.ok).toBe(true)
+    })
+})

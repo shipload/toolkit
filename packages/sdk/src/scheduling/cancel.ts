@@ -35,6 +35,7 @@ export enum CancelBlockReason {
     WOULD_STRAND_COUNTERPART = 'WOULD_STRAND_COUNTERPART',
     GIVER_CAPPED = 'GIVER_CAPPED',
     WOULD_OVERFILL = 'WOULD_OVERFILL',
+    TRAVEL_PRICED = 'TRAVEL_PRICED',
     GIVER_MISSING = 'GIVER_MISSING',
     CLUSTER_FULL = 'CLUSTER_FULL',
     RECEIVER_LOCKED = 'RECEIVER_LOCKED',
@@ -56,6 +57,7 @@ export const CANCEL_REFUSAL_REASONS: ReadonlyMap<string, CancelBlockReason> = ne
     [errors.CANCEL_WOULD_STRAND, CancelBlockReason.WOULD_STRAND],
     [errors.CANCEL_GIVER_CAPPED, CancelBlockReason.GIVER_CAPPED],
     [errors.CANCEL_WOULD_OVERFILL, CancelBlockReason.WOULD_OVERFILL],
+    [errors.CANCEL_TRAVEL_PRICED, CancelBlockReason.TRAVEL_PRICED],
     [errors.CANCEL_PAIRED_NOT_FOUND, CancelBlockReason.GIVER_MISSING],
     [errors.CANCEL_CLUSTER_CANNOT_ABSORB, CancelBlockReason.CLUSTER_FULL],
     [errors.PLOT_BUILD_PENDING, CancelBlockReason.RECEIVER_LOCKED],
@@ -281,13 +283,40 @@ function dock_lock_released_by(t: Task): string | undefined {
     return undefined
 }
 
+// Mirrors priced_travel_refusal in cancel.cpp: a flight already timed must not be lightened after the fact.
+function priced_travel_refusal(
+    lanes: readonly Lane[],
+    restoredMass: number,
+    restoredAtMs: number,
+    now: Date
+): CancelBlockReason | undefined {
+    if (restoredMass <= 0) return undefined
+    const nowMs = now.getTime()
+    for (const l of lanes) {
+        let startsAtMs = l.schedule.started.toDate().getTime()
+        for (const t of l.schedule.tasks) {
+            const completesAtMs = startsAtMs + t.duration.toNumber() * 1000
+            if (
+                isMobilityTask(t.type.toNumber()) &&
+                startsAtMs > nowMs &&
+                restoredAtMs <= startsAtMs
+            )
+                return CancelBlockReason.TRAVEL_PRICED
+            startsAtMs = completesAtMs
+        }
+    }
+    return undefined
+}
+
 // Mirrors cargo_return_refusal in cancel.cpp.
 function cargo_return_refusal(
     row: EntityInfo,
     mass: number,
     capacity: number,
     now: Date,
-    releasedBy?: string
+    releasedBy?: string,
+    authorizedBy?: string,
+    lanes?: readonly Lane[]
 ): CancelBlockReason | undefined {
     const locked = row.holds.some(
         (h) =>
@@ -297,6 +326,8 @@ function cargo_return_refusal(
     if (locked) return CancelBlockReason.RECEIVER_LOCKED
     if (schedule.hasPendingCapper(row)) return CancelBlockReason.GIVER_CAPPED
     if (!incoming_fits(row, now, mass, capacity)) return CancelBlockReason.WOULD_OVERFILL
+    if (authorizedBy !== undefined && row.owner.toString() === authorizedBy)
+        return priced_travel_refusal(lanes ?? row.lanes ?? [], mass, 0, now)
     return undefined
 }
 
@@ -580,6 +611,26 @@ function cancel_entity_impl(
     if (!post_cancel_queue_feasible(ctx, entity, working))
         return refuse(CancelBlockReason.WOULD_STRAND)
 
+    // What this cancel puts back on the entity, read off each cancelled task's own projection delta.
+    let restoredMass = 0
+    let restoredAtMs = Number.POSITIVE_INFINITY
+    for (const ev of events) {
+        const eff = taskCargoEffect(ev.task)
+        const delta =
+            eff.added.reduce((sum, c) => sum + Number(calcCargoItemMass(c)), 0) -
+            eff.removed.reduce((sum, c) => sum + Number(calcCargoItemMass(c)), 0)
+        if (delta >= 0) continue
+        restoredMass -= delta
+        if (ev.completesAt < restoredAtMs) restoredAtMs = ev.completesAt
+    }
+    const pricedSelf = priced_travel_refusal(
+        working,
+        restoredMass,
+        Number.isFinite(restoredAtMs) ? restoredAtMs : 0,
+        now
+    )
+    if (pricedSelf) return refuse(pricedSelf)
+
     const released = new Map<string, {ref: EntityRef; holdIds: string[]}>()
     const release = (ref: EntityRef, holdId: string) => {
         const id = ref.entity_id.toString()
@@ -603,7 +654,15 @@ function cancel_entity_impl(
     const launchMass = paired.reduce((sum, lc) => sum + massOf(lc.cargo), 0)
     if (launchMass > 0) {
         const probe = withRow(entity, {lanes: working})
-        const refusal = cargo_return_refusal(probe, launchMass, capacityOf(entity), now)
+        const refusal = cargo_return_refusal(
+            probe,
+            launchMass,
+            capacityOf(entity),
+            now,
+            undefined,
+            entity.owner.toString(),
+            working
+        )
         if (refusal) return refuse(refusal)
     }
 
@@ -618,7 +677,14 @@ function cancel_entity_impl(
         const row = withRow(giver, {
             cargomass: giver.cargomass.toNumber() + prior,
         })
-        const refusal = cargo_return_refusal(row, mass, capacityOf(giver), now, oc.releasesLockOf)
+        const refusal = cargo_return_refusal(
+            row,
+            mass,
+            capacityOf(giver),
+            now,
+            oc.releasesLockOf,
+            entity.owner.toString()
+        )
         if (refusal) return refuse(refusal, oc.counterpart)
         credited.set(id, prior + mass)
     }

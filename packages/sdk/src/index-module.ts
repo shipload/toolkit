@@ -282,6 +282,7 @@ export {
     getFlightOrigin,
     getInterpolatedPosition,
     getPositionAt,
+    calc_travel_cargomass,
     hasEnergyForDistance,
     interpolateFlightPosition,
     lerp,
