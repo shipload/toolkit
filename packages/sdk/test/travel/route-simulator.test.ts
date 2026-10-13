@@ -30,6 +30,39 @@ describe('simulateRoute', () => {
         expect(result.legs[1].flightSeconds).toBeGreaterThan(0)
     })
 
+    test('a towed hauler adds only its mass to the group', () => {
+        const tug: RouteMoverInput = {...ship, hauler: {capacity: 2, efficiency: 8000}}
+        const plain: RouteMoverInput = {
+            ref: {entityType: 'ship', entityId: 2},
+            hasMovement: false,
+            mass: 3000,
+            energy: 0,
+            priorMobilityEnd: 0,
+            narrowBarrierEnd: 0,
+        }
+        const towedHauler: RouteMoverInput = {...plain, hauler: {capacity: 5, efficiency: 10000}}
+        const waypoints = [{x: 10, y: 0}]
+        const a = simulateRoute([tug, plain], waypoints, {x: 0, y: 0}, false)
+        const b = simulateRoute([tug, towedHauler], waypoints, {x: 0, y: 0}, false)
+        expect(b.legs[0].flightSeconds).toBe(a.legs[0].flightSeconds)
+    })
+
+    test('a busy towed member delays the group departure', () => {
+        const busy: RouteMoverInput = {
+            ref: {entityType: 'container', entityId: 2},
+            hasMovement: false,
+            mass: 3000,
+            energy: 0,
+            priorMobilityEnd: 0,
+            narrowBarrierEnd: 500,
+        }
+        const tug: RouteMoverInput = {...ship, hauler: {capacity: 2, efficiency: 8000}}
+        const idle = simulateRoute([tug], [{x: 10, y: 0}], {x: 0, y: 0}, false)
+        const delayed = simulateRoute([tug, busy], [{x: 10, y: 0}], {x: 0, y: 0}, false)
+        expect(delayed.totalSeconds).toBeGreaterThanOrEqual(500)
+        expect(delayed.totalSeconds).toBeGreaterThan(idle.totalSeconds)
+    })
+
     test('towed containers change flight time but not mover energy cost', () => {
         const shipWithBeam: RouteMoverInput = {
             ...ship,

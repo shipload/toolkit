@@ -123,9 +123,10 @@ export function simulateRoute(
     let reachable = true
     const legs: RouteLegSim[] = []
 
-    const mobilityBarrier = movers
-        .filter((m) => m.hasMovement)
-        .reduce((mx, m) => Math.max(mx, m.priorMobilityEnd, m.narrowBarrierEnd), 0)
+    const mobilityBarrier = movers.reduce(
+        (mx, m) => Math.max(mx, m.priorMobilityEnd, m.narrowBarrierEnd),
+        0
+    )
 
     const rechargeFloor = movers
         .filter((m) => m.hasMovement && m.generator)
