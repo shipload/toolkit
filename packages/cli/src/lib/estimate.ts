@@ -36,6 +36,7 @@ import {
 	checkDestinationIsSystem,
 	checkEnergyAvailable,
 	checkEnergyCapacity,
+	checkHaulCapacity,
 	checkOriginEqualsTarget,
 	checkReserve,
 	checkTravelDuration,
@@ -647,7 +648,7 @@ export async function estimateGroupTravel(params: {
 		} else {
 			haulCount += 1;
 		}
-		if (snap.hauler) {
+		if (hasMovement && snap.hauler) {
 			const capacity = Number(snap.hauler.capacity);
 			pooledHaulCap += capacity;
 			weightedHaulEffNum += Number(snap.hauler.efficiency) * capacity;
@@ -686,6 +687,7 @@ export async function estimateGroupTravel(params: {
 	const issues = collectIssues(
 		checkDestinationIsSystem(hasSystemAtDestination, targetX, targetY),
 		checkTravelDuration(flightSeconds),
+		checkHaulCapacity(haulCount, pooledHaulCap),
 		...energyChecks.flatMap(({ snap, energy, cost }) => {
 			const capacity = Number(snap.generator?.capacity ?? 0);
 			const entity = { entityType: snap.type, entityId: snap.id };

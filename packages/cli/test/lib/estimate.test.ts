@@ -886,6 +886,20 @@ describe("estimateGroupTravel — contract haul penalty and departure mass", () 
 		expect(bare).toBe(120);
 	});
 
+	test("a beam on a towed member adds nothing: same duration as an equal-mass member without one", async () => {
+		const beam = { capacity: 4n, efficiency: 9_000n, drain: 0n };
+		const withBeam = await group([shipSnap(), containerSnap({ hauler: beam })]);
+		const plain = await group([shipSnap(), containerSnap()]);
+		expect(withBeam.duration_s).toBe(plain.duration_s);
+		expect(withBeam.feasibility.ok).toBe(true);
+	});
+
+	test("a tug without a beam cannot tow, even when the towed member carries one", async () => {
+		const beam = { capacity: 4n, efficiency: 9_000n, drain: 0n };
+		const est = await group([shipSnap({ hauler: undefined }), containerSnap({ hauler: beam })]);
+		expect(est.feasibility.issues.map((i) => i.code)).toContain("insufficient_haul_capacity");
+	});
+
 	test("an in-flight load queued behind the departure still counts: duration equals the loaded-hold duration", async () => {
 		const load = ServerTypes.lane.from({
 			lane_key: 3,

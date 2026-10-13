@@ -8,6 +8,7 @@ export type FeasibilityCode =
 	| "insufficient_cargo"
 	| "insufficient_reserve"
 	| "excessive_travel_duration"
+	| "insufficient_haul_capacity"
 	| "origin_equals_target"
 	| "no_system_at_destination";
 
@@ -91,6 +92,16 @@ export function checkTravelDuration(seconds: number): FeasibilityIssue | null {
 		severity: "error",
 		message: `travel duration ${seconds}s exceeds limit ${TRAVEL_MAX_DURATION}s`,
 		detail: { seconds, limit: TRAVEL_MAX_DURATION },
+	};
+}
+
+export function checkHaulCapacity(towed: number, capacity: number): FeasibilityIssue | null {
+	if (towed === 0 || capacity >= towed) return null;
+	return {
+		code: "insufficient_haul_capacity",
+		severity: "error",
+		message: `the moving ships' tractor beams can tow ${capacity} and this group tows ${towed}; a beam on a towed member does not count`,
+		detail: { towed, capacity },
 	};
 }
 
