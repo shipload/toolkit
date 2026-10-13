@@ -653,7 +653,7 @@ export async function estimateGroupTravel(params: {
 			pooledHaulCap += capacity;
 			weightedHaulEffNum += Number(snap.hauler.efficiency) * capacity;
 		}
-		if (recharge && snap.generator) {
+		if (recharge && hasMovement && snap.generator) {
 			const rt = rechargeSecondsAfterQueue(snap, now, energy);
 			if (rt > maxRechargeSeconds) maxRechargeSeconds = rt;
 		}
