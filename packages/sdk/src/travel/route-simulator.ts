@@ -55,8 +55,8 @@ export interface RouteBarriers {
     priorMobilityEnd: number
     narrowBarrierEnd: number
     allLanesEnd: number
-    cargoEffects: CargoEffect[]
-    incomingMass: number
+    cargoEffects?: CargoEffect[]
+    incomingMass?: number
 }
 
 const RECHARGE_BLOCKING_HOLDS: ReadonlySet<number> = new Set<number>([

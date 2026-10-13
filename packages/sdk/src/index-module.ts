@@ -319,6 +319,7 @@ export type {ReachStats} from './travel/reach'
 
 export {routeBarriers, simulateRoute} from './travel/route-simulator'
 export type {
+    CargoEffect,
     RouteBarriers,
     RouteMoverInput,
     RouteLegSim,
