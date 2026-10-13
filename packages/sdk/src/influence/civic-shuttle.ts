@@ -18,6 +18,7 @@ export interface CivicShuttleBay {
     outputPct: number
     queued: number
     full: boolean
+    gapped: boolean
 }
 
 function unfinishedTasks(lane: Lane | undefined, now: Date): number {
@@ -37,9 +38,12 @@ export function civicShuttleBays(
     modules: ModuleEntry[],
     entityItemId: number,
     lanes: Lane[],
-    now: Date = new Date()
+    now: Date = new Date(),
+    minStart?: Date
 ): CivicShuttleBay[] {
     const bays: CivicShuttleBay[] = []
+    const nowMs = now.getTime()
+    const startMs = minStart?.getTime() ?? nowMs
     for (let slotIndex = 0; slotIndex < modules.length; slotIndex++) {
         const installed = modules[slotIndex].installed
         if (!installed) continue
@@ -56,9 +60,14 @@ export function civicShuttleBays(
             outputPct: loader.outputPct,
             queued,
             full: queued >= JOB_QUEUE_CAP,
+            gapped: needsIdleGap(lane, startMs, nowMs),
         })
     }
     return bays
+}
+
+function floorSecond(ms: number): number {
+    return Math.floor(ms / 1000) * 1000
 }
 
 function laneEndMs(lane: Lane | undefined, nowMs: number): number {
@@ -68,7 +77,12 @@ function laneEndMs(lane: Lane | undefined, nowMs: number): number {
     return Math.max(nowMs, lane.schedule.started.toDate().getTime() + endSec * 1000)
 }
 
-// Mirrors cargo.cpp pick_civic_bay: earliest finish among bays below the queue cap.
+// Mirrors placement.hpp lane_needs_idle_gap: a start past the lane's end would push an idle gap onto a shared lane.
+function needsIdleGap(lane: Lane | undefined, startMs: number, nowMs: number): boolean {
+    return floorSecond(startMs) > laneEndMs(lane, floorSecond(nowMs))
+}
+
+// Mirrors cargo.cpp pick_earliest_loader_lane: earliest finish among bays below the queue cap that need no idle gap.
 export function selectCivicShuttleBay(
     modules: ModuleEntry[],
     entityItemId: number,
@@ -77,13 +91,13 @@ export function selectCivicShuttleBay(
     durationFor: (bay: CivicShuttleBay) => number = () => 0,
     minStart?: Date
 ): CivicShuttleBay | undefined {
-    const bays = civicShuttleBays(modules, entityItemId, lanes, now)
+    const bays = civicShuttleBays(modules, entityItemId, lanes, now, minStart)
     const nowMs = now.getTime()
     const floorMs = Math.max(nowMs, minStart?.getTime() ?? nowMs)
     let best: CivicShuttleBay | undefined
     let bestEnd = Infinity
     for (const bay of bays) {
-        if (bay.full) continue
+        if (bay.full || bay.gapped) continue
         const lane = lanes.find((l) => l.lane_key.toNumber() === bay.laneKey)
         const start = Math.max(laneEndMs(lane, nowMs), floorMs)
         const end = start + durationFor(bay) * 1000
@@ -92,7 +106,7 @@ export function selectCivicShuttleBay(
             bestEnd = end
         }
     }
-    return best ?? bays[0]
+    return best ?? bays.find((bay) => !bay.full) ?? bays[0]
 }
 
 export interface PendingCivicTransfer {

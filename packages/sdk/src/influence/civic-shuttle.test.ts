@@ -172,6 +172,60 @@ test('selectCivicShuttleBay picks the earliest finish, not the first free bay', 
     expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, lanes, T0, fast)?.slotIndex).toBe(0)
 })
 
+test('a bay is gapped when the arrival lands past its queue end', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21)])]
+    const arrival = new Date(T0.getTime() + 600_000)
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, T0, arrival)
+    expect(bays.map((b) => b.gapped)).toEqual([true, true])
+    expect(
+        civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, T0).every((b) => !b.gapped)
+    ).toBe(true)
+})
+
+test('an arrival inside a bay queue needs no gap', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21), shuttleTask(22, 23)])]
+    const arrival = new Date(T0.getTime() + 90_000)
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, T0, arrival)
+    expect(bays[0].gapped).toBe(false)
+    expect(bays[1].gapped).toBe(true)
+    expect(
+        selectCivicShuttleBay(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, T0, () => 0, arrival)
+            ?.laneKey
+    ).toBe(1)
+})
+
+test('selectCivicShuttleBay reports a gapped bay as blocked rather than bookable', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21)])]
+    const arrival = new Date(T0.getTime() + 600_000)
+    const bay = selectCivicShuttleBay(
+        depotModules(),
+        ITEM_DEPOT_T1_PACKED,
+        lanes,
+        T0,
+        () => 0,
+        arrival
+    )
+    expect(bay?.gapped).toBe(true)
+    expect(bay?.full).toBe(false)
+})
+
+test('a gapped bay outranks a full one, so the refusal names the arrival', () => {
+    const filled = Array.from({length: JOB_QUEUE_CAP}, () => shuttleTask(20, 21))
+    const lanes = [makeLane(1, filled), makeLane(2, [shuttleTask(22, 23)])]
+    const arrival = new Date(T0.getTime() + 7_200_000)
+    const bay = selectCivicShuttleBay(
+        depotModules(),
+        ITEM_DEPOT_T1_PACKED,
+        lanes,
+        T0,
+        () => 0,
+        arrival
+    )
+    expect(bay?.laneKey).toBe(2)
+    expect(bay?.full).toBe(false)
+    expect(bay?.gapped).toBe(true)
+})
+
 test('selectCivicShuttleBay returns nothing when the building has no loaders', () => {
     const modules = [makeModuleEntry(ITEM_STORAGE_T1, storageStats)]
     expect(selectCivicShuttleBay(modules, ITEM_DEPOT_T1_PACKED, [], T0)).toBeUndefined()

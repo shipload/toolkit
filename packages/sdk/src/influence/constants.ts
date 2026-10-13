@@ -65,6 +65,7 @@ export const CHARTER_WORKSHOP_COST = 2_000_000_000n
 export const CHARTER_BASELINE_STAT = 200
 export const CHARTER_RUNG_STEP = 50
 export const CIVIC_SPEED_CAP = 999
+export const CIVIC_BUNDLE_ENTRY_CAP = 32
 export const CHARTER_MAX_PREREQS = 4
 export const CHARTER_MAX_GRANTS = 4
 

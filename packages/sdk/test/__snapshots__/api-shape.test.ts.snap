@@ -52,6 +52,7 @@ exports[`module export surface 1`] = `
   "CHARTER_RUNG_STEP",
   "CHARTER_WORKSHOP",
   "CHARTER_WORKSHOP_COST",
+  "CIVIC_BUNDLE_ENTRY_CAP",
   "CIVIC_DEPOT",
   "CIVIC_DOCK",
   "CIVIC_FP_SCALE",

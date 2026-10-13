@@ -362,6 +362,8 @@ describe('ShuttleManager', () => {
                 'a shuttle bay only takes cargo that is ready to load now; book this once the cargo is here',
                 'bay-not-ready',
             ],
+            ['a shuttle bay takes at most 32 separate items per trip', 'bundle-too-large'],
+            ['duplicate item in batch', 'duplicate-item'],
             ['fabricator queue is full', 'queue-full'],
             ['Cannot unload cargo that is not loaded.', 'inputs-unavailable'],
             ['Insufficient inputs for recipe.', 'inputs-unavailable'],
@@ -416,6 +418,8 @@ describe('ShuttleManager', () => {
             'not-stored',
             'no-storage',
             'not-ready',
+            'bundle-too-large',
+            'duplicate-item',
         ])
     })
 

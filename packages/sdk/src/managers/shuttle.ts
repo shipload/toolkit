@@ -29,6 +29,8 @@ export type ShuttleReasonCode =
     | 'no-storage'
     | 'bays-booked'
     | 'bay-not-ready'
+    | 'bundle-too-large'
+    | 'duplicate-item'
     | 'player-cap'
     | 'queue-full'
     | 'inputs-unavailable'
@@ -101,6 +103,8 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
         'bay-not-ready',
     'a shuttle bay only takes cargo that is ready to load now; book this once the cargo is here':
         'bay-not-ready',
+    'a shuttle bay takes at most 32 separate items per trip': 'bundle-too-large',
+    'duplicate item in batch': 'duplicate-item',
     'fabricator queue is full': 'queue-full',
     'Cannot unload cargo that is not loaded.': 'inputs-unavailable',
     'Insufficient inputs for recipe.': 'inputs-unavailable',
@@ -130,6 +134,8 @@ export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
     'not-stored',
     'no-storage',
     'not-ready',
+    'bundle-too-large',
+    'duplicate-item',
 ])
 
 // never-shuttle rejections from resolve_civic_carrier; the query never omits, so the wrapper drops them here
