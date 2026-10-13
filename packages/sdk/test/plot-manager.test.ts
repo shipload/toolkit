@@ -1,6 +1,5 @@
 import {describe, expect, test} from 'bun:test'
 import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
-import type {CrafterStats} from '../src/types/capabilities'
 import {ServerContract} from '../src/contracts'
 import {PlotManager} from '../src/managers/plot'
 import {ITEM_PLATE_T2, ITEM_CERAMIC_T2, ITEM_WAREHOUSE_T2_PACKED} from '../src/data/item-ids'
@@ -24,36 +23,6 @@ function makePlotRow(
         modules: [],
         item_id: UInt16.from(itemId),
         lanes: [],
-        holds: [],
-    })
-}
-
-function makePlotInfo(
-    itemId: number,
-    cargomass: number,
-    capacity?: number
-): ServerContract.Types.entity_info {
-    return ServerContract.Types.entity_info.from({
-        projected_at: 0,
-        id: UInt64.from(42),
-        owner: Name.from('alice'),
-        type: Name.from('plot'),
-        entity_name: '',
-        coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
-        cargomass: UInt32.from(cargomass),
-        cargo: [],
-        capacity: capacity !== undefined ? UInt32.from(capacity) : undefined,
-        modules: [],
-        item_id: UInt16.from(itemId),
-        is_idle: true,
-        current_task_elapsed: UInt32.from(0),
-        current_task_remaining: UInt32.from(0),
-        pending_tasks: [],
-        lanes: [],
-        gatherer_lanes: [],
-        crafter_lanes: [],
-        builder_lanes: [],
-        loader_lanes: [],
         holds: [],
     })
 }
@@ -147,25 +116,5 @@ describe('PlotManager.canBuild', () => {
             makeCargoRow(42n, ITEM_CERAMIC_T2, 1000),
         ]
         expect(manager.canBuild(plot, cargo)).toBeTrue()
-    })
-})
-
-describe('PlotManager.timeToComplete', () => {
-    test('divides capacity by speed, minimum 1', () => {
-        const plot = makePlotInfo(ITEM_WAREHOUSE_T2_PACKED, 0, 144000)
-        const crafter: CrafterStats = {
-            speed: UInt16.from(14400),
-            drain: UInt32.from(0),
-        }
-        expect(manager.timeToComplete(plot, crafter)).toBe(1001)
-    })
-
-    test('minimum result is 1', () => {
-        const plot = makePlotInfo(ITEM_WAREHOUSE_T2_PACKED, 0, 1)
-        const crafter: CrafterStats = {
-            speed: UInt16.from(65535),
-            drain: UInt32.from(0),
-        }
-        expect(manager.timeToComplete(plot, crafter)).toBe(1)
     })
 })

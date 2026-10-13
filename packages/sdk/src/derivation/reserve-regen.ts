@@ -20,11 +20,12 @@ export function getEffectiveReserve(
     if (remaining >= max) return max
     const epochSlots = epochSeconds * 2
     if (epochSlots === 0) return remaining
-    const nowSlot = Number(now.value)
-    const lastSlot = Number(row.last_block.value)
+    const nowSlot = BigInt(now.value.toString())
+    const lastSlot = BigInt(row.last_block.value.toString())
     if (nowSlot <= lastSlot) return remaining
-    const regen =
-        Math.floor((max * nowSlot) / epochSlots) - Math.floor((max * lastSlot) / epochSlots)
+    const max64 = BigInt(max)
+    const slots64 = BigInt(epochSlots)
+    const regen = Number((max64 * nowSlot) / slots64 - (max64 * lastSlot) / slots64)
     const effective = remaining + regen
     return effective >= max ? max : effective
 }

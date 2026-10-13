@@ -216,7 +216,7 @@ export function calc_flighttime(distance: UInt64Type, acceleration: number): UIn
     return UInt32.from(2 * Math.sqrt(Number(distance) / acceleration))
 }
 
-const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
+export const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
 
 export function calc_cruise_velocity(acceleration: number): number {
     return Math.sqrt(acceleration * CRUISE_TRANSITION_DISTANCE)

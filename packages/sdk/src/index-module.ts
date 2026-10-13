@@ -254,6 +254,7 @@ export {
     findNearbyPlanets,
     calc_acceleration,
     calc_cruise_velocity,
+    CRUISE_TRANSITION_DISTANCE,
     calc_energyusage,
     calc_flighttime,
     calc_travel_flighttime,
@@ -809,6 +810,7 @@ export {
     computeCargoBayDrain,
     supportDrainTierPercent,
     computeWarpRange,
+    toWholeEnergy,
 } from './nft/description'
 
 export {

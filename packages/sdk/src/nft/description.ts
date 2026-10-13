@@ -17,7 +17,6 @@ import {getItem, tryGetItem} from '../data/catalog'
 import type {ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
-import {resolveCapacityFnName, type CapacityFnName} from '../derivation/capacity-fn-registry'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -69,20 +68,6 @@ export function computeBaseCapacityWarehouse(stats: bigint): number {
 export function computeBaseCapacityDepot(stats: bigint): number {
     const s = decodeStat(stats, 0) + decodeStat(stats, 2)
     return Math.floor(500_000 * 6 ** (s / 1998))
-}
-
-const CAPACITY_FN_BY_NAME: Record<CapacityFnName, (stats: bigint) => number> = {
-    ship: computeBaseCapacityShip,
-    warehouse: computeBaseCapacityWarehouse,
-    container: computeBaseCapacityContainer,
-    structure: computeBaseCapacityStructure,
-    depot: computeBaseCapacityDepot,
-}
-
-export function computeBaseCapacityForEntity(itemId: number, stats: bigint): number {
-    const fnName = resolveCapacityFnName(itemId)
-    if (!fnName) return 0
-    return CAPACITY_FN_BY_NAME[fnName](stats)
 }
 
 export const computeEngineThrust = (vol: number, tier: number): number =>

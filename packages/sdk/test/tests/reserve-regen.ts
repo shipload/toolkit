@@ -1,6 +1,6 @@
 import {describe, test} from 'bun:test'
 import {assert} from 'chai'
-import {BlockTimestamp} from '@wharfkit/antelope'
+import {BlockTimestamp, UInt32} from '@wharfkit/antelope'
 import {getEffectiveReserve} from '$lib'
 
 const EPOCH_SECONDS = 124 * 3600
@@ -70,6 +70,21 @@ describe('getEffectiveReserve', () => {
             last = now
         }
         assert.equal(remaining, 1000 + Math.floor((max * 60) / EPOCH_SLOTS))
+    })
+
+    test('matches uint64 integer division once max * slot passes 2^53', () => {
+        assert.equal(
+            getEffectiveReserve(
+                {
+                    remaining: 0,
+                    max_reserve: 23_999_999,
+                    last_block: BlockTimestamp.from(UInt32.from(1_700_102_387)),
+                },
+                BlockTimestamp.from(UInt32.from(1_700_102_401)),
+                EPOCH_SECONDS
+            ),
+            376
+        )
     })
 
     test('clamps to zero when now is earlier than last_block', () => {
