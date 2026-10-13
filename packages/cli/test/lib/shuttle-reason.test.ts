@@ -40,6 +40,12 @@ test('formatShuttleReason prints both times for a departs rejection', () => {
     expect(out).not.toMatch(BANNED)
 })
 
+test('formatShuttleReason words ship-capped for any entity', () => {
+    expect(formatShuttleReason({code: 'ship-capped', reason: ''})).toBe(
+        'A pending change on this entity must finish or be cancelled first.'
+    )
+})
+
 test('formatShuttleReason distinguishes workshop vs dock for not-equipped', () => {
     expect(
         formatShuttleReason({code: 'not-equipped', reason: 'workshop has no fabricator installed'})
@@ -59,7 +65,7 @@ test('formatShuttleReason prints masses for a depot-full rejection', () => {
     }
     const out = formatShuttleReason(reason)
     expect(out).not.toMatch(BANNED)
-    expect(out).toMatch(/limit for one player/)
+    expect(out).toMatch(/limit for one account/)
 })
 
 test('formatShuttleReason never emits the banned words for any known code', () => {

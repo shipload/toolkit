@@ -9,7 +9,7 @@ export function formatShuttleReason(r: ShuttleReason): string {
         case 'workshop-capped':
             return 'A pending change at the Workshop must finish before it can accept new jobs.'
         case 'ship-capped':
-            return 'A pending change on the ship must finish before it can take this task.'
+            return 'A pending change on this entity must finish or be cancelled first.'
         case 'no-generator':
             return 'The ship needs a working energy source to book this job.'
         case 'not-equipped':
