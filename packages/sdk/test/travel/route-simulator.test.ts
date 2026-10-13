@@ -13,6 +13,36 @@ const ship: RouteMoverInput = {
     narrowBarrierEnd: 0,
 }
 
+describe('simulateRoute departure mass', () => {
+    const dest = [{x: 30, y: 0}]
+    const origin = {x: 0, y: 0}
+    const flight = (m: RouteMoverInput) =>
+        simulateRoute([m], dest, origin, false).legs[0].flightSeconds
+
+    test('a queued removal that completes after departure is still flown', () => {
+        const after = {...ship, cargoEffects: [{atSeconds: 600, delta: -2000}]}
+        expect(flight(after)).toBe(flight({...ship, mass: ship.mass + 2000}))
+    })
+
+    test('a queued removal that completes by departure is not flown', () => {
+        const before = {
+            ...ship,
+            priorMobilityEnd: 600,
+            cargoEffects: [{atSeconds: 600, delta: -2000}],
+        }
+        expect(flight(before)).toBe(flight(ship))
+    })
+
+    test('queued additions are priced through the end-of-queue mass', () => {
+        const added = {...ship, cargoEffects: [{atSeconds: 600, delta: 2000}]}
+        expect(flight(added)).toBe(flight(ship))
+    })
+
+    test('incoming hold mass is flown', () => {
+        expect(flight({...ship, incomingMass: 700})).toBe(flight({...ship, mass: ship.mass + 700}))
+    })
+})
+
 describe('simulateRoute', () => {
     test('solo two equal legs (Option A recharge)', () => {
         const origin = {x: 0, y: 0}

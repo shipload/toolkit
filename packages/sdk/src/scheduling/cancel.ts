@@ -121,6 +121,8 @@ export interface CancelEligibilityInput {
     groupParticipants?: CancelLookup<readonly string[]>
     clusters?: CancelLookup<Cluster>
     hubAt?: (owner: string, x: number, y: number) => string | undefined
+    /** Account signing the cancel when it is not the entity's owner: the sender's owner for cancelcivic. */
+    authorizeAs?: string
 }
 
 const FLIGHT_LANE_BASE = 200
@@ -623,9 +625,10 @@ function cancel_entity_impl(
         restoredMass -= delta
         if (ev.completesAt < restoredAtMs) restoredAtMs = ev.completesAt
     }
+    const authorizer = ctx.input.authorizeAs ?? entity.owner.toString()
     const pricedSelf = priced_travel_refusal(
         working,
-        restoredMass,
+        entity.owner.toString() === authorizer ? restoredMass : 0,
         Number.isFinite(restoredAtMs) ? restoredAtMs : 0,
         now
     )
@@ -660,7 +663,7 @@ function cancel_entity_impl(
             capacityOf(entity),
             now,
             undefined,
-            entity.owner.toString(),
+            authorizer,
             working
         )
         if (refusal) return refuse(refusal)
@@ -683,7 +686,7 @@ function cancel_entity_impl(
             capacityOf(giver),
             now,
             oc.releasesLockOf,
-            entity.owner.toString()
+            authorizer
         )
         if (refusal) return refuse(refusal, oc.counterpart)
         credited.set(id, prior + mass)

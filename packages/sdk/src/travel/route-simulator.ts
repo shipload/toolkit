@@ -1,13 +1,21 @@
 import type {UInt64Type} from '@wharfkit/antelope'
 import {HoldKind, PRECISION, TaskType, TRAVEL_MAX_DURATION} from '../types'
+import {taskCargoEffect} from '../scheduling/availability'
+import {incomingHoldMass} from '../scheduling/unwrap'
 import {orderedTasks, type ScheduleData} from '../scheduling/schedule'
 import {isMobilityTask, isPositionBoundTask} from '../scheduling/task-effects'
 import {
     calc_energyusage,
     calc_group_flighttime,
     calc_rechargetime,
+    cargoListMass,
     distanceBetweenPoints,
 } from './travel'
+
+export interface CargoEffect {
+    atSeconds: number
+    delta: number
+}
 
 export interface RouteMoverInput {
     ref: {entityType: string; entityId: UInt64Type}
@@ -21,6 +29,10 @@ export interface RouteMoverInput {
     narrowBarrierEnd: number
     /** Max end (seconds-from-now) over all this entity's lanes incl. worker/craft; gates recharges like the contract's all_lanes_end. Default 0. */
     allLanesEnd?: number
+    /** Queued cargo changes by completion second; a flight departing before one still carries the mass it removes. */
+    cargoEffects?: CargoEffect[]
+    /** Mass of incoming holds, aboard by departure. */
+    incomingMass?: number
 }
 
 export interface RouteLegSim {
@@ -43,6 +55,8 @@ export interface RouteBarriers {
     priorMobilityEnd: number
     narrowBarrierEnd: number
     allLanesEnd: number
+    cargoEffects: CargoEffect[]
+    incomingMass: number
 }
 
 const RECHARGE_BLOCKING_HOLDS: ReadonlySet<number> = new Set<number>([
@@ -69,10 +83,15 @@ export function routeBarriers(entity: ScheduleData, nowMs: number): RouteBarrier
     let allLanesEndMs = 0
     let recoverMobilityEndMs = 0
     let recoverPositionEndMs = 0
+    const cargoEffects: CargoEffect[] = []
 
     for (const {task, completesAt} of orderedTasks(entity)) {
         const ms = completesAt.getTime()
         if (ms > allLanesEndMs) allLanesEndMs = ms
+
+        const effect = taskCargoEffect(task)
+        const delta = cargoListMass(effect.added) - cargoListMass(effect.removed)
+        if (delta !== 0) cargoEffects.push({atSeconds: secondsFromNow(ms, nowMs), delta})
 
         const type = task.type.toNumber()
         const isRecharge = type === TaskType.RECHARGE
@@ -91,7 +110,15 @@ export function routeBarriers(entity: ScheduleData, nowMs: number): RouteBarrier
         priorMobilityEnd: secondsFromNow(recoverMobilityEndMs, nowMs),
         narrowBarrierEnd: secondsFromNow(Math.max(recoverPositionEndMs, allHoldUntilMs), nowMs),
         allLanesEnd: secondsFromNow(Math.max(allLanesEndMs, rechargeHoldUntilMs), nowMs),
+        cargoEffects,
+        incomingMass: incomingHoldMass(entity.holds),
     }
+}
+
+function stillAboardMass(effects: CargoEffect[] | undefined, departsAt: number): number {
+    let late = 0
+    for (const e of effects ?? []) if (e.atSeconds > departsAt) late += e.delta
+    return Math.max(0, -late)
 }
 
 export function simulateRoute(
@@ -104,7 +131,7 @@ export function simulateRoute(
         .filter((m) => m.hasMovement && m.engines)
         .reduce((sum, m) => sum + m.engines!.thrust, 0)
 
-    const totalMass = movers.reduce((sum, m) => sum + m.mass, 0)
+    const baseMass = movers.reduce((sum, m) => sum + m.mass + (m.incomingMass ?? 0), 0)
 
     const haulCount = movers.filter((m) => !m.hasMovement).length
 
@@ -187,6 +214,11 @@ export function simulateRoute(
                 if (cost > curEnergy) reachable = false
             }
         }
+
+        const departsAt = Math.max(clock, mobilityBarrier)
+        const totalMass =
+            baseMass +
+            movers.reduce((sum, m) => sum + stillAboardMass(m.cargoEffects, departsAt), 0)
 
         const flightSeconds = Number(
             calc_group_flighttime(

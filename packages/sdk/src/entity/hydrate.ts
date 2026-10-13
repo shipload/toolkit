@@ -1,7 +1,9 @@
 import type {UInt32Type, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import type {ComputedCapabilities} from '../derivation/capabilities'
-import type {RouteMoverInput} from '../travel/route-simulator'
+import {routeBarriers, type RouteMoverInput} from '../travel/route-simulator'
+import {calc_queue_cargomass} from '../travel/travel'
+import type {AnchoredScheduleData} from '../scheduling/schedule'
 import type {GatherLane} from '../planner'
 
 const U8_MAX = 255
@@ -42,7 +44,7 @@ export function hydrateEntityLanes(caps: GathererLaneSource): GatherLane[] {
     )
 }
 
-export interface RouteMoverRow {
+export interface RouteMoverRow extends AnchoredScheduleData {
     id: UInt64Type
     energy?: UInt32Type | number
     cargomass?: UInt32Type | number
@@ -56,8 +58,7 @@ export type RouteMoverCaps = Pick<
 export interface RouteMoverOpts {
     entityType?: string
     hasMovement?: boolean
-    /** The chain prices a flight on the cargo aboard at departure; pass calc_travel_cargomass to match it. */
-    departureCargomass?: number
+    nowMs?: number
     priorMobilityEnd?: number
     narrowBarrierEnd?: number
     allLanesEnd?: number
@@ -69,7 +70,11 @@ export function entityToRouteMover(
     opts: RouteMoverOpts = {}
 ): RouteMoverInput {
     const loaderMass = (caps.loaderLanes ?? []).reduce((sum, lane) => sum + Number(lane.mass), 0)
-    const cargomass = opts.departureCargomass ?? Number(row.cargomass ?? 0)
+    const queued = row.lanes !== undefined || row.holds !== undefined
+    const barriers = queued ? routeBarriers(row, opts.nowMs ?? Date.now()) : undefined
+    const cargomass = row.lanes
+        ? calc_queue_cargomass({...row, cargomass: Number(row.cargomass ?? 0)})
+        : Number(row.cargomass ?? 0)
     const mass = cargomass + Number(caps.hullmass ?? 0) + loaderMass
     return {
         ref: {entityType: opts.entityType ?? 'ship', entityId: row.id},
@@ -85,5 +90,7 @@ export function entityToRouteMover(
         priorMobilityEnd: opts.priorMobilityEnd ?? 0,
         narrowBarrierEnd: opts.narrowBarrierEnd ?? 0,
         allLanesEnd: opts.allLanesEnd,
+        cargoEffects: barriers?.cargoEffects,
+        incomingMass: barriers?.incomingMass,
     }
 }

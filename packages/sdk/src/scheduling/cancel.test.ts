@@ -847,6 +847,14 @@ describe('cancelEligibility — a flight already timed without the cargo', () =>
         )
     })
 
+    test('a cancel signed by another account is not pinned by the owner flight', () => {
+        const plan = cancelEligibility(withUnloadAndTravel(50), 1, 0, {
+            now,
+            authorizeAs: 'civic.host',
+        })
+        expect(plan.ok).toBe(true)
+    })
+
     test('an unload that completes after departure is already priced in and cancels freely', () => {
         const plan = cancelEligibility(withUnloadAndTravel(400), 1, 0, {now})
         expect(plan.ok).toBe(true)

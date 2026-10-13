@@ -47,7 +47,7 @@ import {taskCargoEffect} from '../scheduling/availability'
 import {calcCargoItemMass} from '../capabilities/storage'
 import {capacityTierMultiplier, computeLoaderWorkerMass} from '../derivation/capabilities'
 
-function cargoListMass(items: readonly ServerContract.Types.cargo_item[]): number {
+export function cargoListMass(items: readonly ServerContract.Types.cargo_item[]): number {
     let total = 0
     for (const item of items) total += Number(calcCargoItemMass(item))
     return total
@@ -301,6 +301,26 @@ export function calc_ship_mass(ship: ShipLike, cargos: CargoMassInfo[]): UInt64 
     return mass
 }
 
+function queuedCargoDeltas(
+    entity: scheduleModel.AnchoredScheduleData
+): {completesAt: Date; delta: number}[] {
+    return scheduleModel.unappliedTasks(entity).map((ordered) => {
+        const effect = taskCargoEffect(ordered.task)
+        return {
+            completesAt: ordered.completesAt,
+            delta: cargoListMass(effect.added) - cargoListMass(effect.removed),
+        }
+    })
+}
+
+export function calc_queue_cargomass(
+    entity: scheduleModel.AnchoredScheduleData & {cargomass: number | {toNumber(): number}}
+): number {
+    let endOfQueue = Number(entity.cargomass)
+    for (const {delta} of queuedCargoDeltas(entity)) endOfQueue += delta
+    return Math.max(endOfQueue, 0)
+}
+
 // Mirrors plan_leg: the flight pays for the cargo aboard at departure, never less than the end-of-queue mass.
 export function calc_travel_cargomass(
     entity: scheduleModel.AnchoredScheduleData & {cargomass: number | {toNumber(): number}},
@@ -308,14 +328,10 @@ export function calc_travel_cargomass(
 ): number {
     const departsAtMs = departsAt.getTime()
     let atDeparture = Number(entity.cargomass)
-    let endOfQueue = atDeparture
-    for (const ordered of scheduleModel.unappliedTasks(entity)) {
-        const effect = taskCargoEffect(ordered.task)
-        const delta = cargoListMass(effect.added) - cargoListMass(effect.removed)
-        endOfQueue += delta
-        if (ordered.completesAt.getTime() <= departsAtMs) atDeparture += delta
+    for (const {completesAt, delta} of queuedCargoDeltas(entity)) {
+        if (completesAt.getTime() <= departsAtMs) atDeparture += delta
     }
-    return Math.max(Math.max(atDeparture, 0), Math.max(endOfQueue, 0))
+    return Math.max(Math.max(atDeparture, 0), calc_queue_cargomass(entity))
 }
 
 export function calc_group_flighttime(
