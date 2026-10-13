@@ -103,6 +103,7 @@ export class SubscriptionsManager {
     private readonly entitySubs = new Map<string, EntitiesSubscriptionEntry>()
     private subCounter = 0
     private hasConnected = false
+    private readonly stateListeners = new Set<(state: ConnectionState) => void>()
 
     constructor(opts: SubscriptionsOptions) {
         this.conn = new WebSocketConnection({
@@ -118,6 +119,17 @@ export class SubscriptionsManager {
 
     close() {
         this.conn.close()
+    }
+
+    get connectionState(): ConnectionState {
+        return this.conn.state
+    }
+
+    onConnectionStateChange(listener: (state: ConnectionState) => void): () => void {
+        this.stateListeners.add(listener)
+        return () => {
+            this.stateListeners.delete(listener)
+        }
     }
 
     private generateSubID(prefix: string): string {
@@ -290,6 +302,7 @@ export class SubscriptionsManager {
     }
 
     private onStateChange(state: ConnectionState) {
+        for (const listener of this.stateListeners) listener(state)
         if (state !== 'connected') return
         if (!this.hasConnected) {
             this.hasConnected = true

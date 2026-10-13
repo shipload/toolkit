@@ -1,4 +1,5 @@
 import {afterEach, describe, expect, test} from 'bun:test'
+import type {ConnectionState} from './connection'
 import {SubscriptionsManager} from './manager'
 import type {ServerMessage} from './types'
 
@@ -9,6 +10,35 @@ function createManager(): SubscriptionsManager {
 function deliver(mgr: SubscriptionsManager, msg: ServerMessage) {
     ;(mgr as unknown as {onMessage(m: ServerMessage): void}).onMessage(msg)
 }
+
+function changeState(mgr: SubscriptionsManager, state: ConnectionState) {
+    ;(mgr as unknown as {onStateChange(s: ConnectionState): void}).onStateChange(state)
+}
+
+describe('connection state', () => {
+    let mgr: SubscriptionsManager | undefined
+
+    afterEach(() => {
+        mgr?.close()
+        mgr = undefined
+    })
+
+    test('connectionState reads the socket state', () => {
+        mgr = createManager()
+        expect(['connecting', 'reconnecting']).toContain(mgr.connectionState)
+    })
+
+    test('listeners receive every state change until they unsubscribe', () => {
+        mgr = createManager()
+        const seen: ConnectionState[] = []
+        const off = mgr.onConnectionStateChange((s) => seen.push(s))
+        changeState(mgr, 'connected')
+        changeState(mgr, 'reconnecting')
+        off()
+        changeState(mgr, 'connected')
+        expect(seen).toEqual(['connected', 'reconnecting'])
+    })
+})
 
 describe('cluster delta routing', () => {
     let mgr: SubscriptionsManager | undefined
