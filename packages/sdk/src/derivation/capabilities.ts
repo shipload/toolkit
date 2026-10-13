@@ -17,12 +17,14 @@ function sumHullStats(stats: Record<string, number>): number {
     return Object.values(stats).reduce((sum, value) => sum + value, 0)
 }
 
-export function computeBaseHullmass(itemId: number, stats: Record<string, number>): number {
+export function computeBaseHullmassFromStats(
+    itemId: number,
+    stats: Record<string, number>
+): number {
     if (isShipHull(itemId)) {
         return Math.floor((getBaseHullmassFor(itemId) * (10_000 - sumHullStats(stats))) / 10_000)
     }
-    const lightness = stats.density ?? stats.hardness ?? 0
-    return Math.floor((getBaseHullmassFor(itemId) * (2000 - lightness)) / 2000)
+    return Math.floor((getBaseHullmassFor(itemId) * (2000 - (stats.density ?? 0))) / 2000)
 }
 
 export function computeShipHullCapabilities(
@@ -35,7 +37,7 @@ export function computeShipHullCapabilities(
     const statSum = sumHullStats(stats)
     const exponent = statSum / 4995.0
     return {
-        hullmass: computeBaseHullmass(itemId, stats),
+        hullmass: computeBaseHullmassFromStats(itemId, stats),
         capacity: Math.floor(50000 * 6 ** exponent),
     }
 }
@@ -364,7 +366,7 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_WAREHOUSE_T2_PACKED, stats),
+        hullmass: computeBaseHullmassFromStats(ITEM_WAREHOUSE_T2_PACKED, stats),
         capacity: Math.floor(1000000 * 6 ** exponent),
     }
 }
@@ -376,7 +378,7 @@ export function computeDepotHullCapabilities(stats: Record<string, number>): {
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(ITEM_DEPOT_T1_PACKED, stats),
+        hullmass: computeBaseHullmassFromStats(ITEM_DEPOT_T1_PACKED, stats),
         capacity: Math.floor(500000 * 6 ** exponent),
     }
 }
@@ -728,7 +730,7 @@ export function computeEntityCapabilities(
     }
 
     const result: ComputedCapabilities = {
-        hullmass: computeBaseHullmass(itemId, stats) + installedModuleMass,
+        hullmass: computeBaseHullmassFromStats(itemId, stats) + installedModuleMass,
         capacity: clampUint32(baseCapacity + totalStorageCapacity),
     }
 
@@ -810,7 +812,7 @@ export function computeContainerCapabilities(
     const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
     const exponent = statSum / 1998.0
     return {
-        hullmass: computeBaseHullmass(itemId, stats),
+        hullmass: computeBaseHullmassFromStats(itemId, stats),
         capacity: Math.floor(141000 * 6 ** exponent),
     }
 }

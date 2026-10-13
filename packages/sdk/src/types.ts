@@ -117,7 +117,7 @@ export enum TaskCancelable {
 export type CoordinatesType =
     | Coordinates
     | ServerContract.Types.coordinates
-    | {x: Int64Type; y: Int64Type}
+    | {x: Int64Type; y: Int64Type; z?: UInt16Type}
 
 export class Coordinates extends ServerContract.Types.coordinates {
     static from(value: CoordinatesType): Coordinates {

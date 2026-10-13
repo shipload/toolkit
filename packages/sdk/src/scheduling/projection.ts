@@ -17,10 +17,11 @@ import {
 } from '../errors'
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
+import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEntityCapabilities, computeLoaderWorkerMass} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
-import {lerp} from '../travel/travel'
+import {calc_orbital_altitude, lerp} from '../travel/travel'
 import {
     calcStacksMass,
     cargoItemToStack,
@@ -119,8 +120,13 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
         typeof entity.item_id === 'number' ? entity.item_id : entity.item_id.value
     )
     const hullStats = decodeCraftedItemStats(itemId, entity.stats)
+    const shipHull = getPackedEntityType(itemId)?.equals(ENTITY_SHIP) ?? false
     if (hullStats.strength === undefined) hullStats.strength = decodeStat(entity.stats, 0)
     if (hullStats.hardness === undefined) hullStats.hardness = decodeStat(entity.stats, 2)
+    // Non-ship hullmass is positional on slot 1 (compute_capabilities.cpp:138); a ship sums all five, so naming slot 1 twice would double-count it.
+    if (!shipHull && hullStats.density === undefined) {
+        hullStats.density = decodeStat(entity.stats, 1)
+    }
     // The retired Ship T1 recipe only assigned names to its first two stat slots.
     // Its on-chain entity row still carries five packed channels, and the ship hull
     // formula deliberately consumes all five. Keep the unlabelled channels internal
@@ -322,7 +328,12 @@ function applyFlightTask(
 
     if (options.complete) {
         applyEnergyCost(projected, task)
-        projected.location = destination
+        // Mirrors projection.cpp calc_task_effect: a completed move re-seats z from total mass.
+        projected.location = Coordinates.from({
+            x: destination.x.toNumber(),
+            y: destination.y.toNumber(),
+            z: calc_orbital_altitude(Number(projected.totalMass)),
+        })
     } else if (options.progress !== undefined) {
         const interpolated = lerp(projected.location, destination, options.progress)
         projected.location = Coordinates.from({

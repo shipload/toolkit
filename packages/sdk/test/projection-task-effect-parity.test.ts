@@ -5,6 +5,7 @@ import {TaskType} from '../src/types'
 import {LANE_MOBILITY} from '../src/scheduling/schedule'
 import {projectEntityAt, projectRemainingAt} from '../src/scheduling/projection'
 import {makeTask} from './helpers'
+import {calc_orbital_altitude} from '../src/travel/travel'
 
 const STARTED = '2024-06-04T00:00:00.000'
 const NOW = new Date('2024-06-04T00:00:00.000Z')
@@ -81,6 +82,18 @@ describe('projectRemainingAt mirrors calc_task_effect cargo deltas', () => {
         const task = makeTask(TaskType.UNDEPLOY, {cargo: [{item_id: 201, quantity: 1}]})
         const projected = projectRemainingAt(shipWith(task, 0) as never, NOW)
         expect(projected.cargo.length).toBe(1)
+    })
+
+    test('a completed move re-seats z from total mass, not the task coordinates', () => {
+        const task = makeTask(TaskType.TRAVEL, {duration: 60, coordinates: {x: 5, y: 7, z: 0}})
+        const after = new Date(NOW.getTime() + 120_000)
+        const projected = projectEntityAt(shipWith(task, 0) as never, after)
+        expect(projected.location.x.toNumber()).toBe(5)
+        expect(projected.location.y.toNumber()).toBe(7)
+        expect(projected.location.z.toNumber()).toBe(
+            calc_orbital_altitude(projected.totalMass.toNumber())
+        )
+        expect(projected.location.z.toNumber()).toBeGreaterThan(0)
     })
 
     test('a hosted civic deposit moves no cargo on its host', () => {

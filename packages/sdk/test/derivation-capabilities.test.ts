@@ -3,7 +3,7 @@ import {describe, expect, test} from 'bun:test'
 import {
     applyCapacityTier,
     computeBaseCapacity,
-    computeBaseHullmass,
+    computeBaseHullmassFromStats,
     computeDepotHullCapabilities,
     computeShipHullCapabilities,
     gathererDepthForTier,
@@ -202,7 +202,7 @@ describe('computeShipHullCapabilities (hull capacity formula)', () => {
     })
 
     test('non-ship hull mass keeps its density-based formula', () => {
-        expect(computeBaseHullmass(ITEM_WAREHOUSE_T2_PACKED, {density: 500})).toBe(750)
+        expect(computeBaseHullmassFromStats(ITEM_WAREHOUSE_T2_PACKED, {density: 500})).toBe(750)
     })
 })
 

@@ -3,7 +3,7 @@ import {UInt16, UInt64} from '@wharfkit/antelope'
 import {resolveItem} from './resolve-item'
 import {encodeStats} from '../derivation/crafting'
 import {
-    computeBaseHullmass,
+    computeBaseHullmassFromStats,
     computeStructureBaseCapacity,
     applyCapacityTier,
 } from '../derivation/capabilities'
@@ -47,7 +47,7 @@ test('resolveItem resolves the station hub with hullmass and zero cargo capacity
     const resolved = resolveItem(UInt16.from(ITEM_HUB_T2_PACKED), stats)
     const hull = resolved.attributes?.find((g) => g.capability === 'Hull')
     expect(hull?.attributes.find((a) => a.label === 'Mass')?.value).toBe(
-        computeBaseHullmass(ITEM_HUB_T2_PACKED, {density: 100})
+        computeBaseHullmassFromStats(ITEM_HUB_T2_PACKED, {density: 100})
     )
     expect(hull?.attributes.find((a) => a.label === 'Capacity')?.value).toBe(0)
 })

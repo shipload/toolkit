@@ -32,7 +32,7 @@ import {
     computeHaulerCapabilities,
     computeLoaderCapabilities,
     computeBaseCapacity,
-    computeBaseHullmass,
+    computeBaseHullmassFromStats,
     computeStorageCapabilities,
 } from '../derivation/capabilities'
 import {applySlotMultiplierUint32} from '../entities/slot-multiplier'
@@ -319,7 +319,7 @@ function hullCapsForEntity(
           }
         : decoded
     return {
-        hullmass: computeBaseHullmass(itemId, hullStats),
+        hullmass: computeBaseHullmassFromStats(itemId, hullStats),
         capacity: computeBaseCapacity(itemId, hullStats),
     }
 }
