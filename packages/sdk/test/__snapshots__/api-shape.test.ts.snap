@@ -1,44 +1,5 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`Entity public surface 1`] = `
-[
-  "availableCapacity",
-  "canDemolish",
-  "canUndeploy",
-  "canUseModules",
-  "canWrap",
-  "constructor",
-  "entityClass",
-  "hasPendingCapper",
-  "inv",
-  "inventory",
-  "isFull",
-  "isIdle",
-  "isLoading",
-  "isUnloading",
-  "location",
-  "maxCapacity",
-  "name",
-  "sched",
-  "totalCargoMass",
-  "totalMass",
-]
-`;
-
-exports[`EntitiesManager method surface 1`] = `
-[
-  "constructor",
-  "getAllEntities",
-  "getDepot",
-  "getEntities",
-  "getEntity",
-  "getHullStats",
-  "getProjection",
-  "getSummaries",
-  "resolveOwner",
-]
-`;
-
 exports[`module export surface 1`] = `
 [
   "ALL_ENTITY_TYPES",
@@ -108,7 +69,6 @@ exports[`module export surface 1`] = `
   "CIVIC_STAT_NONE",
   "CIVIC_STAT_STORAGE_CAPACITY",
   "CIVIC_STAT_TRANSFER_SPEED",
-  "CIVIC_TRANSFER_PER_PLAYER_CAP",
   "CIVIC_WORKSHOP",
   "CIVIC_WORLD",
   "COMMIT_ALREADY_SET",
@@ -609,7 +569,6 @@ exports[`module export surface 1`] = `
   "civicShuttleBays",
   "civicStatLabel",
   "civicStatModuleType",
-  "civicTransfersAtCap",
   "civicTransfersFrom",
   "clusterStockAvailable",
   "collapseWorkers",
@@ -1021,5 +980,44 @@ exports[`module export surface 1`] = `
   "wrapCostKey",
   "wrappedSchemaStatFields",
   "yieldThresholdAt",
+]
+`;
+
+exports[`Entity public surface 1`] = `
+[
+  "availableCapacity",
+  "canDemolish",
+  "canUndeploy",
+  "canUseModules",
+  "canWrap",
+  "constructor",
+  "entityClass",
+  "hasPendingCapper",
+  "inv",
+  "inventory",
+  "isFull",
+  "isIdle",
+  "isLoading",
+  "isUnloading",
+  "location",
+  "maxCapacity",
+  "name",
+  "sched",
+  "totalCargoMass",
+  "totalMass",
+]
+`;
+
+exports[`EntitiesManager method surface 1`] = `
+[
+  "constructor",
+  "getAllEntities",
+  "getDepot",
+  "getEntities",
+  "getEntity",
+  "getHullStats",
+  "getProjection",
+  "getSummaries",
+  "resolveOwner",
 ]
 `;
