@@ -411,7 +411,6 @@ describe('ShuttleManager', () => {
             'workshop-capped',
             'no-generator',
             'not-equipped',
-            'job-cap',
             'target-busy',
             'cargo-wont-fit',
             'depot-full',

@@ -21,7 +21,6 @@ export type ShuttleReasonCode =
     | 'workshop-capped'
     | 'no-generator'
     | 'not-equipped'
-    | 'job-cap'
     | 'target-busy'
     | 'cargo-wont-fit'
     | 'depot-full'
@@ -31,7 +30,6 @@ export type ShuttleReasonCode =
     | 'bay-not-ready'
     | 'bundle-too-large'
     | 'duplicate-item'
-    | 'player-cap'
     | 'queue-full'
     | 'inputs-unavailable'
     | 'ship-energy'
@@ -127,7 +125,6 @@ export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
     'workshop-capped',
     'no-generator',
     'not-equipped',
-    'job-cap',
     'target-busy',
     'cargo-wont-fit',
     'depot-full',

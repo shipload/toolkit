@@ -16,10 +16,6 @@ export function formatShuttleReason(r: ShuttleReason): string {
             return r.reason.includes('fabricator')
                 ? 'The Workshop has no Fabricator installed.'
                 : 'The Dock has no assembly arm installed.'
-        case 'job-cap':
-            return r.cap !== undefined
-                ? `This building already has the maximum of ${r.cap} bookings waiting on materials; let one finish first.`
-                : 'Too many bookings at this building are waiting on materials; let one finish first.'
         case 'target-busy':
             return 'The target is busy; it must be idle before this can proceed.'
         case 'cargo-wont-fit':
@@ -40,10 +36,6 @@ export function formatShuttleReason(r: ShuttleReason): string {
             return at
                 ? `The building's shuttle bays are fully booked; the next opening is ${at}.`
                 : "The building's shuttle bays are fully booked."
-        case 'player-cap':
-            return r.cap !== undefined
-                ? `You already have the maximum of ${r.cap} transfers this building allows for one player${at ? `; the earliest one finishes ${at}` : ''}.`
-                : 'You already have the most transfers this building allows for one player.'
         case 'queue-full':
             return at
                 ? `The Fabricator queue is full; the next opening is ${at}.`

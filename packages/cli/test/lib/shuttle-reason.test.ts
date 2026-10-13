@@ -16,17 +16,6 @@ test('formatShuttleReason prints the energy values for a ship-energy rejection',
     expect(out).not.toMatch(BANNED)
 })
 
-test('formatShuttleReason prints the cap for a job-cap rejection', () => {
-    const reason: ShuttleReason = {
-        code: 'job-cap',
-        reason: 'too many bookings waiting on materials at this building',
-        cap: 4,
-    }
-    expect(formatShuttleReason(reason)).toBe(
-        'This building already has the maximum of 4 bookings waiting on materials; let one finish first.'
-    )
-})
-
 test('formatShuttleReason prints the opening time for a bays-booked rejection', () => {
     const reason: ShuttleReason = {
         code: 'bays-booked',
@@ -82,7 +71,6 @@ test('formatShuttleReason never emits the banned words for any known code', () =
         {code: 'cargo-wont-fit', reason: ''},
         {code: 'not-stored', reason: ''},
         {code: 'no-storage', reason: ''},
-        {code: 'player-cap', reason: ''},
         {code: 'queue-full', reason: ''},
         {code: 'inputs-unavailable', reason: ''},
         {code: 'dropoff-collision', reason: ''},
