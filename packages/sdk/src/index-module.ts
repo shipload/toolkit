@@ -804,6 +804,9 @@ export {
     computeBuilderDrain,
     computeHaulerCapacity,
     computeHaulerEfficiency,
+    computeHaulerDrain,
+    computeCargoBayDrain,
+    supportDrainTierPercent,
     computeWarpRange,
 } from './nft/description'
 
