@@ -247,9 +247,12 @@ export function shipLoaderLane(ship: ShipLike): {thrust: number; mass: number} |
     return {thrust: Number(lowest.thrust), mass: Number(lowest.mass)}
 }
 
+// Mirrors cargo.cpp calc_load_duration's orbital floor and non-zero floor; count stays parallelism only (ADR 0029).
 export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: number): UInt32 {
     const z = altitude ?? ship.coordinates.z?.toNumber() ?? calc_orbital_altitude(Number(mass))
-    return calc_flighttime(z, calc_loader_acceleration(ship, mass))
+    const loadZ = Math.max(z, MIN_ORBITAL_ALTITUDE)
+    const flightTime = Number(calc_flighttime(loadZ, calc_loader_acceleration(ship, mass)))
+    return UInt32.from(flightTime === 0 ? 1 : flightTime)
 }
 
 export function calc_loader_acceleration(ship: ShipLike, mass: UInt64): number {

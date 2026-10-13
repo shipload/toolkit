@@ -256,6 +256,27 @@ describe('travel', () => {
             const time = calc_loader_flighttime(mockShip, UInt64.from(10000))
             assert.isAbove(Number(time), 0)
         })
+
+        test('floors a ground-level entity at the base orbital altitude, not an instant load', () => {
+            const ground = createMockShip({loaderThrust: 100, loaderMass: 5000, locationZ: 0})
+            const orbital = createMockShip({
+                loaderThrust: 100,
+                loaderMass: 5000,
+                locationZ: MIN_ORBITAL_ALTITUDE,
+            })
+            const mass = UInt64.from(10000)
+            assert.equal(
+                Number(calc_loader_flighttime(ground, mass)),
+                Number(calc_loader_flighttime(orbital, mass)),
+                'cargo.cpp calc_load_duration floors z at the base orbital altitude'
+            )
+            assert.isAbove(Number(calc_loader_flighttime(ground, mass)), 0)
+        })
+
+        test('never reports a zero-second load', () => {
+            const fast = createMockShip({loaderThrust: 65535, loaderMass: 1, locationZ: 0})
+            assert.isAtLeast(Number(calc_loader_flighttime(fast, UInt64.from(1))), 1)
+        })
     })
 
     describe('calc_loader_acceleration', () => {
