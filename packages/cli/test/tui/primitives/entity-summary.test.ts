@@ -13,8 +13,8 @@ function snap(): EntitySnapshot {
         cargomass: 2340,
         cargo: [],
         capacity: 3165,
-        energy: 383,
-        generator: {capacity: 383, recharge: 1},
+        energy: 383_000,
+        generator: {capacity: 383_000, recharge: 1000},
         is_idle: false,
     } as never
 }

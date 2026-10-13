@@ -32,6 +32,16 @@ test('renderDetail still renders item, reserve, richness from raw stratum row', 
     expect(out).toContain('101')
 })
 
+test('renderDetail prints the reserve in tonnes without a trailing "units"', () => {
+    const out = renderDetail(
+        {item_id: 101, reserve: 900, reserve_max: 1000, seed: 'abc', richness: 50} as any,
+        null,
+        0
+    )
+    expect(out).toMatch(/Reserve:\s+.* t \/ .* t \(90%\) · regenerating/)
+    expect(out).not.toContain(' units')
+})
+
 test('renderDetail annotates when the entity can reach the stratum', () => {
     const out = renderDetail(
         {item_id: 101, reserve: 1000, reserve_max: 1000, seed: 'abc', richness: 50} as any,

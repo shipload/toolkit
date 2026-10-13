@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
+	calc_acceleration,
+	calc_travel_flighttime,
 	type CargoInput,
 	cargoInputKey,
+	distanceBetweenPoints,
+	getItem,
 	cargoKey,
 	HoldKind,
 	type IncomingSource,
@@ -16,6 +20,7 @@ import {
 	computeFlightDurationSeconds,
 	computeGatherCargoDelta,
 	estimateCraft,
+	estimateGroupTravel,
 	type EstimateResult,
 	estimateGatherFromStratum,
 	estimateTravel,
@@ -798,5 +803,287 @@ describe("buildIncomingSources", () => {
 			async () => counterpart,
 		);
 		expect(sources).toEqual([]);
+	});
+});
+
+describe("estimateGroupTravel — contract haul penalty and departure mass", () => {
+	const NOW = new Date("2026-06-19T00:00:00.000Z");
+	const TARGET = { x: 10, y: 0 };
+
+	function startedAt(offsetS: number): string {
+		return new Date(NOW.getTime() + offsetS * 1000).toISOString().slice(0, 23);
+	}
+
+	function shipSnap(overrides: Record<string, unknown> = {}) {
+		return {
+			type: "ship",
+			id: 1n,
+			owner: "agent.gm",
+			entity_name: "Hauler",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0n,
+			cargo: [],
+			capacity: 10_000_000n,
+			energy: 1_000_000n,
+			hullmass: 70_000n,
+			engines: { thrust: 50_000n, drain: 1n },
+			generator: { capacity: 1_000_000n, recharge: 1_000n },
+			hauler: { capacity: 1n, efficiency: 5_000n, drain: 0n },
+			gatherer_lanes: [],
+			crafter_lanes: [],
+			builder_lanes: [],
+			loader_lanes: [],
+			is_idle: true,
+			lanes: [],
+			holds: [],
+			...overrides,
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+	}
+
+	function containerSnap(overrides: Record<string, unknown> = {}) {
+		return {
+			type: "container",
+			id: 2n,
+			owner: "agent.gm",
+			entity_name: "Box",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0n,
+			cargo: [],
+			capacity: 10_000_000n,
+			hullmass: 30_000n,
+			gatherer_lanes: [],
+			crafter_lanes: [],
+			builder_lanes: [],
+			loader_lanes: [],
+			is_idle: true,
+			lanes: [],
+			holds: [],
+			...overrides,
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+	}
+
+	function group(snapshots: unknown[], recharge = false) {
+		return estimateGroupTravel({
+			entities: snapshots.map((_, i) => ({ entityId: BigInt(i + 1) })),
+			target: TARGET,
+			recharge,
+			// biome-ignore lint/suspicious/noExplicitAny: stub snapshots
+			snapshots: snapshots as any,
+			hasSystemAtDestination: true,
+			now: NOW,
+		});
+	}
+
+	test("one ship towing one container pays the haul penalty: 128s, not the bare-thrust 120s", async () => {
+		const est = await group([shipSnap(), containerSnap()]);
+		expect(est.duration_s).toBe(128);
+		const bare = calc_travel_flighttime(
+			distanceBetweenPoints(0, 0, TARGET.x, TARGET.y),
+			calc_acceleration(50_000, 100_000),
+		).toNumber();
+		expect(bare).toBe(120);
+	});
+
+	test("an in-flight load queued behind the departure still counts: duration equals the loaded-hold duration", async () => {
+		const load = ServerTypes.lane.from({
+			lane_key: 3,
+			schedule: {
+				started: startedAt(0),
+				tasks: [
+					{
+						type: TaskType.LOAD,
+						duration: 600,
+						cancelable: 0,
+						cargo: [{ item_id: 101, quantity: 5000, stats: 0, modules: [] }],
+						couplings: [],
+					},
+				],
+			},
+		});
+		const queued = await group([shipSnap({ lanes: [load] }), containerSnap()]);
+		const loaded = await group([
+			shipSnap({ cargomass: BigInt(getItem(101).mass * 5000) }),
+			containerSnap(),
+		]);
+		const empty = await group([shipSnap(), containerSnap()]);
+		expect(queued.duration_s).toBe(loaded.duration_s);
+		expect(queued.duration_s).toBeGreaterThan(empty.duration_s);
+	});
+
+	test("recharge time reads the energy left after the queue: a finished recharge makes it zero", async () => {
+		const finishedRecharge = ServerTypes.lane.from({
+			lane_key: 255,
+			schedule: {
+				started: startedAt(-600),
+				tasks: [{ type: TaskType.RECHARGE, duration: 5, cancelable: 0, cargo: [], couplings: [] }],
+			},
+		});
+		const drained = shipSnap({ energy: 0n, lanes: [finishedRecharge] });
+		const est = await group([drained, containerSnap()], true);
+		const plain = await group([shipSnap({ energy: 0n }), containerSnap()], true);
+		expect(plain.duration_s - est.duration_s).toBe(1_000);
+	});
+});
+
+describe("estimateTravel — contract departure mass and projected recharge", () => {
+	const NOW = new Date("2026-06-19T00:00:00.000Z");
+
+	function snap(overrides: Record<string, unknown> = {}) {
+		return {
+			type: "ship",
+			id: 1n,
+			owner: "agent.gm",
+			entity_name: "Solo",
+			coordinates: { x: 0n, y: 0n },
+			cargomass: 0n,
+			cargo: [],
+			capacity: 10_000_000n,
+			energy: 0n,
+			hullmass: 100_000n,
+			engines: { thrust: 50_000n, drain: 1n },
+			generator: { capacity: 1_000_000n, recharge: 1_000n },
+			gatherer_lanes: [],
+			crafter_lanes: [],
+			builder_lanes: [],
+			loader_lanes: [],
+			is_idle: true,
+			lanes: [],
+			holds: [],
+			...overrides,
+			// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+		} as any;
+	}
+
+	test("recharge duration uses the energy projected after queued tasks", async () => {
+		const finishedRecharge = ServerTypes.lane.from({
+			lane_key: 255,
+			schedule: {
+				started: new Date(Date.now() - 600_000).toISOString().slice(0, 23),
+				tasks: [{ type: TaskType.RECHARGE, duration: 5, cancelable: 0, cargo: [], couplings: [] }],
+			},
+		});
+		const projected = await estimateTravel({
+			entityId: 1n,
+			target: { x: 10, y: 0 },
+			recharge: true,
+			snapshot: snap({ lanes: [finishedRecharge] }),
+			hasSystemAtDestination: true,
+		});
+		const stored = await estimateTravel({
+			entityId: 1n,
+			target: { x: 10, y: 0 },
+			recharge: true,
+			snapshot: snap(),
+			hasSystemAtDestination: true,
+		});
+		expect(projected.travel?.rechargeDuration_s).toBe(0);
+		expect(stored.travel?.rechargeDuration_s).toBe(1_000);
+	});
+
+	test("flight is priced on end-of-queue cargo when it exceeds what is aboard at departure", async () => {
+		const load = ServerTypes.lane.from({
+			lane_key: 3,
+			schedule: {
+				started: new Date().toISOString().slice(0, 23),
+				tasks: [
+					{
+						type: TaskType.LOAD,
+						duration: 600,
+						cancelable: 0,
+						cargo: [{ item_id: 101, quantity: 5000, stats: 0, modules: [] }],
+						couplings: [],
+					},
+				],
+			},
+		});
+		const run = (s: unknown) =>
+			// biome-ignore lint/suspicious/noExplicitAny: stub snapshots
+			estimateTravel({ entityId: 1n, target: { x: 10, y: 0 }, snapshot: s as any, hasSystemAtDestination: true });
+		const queued = await run(snap({ energy: 1_000_000n, lanes: [load] }));
+		const loaded = await run(
+			snap({ energy: 1_000_000n, cargomass: BigInt(getItem(101).mass * 5000) }),
+		);
+		const empty = await run(snap({ energy: 1_000_000n }));
+		expect(queued.travel?.flightDuration_s).toBe(loaded.travel?.flightDuration_s);
+		expect(queued.travel?.flightDuration_s).toBeGreaterThan(empty.travel?.flightDuration_s ?? 0);
+	});
+
+	test("travel departs after a queued unload, so the flight is priced on the emptied hold", async () => {
+		const unload = ServerTypes.lane.from({
+			lane_key: 3,
+			schedule: {
+				started: new Date().toISOString().slice(0, 23),
+				tasks: [
+					{
+						type: TaskType.UNLOAD,
+						duration: 600,
+						cancelable: 0,
+						cargo: [{ item_id: 101, quantity: 5000, stats: 0, modules: [] }],
+						couplings: [],
+					},
+				],
+			},
+		});
+		const run = (s: unknown) =>
+			// biome-ignore lint/suspicious/noExplicitAny: stub snapshots
+			estimateTravel({ entityId: 1n, target: { x: 10, y: 0 }, snapshot: s as any, hasSystemAtDestination: true });
+		const loadedMass = BigInt(getItem(101).mass * 5000);
+		const queued = await run(snap({ energy: 1_000_000n, cargomass: loadedMass, lanes: [unload] }));
+		const empty = await run(snap({ energy: 1_000_000n }));
+		expect(queued.travel?.flightDuration_s).toBe(empty.travel?.flightDuration_s);
+	});
+});
+
+describe("estimateCraft — lane choice", () => {
+	const CRAFTER_MODULE = 10104;
+
+	function crafterModule() {
+		return ServerTypes.module_entry.from({
+			type: 6,
+			installed: { item_id: CRAFTER_MODULE, stats: 0 },
+		});
+	}
+
+	test("uses the first free crafter lane, as the contract does", async () => {
+		const busyLane = ServerTypes.lane.from({
+			lane_key: 1,
+			schedule: {
+				started: new Date().toISOString().slice(0, 23),
+				tasks: [{ type: TaskType.CRAFT, duration: 600, cancelable: 0, cargo: [], couplings: [] }],
+			},
+		});
+		const est = await estimateCraft({
+			entityId: 5n,
+			recipeId: 10003,
+			quantity: 1,
+			inputs: [{ itemId: 101, stackId: 0n, quantity: 10, modules: [] }],
+			snapshot: {
+				type: "ship",
+				id: 5n,
+				owner: "agent.gm",
+				entity_name: "Two Crafters",
+				coordinates: { x: 0n, y: 0n },
+				cargomass: 0n,
+				cargo: [],
+				capacity: 10_000_000n,
+				energy: 10_000_000n,
+				generator: { capacity: 10_000_000n, recharge: 1n },
+				modules: [crafterModule(), crafterModule()],
+				crafter_lanes: [
+					{ slot_index: 0, speed: 100, drain: 1 },
+					{ slot_index: 1, speed: 500, drain: 1 },
+				],
+				gatherer_lanes: [],
+				builder_lanes: [],
+				loader_lanes: [],
+				is_idle: false,
+				lanes: [busyLane],
+				// biome-ignore lint/suspicious/noExplicitAny: stub for EntitySnapshot
+			} as any,
+			recipe: { output_item_id: 10003, inputs: [{ item_id: 101, quantity: 10 }] },
+		});
+		expect(est.duration_s).toBe(21);
 	});
 });

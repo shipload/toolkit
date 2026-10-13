@@ -1,4 +1,4 @@
-import {type ProjectedEntity, schedule} from '@shipload/sdk'
+import {type GatherLane, type ProjectedEntity, schedule, ServerTypes} from '@shipload/sdk'
 import {Command} from 'commander'
 import {ALL_ENTITY_TYPES, parseUint32} from '../../lib/args'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -27,6 +27,7 @@ interface GatherableOpts {
 interface ResolvedEntityState {
     coords: {x: bigint; y: bigint}
     caps: GathererCaps
+    lanes: GatherLane[]
     energy: number
     energyCapacity: number
     cargoFree: number
@@ -48,13 +49,11 @@ function resolveState(
     }
     // biome-ignore lint/suspicious/noExplicitAny: getentity readonly return is dynamic
     const raw = snap as any
-    const deepest = gLanes.reduce((best, l) =>
-        Number(l.depth.toString()) > Number(best.depth.toString()) ? l : best
-    )
+    const lanes = gLanes.map((l) => ServerTypes.gatherer_lane.from(l))
     const caps: GathererCaps = {
-        yield: Number(deepest.yield.toString()),
+        yield: lanes.reduce((sum, l) => sum + l.yield.toNumber(), 0),
         depth: reachDepth(gLanes),
-        drain: Number(deepest.drain.toString()),
+        drain: lanes.reduce((sum, l) => sum + l.drain.toNumber(), 0),
     }
 
     const energyCapacity = Number(raw.generator?.capacity?.toString() ?? '0')
@@ -84,6 +83,7 @@ function resolveState(
     return {
         coords,
         caps,
+        lanes,
         energy,
         energyCapacity,
         cargoFree: Math.max(0, cargoFree),
@@ -106,7 +106,7 @@ async function runGatherable(ctx: EntityContext, opts: GatherableOpts): Promise<
         const reachable = stratum.index <= state.caps.depth
         const metrics = reachable
             ? computeStratumGatherMetrics({
-                  caps: state.caps,
+                  lanes: state.lanes,
                   budget: {energy: state.energy, cargoFree: state.cargoFree},
                   stratum,
                   quantity: opts.quantity,

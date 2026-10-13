@@ -1,6 +1,7 @@
 import {Box, Text, type VChild} from '@opentui/core'
 import type {ServerTypes} from '@shipload/sdk'
-import {formatCargoUsage, formatCoordinatePair, projectEnergy} from '../../lib/format'
+import {formatCargoUsage, formatCoordinatePair, formatEnergyAmount} from '../../lib/format'
+import {projectedEnergyNow} from '../../lib/projection'
 import type {EntitySnapshot} from '../../lib/snapshot'
 import {renderField} from './field'
 import {renderHeader} from './header'
@@ -21,35 +22,31 @@ export function renderEntitySummary(opts: EntitySummaryOpts): VChild {
             entityName: opts.snap.entity_name,
             owner: opts.snap.owner,
         }),
-        renderStatsRow(opts.snap, opts.elapsed_s)
+        renderStatsRow(opts.snap)
     )
 }
 
-function renderStatsRow(snap: EntitySnapshot, elapsed_s: number): VChild {
+function renderStatsRow(snap: EntitySnapshot): VChild {
     const cells: string[] = []
     if (snap.coordinates) {
         cells.push(
             `◷ ${formatCoordinatePair(snap.coordinates as unknown as ServerTypes.coordinates)}`
         )
     }
-    const energyStr = energySummary(snap, elapsed_s)
+    const energyStr = energySummary(snap)
     if (energyStr) cells.push(energyStr)
     const cargoStr = cargoSummary(snap)
     if (cargoStr) cells.push(cargoStr)
     return Text({content: cells.join('    ')})
 }
 
-function energySummary(snap: EntitySnapshot, elapsed_s: number): string | null {
+function energySummary(snap: EntitySnapshot): string | null {
     if (snap.energy === undefined) return null
     const stored = Number(snap.energy)
-    if (!snap.generator) return renderField({icon: '⚡', value: String(stored)})
-    const cap = Number(snap.generator.capacity)
-    const recharge = Number(snap.generator.recharge)
-    if (snap.is_idle || !recharge) {
-        return renderField({icon: '⚡', value: `${stored}/${cap}`})
-    }
-    const projected = projectEnergy(stored, cap, recharge, 0, elapsed_s)
-    return renderField({icon: '⚡', value: `${projected}/${cap}`})
+    if (!snap.generator) return renderField({icon: '⚡', value: formatEnergyAmount(stored)})
+    const cap = formatEnergyAmount(Number(snap.generator.capacity))
+    const shown = projectedEnergyNow(snap, new Date())
+    return renderField({icon: '⚡', value: `${formatEnergyAmount(shown)}/${cap}`})
 }
 
 function cargoSummary(snap: EntitySnapshot): string | null {

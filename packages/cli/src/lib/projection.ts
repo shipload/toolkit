@@ -1,8 +1,13 @@
 import {
+	calc_travel_cargomass,
+	placedStart,
+	projectEntityAt,
 	projectRemainingAt,
 	type Projectable,
 	type ProjectedEntity,
+	schedule,
 	type ServerTypes,
+	TaskType,
 } from "@shipload/sdk";
 import { TimePoint } from "@wharfkit/antelope";
 import type { EntitySnapshot } from "./snapshot";
@@ -79,6 +84,36 @@ function normalizeProjectable(entity: Projectable): Projectable {
 
 export function projectRemainingSnapshotAt(entity: unknown, now: Date): ProjectedEntity {
 	return projectRemainingAt(normalizeProjectable(entity as Projectable), now);
+}
+
+export function projectEntitySnapshotAt(entity: unknown, now: Date): ProjectedEntity {
+	return projectEntityAt(normalizeProjectable(entity as Projectable), now);
+}
+
+export function projectedEnergyNow(entity: unknown, now: Date): number {
+	return Number(projectEntitySnapshotAt(entity, now).energy.toString());
+}
+
+export function travelCargoMass(snap: EntitySnapshot, departsAt: Date): number {
+	const entity = normalizeProjectable(snap as unknown as Projectable);
+	return calc_travel_cargomass(
+		{
+			lanes: entity.lanes,
+			holds: entity.holds,
+			projected_at: entity.projected_at,
+			cargomass: Number(snap.cargomass ?? 0),
+		},
+		departsAt,
+	);
+}
+
+export function travelDepartureAt(snap: EntitySnapshot, now: Date, afterAllLanes: boolean): Date {
+	const entity = normalizeProjectable(snap as unknown as Projectable);
+	if (!afterAllLanes) {
+		return placedStart(entity, TaskType.TRAVEL, schedule.LANE_MOBILITY, now);
+	}
+	const idleAt = schedule.entityIdleAt({ lanes: entity.lanes ?? [] }, now);
+	return idleAt && idleAt.getTime() > now.getTime() ? idleAt : now;
 }
 
 export function projectedCoords(snap: EntitySnapshot, now: Date = new Date()): ProjectedCoords {

@@ -125,9 +125,9 @@ describe("renderEntityFull live energy", () => {
 		expect(out).not.toContain("→");
 	});
 
-	test("busy entity with elapsed task renders live-projected energy with arrow", () => {
-		const started = new Date(Date.now() - 10_000).toISOString().slice(0, 23);
-		const ei = ServerContract.Types.entity_info.from({
+	function shipWithTask(type: number, durationS: number, elapsedS: number) {
+		const started = new Date(Date.now() - elapsedS * 1000).toISOString().slice(0, 23);
+		return ServerContract.Types.entity_info.from({
 			projected_at: 0,
 			type: "ship",
 			id: 1,
@@ -149,15 +149,23 @@ describe("renderEntityFull live energy", () => {
 					lane_key: 0,
 					schedule: {
 						started,
-						tasks: [{ type: 5, duration: 60, cancelable: 0, cargo: [], couplings: [] }],
+						tasks: [{ type, duration: durationS, cancelable: 0, cargo: [], couplings: [] }],
 					},
 				},
 			],
 			holds: [],
 		});
-		const out = renderEntityFull(ei);
-		expect(out).toMatch(/Energy:\s+200 → /);
-		expect(out).toContain("/ 350 energy (live, +600 energy/min)");
+	}
+
+	test("a running task does not add recharge; energy changes only when a task completes", () => {
+		const out = renderEntityFull(shipWithTask(TaskType.GATHER, 60, 10));
+		expect(out).toMatch(/Energy:\s+200 \/ 350 energy/);
+		expect(out).not.toContain("→");
+	});
+
+	test("a finished recharge awaiting resolve projects energy to capacity", () => {
+		const out = renderEntityFull(shipWithTask(TaskType.RECHARGE, 5, 10));
+		expect(out).toMatch(/Energy:\s+200 → 350 \/ 350 energy \(live, /);
 	});
 });
 

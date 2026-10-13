@@ -109,6 +109,8 @@ describe('renderRoutePlan', () => {
     test('notes approximate pricing for group routes', () => {
         const out = renderRoutePlan({...meta, group: true, approxPricing: true, label: 'ship:14 + container:2'}, legs, commands)
         expect(out.toLowerCase()).toContain('approx')
+        expect(out).toContain('leg 1 is checked against the combined thrust, mass, and energy of the whole group')
+        expect(out).not.toContain('combined mass validated')
     })
 })
 

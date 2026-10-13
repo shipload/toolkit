@@ -43,7 +43,7 @@ export function renderDetail(
     const lines = [
         `Stratum [${index}]:`,
         `  Item:     ${formatItem(itemId)}`,
-        `  Reserve:  ${formatReserve(effective, max)} units${regenHint}`,
+        `  Reserve:  ${formatReserve(effective, max)}${regenHint}`,
         `  Richness: ${s.richness} / 1000`,
         `  Required depth: ${index}${formatReachVerdict(index, reach)}`,
         `  Seed:     ${s.seed}`,

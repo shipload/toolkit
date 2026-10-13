@@ -122,7 +122,7 @@ export function renderRoutePlan(meta: RouteMeta, legs: LegEstimate[], commands: 
 
     const parts = [header, '', trimTable(table), '', trimTable(summary), '', 'Commands:', ...commands.map((c) => `  ${c}`)]
     if (meta.approxPricing) {
-        parts.push('', 'Note: group energy/time are lead-ship approximations; combined mass validated on leg 1.')
+        parts.push('', 'Note: group energy and time are lead-ship approximations; leg 1 is checked against the combined thrust, mass, and energy of the whole group.')
     }
     return parts.join('\n')
 }

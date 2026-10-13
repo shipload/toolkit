@@ -132,7 +132,7 @@ export function register(program: Command): void {
                     console.error('Group cannot make the first leg:')
                     console.error(renderIssues(groupCheck.feasibility.issues))
                     console.error(
-                        'The lead ship likely lacks thrust for the combined mass. Reduce participants or use a stronger lead.'
+                        'Adjust the group (fewer participants, more thrust, or more energy) and try again.'
                     )
                     process.exit(1)
                 }

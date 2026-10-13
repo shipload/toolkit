@@ -1,6 +1,6 @@
 import { type ServerTypes, schedule, rollupGatherer, rollupBuilder,
 	rollupCrafter, rollupLoaders } from "@shipload/sdk";
-import { UInt64 } from "@wharfkit/antelope";
+import { type TimePoint, UInt64 } from "@wharfkit/antelope";
 import type { EntityTypeName } from "./args";
 import { toBigIntOrUndefined } from "./cargo-build";
 import { server } from "./client";
@@ -41,6 +41,8 @@ export interface EntitySnapshot {
 	is_idle: boolean;
 	modules?: ServerTypes.module_entry[];
 	lanes: ServerTypes.lane[];
+	holds?: ServerTypes.hold[];
+	projected_at?: TimePoint;
 }
 
 export function entityInfoToSnapshot(
@@ -72,6 +74,8 @@ export function entityInfoToSnapshot(
 		is_idle: schedule.isEntityIdle(ei, now),
 		modules: ei.modules,
 		lanes: ei.lanes,
+		holds: ei.holds ?? [],
+		projected_at: ei.projected_at,
 	};
 	if (ei.capacity != null) snap.capacity = BigInt(ei.capacity.toString());
 	if (ei.energy != null) snap.energy = BigInt(ei.energy.toString());

@@ -4,9 +4,10 @@ import {
 	formatCargoUsage,
 	formatCoordinatePair,
 	formatDuration,
+	formatEnergyAmount,
 	formatTaskShort,
-	projectEnergy,
 } from "./format";
+import { projectedEnergyNow } from "./projection";
 import type { EntitySnapshot } from "./snapshot";
 
 const BAR_WIDTH = 28;
@@ -125,11 +126,10 @@ function statsLine(t: ProgressTick): string | null {
 function energySummary(t: ProgressTick): string | null {
 	if (t.snap.energy === undefined) return null;
 	const stored = Number(t.snap.energy);
-	if (!t.snap.generator) return `⚡ ${stored}`;
-	const cap = Number(t.snap.generator.capacity);
-	const recharge = Number(t.snap.generator.recharge);
-	if (t.snap.is_idle || !recharge) return `⚡ ${stored}/${cap}`;
-	return `⚡ ${projectEnergy(stored, cap, recharge, 0, t.elapsed_s)}/${cap}`;
+	if (!t.snap.generator) return `⚡ ${formatEnergyAmount(stored)}`;
+	const cap = formatEnergyAmount(Number(t.snap.generator.capacity));
+	const shown = projectedEnergyNow(t.snap, new Date());
+	return `⚡ ${formatEnergyAmount(shown)}/${cap}`;
 }
 
 function cargoSummary(snap: EntitySnapshot): string | null {

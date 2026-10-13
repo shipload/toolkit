@@ -39,7 +39,6 @@ import {
 	formatResolveHint,
 	formatTaskShort,
 	kvTable,
-	projectEnergy,
 } from "./format";
 import {
 	entitySheetSection,
@@ -51,7 +50,7 @@ import {
 	slotOutputPct,
 } from "./figures";
 import { laneLabel } from "./lane-presentation";
-import { projectRemainingSnapshotAt } from "./projection";
+import { projectedEnergyNow, projectRemainingSnapshotAt } from "./projection";
 import { entityInfoToSnapshot } from "./snapshot";
 
 export interface HeaderContext {
@@ -118,21 +117,8 @@ function entityEnergyValue(
 		return format(null);
 	}
 
-	const now = ctx.now ?? new Date();
-	if (!schedule.isEntityIdle(entity, now)) {
-		const active = schedule
-			.orderedTasks(entity)
-			.find((ot) =>
-				schedule.laneTaskInProgressOf(entity, ot.laneKey, ot.taskIndex, now),
-			);
-		const elapsed_s = active
-			? schedule.laneTaskElapsedOf(entity, active.laneKey, active.taskIndex, now)
-			: 0;
-		if (elapsed_s > 0) {
-			const proj = projectEnergy(stored, capacity, recharge, 0, elapsed_s);
-			if (proj !== stored) return format(proj, "live");
-		}
-	}
+	const live = projectedEnergyNow(entity, ctx.now ?? new Date());
+	if (live !== stored) return format(live, "live");
 
 	return format(null);
 }

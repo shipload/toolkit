@@ -12,6 +12,7 @@ import {
 	RefitOp,
 	resolveItem,
 	TaskType,
+	toWholeEnergy,
 } from "@shipload/sdk";
 import type { Checksum256Type } from "@wharfkit/antelope";
 import Table from "cli-table3";
@@ -168,7 +169,7 @@ const MILLI_PER_ENERGY = 1000;
 export type EnergyRounding = "round" | "ceil" | "floor";
 
 export function wholeEnergy(milli: number, rounding: EnergyRounding = "round"): number {
-	return Math[rounding](milli / MILLI_PER_ENERGY);
+	return rounding === "round" ? toWholeEnergy(milli) : Math[rounding](milli / MILLI_PER_ENERGY);
 }
 
 export function formatEnergyAmount(milli: number, rounding: EnergyRounding = "round"): string {
@@ -181,19 +182,6 @@ export function formatRechargePerMinute(milliPerSecond: number): string {
 
 export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {
 	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
-}
-
-export function projectEnergy(
-	storedEnergy: number,
-	capacity: number,
-	recharge: number,
-	drainPerSec: number,
-	elapsed_s: number,
-): number {
-	return Math.max(
-		0,
-		Math.min(capacity, Math.round(storedEnergy + (recharge - drainPerSec) * elapsed_s)),
-	);
 }
 
 export function formatTimeUTC(d: Date): string {

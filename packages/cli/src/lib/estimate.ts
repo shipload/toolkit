@@ -1,33 +1,12 @@
-/**
- * Action estimators — preview (duration_s, energy_cost, cargo_delta) without submitting.
- *
- * Source of truth: @shipload/sdk helpers mirror the contract formulas and are
- * maintained in lockstep by the SDK package. We call them directly rather than
- * re-mirroring.
- *
- * Contract sources for the underlying formulas (for reference):
- *   - Travel duration : contracts/src/server/src/capabilities/movement.cpp:191 (calc_flighttime)
- *   - Travel energy  : contracts/src/server/src/capabilities/energy.cpp    (calc_entity_energyusage)
- *   - Gather duration: contracts/src/server/src/capabilities/gathering.cpp:7  (calc_gather_duration)
- *   - Gather energy  : contracts/src/server/src/capabilities/gathering.cpp:23 (calc_gather_energy)
- *   - Craft duration : contracts/src/server/src/capabilities/crafting.cpp:6   (calc_craft_duration)
- *   - Craft energy   : contracts/src/server/src/capabilities/crafting.cpp:13  (calc_craft_energy)
- *
- * No readonly endpoint currently exposes an estimate for an arbitrary (x,y) /
- * stratum / recipe without an existing schedule, so we compute locally from the
- * current entity snapshot.
- */
-
 import {
 	buildGatherPlan,
-	calc_acceleration,
 	calc_craft_duration,
 	calc_craft_energy,
 	calc_energyusage,
-	calc_ship_flighttime,
-	calc_travel_flighttime,
+	calc_group_flighttime,
+	calc_rechargetime,
 	calc_ship_mass,
-	calc_ship_rechargetime,
+	calc_travel_flighttime,
 	calcCounterpartDelivery,
 	cargoInputKey,
 	cargoReadyAt,
@@ -38,6 +17,7 @@ import {
 	HoldKind,
 	ServerTypes,
 	laneKeyForModule,
+	workerLaneKey,
 	projectedCargoAvailableAt,
 	schedule,
 	splitCost,
@@ -46,7 +26,7 @@ import {
 	type GatherPlanEntity,
 	type IncomingSource,
 } from "@shipload/sdk";
-import { Int64, UInt16, UInt32, UInt64 } from "@wharfkit/antelope";
+import { Int64, UInt16, UInt32 } from "@wharfkit/antelope";
 import { projectCargoFromSnapshot } from "./cargo-projection";
 import { type ResolvedCargoInput, resolveCargoInputs } from "./cargo-resolve";
 import { getGameSeed, server } from "./client";
@@ -63,7 +43,13 @@ import {
 	type FeasibilityIssue,
 } from "./feasibility";
 import { formatItem } from "./format";
-import { projectedCargoMass, projectedCoords, projectRemainingSnapshotAt } from "./projection";
+import {
+	projectedCargoMass,
+	projectedCoords,
+	projectRemainingSnapshotAt,
+	travelCargoMass,
+	travelDepartureAt,
+} from "./projection";
 import { type EntitySnapshot, getEntitySnapshot } from "./snapshot";
 
 export interface TravelSummary {
@@ -195,6 +181,7 @@ function toShipLike(snap: EntitySnapshot): {
 	engines?: ServerTypes.movement_stats;
 	generator?: ServerTypes.energy_stats;
 	loader_lanes: ServerTypes.loader_lane[];
+	holds: ServerTypes.hold[];
 } {
 	const coordinates = ServerTypes.coordinates.from({
 		x: coerceInt64(snap.coordinates.x),
@@ -217,7 +204,7 @@ function toShipLike(snap: EntitySnapshot): {
 	const hullmass = raw.hullmass !== undefined ? coerceUInt32(raw.hullmass) : undefined;
 	const energy = raw.energy !== undefined ? coerceUInt32(raw.energy) : undefined;
 
-	return { coordinates, hullmass, energy, engines, generator, loader_lanes: snap.loader_lanes ?? [] };
+	return { coordinates, hullmass, energy, engines, generator, loader_lanes: snap.loader_lanes ?? [], holds: snap.holds ?? [] };
 }
 
 export function populateTravelFeasibility(params: {
@@ -290,15 +277,20 @@ export function populateCraftFeasibility(params: {
 	);
 }
 
-function snapshotCargoMassInfo(snap: EntitySnapshot): ServerTypes.cargo_item[] {
-	return snap.cargo.map((c) =>
-		ServerTypes.cargo_item.from({
-			item_id: Number(c.item_id.toString()),
-			quantity: Number(c.quantity.toString()),
-			stats: 0,
-			modules: [],
-		}),
+function rechargeSecondsAfterQueue(snap: EntitySnapshot, now: Date, energyOverride?: number): number {
+	if (!snap.generator) return 0;
+	const energy = energyOverride ?? Number(projectRemainingSnapshotAt(snap, now).energy.toString());
+	return Number(
+		calc_rechargetime(
+			UInt32.from(Number(snap.generator.capacity)),
+			UInt32.from(energy),
+			UInt32.from(Number(snap.generator.recharge)),
+		),
 	);
+}
+
+function travelMass(snap: EntitySnapshot, ship: ReturnType<typeof toShipLike>, departsAt: Date): number {
+	return Number(calc_ship_mass(ship, [])) + travelCargoMass(snap, departsAt);
 }
 
 export async function estimateDeploy(params: {
@@ -340,7 +332,7 @@ export async function estimateRecharge(params: {
 		};
 	}
 
-	const duration = Number(calc_ship_rechargetime(ship));
+	const duration = rechargeSecondsAfterQueue(snap, new Date());
 	return {
 		duration_s: duration,
 		energy_cost: 0,
@@ -371,7 +363,8 @@ export async function estimateTravel(params: {
 		};
 	}
 
-	const projection = projectRemainingSnapshotAt(snap, new Date());
+	const now = new Date();
+	const projection = projectRemainingSnapshotAt(snap, now);
 	const currentX = Number(snap.coordinates.x.toString());
 	const currentY = Number(snap.coordinates.y.toString());
 	const originX = Number(projection.location.x.toString());
@@ -382,18 +375,19 @@ export async function estimateTravel(params: {
 
 	const distance = distanceBetweenPoints(originX, originY, targetX, targetY);
 
-	const mass = calc_ship_mass(ship, snapshotCargoMassInfo(snap));
-	const flightSeconds = Number(calc_ship_flighttime(ship, mass, UInt64.from(distance)));
+	const mass = travelMass(snap, ship, travelDepartureAt(snap, now, recharge));
+	const flightSeconds = Number(
+		calc_group_flighttime(Number(ship.engines.thrust), 0, 0, 0, mass, distance),
+	);
 	const energyUsage = Number(calc_energyusage(distance, ship.engines.drain));
 
-	let rechargeSeconds = 0;
-	if (recharge) {
-		rechargeSeconds = Number(calc_ship_rechargetime(ship));
-	}
+	const projectedAfterPending = Number(projection.energy.toString());
+	const rechargeSeconds = recharge
+		? rechargeSecondsAfterQueue(snap, now, projectedAfterPending)
+		: 0;
 
 	const generatorCapacity = Number(ship.generator.capacity);
 	const snapshotEnergy = Number(ship.energy ?? 0);
-	const projectedAfterPending = Number(projection.energy.toString());
 	const startEnergy = recharge ? generatorCapacity : projectedAfterPending;
 	const startEnergyIsProjected = projectedAfterPending !== snapshotEnergy;
 	const endEnergy = Math.max(0, startEnergy - energyUsage);
@@ -597,87 +591,109 @@ export function estimateGatherFromStratum(params: {
 	};
 }
 
-/**
- * Group travel estimate — combined-thrust / combined-mass, matching the
- * contract grouptravel formula (movement.cpp:~190). Per-entity energy cost
- * is the max across participants (contract validates each entity against its
- * own drain). Returned energy_cost is the worst participant's usage.
- */
 export async function estimateGroupTravel(params: {
 	entities: { entityId: bigint | number }[];
 	target: { x: number | bigint; y: number | bigint };
 	recharge?: boolean;
+	snapshots?: EntitySnapshot[];
+	hasSystemAtDestination?: boolean;
+	now?: Date;
 }): Promise<EstimateResult> {
 	const recharge = params.recharge ?? false;
-	if (params.entities.length === 0) {
-		return {
-			duration_s: 0,
-			energy_cost: 0,
-			cargo_delta: {},
-			feasibility: { ok: true, issues: [] },
-			with_recharge: false,
-		};
-	}
+	const empty: EstimateResult = {
+		duration_s: 0,
+		energy_cost: 0,
+		cargo_delta: {},
+		feasibility: { ok: true, issues: [] },
+		with_recharge: false,
+	};
+	if (params.entities.length === 0) return empty;
 
-	const snapshots = await Promise.all(
-		params.entities.map((e) => getEntitySnapshot(e.entityId)),
-	);
+	const snapshots =
+		params.snapshots ??
+		(await Promise.all(params.entities.map((e) => getEntitySnapshot(e.entityId))));
 
-	const now = new Date();
+	const now = params.now ?? new Date();
 	const groupOrigin = projectedCoords(snapshots[0], now);
 	const originX = Number(groupOrigin.x);
 	const originY = Number(groupOrigin.y);
 	const targetX = typeof params.target.x === "bigint" ? Number(params.target.x) : params.target.x;
 	const targetY = typeof params.target.y === "bigint" ? Number(params.target.y) : params.target.y;
 
-	if (originX === targetX && originY === targetY) {
-		return {
-			duration_s: 0,
-			energy_cost: 0,
-			cargo_delta: {},
-			feasibility: { ok: true, issues: [] },
-			with_recharge: false,
-		};
-	}
+	if (originX === targetX && originY === targetY) return empty;
 
 	const distance = distanceBetweenPoints(originX, originY, targetX, targetY);
 
 	let totalThrust = 0;
-	let totalMass = 0;
+	let haulCount = 0;
+	let pooledHaulCap = 0;
+	let weightedHaulEffNum = 0;
 	let maxEnergyCost = 0;
 	let maxRechargeSeconds = 0;
+	let departure = now;
+	const energyChecks: { snap: EntitySnapshot; energy: number; cost: number }[] = [];
 
 	for (const snap of snapshots) {
 		const ship = toShipLike(snap);
-		const entityMass = Number(calc_ship_mass(ship, snapshotCargoMassInfo(snap)));
-		totalMass += entityMass;
-		if (ship.engines) {
+		const hasMovement = ship.engines !== undefined && ship.generator !== undefined;
+		const energy = hasMovement
+			? Number(projectRemainingSnapshotAt(snap, now).energy.toString())
+			: 0;
+		if (hasMovement && ship.engines) {
 			totalThrust += Number(ship.engines.thrust);
-			const energy = Number(calc_energyusage(distance, ship.engines.drain));
-			if (energy > maxEnergyCost) maxEnergyCost = energy;
+			const cost = Number(calc_energyusage(distance, ship.engines.drain));
+			if (cost > maxEnergyCost) maxEnergyCost = cost;
+			energyChecks.push({ snap, energy, cost });
+		} else {
+			haulCount += 1;
 		}
-		if (recharge && ship.generator) {
-			const rt = Number(calc_ship_rechargetime(ship));
+		if (snap.hauler) {
+			const capacity = Number(snap.hauler.capacity);
+			pooledHaulCap += capacity;
+			weightedHaulEffNum += Number(snap.hauler.efficiency) * capacity;
+		}
+		if (recharge && snap.generator) {
+			const rt = rechargeSecondsAfterQueue(snap, now, energy);
 			if (rt > maxRechargeSeconds) maxRechargeSeconds = rt;
 		}
+		const departsAt = travelDepartureAt(snap, now, recharge);
+		if (departsAt.getTime() > departure.getTime()) departure = departsAt;
 	}
 
-	if (totalThrust === 0 || totalMass === 0) {
-		return {
-			duration_s: 0,
-			energy_cost: 0,
-			cargo_delta: {},
-			feasibility: { ok: true, issues: [] },
-			with_recharge: false,
-		};
-	}
+	if (totalThrust === 0) return empty;
 
-	const acceleration = calc_acceleration(totalThrust, totalMass);
-	const flightSeconds = computeFlightDurationSeconds(Number(distance), acceleration);
+	const departsAt = new Date(departure.getTime() + (recharge ? maxRechargeSeconds * 1000 : 0));
+	const totalMass = snapshots.reduce(
+		(sum, snap) => sum + travelMass(snap, toShipLike(snap), departsAt),
+		0,
+	);
+	if (totalMass === 0) return empty;
 
-	const gameSeed = await getGameSeed();
+	const flightSeconds = Number(
+		calc_group_flighttime(
+			totalThrust,
+			haulCount,
+			pooledHaulCap,
+			weightedHaulEffNum,
+			totalMass,
+			distance,
+		),
+	);
+
+	const hasSystemAtDestination =
+		params.hasSystemAtDestination ??
+		hasSystem(await getGameSeed(), { x: targetX, y: targetY });
 	const issues = collectIssues(
-		checkDestinationIsSystem(hasSystem(gameSeed, { x: targetX, y: targetY }), targetX, targetY),
+		checkDestinationIsSystem(hasSystemAtDestination, targetX, targetY),
+		checkTravelDuration(flightSeconds),
+		...energyChecks.flatMap(({ snap, energy, cost }) => {
+			const capacity = Number(snap.generator?.capacity ?? 0);
+			const entity = { entityType: snap.type, entityId: snap.id };
+			return [
+				checkEnergyCapacity(capacity, cost, "travel"),
+				checkEnergyAvailable(recharge ? capacity : energy, cost, "travel", entity),
+			];
+		}),
 	);
 
 	return {
@@ -738,6 +754,17 @@ export async function buildIncomingSources(
 	return sources;
 }
 
+function pickCrafterLane(snap: EntitySnapshot): ServerTypes.crafter_lane | undefined {
+	const lanes = snap.crafter_lanes ?? [];
+	if (lanes.length <= 1 || !snap.modules?.length) return lanes[0];
+	try {
+		const key = workerLaneKey(snap.modules, "crafter", snap.lanes ?? []);
+		return lanes.find((l) => laneKeyForModule(Number(l.slot_index)) === key) ?? lanes[0];
+	} catch {
+		return lanes[0];
+	}
+}
+
 export async function estimateCraft(params: {
 	entityId: bigint | number;
 	recipeId: number;
@@ -751,8 +778,7 @@ export async function estimateCraft(params: {
 	const { entityId, recipeId, quantity, inputs } = params;
 	const snap = params.snapshot ?? (await getEntitySnapshot(entityId));
 
-	// craft is single-lane
-	const crafter = (snap.crafter_lanes ?? [])[0];
+	const crafter = pickCrafterLane(snap);
 	if (!crafter) {
 		return {
 			duration_s: 0,
@@ -794,19 +820,12 @@ export async function estimateCraft(params: {
 	const energy = calc_craft_energy(drain, totalInputMass).toNumber();
 
 	const recharge = params.recharge ?? false;
-	let rechargeSeconds = 0;
-	if (recharge) {
-		const ship = toShipLike(snap);
-		if (ship.generator) {
-			rechargeSeconds = Number(calc_ship_rechargetime(ship));
-		}
-	}
+	const rechargeSeconds = recharge ? rechargeSecondsAfterQueue(snap, new Date()) : 0;
 
 	// biome-ignore lint/suspicious/noExplicitAny: raw server readonly output has loose typing
 	const rawCraftSnap = snap as any;
 	const craftCapacity = rawCraftSnap.capacity ?? 0;
 	const craftGen = rawCraftSnap.generator;
-	const craftEnergy = rawCraftSnap.energy;
 
 	let outputItemMass = 0;
 	if (outputItemId > 0) {
@@ -817,7 +836,7 @@ export async function estimateCraft(params: {
 
 	const craftIssues = populateCraftFeasibility({
 		generatorCapacity: craftGen ? Number(String(craftGen.capacity ?? "0")) : 0,
-		currentEnergy: Number(String(craftEnergy ?? "0")),
+		currentEnergy: Number(projectRemainingSnapshotAt(snap, now).energy.toString()),
 		energyCost: energy,
 		availableCargo: Number(String(craftCapacity)) - Number(projectedCargoMass(snap, now)),
 		cargoDelta,

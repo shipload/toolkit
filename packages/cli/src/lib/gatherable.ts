@@ -1,23 +1,12 @@
-/**
- * Per-stratum gather metrics for the `gatherable` view.
- *
- * Time and energy mirror the contract via SDK helpers (calc_gather_duration /
- * calc_gather_energy). Max quantity is solved analytically against the linear
- * gather duration formula, then verified by re-feeding the candidate q through
- * the SDK helpers — guarantees we never display a max the contract would reject.
- */
-
 import {
+	allocateProportional,
 	calc_gather_duration,
-	calc_gather_energy,
-	GATHER_MASS_DIVISOR,
+	type GatherLane,
 	getItem,
 	type LocationStratum,
-	type GathererStats,
-	MASS_STAT_SCALE,
-	PRECISION,
+	maxQtyForCharge,
+	splitCost,
 } from "@shipload/sdk";
-import { UInt16, UInt32 } from "@wharfkit/antelope";
 
 export interface GathererCaps {
 	yield: number;
@@ -41,122 +30,78 @@ export interface StratumGatherMetrics {
 	gatherable: boolean;
 }
 
-function gathererStats(caps: GathererCaps): GathererStats {
-	return {
-		yield: UInt16.from(caps.yield),
-		drain: UInt32.from(caps.drain),
-		depth: UInt16.from(caps.depth),
-	};
+function reachingLanes(lanes: GatherLane[], stratum: number): GatherLane[] {
+	return lanes.filter((l) => l.depth.toNumber() >= stratum);
 }
 
-function durationAndEnergy(
-	caps: GathererCaps,
+function splitDuration(
+	reaching: GatherLane[],
 	itemMass: number,
 	stratum: number,
 	richness: number,
 	quantity: number,
-): { duration: number; energy: number } {
-	if (quantity <= 0) return { duration: 0, energy: 0 };
-	const stats = gathererStats(caps);
-	const duration = Number(calc_gather_duration(stats, itemMass, quantity, stratum, richness));
-	const energy = Number(calc_gather_energy(stats, duration));
-	return { duration, energy };
+): number {
+	if (quantity <= 0) return 0;
+	const weights = reaching.map((l) => ({ slot: l.slot_index.toNumber(), weight: l.yield.toNumber() }));
+	let longest = 0;
+	for (const entry of allocateProportional(weights, quantity)) {
+		if (entry.quantity <= 0) continue;
+		const lane = reaching.find((l) => l.slot_index.toNumber() === entry.slot);
+		if (!lane) continue;
+		const dur = Number(
+			calc_gather_duration(
+				lane as unknown as Parameters<typeof calc_gather_duration>[0],
+				itemMass,
+				entry.quantity,
+				stratum,
+				richness,
+			),
+		);
+		if (dur > longest) longest = dur;
+	}
+	return longest;
 }
 
-/**
- * Solve max gatherable quantity for a single gather call, bounded by reserve,
- * cargo space, and current energy. Returns the bound that was binding so
- * agents/users can see why the limit is what it is.
- */
 export function solveMaxGatherQuantity(args: {
-	caps: GathererCaps;
+	lanes: GatherLane[];
 	budget: GatherBudget;
 	itemMass: number;
 	stratum: number;
 	richness: number;
 	reserve: number;
 }): { maxQuantity: number; bound: MaxQuantityBound } {
-	const { caps, budget, itemMass, stratum, richness, reserve } = args;
+	const { budget, itemMass, stratum, richness, reserve } = args;
+	const reaching = reachingLanes(args.lanes, stratum);
+	const totalYield = reaching.reduce((sum, l) => sum + l.yield.toNumber(), 0);
 
-	if (
-		caps.yield === 0 ||
-		richness === 0 ||
-		reserve === 0
-	) {
+	if (totalYield === 0 || richness === 0 || reserve === 0) {
 		return { maxQuantity: 0, bound: reserve === 0 ? "reserve" : null };
 	}
 
-	const reserveCap = reserve;
 	const cargoCap =
 		itemMass > 0 ? Math.floor(budget.cargoFree / itemMass) : Number.POSITIVE_INFINITY;
+	const ceiling = Math.min(reserve, cargoCap);
+	const maxQuantity = maxQtyForCharge(reaching, ceiling, budget.energy, stratum, itemMass, richness);
 
-	let energyCap = Number.POSITIVE_INFINITY;
-	if (caps.drain > 0) {
-		const A = (((itemMass * MASS_STAT_SCALE) / GATHER_MASS_DIVISOR) * 100 * (1 + stratum / 5000)) / (caps.yield * (richness / 1000));
-		if (A > 0) {
-			const candidate = Math.floor((budget.energy * PRECISION / caps.drain) / A);
-			energyCap = Number.isFinite(candidate) ? Math.max(0, candidate) : 0;
-		}
-	}
-
-	let q = Math.min(reserveCap, cargoCap, energyCap);
-	if (!Number.isFinite(q) || q < 0) q = 0;
-	q = Math.floor(q);
-
-	while (q > 0) {
-		const { energy, duration } = durationAndEnergy(caps, itemMass, stratum, richness, q);
-		if (duration === 0) {
-			q = 0;
-			break;
-		}
-		const massNeeded = itemMass * q;
-		if (energy <= budget.energy && massNeeded <= budget.cargoFree && q <= reserveCap) break;
-		q -= 1;
-	}
-
-	const bound = whichBound(q, reserveCap, cargoCap, energyCap);
-	return { maxQuantity: q, bound };
-}
-
-function whichBound(
-	q: number,
-	reserveCap: number,
-	cargoCap: number,
-	energyCap: number,
-): MaxQuantityBound {
-	if (q <= 0) {
-		const candidates: [number, MaxQuantityBound][] = [
-			[reserveCap, "reserve"],
-			[cargoCap, "cargo"],
-			[energyCap, "energy"],
-		];
-		const finite = candidates.filter(([v]) => Number.isFinite(v));
-		if (finite.length === 0) return null;
-		finite.sort((a, b) => (a[0] as number) - (b[0] as number));
-		return finite[0][1];
-	}
-	const tightest = Math.min(reserveCap, cargoCap, energyCap);
-	if (q !== tightest) return null;
-	if (tightest === reserveCap) return "reserve";
-	if (tightest === cargoCap) return "cargo";
-	if (tightest === energyCap) return "energy";
-	return null;
+	if (maxQuantity < ceiling) return { maxQuantity, bound: "energy" };
+	return { maxQuantity, bound: reserve <= cargoCap ? "reserve" : "cargo" };
 }
 
 export function computeStratumGatherMetrics(args: {
-	caps: GathererCaps;
+	lanes: GatherLane[];
 	budget: GatherBudget;
 	stratum: LocationStratum;
 	quantity: number;
 }): StratumGatherMetrics {
-	const { caps, budget, stratum, quantity } = args;
+	const { lanes, budget, stratum, quantity } = args;
 	const itemMass = getItem(stratum.itemId).mass;
 	const richness = stratum.richness;
 	const stratumIdx = stratum.index;
 	const reserve = stratum.reserve;
+	const reaching = reachingLanes(lanes, stratumIdx);
+	const totalYield = reaching.reduce((sum, l) => sum + l.yield.toNumber(), 0);
 
-	const gatherable =
-		caps.yield > 0 && richness > 0 && reserve > 0 && quantity > 0;
+	const gatherable = totalYield > 0 && richness > 0 && reserve > 0 && quantity > 0;
 
 	if (!gatherable) {
 		return {
@@ -169,19 +114,11 @@ export function computeStratumGatherMetrics(args: {
 		};
 	}
 
-	const { duration, energy } = durationAndEnergy(caps, itemMass, stratumIdx, richness, quantity);
-	const max = solveMaxGatherQuantity({
-		caps,
-		budget,
-		itemMass,
-		stratum: stratumIdx,
-		richness,
-		reserve,
-	});
+	const max = solveMaxGatherQuantity({ lanes, budget, itemMass, stratum: stratumIdx, richness, reserve });
 
 	return {
-		timeS: duration,
-		energyCost: energy,
+		timeS: splitDuration(reaching, itemMass, stratumIdx, richness, quantity),
+		energyCost: splitCost(reaching, quantity, stratumIdx, itemMass, richness),
 		maxQuantity: max.maxQuantity,
 		maxQuantityBound: max.bound,
 		itemMass,
