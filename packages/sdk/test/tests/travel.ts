@@ -14,7 +14,6 @@ import {
     calc_travel_flighttime,
     calc_loader_acceleration,
     calc_loader_flighttime,
-    calc_orbital_altitude,
     calc_onesided_duration,
     calc_rechargetime,
     calc_ship_acceleration,
@@ -34,12 +33,15 @@ import {
     lerp,
     rotation,
 } from 'src/travel'
+import {MASS_STAT_SCALE, MIN_ORBITAL_ALTITUDE} from 'src/types'
+import {vessel_altitude, vessel_altitude_at_tier} from 'src/travel/travel'
 import {
-    BASE_ORBITAL_MASS,
-    MASS_STAT_SCALE,
-    MAX_ORBITAL_ALTITUDE,
-    MIN_ORBITAL_ALTITUDE,
-} from 'src/types'
+    ITEM_CONTAINER_T1_PACKED,
+    ITEM_CONTAINER_T2_PACKED,
+    ITEM_SHIP_T1_PACKED,
+    ITEM_TUG_T2A_PACKED,
+    ITEM_WAREHOUSE_T2_PACKED,
+} from 'src/data/item-ids'
 import {assert} from 'chai'
 import {Chains} from '@wharfkit/common'
 import {UInt64} from '@wharfkit/antelope'
@@ -498,29 +500,24 @@ describe('travel', () => {
         })
     })
 
-    describe('calc_orbital_altitude', () => {
-        test('returns MIN_ORBITAL_ALTITUDE for initial ship mass', () => {
-            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS)
-            assert.equal(altitude, MIN_ORBITAL_ALTITUDE)
+    describe('vessel_altitude', () => {
+        test('scales the ship base of 800 by the hull tier', () => {
+            assert.equal(vessel_altitude(ITEM_SHIP_T1_PACKED), 800)
+            assert.equal(vessel_altitude(ITEM_TUG_T2A_PACKED), 1120)
         })
 
-        test('returns MIN_ORBITAL_ALTITUDE for mass below initial', () => {
-            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS / 2)
-            assert.equal(altitude, MIN_ORBITAL_ALTITUDE)
+        test('scales the container base of 300 by the hull tier', () => {
+            assert.equal(vessel_altitude(ITEM_CONTAINER_T1_PACKED), 300)
+            assert.equal(vessel_altitude(ITEM_CONTAINER_T2_PACKED), 420)
         })
 
-        test('increases with heavier mass', () => {
-            const alt1 = calc_orbital_altitude(BASE_ORBITAL_MASS)
-            const alt2 = calc_orbital_altitude(BASE_ORBITAL_MASS * 2)
-            const alt3 = calc_orbital_altitude(BASE_ORBITAL_MASS * 5)
-
-            assert.isAtLeast(alt2, alt1)
-            assert.isAtLeast(alt3, alt2)
+        test('is undefined for a structure hull', () => {
+            assert.isUndefined(vessel_altitude(ITEM_WAREHOUSE_T2_PACKED))
         })
 
-        test('caps at MAX_ORBITAL_ALTITUDE for very heavy mass', () => {
-            const altitude = calc_orbital_altitude(BASE_ORBITAL_MASS * 100)
-            assert.isAtMost(altitude, MAX_ORBITAL_ALTITUDE)
+        test('reaches 3680 for a T10 ship and 1380 for a T10 container', () => {
+            assert.equal(vessel_altitude_at_tier('ship', 10), 3680)
+            assert.equal(vessel_altitude_at_tier('container', 10), 1380)
         })
     })
 

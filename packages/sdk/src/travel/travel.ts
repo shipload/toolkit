@@ -14,6 +14,8 @@ import {
     type Checksum256,
     Int64,
     type Int64Type,
+    type NameType,
+    UInt16,
     UInt32,
     type UInt32Type,
     UInt64,
@@ -23,12 +25,10 @@ import {
 import type {ServerContract} from '../contracts'
 import {
     BASE_HAUL_PENALTY_MILLI,
-    BASE_ORBITAL_MASS,
     type CargoMassInfo,
     type Distance,
     HAULER_EFFICIENCY_DENOM,
     MASS_STAT_SCALE,
-    MAX_ORBITAL_ALTITUDE,
     MIN_ORBITAL_ALTITUDE,
     MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL,
     MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE,
@@ -36,7 +36,7 @@ import {
     type ShipLike,
     TaskType,
 } from '../types'
-import {EntityClass} from '../data/kind-registry'
+import {EntityClass, getKindMeta, getTemplateMeta} from '../data/kind-registry'
 import {getItem} from '../data/catalog'
 import {hasSystem} from '../utils/system'
 import {WH} from '../derivation/wormhole'
@@ -45,7 +45,7 @@ import type {ScheduleData} from '../scheduling/schedule'
 import {incomingHoldMass} from '../scheduling/unwrap'
 import {taskCargoEffect} from '../scheduling/availability'
 import {calcCargoItemMass} from '../capabilities/storage'
-import {computeLoaderWorkerMass} from '../derivation/capabilities'
+import {capacityTierMultiplier, computeLoaderWorkerMass} from '../derivation/capabilities'
 
 function cargoListMass(items: readonly ServerContract.Types.cargo_item[]): number {
     let total = 0
@@ -57,17 +57,17 @@ function isPositionalTask(task: ServerContract.Types.task): boolean {
     return task.type.equals(TaskType.TRAVEL) || task.type.equals(TaskType.TRANSIT)
 }
 
-export function calc_orbital_altitude(mass: number): number {
-    if (mass <= BASE_ORBITAL_MASS) {
-        return MIN_ORBITAL_ALTITUDE
-    }
+// Mirrors kind_registry.hpp vessel_altitude: kind base z scaled by the hull tier; undefined for non-vessels.
+export function vessel_altitude_at_tier(kind: NameType, hullTier: number): number | undefined {
+    const meta = getKindMeta(kind)
+    if (!meta || meta.classification !== EntityClass.OrbitalVessel) return undefined
+    return Math.floor(meta.zCoord * capacityTierMultiplier(hullTier) + 0.5)
+}
 
-    const ratio = mass / BASE_ORBITAL_MASS
-    const capRatio = 10.0
-    let scale = Math.log(ratio) / Math.log(capRatio)
-    scale = Math.min(scale, 1.0)
-
-    return MIN_ORBITAL_ALTITUDE + Math.floor((MAX_ORBITAL_ALTITUDE - MIN_ORBITAL_ALTITUDE) * scale)
+export function vessel_altitude(itemId: number): number | undefined {
+    const template = getTemplateMeta(itemId)
+    if (!template) return undefined
+    return vessel_altitude_at_tier(template.kind, getItem(itemId).tier)
 }
 
 export function distanceBetweenCoordinates(
@@ -249,7 +249,13 @@ export function shipLoaderLane(ship: ShipLike): {thrust: number; mass: number} |
 
 // Mirrors cargo.cpp calc_load_duration's orbital floor and non-zero floor; count stays parallelism only (ADR 0029).
 export function calc_loader_flighttime(ship: ShipLike, mass: UInt64, altitude?: number): UInt32 {
-    const z = altitude ?? ship.coordinates.z?.toNumber() ?? calc_orbital_altitude(Number(mass))
+    const z =
+        altitude ??
+        (ship.item_id === undefined
+            ? undefined
+            : vessel_altitude(UInt16.from(ship.item_id).toNumber())) ??
+        ship.coordinates.z?.toNumber() ??
+        MIN_ORBITAL_ALTITUDE
     const loadZ = Math.max(z, MIN_ORBITAL_ALTITUDE)
     const flightTime = Number(calc_flighttime(loadZ, calc_loader_acceleration(ship, mass)))
     return UInt32.from(flightTime === 0 ? 1 : flightTime)

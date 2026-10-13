@@ -261,7 +261,6 @@ export {
     calc_loader_acceleration,
     calc_loader_flighttime,
     calc_onesided_duration,
-    calc_orbital_altitude,
     calc_rechargetime,
     calc_ship_acceleration,
     calc_ship_flighttime,
@@ -287,6 +286,8 @@ export {
     interpolateFlightPosition,
     lerp,
     rotation,
+    vessel_altitude,
+    vessel_altitude_at_tier,
 } from './travel/travel'
 export type {
     LoadTimeBreakdown,

@@ -5,7 +5,9 @@ import {TaskType} from '../src/types'
 import {LANE_MOBILITY} from '../src/scheduling/schedule'
 import {projectEntityAt, projectRemainingAt} from '../src/scheduling/projection'
 import {makeTask} from './helpers'
-import {calc_orbital_altitude} from '../src/travel/travel'
+import {vessel_altitude} from '../src/travel/travel'
+
+const ITEM_CONTAINER_T2_PACKED = 11200
 
 const STARTED = '2024-06-04T00:00:00.000'
 const NOW = new Date('2024-06-04T00:00:00.000Z')
@@ -84,16 +86,19 @@ describe('projectRemainingAt mirrors calc_task_effect cargo deltas', () => {
         expect(projected.cargo.length).toBe(1)
     })
 
-    test('a completed move re-seats z from total mass, not the task coordinates', () => {
+    test('a completed move keeps the hull altitude, not the stored z or the task coordinates', () => {
         const task = makeTask(TaskType.TRAVEL, {duration: 60, coordinates: {x: 5, y: 7, z: 0}})
         const after = new Date(NOW.getTime() + 120_000)
-        const projected = projectEntityAt(shipWith(task, 0) as never, after)
+        const entity = {
+            ...shipWith(task, 100),
+            item_id: UInt16.from(ITEM_CONTAINER_T2_PACKED),
+            coordinates: {x: 0, y: 0, z: 3000},
+        }
+        const projected = projectEntityAt(entity as never, after)
         expect(projected.location.x.toNumber()).toBe(5)
         expect(projected.location.y.toNumber()).toBe(7)
-        expect(projected.location.z.toNumber()).toBe(
-            calc_orbital_altitude(projected.totalMass.toNumber())
-        )
-        expect(projected.location.z.toNumber()).toBeGreaterThan(0)
+        expect(projected.location.z?.toNumber()).toBe(vessel_altitude(ITEM_CONTAINER_T2_PACKED))
+        expect(projected.location.z?.toNumber()).toBe(420)
     })
 
     test('a hosted civic deposit moves no cargo on its host', () => {

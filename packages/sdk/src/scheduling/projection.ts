@@ -1,4 +1,4 @@
-import {Name, type TimePoint, type UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {Name, type TimePoint, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Coordinates, TaskType} from '../types'
 import {
@@ -21,7 +21,7 @@ import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEntityCapabilities, computeLoaderWorkerMass} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
-import {calc_orbital_altitude, lerp} from '../travel/travel'
+import {lerp, vessel_altitude} from '../travel/travel'
 import {
     calcStacksMass,
     cargoItemToStack,
@@ -235,8 +235,17 @@ export function createProjectedEntity(entity: Projectable): ProjectedEntity {
 
     const cargo: CargoStack[] = entity.cargo.map(cargoItemToStack)
 
+    const location = Coordinates.from(entity.coordinates)
+    const hullZ =
+        entity.item_id === undefined
+            ? undefined
+            : vessel_altitude(
+                  Number(typeof entity.item_id === 'number' ? entity.item_id : entity.item_id.value)
+              )
+    if (hullZ !== undefined) location.z = UInt16.from(hullZ)
+
     const projected: ProjectedEntity = {
-        location: Coordinates.from(entity.coordinates),
+        location,
         energy: UInt32.from(entity.energy ?? 0),
         cargo,
         shipMass,
@@ -328,11 +337,11 @@ function applyFlightTask(
 
     if (options.complete) {
         applyEnergyCost(projected, task)
-        // Mirrors projection.cpp calc_task_effect: a completed move re-seats z from total mass.
+        // Mirrors projection.cpp calc_task_effect: a completed move keeps the hull altitude.
         projected.location = Coordinates.from({
             x: destination.x.toNumber(),
             y: destination.y.toNumber(),
-            z: calc_orbital_altitude(Number(projected.totalMass)),
+            z: projected.location.z,
         })
     } else if (options.progress !== undefined) {
         const interpolated = lerp(projected.location, destination, options.progress)

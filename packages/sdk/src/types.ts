@@ -27,8 +27,6 @@ export const HAULER_EFFICIENCY_DENOM = 10000
 export const MIN_ORBITAL_ALTITUDE = 800
 export const MAX_ORBITAL_ALTITUDE = 3000
 
-export const BASE_ORBITAL_MASS = 1000
-
 export const MIN_TRANSFER_DISTANCE_PLANETARY_STRUCTURE = 100
 export const MIN_TRANSFER_DISTANCE_ORBITAL_VESSEL = 200
 
@@ -40,6 +38,7 @@ export interface ClusterSlotType {
 
 export interface ShipLike {
     coordinates: ServerContract.Types.coordinates
+    item_id?: UInt16Type
     hullmass?: UInt32
     energy?: UInt32
     engines?: ServerContract.Types.movement_stats
