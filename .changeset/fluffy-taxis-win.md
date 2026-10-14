@@ -1,0 +1,73 @@
+---
+"@shipload/cli": patch
+"@shipload/image-renderer": patch
+"@shipload/item-renderer": patch
+"@shipload/oracle": patch
+"@shipload/sdk": patch
+---
+
+- Tag legacy oracle secrets with the running chain
+- Key the oracle secret store to the chain
+- Move to Wharf 4.0.2
+- Close an overdue epoch as the oracle with fresh entropy
+- Move the toolkit to Wharf 4.0.1
+- Preflight platform fund collection in oracle maintenance
+- Format the oracle race classifier test
+- Treat a lost reveal race as a normal beacon outcome
+- Close an overdue epoch from the oracle beacon tick
+- Mirror the ranked ballot in the SDK and page the oracle settlement
+- Inline the base tsconfig into every package
+- Collect fund income and market fees on a slow interval
+- Collapse an all-idle maintenance pass into one log line
+- Log beacon ticks on change and show the next boundary
+- Gate the oracle maintenance sweeps on contract reads
+- Add the voteready ballot settlement tick
+- Add mintready, charterready and tend heartbeat ticks
+- Multi-oracle epoch system
+- Add script to preseed secret
+- Update Dockerfile
+- Migrated shipload/oracle into toolkit
+- Skip recharge for towed group members in estimateGroupTravel
+- Word the ship-capped CLI reason for any entity and fix the depot-full test
+- Remove the retired job-cap and player-cap shuttle reason codes
+- Pool only movers' tractor beams in CLI group travel
+- Price CLI estimates through the contract's schedule and travel rules
+- Realign CLI travel mirrors with the contract and snapshot the SDK export surface
+- Rename the depot allowance copy from player to account
+- Print figures in CLI entity and module views and add --raw
+- Add civic SCRAP bindings, Shares reads and Collect bundles
+- Add depotstore and depottake commands for public Depots
+- Export CargoEffect and make the barrier cargo fields optional
+- Price route previews on departure mass and match the chain's cancel authorizer
+- Include towed members in the simulateRoute departure barrier
+- Match the contract's integer reserve regen and drop dead mirrors
+- Expose the subscription socket's connection state
+- Derive vessel altitude from the hull tier
+- Export the three missing support-drain scalars
+- Floor the loader flight time at the base orbital altitude
+- Read non-ship hullmass from packed slot 1 and re-seat altitude after a move
+- Refuse a civic bay the arrival would gap and mirror the bundle entry cap
+- Add the new travel mirror exports to the SDK export snapshot
+- Mirror departure-mass pricing and the priced-flight cancel refusal
+- Mirror the NFT transit energy charge in the unwrap estimate
+- Charge the full fractional distance in hasEnergyForDistance
+- Update the SDK export snapshot for the removed per-owner cap exports
+- Mirror the civic job bump rule and the raised module cap in the SDK
+- Drop the setcivic bindings and read the civic owner from the server account
+- Take the carrier's loader in calc_transfer_duration
+- Mirror the final wrapped-asset layout and check schema field parity
+- Add SDK figure functions for module tooltips and the entity sheet
+- Mirror the loader thrust floor in the SDK
+- Mirror the sited-craft travel barrier in the SDK
+- Mirror kept-stat component valuation and the per-unit pool bar step
+- Mirror the sealed-receiver cancel refusal in the SDK
+- Parse a citizen's Share on earnings rows
+- Regenerate server bindings for the civic review ABI changes
+- Parse the emission series with its curve and live supply
+- Count craftable units from the Earliest Start
+- Place unwraps at the barrier-aware start when checking receive capacity
+- Drop the removed repair actions from the server bindings
+- Read projected capabilities from caps and generate the dbgcaps bindings
+- Generate the dbgnftcodec bindings
+- Name gatherer, crafter, and warp NFT fields as their schemas do
+- Pass only candidate fields when projecting a shuttle site
