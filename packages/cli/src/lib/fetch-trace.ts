@@ -34,20 +34,27 @@ export function formatFetchFailure(f: FetchFailure): string {
 	);
 }
 
+const READ_PATH = /^\/v1\/chain\/(get_[a-z_]+|send_read_only_transaction)$/;
+
+function isAbort(err: unknown): boolean {
+	return err instanceof Error && err.name === "AbortError";
+}
+
 export function createTracedFetch(
 	base: FetchLike,
 	log: (line: string) => void,
 	now: () => number = Date.now,
 ): FetchLike {
 	const origins = new Map<string, OriginState>();
-	return async (input, init) => {
-		const url = new URL(input instanceof Request ? input.url : String(input));
-		const method = init?.method ?? (input instanceof Request ? input.method : "GET");
-		let state = origins.get(url.origin);
-		if (!state) {
-			state = { inFlight: 0, lastSettledAt: null };
-			origins.set(url.origin, state);
-		}
+
+	const attempt = async (
+		input: string | URL | Request,
+		init: RequestInit | undefined,
+		url: URL,
+		method: string,
+		state: OriginState,
+		suffix: (err: unknown) => string,
+	): Promise<Response> => {
 		const startedAt = now();
 		const idleMs =
 			state.inFlight > 0 ? 0 : state.lastSettledAt === null ? null : startedAt - state.lastSettledAt;
@@ -60,11 +67,34 @@ export function createTracedFetch(
 			const body = await res.arrayBuffer();
 			return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
 		} catch (err) {
-			log(formatFetchFailure({ method, url, phase, elapsedMs: now() - startedAt, idleMs, concurrent, err }));
+			const failure = { method, url, phase, elapsedMs: now() - startedAt, idleMs, concurrent, err };
+			log(`${formatFetchFailure(failure)}${suffix(err)}`);
 			throw err;
 		} finally {
 			state.inFlight--;
 			state.lastSettledAt = now();
+		}
+	};
+
+	return async (input, init) => {
+		const url = new URL(input instanceof Request ? input.url : String(input));
+		const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+		let state = origins.get(url.origin);
+		if (!state) {
+			state = { inFlight: 0, lastSettledAt: null };
+			origins.set(url.origin, state);
+		}
+		const retryable =
+			!(input instanceof Request) &&
+			(init?.body === undefined || init.body === null || typeof init.body === "string") &&
+			READ_PATH.test(url.pathname);
+		try {
+			return await attempt(input, init, url, method, state, (err) =>
+				retryable && !isAbort(err) ? ", retrying" : "",
+			);
+		} catch (err) {
+			if (!retryable || isAbort(err)) throw err;
+			return attempt(input, init, url, method, state, () => ", retry failed");
 		}
 	};
 }
