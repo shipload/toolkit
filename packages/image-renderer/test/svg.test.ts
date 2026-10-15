@@ -14,12 +14,13 @@ function oreT1Payload(): string {
 }
 
 describe('GET /item/<payload>.svg', () => {
-    it('returns an SVG with immutable cache headers', async () => {
+    it('returns an SVG with a one-day cache header', async () => {
         const res = await SELF.fetch(`https://item.shiploadgame.com/item/${oreT1Payload()}.svg`)
         expect(res.status).toBe(200)
         expect(res.headers.get('content-type')).toBe('image/svg+xml')
-        expect(res.headers.get('cache-control')).toContain('immutable')
-        expect(res.headers.get('cache-control')).toContain('max-age=31536000')
+        expect(res.headers.get('cache-control')).toBe(
+            'public, max-age=86400, stale-while-revalidate=604800'
+        )
         const body = await res.text()
         expect(body).toContain('<svg')
         expect(body).toContain('Crude Ore')

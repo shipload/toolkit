@@ -5,8 +5,9 @@ stateless.
 
 ## Endpoints
 
-- `GET /item/<payload>.png` — PNG render; 1-year immutable cache.
-- `GET /item/<payload>.svg` — SVG render; 1-year immutable cache.
+- `GET /item/<payload>.png` — PNG render; one-day cache.
+- `GET /item/<payload>.svg` — SVG render; one-day cache.
+- `GET /social/<payload>.png` — 1200×630 social card; one-day cache.
 - `GET /healthz` — liveness; returns `ok`.
 - Anything else → 404.
 
@@ -76,15 +77,15 @@ Commit any resulting changes. The script is a manual helper, not a deploy hook.
 
 ## Cache behavior
 
-All item responses set:
+Item and social images set:
 
 ```
-Cache-Control: public, max-age=31536000, immutable
+Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 ```
 
-The render output is a pure function of the payload string, so edge-cache hits
-are permanently valid. To force-invalidate in an emergency, append a query
-string (e.g., `?v=2`) — Cloudflare keys cache entries by full URL.
+Viewers and marketplace proxies keep an image for a day and refresh it in the background for a week after that, so a renderer change reaches them within that window. Error responses set `max-age=300`.
+
+The worker stores each successful render in the Cloudflare Cache API, keyed by the request URL plus the worker version id from the `CF_VERSION_METADATA` binding. Each deploy starts with an empty cache, so a renderer change needs no purge; the cost is one re-render per image after each deploy.
 
 ## Known quirks
 

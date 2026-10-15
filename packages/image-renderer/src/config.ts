@@ -1,3 +1,4 @@
 export const MAX_PAYLOAD_CHARS = 512
-export const CACHE_TTL_SECONDS = 31_536_000 // 1 year
+export const CACHE_TTL_SECONDS = 86_400
+export const STALE_WHILE_REVALIDATE_SECONDS = 604_800
 export const PNG_WIDTH = 560

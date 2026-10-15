@@ -29,12 +29,13 @@ async function fetchPngDims(url: string): Promise<{width: number; height: number
 }
 
 describe('GET /item/<payload>.png', () => {
-    it('returns a PNG with immutable cache headers', async () => {
+    it('returns a PNG with a one-day cache header', async () => {
         const res = await SELF.fetch(`https://item.shiploadgame.com/item/${oreT1Payload()}.png`)
         expect(res.status).toBe(200)
         expect(res.headers.get('content-type')).toBe('image/png')
-        expect(res.headers.get('cache-control')).toContain('immutable')
-        expect(res.headers.get('cache-control')).toContain('max-age=31536000')
+        expect(res.headers.get('cache-control')).toBe(
+            'public, max-age=86400, stale-while-revalidate=604800'
+        )
 
         const bytes = new Uint8Array(await res.arrayBuffer())
         expect(bytes.length).toBeGreaterThan(500)
