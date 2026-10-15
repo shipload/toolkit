@@ -1,11 +1,10 @@
-import type {TextSpan} from '@shipload/sdk'
 import {formatLocation, formatMassScaled} from '@shipload/sdk'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
 import {entityIcon, entityIconSlugForName} from '../primitives/entity-icon.ts'
-import {moduleSlot} from '../primitives/module-slot.ts'
+import {moduleSlot, SLOT_CHARS_PER_LINE} from '../primitives/module-slot.ts'
+import {figureRowLines, type FigureRow} from '../primitives/figure-rows.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
-import {wrapText} from '../primitives/wrap.ts'
 import {tokens} from '../tokens/index.ts'
 import {
     tierBorder,
@@ -26,7 +25,7 @@ export interface ShipPanelSlot {
     name?: string
     installed: boolean
     capability?: string
-    description?: string | TextSpan[]
+    rows?: FigureRow[]
 }
 
 export interface ShipPanelProps {
@@ -44,8 +43,6 @@ function formatHullValue(label: string, value: number): string {
         : value.toLocaleString('en-US')
 }
 
-const MODULE_LABEL_PREFIX = (capability: string) => `${capability}: `
-
 function fallbackEntityCode(name: string): string {
     const words = name
         .replace(/\s+T\d+\s*$/i, '')
@@ -62,16 +59,9 @@ function fallbackEntityCode(name: string): string {
 }
 
 function lineCountFor(slot: ShipPanelSlot): number {
-    const desc = slot.description
-    const plain =
-        typeof desc === 'string'
-            ? desc
-            : Array.isArray(desc)
-              ? desc.map((s) => s.text).join('')
-              : ''
-    if (plain.length === 0) return 0
-    const combined = MODULE_LABEL_PREFIX(slot.capability ?? slot.name ?? 'Module') + plain
-    return Math.max(1, wrapText({value: combined, charsPerLine: 36}).length)
+    const rows = slot.rows ?? []
+    if (rows.length === 0) return 0
+    return 1 + rows.reduce((n, row) => n + figureRowLines(row, SLOT_CHARS_PER_LINE).length, 0)
 }
 
 function rowHeightFor(slot: ShipPanelSlot): number {
@@ -122,8 +112,8 @@ export function renderShipPanel(props: ShipPanelProps): string {
             y,
             width: innerW,
             installed: slot.installed,
-            capability: slot.capability ?? slot.name,
-            description: slot.description,
+            name: slot.name ?? slot.capability,
+            rows: slot.rows,
             accentColor,
         })
         lastContentBottom = y + contentBottomOffsetFor(slot)

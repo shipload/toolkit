@@ -1,12 +1,12 @@
 import type {ResolvedItem} from '@shipload/sdk'
-import {describeModuleForItem, formatLocation, renderDescription} from '@shipload/sdk'
+import {formatLocation, getModuleFigures} from '@shipload/sdk'
 import type {CargoItem} from '../payload/codec.ts'
 import {panel} from '../primitives/panel.ts'
 import {iconHex} from '../primitives/icon-hex.ts'
 import {moduleIcon, moduleIconSlugForName} from '../primitives/module-icon.ts'
 import {text} from '../primitives/text.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
-import {spanParagraph} from '../primitives/span-paragraph.ts'
+import {figureRows} from '../primitives/figure-rows.ts'
 import {tokens} from '../tokens/index.ts'
 import {
     shortCode,
@@ -15,11 +15,13 @@ import {
     metaRowBlock,
     titleText,
     capabilityColor,
+    figureRowsFor,
     BADGE_Y,
     HEADER_H,
     ICON_Y,
     META_BLOCK_GAP,
     CAP_HEADER_H,
+    CAP_ROW_H,
     BODY_TAIL,
 } from './_shared.ts'
 
@@ -39,7 +41,7 @@ export function renderModule(
     const innerW = w - pad * 2
 
     const group = resolved.attributes?.[0]
-    const desc = mode === 'values' ? describeModuleForItem(resolved) : undefined
+    const figures = getModuleFigures(resolved.itemId, mode === 'values' ? item.stats : 0n)
 
     const capabilityName = group?.capability ?? resolved.name.replace(/\s+T\d+$/i, '')
 
@@ -55,7 +57,7 @@ export function renderModule(
 
     const iconColor = group ? capabilityColor(group.capability) : capabilityColor(capabilityName)
 
-    const capLabel = (group?.capability ?? capabilityName).toUpperCase()
+    const capLabel = (figures?.sectionLabel ?? capabilityName).toUpperCase()
     const capHeader = text({
         x: pad,
         y: bodyYStart + 16,
@@ -69,18 +71,20 @@ export function renderModule(
 
     let bodyHeight: number
     let capSection: string
-    if (mode === 'values' && desc && group) {
-        const spans = renderDescription(desc)
-        const {svg: paraSvg, lineCount} = spanParagraph({
+    const rows = mode === 'values' ? figureRowsFor(figures) : []
+    if (rows.length > 0) {
+        const {svg: rowsSvg, height: rowsH} = figureRows({
             x: pad,
             y: bodyYStart + 36,
-            spans,
-            charsPerLine: 36,
+            width: innerW,
+            rows,
+            size: tokens.typography.sizes.body,
+            rowHeight: CAP_ROW_H,
             lineHeight: 14,
-            highlightColor: tokens.colors.text.primary,
+            charsPerLine: 36,
         })
-        bodyHeight = CAP_HEADER_H + lineCount * 14 + BODY_TAIL
-        capSection = capHeader + paraSvg
+        bodyHeight = CAP_HEADER_H + 14 + rowsH + BODY_TAIL
+        capSection = capHeader + rowsSvg
     } else {
         bodyHeight = CAP_HEADER_H + BODY_TAIL
         capSection = capHeader

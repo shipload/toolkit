@@ -30,13 +30,12 @@ test('renderShipPanel never uses gold accent', () => {
         attributes: [{capability: 'Hull', attributes: [{label: 'Mass', value: 100}]}],
         slots: [
             {
-                name: 'Engine T1',
+                name: 'Engine',
                 capability: 'Engine',
                 installed: true,
-                description: [
-                    {text: 'generates '},
-                    {text: '500', highlight: true},
-                    {text: ' thrust'},
+                rows: [
+                    {label: 'Speed', value: '40 ly/hr'},
+                    {label: 'Drain', value: '191 energy/ly'},
                 ],
             },
             {installed: false},
@@ -46,46 +45,39 @@ test('renderShipPanel never uses gold accent', () => {
     expect(svg).not.toContain('#f4c96b')
 })
 
-test('renderShipPanel renders installed slots as capability-colored prose', () => {
+test('renderShipPanel renders installed slots as named figure rows', () => {
     const svg = renderShipPanel({
         name: 'Ship',
         tier: 1,
         attributes: [{capability: 'Hull', attributes: [{label: 'Mass', value: 100}]}],
         slots: [
             {
-                name: 'Engine T1',
+                name: 'Engine',
                 capability: 'Engine',
                 installed: true,
-                description: [
-                    {text: 'generates '},
-                    {text: '500', highlight: true},
-                    {text: ' thrust for travel'},
+                rows: [
+                    {label: 'Speed', value: '40 ly/hr'},
+                    {label: 'Drain', value: '191 energy/ly'},
                 ],
             },
             {
-                name: 'Generator T1',
+                name: 'Power Core',
                 capability: 'Generator',
                 installed: true,
-                description: [
-                    {text: 'holds '},
-                    {text: '1000', highlight: true},
-                    {text: ' maximum energy'},
+                rows: [
+                    {label: 'Capacity', value: '+1,544 energy'},
+                    {label: 'Recharge', value: '+262 energy/min'},
                 ],
             },
         ],
     })
-    // Capability prose labels.
-    expect(svg).toContain('Engine:')
-    expect(svg).toContain('Generator:')
-    // Prose body + highlighted numbers present.
-    expect(svg).toContain('generates')
-    expect(svg).toContain('500')
-    expect(svg).toContain('maximum energy')
-    expect(svg).toContain('1000')
-    // Capability colors drive the labels.
+    expect(svg).toContain('>Engine</text>')
+    expect(svg).toContain('>Power Core</text>')
+    expect(svg).not.toContain('Generator')
+    expect(svg).toContain('>40 ly/hr</text>')
+    expect(svg).toContain('>+262 energy/min</text>')
     expect(svg).toContain(tokens.colors.capability.engine)
     expect(svg).toContain(tokens.colors.capability.generator)
-    // White (primary) for highlighted numbers.
     expect(svg).toContain(tokens.colors.text.primary)
 })
 
@@ -122,19 +114,18 @@ test('renderShipPanel mixed slots (installed + empty)', () => {
         attributes: [{capability: 'Hull', attributes: [{label: 'Mass', value: 100}]}],
         slots: [
             {
-                name: 'Engine T1',
+                name: 'Engine',
                 capability: 'Engine',
                 installed: true,
-                description: [
-                    {text: 'generates '},
-                    {text: '500', highlight: true},
-                    {text: ' thrust'},
+                rows: [
+                    {label: 'Speed', value: '40 ly/hr'},
+                    {label: 'Drain', value: '191 energy/ly'},
                 ],
             },
             {installed: false},
             {installed: false},
         ],
     })
-    expect(svg).toContain('Engine:')
+    expect(svg).toContain('>Engine</text>')
     expect((svg.match(/Empty module/g) ?? []).length).toBe(2)
 })

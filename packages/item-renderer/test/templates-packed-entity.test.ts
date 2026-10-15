@@ -1,6 +1,7 @@
 import {expect, test} from 'bun:test'
 import {resolveItem} from '@shipload/sdk'
 import {renderPackedEntity} from '../src/templates/packed-entity.ts'
+import {tokens} from '../src/tokens/index.ts'
 import {FIXTURES} from './fixtures/cargo-items.ts'
 
 test('renders Ship with hull attributes and two modules', () => {
@@ -13,8 +14,8 @@ test('renders Ship with hull attributes and two modules', () => {
     expect(svg).toMatch(/>\s*T1<\/tspan>/)
     expect(svg).toContain('Mass')
     expect(svg).toContain('Capacity')
-    expect(svg).toContain('Engine:')
-    expect(svg).toContain('Power Core:')
+    expect(svg).toContain('>Engine</text>')
+    expect(svg).toContain('>Power Core</text>')
 })
 
 test('renders empty-module rows when slots are unfilled', () => {
@@ -55,18 +56,26 @@ test('matches the committed Ship T1 (only engine) snapshot', async () => {
     expect(svg).toMatchSnapshot('packed-entity-ship-t1-only-engine.svg')
 })
 
-test('ship with two modules renders capability-colored prose, white highlights, no gold', () => {
+test('ship with two modules draws each slot as its module name and figure lines', () => {
     const item = FIXTURES.shipT1TwoModules
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderPackedEntity(item, resolved)
-    // Capability prose labels in their capability colors.
-    expect(svg).toContain('Engine:')
-    expect(svg).toContain('#4a8abf')
-    expect(svg).toContain('Power Core:')
-    expect(svg).toContain('#7E93C4')
-    // Prose body present, highlighted numbers white, no gold.
-    expect(svg).toContain('thrust for')
-    expect(svg).toContain('#e6e8ec')
+    expect(svg).toContain(tokens.colors.capability.engine)
+    expect(svg).toContain(tokens.colors.capability.generator)
+    for (const line of [
+        'Speed',
+        '39 ly/hr',
+        'Drain',
+        '198 energy/ly',
+        'Capacity',
+        '+1,552 energy',
+        'Recharge',
+        '+265 energy/min',
+    ]) {
+        expect(svg).toContain(`>${line}</text>`)
+    }
+    const words = [...svg.matchAll(/>([^<]+)</g)].map((m) => m[1]).join(' ')
+    expect(words).not.toMatch(/generator|thrust/i)
     expect(svg).not.toContain('#f4c96b')
 })
 

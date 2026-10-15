@@ -57,23 +57,19 @@ test('moduleSlot renders an empty state with "Empty module" label', () => {
     expect(svg).toContain('Empty module')
 })
 
-test('moduleSlot renders an installed state with capability prose', () => {
+test('moduleSlot renders an installed state with figure rows', () => {
     const svg = moduleSlot({
         x: 14,
         y: 200,
         width: 252,
         installed: true,
-        capability: 'Engine',
-        description: [
-            {text: 'generates '},
-            {text: '757', highlight: true},
-            {text: ' thrust for travel'},
-        ],
+        name: 'Engine',
+        rows: [{label: 'Speed', value: '40 ly/hr'}],
         accentColor: '#58d08c',
     })
-    expect(svg).toContain('Engine:')
-    expect(svg).toContain('757')
-    expect(svg).toContain('thrust for')
+    expect(svg).toContain('>Engine</text>')
+    expect(svg).toContain('>Speed</text>')
+    expect(svg).toContain('>40 ly/hr</text>')
 })
 
 test('quantityBadge is empty string when quantity is 0', () => {

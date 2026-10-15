@@ -2,40 +2,39 @@ import {test, expect} from 'bun:test'
 import {moduleSlot} from '../src/primitives/module-slot.ts'
 import {tokens} from '../src/tokens/index.ts'
 
-test('installed slot renders a filled diamond + capability-colored prose label', () => {
+test('installed slot renders a filled diamond + accent-colored module name', () => {
     const svg = moduleSlot({
         x: 14,
         y: 40,
         width: 252,
         installed: true,
-        capability: 'Engine',
-        description: 'generates 700 thrust for travel',
+        name: 'Engine',
+        rows: [{label: 'Speed', value: '40 ly/hr'}],
         accentColor: tokens.colors.capability.engine,
     })
     expect(svg).toContain('<polygon')
-    expect(svg).toContain('Engine:')
+    expect(svg).toContain('>Engine</text>')
     expect(svg).toContain(tokens.colors.capability.engine)
 })
 
-test('installed slot renders prose with white-highlighted numbers', () => {
+test('installed slot renders each figure as a label and a right-aligned value', () => {
     const svg = moduleSlot({
         x: 14,
         y: 40,
         width: 252,
         installed: true,
-        capability: 'Gatherer',
-        description: [
-            {text: 'locks onto up to '},
-            {text: '880', highlight: true},
-            {text: ' targets'},
+        name: 'Limpet Bay',
+        rows: [
+            {label: 'Yield', value: '41.0 t/min'},
+            {label: 'Depth', value: '1,000 km'},
         ],
         accentColor: tokens.colors.capability.gatherer,
     })
-    expect(svg).toContain('880')
-    expect(svg).toContain('locks onto')
-    // Highlighted number uses white (primary), not gold.
-    expect(svg).toContain(tokens.colors.text.primary)
-    expect(svg).not.toContain(tokens.colors.text.accent)
+    expect(svg).toContain('>Yield</text>')
+    expect(svg).toContain('>41.0 t/min</text>')
+    expect(svg).toContain('>1,000 km</text>')
+    expect(svg).toContain('text-anchor="end"')
+    expect(svg).toContain(tokens.colors.text.secondary)
 })
 
 test('installed slot uses no gold accent', () => {
@@ -44,25 +43,26 @@ test('installed slot uses no gold accent', () => {
         y: 40,
         width: 252,
         installed: true,
-        capability: 'Engine',
-        description: [{text: 'generates '}, {text: '700', highlight: true}, {text: ' thrust'}],
+        name: 'Engine',
+        rows: [{label: 'Speed', value: '40 ly/hr'}],
         accentColor: tokens.colors.capability.engine,
     })
     expect(svg).not.toContain(tokens.colors.text.accent)
     expect(svg).not.toContain('#f4c96b')
 })
 
-test('installed slot with no description renders capability label only', () => {
+test('installed slot with no rows renders the module name only', () => {
     const svg = moduleSlot({
         x: 14,
         y: 40,
         width: 252,
         installed: true,
-        capability: 'Engine',
+        name: 'Engine',
         accentColor: tokens.colors.capability.engine,
     })
     expect(svg).toContain('Engine')
     expect(svg).toContain(tokens.colors.capability.engine)
+    expect(svg).not.toContain('text-anchor="end"')
 })
 
 test('empty slot renders muted hollow diamond + Empty module', () => {

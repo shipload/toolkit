@@ -1,11 +1,16 @@
-import type {ResolvedItem} from '@shipload/sdk'
+import type {ModuleFigures, ResolvedItem} from '@shipload/sdk'
 import {baseName, formatMassScaled} from '@shipload/sdk'
+import type {FigureRow} from '../primitives/figure-rows.ts'
 import {text} from '../primitives/text.ts'
 import {divider} from '../primitives/divider.ts'
 import {tokens} from '../tokens/index.ts'
 
 export function formatMass(mass: number): string {
     return formatMassScaled(mass)
+}
+
+export function figureRowsFor(figures: ModuleFigures | undefined): FigureRow[] {
+    return (figures?.rows ?? []).map((row) => ({label: row.label, value: row.text}))
 }
 
 export function tierBorder(tier: number): string {

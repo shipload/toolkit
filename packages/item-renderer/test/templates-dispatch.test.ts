@@ -23,7 +23,7 @@ test('renderByType forwards mode=ranges to module template', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id)
     const svg = renderByType(item, resolved, {mode: 'ranges'})
-    expect(svg).toContain('ENGINE')
+    expect(svg).toContain('MOVEMENT')
 })
 
 test('renderByType default mode is values (no opts)', () => {

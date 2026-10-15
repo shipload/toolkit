@@ -25,7 +25,7 @@ test('renderItem dispatches to module template for modules', () => {
     const item = FIXTURES.engineT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderItem(item, resolved)
-    expect(svg).toContain('ENGINE')
+    expect(svg).toContain('MOVEMENT')
 })
 
 test('renderItem throws RenderError for unknown types', () => {
