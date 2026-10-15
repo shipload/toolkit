@@ -2,6 +2,7 @@ import { PlatformContract, ServerContract, Shipload } from "@shipload/sdk";
 import { APIClient, type Checksum256, Name } from "@wharfkit/antelope";
 import { ChainDefinition, TokenIdentifier } from "@wharfkit/common";
 import { loadConfig, type PlayerConfig } from "./config";
+import { appFetch } from "./fetch-trace";
 
 let cfg: PlayerConfig | null = null;
 try {
@@ -25,7 +26,7 @@ export const chain = ChainDefinition.from({
 	}),
 });
 
-export const client = new APIClient({ url: chain.url });
+export const client = new APIClient({ url: chain.url, fetch: appFetch });
 
 export const server = new ServerContract.Contract({ client, account: Name.from(gameContractName) });
 export const platform = new PlatformContract.Contract({ client, account: Name.from(platformContractName) });

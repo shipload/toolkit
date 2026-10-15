@@ -7,7 +7,9 @@ import {
     type TickLogState,
 } from '@shipload/oracle'
 import {describeLoopError} from '../../lib/errors'
+import {chain} from '../../lib/client'
 import {loadOracleConfig} from '../../lib/config'
+import {enableFetchTrace} from '../../lib/fetch-trace'
 import {checkAdmission, isRegistered, resolveResponsibility} from './admission'
 import {buildOracleContext, cleanOnce, tickOnce} from './context'
 import {formatAdmitted, formatClean, formatTick, formatWaiting, formatWaitingBrief} from './format'
@@ -57,6 +59,7 @@ export function register(parent: Command): void {
                 const collectIntervalMs = Math.max(1, Number(opts.collectInterval)) * 1000
                 const heartbeatMs = Math.max(1, Number(opts.heartbeat)) * 1000
                 const cfg = loadOracleConfig()
+                enableFetchTrace((line) => console.error(`${stamp()} ${line}`))
                 let stopping = false
                 let wake: (() => void) | null = null
                 const stop = () => {
@@ -81,7 +84,7 @@ export function register(parent: Command): void {
                 let tickLog: TickLogState | null = null
                 let maintenanceLog: MaintenanceLogState | null = null
                 console.log(
-                    `${stamp()} oracle ${cfg.handle} started (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, collect ${collectIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
+                    `${stamp()} oracle ${cfg.handle} started on ${chain.url} with bun ${Bun.version} (interval ${intervalMs / 1000}s, clean ${cleanIntervalMs / 1000}s, maintenance ${maintenanceIntervalMs / 1000}s, collect ${collectIntervalMs / 1000}s, heartbeat ${heartbeatMs / 1000}s)`
                 )
                 const waitStartedAt = Date.now()
                 let lastWaitLogAt = 0

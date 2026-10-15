@@ -35,6 +35,7 @@ import {
     getShipload,
 } from '../../lib/client'
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
+import {appFetch} from '../../lib/fetch-trace'
 import {ValidationError} from '../../lib/validate'
 import {checkAdmission} from './admission'
 
@@ -95,7 +96,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
             permission: cfg.permission,
             walletPlugin: new WalletPluginPrivateKey(cfg.privateKey),
         },
-        {fetch}
+        {fetch: appFetch}
     )
     const session = wrapSession(rawSession)
     const rawFundSession = new Session(
@@ -105,7 +106,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
             permission: cfg.handle,
             walletPlugin: new WalletPluginPrivateKey(cfg.privateKey),
         },
-        {fetch}
+        {fetch: appFetch}
     )
     const fundSession = wrapSession(rawFundSession)
     const fundContract = new FundContract.Contract({client, account: Name.from(fundContractName)})
