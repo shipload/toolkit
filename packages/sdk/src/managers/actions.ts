@@ -1001,6 +1001,12 @@ export class ActionsManager extends BaseManager {
         ]
     }
 
+    cancelunwrap(assetId: UInt64Type): Action {
+        return this.platform.action('cancelunwrap', {
+            asset_id: UInt64.from(assetId),
+        })
+    }
+
     setRamPayer(newPayer: NameType, assetId: UInt64Type): Action {
         return Action.from(
             {

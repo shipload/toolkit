@@ -110,6 +110,13 @@ test('transferForUnwrap builds an atomicassets::transfer action with the unwrap 
     expect(data.asset_ids.map(String)).toEqual(['1'])
 })
 
+test('cancelunwrap builds a platform action for the asset', () => {
+    const action = sl.actions.cancelunwrap(7)
+    expect(String(action.account)).toBe('nex.shipload')
+    expect(String(action.name)).toBe('cancelunwrap')
+    expect(String(action.decodeData(PlatformContract.abi).asset_id)).toBe('7')
+})
+
 test('wrap bundles setlastpayer when claimRam is set', async () => {
     const actions = await sl.actions.wrap('alice', 1, 2, 3, 4, {claimRam: true})
     expect(actions.length).toBe(2)
