@@ -10,7 +10,7 @@ import {ABI, Asset, Blob, Name, Struct, UInt16, UInt32, UInt64} from '@wharfkit/
 import type {ActionOptions, ContractArgs, PartialBy, Table} from '@wharfkit/contract'
 import {Contract as BaseContract} from '@wharfkit/contract'
 export const abiBlob = Blob.from(
-    'DmVvc2lvOjphYmkvMS4yABkLYWNjcnVlZF9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lB2JhbGFuY2UFYXNzZXQIYWRkdG9rZW4AAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wJYmVuZWZfcm93AAIHYWNjb3VudARuYW1lA2JwcwZ1aW50MTYLYmVuZWZpY2lhcnkAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgVjbGFpbQABE2JlbmVmaWNpYXJ5X2FjY291bnQEbmFtZQdjb2xsZWN0AAALY29sbGVjdGZlZXMAAApjdXJzb3Jfcm93AAENbmV4dF9hc3NldF9pZAZ1aW50NjQIZGVsdG9rZW4AAQ50b2tlbl9jb250cmFjdARuYW1lB2dldGxvdHMAAgtsb3dlcl9ib3VuZAZ1aW50NjQIbWF4X2xvdHMGdWludDMyC2dldHRlbmRhYmxlAAEIbWF4X2xvdHMGdWludDMyCGxvdF9pbmZvAAYIYXNzZXRfaWQGdWludDY0BWdyYWRlBG5hbWUKYXVjdGlvbl9pZAZ1aW50NjQHaXRlbV9pZAZ1aW50MTYIcXVhbnRpdHkGdWludDMyBXN0YXRzBnVpbnQ2NAtsb3RzX3Jlc3VsdAACBGxvdHMKbG90X2luZm9bXQRuZXh0BnVpbnQ2NAhsb3RzX3JvdwADCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0CXJlc2N1ZW5mdAADCWFzc2V0X2lkcwh1aW50NjRbXQJ0bwRuYW1lBG1lbW8Gc3RyaW5nCHNldGJlbmVmAAEIcmVnaXN0cnkNYmVuZWZpY2lhcnlbXQlzZXRtYXJrZXQAAgZtYXJrZXQEbmFtZRFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRlcm1zAAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyDHNldHRpbmdzX3JvdwAEBm1hcmtldARuYW1lDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbBFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRva2VuAAIOdG9rZW5fY29udHJhY3QEbmFtZQx0b2tlbl9zeW1ib2wGc3ltYm9sBXN3ZWVwAAEIbWF4X2xvdHMGdWludDMyBHRlbmQAAQlhc3NldF9pZHMIdWludDY0W10JdGVybXNfcm93AAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyCXRva2VuX3JvdwACDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbAR3aXBlAAAPAAAAU0GaUzIIYWRkdG9rZW4AAAAAAADpTEQFY2xhaW0AAAAAICMVI0UHY29sbGVjdAAAsFIrIxUjRQtjb2xsZWN0ZmVlcwAAAABTQZqjSghkZWx0b2tlbgAAAAAAZxqzYgdnZXRsb3RzAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAAAAAAAKCq4wR3aXBlAAcAAAAgKX0RMgNpNjQAAAthY2NydWVkX3JvdwAAAADgpaY6A2k2NAAACWJlbmVmX3JvdwAAAABciq9GA2k2NAAACmN1cnNvcl9yb3cAAAAAAIAzjQNpNjQAAAhsb3RzX3JvdwAAAJhNl7PCA2k2NAAADHNldHRpbmdzX3JvdwAAAAAALK/KA2k2NAAACXRlcm1zX3JvdwAAAADgqSDNA2k2NAAACXRva2VuX3JvdwAAAAACAAAAAGcas2ILbG90c19yZXN1bHQAVDwmTZWzYgh1aW50NjRbXQ=='
+    'DmVvc2lvOjphYmkvMS4yABsLYWNjcnVlZF9yb3cAAg50b2tlbl9jb250cmFjdARuYW1lB2JhbGFuY2UFYXNzZXQIYWRkdG9rZW4AAg50b2tlbl9jb250cmFjdARuYW1lDHRva2VuX3N5bWJvbAZzeW1ib2wJYmVuZWZfcm93AAIHYWNjb3VudARuYW1lA2JwcwZ1aW50MTYLYmVuZWZpY2lhcnkAAgdhY2NvdW50BG5hbWUDYnBzBnVpbnQxNgVjbGFpbQABE2JlbmVmaWNpYXJ5X2FjY291bnQEbmFtZQdjb2xsZWN0AAALY29sbGVjdGZlZXMAAApjdXJzb3Jfcm93AAENbmV4dF9hc3NldF9pZAZ1aW50NjQIZGVsdG9rZW4AAQ50b2tlbl9jb250cmFjdARuYW1lB2dldGxvdHMAAgtsb3dlcl9ib3VuZAZ1aW50NjQIbWF4X2xvdHMGdWludDMyC2dldHRlbmRhYmxlAAEIbWF4X2xvdHMGdWludDMyCGxvdF9pbmZvAAYIYXNzZXRfaWQGdWludDY0BWdyYWRlBG5hbWUKYXVjdGlvbl9pZAZ1aW50NjQHaXRlbV9pZAZ1aW50MTYIcXVhbnRpdHkGdWludDMyBXN0YXRzBnVpbnQ2NAtsb3RzX3Jlc3VsdAACBGxvdHMKbG90X2luZm9bXQRuZXh0BnVpbnQ2NAhsb3RzX3JvdwADCGFzc2V0X2lkBnVpbnQ2NAVncmFkZQRuYW1lCmF1Y3Rpb25faWQGdWludDY0CG93ZWRfcm93AAIOdG9rZW5fY29udHJhY3QEbmFtZQdiYWxhbmNlBWFzc2V0CXJlc2N1ZW5mdAADCWFzc2V0X2lkcwh1aW50NjRbXQJ0bwRuYW1lBG1lbW8Gc3RyaW5nC3Jlc2N1ZXRva2VuAAQOdG9rZW5fY29udHJhY3QEbmFtZQhxdWFudGl0eQVhc3NldAJ0bwRuYW1lBG1lbW8Gc3RyaW5nCHNldGJlbmVmAAEIcmVnaXN0cnkNYmVuZWZpY2lhcnlbXQlzZXRtYXJrZXQAAgZtYXJrZXQEbmFtZRFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRlcm1zAAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyDHNldHRpbmdzX3JvdwAEBm1hcmtldARuYW1lDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbBFtYWtlcl9tYXJrZXRwbGFjZQRuYW1lCHNldHRva2VuAAIOdG9rZW5fY29udHJhY3QEbmFtZQx0b2tlbl9zeW1ib2wGc3ltYm9sBXN3ZWVwAAEIbWF4X2xvdHMGdWludDMyBHRlbmQAAQlhc3NldF9pZHMIdWludDY0W10JdGVybXNfcm93AAMFZ3JhZGUEbmFtZQxzdGFydGluZ19iaWQFYXNzZXQIZHVyYXRpb24GdWludDMyCXRva2VuX3JvdwACDnRva2VuX2NvbnRyYWN0BG5hbWUMdG9rZW5fc3ltYm9sBnN5bWJvbAR3aXBlAAAQAAAAU0GaUzIIYWRkdG9rZW4AAAAAAADpTEQFY2xhaW0AAAAAICMVI0UHY29sbGVjdAAAsFIrIxUjRQtjb2xsZWN0ZmVlcwAAAABTQZqjSghkZWx0b2tlbgAAAAAAZxqzYgdnZXRsb3RzAABUPCZNlbNiC2dldHRlbmRhYmxlAAAAyGsqjbC6CXJlc2N1ZW5mdAAApoI0K42wugtyZXNjdWV0b2tlbgAAAABLTXWywghzZXRiZW5lZgAAAMgKXiOzwglzZXRtYXJrZXQAAAAAWF6Vs8IIc2V0dGVybXMAAAAAU0Gas8IIc2V0dG9rZW4AAAAAAICqFMcFc3dlZXAAAAAAAACQpsoEdGVuZAAAAAAAAKCq4wR3aXBlAAgAAAAgKX0RMgNpNjQAAAthY2NydWVkX3JvdwAAAADgpaY6A2k2NAAACWJlbmVmX3JvdwAAAABciq9GA2k2NAAACmN1cnNvcl9yb3cAAAAAAIAzjQNpNjQAAAhsb3RzX3JvdwAAAAAAkBSnA2k2NAAACG93ZWRfcm93AAAAmE2Xs8IDaTY0AAAMc2V0dGluZ3Nfcm93AAAAAAAsr8oDaTY0AAAJdGVybXNfcm93AAAAAOCpIM0DaTY0AAAJdG9rZW5fcm93AAAAAAIAAAAAZxqzYgtsb3RzX3Jlc3VsdABUPCZNlbNiCHVpbnQ2NFtd'
 )
 export const abi = ABI.from(abiBlob)
 export namespace Types {
@@ -104,10 +104,28 @@ export namespace Types {
         @Struct.field(UInt64)
         declare auction_id: UInt64
     }
+    @Struct.type('owed_row')
+    export class owed_row extends Struct {
+        @Struct.field(Name)
+        declare token_contract: Name
+        @Struct.field(Asset)
+        declare balance: Asset
+    }
     @Struct.type('rescuenft')
     export class rescuenft extends Struct {
         @Struct.field(UInt64, {array: true})
         declare asset_ids: UInt64[]
+        @Struct.field(Name)
+        declare to: Name
+        @Struct.field('string')
+        declare memo: string
+    }
+    @Struct.type('rescuetoken')
+    export class rescuetoken extends Struct {
+        @Struct.field(Name)
+        declare token_contract: Name
+        @Struct.field(Asset)
+        declare quantity: Asset
         @Struct.field(Name)
         declare to: Name
         @Struct.field('string')
@@ -186,6 +204,7 @@ export const TableMap = {
     benefs: Types.benef_row,
     cursor: Types.cursor_row,
     lots: Types.lots_row,
+    owed: Types.owed_row,
     settings: Types.settings_row,
     terms: Types.terms_row,
     tokens: Types.token_row,
@@ -195,6 +214,7 @@ export interface TableTypes {
     benefs: Types.benef_row
     cursor: Types.cursor_row
     lots: Types.lots_row
+    owed: Types.owed_row
     settings: Types.settings_row
     terms: Types.terms_row
     tokens: Types.token_row
@@ -232,6 +252,12 @@ export namespace ActionParams {
         to: NameType
         memo: string
     }
+    export interface rescuetoken {
+        token_contract: NameType
+        quantity: AssetType
+        to: NameType
+        memo: string
+    }
     export interface setbenef {
         registry: Type.beneficiary[]
     }
@@ -265,6 +291,7 @@ export interface ActionNameParams {
     getlots: ActionParams.getlots
     gettendable: ActionParams.gettendable
     rescuenft: ActionParams.rescuenft
+    rescuetoken: ActionParams.rescuetoken
     setbenef: ActionParams.setbenef
     setmarket: ActionParams.setmarket
     setterms: ActionParams.setterms
