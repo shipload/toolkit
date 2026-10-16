@@ -445,7 +445,7 @@ test('close builds a nex.shipload::close action', () => {
 })
 
 test('withdraw carries the token contract in the extended asset', () => {
-    const action = sl.actions.withdraw('alice', '5 SCRAP', 'scrap.gm')
+    const [, action] = sl.actions.withdraw('alice', '5 SCRAP', 'scrap.gm')
     expect(String(action.account)).toBe('nex.shipload')
     expect(String(action.name)).toBe('withdraw')
     const data = action.decodeData(PlatformContract.abi)
@@ -453,6 +453,25 @@ test('withdraw carries the token contract in the extended asset', () => {
     expect(String(data.quantity.quantity)).toBe('5 SCRAP')
     expect(String(data.quantity.contract)).toBe('scrap.gm')
     expect(String(data.memo)).toBe('withdraw')
+})
+
+test('withdraw opens the recipient token row first, paid by the recipient', () => {
+    const actions = sl.actions.withdraw('alice', '5 SCRAP', 'scrap.gm')
+    expect(actions.length).toBe(2)
+    expect(String(actions[0].account)).toBe('scrap.gm')
+    expect(String(actions[0].name)).toBe('open')
+    const data = actions[0].decodeData(TokenContract.abi)
+    expect(String(data.owner)).toBe('alice')
+    expect(String(data.symbol)).toBe('0,SCRAP')
+    expect(String(data.ram_payer)).toBe('alice')
+    expect(String(actions[1].name)).toBe('withdraw')
+    expect(String(actions[1].authorization[0])).toBe(String(actions[0].authorization[0]))
+})
+
+test('withdraw can omit the token open', () => {
+    const actions = sl.actions.withdraw('alice', '5 SCRAP', 'scrap.gm', {open: false})
+    expect(actions.length).toBe(1)
+    expect(String(actions[0].name)).toBe('withdraw')
 })
 
 test('deposit pairs open with a transfer to the platform', () => {

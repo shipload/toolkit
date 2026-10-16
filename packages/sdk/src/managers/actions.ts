@@ -793,15 +793,31 @@ export class ActionsManager extends BaseManager {
         owner: NameType,
         quantity: AssetType,
         tokenContract: NameType,
-        memo = 'withdraw'
-    ): Action {
-        return this.platform.action('withdraw', {
+        opts: {memo?: string; open?: boolean} = {}
+    ): Action[] {
+        const amount = Asset.from(quantity)
+        const actions: Action[] = []
+        if (opts.open !== false) {
+            actions.push(this.tokenOpen(owner, amount.symbol, tokenContract))
+        }
+        actions.push(
+            this.platform.action('withdraw', {
+                owner: Name.from(owner),
+                quantity: ExtendedAsset.from({
+                    quantity: amount,
+                    contract: Name.from(tokenContract),
+                }),
+                memo: opts.memo ?? 'withdraw',
+            })
+        )
+        return actions
+    }
+
+    tokenOpen(owner: NameType, symbol: Asset.SymbolType, tokenContract: NameType): Action {
+        return this.tokenContract(tokenContract).action('open', {
             owner: Name.from(owner),
-            quantity: ExtendedAsset.from({
-                quantity: Asset.from(quantity),
-                contract: Name.from(tokenContract),
-            }),
-            memo,
+            symbol: Asset.Symbol.from(symbol),
+            ram_payer: Name.from(owner),
         })
     }
 
