@@ -675,6 +675,12 @@ export {
     handlingPercentPerContainer,
     launchChargePerMinute,
     launchDrainPerKiloTonneLy,
+    getModuleFigureSources,
+    sweepModuleFigures,
+    gathererStatsFromFigures,
+    gatherFromFigures,
+    STAT_LOW,
+    STAT_HIGH,
 } from './figures'
 export type {
     Figure,
@@ -691,6 +697,13 @@ export type {
     EntitySheetAnchor,
     EntitySheetSource,
     ModuleFitPreview,
+    FigureStat,
+    FigureSource,
+    StatSweep,
+    FigureSweep,
+    GatherFigures,
+    GatherDeposit,
+    GatherEstimate,
 } from './figures'
 
 export {

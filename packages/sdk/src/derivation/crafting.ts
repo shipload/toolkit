@@ -36,7 +36,7 @@ export function decodeStats(stats: bigint, count: number): number[] {
     return result
 }
 
-function getItemStatKeys(itemId: number): string[] {
+export function getItemStatKeys(itemId: number): string[] {
     const item = getItem(itemId)
     if (item.type === 'resource') {
         if (!item.category) return []
