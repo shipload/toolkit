@@ -39,6 +39,7 @@ export interface EpochReads {
     getRevealsFor(epoch: number): Promise<{oracle_id: Name}[]>
     getEpochState(epoch: number): Promise<EpochState>
     getSecondsUntilClose(epoch: number): Promise<number>
+    getSecondsUntilOpenClose(epoch: number): Promise<number>
     getChainInfo(): Promise<{headBlock: number; libBlock: number}>
 }
 
@@ -55,6 +56,7 @@ export interface SessionLike {
 export interface SecretStoreLike {
     getOrCreate(epoch: number): {commit: Checksum256; reveal: Checksum256}
     getReveal(epoch: number): Checksum256 | undefined
+    getCloseSecret(epoch: number): Checksum256 | undefined
     getCommitBlock(epoch: number): number | undefined
     recordCommitBlock(epoch: number, block: number): void
 }
@@ -86,7 +88,8 @@ export async function runOnce(deps: OracleDeps): Promise<TickResult> {
         commit,
     })
 
-    const close = await resolveClose(deps, target, currentHeight, reveal)
+    const committed = alreadyCommitted || commit === 'posted'
+    const close = await resolveClose(deps, target, currentHeight, reveal, committed)
 
     return {target, currentHeight, commit, reveal, close, eta}
 }
@@ -113,13 +116,16 @@ async function resolveClose(
     deps: OracleDeps,
     target: number,
     currentHeight: number,
-    reveal: RevealOutcome
+    reveal: RevealOutcome,
+    committed: boolean
 ): Promise<CloseOutcome> {
     if (reveal === 'posted' || reveal === 'waiting-for-height') return 'not-due'
     if (reveal === 'epoch-finalized') return 'not-due'
-    const {epochs, actions, session, oracleId} = deps
+    const {epochs, actions, session, oracleId, store} = deps
     if ((await epochs.getSecondsUntilClose(target)) > 0) return 'not-due'
-    const entropy = Checksum256.from(Bytes.random(32))
+    const secret = committed ? store.getCloseSecret(target) : undefined
+    if (!secret && (await epochs.getSecondsUntilOpenClose(target)) > 0) return 'not-due'
+    const entropy = secret ?? Checksum256.from(Bytes.random(32))
     try {
         await session.transact({action: actions.closeepoch(oracleId, currentHeight, entropy)})
         return 'posted'

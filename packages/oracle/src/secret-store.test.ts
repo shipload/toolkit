@@ -38,6 +38,44 @@ test('commit is sha256 of the raw reveal bytes (matches contract reveal check)',
     store.close()
 })
 
+test('the reveal hashes the stored close secret, so the contract can chain a close to the commit', () => {
+    const {store} = tmpStore()
+    const s = store.getOrCreate(8)
+    const close = store.getCloseSecret(8)
+    expect(close).toBeDefined()
+    expect(s.reveal.equals(Checksum256.hash(close!.array))).toBe(true)
+    expect(s.commit.equals(Checksum256.hash(Checksum256.hash(close!.array).array))).toBe(true)
+    expect(store.getCloseSecret(9)).toBeUndefined()
+    store.close()
+})
+
+test('a store from before close secrets gains the column and keeps its rows', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'oracle-store-preclose-'))
+    dirs.push(dir)
+    const path = join(dir, 'preclose.sqlite')
+    const old = new Database(path, {create: true})
+    old.run(`CREATE TABLE secrets (
+        chainId TEXT NOT NULL,
+        epoch INTEGER NOT NULL,
+        commitValue TEXT NOT NULL,
+        revealValue TEXT NOT NULL,
+        commitBlock INTEGER,
+        PRIMARY KEY (chainId, epoch)
+    )`)
+    old.run(
+        'INSERT INTO secrets (chainId, epoch, commitValue, revealValue, commitBlock) VALUES (?, 1, ?, ?, ?)',
+        [CHAIN_A, 'a'.repeat(64), 'b'.repeat(64), 100]
+    )
+    old.close()
+
+    const store = new SecretStore(path, CHAIN_A)
+    expect(store.getReveal(1)?.hexString).toBe('b'.repeat(64))
+    expect(store.getCloseSecret(1)).toBeUndefined()
+    store.getOrCreate(2)
+    expect(store.getCloseSecret(2)).toBeDefined()
+    store.close()
+})
+
 test('getReveal returns the stored reveal, or undefined when absent', () => {
     const {store} = tmpStore()
     const s = store.getOrCreate(9)
@@ -150,6 +188,7 @@ test('a legacy epoch-keyed store migrates existing rows to the running chain and
     })
     expect(store.getReveal(1)?.hexString).toBe('b'.repeat(64))
     expect(store.getCommitBlock(1)).toBe(100)
+    expect(store.getCloseSecret(1)).toBeUndefined()
     expect(store.getOrCreate(1).commit.hexString).toBe('a'.repeat(64))
     store.close()
 

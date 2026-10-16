@@ -4,6 +4,7 @@ import {type EpochInfo, getCurrentEpoch, getEpochInfo} from '../scheduling/epoch
 import type {ServerContract} from '../contracts'
 
 export const DEFAULT_EPOCH_DEADLINE = 10800
+export const OPEN_CLOSE_DEADLINES = 8
 
 const EMPTY_SEED = Checksum256.from('0'.repeat(64))
 
@@ -101,6 +102,17 @@ export class EpochsManager extends BaseManager {
 
     async getSecondsUntilClose(epoch: UInt64Type): Promise<number> {
         const dueAt = await this.getCloseDueAt(epoch)
+        return Math.ceil((dueAt.getTime() - Date.now()) / 1000)
+    }
+
+    async getOpenCloseDueAt(epoch: UInt64Type): Promise<Date> {
+        const info = await this.getByHeight(epoch)
+        const deadline = await this.getDeadline()
+        return new Date(info.start.getTime() + OPEN_CLOSE_DEADLINES * deadline * 1000)
+    }
+
+    async getSecondsUntilOpenClose(epoch: UInt64Type): Promise<number> {
+        const dueAt = await this.getOpenCloseDueAt(epoch)
         return Math.ceil((dueAt.getTime() - Date.now()) / 1000)
     }
 

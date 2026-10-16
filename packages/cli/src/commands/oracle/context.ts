@@ -121,6 +121,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
             getCommitsFor: (epoch) => shipload.epochs.getCommitsFor(epoch),
             getRevealsFor: (epoch) => shipload.epochs.getRevealsFor(epoch),
             getSecondsUntilClose: (epoch) => shipload.epochs.getSecondsUntilClose(epoch),
+            getSecondsUntilOpenClose: (epoch) => shipload.epochs.getSecondsUntilOpenClose(epoch),
             getEpochState: (epoch) => shipload.epochs.getEpochState(epoch),
             getChainInfo: async () => {
                 const info = await client.v1.chain.get_info()

@@ -5,6 +5,7 @@ import {runOnce, type OracleDeps} from './run-once'
 const ORACLE = Name.from('greymass')
 const REVEAL = Checksum256.from('a'.repeat(64))
 const COMMIT = Checksum256.from('b'.repeat(64))
+const CLOSE = Checksum256.from('c'.repeat(64))
 
 function fakeDeps(opts: {
     finalized: number
@@ -19,6 +20,8 @@ function fakeDeps(opts: {
     postBlock?: number
     timeRemainingMs?: number
     secondsUntilClose?: number
+    secondsUntilOpenClose?: number
+    closeSecret?: Checksum256
     epochFinalized?: boolean
     throwOn?: Record<string, unknown>
 }): {
@@ -46,6 +49,7 @@ function fakeDeps(opts: {
                 finalized: opts.epochFinalized ?? false,
             }),
             getSecondsUntilClose: async () => opts.secondsUntilClose ?? 3600,
+            getSecondsUntilOpenClose: async () => opts.secondsUntilOpenClose ?? 8 * 3600,
             getChainInfo: async () => ({headBlock, libBlock}),
         },
         actions: {
@@ -80,6 +84,7 @@ function fakeDeps(opts: {
         store: {
             getOrCreate: () => ({commit: COMMIT, reveal: REVEAL}),
             getReveal: () => opts.secret,
+            getCloseSecret: () => opts.closeSecret,
             getCommitBlock: () => opts.commitBlock,
             recordCommitBlock: (epoch, block) => {
                 recorded.set(epoch, block)
@@ -285,7 +290,38 @@ test('records the commit block when posting a fresh commit', async () => {
     expect(recorded.get(42)).toBe(777)
 })
 
-test('overdue stalled epoch is closed on the normal tick', async () => {
+test('overdue stalled epoch is closed with the stored close secret on the normal tick', async () => {
+    const {deps, sent, calls} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [ORACLE],
+        revealedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+        closeSecret: CLOSE,
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('already-revealed')
+    expect(r.close).toBe('posted')
+    expect(sent).toEqual(['closeepoch'])
+    expect(calls.find((c) => c.kind === 'closeepoch')?.hash).toBe(String(CLOSE))
+})
+
+test('a committed oracle past the open-close stage still sends its stored close secret', async () => {
+    const {deps, calls} = fakeDeps({
+        finalized: 41,
+        height: 45,
+        committedBy: [ORACLE],
+        threshold: 2,
+        secondsUntilClose: 0,
+        secondsUntilOpenClose: 0,
+        closeSecret: CLOSE,
+    })
+    expect((await runOnce(deps)).close).toBe('posted')
+    expect(calls.find((c) => c.kind === 'closeepoch')?.hash).toBe(String(CLOSE))
+})
+
+test('a committed oracle with no stored close secret waits for the open-close stage', async () => {
     const {deps, sent} = fakeDeps({
         finalized: 41,
         height: 42,
@@ -294,13 +330,26 @@ test('overdue stalled epoch is closed on the normal tick', async () => {
         threshold: 2,
         secondsUntilClose: 0,
     })
-    const r = await runOnce(deps)
-    expect(r.reveal).toBe('already-revealed')
-    expect(r.close).toBe('posted')
-    expect(sent).toEqual(['closeepoch'])
+    expect((await runOnce(deps)).close).toBe('not-due')
+    expect(sent).toEqual([])
 })
 
-test('a stalled close targets the wall-clock epoch with fresh entropy each time', async () => {
+test('an oracle without a commit waits for the open-close stage even with a stored secret', async () => {
+    const OTHER = Name.from('greymass2')
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 42,
+        committedBy: [OTHER],
+        revealedBy: [OTHER],
+        threshold: 2,
+        secondsUntilClose: 0,
+        closeSecret: CLOSE,
+    })
+    expect((await runOnce(deps)).close).toBe('not-due')
+    expect(sent).toEqual([])
+})
+
+test('past the open-close stage a close without a stored secret sends fresh entropy each time', async () => {
     const opts = {
         finalized: 41,
         height: 45,
@@ -308,6 +357,7 @@ test('a stalled close targets the wall-clock epoch with fresh entropy each time'
         revealedBy: [ORACLE],
         threshold: 2,
         secondsUntilClose: 0,
+        secondsUntilOpenClose: 0,
     }
     const first = fakeDeps(opts)
     const second = fakeDeps(opts)
@@ -320,6 +370,7 @@ test('a stalled close targets the wall-clock epoch with fresh entropy each time'
     expect(a.epoch).toBe(45)
     expect(a.hash).toHaveLength(64)
     expect(a.hash).not.toBe(String(REVEAL))
+    expect(a.hash).not.toBe(String(CLOSE))
     expect(a.hash).not.toBe(b.hash)
 })
 
@@ -467,6 +518,7 @@ test('a close that lost the race reports raced, not failed', async () => {
         revealedBy: [ORACLE],
         threshold: 2,
         secondsUntilClose: 0,
+        closeSecret: CLOSE,
         throwOn: {closeepoch: chainError('Epoch already finalized.')},
     })
     const r = await runOnce(deps)
@@ -482,6 +534,7 @@ test('a close that failed for another reason still reports failed', async () => 
         revealedBy: [ORACLE],
         threshold: 2,
         secondsUntilClose: 0,
+        closeSecret: CLOSE,
         throwOn: {closeepoch: chainError('Epoch deadline has not passed.')},
     })
     const r = await runOnce(deps)
@@ -511,6 +564,7 @@ test('an unlinked close reports unauthorized once and still commits', async () =
         finalized: 41,
         height: 45,
         secondsUntilClose: 0,
+        closeSecret: CLOSE,
         throwOn: {closeepoch: unlinkedCloseError()},
     })
     const r = await runOnce(deps)

@@ -1,7 +1,7 @@
 import {Database} from 'bun:sqlite'
 import {chmodSync, mkdirSync} from 'node:fs'
 import {dirname} from 'node:path'
-import {Bytes, Checksum256, PrivateKey} from '@wharfkit/antelope'
+import {Bytes, Checksum256} from '@wharfkit/antelope'
 
 export interface Secret {
     commit: Checksum256
@@ -12,6 +12,7 @@ interface SecretRow {
     epoch: number
     commitValue: string
     revealValue: string
+    closeValue: string | null
     commitBlock: number | null
 }
 
@@ -59,17 +60,25 @@ export class SecretStore {
             epoch INTEGER NOT NULL,
             commitValue TEXT NOT NULL,
             revealValue TEXT NOT NULL,
+            closeValue TEXT,
             commitBlock INTEGER,
             PRIMARY KEY (chainId, epoch)
         )`)
+        this.addCloseColumn()
         this.selectStmt = this.db.query<SecretRow, {$chainId: string; $epoch: number}>(
-            'SELECT epoch, commitValue, revealValue, commitBlock FROM secrets WHERE chainId=$chainId AND epoch=$epoch'
+            'SELECT epoch, commitValue, revealValue, closeValue, commitBlock FROM secrets WHERE chainId=$chainId AND epoch=$epoch'
         )
         this.insertStmt = this.db.prepare<
             void,
-            {$chainId: string; $epoch: number; $commitValue: string; $revealValue: string}
+            {
+                $chainId: string
+                $epoch: number
+                $commitValue: string
+                $revealValue: string
+                $closeValue: string
+            }
         >(
-            'INSERT INTO secrets (chainId, epoch, commitValue, revealValue) VALUES($chainId, $epoch, $commitValue, $revealValue)'
+            'INSERT INTO secrets (chainId, epoch, commitValue, revealValue, closeValue) VALUES($chainId, $epoch, $commitValue, $revealValue, $closeValue)'
         )
         this.refreshChainState()
     }
@@ -97,6 +106,13 @@ export class SecretStore {
             )
             this.db.run('DROP TABLE secrets_legacy')
         })()
+    }
+
+    private addCloseColumn(): void {
+        const cols = this.db.query<{name: string}, []>('PRAGMA table_info(secrets)').all()
+        if (!cols.some((c) => c.name === 'closeValue')) {
+            this.db.run('ALTER TABLE secrets ADD COLUMN closeValue TEXT')
+        }
     }
 
     private refreshChainState(): void {
@@ -137,14 +153,15 @@ export class SecretStore {
                 reveal: Checksum256.from(existing.revealValue),
             }
         }
-        const entropy = String(PrivateKey.generate('K1'))
-        const reveal = Checksum256.hash(Bytes.from(entropy, 'utf8').array)
+        const close = Checksum256.from(Bytes.random(32))
+        const reveal = Checksum256.hash(close.array)
         const commit = Checksum256.hash(reveal.array)
         this.insertStmt.run({
             $chainId: this.chainId,
             $epoch: epoch,
             $commitValue: commit.hexString,
             $revealValue: reveal.hexString,
+            $closeValue: close.hexString,
         })
         this.refreshChainState()
         return {commit, reveal}
@@ -154,6 +171,12 @@ export class SecretStore {
         this.assertUsable()
         const row = this.selectStmt.get({$chainId: this.chainId, $epoch: epoch})
         return row ? Checksum256.from(row.revealValue) : undefined
+    }
+
+    getCloseSecret(epoch: number): Checksum256 | undefined {
+        this.assertUsable()
+        const row = this.selectStmt.get({$chainId: this.chainId, $epoch: epoch})
+        return row?.closeValue ? Checksum256.from(row.closeValue) : undefined
     }
 
     getCommitBlock(epoch: number): number | undefined {
