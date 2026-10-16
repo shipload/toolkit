@@ -1,6 +1,6 @@
 export type CommitRace = 'window-closed' | 'epoch-closed'
 export type RevealRace = 'epoch-finalized'
-export type CloseRace = 'raced'
+export type CloseRace = 'raced' | 'unauthorized'
 
 interface ErrorDetail {
     message?: unknown
@@ -48,5 +48,7 @@ export function classifyRevealRace(err: unknown): RevealRace | null {
 }
 
 export function classifyCloseRace(err: unknown): CloseRace | null {
-    return matches(err, 'Epoch already finalized.') ? 'raced' : null
+    if (matches(err, 'Epoch already finalized.')) return 'raced'
+    if (matches(err, 'irrelevant authority')) return 'unauthorized'
+    return null
 }

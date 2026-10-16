@@ -379,6 +379,18 @@ test('formatTick reports a close only when one was attempted', () => {
     expect(formatTick(closed)).toContain('close: posted')
 })
 
+test('an unlinked close tells the operator to have closeepoch linked', () => {
+    const out = formatTick({
+        target: 42,
+        currentHeight: 45,
+        commit: 'posted',
+        reveal: 'just-committed',
+        close: 'unauthorized',
+    })
+    expect(out).toContain('close: unauthorized')
+    expect(out).toContain('Ask the deployer to link closeepoch')
+})
+
 test('the waiting message names the permission the deployer must create', () => {
     const out = formatWaiting({
         handle: 'mycoolnode',

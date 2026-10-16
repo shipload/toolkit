@@ -43,3 +43,24 @@ test('classifyCloseRace reports another oracle getting there first as raced', ()
     expect(classifyCloseRace(apiError('closeepoch targets the wall-clock epoch.'))).toBeNull()
     expect(classifyCloseRace(apiError('Epoch deadline has not passed.'))).toBeNull()
 })
+
+test('classifyCloseRace names an unlinked closeepoch as unauthorized', () => {
+    const err = {
+        message: 'Irrelevant authority included',
+        response: {
+            json: {
+                error: {
+                    name: 'irrelevant_auth_exception',
+                    what: 'Irrelevant authority included',
+                    details: [
+                        {
+                            message:
+                                'action declares irrelevant authority \'{"actor":"eon.shipload","permission":"greymass"}\'; minimum authority is {"actor":"eon.shipload","permission":"active"}',
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    expect(classifyCloseRace(err)).toBe('unauthorized')
+})

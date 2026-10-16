@@ -13,7 +13,7 @@ export type RevealOutcome =
     | 'no-commit'
     | 'epoch-finalized'
 
-export type CloseOutcome = 'not-due' | 'posted' | 'failed' | 'raced'
+export type CloseOutcome = 'not-due' | 'posted' | 'failed' | 'raced' | 'unauthorized'
 
 export type TickEta = {kind: 'boundary' | 'finality'; seconds: number}
 

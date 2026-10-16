@@ -80,6 +80,13 @@ function raceLines(r: TickResult): string[] | null {
     if (r.close === 'raced') {
         return ['Another oracle closed this epoch first.']
     }
+    if (r.close === 'unauthorized') {
+        return [
+            'The chain refused your closeepoch because it is not linked to your oracle',
+            'permission. Ask the deployer to link closeepoch; your beacon keeps committing',
+            'and revealing, and retries the close on each pass until the link exists.',
+        ]
+    }
     return null
 }
 

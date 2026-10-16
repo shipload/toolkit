@@ -487,3 +487,50 @@ test('a close that failed for another reason still reports failed', async () => 
     const r = await runOnce(deps)
     expect(r.close).toBe('failed')
 })
+
+function unlinkedCloseError(): unknown {
+    const message =
+        'action declares irrelevant authority \'{"actor":"eon.shipload","permission":"greymass"}\'; minimum authority is {"actor":"eon.shipload","permission":"active"}'
+    return {
+        message: 'Irrelevant authority included',
+        response: {
+            json: {
+                error: {
+                    code: 3090004,
+                    name: 'irrelevant_auth_exception',
+                    what: 'Irrelevant authority included',
+                    details: [{message}],
+                },
+            },
+        },
+    }
+}
+
+test('an unlinked close reports unauthorized once and still commits', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 45,
+        secondsUntilClose: 0,
+        throwOn: {closeepoch: unlinkedCloseError()},
+    })
+    const r = await runOnce(deps)
+    expect(r.commit).toBe('posted')
+    expect(r.close).toBe('unauthorized')
+    expect(sent).toEqual(['commit', 'closeepoch'])
+})
+
+test('an unlinked close does not stop the reveal on a later tick', async () => {
+    const {deps, sent} = fakeDeps({
+        finalized: 41,
+        height: 45,
+        committedBy: [ORACLE],
+        secret: REVEAL,
+        commitBlock: 50,
+        libBlock: 100,
+        secondsUntilClose: 0,
+        throwOn: {closeepoch: unlinkedCloseError()},
+    })
+    const r = await runOnce(deps)
+    expect(r.reveal).toBe('posted')
+    expect(sent).toEqual(['reveal'])
+})
