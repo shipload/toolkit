@@ -55,12 +55,12 @@ describe('formatMassScaled', () => {
     })
 
     test('switches to m at 1,000,000 t', () => {
-        expect(formatMassScaled(10_000_000)).toBe('1m t')
-        expect(formatMassScaled(25_000_000)).toBe('2.5m t')
+        expect(formatMassScaled(10_000_000)).toBe('1M t')
+        expect(formatMassScaled(25_000_000)).toBe('2.5M t')
     })
 
     test('switches to b at 1,000,000,000 t', () => {
-        expect(formatMassScaled(10_000_000_000)).toBe('1b t')
+        expect(formatMassScaled(10_000_000_000)).toBe('1B t')
     })
 
     test('handles negative mass', () => {

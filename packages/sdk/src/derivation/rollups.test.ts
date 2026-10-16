@@ -1,6 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {ServerContract} from '../contracts'
-import {rollupGatherer, rollupCrafter, rollupLoaders} from './rollups'
+import {rollupGatherer, rollupGathererAt, rollupCrafter, rollupLoaders} from './rollups'
 
 const gLane = (slot: number, y: number, d: number, depth: number) =>
     ServerContract.Types.gatherer_lane.from({
@@ -33,6 +33,23 @@ describe('rollupGatherer', () => {
     test('clamps summed yield to uint16', () => {
         const r = rollupGatherer([gLane(2, 60000, 0, 1), gLane(3, 60000, 0, 1)])!
         expect(r.yield.toNumber()).toBe(65535)
+    })
+})
+
+describe('rollupGathererAt', () => {
+    const shallow = gLane(2, 300, 1250, 500)
+    const deep = gLane(3, 250, 1000, 5495)
+    test('pools only the lanes that reach the stratum', () => {
+        const r = rollupGathererAt([shallow, deep], 2000)!
+        expect(r.yield.toNumber()).toBe(250)
+        expect(r.drain.toNumber()).toBe(1000)
+        expect(r.depth.toNumber()).toBe(5495)
+    })
+    test('pools every lane at a stratum all of them reach', () => {
+        expect(rollupGathererAt([shallow, deep], 500)!.yield.toNumber()).toBe(550)
+    })
+    test('no lane reaches → undefined', () => {
+        expect(rollupGathererAt([shallow, deep], 6000)).toBeUndefined()
     })
 })
 

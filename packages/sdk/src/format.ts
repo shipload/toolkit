@@ -29,8 +29,8 @@ export function formatMassScaled(mass: number): string {
     if (mass === 0) return '0 t'
     const sign = mass < 0 ? '-' : ''
     const tonnes = Math.abs(mass) / MASS_UNITS_PER_TONNE
-    if (tonnes >= 1_000_000_000) return `${sign}${trim(tonnes / 1_000_000_000)}b t`
-    if (tonnes >= 1_000_000) return `${sign}${trim(tonnes / 1_000_000)}m t`
+    if (tonnes >= 1_000_000_000) return `${sign}${trim(tonnes / 1_000_000_000)}B t`
+    if (tonnes >= 1_000_000) return `${sign}${trim(tonnes / 1_000_000)}M t`
     if (tonnes >= 1_000) return `${sign}${trim(tonnes / 1_000)}k t`
     return formatMass(mass)
 }

@@ -936,6 +936,7 @@ exports[`module export surface 1`] = `
   "rollupBuilder",
   "rollupCrafter",
   "rollupGatherer",
+  "rollupGathererAt",
   "rollupLoaders",
   "romanNumeral",
   "rotation",

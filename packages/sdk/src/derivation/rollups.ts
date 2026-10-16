@@ -21,6 +21,13 @@ export function rollupGatherer(
     }
 }
 
+export function rollupGathererAt(
+    lanes: ServerContract.Types.gatherer_lane[],
+    stratum: number
+): {yield: UInt16; drain: UInt32; depth: UInt16} | undefined {
+    return rollupGatherer(lanes.filter((l) => Number(l.depth) >= stratum))
+}
+
 export function rollupCrafter(
     lanes: ServerContract.Types.crafter_lane[]
 ): {speed: UInt16; drain: UInt32} | undefined {
