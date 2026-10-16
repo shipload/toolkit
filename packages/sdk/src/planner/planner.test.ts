@@ -43,12 +43,12 @@ function gathererLane(
 
 function loaderLane(
     slotIndex: number,
-    mass: number,
+    payload: number,
     thrust: number
 ): ServerContract.Types.loader_lane {
     return ServerContract.Types.loader_lane.from({
         slot_index: UInt8.from(slotIndex),
-        mass: UInt32.from(mass),
+        payload: UInt16.from(payload),
         thrust: UInt16.from(thrust),
         output_pct: UInt16.from(100),
     })

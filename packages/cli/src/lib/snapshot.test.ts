@@ -54,8 +54,8 @@ test("loader thrust rollup clamps to uint16 max", () => {
 	const snap = entityInfoToSnapshot(
 		entityInfoWith({
 			loader_lanes: [
-				{ mass: u(2000), thrust: u(40000) },
-				{ mass: u(2000), thrust: u(40000) },
+				{ payload: u(600), thrust: u(40000) },
+				{ payload: u(600), thrust: u(40000) },
 			],
 		}),
 	);

@@ -75,18 +75,18 @@ describe('hydrateEntityLanes', () => {
 })
 
 describe('entityToRouteMover', () => {
-    test('sums hullmass, cargomass, and loader lane mass into total mass', () => {
+    test('sums hullmass, cargomass, and each docked bay into total mass', () => {
         const mover = entityToRouteMover(
             {id: UInt64.from(1), energy: 500, cargomass: 200},
             {
                 hullmass: 1000,
                 loaderLanes: [
-                    {slotIndex: 0, mass: 50, thrust: 10, outputPct: 100},
-                    {slotIndex: 1, mass: 25, thrust: 10, outputPct: 100},
+                    {slotIndex: 0, payload: 600, thrust: 10, outputPct: 100},
+                    {slotIndex: 1, payload: 700, thrust: 10, outputPct: 100},
                 ],
             }
         )
-        expect(mover.mass).toBe(1000 + 200 + 50 + 25)
+        expect(mover.mass).toBe(1000 + 200 + 20 + 20)
         expect(mover.energy).toBe(500)
         expect(mover.ref).toEqual({entityType: 'ship', entityId: UInt64.from(1)})
     })

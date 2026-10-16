@@ -217,10 +217,9 @@ describe('computeEntitySheet sections for movement modules', () => {
         ])
         expect(section(sheet, 'shuttling').headline).toBe('transfer')
         expect(texts(sheet, 'shuttling')).toEqual([
-            ['Transfer', '2 × 426 t/min'],
+            ['Transfer', '2 × 326 t/min'],
             ['Shuttles', '2'],
         ])
-        expect(rowOf(sheet, 'shuttling', 'transfer').provisional).toBe(true)
     })
 })
 

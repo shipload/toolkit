@@ -5,7 +5,12 @@ import {MASS_STAT_SCALE, PRECISION, TaskType} from '../types'
 import {getBaseHullmassFor} from '../derivation/capabilities'
 import {getItem} from '../data/catalog'
 import {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../data/item-ids'
-import {computeGeneratorRech, computeTravelDrain} from '../nft/description'
+import {
+    calcShuttleMass,
+    computeGeneratorRech,
+    computeLoaderPayload,
+    computeTravelDrain,
+} from '../nft/description'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
 import {placedStart} from './lanes'
@@ -18,29 +23,29 @@ const NFT_TRANSIT_REFERENCE_MASS =
     getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
     Number(getItem(ITEM_ENGINE_T1).mass) +
     Number(getItem(ITEM_GENERATOR_T1).mass)
-const BASELINE_LOADER: DerivedLoaders = {mass: 20, thrust: 1, quantity: 1}
+const BASELINE_LOADER: DerivedLoaders = {payload: computeLoaderPayload(0), thrust: 1, quantity: 1}
 // ground-level entities (warehouses, z=0) still incur a base orbital climb of load effort
 const MIN_LOAD_Z = 800
 
 export interface DerivedLoaders {
-    mass: number
+    payload: number
     thrust: number
     quantity: number
 }
 
 export function derivedLoaders(
-    lanes: {mass: UInt32Type | number; thrust: UInt16Type | number}[] | undefined
+    lanes: {payload: UInt16Type | number; thrust: UInt16Type | number}[] | undefined
 ): DerivedLoaders | null {
     if (!lanes || lanes.length === 0) return null
-    let totalMass = 0
+    let totalPayload = 0
     let totalThrust = 0
     for (const l of lanes) {
-        totalMass += Number(l.mass)
+        totalPayload += Number(l.payload)
         totalThrust += Number(l.thrust)
     }
     const count = lanes.length
     return {
-        mass: Math.floor(totalMass / count),
+        payload: Math.floor(totalPayload / count),
         thrust: Math.min(totalThrust, 65_535),
         quantity: count,
     }
@@ -94,7 +99,7 @@ export function unwrapLoadDuration(
     destZ: number
 ): number {
     if (!loaders || itemMass <= 0) return 0
-    const total = itemMass + loaders.mass
+    const total = calcShuttleMass(itemMass, loaders.payload)
     const flight = flightTime(Math.max(destZ, MIN_LOAD_Z), acceleration(loaders.thrust, total))
     const duration = Math.floor(flight / loaders.quantity)
     return duration === 0 ? 1 : duration
@@ -109,7 +114,7 @@ export interface UnwrapItem {
 }
 
 export interface UnwrapDestination {
-    loader_lanes?: {mass: UInt32Type | number; thrust: UInt16Type | number}[]
+    loader_lanes?: {payload: UInt16Type | number; thrust: UInt16Type | number}[]
     coordinates: {x: UInt32Type | number; y: UInt32Type | number; z?: UInt32Type | number}
 }
 

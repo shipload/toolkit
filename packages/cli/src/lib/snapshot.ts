@@ -33,7 +33,7 @@ export interface EntitySnapshot {
 	crafter?: { speed: bigint; drain: bigint };
 	builder?: { speed: bigint; drain: bigint };
 	warp?: { range: bigint };
-	loaders?: { mass: bigint; thrust: bigint; quantity: bigint };
+	loaders?: { payload: bigint; thrust: bigint; quantity: bigint };
 	gatherer_lanes: ServerTypes.gatherer_lane[];
 	crafter_lanes: ServerTypes.crafter_lane[];
 	builder_lanes: ServerTypes.builder_lane[];
@@ -109,7 +109,7 @@ export function entityInfoToSnapshot(
 		snap.warp = {range: BigInt(ei.warp.range.toString())};
 	}
 	const l = rollupLoaders(ei.loader_lanes ?? []);
-	if (l) snap.loaders = {mass: BigInt(l.mass.toString()), thrust: BigInt(l.thrust.toString()), quantity: BigInt(l.quantity.toString())};
+	if (l) snap.loaders = {payload: BigInt(l.payload.toString()), thrust: BigInt(l.thrust.toString()), quantity: BigInt(l.quantity.toString())};
 	return snap;
 }
 

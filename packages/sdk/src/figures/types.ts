@@ -48,7 +48,6 @@ export interface Figure {
     unit: string
     text: string
     note?: string
-    provisional?: boolean
 }
 
 export interface ModuleFigures {

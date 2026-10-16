@@ -3,7 +3,7 @@ import {expect, test} from 'bun:test'
 import {encodeStats} from '../derivation/crafting'
 import {computeGathererDepth, computeGathererDrain} from '../nft/description'
 import {computeGathererYield} from '../derivation/capabilities'
-import {computeLoaderThrust, computeLoaderMass} from '../nft/description'
+import {computeLoaderThrust, computeLoaderPayload} from '../nft/description'
 import {computeCrafterSpeed, computeCrafterDrain} from '../nft/description'
 import {applySlotMultiplier} from '../entities/slot-multiplier'
 import {getSlotAmp} from '../entities/slot-multiplier'
@@ -146,7 +146,7 @@ test('resolveLaneLoader returns correct stats for slot 0 (laneKey=1)', () => {
     expect(result.valid).toBe(true)
     expect(result.slotIndex).toBe(0)
     expect(result.thrust).toBe(applySlotMultiplier(computeLoaderThrust(LOADER_PLA, 1), amp))
-    expect(result.mass).toBe(computeLoaderMass(LOADER_INS))
+    expect(result.payload).toBe(computeLoaderPayload(LOADER_INS))
     expect(result.outputPct).toBe(amp)
 })
 
@@ -155,7 +155,7 @@ test('resolveLaneLoader soft-returns invalid for LANE_MOBILITY (key 0), never th
     const result = resolveLaneLoader(modules, ITEM_LOADER_T1, LANE_MOBILITY)
     expect(result.valid).toBe(false)
     expect(result.thrust).toBe(0)
-    expect(result.mass).toBe(0)
+    expect(result.payload).toBe(0)
 })
 
 test('resolveLaneLoader soft-returns invalid for a missing/out-of-range module, never throws', () => {
@@ -163,7 +163,7 @@ test('resolveLaneLoader soft-returns invalid for a missing/out-of-range module, 
     const result = resolveLaneLoader(modules, ITEM_LOADER_T1, 5)
     expect(result.valid).toBe(false)
     expect(result.thrust).toBe(0)
-    expect(result.mass).toBe(0)
+    expect(result.payload).toBe(0)
 })
 
 // --- depth-aware workerLaneKey ---

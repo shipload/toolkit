@@ -91,7 +91,7 @@ export const computeGathererDrain = (con: number): number =>
     2 * Math.max(250_000, 1_250_000 - con * 1250)
 export const computeGathererDepth = (tol: number, tier: number): number =>
     gathererDepthForTier(tol, tier)
-export const computeLoaderMass = (ins: number): number => Math.max(2, 20 - idiv(ins, 50))
+export {computeLoaderPayload, calcShuttleMass} from '../derivation/capabilities'
 export const computeLoaderThrust = (pla: number, tier: number): number =>
     idiv((1 + idiv(pla * pla, 10000)) * moduleTierPct(LOADER_THRUST_TIER_PCT, tier), 100)
 export const computeCrafterSpeed = (rea: number, tier: number): number =>

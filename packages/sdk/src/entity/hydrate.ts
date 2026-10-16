@@ -1,6 +1,6 @@
 import type {UInt32Type, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
-import type {ComputedCapabilities} from '../derivation/capabilities'
+import {computeLoaderDockedMass, type ComputedCapabilities} from '../derivation/capabilities'
 import {routeBarriers, type RouteMoverInput} from '../travel/route-simulator'
 import {calc_queue_cargomass} from '../travel/travel'
 import type {AnchoredScheduleData} from '../scheduling/schedule'
@@ -69,7 +69,7 @@ export function entityToRouteMover(
     caps: RouteMoverCaps,
     opts: RouteMoverOpts = {}
 ): RouteMoverInput {
-    const loaderMass = (caps.loaderLanes ?? []).reduce((sum, lane) => sum + Number(lane.mass), 0)
+    const loaderMass = computeLoaderDockedMass((caps.loaderLanes ?? []).length)
     const queued = row.lanes !== undefined || row.holds !== undefined
     const barriers = queued ? routeBarriers(row, opts.nowMs ?? Date.now()) : undefined
     const cargomass = row.lanes

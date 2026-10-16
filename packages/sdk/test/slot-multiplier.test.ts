@@ -131,7 +131,7 @@ describe('computeEntityCapabilities — selective application', () => {
         )
 
         expect(amplified.loaders!.thrust).toBe(2 * baseline.loaders!.thrust)
-        expect(amplified.loaders!.mass).toBe(baseline.loaders!.mass)
+        expect(amplified.loaders!.payload).toBe(baseline.loaders!.payload)
         expect(amplified.loaders!.count).toBe(baseline.loaders!.count)
     })
 })

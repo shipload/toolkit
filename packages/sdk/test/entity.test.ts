@@ -165,8 +165,8 @@ describe('Entity unification — registry-driven', () => {
             const e = Object.setPrototypeOf(
                 shipWithLanes({
                     loaders: [
-                        {slot_index: 0, mass: 1000, thrust: 40000},
-                        {slot_index: 1, mass: 1000, thrust: 40000},
+                        {slot_index: 0, payload: 500, thrust: 40000},
+                        {slot_index: 1, payload: 500, thrust: 40000},
                     ],
                 }),
                 Entity.prototype

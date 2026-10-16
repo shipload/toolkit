@@ -38,10 +38,10 @@ describe('unwrap duration mirror', () => {
         expect(derivedLoaders([])).toBeNull()
         expect(
             derivedLoaders([
-                {mass: 1000, thrust: 10},
-                {mass: 1400, thrust: 20},
+                {payload: 600, thrust: 10},
+                {payload: 701, thrust: 20},
             ])
-        ).toEqual({mass: 1200, thrust: 30, quantity: 2}) // floor(2400/2)=1200, sum thrust, count
+        ).toEqual({payload: 650, thrust: 30, quantity: 2})
     })
 
     test('transit floors item mass at cruise-transition distance before cruise-capping flight time', () => {
@@ -71,10 +71,10 @@ describe('unwrap duration mirror', () => {
         expect(nftTransitDuration(0, 48_473)).toBe(0)
     })
 
-    test('load uses altitude z, adds loader mass, divides by quantity', () => {
-        const loaders = {mass: 1200, thrust: 30, quantity: 2}
+    test('load uses altitude z, divides the item by payload, divides by quantity', () => {
+        const loaders = {payload: 640, thrust: 30, quantity: 2}
         const itemMass = 800
-        const accel = (30 / ((itemMass + 1200) * 100)) * 10000
+        const accel = (30 / (1250 * 100)) * 10000
         const flight = Math.floor(2 * Math.sqrt(3000 / accel))
         expect(unwrapLoadDuration(loaders, itemMass, 3000)).toBe(Math.floor(flight / 2))
     })
@@ -85,7 +85,7 @@ describe('unwrap duration mirror', () => {
     })
 
     test('load altitude is floored so ground-level (z=0) destinations are not instant', () => {
-        const loaders = {mass: 500, thrust: 200, quantity: 1}
+        const loaders = {payload: 500, thrust: 200, quantity: 1}
         const atZero = unwrapLoadDuration(loaders, 1000, 0)
         const at800 = unwrapLoadDuration(loaders, 1000, 800)
         expect(atZero).toBeGreaterThan(0)
@@ -101,7 +101,7 @@ describe('unwrap duration mirror', () => {
         expect(bare).toBeGreaterThan(0)
 
         const loadedDest = {
-            loader_lanes: [{mass: 500, thrust: 200}],
+            loader_lanes: [{payload: 500, thrust: 200}],
             coordinates: {x: 0, y: 0, z: 800},
         }
         const loaded = estimateUnwrapDuration(loadedDest, item)
@@ -217,7 +217,7 @@ function rawLane(key: number, tasks: ServerContract.Types.task[]) {
 describe('receiveFits behind a pending recharge', () => {
     const dest = {
         coordinates: {x: 0, y: 0, z: 800},
-        loader_lanes: [{mass: 16, thrust: 4}],
+        loader_lanes: [{payload: 600, thrust: 4}],
         cargomass: 6_600 * CRYSTAL_MASS,
         capacity: 67_873,
         holds: [],

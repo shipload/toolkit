@@ -78,12 +78,13 @@ describe('getModuleFigures starter T1 rows', () => {
         ])
     })
 
-    test('Shuttle Bay transfer is provisional until the payload curve lands', () => {
+    test('Shuttle Bay', () => {
         const figures = getModuleFigures(ITEM_LOADER_T1, STARTER)
         expect(figures?.sectionLabel).toBe('Shuttling')
-        expect(figures?.rows.map((r) => [r.label, r.text, r.provisional ?? false])).toEqual([
-            ['Transfer', '476 t/min', true],
-            ['Shuttles', '1', false],
+        expect(figures?.rows.map((r) => [r.label, r.text])).toEqual([
+            ['Transfer', '364 t/min'],
+            ['Payload', '58.7%'],
+            ['Shuttles', '1'],
         ])
     })
 
@@ -123,9 +124,9 @@ describe('getModuleFigures numeric values', () => {
         expect(getModuleFigures(ITEM_ENGINE_T1, STARTER)?.rows[1].value).toBeCloseTo(200.8, 1)
     })
 
-    test('Shuttle Bay moves 1,000 t between two ships in 126 s', () => {
+    test('Shuttle Bay moves 1,000 t between two ships in 165 s', () => {
         expect(getModuleFigures(ITEM_LOADER_T1, STARTER)?.rows[0].value).toBeCloseTo(
-            60_000 / 126,
+            60_000 / 165,
             6
         )
     })

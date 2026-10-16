@@ -4,6 +4,7 @@ import type {ServerContract} from '../contracts'
 import {PlotManager} from './plot'
 import {getItem} from '../data/catalog'
 import {calc_build_duration} from '../capabilities/crafting'
+import {computeLoaderDockedMass} from '../derivation/capabilities'
 import {getLanes, getTasks, isIdle} from '../scheduling/schedule'
 import {HoldKind, TaskType} from '../types'
 import type {
@@ -362,7 +363,7 @@ function partitionSources(
         if (relevant.length === 0) continue
         const loaderLanes = entity.loader_lanes ?? []
         const loaderCount = loaderLanes.length
-        const loaderTotalMass = loaderLanes.reduce((s, l) => s + Number(l.mass), 0)
+        const loaderTotalMass = computeLoaderDockedMass(loaderCount)
         const ref: SourceEntityRef = {
             entityId: entity.id,
             name: entity.id.toString(),

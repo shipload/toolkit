@@ -187,7 +187,7 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         info.loader_lanes = (caps.loaderLanes ?? []).map((l) =>
             ServerContract.Types.loader_lane.from({
                 slot_index: l.slotIndex,
-                mass: l.mass,
+                payload: l.payload,
                 thrust: l.thrust,
                 output_pct: l.outputPct,
             })

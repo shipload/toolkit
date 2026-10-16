@@ -125,11 +125,11 @@ export function computeGathererCapabilities(
 export function computeLoaderCapabilities(
     stats: Record<string, number>,
     tier: number
-): {mass: number; thrust: number; quantity: number} {
+): {payload: number; thrust: number; quantity: number} {
     const insulation = stats.insulation
     const plasticity = stats.plasticity
     return {
-        mass: Math.max(2, 20 - Math.floor(insulation / 50)),
+        payload: computeLoaderPayload(insulation),
         thrust: Math.floor(
             ((1 + Math.floor((plasticity * plasticity) / 10000)) *
                 moduleTierPct(LOADER_THRUST_TIER_PCT, tier)) /
@@ -300,6 +300,19 @@ export const CRAFTER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 2
 export const BUILDER_SPEED_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
 export const WARP_RANGE_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
 export const LOADER_THRUST_TIER_PCT = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280] as const
+export const LOADER_PAYLOAD_MIN_PERMILLE = 500
+export const LOADER_PAYLOAD_MAX_PERMILLE = 910
+export const LOADER_DOCKED_MASS = 20
+
+export function computeLoaderPayload(insulation: number): number {
+    const span = LOADER_PAYLOAD_MAX_PERMILLE - LOADER_PAYLOAD_MIN_PERMILLE
+    return LOADER_PAYLOAD_MIN_PERMILLE + Math.floor((Math.min(insulation, 999) * span) / 999)
+}
+
+// Mirrors calc_shuttle_mass: the load plus its thermal container.
+export function calcShuttleMass(load: number, payload: number): number {
+    return Math.floor((load * 1000) / Math.max(payload, 1))
+}
 export const CARGO_BAY_CAPACITY_TIER_PCT = [
     100, 110, 120, 130, 140, 150, 160, 170, 180, 190,
 ] as const
@@ -407,7 +420,7 @@ export interface BuilderLaneEntry {
 
 export interface LoaderLaneEntry {
     slotIndex: number
-    mass: number
+    payload: number
     thrust: number
     outputPct: number
 }
@@ -427,7 +440,7 @@ export interface ComputedCapabilities {
     generator?: {capacity: number; recharge: number}
     gatherer?: {yield: number; drain: number; depth: number}
     gathererLanes?: GathererLaneEntry[]
-    loaders?: {mass: number; thrust: number; quantity: number}
+    loaders?: {payload: number; thrust: number; quantity: number}
     loaderLanes?: LoaderLaneEntry[]
     crafter?: {speed: number; drain: number}
     crafterLanes?: CrafterLaneEntry[]
@@ -447,7 +460,7 @@ export type ModuleCapabilities =
     | {kind: 'engine'; tier: number; thrust: number; thermal: number}
     | {kind: 'generator'; tier: number; capacity: number; recharge: number}
     | {kind: 'gatherer'; tier: number; yield: number; drain: number; depth: number}
-    | {kind: 'loader'; tier: number; mass: number; thrust: number; quantity: number}
+    | {kind: 'loader'; tier: number; payload: number; thrust: number; quantity: number}
     | {kind: 'storage'; tier: number; capacity: number; drain: number}
     | {kind: 'crafter'; tier: number; speed: number; drain: number}
     | {kind: 'builder'; tier: number; speed: number; drain: number}
@@ -509,7 +522,7 @@ export function computeModuleCapabilities(
             return {
                 kind: 'loader',
                 tier,
-                mass: caps.mass,
+                payload: caps.payload,
                 thrust: Math.max(1, applySlotMultiplier(caps.thrust, outputPct)),
                 quantity: caps.quantity,
             }
@@ -579,11 +592,9 @@ export function computeModuleCapabilities(
     }
 }
 
-// Mirrors entity_capabilities::loader_mass(): floor(mean) × count.
-export function computeLoaderWorkerMass(laneMasses: readonly number[]): number {
-    if (laneMasses.length === 0) return 0
-    const total = laneMasses.reduce((sum, mass) => sum + mass, 0)
-    return Math.floor(total / laneMasses.length) * laneMasses.length
+// Mirrors entity_capabilities::loader_mass(): a fixed docked weight per fitted bay.
+export function computeLoaderDockedMass(bayCount: number): number {
+    return LOADER_DOCKED_MASS * bayCount
 }
 
 export function computeEntityCapabilities(
@@ -601,7 +612,7 @@ export function computeEntityCapabilities(
     let totalGenRecharge = 0
     let hasGenerator = false
 
-    const loaderMasses: number[] = []
+    let totalLoaderPayload = 0
     let totalLoaderThrust = 0
     let totalLoaderQuantity = 0
     let hasLoader = false
@@ -674,12 +685,12 @@ export function computeEntityCapabilities(
             })
         } else if (caps.kind === 'loader') {
             hasLoader = true
-            loaderMasses.push(caps.mass)
+            totalLoaderPayload += caps.payload
             totalLoaderThrust += caps.thrust
             totalLoaderQuantity += caps.quantity
             loaderLanes.push({
                 slotIndex: mod.slotIndex,
-                mass: caps.mass,
+                payload: caps.payload,
                 thrust: caps.thrust,
                 outputPct: amp,
             })
@@ -762,7 +773,7 @@ export function computeEntityCapabilities(
     }
     if (hasLoader) {
         result.loaders = {
-            mass: computeLoaderWorkerMass(loaderMasses),
+            payload: Math.floor(totalLoaderPayload / loaderLanes.length),
             thrust: clampUint16(totalLoaderThrust),
             quantity: totalLoaderQuantity,
         }

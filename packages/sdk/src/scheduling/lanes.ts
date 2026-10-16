@@ -8,7 +8,7 @@ import {applySlotMultiplier, getSlotAmp} from '../entities/slot-multiplier'
 import {
     computeGathererDrain,
     computeLoaderThrust,
-    computeLoaderMass,
+    computeLoaderPayload,
     computeCrafterSpeed,
     computeCrafterDrain,
     computeBuilderSpeed,
@@ -51,7 +51,7 @@ export interface ResolvedCrafterLane {
 export interface ResolvedLoaderLane {
     slotIndex: number
     thrust: number
-    mass: number
+    payload: number
     outputPct: number
     valid: boolean
 }
@@ -151,12 +151,12 @@ export function resolveLaneLoader(
     laneKey: number
 ): ResolvedLoaderLane {
     if (laneKey === LANE_MOBILITY) {
-        return {slotIndex: -1, thrust: 0, mass: 0, outputPct: 0, valid: false}
+        return {slotIndex: -1, thrust: 0, payload: 0, outputPct: 0, valid: false}
     }
     const idx = laneKey - 1
     const installed = idx >= 0 && idx < modules.length ? modules[idx].installed : undefined
     if (!installed) {
-        return {slotIndex: idx, thrust: 0, mass: 0, outputPct: 0, valid: false}
+        return {slotIndex: idx, thrust: 0, payload: 0, outputPct: 0, valid: false}
     }
     const item = getItem(Number(installed.item_id.value ?? installed.item_id))
     const stats = BigInt(installed.stats.toString())
@@ -165,8 +165,8 @@ export function resolveLaneLoader(
     const layout = getEntityLayout(entityItemId)?.slots ?? []
     const amp = getSlotAmp(layout, idx)
     const thrust = Math.max(1, applySlotMultiplier(computeLoaderThrust(pla, item.tier ?? 1), amp))
-    const mass = computeLoaderMass(ins)
-    return {slotIndex: idx, thrust, mass, outputPct: amp, valid: true}
+    const payload = computeLoaderPayload(ins)
+    return {slotIndex: idx, thrust, payload, outputPct: amp, valid: true}
 }
 
 export function workerLaneKey(

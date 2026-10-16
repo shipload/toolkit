@@ -159,7 +159,7 @@ describe('partitionSources netting against reservations', () => {
             loader_lanes: [
                 ServerContract.Types.loader_lane.from({
                     slot_index: UInt8.from(0),
-                    mass: UInt32.from(50_000),
+                    payload: UInt16.from(500),
                     thrust: UInt16.from(0),
                     output_pct: UInt16.from(100),
                 }),

@@ -6,6 +6,7 @@ import {
     cruiseSpeedLyPerHour,
     gatherDrainPerMinute,
     handlingPercentPerContainer,
+    payloadPercent,
     inputTonnesPerMinute,
     launchChargePerMinute,
     launchDrainPerKiloTonneLy,
@@ -103,17 +104,15 @@ export function transferFigure(
     key: string,
     label: string,
     thrust: number,
-    shuttleMass: number
+    payload: number
 ): Figure {
-    const value = referenceTransferPerMinute(thrust, shuttleMass)
-    return {
-        key,
-        label,
-        value,
-        unit: 't/min',
-        text: formatTonnesRate(value, 0),
-        provisional: true,
-    }
+    const value = referenceTransferPerMinute(thrust, payload)
+    return {key, label, value, unit: 't/min', text: formatTonnesRate(value, 0)}
+}
+
+export function payloadFigure(key: string, label: string, payload: number): Figure {
+    const value = payloadPercent(payload)
+    return {key, label, value, unit: '%', text: `${formatFixed(value, 1)}%`}
 }
 
 export function countFigure(key: string, label: string, count: number): Figure {
@@ -212,7 +211,8 @@ function moduleRows(caps: ModuleCapabilities): Figure[] {
             ]
         case 'loader':
             return [
-                transferFigure('transfer', 'Transfer', caps.thrust, caps.mass),
+                transferFigure('transfer', 'Transfer', caps.thrust, caps.payload),
+                payloadFigure('payload', 'Payload', caps.payload),
                 countFigure('shuttles', 'Shuttles', caps.quantity),
             ]
         case 'crafter':

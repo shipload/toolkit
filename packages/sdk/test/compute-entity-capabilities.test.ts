@@ -267,7 +267,7 @@ describe('computeEntityCapabilities', () => {
         )
         expect(result.loaders).toBeDefined()
         expect(result.loaders?.quantity).toBeGreaterThan(0)
-        expect(result.loaders?.mass).toBeGreaterThan(0)
+        expect(result.loaders?.payload).toBeGreaterThanOrEqual(500)
     })
 
     test('hauler: single T1 beam yields capacity 2 and a single capacityByTier entry', () => {

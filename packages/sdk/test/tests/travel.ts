@@ -63,7 +63,7 @@ function createMockShip(
         recharge: number
         drain: number
         loaderQuantity: number
-        loaderMass: number
+        loaderPayload: number
         loaderThrust: number
         locationZ: number
         generatorCapacity: number
@@ -94,7 +94,7 @@ function createMockShip(
         },
         loaders: {
             quantity: overrides.loaderQuantity ?? 1,
-            mass: overrides.loaderMass ?? 5000,
+            payload: overrides.loaderPayload ?? 500,
             thrust: overrides.loaderThrust ?? 100,
         },
         is_idle: true,
@@ -107,7 +107,7 @@ function createMockShip(
         builder_lanes: [],
         loader_lanes: Array.from({length: overrides.loaderQuantity ?? 1}, (_, i) => ({
             slot_index: i,
-            mass: overrides.loaderMass ?? 5000,
+            payload: overrides.loaderPayload ?? 500,
             thrust: overrides.loaderThrust ?? 100,
             output_pct: 100,
         })),
@@ -254,16 +254,20 @@ describe('travel', () => {
 
     describe('calc_loader_flighttime', () => {
         test('calculates loader flight time', () => {
-            const mockShip = createMockShip({loaderThrust: 100, loaderMass: 5000, capacity: 500000})
+            const mockShip = createMockShip({
+                loaderThrust: 100,
+                loaderPayload: 500,
+                capacity: 500000,
+            })
             const time = calc_loader_flighttime(mockShip, UInt64.from(10000))
             assert.isAbove(Number(time), 0)
         })
 
         test('floors a ground-level entity at the base orbital altitude, not an instant load', () => {
-            const ground = createMockShip({loaderThrust: 100, loaderMass: 5000, locationZ: 0})
+            const ground = createMockShip({loaderThrust: 100, loaderPayload: 500, locationZ: 0})
             const orbital = createMockShip({
                 loaderThrust: 100,
-                loaderMass: 5000,
+                loaderPayload: 500,
                 locationZ: MIN_ORBITAL_ALTITUDE,
             })
             const mass = UInt64.from(10000)
@@ -276,14 +280,14 @@ describe('travel', () => {
         })
 
         test('never reports a zero-second load', () => {
-            const fast = createMockShip({loaderThrust: 65535, loaderMass: 1, locationZ: 0})
+            const fast = createMockShip({loaderThrust: 65535, loaderPayload: 910, locationZ: 0})
             assert.isAtLeast(Number(calc_loader_flighttime(fast, UInt64.from(1))), 1)
         })
     })
 
     describe('calc_loader_acceleration', () => {
         test('calculates loader acceleration', () => {
-            const mockShip = createMockShip({loaderThrust: 100, loaderMass: 5000})
+            const mockShip = createMockShip({loaderThrust: 100, loaderPayload: 500})
             const accel = calc_loader_acceleration(mockShip, UInt64.from(10000))
             assert.isAbove(accel, 0)
         })
@@ -314,20 +318,32 @@ describe('travel', () => {
 
     describe('calc_ship_mass', () => {
         test('calculates mass without cargo', () => {
-            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 1, loaderMass: 5000})
+            const mockShip = createMockShip({
+                hullmass: 100000,
+                loaderQuantity: 1,
+                loaderPayload: 500,
+            })
             const mass = calc_ship_mass(mockShip, [])
-            assert.equal(Number(mass), 105000)
+            assert.equal(Number(mass), 100020)
         })
 
         test('includes cargo mass', () => {
-            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 0, loaderMass: 0})
+            const mockShip = createMockShip({
+                hullmass: 100000,
+                loaderQuantity: 0,
+                loaderPayload: 500,
+            })
             const cargo = createMockCargo(1, 10)
             const mass = calc_ship_mass(mockShip, [cargo])
             assert.isAbove(Number(mass), 100000)
         })
 
         test('handles ship with no loaders', () => {
-            const mockShip = createMockShip({hullmass: 100000, loaderQuantity: 0, loaderMass: 5000})
+            const mockShip = createMockShip({
+                hullmass: 100000,
+                loaderQuantity: 0,
+                loaderPayload: 500,
+            })
             const mass = calc_ship_mass(mockShip, [])
             assert.equal(Number(mass), 100000)
         })
@@ -522,12 +538,12 @@ describe('travel', () => {
     })
 
     describe('calc_transfer_duration (ADR 0029 per-lane, T8 consumed path)', () => {
-        const lane = (thrust: number, mass: number, slot = 0) => ({
+        const lane = (thrust: number, payload: number, slot = 0) => ({
             slot_index: slot,
             thrust,
-            mass,
+            payload,
         })
-        const oneLoader = [lane(100, 5000)]
+        const oneLoader = [lane(100, 500)]
 
         test('returns 0 when cargo mass is 0', () => {
             const source = {
@@ -545,7 +561,6 @@ describe('travel', () => {
         })
 
         test('multi-loader entity: returns the chosen lane value, NOT summed÷count', () => {
-            // BEFORE old summed÷count = 2; AFTER per-lane lowest-slot (thrust=100,mass=500) = 6
             const sender = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
@@ -556,19 +571,19 @@ describe('travel', () => {
                 entityClass: EntityClass.OrbitalVessel,
             }
             const duration = calc_transfer_duration(sender, receiver, 100)
-            assert.equal(duration, 6)
+            assert.equal(duration, 4)
         })
 
         test('lane selection uses lowest slot regardless of array order', () => {
             const senderOrdered = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
-                loaderLanes: [lane(100, 50000, 0), lane(300, 80000, 1)],
+                loaderLanes: [lane(100, 600, 0), lane(300, 800, 1)],
             }
             const senderReversed = {
                 location: {z: 800},
                 entityClass: EntityClass.OrbitalVessel,
-                loaderLanes: [lane(300, 80000, 1), lane(100, 50000, 0)],
+                loaderLanes: [lane(300, 800, 1), lane(100, 600, 0)],
             }
             const receiver = {location: {z: 800}, entityClass: EntityClass.OrbitalVessel}
             assert.equal(
@@ -653,7 +668,7 @@ describe('travel', () => {
             const counterpart = {
                 location: {z: 1000},
                 entityClass: EntityClass.PlanetaryStructure,
-                loaderLanes: [lane(50, 50000)],
+                loaderLanes: [lane(50, 600)],
             }
             const expected = calc_onesided_duration(
                 300,
@@ -999,15 +1014,15 @@ describe('getInterpolatedPosition', () => {
 })
 
 describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
-    // BEFORE=3 (old summed÷count), AFTER=6 (per-lane single-module thrust, no ÷qty)
     const LOADER_THRUST = 100
     const LOADER_MASS = 500
+    const LOADER_PAYLOAD = 500
     const CARGO_MASS = 100
     const ACTIVE_Z = 800
     const COUNTERPART_Z = 800
 
     const BEFORE_DURATION = 3
-    const AFTER_DURATION = 6
+    const AFTER_DURATION = 4
 
     test('old summed-÷count arithmetic yields BEFORE value (proves fixture distinguishes)', () => {
         // Reproduce the removed summed÷count formula for one loader on each side:
@@ -1025,7 +1040,7 @@ describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
     test('calc_onesided_duration returns AFTER value matching contract calc_onesided_duration', () => {
         const result = calc_onesided_duration(
             LOADER_THRUST,
-            LOADER_MASS,
+            LOADER_PAYLOAD,
             ACTIVE_Z,
             COUNTERPART_Z,
             EntityClass.OrbitalVessel,
@@ -1038,7 +1053,7 @@ describe('calc_onesided_duration — ADR 0029 per-lane loader parity', () => {
     test('zero cargo mass → 0 (mirrors contract early-return)', () => {
         const result = calc_onesided_duration(
             LOADER_THRUST,
-            LOADER_MASS,
+            LOADER_PAYLOAD,
             ACTIVE_Z,
             COUNTERPART_Z,
             EntityClass.OrbitalVessel,

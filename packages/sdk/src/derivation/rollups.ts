@@ -55,17 +55,17 @@ export function rollupBuilder(
 
 export function rollupLoaders(
     lanes: ServerContract.Types.loader_lane[]
-): {mass: UInt32; thrust: UInt16; quantity: UInt8} | undefined {
+): {payload: UInt16; thrust: UInt16; quantity: UInt8} | undefined {
     if (lanes.length === 0) return undefined
     const count = lanes.length
-    let totalMass = 0
+    let totalPayload = 0
     let totalThrust = 0
     for (const l of lanes) {
-        totalMass += Number(l.mass)
+        totalPayload += Number(l.payload)
         totalThrust += Number(l.thrust)
     }
     return {
-        mass: UInt32.from(Math.floor(totalMass / count)),
+        payload: UInt16.from(Math.floor(totalPayload / count)),
         thrust: UInt16.from(Math.min(totalThrust, 65535)),
         quantity: UInt8.from(count),
     }

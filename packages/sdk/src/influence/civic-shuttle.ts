@@ -14,7 +14,7 @@ export interface CivicShuttleBay {
     laneKey: number
     slotIndex: number
     thrust: number
-    mass: number
+    payload: number
     outputPct: number
     queued: number
     full: boolean
@@ -56,7 +56,7 @@ export function civicShuttleBays(
             laneKey,
             slotIndex,
             thrust: loader.thrust,
-            mass: loader.mass,
+            payload: loader.payload,
             outputPct: loader.outputPct,
             queued,
             full: queued >= JOB_QUEUE_CAP,

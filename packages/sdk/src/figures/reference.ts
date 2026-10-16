@@ -56,10 +56,10 @@ export function craftDrainPerKiloTonne(drain: number): number {
     return milliToEnergy((1000 * MASS_UNITS_PER_TONNE * drain) / CRAFT_ENERGY_DIVISOR)
 }
 
-export function referenceTransferSeconds(thrust: number, shuttleMass: number): number {
+export function referenceTransferSeconds(thrust: number, payload: number): number {
     return calc_onesided_duration(
         thrust,
-        shuttleMass,
+        payload,
         0,
         0,
         EntityClass.OrbitalVessel,
@@ -68,9 +68,13 @@ export function referenceTransferSeconds(thrust: number, shuttleMass: number): n
     )
 }
 
-export function referenceTransferPerMinute(thrust: number, shuttleMass: number): number {
-    const seconds = referenceTransferSeconds(thrust, shuttleMass)
+export function referenceTransferPerMinute(thrust: number, payload: number): number {
+    const seconds = referenceTransferSeconds(thrust, payload)
     return seconds > 0 ? (REFERENCE_TRANSFER_TONNES * SECONDS_PER_MINUTE) / seconds : 0
+}
+
+export function payloadPercent(payload: number): number {
+    return payload / 10
 }
 
 export function handlingPercentPerContainer(efficiency: number): number {

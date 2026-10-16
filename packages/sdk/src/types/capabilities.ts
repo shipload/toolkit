@@ -2,7 +2,7 @@ import type {Name, UInt32, UInt8} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 
 export interface LoaderStats {
-    mass: {toNumber(): number; multiplying(v: unknown): {toNumber(): number}}
+    payload: {toNumber(): number}
     thrust: {toNumber(): number}
     quantity: {toNumber(): number; gt(v: unknown): boolean}
 }

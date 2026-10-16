@@ -67,12 +67,12 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     },
     loading: {
         id: 'module.loading.description',
-        template: 'generates {thrust} thrust with a weight of {mass} per unit',
-        params: [
-            ['thrust', 'Thrust'],
-            ['mass', 'Mass'],
-        ],
-        highlightKeys: ['thrust', 'mass'],
+        template: 'generates {thrust} thrust and launches loads that are {payload}% cargo',
+        params: [['thrust', 'Thrust']],
+        highlightKeys: ['thrust', 'payload'],
+        derive: {
+            payload: (get) => get('Payload') / 10,
+        },
     },
     crafting: {
         id: 'module.crafting.description',

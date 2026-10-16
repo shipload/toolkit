@@ -200,7 +200,7 @@ function computeCapabilityGroup(
             return {
                 capability: 'Loading',
                 attributes: [
-                    {label: 'Mass', value: caps.mass},
+                    {label: 'Payload', value: caps.payload},
                     {label: 'Thrust', value: caps.thrust},
                     {label: 'Quantity', value: caps.quantity},
                 ],

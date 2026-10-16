@@ -103,7 +103,7 @@ test('civicShuttleBays lists both Depot bays with their queue depth', () => {
     expect(bays[0].queued).toBe(1)
     expect(bays[1].queued).toBe(0)
     expect(bays.every((b) => !b.full)).toBe(true)
-    expect(bays.every((b) => b.thrust > 0 && b.mass > 0)).toBe(true)
+    expect(bays.every((b) => b.thrust > 0 && b.payload >= 500)).toBe(true)
 })
 
 test('a bay is full at the job queue cap', () => {

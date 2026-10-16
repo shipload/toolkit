@@ -12,8 +12,13 @@ const gLane = (slot: number, y: number, d: number, depth: number) =>
     })
 const cLane = (slot: number, s: number, d: number) =>
     ServerContract.Types.crafter_lane.from({slot_index: slot, speed: s, drain: d, output_pct: 100})
-const lLane = (slot: number, m: number, t: number) =>
-    ServerContract.Types.loader_lane.from({slot_index: slot, mass: m, thrust: t, output_pct: 100})
+const lLane = (slot: number, p: number, t: number) =>
+    ServerContract.Types.loader_lane.from({
+        slot_index: slot,
+        payload: p,
+        thrust: t,
+        output_pct: 100,
+    })
 
 describe('rollupGatherer', () => {
     test('empty → undefined', () => {
@@ -46,9 +51,9 @@ describe('rollupLoaders', () => {
     test('empty → undefined', () => {
         expect(rollupLoaders([])).toBeUndefined()
     })
-    test('integer-averages mass, sums thrust, counts quantity', () => {
-        const r = rollupLoaders([lLane(2, 200, 5), lLane(3, 201, 7)])!
-        expect(r.mass.toNumber()).toBe(200) // floor(401/2)
+    test('integer-averages payload, sums thrust, counts quantity', () => {
+        const r = rollupLoaders([lLane(2, 600, 5), lLane(3, 601, 7)])!
+        expect(r.payload.toNumber()).toBe(600)
         expect(r.thrust.toNumber()).toBe(12)
         expect(r.quantity.toNumber()).toBe(2)
     })

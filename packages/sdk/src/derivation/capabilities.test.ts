@@ -236,14 +236,12 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
     expect(result.loaderLanes![0].slotIndex).toBe(0)
 
     const caps = computeLoaderCapabilities({insulation: 600, plasticity: 500}, 1)
-    // mass is unscaled (raw); thrust is amp-scaled
-    expect(result.loaderLanes![0].mass).toBe(caps.mass)
+    expect(result.loaderLanes![0].payload).toBe(caps.payload)
     expect(result.loaderLanes![0].thrust).toBe(applySlotMultiplier(caps.thrust, 80))
     expect(result.loaderLanes![0].outputPct).toBe(80)
 
-    // Legacy loaders.mass is total (same as single-lane raw mass here)
     expect(result.loaders).toBeDefined()
-    expect(result.loaders!.mass).toBe(caps.mass)
+    expect(result.loaders!.payload).toBe(caps.payload)
 })
 
 test('per-lane amp-scaled stats clamp to UInt16, matching the contract clamp_to_uint16', () => {

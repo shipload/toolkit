@@ -8,7 +8,7 @@ import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {
     computeEntityCapabilities,
-    computeLoaderWorkerMass,
+    computeLoaderDockedMass,
     computeModuleCapabilities,
     type ComputedCapabilities,
     type ModuleCapabilities,
@@ -245,7 +245,6 @@ function workerRow(
         value: Math.max(0, ...groups.map((g) => g.value)),
         unit,
         text: formatWorkerGroups(groups, unit),
-        provisional: figures.some((f) => f.provisional) || undefined,
         headline: false,
         workers: groups,
         breakdown: figures.map((f, i) => line(fitted[i], f)),
@@ -270,7 +269,7 @@ function totalMass(ctx: SheetContext, cargoMass: number): number {
 }
 
 function workerMass(ctx: SheetContext): number {
-    return computeLoaderWorkerMass(ofKind(ctx.fitted, 'loader').map((f) => f.caps.mass))
+    return computeLoaderDockedMass(ofKind(ctx.fitted, 'loader').length)
 }
 
 function movementSection(ctx: SheetContext): SheetRow[] {
@@ -432,7 +431,7 @@ function shuttlingSection(ctx: SheetContext): SheetRow[] {
         workerRow(
             'transfer',
             'Transfer',
-            bays.map((f) => transferFigure('transfer', 'Transfer', f.caps.thrust, f.caps.mass)),
+            bays.map((f) => transferFigure('transfer', 'Transfer', f.caps.thrust, f.caps.payload)),
             bays
         ),
         row(countFigure('shuttles', 'Shuttles', bays.length)),

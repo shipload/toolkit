@@ -86,7 +86,7 @@ describe('resolveItem', () => {
             [ITEM_ENGINE_T1, 'Engine', ['Thrust', 'Drain']],
             [ITEM_GENERATOR_T1, 'Generator', ['Capacity', 'Recharge']],
             [ITEM_GATHERER_T1, 'Gatherer', ['Yield', 'Drain', 'Depth']],
-            [ITEM_LOADER_T1, 'Loading', ['Mass', 'Thrust', 'Quantity']],
+            [ITEM_LOADER_T1, 'Loading', ['Payload', 'Thrust', 'Quantity']],
             [ITEM_CRAFTER_T1, 'Crafting', ['Speed', 'Drain']],
         ]
         for (const [itemId, capName, attrNames] of expectations) {

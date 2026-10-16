@@ -18,7 +18,7 @@ import {
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
-import {computeEntityCapabilities, computeLoaderWorkerMass} from '../derivation/capabilities'
+import {computeEntityCapabilities, computeLoaderDockedMass} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
 import {packedModulesToInstalled, type InstalledModule} from '../entities/slot-multiplier'
 import {lerp, vessel_altitude} from '../travel/travel'
@@ -141,13 +141,13 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
 
     const toLoaderLane = (l: {
         slotIndex: number
-        mass: number
+        payload: number
         thrust: number
         outputPct: number
     }): ServerContract.Types.loader_lane =>
         ServerContract.Types.loader_lane.from({
             slot_index: l.slotIndex,
-            mass: l.mass,
+            payload: l.payload,
             thrust: l.thrust,
             output_pct: l.outputPct,
         })
@@ -208,7 +208,7 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
 }
 
 function loaderLanesTotalMass(lanes: ServerContract.Types.loader_lane[]): UInt64 {
-    return UInt64.from(computeLoaderWorkerMass(lanes.map((l) => Number(l.mass))))
+    return UInt64.from(computeLoaderDockedMass(lanes.length))
 }
 
 export function createProjectedEntity(entity: Projectable): ProjectedEntity {
