@@ -382,6 +382,7 @@ describe('ShuttleManager', () => {
             ['Item is not part of the plot target recipe.', 'plot-recipe'],
             ['Deposit would exceed plot recipe requirement.', 'plot-recipe'],
             ['craft job is not finished yet', 'not-ready'],
+            ['no bumped drop-off holds that much of this item here', 'bumped-short'],
         ]
         for (const [reason, code] of table) {
             expect(shuttleReasonCode(reason)).toBe(code)
@@ -417,6 +418,7 @@ describe('ShuttleManager', () => {
             'not-stored',
             'no-storage',
             'not-ready',
+            'bumped-short',
             'bundle-too-large',
             'duplicate-item',
         ])
@@ -532,6 +534,84 @@ describe('ShuttleManager', () => {
         const out = await m.claim({jobId: 1, shipId: 5, candidates: []})
         expect(out.blocked?.code).toBe('not-ready')
         expect(out.blocked?.reason).toBe('craft job is not finished yet')
+    })
+
+    it('claimBumped calls getbumpopts with every field', async () => {
+        let called: {name: string; data: unknown} | null = null
+        const m = managerWithReadonly(async (name, data) => {
+            called = {name, data}
+            return {options: [rawOption()]}
+        })
+        const items = [{item_id: 4}] as never
+        const out = await m.claimBumped({
+            entityId: 1,
+            buildingId: 2,
+            receiverId: 3,
+            items,
+            candidates: [5],
+        })
+        expect(called!.name).toBe('getbumpopts')
+        expect(called!.data).toEqual({
+            entity_id: UInt64.from(1),
+            building_id: UInt64.from(2),
+            receiver_id: UInt64.from(3),
+            items,
+            candidates: [UInt64.from(5)],
+        })
+        expect(out.auto?.mode).toBe('internal')
+    })
+
+    it('claimBumped over the parked quantity is blocked as bumped-short', async () => {
+        const m = managerWithReadonly(async () => {
+            throw new Error(
+                'assertion failure with message: no bumped drop-off holds that much of this item here'
+            )
+        })
+        const out = await m.claimBumped({
+            entityId: 1,
+            buildingId: 2,
+            receiverId: 3,
+            items: [],
+            candidates: [],
+        })
+        expect(out.blocked?.code).toBe('bumped-short')
+        expect(out.options).toEqual([])
+    })
+
+    it('bumped groups parked cargo by building and filters by owner', async () => {
+        let called: {name: string; data: unknown} | null = null
+        const item = (id: number, quantity: number) => ({
+            item_id: id,
+            stats: 0,
+            modules: [],
+            quantity,
+            entity_id: null,
+        })
+        const m = managerWithReadonly(async (name, data) => {
+            called = {name, data}
+            return {
+                buildings: [
+                    {building_id: 20, owner: 'alice', items: [item(101, 10), item(102, 3)]},
+                    {building_id: 21, owner: 'bob', items: [item(101, 4)]},
+                ],
+            }
+        })
+        const all = await m.bumped(7)
+        expect(called!.name).toBe('getbumped')
+        expect(called!.data).toEqual({entity_id: UInt64.from(7)})
+        expect(all.map((b) => [b.buildingId, b.owner, b.items.length])).toEqual([
+            ['20', 'alice', 2],
+            ['21', 'bob', 1],
+        ])
+        expect(all[0].items[0].quantity.toNumber()).toBe(10)
+
+        const mine = await m.bumped(7, 'alice')
+        expect(mine.map((b) => b.buildingId)).toEqual(['20'])
+    })
+
+    it('bumped is empty when nothing is parked', async () => {
+        const m = managerWithReadonly(async () => ({buildings: []}))
+        expect(await m.bumped(7, 'alice')).toEqual([])
     })
 
     it('resolved comes from the wire, not from the times', async () => {

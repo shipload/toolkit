@@ -602,6 +602,25 @@ export class ActionsManager extends BaseManager {
         return this.server.action('claimcraft', params)
     }
 
+    claimbumped(
+        entityId: UInt64Type,
+        buildingId: UInt64Type,
+        receiverId: UInt64Type,
+        items: ServerContract.ActionParams.Type.cargo_item[],
+        shuttledBy?: UInt64Type
+    ): Action {
+        const params: ServerContract.ActionParams.claimbumped = {
+            entity_id: UInt64.from(entityId),
+            building_id: UInt64.from(buildingId),
+            receiver_id: UInt64.from(receiverId),
+            items,
+        }
+        if (shuttledBy !== undefined) {
+            params.shuttled_by = UInt64.from(shuttledBy)
+        }
+        return this.server.action('claimbumped', params)
+    }
+
     buildjob(
         targetId: UInt64Type,
         dockId: UInt64Type,

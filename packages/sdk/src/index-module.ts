@@ -79,6 +79,7 @@ export {
     OMITTED_REASONS,
 } from './managers/shuttle'
 export type {
+    BumpedCargo,
     ShuttleMissingItem,
     ShuttleMode,
     ShuttleOption,

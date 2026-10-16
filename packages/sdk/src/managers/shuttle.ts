@@ -41,6 +41,7 @@ export type ShuttleReasonCode =
     | 'schedule-full'
     | 'plot-recipe'
     | 'not-ready'
+    | 'bumped-short'
     | 'unknown'
 
 export interface ShuttleMissingItem {
@@ -73,6 +74,12 @@ export interface ShuttleOption {
     window?: {startsAt: Date; completesAt: Date}
     energyCost?: number
     blocked?: ShuttleReason
+}
+
+export interface BumpedCargo {
+    buildingId: string
+    owner: string
+    items: ServerContract.Types.cargo_item[]
 }
 
 export interface ShuttleOptions {
@@ -119,6 +126,7 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'Item is not part of the plot target recipe.': 'plot-recipe',
     'Deposit would exceed plot recipe requirement.': 'plot-recipe',
     'craft job is not finished yet': 'not-ready',
+    'no bumped drop-off holds that much of this item here': 'bumped-short',
 }
 
 export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
@@ -131,6 +139,7 @@ export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
     'not-stored',
     'no-storage',
     'not-ready',
+    'bumped-short',
     'bundle-too-large',
     'duplicate-item',
 ])
@@ -326,6 +335,7 @@ export class ShuttleManager extends BaseManager {
             | 'getbuildopts'
             | 'getclaimopts'
             | 'getcbldopts'
+            | 'getbumpopts'
             | 'getstoreopts'
             | 'gettakeopts',
         data: unknown
@@ -396,6 +406,39 @@ export class ShuttleManager extends BaseManager {
     cancelBuild(req: {jobId: UInt64Type; candidates: UInt64Type[]}): Promise<ShuttleOptions> {
         return this.query('getcbldopts', {
             job_id: UInt64.from(req.jobId),
+            candidates: req.candidates.map((c) => UInt64.from(c)),
+        })
+    }
+
+    async bumped(entityId: UInt64Type, owner?: NameType): Promise<BumpedCargo[]> {
+        const raw = await this.server.readonly(
+            'getbumped' as never,
+            {
+                entity_id: UInt64.from(entityId),
+            } as never
+        )
+        const result = ServerContract.Types.bumped_result.from(raw)
+        return result.buildings
+            .filter((b) => owner === undefined || b.owner.equals(owner))
+            .map((b) => ({
+                buildingId: b.building_id.toString(),
+                owner: b.owner.toString(),
+                items: b.items,
+            }))
+    }
+
+    claimBumped(req: {
+        entityId: UInt64Type
+        buildingId: UInt64Type
+        receiverId: UInt64Type
+        items: ServerContract.ActionParams.Type.cargo_item[]
+        candidates: UInt64Type[]
+    }): Promise<ShuttleOptions> {
+        return this.query('getbumpopts', {
+            entity_id: UInt64.from(req.entityId),
+            building_id: UInt64.from(req.buildingId),
+            receiver_id: UInt64.from(req.receiverId),
+            items: req.items,
             candidates: req.candidates.map((c) => UInt64.from(c)),
         })
     }

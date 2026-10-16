@@ -221,6 +221,41 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('claimbumped', () => {
+        test('encodes the bumped ship, building, receiver, items and carrier', () => {
+            const action = shipload.actions.claimbumped(
+                41,
+                77,
+                42,
+                [{item_id: 101, stats: 0n, modules: [], quantity: 10}],
+                9
+            )
+            assert.equal(action.name.toString(), 'claimbumped')
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'claimbumped',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(String(data.entity_id), '41')
+            assert.equal(String(data.building_id), '77')
+            assert.equal(String(data.receiver_id), '42')
+            assert.equal(String(data.items[0].quantity), '10')
+            assert.equal(String(data.shuttled_by), '9')
+        })
+
+        test('leaves the carrier unset when none is chosen', () => {
+            const action = shipload.actions.claimbumped(41, 77, 42, [
+                {item_id: 101, stats: 0n, modules: [], quantity: 10},
+            ])
+            const data = Serializer.decode({
+                data: action.data,
+                type: 'claimbumped',
+                abi: ServerContract.abi,
+            }) as any
+            assert.equal(data.shuttled_by, null)
+        })
+    })
+
     describe('shuttle', () => {
         test('creates shuttle action with single item', () => {
             const action = shipload.actions.shuttle(1, 2, 3, [
@@ -422,6 +457,8 @@ describe('ActionsManager', () => {
             'getbuildjobs',
             // shuttle-option queries — wrapped by ShuttleManager, not ActionsManager
             'getbuildopts',
+            'getbumped',
+            'getbumpopts',
             'getcbldopts',
             'getclaimopts',
             'getcraftopts',
@@ -474,6 +511,7 @@ describe('ActionsManager', () => {
             'importstate',
             'importstorage',
             'migrateworld',
+            'rekeycargo',
             'dbgjobs',
             'dbgpick',
             'dbgplace',
