@@ -873,6 +873,7 @@ exports[`module export surface 1`] = `
   "maxQtyForCharge",
   "maxTravelDistance",
   "mergeStacks",
+  "mintCost",
   "moduleAccepts",
   "moduleDisplayName",
   "moduleIcon",

@@ -9,37 +9,37 @@ const planetSubtypes: PlanetSubtypeInfo[] = [
     {
         id: 0,
         label: 'Gas Giant',
-        description: 'Massive planets with thick atmospheres rich in gases',
+        description: 'Yields gas up to T10 and crystal up to T3.',
         paletteType: 'gasGiant',
     },
     {
         id: 1,
         label: 'Rocky',
-        description: 'Dense, mineral-rich worlds with metallic cores',
+        description: 'Yields regolith up to T10 and ore up to T3.',
         paletteType: 'rocky',
     },
     {
         id: 2,
         label: 'Terrestrial',
-        description: 'Earth-like planets with varied terrain and life potential',
+        description: 'Yields ore up to T10 and biomass up to T3.',
         paletteType: 'terrestrial',
     },
     {
         id: 3,
         label: 'Icy',
-        description: 'Frozen worlds with subsurface resources',
+        description: 'Yields crystal up to T10 and regolith up to T3.',
         paletteType: 'ice',
     },
     {
         id: 4,
         label: 'Ocean',
-        description: 'Water worlds with dissolved minerals and organics',
+        description: 'Yields biomass up to T10 and gas up to T3.',
         paletteType: 'ocean',
     },
     {
         id: 5,
         label: 'Industrial',
-        description: 'Heavily processed worlds rich in refined materials',
+        description: 'Yields ore, crystal, regolith, and biomass, each up to T3.',
         paletteType: 'industrial',
     },
 ]

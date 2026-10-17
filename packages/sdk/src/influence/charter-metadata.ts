@@ -64,7 +64,7 @@ export const charterMetadata: Record<number, CharterMeta> = {
     },
     20001: {
         name: 'Civic Nexus',
-        summary: 'Advances the world to Tier II; wrap items for trade and unwrap them here',
+        summary: 'Advances the world to Tier II; wrap items for trade here',
     },
     30100001: {
         name: 'Construction Dock',

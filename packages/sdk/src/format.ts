@@ -37,7 +37,7 @@ export function formatMassScaled(mass: number): string {
 
 export function formatInfluence(atomic: bigint | number | string): string {
     const points = BigInt(String(atomic)) / 10_000n
-    return `${points.toLocaleString('en-US')} pts`
+    return points.toLocaleString('en-US')
 }
 
 export function formatNeedMultiplier(needFp: bigint | number | string): string {

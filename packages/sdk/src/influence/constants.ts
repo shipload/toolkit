@@ -83,3 +83,8 @@ export function influenceWeightKey(category: number, tier: number): bigint {
 export function atomicToPoints(atomic: bigint | number | string): number {
     return Math.floor(Number(BigInt(atomic.toString())) / INFLUENCE_ATOMIC_PER_POINT)
 }
+
+export function mintCost(threshold: bigint | number, burnBps: number): bigint {
+    const kept = 10_000n - BigInt(burnBps)
+    return (BigInt(threshold) * 10_000n + kept - 1n) / kept
+}

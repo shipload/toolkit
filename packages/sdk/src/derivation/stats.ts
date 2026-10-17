@@ -25,7 +25,7 @@ const ORE_STATS: StatDefinition[] = [
         key: 'density',
         label: 'Density',
         abbreviation: 'DEN',
-        purpose: 'Structural integrity — higher rolls produce lighter hulls',
+        purpose: 'Lowers the hull mass of containers and structures and raises Cargo Hold capacity',
     },
 ]
 
@@ -40,13 +40,13 @@ const CRYSTAL_STATS: StatDefinition[] = [
         key: 'resonance',
         label: 'Resonance',
         abbreviation: 'RES',
-        purpose: 'Frequency tuning and piezoelectric response — storage and amplification',
+        purpose: 'Frequency tuning and piezoelectric response; storage and amplification',
     },
     {
         key: 'reflectivity',
         label: 'Reflectivity',
         abbreviation: 'REF',
-        purpose: 'Optical refraction and reflection — lenses, mirrors, focus',
+        purpose: 'Optical refraction and reflection; lenses, mirrors, focus',
     },
 ]
 
@@ -76,20 +76,19 @@ const REGOLITH_STATS: StatDefinition[] = [
         key: 'cohesion',
         label: 'Cohesion',
         abbreviation: 'COH',
-        purpose:
-            'Binding strength of the loose aggregate; higher cohesion yields more rigid frames and hulls',
+        purpose: 'Lowers Cargo Hold drain',
     },
     {
         key: 'hardness',
         label: 'Hardness',
         abbreviation: 'HRD',
-        purpose: 'Particle hardness — cutting surfaces, abrasives, wear resistance',
+        purpose: 'Particle hardness; cutting surfaces, abrasives, wear resistance',
     },
     {
         key: 'fineness',
         label: 'Fineness',
         abbreviation: 'FIN',
-        purpose: 'Grain size — fine powder for smooth composites and sintering',
+        purpose: 'Grain size: fine powder for smooth composites and sintering',
     },
 ]
 
