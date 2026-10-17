@@ -3,6 +3,7 @@ import {FundContract, PlatformContract, ServerContract} from './contracts'
 import type {ChainDefinition} from '@wharfkit/common'
 import {ContractKit, type Contract} from '@wharfkit/contract'
 
+import {decodeLegacyLoaderReadonly} from './contracts/legacy-loader-mass'
 import {GameContext} from './managers/context'
 import type {EntitiesManager} from './managers/entities'
 import type {PlayersManager} from './managers/players'
@@ -59,6 +60,8 @@ export class Shipload {
                   client: apiClient,
                   account: constructorOptions?.serverContractAccount,
               })
+
+        if (!serverContract) decodeLegacyLoaderReadonly(server)
 
         const fund = fundContract
             ? fundContract

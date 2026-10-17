@@ -1,5 +1,6 @@
 import {ServerContract} from '../contracts'
 import {Entity} from '../entities/entity'
+import {payloadFromLegacyMass} from '../contracts/legacy-loader-mass'
 import type {WireEntity} from './types'
 
 export function mapEntity(ei: ServerContract.Types.entity_info): Entity {
@@ -20,6 +21,8 @@ export function parseWireEntity(raw: WireEntity): ServerContract.Types.entity_in
     delete shaped.name
 
     if (shaped.holds === undefined) shaped.holds = []
+
+    shaped.loader_lanes = payloadFromLegacyMass(shaped.loader_lanes)
 
     return ServerContract.Types.entity_info.from(shaped)
 }
