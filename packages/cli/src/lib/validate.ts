@@ -37,6 +37,9 @@ export function checkCapacity(
 }
 
 export function checkDepth(gathererDepth: number, stratumIndex: number): void {
+	if (stratumIndex < 1) {
+		throw new ValidationError(`Stratum index ${stratumIndex} is invalid: strata start at 1.`);
+	}
 	if (stratumIndex <= gathererDepth) return;
 	throw new ValidationError(
 		`Stratum index ${stratumIndex} is below gatherer depth ${gathererDepth}.`,

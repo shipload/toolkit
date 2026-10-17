@@ -33,6 +33,9 @@ describe("checkDepth", () => {
 	test("throws with depth detail", () => {
 		expect(() => checkDepth(100, 705)).toThrow(/depth 100/);
 	});
+	test("rejects stratum 0, which the gather action refuses", () => {
+		expect(() => checkDepth(100, 0)).toThrow(/start at 1/);
+	});
 });
 
 describe("checkEnergy", () => {
