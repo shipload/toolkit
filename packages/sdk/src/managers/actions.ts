@@ -1100,6 +1100,14 @@ export class ActionsManager extends BaseManager {
         })
     }
 
+    halt(permission: NameType = 'pause'): Action {
+        return this.server.action(
+            'halt',
+            {},
+            {authorization: [{actor: this.server.account, permission: Name.from(permission)}]}
+        )
+    }
+
     closeepoch(oracleId: NameType, epoch: UInt64Type, entropy: Checksum256Type): Action {
         return this.server.action('closeepoch', {
             oracle_id: Name.from(oracleId),

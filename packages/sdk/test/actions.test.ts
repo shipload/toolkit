@@ -89,6 +89,22 @@ test('setLastPayer builds an atomicassets::setlastpayer action authed by the own
     expect(String(data.collection_name)).toBe('shipload')
 })
 
+test('halt builds an eon.shipload::halt action signed by eon.shipload@pause', () => {
+    const action = sl.actions.halt()
+    expect(String(action.account)).toBe('eon.shipload')
+    expect(String(action.name)).toBe('halt')
+    expect(action.authorization.length).toBe(1)
+    expect(String(action.authorization[0].actor)).toBe('eon.shipload')
+    expect(String(action.authorization[0].permission)).toBe('pause')
+    expect(action.data.length).toBe(0)
+})
+
+test('halt accepts another permission of the game account', () => {
+    const action = sl.actions.halt('active')
+    expect(String(action.authorization[0].actor)).toBe('eon.shipload')
+    expect(String(action.authorization[0].permission)).toBe('active')
+})
+
 test('setRamPayer builds an atomicassets::setrampayer action authed by the new payer', () => {
     const action = sl.actions.setRamPayer('alice', 1)
     expect(String(action.account)).toBe('atomicassets')
