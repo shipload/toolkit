@@ -2439,10 +2439,6 @@
       "schema": "tractor.v1"
     },
     {
-      "itemId": 11107,
-      "schema": "warpdrive.v1"
-    },
-    {
       "itemId": 11108,
       "schema": "battery.v1"
     },
