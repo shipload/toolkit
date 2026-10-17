@@ -50,9 +50,9 @@ export const SECTOR_ADJECTIVES: readonly string[] = [
 ]
 
 export const SECTOR_NOUNS: readonly string[] = [
-    'Belt',
+    'Sea',
     'Bluff',
-    'Cluster',
+    'Swath',
     'Coil',
     'Crest',
     'Drift',
