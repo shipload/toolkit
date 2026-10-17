@@ -6,6 +6,7 @@ import {
     getAllRecipes,
     getComponentDemand,
     getItem,
+    getItemStatSlots,
     getRecipe,
     getRecipeConsumers,
     getResourceDemand,
@@ -189,8 +190,8 @@ export function renderDetail(r: Recipe): string {
     sections.push([inputsHeader, trimEnds(inputsTable.toString())].join('\n'))
 
     const blendWeights = Array.isArray(r.blend_weights) ? r.blend_weights : []
-    const blended = blendWeights.length > 0
-    const hasIgnoredSources = !blended && r.stat_slots.some((s) => s.sources.length > 1)
+    const blended = blendWeights.length > 0 || r.stat_slots.some((s) => s.sources.length > 1)
+    const outputSlots = getItemStatSlots(outId)
 
     const slotHead = blended
         ? ['Idx', 'Output stat', 'Source input', 'Source stat', 'Weight']
@@ -207,12 +208,14 @@ export function renderDetail(r: Recipe): string {
             slotsTable.push(row)
             continue
         }
-        const outputLabel = resolveSourceStatLabel(
-            r.inputs,
-            slot.sources[0].input_index,
-            slot.sources[0].input_stat_index
-        )
-        const sources = blended ? slot.sources : slot.sources.slice(0, 1)
+        const outputLabel =
+            outputSlots.find((s) => s.index === i)?.label ??
+            resolveSourceStatLabel(
+                r.inputs,
+                slot.sources[0].input_index,
+                slot.sources[0].input_stat_index
+            )
+        const sources = slot.sources
         for (let s = 0; s < sources.length; s++) {
             const src = sources[s]
             const inp = r.inputs[src.input_index]
@@ -231,16 +234,13 @@ export function renderDetail(r: Recipe): string {
                 sourceStat,
             ]
             if (blended) {
-                const weight = blendWeights[src.input_index]
+                const weight = blendWeights[src.input_index] ?? (sources.length > 1 ? 1 : undefined)
                 row.push(weight !== undefined ? String(weight) : '—')
             }
             slotsTable.push(row)
         }
     }
     const slotsBlock = [`Stat slots (${r.stat_slots.length}):`, trimEnds(slotsTable.toString())]
-    if (hasIgnoredSources) {
-        slotsBlock.push('  (recipe has no blend_weights — secondary sources ignored)')
-    }
     sections.push(slotsBlock.join('\n'))
 
     return sections.join('\n\n')

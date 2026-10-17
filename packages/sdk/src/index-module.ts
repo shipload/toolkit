@@ -231,7 +231,7 @@ export type {EffectiveReserveInput} from './derivation'
 
 export {eligibleUpgrades} from './derivation'
 
-export {getStatDefinitions, getStatName, resolveStats} from './derivation'
+export {findStatDefinition, getStatDefinitions, getStatName, resolveStats} from './derivation'
 export type {StatDefinition, NamedStats} from './derivation'
 
 export {
@@ -576,6 +576,8 @@ export {
     decodeStats,
     decodeCraftedItemStats,
     usedInputStatKeys,
+    getItemStatSlots,
+    traceResourceStatKeys,
     blendStacks,
     computeComponentStats,
     blendComponentStacks,
@@ -585,7 +587,7 @@ export {
     computeInputMass,
     computeCraftedOutputStats,
 } from './derivation/crafting'
-export type {StackInput, CategoryStacks, RecipeSlotInput} from './derivation/crafting'
+export type {StackInput, CategoryStacks, RecipeSlotInput, ItemStatSlot} from './derivation/crafting'
 
 export {
     availableBuildMethods,
@@ -662,6 +664,7 @@ export {
     REFERENCE_DEPOSIT,
     REFERENCE_TRANSFER_MASS,
     REFERENCE_TRANSFER_TONNES,
+    milliToEnergy,
     cruiseSpeedLyPerHour,
     travelDrainPerLy,
     rechargePerMinute,

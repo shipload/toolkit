@@ -1,7 +1,12 @@
 import {UInt16, UInt32} from '@wharfkit/antelope'
 import {calc_gather_duration, calc_gather_energy, calc_gather_rate} from '../capabilities/gathering'
-import type {ModuleCapabilityKind} from '../derivation/capabilities'
-import {decodeStats, encodeStats, getItemStatKeys} from '../derivation/crafting'
+import {
+    computeStatsFromResources,
+    decodeStats,
+    encodeStats,
+    getItemStatKeys,
+    traceResourceStatKeys,
+} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {CATEGORY_LABELS, MASS_UNITS_PER_TONNE, PRECISION, type ResourceCategory} from '../types'
 import type {GathererStats} from '../types/capabilities'
@@ -11,31 +16,22 @@ import type {Figure} from './types'
 
 export const STAT_LOW = 1
 export const STAT_HIGH = 999
+const STAT_MID = 500
 
-const FIGURE_SOURCE_STATS: Record<ModuleCapabilityKind, Record<string, string[]>> = {
-    engine: {speed: ['volatility'], drain: ['volatility', 'thermal']},
-    generator: {capacity: ['resonance'], recharge: ['reflectivity']},
-    battery: {capacity: ['volatility', 'thermal', 'plasticity', 'insulation']},
-    gatherer: {yield: ['strength'], depth: ['tolerance'], drain: ['saturation']},
-    loader: {transfer: ['insulation', 'plasticity'], payload: ['insulation'], shuttles: []},
-    storage: {capacity: ['strength', 'density', 'hardness'], drain: ['cohesion']},
-    crafter: {speed: ['fineness'], drain: ['conductivity']},
-    builder: {speed: ['resonance'], drain: ['fineness']},
-    hauler: {tows: ['resonance'], handling: ['plasticity'], drain: ['conductivity']},
-    warp: {jump: ['reflectivity']},
-    launcher: {charge: [], launchSpeed: [], drain: []},
-}
+const CATEGORIES = Object.keys(CATEGORY_LABELS) as ResourceCategory[]
 
 const STAT_LABELS: Record<string, string> = Object.fromEntries(
-    (Object.keys(CATEGORY_LABELS) as ResourceCategory[]).flatMap((category) =>
-        getStatDefinitions(category).map((d) => [d.key, d.label])
-    )
+    CATEGORIES.flatMap((category) => getStatDefinitions(category).map((d) => [d.key, d.label]))
+)
+
+const STAT_CATEGORY: Record<string, ResourceCategory> = Object.fromEntries(
+    CATEGORIES.flatMap((category) => getStatDefinitions(category).map((d) => [d.key, category]))
 )
 
 export interface FigureStat {
     key: string
     label: string
-    index: number
+    category: ResourceCategory
 }
 
 export interface FigureSource {
@@ -57,35 +53,81 @@ export interface FigureSweep {
     sweeps: StatSweep[]
 }
 
+const statFiguresByItem = new Map<number, string[][]>()
+
+function moduleStatFigures(itemId: number): string[][] {
+    const cached = statFiguresByItem.get(itemId)
+    if (cached) return cached
+    const count = getItemStatKeys(itemId).length
+    const result = Array.from({length: count}, (_, index) => {
+        const moved = new Set<string>()
+        for (const baseline of [STAT_LOW, STAT_MID, STAT_HIGH]) {
+            const at = (value: number) => {
+                const values = Array<number>(count).fill(baseline)
+                values[index] = value
+                return getModuleFigures(itemId, encodeStats(values))?.rows ?? []
+            }
+            const high = at(STAT_HIGH)
+            for (const [i, row] of at(STAT_LOW).entries()) {
+                if (row.value !== high[i]?.value) moved.add(row.key)
+            }
+        }
+        return [...moved]
+    })
+    statFiguresByItem.set(itemId, result)
+    return result
+}
+
 export function getModuleFigureSources(itemId: number): FigureSource[] | undefined {
     const figures = getModuleFigures(itemId, 0n)
     if (!figures) return undefined
-    const statKeys = getItemStatKeys(itemId)
-    const sources = FIGURE_SOURCE_STATS[figures.kind]
-    return figures.rows.map((row) => ({
-        key: row.key,
-        label: row.label,
-        stats: (sources[row.key] ?? []).flatMap((key) => {
-            const index = statKeys.indexOf(key)
-            return index < 0 ? [] : [{key, label: STAT_LABELS[key] ?? key, index}]
-        }),
-    }))
+    const slotFigures = moduleStatFigures(itemId)
+    return figures.rows.map((row) => {
+        const keys = slotFigures.flatMap((moved, index) =>
+            moved.includes(row.key) ? traceResourceStatKeys(itemId, index) : []
+        )
+        return {
+            key: row.key,
+            label: row.label,
+            stats: [...new Set(keys)].map((key) => ({
+                key,
+                label: STAT_LABELS[key] ?? key,
+                category: STAT_CATEGORY[key],
+            })),
+        }
+    })
+}
+
+function resourceBaseline(itemId: number, packed: bigint): Record<string, number> {
+    const values = decodeStats(packed, getItemStatKeys(itemId).length)
+    const baseline: Record<string, number> = {}
+    for (const [index, value] of values.entries()) {
+        for (const key of traceResourceStatKeys(itemId, index)) baseline[key] ??= value
+    }
+    return baseline
 }
 
 export function sweepModuleFigures(
     itemId: number,
-    stats: bigint | {toString(): string}
+    stats: bigint | {toString(): string},
+    resources?: Record<string, number>
 ): FigureSweep[] | undefined {
     const packed = BigInt(String(stats))
     const current = getModuleFigures(itemId, packed)
     const sources = getModuleFigureSources(itemId)
     if (!current || !sources) return undefined
-    const values = decodeStats(packed, getItemStatKeys(itemId).length)
-    const figureAt = (index: number, value: number, key: string): Figure => {
-        const next = [...values]
-        next[index] = value
-        const row = getModuleFigures(itemId, encodeStats(next))?.rows.find((r) => r.key === key)
-        if (!row) throw new Error(`figure ${key} missing for item ${itemId}`)
+    const base = {...resourceBaseline(itemId, packed), ...resources}
+    const rowsAt = new Map<string, Figure[]>()
+    const figureAt = (statKey: string, value: number, figureKey: string): Figure => {
+        const id = `${statKey}:${value}`
+        let rows = rowsAt.get(id)
+        if (!rows) {
+            const values = computeStatsFromResources(itemId, {...base, [statKey]: value})
+            rows = getModuleFigures(itemId, encodeStats(values))?.rows ?? []
+            rowsAt.set(id, rows)
+        }
+        const row = rows.find((r) => r.key === figureKey)
+        if (!row) throw new Error(`figure ${figureKey} missing for item ${itemId}`)
         return row
     }
     return sources.map((source, i) => ({
@@ -94,8 +136,8 @@ export function sweepModuleFigures(
         current: current.rows[i],
         sweeps: source.stats.map((stat) => ({
             stat,
-            low: figureAt(stat.index, STAT_LOW, source.key),
-            high: figureAt(stat.index, STAT_HIGH, source.key),
+            low: figureAt(stat.key, STAT_LOW, source.key),
+            high: figureAt(stat.key, STAT_HIGH, source.key),
         })),
     }))
 }

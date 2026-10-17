@@ -2,7 +2,7 @@ import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
 import {getRecipe, type Recipe} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
-import {getStatDefinitions} from './stats'
+import {findStatDefinition, getStatDefinitions, type StatDefinition} from './stats'
 import {deriveResourceStats} from './stratum'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
 
@@ -64,6 +64,88 @@ function keyForRecipeInputStat(recipe: Recipe, inputIndex: number, statIndex: nu
     // (resource stat definitions for resources, statSlots for crafted items).
     const innerKeys = getItemStatKeys(input.itemId)
     return innerKeys[statIndex] ?? ''
+}
+
+export function traceResourceStatKeys(itemId: number, statIndex: number): string[] {
+    const item = getItem(itemId)
+    if (item.type === 'resource') {
+        const key = item.category ? getStatDefinitions(item.category)[statIndex]?.key : undefined
+        return key ? [key] : []
+    }
+    const recipe = getRecipe(itemId)
+    const slot = recipe?.statSlots[statIndex]
+    if (!recipe || !slot) return []
+    const keys = slot.sources.flatMap((src) => {
+        const input = recipe.inputs[src.inputIndex]
+        return input ? traceResourceStatKeys(input.itemId, src.statIndex) : []
+    })
+    return [...new Set(keys)]
+}
+
+export interface ItemStatSlot {
+    index: number
+    key: string
+    label: string
+    abbreviation: string
+    sources: StatDefinition[]
+}
+
+export function getItemStatSlots(itemId: number): ItemStatSlot[] {
+    return getItemStatKeys(itemId).flatMap((key, index) => {
+        if (!key) return []
+        const sources = traceResourceStatKeys(itemId, index).flatMap((sourceKey) => {
+            const found = findStatDefinition(sourceKey)
+            return found ? [found.definition] : []
+        })
+        if (sources.length === 0) {
+            const own = findStatDefinition(key)?.definition
+            return own
+                ? [{index, key, label: own.label, abbreviation: own.abbreviation, sources: [own]}]
+                : []
+        }
+        return [
+            {
+                index,
+                key,
+                label: sources.map((s) => s.label).join(' + '),
+                abbreviation: sources.map((s) => s.abbreviation).join('+'),
+                sources,
+            },
+        ]
+    })
+}
+
+function statRecordFromResources(
+    itemId: number,
+    resources: Record<string, number>
+): Record<string, number> {
+    const item = getItem(itemId)
+    if (item.type === 'resource') {
+        if (!item.category) return {}
+        return Object.fromEntries(
+            getStatDefinitions(item.category).map((d) => [d.key, resources[d.key] ?? 0])
+        )
+    }
+    const keys = getItemStatKeys(itemId)
+    const values = computeStatsFromResources(itemId, resources)
+    return Object.fromEntries(
+        keys.flatMap((key, i) => (key && values[i] !== undefined ? [[key, values[i]]] : []))
+    )
+}
+
+export function computeStatsFromResources(
+    itemId: number,
+    resources: Record<string, number>
+): number[] {
+    const recipe = getRecipe(itemId)
+    if (!recipe) return []
+    const stacks: Record<number, StackInput[]> = {}
+    for (const input of recipe.inputs) {
+        stacks[input.itemId] = [
+            {quantity: 1, stats: statRecordFromResources(input.itemId, resources)},
+        ]
+    }
+    return computeEntityStats(itemId, stacks).map((s) => s.value)
 }
 
 export function usedInputStatKeys(outputItemId: number): string[][] {

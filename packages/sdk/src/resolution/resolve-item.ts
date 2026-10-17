@@ -20,7 +20,7 @@ import {
     MODULE_LOADER,
     MODULE_STORAGE,
 } from '../capabilities/modules'
-import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
+import {decodeCraftedItemStats, decodeStat, getItemStatSlots} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeCrafterCapabilities,
@@ -127,20 +127,16 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
     let resolvedStats: ResolvedItemStat[] | undefined
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
+        const slotByKey = new Map(getItemStatSlots(id).map((slot) => [slot.key, slot]))
         resolvedStats = Object.entries(decoded).map(([key, value]) => {
-            const allDefs = getStatDefinitions('ore')
-                .concat(getStatDefinitions('crystal'))
-                .concat(getStatDefinitions('gas'))
-                .concat(getStatDefinitions('regolith'))
-                .concat(getStatDefinitions('biomass'))
-            const def = allDefs.find((d) => d.key === key)
+            const slot = slotByKey.get(key)
             return {
                 key,
-                label: def?.label ?? key,
-                abbreviation: def?.abbreviation ?? key.slice(0, 3).toUpperCase(),
+                label: slot?.label ?? key,
+                abbreviation: slot?.abbreviation ?? key.slice(0, 3).toUpperCase(),
                 value,
                 color: '#9BADB8',
-                inverted: def?.inverted,
+                inverted: slot?.sources.length === 1 ? slot.sources[0].inverted : undefined,
             }
         })
     }

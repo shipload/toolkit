@@ -1,35 +1,20 @@
 import {
 	computeModuleCapabilities,
-	decodeCraftedItemStats,
 	decodeStat,
 	FIGURE_SECTION_LABELS,
 	formatMass,
 	getItem,
+	getItemStatSlots,
 	getStatDefinitions,
 	isModuleItem,
 	MODULE_FIGURE_SECTION,
 	resolveItem,
 	resolveItemCategory,
-	type ResourceCategory,
 } from "@shipload/sdk";
 import { formatModuleFigures, formatModuleRaw } from "./figures";
 
 export interface ItemStatsOptions {
 	raw?: boolean;
-}
-
-const ALL_STAT_KEY_TO_ABBR: Map<string, string> = (() => {
-	const map = new Map<string, string>();
-	for (const cat of ["ore", "crystal", "gas", "regolith", "biomass"] as ResourceCategory[]) {
-		for (const def of getStatDefinitions(cat)) {
-			if (!map.has(def.key)) map.set(def.key, def.abbreviation);
-		}
-	}
-	return map;
-})();
-
-function abbreviateKey(key: string): string {
-	return ALL_STAT_KEY_TO_ABBR.get(key) ?? key.slice(0, 3).toUpperCase();
 }
 
 function statPair(label: string, value: number): string {
@@ -47,11 +32,11 @@ function formatResourceStats(itemId: number, stats: bigint): string {
 
 function formatComponentStats(itemId: number, stats: bigint): string {
 	if (stats === 0n) return "";
-	const decoded = decodeCraftedItemStats(itemId, stats);
 	const parts: string[] = [];
-	for (const [key, value] of Object.entries(decoded)) {
+	for (const slot of getItemStatSlots(itemId)) {
+		const value = decodeStat(stats, slot.index);
 		if (value === 0) continue;
-		parts.push(statPair(abbreviateKey(key), value));
+		parts.push(statPair(slot.abbreviation, value));
 	}
 	return parts.join(" / ");
 }

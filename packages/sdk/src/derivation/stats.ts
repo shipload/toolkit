@@ -25,7 +25,8 @@ const ORE_STATS: StatDefinition[] = [
         key: 'density',
         label: 'Density',
         abbreviation: 'DEN',
-        purpose: 'Lowers the hull mass of containers and structures and raises Cargo Hold capacity',
+        purpose:
+            'Lowers the hull mass of containers and structures, and raises Limpet Bay yield and Cargo Hold capacity',
     },
 ]
 
@@ -76,7 +77,7 @@ const REGOLITH_STATS: StatDefinition[] = [
         key: 'cohesion',
         label: 'Cohesion',
         abbreviation: 'COH',
-        purpose: 'Lowers Cargo Hold drain',
+        purpose: 'Raises Fabricator speed and lowers Cargo Hold drain',
     },
     {
         key: 'hardness',
@@ -123,6 +124,16 @@ const STAT_MAP: Record<ResourceCategory, StatDefinition[]> = {
 
 export function getStatDefinitions(category: ResourceCategory): StatDefinition[] {
     return STAT_MAP[category]
+}
+
+export function findStatDefinition(
+    key: string
+): {category: ResourceCategory; definition: StatDefinition} | undefined {
+    for (const category of Object.keys(STAT_MAP) as ResourceCategory[]) {
+        const definition = STAT_MAP[category].find((d) => d.key === key)
+        if (definition) return {category, definition}
+    }
+    return undefined
 }
 
 export function getStatName(category: ResourceCategory, index: 0 | 1 | 2): StatDefinition {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { encodeStats } from "@shipload/sdk";
+import { encodeStats, ITEM_PLASMA_CELL } from "@shipload/sdk";
 import { formatItemStats } from "../../src/lib/item-stats";
 
 describe("formatItemStats", () => {
@@ -20,5 +20,13 @@ describe("formatItemStats", () => {
 	test("pads stat values to 3 chars for column alignment", () => {
 		const packed = encodeStats([30, 233, 94]);
 		expect(formatItemStats(101, packed)).toBe("STR  30 / TOL 233 / DEN  94");
+	});
+});
+
+describe("formatItemStats components", () => {
+	test("labels component stats with the abbreviation of each slot", () => {
+		expect(formatItemStats(ITEM_PLASMA_CELL, encodeStats([500, 400, 300]))).toBe(
+			"VOL 500 / THM 400 / REA 300",
+		);
 	});
 });

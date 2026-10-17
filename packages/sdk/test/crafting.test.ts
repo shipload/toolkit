@@ -4,8 +4,12 @@ import {
     computeEntityStats,
     decodeCraftedItemStats,
     encodeStats,
+    getItemStatSlots,
 } from '../src/derivation/crafting'
+import {getAllRecipes} from '../src/derivation/recipe-usage'
 import {
+    ITEM_ENGINE_T1,
+    ITEM_PLASMA_CELL,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_BEAM,
     ITEM_ROUSTABOUT_T1A_PACKED,
@@ -71,5 +75,25 @@ test('computeCraftedOutputStats agrees with computeEntityStats for the donor ble
     for (const {key, value} of viaEntity) {
         if (!key) continue
         expect(decoded[key]).toBe(value)
+    }
+})
+
+test('getItemStatSlots names a blended module slot after every source stat', () => {
+    const slots = getItemStatSlots(ITEM_ENGINE_T1)
+    expect(slots.map((s) => s.label)).toEqual(['Volatility + Reactivity', 'Thermal'])
+    expect(slots.map((s) => s.abbreviation)).toEqual(['VOL+REA', 'THM'])
+    expect(slots[0].key).toBe('volatility')
+})
+
+test('getItemStatSlots keeps a single-source slot to its one stat', () => {
+    const slots = getItemStatSlots(ITEM_PLASMA_CELL)
+    expect(slots.map((s) => s.label)).toEqual(['Volatility', 'Thermal', 'Reactivity'])
+})
+
+test('getItemStatSlots leads each slot with the stat that keys it', () => {
+    for (const recipe of getAllRecipes()) {
+        for (const slot of getItemStatSlots(recipe.outputItemId)) {
+            expect(slot.sources[0].key, String(recipe.outputItemId)).toBe(slot.key)
+        }
     }
 })
