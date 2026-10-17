@@ -75,7 +75,7 @@ function ingestViaJs(cells: Array<{x: number; y: number}>): {
         if (size === 0) continue
         const subtype = loc.subtype.toNumber()
 
-        for (let stratum = 0; stratum < size; stratum++) {
+        for (let stratum = 1; stratum <= size; stratum++) {
             const s = deriveStratum(epochSeed, coord, stratum, locType, subtype, size)
             if (s.reserve === 0) continue
             const stats = deriveResourceStats(s.seed)

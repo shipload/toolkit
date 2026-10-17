@@ -56,6 +56,55 @@ describe('deriveStrata', () => {
         assert.equal(first.seed, expected.seed)
     })
 
+    test('every index is a gatherable stratum in 1..size', () => {
+        const size = deriveLocationSize(deriveLocationStatic(testGameSeed, SYSTEM_COORDS))
+        const result = deriveStrata(SYSTEM_COORDS, testGameSeed, testEpochSeed)
+        assert.isAbove(result.length, 0, 'fixture sanity')
+        for (const s of result) {
+            assert.isAtLeast(s.index, 1)
+            assert.isAtMost(s.index, size)
+        }
+    })
+
+    test('includes the bottom stratum at index == size', () => {
+        const coords = {x: -66, y: -14}
+        const loc = deriveLocationStatic(testGameSeed, coords)
+        const size = deriveLocationSize(loc)
+        assert.equal(size, 2443, 'fixture sanity')
+        const result = deriveStrata(coords, testGameSeed, testEpochSeed)
+        const last = result[result.length - 1]
+        assert.equal(last.index, size)
+        const expected = deriveStratum(
+            testEpochSeed,
+            coords,
+            size,
+            Number(loc.type),
+            Number(loc.subtype),
+            size
+        )
+        assert.equal(last.itemId, expected.itemId)
+        assert.equal(last.reserve, expected.reserve)
+        assert.equal(last.richness, expected.richness)
+    })
+
+    test('excludes stratum 0 even where it would yield', () => {
+        const coords = {x: -105, y: -93}
+        const loc = deriveLocationStatic(testGameSeed, coords)
+        const size = deriveLocationSize(loc)
+        const zero = deriveStratum(
+            testEpochSeed,
+            coords,
+            0,
+            Number(loc.type),
+            Number(loc.subtype),
+            size
+        )
+        assert.isAbove(zero.reserve, 0, 'fixture sanity')
+        const result = deriveStrata(coords, testGameSeed, testEpochSeed)
+        assert.isAbove(result.length, 0, 'fixture sanity')
+        assert.isFalse(result.some((s) => s.index === 0))
+    })
+
     test('entries are in ascending stratum-index order', () => {
         const result = deriveStrata(SYSTEM_COORDS, testGameSeed, testEpochSeed)
         for (let i = 1; i < result.length; i++) {

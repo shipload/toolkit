@@ -83,9 +83,9 @@ export function scanForResource(options: FindOptions): FindHit[] {
         const size = deriveLocationSize(loc)
         if (size === 0) continue
         const subtype = loc.subtype.toNumber()
-        const limit = Math.min(size, depth + 1)
+        const limit = Math.min(size, depth)
 
-        for (let i = 0; i < limit; i++) {
+        for (let i = 1; i <= limit; i++) {
             const s = deriveStratum(epochSeed, coord, i, locType, subtype, size)
             if (s.reserve === 0) continue
             if (s.itemId !== resourceId) continue

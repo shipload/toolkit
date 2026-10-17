@@ -37,6 +37,7 @@ const EPOCH = '22'.repeat(32)
 test('scanCells region parity with deriveStrata', async () => {
     const cells: {x: number; y: number}[] = []
     for (let x = 5000; x < 5008; x++) for (let y = 5000; y < 5008; y++) cells.push({x, y})
+    cells.push({x: -109, y: -118}, {x: -33, y: 51})
     const out = await scanCells(GAME, EPOCH, cells)
     out.forEach((cell, i) => {
         const ts = deriveStrata(cells[i], GAME, EPOCH)
@@ -44,6 +45,10 @@ test('scanCells region parity with deriveStrata', async () => {
         expect(cell.location.locType).toBe(Number(loc.type))
         expect(cell.location.size).toBe(Number(loc.type) === 0 ? 0 : deriveLocationSize(loc))
         const deps = cell.deposits.slice().sort((a, b) => a.depth - b.depth)
+        for (const d of deps) {
+            expect(d.depth).toBeGreaterThanOrEqual(1)
+            expect(d.depth).toBeLessThanOrEqual(cell.location.size)
+        }
         expect(deps.length).toBe(ts.length)
         ts.forEach((t, j) => {
             expect(deps[j].depth).toBe(t.index)
@@ -53,4 +58,7 @@ test('scanCells region parity with deriveStrata', async () => {
             expect(deps[j].stats).toEqual([t.stats.stat1, t.stats.stat2, t.stats.stat3])
         })
     })
+    const bottom = out[out.length - 2]
+    expect(bottom.deposits.some((d) => d.depth === bottom.location.size)).toBe(true)
+    expect(out[out.length - 1].deposits.some((d) => d.depth === 0)).toBe(false)
 })

@@ -103,6 +103,21 @@ describe('LocationsManager.getStrata', () => {
         assert.equal(matched!.reserveMax, target.reserve)
     })
 
+    test('applies a getreserves row keyed by the bottom stratum number', async () => {
+        const coords = {x: -66, y: -14}
+        const size = 2443
+        const baseline = await buildManager([]).getStrata(coords, NOW)
+        const bottom = baseline.find((s) => s.index === size)
+        assert.isDefined(bottom, 'fixture sanity')
+
+        const mgr = buildManager([{stratum: size, remaining: 0}])
+        const result = await mgr.getStrata(coords, NOW)
+        const matched = result.find((r) => r.index === size)
+        assert.isDefined(matched)
+        assert.equal(matched!.reserve, 0)
+        assert.equal(matched!.reserveMax, bottom!.reserve)
+    })
+
     test('non-overridden strata pass through unchanged', async () => {
         const baseline = await buildManager([]).getStrata(SYSTEM_COORDS, NOW)
         assert.isAbove(baseline.length, 1, 'need at least 2 strata for this test')

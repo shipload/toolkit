@@ -95,7 +95,7 @@ export function buildLocationSummary(
 	let totalNonEmpty = 0;
 	let reachableNonEmpty = 0;
 
-	for (let i = 0; i < size; i++) {
+	for (let i = 1; i <= size; i++) {
 		const s = deriveStratum(opts.epochSeed, coord, i, type, subtype, size);
 		if (s.reserve === 0) continue;
 		totalNonEmpty++;

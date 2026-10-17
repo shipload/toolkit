@@ -3,9 +3,12 @@ import { isReachable, reachLegend } from "../../src/lib/reach";
 
 describe("isReachable", () => {
 	test("stratum index equal to or below depth is reachable", () => {
-		expect(isReachable(0, 100)).toBe(true);
+		expect(isReachable(1, 100)).toBe(true);
 		expect(isReachable(99, 100)).toBe(true);
 		expect(isReachable(100, 100)).toBe(true);
+	});
+	test("stratum 0 is never reachable, matching the gather action", () => {
+		expect(isReachable(0, 100)).toBe(false);
 	});
 	test("stratum index above depth is not reachable", () => {
 		expect(isReachable(101, 100)).toBe(false);
@@ -73,6 +76,9 @@ describe("shallowestPerItem", () => {
 		const full = shallowestPerItem(gameSeed, epochSeed, { x: 0, y: 0 });
 		const shallow = shallowestPerItem(gameSeed, epochSeed, { x: 0, y: 0 }, 50);
 		expect(shallow.length).toBeLessThanOrEqual(full.length);
-		for (const s of shallow) expect(s.index).toBeLessThanOrEqual(50);
+		for (const s of shallow) {
+			expect(s.index).toBeGreaterThanOrEqual(1);
+			expect(s.index).toBeLessThanOrEqual(50);
+		}
 	});
 });

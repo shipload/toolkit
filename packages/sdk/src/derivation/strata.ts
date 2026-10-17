@@ -29,7 +29,7 @@ export function deriveStrata(
     const seed = Checksum256.from(epochSeed)
     const at = Coordinates.from(coords)
     const out: DerivedStratum[] = []
-    for (let i = 0; i < size; i++) {
+    for (let i = 1; i <= size; i++) {
         const s = deriveStratum(seed, at, i, locType, subtype, size)
         if (s.reserve === 0) continue
         out.push({

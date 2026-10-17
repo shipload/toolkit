@@ -300,7 +300,7 @@ export function formatLocation(
 
 		if (size > 0) {
 			const all: { index: number; itemId: number; reserve: number }[] = [];
-			for (let i = 0; i < size; i++) {
+			for (let i = 1; i <= size; i++) {
 				const s = deriveStratum(epochSeed, coord, i, locationType, subtype, size);
 				if (s.reserve === 0) continue;
 				all.push({ index: i, itemId: s.itemId, reserve: s.reserve });

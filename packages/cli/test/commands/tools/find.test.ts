@@ -88,6 +88,8 @@ test('scanForResource populates stats and quality on each hit', () => {
         epochSeed,
     })
     for (const h of hits) {
+        expect(h.stratumIndex).toBeGreaterThanOrEqual(1)
+        expect(h.stratumIndex).toBeLessThanOrEqual(1000)
         expect(h.seed).not.toBe(0n)
         expect(h.stats.stat1).toBeGreaterThanOrEqual(1)
         expect(h.stats.stat1).toBeLessThanOrEqual(999)

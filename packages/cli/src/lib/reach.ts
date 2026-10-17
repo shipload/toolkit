@@ -37,7 +37,7 @@ export interface StratumLead {
 }
 
 export function isReachable(index: number, depth: number): boolean {
-	return index <= depth;
+	return index >= 1 && index <= depth;
 }
 
 export function reachLegend(reachable: number, total: number, depth: number): string {
@@ -88,9 +88,9 @@ export function shallowestPerItem(
 	const size = deriveLocationSize(loc);
 	if (size === 0) return [];
 	const subtype = loc.subtype.toNumber();
-	const limit = maxDepth === undefined ? size : Math.min(size, maxDepth + 1);
+	const limit = maxDepth === undefined ? size : Math.min(size, maxDepth);
 	const byItem = new Map<number, StratumLead>();
-	for (let i = 0; i < limit; i++) {
+	for (let i = 1; i <= limit; i++) {
 		const s = deriveStratum(epochSeed, coord, i, locType, subtype, size);
 		if (s.reserve === 0) continue;
 		if (!byItem.has(s.itemId)) {
