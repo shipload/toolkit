@@ -29,7 +29,12 @@ import {
     sweepModuleFigures,
 } from './guide'
 import {getModuleFigures} from './module'
-import {gatherDrainPerMinute, milliToEnergy, referenceYieldPerMinute} from './reference'
+import {
+    gatherDrainPerMinute,
+    milliToEnergy,
+    REFERENCE_DEPOSIT,
+    referenceYieldPerMinute,
+} from './reference'
 
 const STARTER = encodeStats([213, 213, 213, 213, 213, 213])
 
@@ -227,7 +232,10 @@ describe('gatherFromFigures', () => {
         expect(estimate.durationSeconds).toBe(duration)
         expect(estimate.energy).toBe(milliToEnergy(calc_gather_energy(raw, duration).toNumber()))
         expect(estimate.tonnesPerMinute).toBeCloseTo(
-            (referenceYieldPerMinute(1240) * (730 / 500)) / (1 + 4200 / 5000),
+            (referenceYieldPerMinute(1240) *
+                (730 / REFERENCE_DEPOSIT.richness) *
+                (1 + REFERENCE_DEPOSIT.stratum / 5000)) /
+                (1 + 4200 / 5000),
             9
         )
     })

@@ -7,7 +7,7 @@ import {calc_acceleration, calc_cruise_velocity, calc_onesided_duration} from '.
 
 export const REFERENCE_MASS_TONNES = 10_000
 export const REFERENCE_MASS = REFERENCE_MASS_TONNES * MASS_UNITS_PER_TONNE
-export const REFERENCE_DEPOSIT = {stratum: 0, richness: 500} as const
+export const REFERENCE_DEPOSIT = {stratum: 1, richness: 500} as const
 export const REFERENCE_TRANSFER_TONNES = 1_000
 export const REFERENCE_TRANSFER_MASS = REFERENCE_TRANSFER_TONNES * MASS_UNITS_PER_TONNE
 
