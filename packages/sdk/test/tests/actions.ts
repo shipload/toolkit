@@ -492,6 +492,7 @@ describe('ActionsManager', () => {
             'setcluster',
             'setcoords',
             'setemitcfg',
+            'setemitpause',
             'setretarget',
             'setnextid',
             'setnftcfg',
