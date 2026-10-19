@@ -47,7 +47,7 @@ export function toCargoItems(inputs: ResolvedCargoInput[]): ServerTypes.cargo_it
     )
 }
 
-export function lockerAsCargo(rows: ServerTypes.storage_row[]): ServerTypes.cargo_item[] {
+export function lockerAsCargo(rows: ServerTypes.depot_stack[]): ServerTypes.cargo_item[] {
     return rows.map(
         (r) =>
             ({
