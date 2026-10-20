@@ -112,4 +112,30 @@ export default [
         output: {file: 'lib/scan.d.ts', format: 'esm'},
         plugins: [dts(), cleanup({extensions: ['d.ts']})],
     },
+    {
+        input: 'src/sandbox.ts',
+        output: {
+            file: 'lib/sandbox.js',
+            format: 'cjs',
+            sourcemap: true,
+            exports: 'named',
+        },
+        plugins: codePlugins(),
+        external,
+    },
+    {
+        input: 'src/sandbox.ts',
+        output: {
+            file: 'lib/sandbox.m.js',
+            format: 'esm',
+            sourcemap: true,
+        },
+        plugins: codePlugins(),
+        external,
+    },
+    {
+        input: 'src/sandbox.ts',
+        output: {file: 'lib/sandbox.d.ts', format: 'esm'},
+        plugins: [dts(), cleanup({extensions: ['d.ts']})],
+    },
 ]

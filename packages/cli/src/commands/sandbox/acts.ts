@@ -1,4 +1,5 @@
-import {getStatCount, SandboxContract} from '@shipload/sdk'
+import {getStatCount} from '@shipload/sdk'
+import {SandboxContract} from '@shipload/sdk/sandbox'
 import {type Action, type APIClient, Name} from '@wharfkit/antelope'
 import {InvalidArgumentError} from 'commander'
 import {parseUint8, parseUint16} from '../../lib/args'

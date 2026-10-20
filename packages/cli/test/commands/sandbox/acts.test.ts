@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {SandboxContract} from '@shipload/sdk'
+import {SandboxContract} from '@shipload/sdk/sandbox'
 import {
     type ActsContext,
     buildCredit,

@@ -29,6 +29,11 @@
             "import": "./lib/scan.m.js",
             "require": "./lib/scan.js"
         },
+        "./sandbox": {
+            "types": "./lib/sandbox.d.ts",
+            "import": "./lib/sandbox.m.js",
+            "require": "./lib/sandbox.js"
+        },
         "./package.json": "./package.json"
     },
     "files": [
