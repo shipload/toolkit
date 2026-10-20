@@ -34,14 +34,14 @@ describe('describeModule', () => {
             capability: 'Generator',
             attributes: [
                 {label: 'Capacity', value: 450},
-                {label: 'Recharge', value: 3},
+                {label: 'Recharge', value: 197},
             ],
         })
         expect(desc?.id).toBe('module.generator.description')
         expect(desc?.template).toBe(
-            'holds {capacity} maximum energy and restores {recharge} per second while recharging'
+            'holds {capacity} maximum energy and restores {recharge} energy each minute while recharging'
         )
-        expect(desc?.params).toEqual({capacity: 450, recharge: 3})
+        expect(desc?.params).toEqual({capacity: 450, recharge: 197})
         expect(desc?.highlightKeys).toEqual(['capacity', 'recharge'])
     })
 

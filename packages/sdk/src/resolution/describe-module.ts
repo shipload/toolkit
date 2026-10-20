@@ -45,7 +45,7 @@ const TEMPLATES: Record<string, TemplateSpec> = {
     generator: {
         id: 'module.generator.description',
         template:
-            'holds {capacity} maximum energy and restores {recharge} per second while recharging',
+            'holds {capacity} maximum energy and restores {recharge} energy each minute while recharging',
         params: [
             ['capacity', 'Capacity'],
             ['recharge', 'Recharge'],

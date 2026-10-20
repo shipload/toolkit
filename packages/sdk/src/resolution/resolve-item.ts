@@ -176,7 +176,7 @@ function computeCapabilityGroup(
                 capability: 'Generator',
                 attributes: [
                     {label: 'Capacity', value: toWholeEnergy(caps.capacity)},
-                    {label: 'Recharge', value: toWholeEnergy(caps.recharge)},
+                    {label: 'Recharge', value: toWholeEnergy(caps.recharge * 60)},
                 ],
             }
         }

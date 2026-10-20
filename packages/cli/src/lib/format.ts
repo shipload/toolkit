@@ -180,10 +180,6 @@ export function formatRechargePerMinute(milliPerSecond: number): string {
 	return `${wholeEnergy(milliPerSecond * 60).toLocaleString("en-US")} energy/min`;
 }
 
-export function formatEnergy(storedEnergy: number, capacity: number, recharge: number): string {
-	return `${storedEnergy} / ${capacity}  (recharge ${recharge}/s)`;
-}
-
 export function formatTimeUTC(d: Date): string {
 	return `${d.toISOString().slice(11, 19)} UTC`;
 }
