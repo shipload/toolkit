@@ -17,6 +17,7 @@ import {getItem, tryGetItem} from '../data/catalog'
 import type {ModuleType} from '../types'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getBaseHullmassFor} from '../derivation/capabilities'
+import {computeGeneratorResonanceCapacity} from '../derivation/stat-scaling'
 
 function idiv(a: number, b: number): number {
     return Math.floor(a / b)
@@ -83,8 +84,12 @@ export const computeTravelDrain = (totalThrust: number, avgThm: number): number 
     const thrustFactor = Math.sqrt(ENGINE_DRAIN_REF_THRUST / totalThrust)
     return Math.floor(ENGINE_DRAIN_BASE * 1000 * thermalFactor * thrustFactor)
 }
-export const computeGeneratorCap = (com: number, tier: number): number =>
-    idiv((1_300_000 + com * 500) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier), 100)
+export const computeGeneratorCap = (resonance: number, tier: number): number =>
+    idiv(
+        (1_300_000 + computeGeneratorResonanceCapacity(resonance)) *
+            moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier),
+        100
+    )
 export const computeGeneratorRech = (fin: number, tier: number): number =>
     idiv((2000 + fin * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier), 100)
 export const computeGathererDrain = (con: number): number =>

@@ -22,6 +22,8 @@ import {
     WARP_RANGE_TIER_PCT,
     LOADER_THRUST_TIER_PCT,
     moduleTierPct,
+    RANGE_FLOOR_LY,
+    rangeFloorDrainCap,
 } from './capabilities'
 import {
     computeEngineThrust,
@@ -56,9 +58,11 @@ import {
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_BUILDER_T1,
+    ITEM_STORAGE_T1,
+    ITEM_BATTERY_T1,
 } from '../data/item-ids'
 import type {InstalledModule} from '../entities/slot-multiplier'
-import type {EntitySlot} from '../data/recipes-runtime'
+import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
 import {computeTravelDrain} from '../nft/description'
 import {computeEffectiveModuleStat} from './stat-scaling'
 
@@ -255,6 +259,117 @@ test('generator capacity and recharge are denominated to milli-energy', () => {
     expect(caps.recharge).toBe(3_278)
 })
 
+describe('generator Resonance curve', () => {
+    test('Resonance at or below 213 keeps the shared 500-per-point slope', () => {
+        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 213}, 1).capacity).toBe(
+            1_406_500
+        )
+        expect(computeGeneratorCapabilities({resonance: 150, reflectivity: 213}, 1).capacity).toBe(
+            1_375_000
+        )
+    })
+
+    test('Resonance above 213 counts 1,000 per raw point with no soft cap', () => {
+        expect(computeGeneratorCapabilities({resonance: 500, reflectivity: 213}, 1).capacity).toBe(
+            1_693_500
+        )
+        expect(computeGeneratorCapabilities({resonance: 214, reflectivity: 213}, 1).capacity).toBe(
+            1_407_500
+        )
+    })
+
+    test('reflectivity keeps the tapered effective stat', () => {
+        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 500}, 1).recharge).toBe(
+            Math.floor(2000 + computeEffectiveModuleStat(500) * 6)
+        )
+    })
+
+    test('NFT description mirror takes raw Resonance', () => {
+        for (const resonance of [0, 150, 213, 214, 416, 545, 999]) {
+            for (const tier of [1, 2, 10]) {
+                expect(computeGeneratorCap(resonance, tier)).toBe(
+                    computeGeneratorCapabilities({resonance, reflectivity: 0}, tier).capacity
+                )
+            }
+        }
+    })
+})
+
+describe('Range floor', () => {
+    const roustabout = getEntityLayout(ITEM_ROUSTABOUT_T1A_PACKED)!.slots as EntitySlot[]
+    const core = {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: encodeStats([213, 213])}
+    const engine = {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([213, 213])}
+
+    test('floor is 5 ly and caps drain at a fifth of capacity', () => {
+        expect(RANGE_FLOOR_LY).toBe(5)
+        expect(rangeFloorDrainCap(1_125_200)).toBe(225_040)
+        expect(rangeFloorDrainCap(1_125_204)).toBe(225_040)
+    })
+
+    test('starter Roustabout T1A sits just above the floor, uncapped', () => {
+        const caps = computeEntityCapabilities(
+            {},
+            ITEM_ROUSTABOUT_T1A_PACKED,
+            [core, engine],
+            roustabout
+        )
+        expect(caps.generator!.capacity).toBe(1_125_200)
+        expect(caps.engines!.drain).toBe(224_517)
+        expect(caps.travelDrain!.total).toBe(224_517)
+    })
+
+    test('a Cargo Hold that would push Range below 5 ly is capped at the floor', () => {
+        const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213, 213])}
+        const caps = computeEntityCapabilities(
+            {},
+            ITEM_ROUSTABOUT_T1A_PACKED,
+            [core, engine, hold],
+            roustabout
+        )
+        const breakdown = caps.travelDrain!
+        expect(breakdown.cargoHolds).toBeGreaterThan(0)
+        expect(breakdown.engine + breakdown.cargoHolds).toBeGreaterThan(225_040)
+        expect(breakdown.engine).toBe(224_517)
+        expect(breakdown.total).toBe(225_040)
+        expect(caps.engines!.drain).toBe(225_040)
+        expect(caps.generator!.capacity / breakdown.total).toBeGreaterThanOrEqual(RANGE_FLOOR_LY)
+    })
+
+    test('a weak engine is capped at the floor', () => {
+        const weak = {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([100, 100])}
+        const caps = computeEntityCapabilities(
+            {},
+            ITEM_ROUSTABOUT_T1A_PACKED,
+            [core, weak],
+            roustabout
+        )
+        expect(caps.travelDrain!.engine).toBeGreaterThan(225_040)
+        expect(caps.travelDrain!.total).toBe(225_040)
+    })
+
+    test('Battery Bank capacity counts toward the cap', () => {
+        const battery = {
+            slotIndex: 2,
+            itemId: ITEM_BATTERY_T1,
+            stats: encodeStats([213, 213, 213, 213]),
+        }
+        const caps = computeEntityCapabilities(
+            {},
+            ITEM_ROUSTABOUT_T1A_PACKED,
+            [core, engine, battery],
+            roustabout
+        )
+        expect(caps.generator!.capacity).toBeGreaterThan(1_125_200)
+        expect(caps.travelDrain!.total).toBe(224_517)
+    })
+
+    test('an engine without a power core is left uncapped', () => {
+        const caps = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1A_PACKED, [engine], roustabout)
+        expect(caps.generator).toBeUndefined()
+        expect(caps.travelDrain!.total).toBe(224_517)
+    })
+})
+
 test('engine and generator capabilities use tapered quality consistently', () => {
     const modules: InstalledModule[] = [
         {slotIndex: 0, itemId: ITEM_ENGINE_T1, stats: encodeStats([500, 500])},
@@ -346,9 +461,9 @@ describe('module tier tables', () => {
         expect(computeEngineThrust(500, 10)).toBe(2170)
     })
     test('generator capacity k=0.1, recharge k=0.2', () => {
-        expect(computeGeneratorCap(500, 1)).toBe(1_550_000)
-        expect(computeGeneratorCap(500, 2)).toBe(1_705_000)
-        expect(computeGeneratorCap(500, 10)).toBe(2_945_000)
+        expect(computeGeneratorCap(500, 1)).toBe(1_693_500)
+        expect(computeGeneratorCap(500, 2)).toBe(1_862_850)
+        expect(computeGeneratorCap(500, 10)).toBe(3_217_650)
         expect(computeGeneratorRech(500, 1)).toBe(5000)
         expect(computeGeneratorRech(500, 2)).toBe(6000)
         expect(computeGeneratorRech(500, 10)).toBe(14000)

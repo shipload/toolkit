@@ -4,7 +4,6 @@ import {
     computeEntityCapabilities,
     computeStorageCapabilities,
 } from '../src/derivation/capabilities'
-import {computeEffectiveModuleStat} from '../src/derivation/stat-scaling'
 import {encodeStats} from '../src/derivation/crafting'
 import type {InstalledModule} from '../src/entities/slot-multiplier'
 import {
@@ -26,7 +25,7 @@ const SHIP_LAYOUT: EntitySlot[] = [
 const SAMPLE_STATS_RECORD = {strength: 100, density: 100, hardness: 100, saturation: 100}
 
 function generatorCapacity(resonance: number): number {
-    return 1_300_000 + computeEffectiveModuleStat(resonance) * 500
+    return 1_300_000 + 500 * Math.min(resonance, 213) + 1_000 * Math.max(0, resonance - 213)
 }
 
 describe('T2 Battery Bank & Cargo Hold tier scaling', () => {

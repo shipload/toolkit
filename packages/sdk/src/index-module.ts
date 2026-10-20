@@ -632,6 +632,8 @@ export {
     GATHERER_DEPTH_MAX_TIER,
     gathererDepthForTier,
     computeGathererYield,
+    RANGE_FLOOR_LY,
+    rangeFloorDrainCap,
 } from './derivation/capabilities'
 export type {
     GathererDepthParams,
@@ -795,7 +797,10 @@ export {
 export {
     MODULE_STAT_SCALING_ANCHOR,
     MODULE_STAT_SCALING_POST_ANCHOR_PERCENT,
+    GENERATOR_RESONANCE_BASE_SLOPE,
+    GENERATOR_RESONANCE_POST_ANCHOR_SLOPE,
     computeEffectiveModuleStat,
+    computeGeneratorResonanceCapacity,
 } from './derivation/stat-scaling'
 export type {
     AtomicAssetRow,

@@ -1,6 +1,6 @@
 import {getEntityLayout} from '../data/recipes-runtime'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
-import {computeEffectiveModuleStat} from './stat-scaling'
+import {computeEffectiveModuleStat, computeGeneratorResonanceCapacity} from './stat-scaling'
 import {resolveCapacityFnName, type CapacityFnName} from './capacity-fn-registry'
 
 export const DEFAULT_BASE_HULLMASS = 1_000
@@ -60,16 +60,22 @@ export function computeGeneratorCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {capacity: number; recharge: number} {
-    const res = computeEffectiveModuleStat(stats.resonance)
+    const res = computeGeneratorResonanceCapacity(stats.resonance)
     const ref = computeEffectiveModuleStat(stats.reflectivity)
     return {
         capacity: Math.floor(
-            ((1_300_000 + res * 500) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier)) / 100
+            ((1_300_000 + res) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier)) / 100
         ),
         recharge: Math.floor(
             ((2000 + ref * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier)) / 100
         ),
     }
+}
+
+export const RANGE_FLOOR_LY = 5
+
+export function rangeFloorDrainCap(generatorCapacity: number): number {
+    return Math.floor(generatorCapacity / RANGE_FLOOR_LY)
 }
 
 export interface GathererDepthParams {
@@ -748,7 +754,10 @@ export function computeEntityCapabilities(
     if (hasEngine) {
         const avgThm = engineCount > 0 ? Math.trunc(totalEngineThm / engineCount) : 0
         const engineDrain = computeTravelDrain(totalThrust, avgThm)
-        const totalDrain = clampUint32(engineDrain + totalCargoHoldDrain + totalHaulerDrain)
+        const uncappedDrain = clampUint32(engineDrain + totalCargoHoldDrain + totalHaulerDrain)
+        const totalDrain = hasGenerator
+            ? Math.min(uncappedDrain, rangeFloorDrainCap(clampUint32(totalGenCapacity)))
+            : uncappedDrain
         result.engines = {thrust: totalThrust, drain: totalDrain}
         result.travelDrain = {
             engine: engineDrain,
