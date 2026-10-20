@@ -1,4 +1,5 @@
 export * as FundContract from './contracts/fund'
 export * as PlatformContract from './contracts/platform'
+export * as SandboxContract from './contracts/sandbox'
 export * as ServerContract from './contracts/server'
 export * as TokenContract from './contracts/token'

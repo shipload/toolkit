@@ -94,6 +94,7 @@ PLATFORM_ACCOUNT ?= nex.shipload
 SERVER_ACCOUNT   ?= eon.shipload
 FUND_ACCOUNT     ?= fnd.shipload
 TOKEN_ACCOUNT    ?= eosio.token
+SANDBOX_ACCOUNT  ?= box.shipload
 
 .PHONY: codegen
 codegen: codegen/platform codegen/server codegen/fund codegen/token
@@ -110,9 +111,13 @@ codegen/fund:
 codegen/token:
 	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/token.ts $(TOKEN_ACCOUNT)
 
-SERVER_ABI_LOCAL   ?= ../../../contracts/src/server/build/server.abi
-PLATFORM_ABI_LOCAL ?= ../../../contracts/src/platform/build/platform.abi
-FUND_ABI_LOCAL     ?= ../../../contracts/src/fund/build/fund.abi
+codegen/sandbox:
+	bunx @wharfkit/cli generate --url $(CODEGEN_URL) --file ./src/contracts/sandbox.ts $(SANDBOX_ACCOUNT)
+
+SERVER_ABI_LOCAL   ?= ../../../contracts/src/server/build/debug/server.abi
+PLATFORM_ABI_LOCAL ?= ../../../contracts/src/platform/build/debug/platform.abi
+FUND_ABI_LOCAL     ?= ../../../contracts/src/fund/build/debug/fund.abi
+SANDBOX_ABI_LOCAL  ?= ../../../contracts/src/server/build/sandbox/server.abi
 
 .PHONY: codegen/local
 codegen/local: codegen/server/local codegen/platform/local codegen/fund/local
@@ -125,3 +130,6 @@ codegen/platform/local:
 
 codegen/fund/local:
 	bunx @wharfkit/cli generate --json $(FUND_ABI_LOCAL) --file ./src/contracts/fund.ts $(FUND_ACCOUNT)
+
+codegen/sandbox/local:
+	bunx @wharfkit/cli generate --json $(SANDBOX_ABI_LOCAL) --file ./src/contracts/sandbox.ts $(SANDBOX_ACCOUNT)

@@ -433,6 +433,7 @@ exports[`module export surface 1`] = `
   "STAR_STEP",
   "STAT_HIGH",
   "STAT_LOW",
+  "SandboxContract",
   "ScheduleAccessor",
   "ServerContract",
   "ServerTypes",

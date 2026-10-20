@@ -1,0 +1,16 @@
+; Sandbox profile: points the CLI at the Sandbox on Jungle 4, a separate world
+; where `shiploadcli sandbox` spawns, grants, moves, removes, credits and resolves.
+; Save it apart from your live config.ini and select it per command:
+;   PLAYER_CONFIG=~/.config/shipload/sandbox.ini shiploadcli sandbox spawn 10201 0 0
+; Run `PLAYER_CONFIG=<this file> shiploadcli auth create <account>` once, so the
+; restricted key is linked to box.shipload. The Sandbox has no NFTs, market or fund.
+
+[default]
+; actor = myaccount
+
+[contracts]
+game = box.shipload
+platform = bxn.shipload
+
+[indexer]
+url = https://sandbox-api.shiploadgame.com

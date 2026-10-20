@@ -93,7 +93,7 @@ const TASK_RESULT_ACTIONS = [
 ];
 const DEPLOY_ACTIONS = ["deploy"];
 const CLAIM_ACTIONS = ["claimplot"];
-const RESOLVE_ACTIONS = ["resolve"];
+const RESOLVE_ACTIONS = ["resolve", "sbresolve"];
 const RESOLVEALL_ACTIONS = ["resolveall"];
 const CANCEL_ACTIONS = ["cancel"];
 
@@ -233,6 +233,9 @@ async function formatActionResult(
 	if (CANCEL_ACTIONS.includes(actionName)) {
 		const results = ServerTypes.cancel_results.from(returnData);
 		return formatCancelResults(results);
+	}
+	if (actionName === "sbspawn") {
+		return `Spawned entity ${String(returnData)}.`;
 	}
 	if (actionName === "craftjob") {
 		return formatWindowReceipt(decodeWindowReceipt(returnData), new Date());

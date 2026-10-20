@@ -70,6 +70,7 @@ import * as oracle from './commands/oracle'
 import * as msig from './commands/msig'
 import * as admin from './commands/admin'
 import * as auth from './commands/auth'
+import * as sandbox from './commands/sandbox'
 import {ALL_ENTITY_TYPES, parseEntityType} from './lib/args'
 import {registerCoordSubcommand} from './lib/coord-scope'
 import {
@@ -184,6 +185,7 @@ export function build(): Command {
     msig.register(program)
     admin.register(program)
     auth.register(program)
+    sandbox.register(program)
 
     return program
 }
