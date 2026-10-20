@@ -180,7 +180,7 @@ describe('entityInfoToSnapshot', () => {
             item_id: 0,
             cargomass: 5,
             cargo: [
-                {item_id: 101, quantity: 3, stats: 0, modules: [], id: 0},
+                {item_id: 101, quantity: 3, stats: 0, modules: []},
             ],
             modules: [],
             energy: 1000,
@@ -206,7 +206,6 @@ describe('entityInfoToSnapshot', () => {
             item_id: 101n,
             quantity: 3n,
             stats: 0n,
-            id: 0n,
         })
         expect(snap.cargo[0].entity_id).toBeUndefined()
     })
@@ -222,7 +221,7 @@ describe('entityInfoToSnapshot', () => {
             item_id: 0,
             cargomass: 5,
             cargo: [
-                {item_id: 10201, quantity: 1, stats: 196849, modules: [], id: 5, entity_id: 42},
+                {item_id: 10201, quantity: 1, stats: 196849, modules: [], entity_id: 42},
             ],
             modules: [],
             is_idle: true,

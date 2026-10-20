@@ -549,7 +549,6 @@ export interface InventoryViewResult {
 }
 
 const INVENTORY_DEFAULT_COLUMNS: CargoColumn[] = [
-	"rowId",
 	"item",
 	"itemId",
 	"stack",
@@ -585,22 +584,7 @@ export function renderInventoryView(
 		const projected = projectCargoFromSnapshot(snap, now);
 		const computedDeltas = diffStacks(current, projected);
 
-		const currentById = new Map<string, bigint>();
-		for (const c of current) {
-			const key = `${c.item_id.toString()}#${c.stats.toString()}`;
-			currentById.set(key, c.id);
-		}
-
-		const merged: ProjectedCargoStack[] = projected.map((p) => {
-			const key = `${p.item_id.toString()}#${p.stats.toString()}`;
-			const existingId = currentById.get(key);
-			return {
-				...p,
-				id: existingId ?? p.id,
-			};
-		});
-
-		cargoArr = merged;
+		cargoArr = projected;
 		deltas = computedDeltas;
 		projectionApplied = computedDeltas.size > 0;
 	} else {

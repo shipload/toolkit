@@ -85,7 +85,13 @@ describe('ActionsManager', () => {
         }
 
         test('returns the wrapcargo action alone when claimRam is off (mint is inline on-chain)', async () => {
-            const actions = await makeStubManager().wrap('alice', 42, 7, 99, 5, {claimRam: false})
+            const actions = await makeStubManager().wrap(
+                'alice',
+                42,
+                7,
+                {item_id: 101, stats: 0, modules: [], quantity: 5},
+                {claimRam: false}
+            )
             assert.equal(actions.length, 1)
             assert.equal(actions[0].name.toString(), 'wrapcargo')
             assert.equal(actions[0].account.toString(), 'nex.shipload')

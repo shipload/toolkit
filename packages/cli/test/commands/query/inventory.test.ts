@@ -75,19 +75,17 @@ describe('inventory.render', () => {
         const out = render(
             makeEntity({
                 cargo: [
-                    {item_id: 301, quantity: 32, stats: 214202522n, id: 7},
-                    {item_id: 201, quantity: 5, stats: 999n, id: 11},
+                    {item_id: 301, quantity: 32, stats: 214202522n},
+                    {item_id: 201, quantity: 5, stats: 999n},
                 ],
             })
         )
-        expect(out).toContain('Row ID')
+        expect(out).not.toContain('Row ID')
         expect(out).toContain('Item ID')
         expect(out).toContain('Stack ID')
         expect(out).toContain('Qty')
         expect(out).toContain('301')
         expect(out).toContain('201')
-        expect(out).toContain('7')
-        expect(out).toContain('11')
     })
 
     test('busy entity with queued UNLOAD -1u shows (-1) delta and identity line', () => {

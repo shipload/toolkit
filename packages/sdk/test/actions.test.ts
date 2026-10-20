@@ -133,8 +133,10 @@ test('cancelunwrap builds a platform action for the asset', () => {
     expect(String(action.decodeData(PlatformContract.abi).asset_id)).toBe('7')
 })
 
+const WRAP_STACK = {item_id: 101, stats: 12345, modules: [], quantity: 4}
+
 test('wrap bundles setlastpayer when claimRam is set', async () => {
-    const actions = await sl.actions.wrap('alice', 1, 2, 3, 4, {claimRam: true})
+    const actions = await sl.actions.wrap('alice', 1, 2, WRAP_STACK, {claimRam: true})
     expect(actions.length).toBe(2)
     expect(String(actions[0].name)).toBe('wrapcargo')
     expect(String(actions[1].account)).toBe('atomicassets')
@@ -143,16 +145,20 @@ test('wrap bundles setlastpayer when claimRam is set', async () => {
 })
 
 test('wrap bundles setlastpayer by default', async () => {
-    const actions = await sl.actions.wrap('alice', 1, 2, 3, 4)
+    const actions = await sl.actions.wrap('alice', 1, 2, WRAP_STACK)
     expect(actions.length).toBe(2)
     expect(String(actions[0].name)).toBe('wrapcargo')
     expect(String(actions[1].name)).toBe('setlastpayer')
 })
 
 test('wrap omits setlastpayer when claimRam is explicitly false', async () => {
-    const actions = await sl.actions.wrap('alice', 1, 2, 3, 4, {claimRam: false})
+    const actions = await sl.actions.wrap('alice', 1, 2, WRAP_STACK, {claimRam: false})
     expect(actions.length).toBe(1)
     expect(String(actions[0].name)).toBe('wrapcargo')
+    const data = actions[0].decodeData(PlatformContract.abi)
+    expect(String(data.stack.item_id)).toBe('101')
+    expect(String(data.stack.stats)).toBe('12345')
+    expect(String(data.stack.quantity)).toBe('4')
 })
 
 test('wrapEntity bundles setlastpayer when claimRam is set', async () => {
@@ -187,20 +193,20 @@ test('setLastPayer defaults to the atomicassets account', () => {
 
 test('wrap bundling targets the configured atomicAssets account when overridden', async () => {
     const custom = new Shipload(Chains.Jungle4, {atomicAssetsAccount: 'atomic.gm'})
-    const actions = await custom.actions.wrap('alice', 1, 2, 3, 4, {claimRam: true})
+    const actions = await custom.actions.wrap('alice', 1, 2, WRAP_STACK, {claimRam: true})
     expect(String(actions[1].account)).toBe('atomic.gm')
 })
 
 test('wrap bundles setlastpayer by default when the atomicAssets account is custom', async () => {
     const custom = new Shipload(Chains.Jungle4, {atomicAssetsAccount: 'atomic.gm'})
-    const actions = await custom.actions.wrap('alice', 1, 2, 3, 4)
+    const actions = await custom.actions.wrap('alice', 1, 2, WRAP_STACK)
     expect(actions.length).toBe(2)
     expect(String(actions[1].name)).toBe('setlastpayer')
 })
 
 test('wrap omits setlastpayer when claimRam is explicitly false even on a custom account', async () => {
     const custom = new Shipload(Chains.Jungle4, {atomicAssetsAccount: 'atomic.gm'})
-    const actions = await custom.actions.wrap('alice', 1, 2, 3, 4, {claimRam: false})
+    const actions = await custom.actions.wrap('alice', 1, 2, WRAP_STACK, {claimRam: false})
     expect(actions.length).toBe(1)
 })
 

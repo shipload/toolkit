@@ -20,7 +20,6 @@ export interface EntitySnapshot {
 		quantity: bigint;
 		stats?: bigint;
 		modules?: unknown[];
-		id?: bigint;
 		entity_id?: bigint;
 	}[];
 	capacity?: bigint;
@@ -64,7 +63,6 @@ export function entityInfoToSnapshot(
 			quantity: BigInt(c.quantity.toString()),
 			stats: BigInt(c.stats.toString()),
 			modules: c.modules,
-			id: BigInt(c.id.toString()),
 			entity_id: toBigIntOrUndefined(c.entity_id),
 		})),
 		gatherer_lanes: ei.gatherer_lanes ?? [],

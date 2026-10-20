@@ -7,7 +7,6 @@ export interface ProjectedCargoStack {
 	stats: bigint;
 	quantity: bigint;
 	modules: unknown[];
-	id: bigint;
 	entity_id?: bigint;
 }
 
@@ -110,7 +109,7 @@ function isIndividuated(entity_id: bigint | undefined): boolean {
 function addCargo(stacks: ProjectedCargoStack[], item: ServerTypes.cargo_item): void {
 	const incoming = toBigInts(item);
 	if (isIndividuated(incoming.entity_id)) {
-		stacks.push({ ...incoming, id: 0n });
+		stacks.push(incoming);
 		return;
 	}
 	const idx = stacks.findIndex(
@@ -119,7 +118,7 @@ function addCargo(stacks: ProjectedCargoStack[], item: ServerTypes.cargo_item): 
 			!isIndividuated(s.entity_id),
 	);
 	if (idx === -1) {
-		stacks.push({ ...incoming, id: 0n });
+		stacks.push(incoming);
 	} else {
 		stacks[idx].quantity += incoming.quantity;
 	}
@@ -178,7 +177,6 @@ export function snapshotToStacks(snap: EntitySnapshot): ProjectedCargoStack[] {
 		stats: c.stats ?? 0n,
 		quantity: c.quantity,
 		modules: (c.modules ?? []) as unknown[],
-		id: c.id ?? 0n,
 		entity_id: c.entity_id,
 	}));
 }

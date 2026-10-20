@@ -104,7 +104,7 @@ function mergeIncomingCargo(
             const quantity = BigInt(item.quantity.toString())
             const idx = merged.findIndex((s) => s.item_id === itemId && s.stats === stats)
             if (idx === -1) {
-                merged.push({item_id: itemId, stats, quantity, modules: item.modules ?? [], id: 0n})
+                merged.push({item_id: itemId, stats, quantity, modules: item.modules ?? []})
             } else {
                 merged[idx] = {...merged[idx], quantity: merged[idx].quantity + quantity}
             }

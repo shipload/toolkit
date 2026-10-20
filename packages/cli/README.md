@@ -111,7 +111,7 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 - `<entity-type> <id> craft <recipe-id> <quantity> <input>...` — produce items from a recipe. Each input is `<item-id>:<stack-id>:<qty>`; total qty per slot must equal `recipe.qty × quantity`. Multiple inputs with the same item-id draw from multiple stacks.
 - `<entity-type> <id> blend <input>...` — merge multiple stacks of the same item into one with blended stats. Each input is `<item-id>:<stack-id>:<qty>`.
 - `<entity-type> <id> deploy <input>` — deploy an entity from a packed cargo item. Input is `<packed-item-id>:<stack-id>:1`.
-- `<entity-type> <id> wrap <owner> <cargo-id> <quantity>` — wrap cargo into an NFT for the specified owner.
+- `<entity-type> <id> wrap <owner> <nexus-id> <item-id>:<stack-id> <quantity>` — wrap cargo into an NFT for the specified owner.
 - `<ship|warehouse> <id> unwrap <asset-id>...` — pull one or more shipload AtomicAssets NFTs back into the entity's cargo. Submits an `atomicassets::transfer` with memo `unwrap:<entity-type>:<entity-id>`. All assets in a batch must share the same wrap origin; transit time is charged from that origin to the entity's current coordinates. `--estimate` previews mass and duration without broadcasting.
 - `<entity-type> <id> addmodule <module-index> <module-cargo-id>` — attach a module cargo to an entity slot.
 - `<entity-type> <id> rmmodule <module-index>` — remove a module from a slot.

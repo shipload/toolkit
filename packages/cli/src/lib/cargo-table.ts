@@ -9,7 +9,7 @@ import Table from "cli-table3";
 import { stackKey, type StackDelta, type StackKey } from "./cargo-projection";
 import { formatItemStats } from "./item-stats";
 
-type CargoLike = ServerTypes.cargo_item & {id?: ServerTypes.cargo_view['id'] | bigint | number};
+type CargoLike = ServerTypes.cargo_item;
 
 export type CargoColumn =
 	| "qty"
@@ -18,8 +18,7 @@ export type CargoColumn =
 	| "stats"
 	| "each"
 	| "mass"
-	| "stack"
-	| "rowId";
+	| "stack";
 
 export interface CargoTableOptions {
 	indent?: string;
@@ -46,25 +45,18 @@ const COLUMN_HEADERS: Record<CargoColumn, string> = {
 	each: "Each",
 	mass: "Mass",
 	stack: "Stack ID",
-	rowId: "Row ID",
 };
 
-const RIGHT_ALIGNED: Set<CargoColumn> = new Set(["qty", "itemId", "each", "mass", "stack", "rowId"]);
+const RIGHT_ALIGNED: Set<CargoColumn> = new Set(["qty", "itemId", "each", "mass", "stack"]);
 
 export function sortCargoForDisplay<T extends CargoLike>(cargo: readonly T[]): T[] {
 	return [...cargo].sort((a, b) => {
 		const itemDiff = Number(a.item_id) - Number(b.item_id);
 		if (itemDiff !== 0) return itemDiff;
-		const aIdRaw = (a as CargoLike).id;
-		const bIdRaw = (b as CargoLike).id;
-		const aId =
-			aIdRaw === undefined || aIdRaw === null ? 0n : BigInt(aIdRaw.toString());
-		const bId =
-			bIdRaw === undefined || bIdRaw === null ? 0n : BigInt(bIdRaw.toString());
-		if (aId === 0n && bId !== 0n) return 1;
-		if (bId === 0n && aId !== 0n) return -1;
-		if (aId < bId) return -1;
-		if (aId > bId) return 1;
+		const aKey = stackKey(BigInt(a.item_id.toString()), BigInt(a.stats.toString()), (a.modules ?? []) as unknown[]);
+		const bKey = stackKey(BigInt(b.item_id.toString()), BigInt(b.stats.toString()), (b.modules ?? []) as unknown[]);
+		if (aKey < bKey) return -1;
+		if (aKey > bKey) return 1;
 		return 0;
 	});
 }
@@ -118,9 +110,6 @@ function moduleSubRows(
 					break;
 				case "stack":
 					row.push(String(modStats));
-					break;
-				case "rowId":
-					row.push("");
 					break;
 			}
 		}
@@ -181,13 +170,6 @@ function cargoRow(
 			case "stack":
 				row.push(String(stackId));
 				break;
-			case "rowId": {
-				const raw = (c as CargoLike).id;
-				const value =
-					raw === undefined || raw === null ? 0n : BigInt(raw.toString());
-				row.push(value === 0n ? "—" : value.toString());
-				break;
-			}
 		}
 	}
 	return row;

@@ -894,8 +894,7 @@ export class ActionsManager extends BaseManager {
         owner: NameType,
         entityId: UInt64Type,
         nexusId: UInt64Type,
-        cargoId: UInt64Type,
-        quantity: UInt64Type,
+        stack: ServerContract.ActionParams.Type.cargo_item,
         opts: {claimRam?: boolean} = {}
     ): Promise<Action[]> {
         const actions: Action[] = [
@@ -904,8 +903,7 @@ export class ActionsManager extends BaseManager {
                 owner: Name.from(owner),
                 entity_id: UInt64.from(entityId),
                 nexus_id: UInt64.from(nexusId),
-                cargo_id: UInt64.from(cargoId),
-                quantity: UInt64.from(quantity),
+                stack,
             }),
         ]
         // setlastpayer is what fires logrampayer and clears the wrap gate; skipping it strands it.
