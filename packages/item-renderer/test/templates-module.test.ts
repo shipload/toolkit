@@ -42,7 +42,8 @@ const FIGURE_LINES: Record<string, {heading: string; rows: [string, string][]}> 
     loaderT1: {
         heading: 'SHUTTLING',
         rows: [
-            ['Transfer', '1.1k t/min'],
+            ['Transfer', '984 t/min'],
+            ['Payload', '80.7%'],
             ['Shuttles', '1'],
         ],
     },
