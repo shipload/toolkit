@@ -22,7 +22,7 @@ import {
 import {BaseManager} from './base'
 import {Coordinates, PRECISION, type ClusterSlotType, type CoordinatesType} from '../types'
 import {ServerContract, TokenContract} from '../contracts'
-import {ATOMICASSETS_ABI, SHIPLOAD_COLLECTION} from '../nft/atomicassets'
+import {ATOMICASSETS_ABI} from '../nft/atomicassets'
 import {getItem} from '../data/catalog'
 import type {JobCancelRoute} from '../scheduling/jobs'
 import type {DepositConfigInput} from './balances'
@@ -911,7 +911,7 @@ export class ActionsManager extends BaseManager {
         // setlastpayer is what fires logrampayer and clears the wrap gate; skipping it strands it.
         const claimRam = opts.claimRam ?? true
         if (claimRam) {
-            actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
+            actions.push(this.setLastPayer(owner, this.collection))
         }
         return actions
     }
@@ -924,7 +924,7 @@ export class ActionsManager extends BaseManager {
     }
 
     claimStarter(owner: NameType): Action {
-        return this.server.action('claimstarter', {
+        return this.server.action('dbgstarter', {
             owner: Name.from(owner),
         })
     }
@@ -946,7 +946,7 @@ export class ActionsManager extends BaseManager {
         // setlastpayer is what fires logrampayer and clears the wrap gate; skipping it strands it.
         const claimRam = opts.claimRam ?? true
         if (claimRam) {
-            actions.push(this.setLastPayer(owner, SHIPLOAD_COLLECTION))
+            actions.push(this.setLastPayer(owner, this.collection))
         }
         return actions
     }

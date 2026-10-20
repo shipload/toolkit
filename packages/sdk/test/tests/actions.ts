@@ -118,6 +118,29 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('claimStarter', () => {
+        test('sends dbgstarter to the server', () => {
+            const action = shipload.actions.claimStarter('alice')
+            assert.equal(action.name.toString(), 'dbgstarter')
+            assert.equal(action.account.toString(), 'eon.shipload')
+        })
+    })
+
+    describe('collection', () => {
+        test('defaults to the shipload collection', () => {
+            assert.equal(shipload.collection, 'shipload')
+        })
+
+        test('wrap actions name the configured collection', async () => {
+            const sandbox = new Shipload(Chains.Jungle4, {client, collection: 'sbxcollect'})
+            const actions = await sandbox.actions.wrapEntity('alice', 50, 7)
+            const last = actions[actions.length - 1]
+            assert.equal(last.name.toString(), 'setlastpayer')
+            const collection = Serializer.encode({object: Name.from('sbxcollect')}).hexString
+            assert.isTrue(last.data.hexString.endsWith(collection))
+        })
+    })
+
     describe('contribute', () => {
         const bundle = [{item_id: 101, stats: 12345, modules: [], quantity: 10}]
 
@@ -416,7 +439,7 @@ describe('ActionsManager', () => {
             'getconfig',
             'getdecomp',
             'getdemand',
-            'getdeposit',
+            'dbgdeposit',
             'getdepot',
             'geteligible',
             'getentcls',
@@ -426,7 +449,7 @@ describe('ActionsManager', () => {
             'getitemdata',
             'getitemids',
             'getitems',
-            'getitemtype',
+            'dbgitemtype',
             'getinfdecay',
             'getinfluence',
             'getinfvalue',
@@ -440,7 +463,7 @@ describe('ActionsManager', () => {
             'getmodtypes',
             'getmodules',
             'getnearby',
-            'getnftbase',
+            'dbgnftbase',
             'getnftinfo',
             'getplayer',
             'getpool',
@@ -475,41 +498,39 @@ describe('ActionsManager', () => {
             'getworldprod',
             // admin / setup actions — contract authority only
             'addnexus',
-            'cleartable',
+            'dbgcleartbl',
             'configlog',
             'enable',
-            'fixcargomass',
+            'dbgfixmass',
             'fixitemids',
-            'forcereveal',
+            'dbgreveal',
             'genesisfleet',
             'genesisworld',
-            'resolveearly',
+            'dbgresolve',
             'setinfburn',
             'setinfd1',
             'setinfdemand',
             'setinfmint',
             'setinfweight',
-            'setcluster',
-            'setcoords',
+            'dbgsetcoords',
             'setemitcfg',
             'setemitpause',
             'setretarget',
-            'setnextid',
             'setnftcfg',
             'setwrapcost',
             'setwrapfee',
-            'wipe',
+            'dbgwipe',
             // data import actions — admin one-shot migrations
-            'importcargo',
-            'importcell',
-            'importentity',
-            'importepoch',
-            'importgroup',
+            'dbgimpcargo',
+            'dbgimpcell',
+            'dbgimpentity',
+            'dbgimpepoch',
+            'dbgimpgroup',
             'importlocker',
-            'importnftcfg',
-            'importplayer',
-            'importreserve',
-            'importstate',
+            'dbgimpnftcfg',
+            'dbgimpplayer',
+            'dbgimpreserv',
+            'dbgimpstate',
             'importstorage',
             'migrateworld',
             'rekeycargo',
@@ -548,7 +569,9 @@ describe('ActionsManager', () => {
             'stowcargo',
             'stowentity',
             // admin entity removal
-            'delentity',
+            'dbgdelentity',
+            // built by claimStarter
+            'dbgstarter',
         ])
 
         test('every server action has an ActionsManager builder (or is explicitly excluded)', () => {

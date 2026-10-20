@@ -3,6 +3,7 @@ import {
     ATOMICASSETS_ACCOUNT,
     ActionsManager,
     PlatformContract,
+    SHIPLOAD_COLLECTION,
     ServerContract,
     type Shipload,
 } from '@shipload/sdk'
@@ -25,6 +26,7 @@ function makeStubShipload(): Shipload {
         server: stubServer,
         platform: stubPlatform,
         atomicAssetsAccount: Name.from(ATOMICASSETS_ACCOUNT),
+        collection: SHIPLOAD_COLLECTION,
     }
     const manager = new ActionsManager(context)
     return {actions: manager} as unknown as Shipload

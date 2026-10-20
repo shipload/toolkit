@@ -3,6 +3,7 @@ import type {Contract} from '@wharfkit/contract'
 import type {PlatformContract} from '../contracts'
 import {FundContract} from '../contracts'
 import {GameState} from '../entities/gamestate'
+import {SHIPLOAD_COLLECTION} from '../nft/atomicassets'
 
 import {EntitiesManager} from './entities'
 import {PlayersManager} from './players'
@@ -48,7 +49,8 @@ export class GameContext {
         public readonly server: Contract,
         public readonly platform: Contract,
         public readonly atomicAssetsAccount: string = 'atomicassets',
-        public readonly fund: Contract = new FundContract.Contract({client})
+        public readonly fund: Contract = new FundContract.Contract({client}),
+        public readonly collection: string = SHIPLOAD_COLLECTION
     ) {}
 
     get entities(): EntitiesManager {

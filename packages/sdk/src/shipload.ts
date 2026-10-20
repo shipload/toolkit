@@ -32,6 +32,7 @@ interface ShiploadOptions {
     client?: APIClient
     subscriptionsUrl?: string
     atomicAssetsAccount?: string
+    collection?: string
 }
 
 interface ShiploadConstructorOptions extends ShiploadOptions {
@@ -75,7 +76,8 @@ export class Shipload {
             server,
             platform,
             constructorOptions?.atomicAssetsAccount ?? 'atomicassets',
-            fund
+            fund,
+            constructorOptions?.collection
         )
 
         if (constructorOptions?.subscriptionsUrl) {
@@ -128,6 +130,10 @@ export class Shipload {
 
     get atomicAssetsAccount(): string {
         return this._context.atomicAssetsAccount
+    }
+
+    get collection(): string {
+        return this._context.collection
     }
 
     get server(): Contract {

@@ -23,6 +23,10 @@ export abstract class BaseManager {
         return this.context.atomicAssetsAccount
     }
 
+    protected get collection() {
+        return this.context.collection
+    }
+
     protected async getGame() {
         return this.context.getGame()
     }

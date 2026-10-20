@@ -101,6 +101,26 @@ test('atomicAssetsContract reads [contracts] atomicassets', () => {
     expect(cfg.atomicAssetsContract).toBe('atomic.gm')
 })
 
+test('collection defaults to shipload', () => {
+    const dir = writeConfig(['[default]', 'private_key = PVT_K1_a', 'actor = someplayer'].join('\n'))
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.collection).toBe('shipload')
+})
+
+test('collection reads [contracts] collection', () => {
+    const dir = writeConfig(
+        [
+            '[default]',
+            'private_key = PVT_K1_a',
+            'actor = someplayer',
+            '[contracts]',
+            'collection = sbxcollect',
+        ].join('\n')
+    )
+    const cfg = loadConfig(opts(dir))
+    expect(cfg.collection).toBe('sbxcollect')
+})
+
 test('fundContract defaults to fnd.shipload', () => {
     const dir = writeConfig(['[default]', 'private_key = PVT_K1_a', 'actor = someplayer'].join('\n'))
     const cfg = loadConfig(opts(dir))

@@ -10,12 +10,11 @@ import {
     getItem,
     resolveItem,
     type ServerTypes,
-    SHIPLOAD_COLLECTION,
 } from '@shipload/sdk'
 import Table from 'cli-table3'
 import type {Command} from 'commander'
 import {parseUint32} from '../../lib/args'
-import {atomicAssetsContractName, client, server} from '../../lib/client'
+import {atomicAssetsContractName, client, collectionName, server} from '../../lib/client'
 import {formatItem, jsonStringify} from '../../lib/format'
 import {formatItemStats} from '../../lib/item-stats'
 import {getAccountName} from '../../lib/session'
@@ -71,10 +70,10 @@ function toRow(asset: AtomicAssetRow, schema: AtomicSchemaRow, itemId: number): 
 export async function fetchNftRows(owner: string): Promise<NftRow[]> {
     const [assets, schemas, templateMap] = await Promise.all([
         fetchAtomicAssetsForOwner(client, owner, {
-            collection: SHIPLOAD_COLLECTION,
+            collection: collectionName,
             account: atomicAssetsContractName,
         }),
-        fetchAtomicSchemas(client, SHIPLOAD_COLLECTION, atomicAssetsContractName),
+        fetchAtomicSchemas(client, collectionName, atomicAssetsContractName),
         loadNftConfig(),
     ])
     const schemaByName = indexSchemas(schemas)
@@ -108,7 +107,7 @@ function formatStatsField(itemId: number, stats: bigint, raw: boolean): string {
 
 export function renderPretty(owner: string, rows: NftRow[], opts: {raw?: boolean} = {}): string {
     if (rows.length === 0) {
-        return `NFTs (${owner}): none in collection '${SHIPLOAD_COLLECTION}'.`
+        return `NFTs (${owner}): none in collection '${collectionName}'.`
     }
     const table = new Table({
         head: ['Asset ID', 'Item', 'Qty', 'Mass', 'Origin', 'Stats', 'Schema', 'Template'],
@@ -157,7 +156,7 @@ export function renderPretty(owner: string, rows: NftRow[], opts: {raw?: boolean
 function rowsToJson(owner: string, rows: NftRow[]): unknown {
     return {
         owner,
-        collection: SHIPLOAD_COLLECTION,
+        collection: collectionName,
         count: rows.length,
         assets: rows.map((r) => ({
             asset_id: String(r.asset_id),
@@ -176,7 +175,7 @@ function rowsToJson(owner: string, rows: NftRow[]): unknown {
 export function register(program: Command): void {
     const nft = program
         .command('nft')
-        .description(`List Shipload NFTs owned by an account (collection '${SHIPLOAD_COLLECTION}')`)
+        .description(`List Shipload NFTs owned by an account (collection '${collectionName}')`)
         .argument('[account]', 'account to inspect (defaults to configured actor)')
         .option('--item <id>', 'filter by item id', parseUint32)
         .option('--json', 'emit JSON instead of formatted text')

@@ -28,12 +28,12 @@ describe('tools restore table filters', () => {
         ).toThrow('--tables requires --skip-wipe')
     })
 
-    test('entity filter emits only importentity step', () => {
+    test('entity filter emits only dbgimpentity step', () => {
         const steps = buildRestoreSteps({
             tables: parseRestoreTables('entity'),
             skipWipe: true,
         })
-        expect(steps.map((s) => s.name)).toEqual(['importentity'])
+        expect(steps.map((s) => s.name)).toEqual(['dbgimpentity'])
     })
 
     test('full restore behavior includes wipe and all import steps', () => {
@@ -42,14 +42,14 @@ describe('tools restore table filters', () => {
             skipWipe: false,
         })
         expect(steps.map((s) => s.name)).toEqual([
-            'wipe',
-            'importstate',
+            'dbgwipe',
+            'dbgimpstate',
             'setnftcfg',
-            'importplayer',
-            'importentity',
-            'importcargo',
-            'importgroup',
-            'importreserve',
+            'dbgimpplayer',
+            'dbgimpentity',
+            'dbgimpcargo',
+            'dbgimpgroup',
+            'dbgimpreserv',
         ])
     })
 

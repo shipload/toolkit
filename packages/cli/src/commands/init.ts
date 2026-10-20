@@ -42,7 +42,8 @@ const STUB = `[default]
 ; url = https://history.example.test
 
 ; Uncomment to override the contract accounts the CLI targets. Defaults:
-; game = eon.shipload, platform = nex.shipload, atomicassets = atomicassets.
+; game = eon.shipload, platform = nex.shipload, atomicassets = atomicassets,
+; collection = shipload.
 ; Set 'atomicassets' to the deployed AtomicAssets account on a testnet, e.g.
 ; atomic.gm on Jungle 4, so wrap --claim-ram and unwrap target the right contract.
 ; [contracts]

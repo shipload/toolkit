@@ -36,14 +36,14 @@ export type RestoreTable =
     | 'reserve'
 
 export type RestoreStepName =
-    | 'wipe'
-    | 'importstate'
+    | 'dbgwipe'
+    | 'dbgimpstate'
     | 'setnftcfg'
-    | 'importplayer'
-    | 'importentity'
-    | 'importcargo'
-    | 'importgroup'
-    | 'importreserve'
+    | 'dbgimpplayer'
+    | 'dbgimpentity'
+    | 'dbgimpcargo'
+    | 'dbgimpgroup'
+    | 'dbgimpreserv'
 
 export interface RestoreStep {
     name: RestoreStepName
@@ -61,13 +61,13 @@ const RESTORE_TABLES: readonly RestoreTable[] = [
 ]
 
 const RESTORE_STEPS: readonly RestoreStep[] = [
-    {name: 'importstate', table: 'state'},
+    {name: 'dbgimpstate', table: 'state'},
     {name: 'setnftcfg', table: 'nftconfig'},
-    {name: 'importplayer', table: 'player'},
-    {name: 'importentity', table: 'entity'},
-    {name: 'importcargo', table: 'cargo'},
-    {name: 'importgroup', table: 'entitygroup'},
-    {name: 'importreserve', table: 'reserve'},
+    {name: 'dbgimpplayer', table: 'player'},
+    {name: 'dbgimpentity', table: 'entity'},
+    {name: 'dbgimpcargo', table: 'cargo'},
+    {name: 'dbgimpgroup', table: 'entitygroup'},
+    {name: 'dbgimpreserv', table: 'reserve'},
 ]
 
 interface PendingAction {
@@ -130,7 +130,7 @@ export function buildRestoreSteps(opts: {
     }
 
     const steps: RestoreStep[] = []
-    if (!opts.skipWipe) steps.push({name: 'wipe'})
+    if (!opts.skipWipe) steps.push({name: 'dbgwipe'})
     for (const step of RESTORE_STEPS) {
         if (step.table && opts.tables.has(step.table)) steps.push(step)
     }
@@ -172,14 +172,14 @@ export function registerSubcommand(tools: Command): void {
                     `  state.epoch=${manifest.state.epoch}, players=${manifest.players.length}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}`
                 )
 
-                if (stepNames.has('wipe')) {
-                    console.log('Step 1: wipe')
-                    await pushAction(target, 'wipe', {})
+                if (stepNames.has('dbgwipe')) {
+                    console.log('Step 1: dbgwipe')
+                    await pushAction(target, 'dbgwipe', {})
                 }
 
-                if (stepNames.has('importstate')) {
-                    console.log('Step 2: importstate')
-                    await pushAction(target, 'importstate', {row: manifest.state})
+                if (stepNames.has('dbgimpstate')) {
+                    console.log('Step 2: dbgimpstate')
+                    await pushAction(target, 'dbgimpstate', {row: manifest.state})
                 }
 
                 if (stepNames.has('setnftcfg')) {
@@ -197,19 +197,19 @@ export function registerSubcommand(tools: Command): void {
                     )
                 }
 
-                if (stepNames.has('importplayer')) {
-                    console.log(`Step 4: importplayer × ${manifest.players.length}`)
+                if (stepNames.has('dbgimpplayer')) {
+                    console.log(`Step 4: dbgimpplayer × ${manifest.players.length}`)
                     await pushBatched(
                         target,
                         manifest.players.map((p) => ({
-                            name: 'importplayer',
+                            name: 'dbgimpplayer',
                             data: {owner: p.owner},
                         }))
                     )
                 }
 
-                if (stepNames.has('importentity')) {
-                    console.log(`Step 5: importentity × ${manifest.entities.length}`)
+                if (stepNames.has('dbgimpentity')) {
+                    console.log(`Step 5: dbgimpentity × ${manifest.entities.length}`)
                     await pushBatched(
                         target,
                         manifest.entities.map((e) => {
@@ -220,36 +220,36 @@ export function registerSubcommand(tools: Command): void {
                                       schedule: shiftScheduleTimestamps(l.schedule, offset),
                                   }))
                                 : row.lanes
-                            return {name: 'importentity', data: {row: {...e, lanes}}}
+                            return {name: 'dbgimpentity', data: {row: {...e, lanes}}}
                         })
                     )
                 }
 
-                if (stepNames.has('importcargo')) {
-                    console.log(`Step 6: importcargo × ${manifest.cargo.length}`)
+                if (stepNames.has('dbgimpcargo')) {
+                    console.log(`Step 6: dbgimpcargo × ${manifest.cargo.length}`)
                     await pushBatched(
                         target,
-                        manifest.cargo.map((c) => ({name: 'importcargo', data: {row: c}}))
+                        manifest.cargo.map((c) => ({name: 'dbgimpcargo', data: {row: c}}))
                     )
                 }
 
-                if (stepNames.has('importgroup')) {
-                    console.log(`Step 7: importgroup × ${manifest.entitygroups.length}`)
+                if (stepNames.has('dbgimpgroup')) {
+                    console.log(`Step 7: dbgimpgroup × ${manifest.entitygroups.length}`)
                     await pushBatched(
                         target,
-                        manifest.entitygroups.map((g) => ({name: 'importgroup', data: {row: g}}))
+                        manifest.entitygroups.map((g) => ({name: 'dbgimpgroup', data: {row: g}}))
                     )
                 }
 
-                if (stepNames.has('importreserve')) {
+                if (stepNames.has('dbgimpreserv')) {
                     const reserveActions = manifest.reserves.flatMap((scope) =>
                         scope.rows.map((r) => ({
-                            name: 'importreserve',
+                            name: 'dbgimpreserv',
                             data: {epoch_scope: scope.scope, row: r},
                         }))
                     )
                     console.log(
-                        `Step 8: importreserve × ${reserveActions.length} across ${manifest.reserves.length} scopes`
+                        `Step 8: dbgimpreserv × ${reserveActions.length} across ${manifest.reserves.length} scopes`
                     )
                     await pushBatched(target, reserveActions)
                 }

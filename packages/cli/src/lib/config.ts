@@ -41,6 +41,7 @@ export interface PlayerConfig {
 	platformContract: string;
 	atomicAssetsContract: string;
 	fundContract: string;
+	collection: string;
 	track: TrackConfig;
 }
 
@@ -98,6 +99,7 @@ export interface ParsedSection {
 	platformContract?: string;
 	atomicAssets?: string;
 	fundContract?: string;
+	collection?: string;
 	trackDefaultSort?: string;
 	trackDefaultTypeFilter?: string;
 	trackDefaultStatusFilter?: string;
@@ -145,6 +147,7 @@ function parseIniFile(path: string): ParsedSection {
 		platformContract: contracts.platform as string | undefined,
 		atomicAssets: contracts.atomicassets as string | undefined,
 		fundContract: contracts.fund as string | undefined,
+		collection: contracts.collection as string | undefined,
 		trackDefaultSort: track.default_sort as string | undefined,
 		trackDefaultTypeFilter: track.default_type_filter as string | undefined,
 		trackDefaultStatusFilter: track.default_status_filter as string | undefined,
@@ -226,6 +229,7 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		platformContract: fileData.platformContract ?? "nex.shipload",
 		atomicAssetsContract: fileData.atomicAssets ?? "atomicassets",
 		fundContract: fileData.fundContract ?? "fnd.shipload",
+		collection: fileData.collection ?? "shipload",
 		track,
 		source,
 	};
