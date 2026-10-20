@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Int64, Name, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
+import {cargoStackFloor} from '../../src/utils/cargo'
 import {ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import {MODULE_CRAFTER, MODULE_LOADER} from '../../src/capabilities/modules'
 
@@ -121,9 +122,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         modules: ServerContract.Types.module_entry[] = []
     ) {
         return ServerContract.Types.cargo_row.from({
-            id: UInt64.from(rowId),
-            entity_id: UInt64.from(entityId),
-            item_id: UInt64.from(itemId),
+            id: UInt64.from(cargoStackFloor(entityId, itemId) + BigInt(rowId)),
             quantity: UInt64.from(qty),
             stats: UInt64.from(stats),
             modules,
@@ -219,7 +218,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
                 available: 8,
                 reserved: 0,
                 stats: '0',
-                rowId: '100',
+                rowId: (cargoStackFloor(10, INPUT_ITEM_ID) + 100n).toString(),
             },
             {
                 key: `${INPUT_ITEM_ID}#42#`,
@@ -227,7 +226,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
                 available: 5,
                 reserved: 0,
                 stats: '42',
-                rowId: '101',
+                rowId: (cargoStackFloor(10, INPUT_ITEM_ID) + 101n).toString(),
             },
         ])
     })

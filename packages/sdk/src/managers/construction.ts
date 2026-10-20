@@ -2,6 +2,7 @@ import type {UInt64, UInt32} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import type {ServerContract} from '../contracts'
 import {PlotManager} from './plot'
+import {cargoRowEntityId, cargoRowItemId} from '../utils/cargo'
 import {getItem} from '../data/catalog'
 import {calc_build_duration} from '../capabilities/crafting'
 import {computeLoaderDockedMass} from '../derivation/capabilities'
@@ -42,7 +43,7 @@ export class ConstructionManager extends BaseManager {
         if (entity.kind.toString() !== 'plot') return false
         if (!isIdle(entity)) return false
         if (Number(entity.cargomass) !== 0) return false
-        return !cargo.some((c) => c.entity_id.equals(entity.id))
+        return !cargo.some((c) => cargoRowEntityId(c).equals(entity.id))
     }
 
     eligibleSources(
@@ -302,7 +303,7 @@ function moduleKey(module: ServerContract.Types.module_entry): string {
 }
 
 function sourceStackKey(cargo: ServerContract.Types.cargo_row): string {
-    return `${cargo.item_id.toNumber()}#${cargo.stats.toString()}#${(cargo.modules ?? [])
+    return `${cargoRowItemId(cargo)}#${cargo.stats.toString()}#${(cargo.modules ?? [])
         .map(moduleKey)
         .join(',')}`
 }
@@ -319,8 +320,8 @@ function matchRelevantCargo(
     const remainingReserved = new Map(reservedByItem)
     const out: SourceCargoStack[] = []
     for (const c of cargo) {
-        if (!c.entity_id.equals(entity.id)) continue
-        const itemId = c.item_id.toNumber()
+        if (!cargoRowEntityId(c).equals(entity.id)) continue
+        const itemId = cargoRowItemId(c)
         const need = needsByItemId.get(itemId)
         if (!need) continue
         const gross = c.quantity.toNumber()

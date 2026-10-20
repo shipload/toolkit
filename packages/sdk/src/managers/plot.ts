@@ -3,6 +3,7 @@ import {getItem} from '../data/catalog'
 import {getRecipe} from '../data/recipes-runtime'
 import {computeInputMass} from '../derivation/crafting'
 import {TaskType} from '../types'
+import {cargoRowEntityId, cargoRowItemId} from '../utils/cargo'
 import {BaseManager} from './base'
 import type {ServerContract} from '../contracts'
 import type {BuildableTarget, ScheduledBuild} from './construction-types'
@@ -34,11 +35,11 @@ export class PlotManager extends BaseManager {
         }
 
         const plotId = plot.id.toString()
-        const plotCargo = cargo.filter((c) => c.entity_id.toString() === plotId)
+        const plotCargo = cargo.filter((c) => cargoRowEntityId(c).toString() === plotId)
 
         const quantityByItemId = new Map<number, number>()
         for (const c of plotCargo) {
-            const id = c.item_id.toNumber()
+            const id = cargoRowItemId(c)
             quantityByItemId.set(
                 id,
                 (quantityByItemId.get(id) ?? 0) + Number(c.quantity.toString())

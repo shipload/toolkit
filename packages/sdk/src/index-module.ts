@@ -366,7 +366,13 @@ export type {HasCargo} from './entities/inventory-accessor'
 export * as cargoUtils from './entities/cargo-utils'
 export type {CargoData} from './entities/cargo-utils'
 
-export {cargoRef, cargoItem} from './utils/cargo'
+export {
+    cargoRef,
+    cargoItem,
+    cargoRowEntityId,
+    cargoRowItemId,
+    cargoStackFloor,
+} from './utils/cargo'
 
 export {
     createProjectedEntity,

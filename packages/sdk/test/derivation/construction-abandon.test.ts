@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ConstructionManager} from '../../src/managers/construction'
 import {ServerContract} from '../../src/contracts'
+import {cargoStackFloor} from '../../src/utils/cargo'
 import {ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import {HoldKind, TaskType} from '../../src/types'
 import {makeTask} from '../helpers'
@@ -34,9 +35,7 @@ describe('ConstructionManager.canAbandon', () => {
 
     function makeCargoRow(entityId: number, rowId: number) {
         return ServerContract.Types.cargo_row.from({
-            id: UInt64.from(rowId),
-            entity_id: UInt64.from(entityId),
-            item_id: UInt64.from(1),
+            id: UInt64.from(cargoStackFloor(entityId, 1) + BigInt(rowId)),
             quantity: UInt64.from(1),
             stats: UInt64.from(0),
             modules: [],

@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test'
 import {Name, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {PlotManager} from '../../src/managers/plot'
 import {ServerContract} from '../../src/contracts'
+import {cargoStackFloor} from '../../src/utils/cargo'
 import {ITEM_PLATE_T2, ITEM_CERAMIC_T2, ITEM_WAREHOUSE_T2_PACKED} from '../../src/data/item-ids'
 import type {ScheduledBuild} from '../../src/managers/construction-types'
 
@@ -30,9 +31,7 @@ function makeCargoRow(
     quantity: number
 ): ServerContract.Types.cargo_row {
     return ServerContract.Types.cargo_row.from({
-        id: UInt64.from(cargoIdSeq++),
-        entity_id: UInt64.from(entityId),
-        item_id: UInt64.from(itemId),
+        id: UInt64.from(cargoStackFloor(entityId, itemId) + BigInt(cargoIdSeq++)),
         quantity: UInt64.from(quantity),
         stats: UInt64.from(0),
         modules: [],
