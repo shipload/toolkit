@@ -20,18 +20,19 @@ const row = (over: Record<string, unknown> = {}) => ({
     ...over,
 })
 
-function managerWith(queryImpl: () => Promise<unknown[]>, allImpl: () => Promise<unknown[]>) {
-    const table = () => ({query: () => ({all: queryImpl}), all: allImpl})
+function managerWith(rows: unknown[]) {
+    const table = () => ({
+        all: async () => rows,
+        get: async (id: {toString(): string}) =>
+            rows.find((r) => String((r as ReturnType<typeof row>).id.toNumber()) === String(id)),
+    })
     const ctx = {server: {table}} as never
     return new JobsManager(ctx)
 }
 
 describe('JobsManager.getOwnedJobs', () => {
     it('parses a deposited row: inputs then the output tail, status derived', async () => {
-        const m = managerWith(
-            async () => [row({cargo: [{item: 'in'}, {item: 'out'}]})],
-            async () => []
-        )
+        const m = managerWith([row({cargo: [{item: 'in'}, {item: 'out'}]})])
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs).toHaveLength(1)
         expect(jobs[0]).toMatchObject({id: 7, building: 42, quantity: 5, status: 'ready'})
@@ -46,10 +47,7 @@ describe('JobsManager.getOwnedJobs', () => {
             deposited: false,
             cargo: [{item: 'in'}],
         })
-        const m = managerWith(
-            async () => [inFlight],
-            async () => []
-        )
+        const m = managerWith([inFlight])
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs[0].status).toBe('dropping')
         expect(jobs[0].deposited).toBe(false)
@@ -65,10 +63,7 @@ describe('JobsManager.getOwnedJobs', () => {
                 {item_id: 101, quantity: 30},
             ],
         })
-        const m = managerWith(
-            async () => [inFlight],
-            async () => []
-        )
+        const m = managerWith([inFlight])
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T11:30:00Z')})
         expect(jobs[0].status).toBe('dropping')
         expect(jobs[0].inputs).toEqual([
@@ -84,35 +79,31 @@ describe('JobsManager.getOwnedJobs', () => {
             deposited: true,
             cargo: [{item: 'in'}],
         })
-        const m = managerWith(
-            async () => [cancelled],
-            async () => []
-        )
+        const m = managerWith([cancelled])
         const jobs = await m.getOwnedJobs(OWNER, {now: new Date('2026-07-26T09:00:00Z')})
         expect(jobs[0].status).toBe('ready')
         expect(jobs[0].output).toBeNull()
         expect(jobs[0].inputs).toEqual([{item: 'in'}] as never)
     })
 
-    it('drops rows whose owner does not match (positional-index safety re-filter)', async () => {
+    it('keeps only the rows the owner holds', async () => {
         const other = row({owner: Name.from('someoneelse.gm')})
-        const m = managerWith(
-            async () => [row(), other],
-            async () => []
-        )
+        const m = managerWith([row(), other])
         const jobs = await m.getOwnedJobs(OWNER)
         expect(jobs).toHaveLength(1)
     })
+})
 
-    it('falls back to a full-scan .all() when the positional query throws', async () => {
-        const m = managerWith(
-            async () => {
-                throw new Error('bad index_position')
-            },
-            async () => [row()]
-        )
-        const jobs = await m.getOwnedJobs(OWNER)
-        expect(jobs).toHaveLength(1)
+describe('JobsManager.getOwnedJob', () => {
+    it('reads one job by its id when the owner holds it', async () => {
+        const m = managerWith([row()])
+        expect((await m.getOwnedJob(OWNER, 7))?.building).toBe(42)
+    })
+
+    it('returns nothing for a missing id or another owner', async () => {
+        const m = managerWith([row()])
+        expect(await m.getOwnedJob(OWNER, 8)).toBeUndefined()
+        expect(await m.getOwnedJob('someoneelse.gm', 7)).toBeUndefined()
     })
 })
 

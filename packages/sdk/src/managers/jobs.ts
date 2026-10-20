@@ -16,24 +16,20 @@ export class JobsManager extends BaseManager {
     async getOwnedJobs(owner: NameType, opts?: {now?: Date}): Promise<OwnedJob[]> {
         const ownerName = Name.from(owner)
         const now = opts?.now ?? new Date()
-
-        let rows: JobRow[]
-        try {
-            // index_position 'tertiary' = nodeos slot 3 = owner's secondary index; no ABI metadata for it.
-            rows = (await this.server
-                .table('craftjobs')
-                .query({
-                    index_position: 'tertiary',
-                    key_type: 'i64',
-                    from: ownerName.value,
-                    to: ownerName.value,
-                })
-                .all()) as JobRow[]
-        } catch {
-            rows = (await this.server.table('craftjobs').all()) as JobRow[]
-        }
-
+        const rows = (await this.server.table('craftjobs').all()) as JobRow[]
         return rows.filter((r) => ownerName.equals(r.owner)).map((r) => this.parseOwnedJob(r, now))
+    }
+
+    async getOwnedJob(
+        owner: NameType,
+        id: UInt64Type,
+        opts?: {now?: Date}
+    ): Promise<OwnedJob | undefined> {
+        const row = (await this.server.table('craftjobs').get(UInt64.from(id))) as
+            | JobRow
+            | undefined
+        if (!row || !Name.from(owner).equals(row.owner)) return undefined
+        return this.parseOwnedJob(row, opts?.now ?? new Date())
     }
 
     async getBuildJobs(dockId: UInt64Type, opts?: {now?: Date}): Promise<BuildJob[]> {

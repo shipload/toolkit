@@ -30,7 +30,7 @@ export interface ClaimcraftCliOptions extends WaitableOptions {
 }
 
 export async function findOwnedJob(sl: Shipload, jobId: bigint, player: string): Promise<OwnedJob> {
-    const job = (await sl.jobs.getOwnedJobs(player)).find((j) => BigInt(j.id) === jobId)
+    const job = await sl.jobs.getOwnedJob(player, jobId)
     if (!job) {
         throw new ValidationError(
             `craft job ${jobId} is not one of ${player}'s jobs.`,

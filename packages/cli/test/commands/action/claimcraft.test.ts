@@ -35,7 +35,8 @@ test('claimcraft SUBCOMMAND takes a job id and the shuttle and wait options', ()
 
 test('findOwnedJob names the account and the lookup when the job is not theirs', async () => {
     const sl = getLocalShipload()
-    sl.jobs.getOwnedJobs = (async () => [JOB]) as typeof sl.jobs.getOwnedJobs
+    sl.jobs.getOwnedJob = (async (_owner, id) =>
+        String(id) === '42' ? JOB : undefined) as typeof sl.jobs.getOwnedJob
     expect((await findOwnedJob(sl, 42n, 'eggmaple.gm')).building).toBe(1001)
     await expect(findOwnedJob(sl, 43n, 'eggmaple.gm')).rejects.toThrow(
         "craft job 43 is not one of eggmaple.gm's jobs."
