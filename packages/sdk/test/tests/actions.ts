@@ -540,6 +540,7 @@ describe('ActionsManager', () => {
             'dbgrepack',
             'dbgappend',
             'dbgbarrier',
+            'dbglaneclock',
             'dbgstart',
             // internal / notification actions — not player-initiated
             'chkcollect',
