@@ -121,18 +121,18 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
             hashBytes[offset + 3]) >>>
         0
 
-    const weibull = (raw: number): number => {
-        const u = raw / 4294967296
-        let x = 0.24 * Math.sqrt(-Math.log(1 - u))
-        if (x > 1) x = 1
-        let val = Math.floor(x * 999) + 1
-        if (val > 999) val = 999
-        return val
-    }
-
     return {
-        stat1: weibull(extractU32(0)),
-        stat2: weibull(extractU32(4)),
-        stat3: weibull(extractU32(8)),
+        stat1: resourceStatFromRaw(extractU32(0)),
+        stat2: resourceStatFromRaw(extractU32(4)),
+        stat3: resourceStatFromRaw(extractU32(8)),
     }
+}
+
+export function resourceStatFromRaw(raw: number): number {
+    const u = raw / 4294967296
+    let x = 0.24 * Math.sqrt(-Math.log(1 - u))
+    if (x > 1) x = 1
+    let val = Math.floor(x * 999) + 1
+    if (val > 999) val = 999
+    return val
 }
