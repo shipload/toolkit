@@ -304,15 +304,24 @@ describe('SF-21 verifier', () => {
     test('WP-SF-21-V04 the claim needs equal rolls: a well-rolled Roustabout gatherer out-earns a poorly rolled Prospector T1', () => {
         const strong = tonnesPerEpoch(roustabout(800, ITEM_GATHERER_T1), 10)
         const weak = tonnesPerEpoch(specialist(PROSPECTOR_T1, 213, ITEM_GATHERER_T1), 10)
-        console.log(`WP-SF-21-V04 strong roustabout / weak prospector ${(strong / weak).toFixed(3)}`)
+        console.log(
+            `WP-SF-21-V04 strong roustabout / weak prospector ${(strong / weak).toFixed(3)}`
+        )
         expect(strong).toBeGreaterThan(weak)
     })
 
     test('WP-SF-21-V05 per ship the generalist earns less, but a Prospector T1 recipe consumes a Roustabout plus another 750 components, so per component the Roustabout earns more', () => {
-        const rows = recipes as {outputItemId: number; inputs: {itemId: number; quantity: number}[]}[]
+        const rows = recipes as {
+            outputItemId: number
+            inputs: {itemId: number; quantity: number}[]
+        }[]
         const count = (id: number) =>
             rows.find((r) => r.outputItemId === id)!.inputs.reduce((n, i) => n + i.quantity, 0)
-        expect(rows.find((r) => r.outputItemId === PROSPECTOR_T1)!.inputs.some((i) => i.itemId === ROUSTABOUT)).toBe(true)
+        expect(
+            rows
+                .find((r) => r.outputItemId === PROSPECTOR_T1)!
+                .inputs.some((i) => i.itemId === ROUSTABOUT)
+        ).toBe(true)
         const rousCost = count(ROUSTABOUT)
         const prospectorCost = rousCost + count(PROSPECTOR_T1) - 1
         expect(prospectorCost).toBeGreaterThan(rousCost)
@@ -352,6 +361,11 @@ describe('SF-21 verifier', () => {
         }
         walk(join(base, 'src'))
         walk(join(base, 'include'))
-        expect(hits.sort()).toEqual(['items.cpp', 'items.hpp', 'kind_registry.hpp', 'wrapped_schema.hpp'])
+        expect(hits.sort()).toEqual([
+            'items.cpp',
+            'items.hpp',
+            'kind_registry.hpp',
+            'wrapped_schema.hpp',
+        ])
     })
 })
