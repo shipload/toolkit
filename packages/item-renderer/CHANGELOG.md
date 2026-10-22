@@ -1,5 +1,68 @@
 # @shipload/item-renderer
 
+## 1.0.0-next.81
+
+### Patch Changes
+
+- 4e80049: - Update the item-renderer generator figures for the Resonance curve
+  - Update the loader module snapshot for per-lane transfer and payload
+  - Close stalled epochs with the beacon's committed secret
+  - Report an unlinked oracle close as unauthorized
+  - Tag legacy oracle secrets with the running chain
+  - Key the oracle secret store to the chain
+  - Move to Wharf 4.0.2
+  - Close an overdue epoch as the oracle with fresh entropy
+  - Move the toolkit to Wharf 4.0.1
+  - Preflight platform fund collection in oracle maintenance
+  - Format the oracle race classifier test
+  - Treat a lost reveal race as a normal beacon outcome
+  - Close an overdue epoch from the oracle beacon tick
+  - Mirror the ranked ballot in the SDK and page the oracle settlement
+  - Inline the base tsconfig into every package
+  - Collect fund income and market fees on a slow interval
+  - Collapse an all-idle maintenance pass into one log line
+  - Log beacon ticks on change and show the next boundary
+  - Gate the oracle maintenance sweeps on contract reads
+  - Add the voteready ballot settlement tick
+  - Add mintready, charterready and tend heartbeat ticks
+  - Multi-oracle epoch system
+  - Add script to preseed secret
+  - Update Dockerfile
+  - Migrated shipload/oracle into toolkit
+  - Add WP-CP and WP-WG tests for the crafting and world generation claims
+  - Ship the sandbox binding on its own SDK subpath
+  - Add the Sandbox binding and shiploadcli sandbox commands
+  - Regenerate bindings on the dbg debug actions and read the NFT collection from config
+  - Show Recharge in whole energy per minute in SDK displays
+  - Reject stratum 0 in the CLI gather preflight
+  - Trace Guide figure sources and blended stat labels through the recipes
+  - Derive strata 1..size in the SDK and CLI to match the gather action
+  - Switch the SDK and CLI from shuttle mass to Payload
+  - Retry a failed oracle chain read once on a fresh connection
+  - Show the Range floor in the Entity Sheet drain breakdown and Range note
+  - Add WP-SF-21 SDK tests for the universal socket claim
+  - Add WP-GM SDK-derived tests for gear, deposit and recharge claims
+  - Regenerate the server binding for dbglaneclock
+  - Mirror the Range floor and Resonance curve in the SDK
+  - Add the halt action helper signed by the pause permission
+  - Decode loader lanes from a contract that still sends mass
+  - Sync the catalog without the T2 Warp recipe
+  - Rename Sector nouns Belt and Cluster to Sea and Swath
+  - Measure Guide reference figures at stratum 1, the shallowest gatherable stratum
+  - Regenerate server bindings for the genesis and emission pause tables
+  - Correct the SDK location, category and stat descriptions and print influence without a unit
+  - Add Guide figure sources, stat sweeps and gather-from-figures to the SDK
+  - Add claimbumped and the bumped-cargo queries to the SDK
+  - Add the worlds citizen count and earning flag to the SDK bindings
+  - Add the platform cancelunwrap action to the SDK bindings
+  - Rate gathering on the bays that reach a stratum and capitalise mass suffixes
+  - Add the fund rescuetoken action and owed table to the SDK bindings
+  - Open the recipient token row before every withdraw
+- Updated dependencies [27fe0cb]
+- Updated dependencies [4e80049]
+- Updated dependencies [27fe0cb]
+  - @shipload/sdk@1.0.0-next.81
+
 ## 1.0.0-next.80
 
 ### Patch Changes
