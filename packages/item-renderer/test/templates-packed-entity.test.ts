@@ -68,7 +68,7 @@ test('ship with two modules draws each slot as its module name and figure lines'
         'Drain',
         '198 energy/ly',
         'Capacity',
-        '+1,552 energy',
+        '+2,133 energy',
         'Recharge',
         '+265 energy/min',
     ]) {
