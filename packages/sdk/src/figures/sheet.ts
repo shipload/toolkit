@@ -10,6 +10,7 @@ import {
     computeEntityCapabilities,
     computeLoaderDockedMass,
     computeModuleCapabilities,
+    RANGE_FLOOR_LY,
     type ComputedCapabilities,
     type ModuleCapabilities,
 } from '../derivation/capabilities'
@@ -21,8 +22,9 @@ import {
     cruiseSpeedLyPerHour,
     gatherDrainPerMinute,
     milliToEnergy,
+    travelDrainPerLy,
 } from './reference'
-import {formatFixed} from './format'
+import {formatDistance, formatFixed} from './format'
 import {
     countFigure,
     craftDrainFigure,
@@ -312,9 +314,18 @@ function massSection(ctx: SheetContext): SheetRow[] {
     return [row(tonnesFigure('total', 'Total', totalMass(ctx, ctx.cargoMass)), lines)]
 }
 
+function rangeFloorNote(floorReductionMilli: number): string {
+    const gap = Math.max(1, Math.ceil(travelDrainPerLy(-floorReductionMilli)))
+    return `Every ship reaches at least ${formatDistance(RANGE_FLOOR_LY)} on a full charge. This ship needs ${gap} energy/ly less drain to fly farther.`
+}
+
 function energySection(ctx: SheetContext): SheetRow[] {
     const {generator, travelDrain} = ctx.caps
     const rows: SheetRow[] = []
+    const floorReduction = travelDrain
+        ? travelDrain.total -
+          (travelDrain.engine + travelDrain.cargoHolds + travelDrain.tractorBeams)
+        : 0
     if (generator) {
         const capacityLines = ctx.fitted.flatMap((f) =>
             f.caps.kind === 'generator' || f.caps.kind === 'battery'
@@ -331,7 +342,10 @@ function energySection(ctx: SheetContext): SheetRow[] {
             )
         )
         if (travelDrain && travelDrain.total > 0) {
-            rows.push(row(distanceFigure('range', 'Range', generator.capacity / travelDrain.total)))
+            const range = distanceFigure('range', 'Range', generator.capacity / travelDrain.total)
+            rows.push(
+                row(floorReduction < 0 ? {...range, note: rangeFloorNote(floorReduction)} : range)
+            )
         }
     }
     if (travelDrain) {
@@ -342,6 +356,14 @@ function energySection(ctx: SheetContext): SheetRow[] {
             if (f.caps.kind === 'storage' || f.caps.kind === 'hauler') {
                 lines.push(line(f, travelDrainFigure('drain', 'Drain', f.caps.drain)))
             }
+        }
+        if (floorReduction < 0) {
+            lines.push(
+                plainLine(
+                    'Range floor',
+                    travelDrainFigure('rangeFloor', 'Range floor', floorReduction)
+                )
+            )
         }
         rows.push(row(travelDrainFigure('travelDrain', 'Travel drain', travelDrain.total), lines))
     }

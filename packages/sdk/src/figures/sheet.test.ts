@@ -11,6 +11,7 @@ import {
     ITEM_LOADER_T1,
     ITEM_PORTER_T1A_PACKED,
     ITEM_PROSPECTOR_T1A_PACKED,
+    ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_SHIP_T1_PACKED,
     ITEM_STORAGE_T1,
     ITEM_TUG_T1A_PACKED,
@@ -220,6 +221,46 @@ describe('computeEntitySheet sections for movement modules', () => {
             ['Transfer', '2 × 326 t/min'],
             ['Shuttles', '2'],
         ])
+    })
+})
+
+describe('computeEntitySheet at the Range floor', () => {
+    const core = {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: encodeStats([213, 213])}
+    const engine = {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([213, 213])}
+    const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213, 213])}
+
+    test('a starter Roustabout with a Cargo Hold shows the floor line and a Range note', () => {
+        const sheet = computeEntitySheet({
+            itemId: ITEM_ROUSTABOUT_T1A_PACKED,
+            hullStats: {},
+            modules: [core, engine, hold],
+        })
+        const drain = rowOf(sheet, 'energy', 'travelDrain')
+        expect(drain.text).toBe('225 energy/ly')
+        expect(drain.breakdown?.map((l) => [l.label, l.text])).toEqual([
+            ['Engines', '225 energy/ly'],
+            ['Cargo Hold', '11.3 energy/ly'],
+            ['Range floor', '-10.7 energy/ly'],
+        ])
+        const sum = drain.breakdown!.reduce((total, l) => total + l.value, 0)
+        expect(sum).toBeCloseTo(drain.value, 9)
+        const range = rowOf(sheet, 'energy', 'range')
+        expect(range.text).toBe('5.0 ly')
+        expect(range.note).toBe(
+            'Every ship reaches at least 5.0 ly on a full charge. This ship needs 11 energy/ly less drain to fly farther.'
+        )
+    })
+
+    test('a starter Roustabout without a hold sits above the floor with no note', () => {
+        const sheet = computeEntitySheet({
+            itemId: ITEM_ROUSTABOUT_T1A_PACKED,
+            hullStats: {},
+            modules: [core, engine],
+        })
+        expect(rowOf(sheet, 'energy', 'travelDrain').breakdown?.map((l) => l.label)).toEqual([
+            'Engines',
+        ])
+        expect(rowOf(sheet, 'energy', 'range').note).toBeUndefined()
     })
 })
 
