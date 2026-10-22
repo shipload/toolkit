@@ -9,30 +9,23 @@ export interface PlayerRosterEntry {
 
 export class PlayersManager extends BaseManager {
     async getPlayer(account: NameType): Promise<Player | undefined> {
-        const playerRow = await this.server.table('player').get(Name.from(account))
-        if (!playerRow) {
+        const company = await this.platform.table('company').get(Name.from(account))
+        if (!company) {
             return undefined
         }
-        return new Player(playerRow)
+        return Player.fromState({owner: company.account})
     }
 
     async getPlayers(): Promise<Player[]> {
-        const rows = await this.server.table('player').all()
-        return rows.map((row) => new Player(row))
+        const companies = await this.platform.table('company').all()
+        return companies.map((company) => Player.fromState({owner: company.account}))
     }
 
     async getRoster(): Promise<PlayerRosterEntry[]> {
-        const [players, companies] = await Promise.all([
-            this.server.table('player').all(),
-            this.platform.table('company').all(),
-        ])
-        const companyNames = new Map<string, string>()
-        for (const company of companies) {
-            companyNames.set(company.account.toString(), company.name)
-        }
-        return players.map((player) => ({
-            owner: player.owner,
-            company: companyNames.get(player.owner.toString()),
+        const companies = await this.platform.table('company').all()
+        return companies.map((company) => ({
+            owner: company.account,
+            company: company.name,
         }))
     }
 }

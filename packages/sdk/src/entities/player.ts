@@ -1,15 +1,15 @@
-import {Name, type NameType} from '@wharfkit/antelope'
-import {ServerContract} from '../contracts'
+import {Name, type NameType, Struct} from '@wharfkit/antelope'
 
 export interface PlayerStateInput {
     owner: NameType
 }
 
-export class Player extends ServerContract.Types.player_row {
+@Struct.type('player')
+export class Player extends Struct {
+    @Struct.field(Name)
+    declare owner: Name
+
     static fromState(state: PlayerStateInput): Player {
-        const playerRow = ServerContract.Types.player_row.from({
-            owner: Name.from(state.owner),
-        })
-        return new Player(playerRow)
+        return Player.from({owner: Name.from(state.owner)})
     }
 }

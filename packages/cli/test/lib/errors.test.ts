@@ -90,14 +90,14 @@ describe("printError", () => {
 		expect(joined).toContain("--quantity 16");
 	});
 
-	test("already-founded company error hints at join", () => {
+	test("already-founded company error points at next", () => {
 		const errSpy = mock((..._args: unknown[]) => {});
 		const orig = console.error;
 		console.error = errSpy;
 		printError(new Error("assertion failure with message: This account has already founded a company"));
 		console.error = orig;
 		const joined = errSpy.mock.calls.map((c) => String(c[0])).join("\n");
-		expect(joined).toContain("shiploadcli join");
+		expect(joined).toContain("shiploadcli next");
 	});
 });
 

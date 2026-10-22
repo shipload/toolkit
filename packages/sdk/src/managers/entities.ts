@@ -1,6 +1,7 @@
 import {Name, UInt64, type NameType, type UInt64Type} from '@wharfkit/antelope'
 import {BaseManager} from './base'
 import {Entity} from '../entities/entity'
+import type {Player} from '../entities/player'
 import type {EntityTypeName} from '../data/kind-registry'
 import type {ServerContract} from '../contracts'
 
@@ -21,10 +22,7 @@ export class EntitiesManager extends BaseManager {
         })
     }
 
-    async getEntities(
-        owner: NameType | ServerContract.Types.player_row,
-        kind?: EntityTypeName
-    ): Promise<Entity[]> {
+    async getEntities(owner: NameType | Player, kind?: EntityTypeName): Promise<Entity[]> {
         const ownerName = this.resolveOwner(owner)
         const result = await this.server.readonly('getentities', {
             owner: ownerName,
@@ -51,7 +49,7 @@ export class EntitiesManager extends BaseManager {
     }
 
     async getSummaries(
-        owner: NameType | ServerContract.Types.player_row,
+        owner: NameType | Player,
         kind?: EntityTypeName
     ): Promise<ServerContract.Types.entity_summary[]> {
         const ownerName = this.resolveOwner(owner)
@@ -64,7 +62,7 @@ export class EntitiesManager extends BaseManager {
 
     async getDepot(
         depotId: UInt64Type,
-        owner: NameType | ServerContract.Types.player_row
+        owner: NameType | Player
     ): Promise<ServerContract.Types.depot_view> {
         const result = await this.server.readonly('getdepot', {
             depot_id: depotId,
@@ -73,7 +71,7 @@ export class EntitiesManager extends BaseManager {
         return result as ServerContract.Types.depot_view
     }
 
-    private resolveOwner(owner: NameType | ServerContract.Types.player_row): Name {
+    private resolveOwner(owner: NameType | Player): Name {
         if (typeof owner === 'object' && owner !== null && 'owner' in owner) {
             return owner.owner
         }

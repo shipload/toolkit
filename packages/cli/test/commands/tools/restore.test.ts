@@ -7,14 +7,13 @@ describe('tools restore table filters', () => {
     })
 
     test('parses comma-separated table filters', () => {
-        expect([...parseRestoreTables('player,cargo')]).toEqual(['player', 'cargo'])
+        expect([...parseRestoreTables('entity,cargo')]).toEqual(['entity', 'cargo'])
     })
 
     test('defaults to all tables when filter is absent', () => {
         expect([...parseRestoreTables()]).toEqual([
             'state',
             'nftconfig',
-            'player',
             'entity',
             'cargo',
             'entitygroup',
@@ -45,7 +44,6 @@ describe('tools restore table filters', () => {
             'dbgwipe',
             'dbgimpstate',
             'setnftcfg',
-            'dbgimpplayer',
             'dbgimpentity',
             'dbgimpcargo',
             'dbgimpgroup',

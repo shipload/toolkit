@@ -46,14 +46,6 @@ describe('ActionsManager', () => {
         })
     })
 
-    describe('join', () => {
-        test('creates join action', () => {
-            const action = shipload.actions.join('newplayer')
-            assert.equal(action.name.toString(), 'join')
-            assert.isDefined(action.data)
-        })
-    })
-
     describe('warp', () => {
         test('creates warp action with number coordinates', () => {
             const action = shipload.actions.warp(1, {x: 5, y: 10})
@@ -542,6 +534,7 @@ describe('ActionsManager', () => {
             'movestorage',
             'rekeycargo',
             'rekeyjobs',
+            'dropplayers',
             'dbgjobs',
             'dbgpick',
             'dbgplace',
@@ -565,6 +558,7 @@ describe('ActionsManager', () => {
             'dbgnftcodec',
             'dbgoldcargo',
             'dbgoldjobs',
+            'dbgoldplayer',
             'dbgoldstore',
             'dbgoldworld',
             'dbgpagerows',

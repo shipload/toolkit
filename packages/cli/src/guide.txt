@@ -19,10 +19,9 @@ Run these once per account, in order. Each step says what to confirm before movi
 
    From here the CLI signs game actions with the restricted key. Any action that key cannot sign comes back as a wallet signing link; give it to the player and continue once they report it signed.
 
-2. Register and join:
+2. Register a company:
 
        shiploadcli foundcompany
-       shiploadcli join
 
 3. Claim and deploy the starter ship (testnet only; `claimstarter` does not exist on a real network):
 

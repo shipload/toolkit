@@ -290,7 +290,7 @@ describe("formatPlayer", () => {
 
 	test("unjoined account points at foundcompany and join", () => {
 		expect(formatPlayer(player({}))).toBe(
-			"agent.gm\nNot in game. Run: shiploadcli foundcompany, then shiploadcli join",
+			"agent.gm\nNot in game. Run: shiploadcli foundcompany",
 		);
 	});
 });

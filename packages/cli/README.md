@@ -59,11 +59,10 @@ permission = active
 
 The file should be readable only by you. `shiploadcli init` writes it with mode `0600`; if you create it by hand, `chmod 600 config.ini`.
 
-First-run bootstrap (create a company, join the game, and — on testnet — claim a starter ship):
+First-run bootstrap (create a company, which puts the account in the game, then claim a starter ship on testnet):
 
 ```bash
 bun run shiploadcli foundcompany
-bun run shiploadcli join
 bun run shiploadcli claimstarter
 ```
 
@@ -100,7 +99,6 @@ Every query command accepts `--json` to emit raw JSON instead of formatted text.
 ### Action (transacting)
 
 - `foundcompany` — create a new company on the platform.
-- `join` — join the Shipload game.
 - `claimstarter` — claim the free starter ship (testnet only).
 - `ship <id> travel <x> <y>` — fly a ship to coordinates. `--no-recharge` disables auto-recharge.
 - `grouptravel <entities> <x> <y>` — fly multiple entities together (e.g., `ship:1,container:2`).

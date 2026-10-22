@@ -454,12 +454,6 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    join(account: NameType): Action {
-        return this.server.action('join', {
-            account: Name.from(account),
-        })
-    }
-
     gather(
         sourceId: UInt64Type,
         destinationId: UInt64Type,
@@ -1051,7 +1045,7 @@ export class ActionsManager extends BaseManager {
     }
 
     joinGame(account: NameType, companyName: string): Action[] {
-        return [this.foundCompany(account, companyName), this.join(account)]
+        return [this.foundCompany(account, companyName)]
     }
 
     commit(oracleId: NameType, epoch: UInt64Type, commit: Checksum256Type): Action {

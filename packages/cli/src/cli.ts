@@ -16,7 +16,6 @@ import * as deploy from './commands/action/deploy'
 import * as foundcompany from './commands/action/foundcompany'
 import * as gather from './commands/action/gather'
 import * as grouptravel from './commands/action/grouptravel'
-import * as join from './commands/action/join'
 import * as load from './commands/action/load'
 import * as movetile from './commands/action/movetile'
 import * as recharge from './commands/action/recharge'
@@ -154,7 +153,6 @@ export function build(): Command {
     registerEntitySubcommand(tasks.SUBCOMMAND)
 
     foundcompany.register(program)
-    join.register(program)
     claimstarter.register(program)
     registerEntitySubcommand(travel.SUBCOMMAND)
     grouptravel.register(program)

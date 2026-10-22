@@ -1,5 +1,5 @@
 export interface GameState {
-	player: { company: string; in_game: boolean } | null;
+	player: { company: string } | null;
 	entities: Array<{
 		type: string;
 		id: number;
@@ -23,10 +23,6 @@ const RULES: Rule[] = [
 					reason: "No company registered yet.",
 					command: "shiploadcli foundcompany",
 				}
-			: null,
-	(s) =>
-		s.player && !s.player.in_game
-			? { reason: "Company registered, not joined.", command: "shiploadcli join" }
 			: null,
 	(s) => {
 		const busy = s.entities.find((e) => e.status === "active");

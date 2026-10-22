@@ -133,7 +133,7 @@ const HINTS: ChainHint[] = [
 	},
 	{
 		matches: (m) => m.includes("already founded a company"),
-		hint: "This account already has a company. If `shiploadcli player` shows [Not in game], run `shiploadcli join`.",
+		hint: "This account already has a company, so it is already in the game. Run `shiploadcli next` for the next step.",
 	},
 ];
 

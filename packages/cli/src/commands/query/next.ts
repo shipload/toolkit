@@ -30,17 +30,8 @@ async function buildState(): Promise<GameState> {
         }
     })
 
-    const hasCompany = Boolean(playerInfo?.company_name)
-    const inGame = Boolean(playerInfo?.is_player)
-
     return {
-        player:
-            hasCompany || inGame
-                ? {
-                      company: String(playerInfo?.company_name ?? ''),
-                      in_game: inGame,
-                  }
-                : null,
+        player: playerInfo?.is_player ? {company: String(playerInfo?.company_name ?? '')} : null,
         entities,
     }
 }

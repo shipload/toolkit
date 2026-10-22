@@ -47,25 +47,23 @@ export function registerSubcommand(tools: Command): void {
 
             const epoch = Number(stateRow.epoch)
 
-            const [nftconfig, players, entities, cargo, entitygroups, reserveScopes] =
-                await Promise.all([
-                    fetchAllRows(chainUrl, opts.contract, scope, 'nftconfig'),
-                    fetchAllRows(chainUrl, opts.contract, scope, 'player'),
-                    fetchAllRows(chainUrl, opts.contract, scope, 'entity'),
-                    fetchAllRows(chainUrl, opts.contract, scope, 'cargo'),
-                    fetchAllRows(chainUrl, opts.contract, scope, 'entitygroup'),
-                    Promise.all(
-                        Array.from({length: epoch}, (_, i) => i + 1).map(async (e) => {
-                            const rows = await fetchAllRows(
-                                chainUrl,
-                                opts.contract,
-                                String(e),
-                                'reserve'
-                            )
-                            return {scope: e, rows}
-                        })
-                    ),
-                ])
+            const [nftconfig, entities, cargo, entitygroups, reserveScopes] = await Promise.all([
+                fetchAllRows(chainUrl, opts.contract, scope, 'nftconfig'),
+                fetchAllRows(chainUrl, opts.contract, scope, 'entity'),
+                fetchAllRows(chainUrl, opts.contract, scope, 'cargo'),
+                fetchAllRows(chainUrl, opts.contract, scope, 'entitygroup'),
+                Promise.all(
+                    Array.from({length: epoch}, (_, i) => i + 1).map(async (e) => {
+                        const rows = await fetchAllRows(
+                            chainUrl,
+                            opts.contract,
+                            String(e),
+                            'reserve'
+                        )
+                        return {scope: e, rows}
+                    })
+                ),
+            ])
 
             const manifest: SnapshotManifest = {
                 version: 1,
@@ -74,7 +72,6 @@ export function registerSubcommand(tools: Command): void {
                 chainId: String(chain.id),
                 state: stateRow,
                 nftconfig,
-                players,
                 entities,
                 cargo,
                 entitygroups,
@@ -86,7 +83,7 @@ export function registerSubcommand(tools: Command): void {
             await writeFile(outPath, manifestToJSON(manifest), 'utf8')
             console.log(`Snapshot written to ${outPath}`)
             console.log(
-                `  state: epoch=${epoch}, players=${manifest.players.length}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}, groups=${manifest.entitygroups.length}, reserve scopes=${manifest.reserves.length}`
+                `  state: epoch=${epoch}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}, groups=${manifest.entitygroups.length}, reserve scopes=${manifest.reserves.length}`
             )
 
             if (opts.contract === gameContractName && opts.source === String(chain.url)) {

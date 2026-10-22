@@ -271,7 +271,7 @@ export function formatEntityRef(ref: { entityType: string; entityId: number | bi
 export function formatPlayer(player:ServerTypes.player_info): string {
 	const status = player.is_player
 		? "In game"
-		: "Not in game. Run: shiploadcli foundcompany, then shiploadcli join";
+		: "Not in game. Run: shiploadcli foundcompany";
 	return `${player.owner}\n${status}`;
 }
 

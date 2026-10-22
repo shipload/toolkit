@@ -26,20 +26,12 @@ function shiftScheduleTimestamps(rawSchedule: unknown, seconds: number): unknown
 
 const BATCH_SIZE = 50
 
-export type RestoreTable =
-    | 'state'
-    | 'nftconfig'
-    | 'player'
-    | 'entity'
-    | 'cargo'
-    | 'entitygroup'
-    | 'reserve'
+export type RestoreTable = 'state' | 'nftconfig' | 'entity' | 'cargo' | 'entitygroup' | 'reserve'
 
 export type RestoreStepName =
     | 'dbgwipe'
     | 'dbgimpstate'
     | 'setnftcfg'
-    | 'dbgimpplayer'
     | 'dbgimpentity'
     | 'dbgimpcargo'
     | 'dbgimpgroup'
@@ -53,7 +45,6 @@ export interface RestoreStep {
 const RESTORE_TABLES: readonly RestoreTable[] = [
     'state',
     'nftconfig',
-    'player',
     'entity',
     'cargo',
     'entitygroup',
@@ -63,7 +54,6 @@ const RESTORE_TABLES: readonly RestoreTable[] = [
 const RESTORE_STEPS: readonly RestoreStep[] = [
     {name: 'dbgimpstate', table: 'state'},
     {name: 'setnftcfg', table: 'nftconfig'},
-    {name: 'dbgimpplayer', table: 'player'},
     {name: 'dbgimpentity', table: 'entity'},
     {name: 'dbgimpcargo', table: 'cargo'},
     {name: 'dbgimpgroup', table: 'entitygroup'},
@@ -169,7 +159,7 @@ export function registerSubcommand(tools: Command): void {
 
                 console.log(`Restoring snapshot ${file} → ${target}`)
                 console.log(
-                    `  state.epoch=${manifest.state.epoch}, players=${manifest.players.length}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}`
+                    `  state.epoch=${manifest.state.epoch}, entities=${manifest.entities.length}, cargo=${manifest.cargo.length}`
                 )
 
                 if (stepNames.has('dbgwipe')) {
@@ -197,19 +187,8 @@ export function registerSubcommand(tools: Command): void {
                     )
                 }
 
-                if (stepNames.has('dbgimpplayer')) {
-                    console.log(`Step 4: dbgimpplayer × ${manifest.players.length}`)
-                    await pushBatched(
-                        target,
-                        manifest.players.map((p) => ({
-                            name: 'dbgimpplayer',
-                            data: {owner: p.owner},
-                        }))
-                    )
-                }
-
                 if (stepNames.has('dbgimpentity')) {
-                    console.log(`Step 5: dbgimpentity × ${manifest.entities.length}`)
+                    console.log(`Step 4: dbgimpentity × ${manifest.entities.length}`)
                     await pushBatched(
                         target,
                         manifest.entities.map((e) => {
@@ -226,7 +205,7 @@ export function registerSubcommand(tools: Command): void {
                 }
 
                 if (stepNames.has('dbgimpcargo')) {
-                    console.log(`Step 6: dbgimpcargo × ${manifest.cargo.length}`)
+                    console.log(`Step 5: dbgimpcargo × ${manifest.cargo.length}`)
                     await pushBatched(
                         target,
                         manifest.cargo.map((c) => ({name: 'dbgimpcargo', data: {row: c}}))
@@ -234,7 +213,7 @@ export function registerSubcommand(tools: Command): void {
                 }
 
                 if (stepNames.has('dbgimpgroup')) {
-                    console.log(`Step 7: dbgimpgroup × ${manifest.entitygroups.length}`)
+                    console.log(`Step 6: dbgimpgroup × ${manifest.entitygroups.length}`)
                     await pushBatched(
                         target,
                         manifest.entitygroups.map((g) => ({name: 'dbgimpgroup', data: {row: g}}))
@@ -249,7 +228,7 @@ export function registerSubcommand(tools: Command): void {
                         }))
                     )
                     console.log(
-                        `Step 8: dbgimpreserv × ${reserveActions.length} across ${manifest.reserves.length} scopes`
+                        `Step 7: dbgimpreserv × ${reserveActions.length} across ${manifest.reserves.length} scopes`
                     )
                     await pushBatched(target, reserveActions)
                 }

@@ -5,7 +5,6 @@ export interface SnapshotManifest {
     chainId: string
     state: Record<string, unknown>
     nftconfig: Record<string, unknown>[]
-    players: Record<string, unknown>[]
     entities: Record<string, unknown>[]
     cargo: Record<string, unknown>[]
     entitygroups: Record<string, unknown>[]
