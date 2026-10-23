@@ -1,6 +1,7 @@
 import {expect, spyOn, test} from 'bun:test'
 import {Action, Asset, Name} from '@wharfkit/antelope'
 import type {FundDeps} from '@shipload/oracle'
+import {fundSweepsEnabled} from './context'
 import {runCollectPass} from './maintenance-pass'
 import {formatCollect} from './format'
 
@@ -109,4 +110,15 @@ test('collection formatting distinguishes idle from productive sources', () => {
     expect(formatCollect({kind: 'collected', source: 'market'})).toBe(
         'fund collect: pulled market fees'
     )
+})
+
+test('an oracle without a fund permission runs no collection and stays quiet', async () => {
+    expect(await capture(() => runCollectPass({fund: null}))).toEqual({out: [], err: []})
+})
+
+test('fund sweeps run when the fund permission is wired or the chain is unreachable', () => {
+    expect(fundSweepsEnabled({state: 'admitted'})).toBe(true)
+    expect(fundSweepsEnabled({state: 'unreachable', detail: 'timeout'})).toBe(true)
+    expect(fundSweepsEnabled({state: 'no-permission'})).toBe(false)
+    expect(fundSweepsEnabled({state: 'key-not-wired'})).toBe(false)
 })

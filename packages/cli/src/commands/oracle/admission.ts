@@ -1,5 +1,5 @@
 import {PrivateKey, type PublicKey} from '@wharfkit/antelope'
-import {client, getShipload} from '../../lib/client'
+import {client, fundContractName, getShipload} from '../../lib/client'
 import type {OracleConfig} from '../../lib/config'
 import {ValidationError} from '../../lib/validate'
 import type {AdmissionState} from './format'
@@ -15,10 +15,22 @@ export interface Responsibility {
     secondsAway: number
 }
 
-export async function checkAdmission(cfg: OracleConfig): Promise<Admission> {
+export function checkAdmission(cfg: OracleConfig): Promise<Admission> {
+    return checkPermission(cfg.actor, cfg.permission, cfg.privateKey)
+}
+
+export function checkFundAdmission(cfg: OracleConfig): Promise<Admission> {
+    return checkPermission(fundContractName, cfg.handle, cfg.privateKey)
+}
+
+async function checkPermission(
+    actor: string,
+    permission: string,
+    privateKey: string
+): Promise<Admission> {
     let pub: PublicKey
     try {
-        pub = PrivateKey.from(cfg.privateKey).toPublic()
+        pub = PrivateKey.from(privateKey).toPublic()
     } catch {
         throw new ValidationError(
             'The oracle private_key in your config is not a valid Antelope key.',
@@ -27,11 +39,11 @@ export async function checkAdmission(cfg: OracleConfig): Promise<Admission> {
     }
     let account: Awaited<ReturnType<typeof client.v1.chain.get_account>>
     try {
-        account = await client.v1.chain.get_account(cfg.actor)
+        account = await client.v1.chain.get_account(actor)
     } catch (err) {
         return {state: 'unreachable', detail: (err as Error).message}
     }
-    const perm = account.permissions.find((p) => String(p.perm_name) === cfg.permission)
+    const perm = account.permissions.find((p) => String(p.perm_name) === permission)
     if (!perm) return {state: 'no-permission'}
     if (!perm.required_auth.keys.some((k) => k.key.equals(pub))) return {state: 'key-not-wired'}
     return {state: 'admitted'}

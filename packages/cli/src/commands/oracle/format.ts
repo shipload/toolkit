@@ -183,6 +183,19 @@ export function formatWaiting(opts: {
     ].join('\n')
 }
 
+export function formatFundOff(opts: {
+    actor: string
+    permission: string
+    state: AdmissionState
+}): string {
+    const perm = `${opts.actor}@${opts.permission}`
+    const reason =
+        opts.state === 'key-not-wired'
+            ? `your oracle key is not wired to ${perm}`
+            : `${perm} does not exist on chain`
+    return `fund sweeps off: ${reason}, so this oracle skips the tend, collect and collectfees passes`
+}
+
 export function formatWaitingBrief(opts: {
     handle: string
     state: AdmissionState

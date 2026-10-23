@@ -37,7 +37,7 @@ import {
 import {loadOracleConfig, type OracleConfig} from '../../lib/config'
 import {appFetch} from '../../lib/fetch-trace'
 import {ValidationError} from '../../lib/validate'
-import {checkAdmission} from './admission'
+import {type Admission, checkAdmission, checkFundAdmission} from './admission'
 
 export interface OracleContext {
     cfg: OracleConfig
@@ -45,7 +45,8 @@ export interface OracleContext {
     maintenance: MaintenanceDeps
     influence: InfluenceDeps
     ballots: BallotDeps
-    fund: FundDeps
+    fund: FundDeps | null
+    fundAdmission: Admission
     store: SecretStore
     close(): void
 }
@@ -181,7 +182,7 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
         },
         session,
     }
-    const fund: FundDeps = {
+    const fundDeps: FundDeps = {
         reads: {
             getTendable: async (maxLots) => {
                 const ids = (await fundContract.readonly('gettendable', {
@@ -208,7 +209,19 @@ export async function buildOracleContext(opts: {verify?: boolean} = {}): Promise
         },
         session: fundSession,
     }
-    return {cfg, deps, maintenance, influence, ballots, fund, store, close: () => store.close()}
+    const fundAdmission = await checkFundAdmission(cfg)
+    const fund = fundSweepsEnabled(fundAdmission) ? fundDeps : null
+    return {
+        cfg,
+        deps,
+        maintenance,
+        influence,
+        ballots,
+        fund,
+        fundAdmission,
+        store,
+        close: () => store.close(),
+    }
 }
 
 export async function tickOnce(ctx: OracleContext): Promise<TickResult> {
@@ -240,16 +253,22 @@ export async function settleReadyBallotsOnce(
     return settleReadyBallots(ctx.ballots, maxPages)
 }
 
-export async function tendFundOnce(ctx: OracleContext, maxLots = 0): Promise<TendResult> {
+export function fundOffOpts(ctx: Pick<OracleContext, 'cfg' | 'fundAdmission'>) {
+    return {actor: fundContractName, permission: ctx.cfg.handle, state: ctx.fundAdmission.state}
+}
+
+export function fundSweepsEnabled(admission: Admission): boolean {
+    return admission.state === 'admitted' || admission.state === 'unreachable'
+}
+
+export async function tendFundOnce(ctx: {fund: FundDeps}, maxLots = 0): Promise<TendResult> {
     return tendFund(ctx.fund, maxLots)
 }
 
-export async function collectFundOnce(ctx: Pick<OracleContext, 'fund'>): Promise<CollectResult> {
+export async function collectFundOnce(ctx: {fund: FundDeps}): Promise<CollectResult> {
     return collectFund(ctx.fund)
 }
 
-export async function collectFundFeesOnce(
-    ctx: Pick<OracleContext, 'fund'>
-): Promise<CollectResult> {
+export async function collectFundFeesOnce(ctx: {fund: FundDeps}): Promise<CollectResult> {
     return collectFundFees(ctx.fund)
 }

@@ -11,8 +11,15 @@ import {chain} from '../../lib/client'
 import {loadOracleConfig} from '../../lib/config'
 import {enableFetchTrace} from '../../lib/fetch-trace'
 import {checkAdmission, isRegistered, resolveResponsibility} from './admission'
-import {buildOracleContext, cleanOnce, tickOnce} from './context'
-import {formatAdmitted, formatClean, formatTick, formatWaiting, formatWaitingBrief} from './format'
+import {buildOracleContext, cleanOnce, fundOffOpts, tickOnce} from './context'
+import {
+    formatAdmitted,
+    formatClean,
+    formatFundOff,
+    formatTick,
+    formatWaiting,
+    formatWaitingBrief,
+} from './format'
 import {runCollectPass, runMaintenancePass} from './maintenance-pass'
 
 const ADMISSION_POLL_MS = 60_000
@@ -134,6 +141,7 @@ export function register(parent: Command): void {
                     return
                 }
                 const ctx = await buildOracleContext({verify: false})
+                if (!ctx.fund) console.log(`${stamp()} ${formatFundOff(fundOffOpts(ctx))}`)
                 try {
                     while (!stopping) {
                         try {

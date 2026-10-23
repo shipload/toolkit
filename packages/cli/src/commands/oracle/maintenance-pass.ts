@@ -57,8 +57,9 @@ export async function runMaintenancePass(
             formatCharterReady
         ),
         await sweep('ballot', () => settleReadyBallotsOnce(ctx), 'settled', formatVoteReady),
-        await sweep('fund', () => tendFundOnce(ctx), 'tended', formatTend),
     ]
+    const fund = ctx.fund
+    if (fund) outcomes.push(await sweep('fund', () => tendFundOnce({fund}), 'tended', formatTend))
     const plan = planMaintenanceLog(outcomes, prev, now, heartbeatMs)
     for (const line of plan.out) console.log(`${stamp()} ${line}`)
     for (const line of plan.err) console.error(`${stamp()} ${line}`)
@@ -66,9 +67,11 @@ export async function runMaintenancePass(
 }
 
 export async function runCollectPass(ctx: Pick<OracleContext, 'fund'>): Promise<void> {
+    const fund = ctx.fund
+    if (!fund) return
     const outcomes: SweepOutcome[] = [
-        await sweep('collect', () => collectFundOnce(ctx), 'collected', formatCollect),
-        await sweep('collectfees', () => collectFundFeesOnce(ctx), 'collected', formatCollect),
+        await sweep('collect', () => collectFundOnce({fund}), 'collected', formatCollect),
+        await sweep('collectfees', () => collectFundFeesOnce({fund}), 'collected', formatCollect),
     ]
     for (const outcome of outcomes) {
         if (outcome.kind === 'productive') console.log(`${stamp()} ${outcome.line}`)

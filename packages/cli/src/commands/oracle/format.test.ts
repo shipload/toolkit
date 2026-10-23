@@ -8,6 +8,7 @@ import {
     formatStoreChain,
     formatTend,
     formatDuration,
+    formatFundOff,
     formatTick,
     raceNote,
     formatVoteReady,
@@ -627,4 +628,15 @@ test('renderStatus explains the threshold as a race', () => {
     })
     expect(out).toMatch(/Threshold:\s+2 of 3/)
     expect(out).toContain('the fastest 2 reveals compose the seed; later reveals bounce')
+})
+
+test('the fund-off line names the missing fund permission', () => {
+    expect(
+        formatFundOff({actor: 'fnd.shipload', permission: 'sandbox1', state: 'no-permission'})
+    ).toBe(
+        'fund sweeps off: fnd.shipload@sandbox1 does not exist on chain, so this oracle skips the tend, collect and collectfees passes'
+    )
+    expect(
+        formatFundOff({actor: 'fnd.shipload', permission: 'oracle1', state: 'key-not-wired'})
+    ).toContain('your oracle key is not wired to fnd.shipload@oracle1')
 })

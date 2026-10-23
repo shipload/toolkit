@@ -2,9 +2,9 @@ import {StaleSecretStoreError} from '@shipload/oracle'
 import type {Command} from 'commander'
 import {loadOracleConfig} from '../../lib/config'
 import {checkAdmission} from './admission'
-import {buildOracleContext, tickOnce} from './context'
+import {buildOracleContext, fundOffOpts, tickOnce} from './context'
 import {describeLoopError} from '../../lib/errors'
-import {formatTick, formatWaitingBrief} from './format'
+import {formatFundOff, formatTick, formatWaitingBrief} from './format'
 import {runCollectPass, runMaintenancePass} from './maintenance-pass'
 
 export function register(parent: Command): void {
@@ -21,6 +21,9 @@ export function register(parent: Command): void {
                 return
             }
             const ctx = await buildOracleContext({verify: false})
+            if ((opts.maintenance || opts.collect) && !ctx.fund) {
+                console.log(formatFundOff(fundOffOpts(ctx)))
+            }
             try {
                 const result = await tickOnce(ctx)
                 console.log(formatTick(result))
