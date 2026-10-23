@@ -5,6 +5,7 @@ import {loadConfig} from '../../lib/config'
 import {authorityHasKey} from '../../lib/auth/authority'
 import {hasKeyFile, readKeyFile} from '../../lib/auth/keyfile'
 import {isWildcardLink} from '../../lib/auth/plan'
+import {type ActionNamesLookup, gamePermission} from '../sandbox/guard'
 
 function reportTier(
     account: API.v1.AccountObject,
@@ -40,6 +41,15 @@ function reportTier(
     return lines
 }
 
+export async function reportGameTier(
+    account: API.v1.AccountObject,
+    contract: string,
+    ourKey: string | undefined,
+    lookup?: ActionNamesLookup
+): Promise<string[]> {
+    return reportTier(account, await gamePermission(contract, lookup), contract, ourKey)
+}
+
 export function register(parent: Command): void {
     const cmd = new Command('status')
         .description('Report whether the game and platform restricted permissions are set up')
@@ -60,7 +70,7 @@ export function register(parent: Command): void {
                 : undefined
             if (!ourKey) console.log('No local signing key found; run `shiploadcli auth create`.')
             console.log()
-            for (const line of reportTier(account, 'shipload', config.gameContract, ourKey))
+            for (const line of await reportGameTier(account, config.gameContract, ourKey))
                 console.log(line)
             console.log()
             for (const line of reportTier(account, 'shipload.nex', config.platformContract, ourKey))

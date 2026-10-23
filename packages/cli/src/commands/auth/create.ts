@@ -1,4 +1,4 @@
-import {type API, PermissionLevel} from '@wharfkit/antelope'
+import {type API, PermissionLevel, type PublicKeyType} from '@wharfkit/antelope'
 import {Command} from 'commander'
 import {chain, client} from '../../lib/client'
 import {ConfigError, findConfigFile} from '../../lib/config'
@@ -7,6 +7,7 @@ import {buildSigningLink} from '../../lib/auth/signing-link'
 import {loadOrCreateKey} from '../../lib/auth/keyfile'
 import {EOSIO_AUTH_ABI} from '../../lib/auth/actions'
 import {planPermissionLink} from '../../lib/auth/plan'
+import {type ActionNamesLookup, gamePermission} from '../sandbox/guard'
 
 async function tryGetAccount(actor: string): Promise<API.v1.AccountObject | undefined> {
     try {
@@ -18,6 +19,20 @@ async function tryGetAccount(actor: string): Promise<API.v1.AccountObject | unde
 
 function abiLookup(account: string) {
     return account === 'eosio' ? EOSIO_AUTH_ABI : undefined
+}
+
+export async function planGameTier(args: {
+    actor: string
+    contract: string
+    pubkey: PublicKeyType
+    account: API.v1.AccountObject | undefined
+    authorization: PermissionLevel[]
+    lookup?: ActionNamesLookup
+}) {
+    const permission = await gamePermission(args.contract, args.lookup)
+    const plan = planPermissionLink({...args, permission, parent: 'active'})
+    const configUpdates: Record<string, string> = {server_permission: permission}
+    return {permission, plan, configUpdates}
 }
 
 export function register(parent: Command): void {
@@ -52,10 +67,8 @@ export function register(parent: Command): void {
 
             const account = await tryGetAccount(actor)
             const authorization = [PermissionLevel.from(`${actor}@active`)]
-            const plan = planPermissionLink({
+            const {permission, plan, configUpdates} = await planGameTier({
                 actor,
-                permission: 'shipload',
-                parent: 'active',
                 contract: gameContract,
                 pubkey,
                 account,
@@ -79,11 +92,10 @@ export function register(parent: Command): void {
                 for (const line of summary) console.log(line)
             }
 
-            const configUpdates: Record<string, string> = {server_permission: 'shipload'}
             if (!fileData.actor) configUpdates.actor = actor
             writeConfigKeys(source, configUpdates)
             console.log()
-            console.log(`Wrote server_permission = shipload to ${source}.`)
+            console.log(`Wrote server_permission = ${permission} to ${source}.`)
         })
     parent.addCommand(cmd)
 }

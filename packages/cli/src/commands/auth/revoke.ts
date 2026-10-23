@@ -12,36 +12,39 @@ import {
 import {isAuthorityEmpty, removeKeyFromAuthority} from '../../lib/auth/authority'
 import {hasKeyFile, readKeyFile} from '../../lib/auth/keyfile'
 import {buildSigningLink} from '../../lib/auth/signing-link'
+import {type ActionNamesLookup, gamePermission} from '../sandbox/guard'
 
 function abiLookup(account: string) {
     return account === 'eosio' ? EOSIO_AUTH_ABI : undefined
 }
 
-function planGameTierRevoke(
+export async function planGameTierRevoke(
     account: API.v1.AccountObject,
     actor: string,
     contract: string,
     ourKey: string,
-    authorization: PermissionLevel[]
-): {actions: Action[]; messages: string[]} {
+    authorization: PermissionLevel[],
+    lookup?: ActionNamesLookup
+): Promise<{actions: Action[]; messages: string[]}> {
     const messages: string[] = []
+    const permission = await gamePermission(contract, lookup)
     const perm = account.permissions.find(
-        (p: API.v1.AccountPermission) => String(p.perm_name) === 'shipload'
+        (p: API.v1.AccountPermission) => String(p.perm_name) === permission
     )
     if (!perm) {
-        messages.push("Permission 'shipload' does not exist; nothing to revoke.")
+        messages.push(`Permission '${permission}' does not exist; nothing to revoke.`)
         return {actions: [], messages}
     }
     const reduced = removeKeyFromAuthority(perm.required_auth, ourKey)
     if (reduced.keys.length === perm.required_auth.keys.length) {
-        messages.push("Our key is not in 'shipload'; nothing to remove.")
+        messages.push(`Our key is not in '${permission}'; nothing to remove.`)
         return {actions: [], messages}
     }
     if (isAuthorityEmpty(reduced)) {
         return {
             actions: [
                 buildUnlinkAuth({account: actor, code: contract, type: ''}, authorization),
-                buildDeleteAuth({account: actor, permission: 'shipload'}, authorization),
+                buildDeleteAuth({account: actor, permission}, authorization),
             ],
             messages,
         }
@@ -49,7 +52,7 @@ function planGameTierRevoke(
     return {
         actions: [
             buildUpdateAuth(
-                {account: actor, permission: 'shipload', parent: perm.parent, auth: reduced},
+                {account: actor, permission, parent: perm.parent, auth: reduced},
                 authorization
             ),
         ],
@@ -95,7 +98,7 @@ export function register(parent: Command): void {
             const account = await client.v1.chain.get_account(config.actor)
             const authorization = [PermissionLevel.from(`${config.actor}@active`)]
 
-            const game = planGameTierRevoke(
+            const game = await planGameTierRevoke(
                 account,
                 config.actor,
                 config.gameContract,
