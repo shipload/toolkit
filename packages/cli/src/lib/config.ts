@@ -159,6 +159,17 @@ function parseIniFile(path: string): ParsedSection {
 	};
 }
 
+/** Throws when $PLAYER_CONFIG names a missing file; returns its resolved path, or null when unset. */
+export function assertPlayerConfigExists(): string | null {
+	const explicitPath = process.env.PLAYER_CONFIG ? resolve(process.env.PLAYER_CONFIG) : null;
+	if (explicitPath && !existsSync(explicitPath)) {
+		throw new ConfigError(
+			`$PLAYER_CONFIG is set to ${explicitPath}, but that file does not exist.`,
+		);
+	}
+	return explicitPath;
+}
+
 export function findConfigFile(options: LoadConfigOptions = {}): {
 	fileData: ParsedSection;
 	source: string;
@@ -168,13 +179,7 @@ export function findConfigFile(options: LoadConfigOptions = {}): {
 	const userConfigDir = options.userConfigDir ?? getUserConfigDir();
 	const cwdPath = resolve(cwd, "config.ini");
 	const userPath = join(userConfigDir, "config.ini");
-	const explicitPath = process.env.PLAYER_CONFIG ? resolve(process.env.PLAYER_CONFIG) : null;
-
-	if (explicitPath && !existsSync(explicitPath)) {
-		throw new ConfigError(
-			`$PLAYER_CONFIG is set to ${explicitPath}, but that file does not exist.`,
-		);
-	}
+	const explicitPath = assertPlayerConfigExists();
 
 	const candidates: string[] = [];
 	if (explicitPath) candidates.push(explicitPath);

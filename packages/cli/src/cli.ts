@@ -72,6 +72,7 @@ import * as admin from './commands/admin'
 import * as auth from './commands/auth'
 import * as sandbox from './commands/sandbox'
 import {ALL_ENTITY_TYPES, parseEntityType} from './lib/args'
+import {assertPlayerConfigExists} from './lib/config'
 import {registerCoordSubcommand} from './lib/coord-scope'
 import {
     buildEntityParent,
@@ -86,10 +87,21 @@ const PACKAGE = {
     description: 'Shipload game CLI — query state and submit actions',
 }
 
+const CONTRACT_FREE_COMMANDS = new Set(['guide', 'init', 'update'])
+
+function topLevelName(command: Command): string {
+    let current = command
+    while (current.parent?.parent) current = current.parent
+    return current.name()
+}
+
 export function build(): Command {
     const program = new Command()
     program.name(PACKAGE.name).version(PACKAGE.version).description(PACKAGE.description)
     program.option('--debug', 'show full error details including stack traces')
+    program.hook('preAction', (_program, actionCommand) => {
+        if (!CONTRACT_FREE_COMMANDS.has(topLevelName(actionCommand))) assertPlayerConfigExists()
+    })
 
     program.addHelpText(
         'before',
