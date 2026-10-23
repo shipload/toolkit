@@ -18,7 +18,10 @@ export function getLocationType(
     const str = ['system', coordinates.x, coordinates.y].join('-')
     const hashResult = hash512(seed, str)
 
-    if (hashResult.array[0] >= LOCATION_EXISTS_THRESHOLD) {
+    if (
+        hashResult.array[0] >= LOCATION_EXISTS_THRESHOLD ||
+        wormholeAt(seed, Number(coordinates.x), Number(coordinates.y))
+    ) {
         return LocationType.EMPTY
     }
 
@@ -134,7 +137,10 @@ export function deriveLocationStatic(
         seed1: 0,
     })
 
-    if (hashResult.array[0] >= LOCATION_EXISTS_THRESHOLD) {
+    if (
+        hashResult.array[0] >= LOCATION_EXISTS_THRESHOLD ||
+        wormholeAt(seed, Number(coords.x), Number(coords.y))
+    ) {
         return loc
     }
 

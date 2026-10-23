@@ -1,7 +1,7 @@
 {
   "catalog_hash": "ff8f34790f1945fb4f458cc5b9f84dd9ba1ebce970e1190d119d04c375f33243",
   "game_seed": "0be1140ada53742f96d665c114fa693bd1512f886b6949b08b570fd70b764e83",
-  "generated_at": "2026-10-17T17:51:07.905Z",
+  "generated_at": "2026-10-23T00:06:30.472Z",
   "cases": [
     {
       "name": "pos 37,1503",
@@ -12,7 +12,10 @@
         "destination": {
           "x": 1089834,
           "y": 1059080
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -24,7 +27,10 @@
         "destination": {
           "x": 231926,
           "y": 912148
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -36,7 +42,10 @@
         "destination": {
           "x": 487878,
           "y": 568416
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -48,7 +57,10 @@
         "destination": {
           "x": -299718,
           "y": -170785
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -60,7 +72,10 @@
         "destination": {
           "x": -11207,
           "y": -8707
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -72,7 +87,10 @@
         "destination": {
           "x": -593217,
           "y": -1062050
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -84,7 +102,10 @@
         "destination": {
           "x": -11250,
           "y": -8365
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -96,7 +117,10 @@
         "destination": {
           "x": -619497,
           "y": -483318
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -108,7 +132,10 @@
         "destination": {
           "x": -11194,
           "y": -7801
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     },
     {
@@ -120,7 +147,40 @@
         "destination": {
           "x": 38,
           "y": 1503
-        }
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
+      }
+    },
+    {
+      "name": "system-rolled 612,6052",
+      "x": 612,
+      "y": 6052,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": 486513,
+          "y": 754152
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
+      }
+    },
+    {
+      "name": "system-rolled 486513,754152",
+      "x": 486513,
+      "y": 754152,
+      "expected": {
+        "is_wormhole": true,
+        "destination": {
+          "x": 612,
+          "y": 6052
+        },
+        "is_system": false,
+        "type": 0,
+        "size": 0
       }
     }
   ]

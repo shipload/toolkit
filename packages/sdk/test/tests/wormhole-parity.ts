@@ -3,8 +3,8 @@ import {assert} from 'chai'
 import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {Checksum256} from '@wharfkit/antelope'
-import {wormholeAt} from '../../src'
-import {getLocationKind, hasSystem} from '../../src/utils/system'
+import {deriveStrata, wormholeAt} from '../../src'
+import {deriveLocation, getLocationKind, getLocationType, hasSystem} from '../../src/utils/system'
 import {computeCatalogHash, CATALOG_FILES_REL} from '../../src/testing'
 
 const FIXTURE_PATH = resolve(__dirname, '../fixtures/wormhole-cases.json')
@@ -17,7 +17,13 @@ interface WormholePayload {
         name: string
         x: number
         y: number
-        expected: {is_wormhole: boolean; destination: {x: number; y: number}}
+        expected: {
+            is_wormhole: boolean
+            destination: {x: number; y: number}
+            is_system: boolean
+            type: number
+            size: number
+        }
     }>
 }
 
@@ -55,13 +61,27 @@ describe('wormhole parity — fixture replay', () => {
                 assert.isNull(sdk)
             }
         })
+
+        test(`location kind: ${c.name}`, () => {
+            const at = {x: c.x, y: c.y}
+            const loc = deriveLocation(seed, at)
+            assert.equal(hasSystem(seed, at), c.expected.is_system)
+            assert.equal(getLocationType(seed, at), c.expected.type)
+            assert.equal(Number(loc.static_props.type), c.expected.type)
+            assert.equal(Number(loc.size), c.expected.size)
+            if (c.expected.is_wormhole) {
+                assert.equal(getLocationKind(seed, c.x, c.y), 'wormhole')
+                assert.deepEqual(deriveStrata(at, seed, seed), [])
+            }
+        })
     }
 
-    // A coordinate carrying both a raw system and a wormhole must resolve as a wormhole (contract getlocation precedence).
-    const SUPPRESSED = {x: -11234, y: -4942}
-    test('wormhole precedence suppresses a raw system', () => {
-        assert.isTrue(hasSystem(seed, SUPPRESSED))
-        assert.isNotNull(wormholeAt(seed, SUPPRESSED.x, SUPPRESSED.y))
-        assert.equal(getLocationKind(seed, SUPPRESSED.x, SUPPRESSED.y), 'wormhole')
+    test('the fixture covers both ends of a pair that also rolled a system', () => {
+        const rolled = payload.cases.filter((c) => c.name.startsWith('system-rolled'))
+        assert.lengthOf(rolled, 2)
+        assert.deepEqual(
+            {x: rolled[0].expected.destination.x, y: rolled[0].expected.destination.y},
+            {x: rolled[1].x, y: rolled[1].y}
+        )
     })
 })
