@@ -1,15 +1,10 @@
 import { PlatformContract, ServerContract, Shipload } from "@shipload/sdk";
 import { APIClient, type Checksum256, Name } from "@wharfkit/antelope";
 import { ChainDefinition, TokenIdentifier } from "@wharfkit/common";
-import { loadConfig, type PlayerConfig } from "./config";
+import { loadContractConfig } from "./config";
 import { appFetch } from "./fetch-trace";
 
-let cfg: PlayerConfig | null = null;
-try {
-	cfg = loadConfig();
-} catch {
-	cfg = null;
-}
+const cfg = loadContractConfig();
 
 export const gameContractName = cfg?.gameContract ?? "eon.shipload";
 export const platformContractName = cfg?.platformContract ?? "nex.shipload";

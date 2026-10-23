@@ -225,13 +225,46 @@ export function loadConfig(options: LoadConfigOptions = {}): PlayerConfig {
 		historyUrl: fileData.historyUrl,
 		webappUrl: fileData.webappUrl,
 		resourcesUrl: fileData.resourcesUrl,
+		...contractFields(fileData),
+		track,
+		source,
+	};
+}
+
+export type ContractConfig = Pick<
+	PlayerConfig,
+	| "chainUrl"
+	| "gameContract"
+	| "platformContract"
+	| "atomicAssetsContract"
+	| "fundContract"
+	| "collection"
+	| "source"
+>;
+
+function contractFields(fileData: ParsedSection): Omit<ContractConfig, "chainUrl" | "source"> {
+	return {
 		gameContract: fileData.gameContract ?? "eon.shipload",
 		platformContract: fileData.platformContract ?? "nex.shipload",
 		atomicAssetsContract: fileData.atomicAssets ?? "atomicassets",
 		fundContract: fileData.fundContract ?? "fnd.shipload",
 		collection: fileData.collection ?? "shipload",
-		track,
-		source,
+	};
+}
+
+/** Contract accounts and chain URL without the player fields; null when no config.ini exists. */
+export function loadContractConfig(options: LoadConfigOptions = {}): ContractConfig | null {
+	let found: ReturnType<typeof findConfigFile>;
+	try {
+		found = findConfigFile(options);
+	} catch (err) {
+		if (err instanceof ConfigError) return null;
+		throw err;
+	}
+	return {
+		chainUrl: found.fileData.chainUrl,
+		...contractFields(found.fileData),
+		source: found.source,
 	};
 }
 

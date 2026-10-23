@@ -2,7 +2,13 @@ import {expect, test} from 'bun:test'
 import {mkdtempSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {ConfigError, hasOracleConfig, loadConfig, loadOracleConfig} from './config'
+import {
+    ConfigError,
+    hasOracleConfig,
+    loadConfig,
+    loadContractConfig,
+    loadOracleConfig,
+} from './config'
 
 function writeConfig(body: string): string {
     const dir = mkdtempSync(join(tmpdir(), 'oracle-cfg-'))
@@ -154,4 +160,45 @@ test('explicit actor and permission override the defaults', () => {
     const cfg = loadOracleConfig(opts(dir))
     expect(cfg.actor).toBe('custom.acct')
     expect(cfg.permission).toBe('custom')
+})
+
+test('loadContractConfig reads [contracts] even when actor is missing', () => {
+    const dir = writeConfig(
+        [
+            '[contracts]',
+            'game = box.shipload',
+            'platform = nex.shipload',
+            'fund = fnd.shipload',
+            '[oracle]',
+            'handle = sandbox1',
+            'private_key = PVT_K1_x',
+        ].join('\n')
+    )
+    expect(() => loadConfig(opts(dir))).toThrow(ConfigError)
+    const cfg = loadContractConfig(opts(dir))
+    expect(cfg?.gameContract).toBe('box.shipload')
+    expect(cfg?.platformContract).toBe('nex.shipload')
+})
+
+test('loadContractConfig returns null when no config.ini exists', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'oracle-cfg-'))
+    expect(loadContractConfig(opts(dir))).toBeNull()
+})
+
+test('client targets the [contracts] game of a config.ini with no actor', () => {
+    const dir = writeConfig(
+        [
+            '[contracts]',
+            'game = box.shipload',
+            '[oracle]',
+            'handle = sandbox1',
+            'private_key = PVT_K1_x',
+        ].join('\n')
+    )
+    const script = "const c = await import('./src/lib/client.ts'); console.log(c.gameContractName)"
+    const proc = Bun.spawnSync(['bun', '-e', script], {
+        cwd: join(import.meta.dir, '..', '..'),
+        env: {...process.env, PLAYER_CONFIG: join(dir, 'config.ini')},
+    })
+    expect(proc.stdout.toString().trim()).toBe('box.shipload')
 })
