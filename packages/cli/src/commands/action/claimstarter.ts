@@ -20,7 +20,7 @@ export function register(program: Command): void {
             'before',
             [
                 'Testnet only: this action exists on the Jungle 4 deployment and will not exist on a real network.',
-                'Mints a wrapped starter ship to your account. Deploy it to a nexus with `shiploadcli nft deploy`.',
+                'Mints a wrapped starter ship to your account. Deploy it at the Genesis Nexus with `shiploadcli nft deploy`.',
                 'Requires: one claim per account. Deploying it needs a joined player.',
                 '',
             ].join('\n')
@@ -31,7 +31,7 @@ export function register(program: Command): void {
 Examples:
   shiploadcli claimstarter
   shiploadcli nft                          # find the starter's asset id
-  shiploadcli nft deploy <asset-id> <nexus-id>`
+  shiploadcli nft deploy <asset-id>`
         )
         .action(async () => {
             const account = getAccountName()

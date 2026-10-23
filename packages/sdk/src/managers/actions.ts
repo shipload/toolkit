@@ -965,11 +965,10 @@ export class ActionsManager extends BaseManager {
         })
     }
 
-    placeentity(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action {
+    placeentity(owner: NameType, assetId: UInt64Type): Action {
         return this.server.action('placeentity', {
             owner: Name.from(owner),
             asset_id: UInt64.from(assetId),
-            target_nexus_id: UInt64.from(targetNexusId),
         })
     }
 
@@ -1012,12 +1011,9 @@ export class ActionsManager extends BaseManager {
         return [this.transferForUnwrap(owner, assetId), this.placecargo(owner, hostId, assetId)]
     }
 
-    // Two top-level actions the wallet signs to place an entity NFT at a nexus.
-    unwrapEntityTx(owner: NameType, assetId: UInt64Type, targetNexusId: UInt64Type): Action[] {
-        return [
-            this.transferForUnwrap(owner, assetId),
-            this.placeentity(owner, assetId, targetNexusId),
-        ]
+    // Two top-level actions the wallet signs to place an entity NFT at its Wrap Nexus.
+    unwrapEntityTx(owner: NameType, assetId: UInt64Type): Action[] {
+        return [this.transferForUnwrap(owner, assetId), this.placeentity(owner, assetId)]
     }
 
     cancelunwrap(assetId: UInt64Type): Action {

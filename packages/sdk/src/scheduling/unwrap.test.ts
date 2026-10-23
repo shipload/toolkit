@@ -1,11 +1,10 @@
 import {describe, expect, test} from 'bun:test'
 import {
     derivedLoaders,
-    nftTransitDuration,
-    unwrapTransitDuration,
     unwrapLoadDuration,
     estimateUnwrapDuration,
     incomingHoldMass,
+    isAtWrapNexus,
     projectCargomass,
     projectedPeakCargomass,
     receiveFits,
@@ -13,25 +12,8 @@ import {
 import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
-import {
-    ITEM_BEAM,
-    ITEM_ENGINE_T1,
-    ITEM_GENERATOR_T1,
-    ITEM_ROUSTABOUT_T1A_PACKED,
-} from '../data/item-ids'
-import {getBaseHullmassFor} from '../derivation/capabilities'
+import {ITEM_BEAM} from '../data/item-ids'
 import {TaskType} from '../types'
-
-const REFERENCE_MASS =
-    getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
-    Number(getItem(ITEM_ENGINE_T1).mass) +
-    Number(getItem(ITEM_GENERATOR_T1).mass)
-const REFERENCE_DRAIN = 252_491
-const REFERENCE_RECHARGE = 2000
-
-function refillSeconds(distance: number): number {
-    return Math.floor(Math.floor((distance * REFERENCE_DRAIN) / 10000) / REFERENCE_RECHARGE)
-}
 
 describe('unwrap duration mirror', () => {
     test('derivedLoaders aggregates lanes like derived_loaders()', () => {
@@ -44,31 +26,11 @@ describe('unwrap duration mirror', () => {
         ).toEqual({payload: 650, thrust: 30, quantity: 2})
     })
 
-    test('transit floors item mass at cruise-transition distance before cruise-capping flight time', () => {
-        // distance 50000 is past the cruise transition; item mass 1000 is under the floor, so accel uses it
-        const accel = (400 / (REFERENCE_MASS * 100)) * 10000
-        const cruiseVelocity = Math.sqrt(accel * 2 * 10000)
-        const expected = Math.floor(50000 / cruiseVelocity + cruiseVelocity / accel)
-        expect(unwrapTransitDuration(1000, {x: 0, y: 0}, {x: 3, y: 4})).toBe(
-            expected + refillSeconds(50000)
-        )
-    })
-
-    test('transit below cruise transition uses the sqrt curve, and a heavy item skips the mass floor', () => {
-        // distance 5000 is within the cruise transition
-        const mass = REFERENCE_MASS * 2
-        const accel = (400 / (mass * 100)) * 10000
-        const expected = Math.floor(2 * Math.sqrt(5000 / accel))
-        expect(unwrapTransitDuration(mass, {x: 0, y: 0}, {x: 0.3, y: 0.4})).toBe(
-            expected + refillSeconds(5000)
-        )
-    })
-
-    test('transit pays the reference engine energy back at the reference generator rate', () => {
-        // Golden pair from placeentity on chain: a 48,473-mass starter relocated 100 tiles queues 20,563 s.
-        expect(nftTransitDuration(1_000_000, 48_473)).toBe(20_563)
-        expect(nftTransitDuration(1_000_000, 48_473)).toBeGreaterThan(refillSeconds(1_000_000))
-        expect(nftTransitDuration(0, 48_473)).toBe(0)
+    test('only a host at the crate origin is at its Wrap Nexus', () => {
+        const item = {itemId: 101, quantity: 10, modules: [], originX: 4, originY: -2}
+        expect(isAtWrapNexus({coordinates: {x: 4, y: -2, z: 800}}, item)).toBe(true)
+        expect(isAtWrapNexus({coordinates: {x: 5, y: -2}}, item)).toBe(false)
+        expect(isAtWrapNexus({coordinates: {x: 4, y: -1}}, item)).toBe(false)
     })
 
     test('load uses altitude z, divides the item by payload, divides by quantity', () => {
@@ -80,7 +42,7 @@ describe('unwrap duration mirror', () => {
     })
 
     test('zero item mass and no loaders are safe', () => {
-        expect(unwrapTransitDuration(0, {x: 0, y: 0}, {x: 9, y: 9})).toBe(0)
+        expect(unwrapLoadDuration({payload: 500, thrust: 200, quantity: 1}, 0, 3000)).toBe(0)
         expect(unwrapLoadDuration(null, 500, 3000)).toBe(0)
     })
 
@@ -93,7 +55,6 @@ describe('unwrap duration mirror', () => {
     })
 
     test('estimateUnwrapDuration uses worst-loader baseline when dest has no loaders', () => {
-        // IRON (101); same coords so transit is 0 and the estimate is baseline load alone
         const item = {itemId: 101, quantity: 10, modules: [], originX: 0, originY: 0}
         const bareDest = {loader_lanes: [], coordinates: {x: 0, y: 0, z: 800}}
 

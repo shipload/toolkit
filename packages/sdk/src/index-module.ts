@@ -443,12 +443,11 @@ export {
     derivedLoaders,
     estimateUnwrapDuration,
     incomingHoldMass,
-    nftTransitDuration,
+    isAtWrapNexus,
     projectCargomass,
     projectedPeakCargomass,
     receiveFits,
     unwrapLoadDuration,
-    unwrapTransitDuration,
 } from './scheduling/unwrap'
 export type {
     CargomassProjection,

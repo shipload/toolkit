@@ -28,10 +28,9 @@ Run these once per account, in order. Each step says what to confirm before movi
 
        shiploadcli claimstarter
        shiploadcli nft
-       shiploadcli entities --type nexus --all
-       shiploadcli nft deploy <asset-id> <nexus-id>
+       shiploadcli nft deploy <asset-id>
 
-   `nft` lists the wrapped ship and its asset id. Deploying unwraps it into a live ship that travels to the nexus and recharges.
+   `nft` lists the wrapped ship and its asset id. Deploying unwraps it into a live ship at the nexus where it was wrapped, and the ship recharges there.
 
 4. Confirm:
 

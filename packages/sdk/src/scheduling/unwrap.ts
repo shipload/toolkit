@@ -2,27 +2,11 @@ import type {UInt16Type, UInt32Type} from '@wharfkit/antelope'
 import {calcCargoItemMass} from '../capabilities/storage'
 import type {ServerContract} from '../contracts'
 import {MASS_STAT_SCALE, PRECISION, TaskType} from '../types'
-import {getBaseHullmassFor} from '../derivation/capabilities'
-import {getItem} from '../data/catalog'
-import {ITEM_ENGINE_T1, ITEM_GENERATOR_T1, ITEM_ROUSTABOUT_T1A_PACKED} from '../data/item-ids'
-import {
-    calcShuttleMass,
-    computeGeneratorRech,
-    computeLoaderPayload,
-    computeTravelDrain,
-} from '../nft/description'
+import {calcShuttleMass, computeLoaderPayload} from '../nft/description'
 import * as sched from './schedule'
 import {taskCargoEffect} from './availability'
 import {placedStart} from './lanes'
 
-const NFT_TRANSIT_THRUST = 400
-const NFT_TRANSIT_DRAIN = computeTravelDrain(NFT_TRANSIT_THRUST, 0)
-const NFT_TRANSIT_RECHARGE = computeGeneratorRech(0, 1)
-const CRUISE_TRANSITION_DISTANCE = 2 * PRECISION
-const NFT_TRANSIT_REFERENCE_MASS =
-    getBaseHullmassFor(ITEM_ROUSTABOUT_T1A_PACKED) +
-    Number(getItem(ITEM_ENGINE_T1).mass) +
-    Number(getItem(ITEM_GENERATOR_T1).mass)
 const BASELINE_LOADER: DerivedLoaders = {payload: computeLoaderPayload(0), thrust: 1, quantity: 1}
 // ground-level entities (warehouses, z=0) still incur a base orbital climb of load effort
 const MIN_LOAD_Z = 800
@@ -61,38 +45,6 @@ function flightTime(distance: number, accel: number): number {
     return Math.floor(2 * Math.sqrt(distance / accel))
 }
 
-function travelFlightTime(distance: number, accel: number): number {
-    if (accel <= 0 || distance <= 0) return 0
-    if (distance <= CRUISE_TRANSITION_DISTANCE) return flightTime(distance, accel)
-    const cruiseVelocity = Math.sqrt(accel * CRUISE_TRANSITION_DISTANCE)
-    return Math.floor(distance / cruiseVelocity + cruiseVelocity / accel)
-}
-
-function distance2d(ax: number, ay: number, bx: number, by: number): number {
-    const dx = ax - bx
-    const dy = ay - by
-    return Math.floor(Math.sqrt(dx * dx + dy * dy) * PRECISION)
-}
-
-// Mirrors nft_transit_duration in nft.hpp: the weakest engine's flight plus the weakest generator's refill.
-export function nftTransitDuration(distance: number, mass: number): number {
-    const flight = travelFlightTime(distance, acceleration(NFT_TRANSIT_THRUST, mass))
-    const energy = Math.floor((distance * NFT_TRANSIT_DRAIN) / PRECISION)
-    return flight + Math.floor(energy / NFT_TRANSIT_RECHARGE)
-}
-
-export function unwrapTransitDuration(
-    itemMass: number,
-    origin: {x: number; y: number},
-    dest: {x: number; y: number}
-): number {
-    if (itemMass <= 0) return 0
-    return nftTransitDuration(
-        distance2d(origin.x, origin.y, dest.x, dest.y),
-        Math.max(itemMass, NFT_TRANSIT_REFERENCE_MASS)
-    )
-}
-
 export function unwrapLoadDuration(
     loaders: DerivedLoaders | null,
     itemMass: number,
@@ -118,6 +70,12 @@ export interface UnwrapDestination {
     coordinates: {x: UInt32Type | number; y: UInt32Type | number; z?: UInt32Type | number}
 }
 
+export function isAtWrapNexus(dest: UnwrapDestination, item: UnwrapItem): boolean {
+    return (
+        Number(dest.coordinates.x) === item.originX && Number(dest.coordinates.y) === item.originY
+    )
+}
+
 export function estimateUnwrapDuration(dest: UnwrapDestination, item: UnwrapItem): number {
     const itemMass = Number(
         calcCargoItemMass({
@@ -128,16 +86,7 @@ export function estimateUnwrapDuration(dest: UnwrapDestination, item: UnwrapItem
     )
     const loaders = derivedLoaders(dest.loader_lanes) ?? BASELINE_LOADER
     const dz = Number(dest.coordinates.z ?? 0)
-    const load = unwrapLoadDuration(loaders, itemMass, dz)
-    const transit = unwrapTransitDuration(
-        itemMass,
-        {x: item.originX, y: item.originY},
-        {
-            x: Number(dest.coordinates.x),
-            y: Number(dest.coordinates.y),
-        }
-    )
-    return load + transit
+    return unwrapLoadDuration(loaders, itemMass, dz)
 }
 
 // Hold kinds that count as incoming (mirror is_incoming_hold_kind in holds.hpp).
