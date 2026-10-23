@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { performTransact } from "../../src/lib/session";
+import { performTransact, signingHandoffLines } from "../../src/lib/session";
 
 describe("session lazy initialization", () => {
 	test("exports getter functions, not pre-initialized values", async () => {
@@ -32,5 +32,15 @@ describe("performTransact", () => {
 		await expect(call).rejects.toMatchObject({
 			response: { json: { error: { details: [{ message: expect.stringContaining("boom") }] } } },
 		});
+	});
+});
+
+describe("signingHandoffLines", () => {
+	test("says the action takes effect once the link is signed", () => {
+		const lines = signingHandoffLines("Founding company", "https://sign.example/x", ["nex.shipload::foundcompany {}"]);
+		expect(lines[0]).toBe("Founding company");
+		expect(lines.join("\n")).toContain("It takes effect once you sign it with your wallet:");
+		expect(lines).toContain("https://sign.example/x");
+		expect(lines.at(-1)).toBe("nex.shipload::foundcompany {}");
 	});
 });

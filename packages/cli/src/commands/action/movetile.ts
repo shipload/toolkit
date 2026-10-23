@@ -40,7 +40,7 @@ export async function runMovetile(
         await transact(
             {action},
             {
-                description: `Moved tile (${fromGx},${fromGy}) -> (${toGx},${toGy}) in hub ${ctx.entityId}.`,
+                description: `Moving tile (${fromGx},${fromGy}) -> (${toGx},${toGy}) in hub ${ctx.entityId}`,
             }
         )
     })

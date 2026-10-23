@@ -227,7 +227,12 @@ export function populateTravelFeasibility(params: {
 	const destinationCheck =
 		params.hasSystemAtDestination === undefined
 			? null
-			: checkDestinationIsSystem(params.hasSystemAtDestination, params.targetX, params.targetY);
+			: checkDestinationIsSystem(
+					params.hasSystemAtDestination,
+					params.targetX,
+					params.targetY,
+					params.entity,
+				);
 	return collectIssues(
 		checkOriginEqualsTarget(params.originX, params.originY, params.targetX, params.targetY),
 		destinationCheck,
@@ -685,7 +690,10 @@ export async function estimateGroupTravel(params: {
 		params.hasSystemAtDestination ??
 		hasSystem(await getGameSeed(), { x: targetX, y: targetY });
 	const issues = collectIssues(
-		checkDestinationIsSystem(hasSystemAtDestination, targetX, targetY),
+		checkDestinationIsSystem(hasSystemAtDestination, targetX, targetY, {
+			entityType: snapshots[0].type,
+			entityId: snapshots[0].id,
+		}),
 		checkTravelDuration(flightSeconds),
 		checkHaulCapacity(haulCount, pooledHaulCap),
 		...energyChecks.flatMap(({ snap, energy, cost }) => {

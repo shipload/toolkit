@@ -123,12 +123,16 @@ export function checkDestinationIsSystem(
 	hasSystem: boolean,
 	tx: number,
 	ty: number,
+	entity?: { entityType: string; entityId: bigint | number | string },
 ): FeasibilityIssue | null {
 	if (hasSystem) return null;
+	const hint = entity
+		? `; run \`shiploadcli ${entity.entityType} ${entity.entityId} nearby\` to list reachable systems`
+		: "";
 	return {
 		code: "no_system_at_destination",
 		severity: "error",
-		message: `no system at (${tx}, ${ty}) — use \`nearby\` to list reachable systems`,
+		message: `no system at (${tx}, ${ty})${hint}`,
 		detail: { tx, ty },
 	};
 }

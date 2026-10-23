@@ -113,6 +113,15 @@ describe("checkDestinationIsSystem", () => {
 		expect(issue?.message).toContain("(3, 8)");
 		expect(issue?.detail).toEqual({ tx: 3, ty: 8 });
 	});
+	test("hint names the entity's nearby command", () => {
+		const issue = checkDestinationIsSystem(false, 3, 8, { entityType: "ship", entityId: 6 });
+		expect(issue?.message).toBe(
+			"no system at (3, 8); run `shiploadcli ship 6 nearby` to list reachable systems",
+		);
+	});
+	test("no hint without an entity", () => {
+		expect(checkDestinationIsSystem(false, 3, 8)?.message).toBe("no system at (3, 8)");
+	});
 });
 
 describe("collectIssues", () => {

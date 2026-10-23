@@ -17,6 +17,6 @@ export function register(parent: Command): void {
                 {proposer, proposal_name: name, canceler: session.actor},
                 {authorization: [session.permissionLevel]}
             )
-            await transact({action}, {description: `Cancelled proposal ${proposer}/${name}`})
+            await transact({action}, {description: `Cancelling proposal ${proposer}/${name}`})
         })
 }

@@ -876,6 +876,19 @@ describe("estimateGroupTravel — contract haul penalty and departure mass", () 
 		});
 	}
 
+	test("a destination without a system points at the lead ship's nearby command", async () => {
+		const est = await estimateGroupTravel({
+			entities: [{ entityId: 6n }],
+			target: TARGET,
+			// biome-ignore lint/suspicious/noExplicitAny: stub snapshots
+			snapshots: [shipSnap({ id: 6n })] as any,
+			hasSystemAtDestination: false,
+			now: NOW,
+		});
+		const issue = est.feasibility.issues.find((i) => i.code === "no_system_at_destination");
+		expect(issue?.message).toContain("`shiploadcli ship 6 nearby`");
+	});
+
 	test("one ship towing one container pays the haul penalty: 128s, not the bare-thrust 120s", async () => {
 		const est = await group([shipSnap(), containerSnap()]);
 		expect(est.duration_s).toBe(128);

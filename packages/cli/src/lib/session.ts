@@ -298,6 +298,18 @@ export async function performTransact(
 	return { txid: String(txid), snapshots };
 }
 
+export function signingHandoffLines(description: string | undefined, url: string, summary: string[]): string[] {
+	return [
+		...(description ? [description] : []),
+		"",
+		"This needs a signature this CLI's restricted key cannot provide. It takes effect once you sign it with your wallet:",
+		"",
+		url,
+		"",
+		...summary,
+	];
+}
+
 export async function transact(
 	args: TransactArgs,
 	options?: TransactOptions & {
@@ -316,7 +328,6 @@ export async function transact(
 		const actions = getActions(args);
 		const decision = actions.length > 0 ? decideSigning(config, actions) : { kind: "direct" as const };
 		if (decision.kind === "link") {
-			if (options?.description) console.log(options.description);
 			const authorization = [PermissionLevel.from(`${config.actor}@active`)];
 			const linked = actions.map((action) => withAuthorization(action, authorization));
 			const { url, summary } = await buildSigningLink(
@@ -325,12 +336,7 @@ export async function transact(
 				withChainAbi(abiLookup),
 				config.webappUrl,
 			);
-			console.log();
-			console.log("This needs a signature this CLI's restricted key cannot provide. Sign it with your wallet:");
-			console.log();
-			console.log(url);
-			console.log();
-			for (const line of summary) console.log(line);
+			for (const line of signingHandoffLines(options?.description, url, summary)) console.log(line);
 			return { txid: "", snapshots: new Map() };
 		}
 		if (decision.kind === "restricted") {
