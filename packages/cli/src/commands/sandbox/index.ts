@@ -15,6 +15,7 @@ import {
     defaultContext,
     type ModuleSpec,
     parseEnergy,
+    parseInfluence,
     parseStats,
 } from './acts'
 import {requireSandbox} from './guard'
@@ -174,12 +175,12 @@ Examples:
         .description('Credit your influence at a World')
         .argument('<x>', 'World x coordinate', parseInt64)
         .argument('<y>', 'World y coordinate', parseInt64)
-        .argument('<amount>', 'influence to credit', parseUint64)
+        .argument('<amount>', 'influence to credit, in whole points', parseInfluence)
         .option('--node <id>', 'charter node to credit toward', parseUint32)
         .addHelpText('before', before('Requires: a World at the coordinate.'))
         .addHelpText(
             'after',
-            '\nExamples:\n  shiploadcli sandbox credit 0 0 5000\n  shiploadcli sandbox credit 0 0 5000 --node 3'
+            '\nExamples:\n  shiploadcli sandbox credit 0 0 5\n  shiploadcli sandbox credit 0 0 5 --node 3'
         )
         .action(async (x: bigint, y: bigint, amount: bigint, opts: {node?: number}) => {
             await send(

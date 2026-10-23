@@ -1,4 +1,4 @@
-import {getStatCount} from '@shipload/sdk'
+import {getStatCount, INFLUENCE_ATOMIC_PER_POINT} from '@shipload/sdk'
 import {SandboxContract} from '@shipload/sdk/sandbox'
 import {type Action, type APIClient, Name} from '@wharfkit/antelope'
 import {InvalidArgumentError} from 'commander'
@@ -11,6 +11,8 @@ export const DEFAULT_STAT = 500
 export const MAX_STAT = 999
 const MILLI_PER_ENERGY = 1000
 const MAX_WHOLE_ENERGY = Math.floor(0xffffffff / MILLI_PER_ENERGY)
+const INFLUENCE_ATOMIC = BigInt(INFLUENCE_ATOMIC_PER_POINT)
+const MAX_WHOLE_INFLUENCE = 0xffffffffffffffffn / INFLUENCE_ATOMIC
 
 export interface ModuleSpec {
     slot: number
@@ -39,6 +41,15 @@ export function parseEnergy(s: string): number {
         )
     }
     return n
+}
+
+export function parseInfluence(s: string): bigint {
+    if (!/^\d+$/.test(s) || BigInt(s) > MAX_WHOLE_INFLUENCE) {
+        throw new InvalidArgumentError(
+            `influence must be a whole number 0–${MAX_WHOLE_INFLUENCE} (got "${s}")`
+        )
+    }
+    return BigInt(s)
 }
 
 export function parseModule(s: string): ModuleSpec {
@@ -152,7 +163,13 @@ export function buildCredit(
     amount: bigint,
     node?: number
 ): Action {
-    return ctx.contract.action('sbcredit', {owner: ctx.owner, x, y, amount, node})
+    return ctx.contract.action('sbcredit', {
+        owner: ctx.owner,
+        x,
+        y,
+        amount: amount * INFLUENCE_ATOMIC,
+        node,
+    })
 }
 
 export function buildResolve(ctx: ActsContext, entityId: bigint, count?: bigint): Action {

@@ -1,4 +1,5 @@
 import {describe, expect, test} from 'bun:test'
+import {INFLUENCE_ATOMIC_PER_POINT} from '@shipload/sdk'
 import {SandboxContract} from '@shipload/sdk/sandbox'
 import {
     type ActsContext,
@@ -7,6 +8,7 @@ import {
     buildResolve,
     buildSpawn,
     parseEnergy,
+    parseInfluence,
     parseModule,
     parseStats,
     resolveStats,
@@ -43,6 +45,12 @@ describe('sandbox arg parsers', () => {
     test('parses whole energy and rejects fractions', () => {
         expect(parseEnergy('250')).toBe(250)
         expect(() => parseEnergy('2.5')).toThrow('whole number')
+    })
+
+    test('parses whole influence and rejects fractions or overflow', () => {
+        expect(parseInfluence('5')).toBe(5n)
+        expect(() => parseInfluence('2.5')).toThrow('whole number')
+        expect(() => parseInfluence('18446744073709551615')).toThrow('whole number')
     })
 
     test('rejects a malformed module', () => {
@@ -106,8 +114,14 @@ describe('sandbox act builders', () => {
         expect(Number(data.items[0].quantity)).toBe(7)
     })
 
+    test('sbcredit scales whole influence to atomic units', () => {
+        const credit = decode(buildCredit(ctx, 0n, 0n, 5n), SandboxContract.Types.sbcredit)
+        expect(BigInt(String(credit.amount))).toBe(5n * BigInt(INFLUENCE_ATOMIC_PER_POINT))
+        expect(credit.node).toBeUndefined()
+    })
+
     test('sbcredit and sbresolve carry their optional fields', () => {
-        const credit = decode(buildCredit(ctx, 1n, 2n, 5000n, 3), SandboxContract.Types.sbcredit)
+        const credit = decode(buildCredit(ctx, 1n, 2n, 5n, 3), SandboxContract.Types.sbcredit)
         expect(Number(credit.node)).toBe(3)
         const resolve = decode(buildResolve(ctx, 9n), SandboxContract.Types.sbresolve)
         expect(resolve.count).toBeUndefined()
