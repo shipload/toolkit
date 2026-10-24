@@ -115,6 +115,7 @@ export const DEPLOY_ENTITY_HAS_SCHEDULE = 'Entity must be idle to deploy.'
 export const BLEND_INPUTS_MUST_MATCH = 'All blend inputs must be the same item.'
 export const GATHER_NOT_ENOUGH_ENERGY = 'Gather requires more energy than entity has.'
 export const GATHER_EXCEEDS_ENERGY_CAPACITY = "Gather drain exceeds entity's energy capacity."
+export const GATHER_PAST_BOOKING_HORIZON = 'Gather must complete within one epoch of being queued.'
 export const CRAFT_NOT_ENOUGH_ENERGY = 'Craft requires more energy than entity has.'
 export const CRAFT_EXCEEDS_ENERGY_CAPACITY = "Craft drain exceeds entity's energy capacity."
 export const BLEND_REQUIRES_MULTIPLE = 'Blend requires at least two input stacks.'

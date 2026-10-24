@@ -3,7 +3,9 @@ import type {ServerContract} from '../contracts'
 import {calc_gather_duration, calc_gather_energy} from '../capabilities/gathering'
 import {calc_rechargetime} from '../travel/travel'
 import {projectRemainingAt, type Projectable} from '../scheduling/projection'
-import {selectGatherLane} from '../scheduling/lanes'
+import {laneKeyForModule, placedStart, selectGatherLane} from '../scheduling/lanes'
+import {LANE_BARRIER} from '../scheduling/schedule'
+import {TaskType} from '../types'
 
 export type GatherLane = ServerContract.Types.gatherer_lane
 
@@ -33,7 +35,7 @@ export interface GatherCycle {
     batchOre: number
 }
 
-export type FillCap = 'reserve' | 'hold' | 'requested'
+export type FillCap = 'reserve' | 'hold' | 'requested' | 'horizon'
 
 export interface GatherPlan {
     cycles: GatherCycle[]
@@ -54,6 +56,7 @@ export interface BuildGatherPlanOpts {
     reserveRemaining: number
     now: Date
     startEnergy?: number
+    epochtime?: number
 }
 
 export interface GatherSink {
@@ -72,6 +75,51 @@ export interface MultiGatherPlan extends GatherPlan {
 }
 
 const MAX_CYCLES = 10_000
+
+interface GatherClock {
+    horizonMs: number
+    lanes: Map<number, number>
+    allEndMs: number
+}
+
+function startClock(
+    entity: GatherPlanEntity,
+    reaching: ServerContract.Types.gatherer_lane[],
+    now: Date,
+    epochtime: number
+): GatherClock {
+    const lanes = new Map<number, number>()
+    for (const l of reaching) {
+        const slot = l.slot_index.toNumber()
+        lanes.set(slot, placedStart(entity, TaskType.GATHER, laneKeyForModule(slot), now).getTime())
+    }
+    return {
+        horizonMs: now.getTime() + epochtime * 1000,
+        lanes,
+        allEndMs: placedStart(entity, TaskType.RECHARGE, LANE_BARRIER, now).getTime(),
+    }
+}
+
+function advanceClock(clock: GatherClock, cycle: GatherCycle): GatherClock {
+    const lanes = new Map(clock.lanes)
+    let allEndMs = clock.allEndMs
+    if (cycle.rechargeBefore) {
+        const start = Math.max(allEndMs, ...lanes.values())
+        allEndMs = start + cycle.rechargeSeconds * 1000
+        for (const slot of lanes.keys()) lanes.set(slot, Math.max(lanes.get(slot)!, allEndMs))
+    }
+    for (const limpet of cycle.limpets) {
+        const end = lanes.get(limpet.slot)! + limpet.durationSeconds * 1000
+        lanes.set(limpet.slot, end)
+        allEndMs = Math.max(allEndMs, end)
+    }
+    return {horizonMs: clock.horizonMs, lanes, allEndMs}
+}
+
+function withinHorizon(clock: GatherClock, cycle: GatherCycle): boolean {
+    const next = advanceClock(clock, cycle)
+    return cycle.limpets.every((l) => next.lanes.get(l.slot)! <= clock.horizonMs)
+}
 
 const MAX_TRANSFER_QTY = 10000
 
@@ -159,6 +207,16 @@ export function buildGatherPlan(
     target: PlanTarget,
     opts: BuildGatherPlanOpts
 ): GatherPlan {
+    return planGather(entity, stratum, target, opts).plan
+}
+
+function planGather(
+    entity: GatherPlanEntity,
+    stratum: number,
+    target: PlanTarget,
+    opts: BuildGatherPlanOpts,
+    startingClock?: GatherClock
+): {plan: GatherPlan; clock?: GatherClock} {
     const {richness, itemMass, holdRoom, reserveRemaining, now} = opts
     const warnings: string[] = []
 
@@ -176,6 +234,11 @@ export function buildGatherPlan(
     const capacity = entity.generator.capacity.toNumber()
     const rechargeRate = entity.generator.recharge.toNumber()
     let energy = opts.startEnergy ?? Number(projectRemainingAt(entity, now).energy)
+    let clock =
+        startingClock ??
+        (opts.epochtime !== undefined
+            ? startClock(entity, reaching, now, opts.epochtime)
+            : undefined)
 
     const requested = target === 'max' ? Infinity : target.quantity
     let fillTarget = requested
@@ -190,27 +253,16 @@ export function buildGatherPlan(
     }
     fillTarget = Math.max(0, Math.floor(fillTarget))
 
-    const cycles: GatherCycle[] = []
-    let remaining = fillTarget
-    let guard = 0
-    while (remaining > 0 && guard++ < MAX_CYCLES) {
-        const batch = maxQtyForCharge(reaching, remaining, capacity, stratum, itemMass, richness)
-        if (batch <= 0) {
-            warnings.push('a single gather cannot fit within one full charge')
-            break
-        }
-
+    const weights = reaching.map((l) => ({
+        slot: l.slot_index.toNumber(),
+        weight: l.yield.toNumber(),
+    }))
+    const buildCycle = (batch: number): {cycle: GatherCycle; energyAfter: number} => {
         const costFull = splitCost(reaching, batch, stratum, itemMass, richness)
         const rechargeBefore = energy < costFull
         const rechargeSeconds = rechargeBefore
             ? Number(calc_rechargetime(capacity, energy, rechargeRate))
             : 0
-        if (rechargeBefore) energy = capacity
-
-        const weights = reaching.map((l) => ({
-            slot: l.slot_index.toNumber(),
-            weight: l.yield.toNumber(),
-        }))
         const split = allocateProportional(weights, batch).filter((e) => e.quantity > 0)
         const limpets: GatherLimpet[] = split.map((e) => {
             const lane = reaching.find((l) => l.slot_index.toNumber() === e.slot)!
@@ -223,25 +275,60 @@ export function buildGatherPlan(
             const lane = reaching.find((r) => r.slot_index.toNumber() === l.slot)!
             return sum + Number(calc_gather_energy(laneStats(lane), l.durationSeconds))
         }, 0)
-        energy = Math.max(0, energy - actualCost)
-
         const gatherSeconds = limpets.reduce((m, l) => Math.max(m, l.durationSeconds), 0)
-        cycles.push({rechargeBefore, rechargeSeconds, limpets, gatherSeconds, batchOre: batch})
+        return {
+            cycle: {rechargeBefore, rechargeSeconds, limpets, gatherSeconds, batchOre: batch},
+            energyAfter: Math.max(0, (rechargeBefore ? capacity : energy) - actualCost),
+        }
+    }
+
+    const cycles: GatherCycle[] = []
+    let remaining = fillTarget
+    let guard = 0
+    while (remaining > 0 && guard++ < MAX_CYCLES) {
+        let batch = maxQtyForCharge(reaching, remaining, capacity, stratum, itemMass, richness)
+        if (batch <= 0) {
+            warnings.push('a single gather cannot fit within one full charge')
+            break
+        }
+
+        let built = buildCycle(batch)
+        if (clock && !withinHorizon(clock, built.cycle)) {
+            let lo = 0
+            let hi = batch - 1
+            while (lo < hi) {
+                const mid = Math.ceil((lo + hi) / 2)
+                if (withinHorizon(clock, buildCycle(mid).cycle)) lo = mid
+                else hi = mid - 1
+            }
+            cap = 'horizon'
+            if (lo === 0) break
+            batch = lo
+            built = buildCycle(batch)
+            remaining = batch
+        }
+
+        cycles.push(built.cycle)
+        energy = built.energyAfter
+        if (clock) clock = advanceClock(clock, built.cycle)
         remaining -= batch
     }
 
     const totalOre = cycles.reduce((s, c) => s + c.batchOre, 0)
     const totalSeconds = cycles.reduce((s, c) => s + c.rechargeSeconds + c.gatherSeconds, 0)
     return {
-        cycles,
-        cycleCount: cycles.length,
-        totalOre,
-        totalSeconds,
-        cap,
-        reachingCount: reaching.length,
-        totalLimpets: entity.gatherer_lanes.length,
-        warnings,
-        endEnergy: energy,
+        plan: {
+            cycles,
+            cycleCount: cycles.length,
+            totalOre,
+            totalSeconds,
+            cap,
+            reachingCount: reaching.length,
+            totalLimpets: entity.gatherer_lanes.length,
+            warnings,
+            endEnergy: energy,
+        },
+        clock,
     }
 }
 
@@ -273,20 +360,26 @@ export function buildMultiGatherPlan(
     const allocations: GatherAllocation[] = []
     let energy = opts.startEnergy
     let reserve = opts.reserveRemaining
+    let clock: GatherClock | undefined
     for (const sink of sinks) {
         const quantity = Math.min(left, Math.max(0, Math.floor(sink.holdRoom)))
         if (quantity <= 0) continue
-        const plan = buildGatherPlan(
+        const built = planGather(
             entity,
             stratum,
             {quantity},
-            {...opts, holdRoom: quantity, reserveRemaining: reserve, startEnergy: energy}
+            {...opts, holdRoom: quantity, reserveRemaining: reserve, startEnergy: energy},
+            clock
         )
+        const plan = built.plan
+        clock = built.clock
+        if (plan.cap === 'horizon') cap = 'horizon'
         if (plan.totalOre <= 0) break
         allocations.push({id: sink.id, quantity: plan.totalOre, plan})
         energy = plan.endEnergy
         reserve -= plan.totalOre
         left -= plan.totalOre
+        if (plan.cap === 'horizon') break
     }
 
     const cycles = allocations.flatMap((a) => a.plan.cycles)

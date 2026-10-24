@@ -1,8 +1,10 @@
-import {UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
+import {TimePoint, UInt8, UInt16, UInt32, UInt64} from '@wharfkit/antelope'
 import {expect, test, describe} from 'bun:test'
 import {ServerContract} from '../contracts'
 import {encodeStats} from '../derivation/crafting'
 import {ITEM_GATHERER_T1} from '../data/item-ids'
+import {laneKeyForModule} from '../scheduling/lanes'
+import {TaskType} from '../types'
 import {
     planParallelTransfer,
     planSingleGather,
@@ -450,6 +452,101 @@ describe('buildMultiGatherPlan', () => {
         expect(plan.cycleCount).toBe(0)
         expect(plan.allocations).toEqual([])
         expect(plan.cap).toBe('hold')
+    })
+})
+
+describe('booking horizon', () => {
+    const STRATUM = 100
+    const OPTS = {
+        richness: 500,
+        itemMass: 10,
+        holdRoom: 1_000_000,
+        reserveRemaining: 1_000_000,
+        now: NOW,
+    }
+    const CAP = 40_000
+
+    function ship(lanes: Lane[] = []) {
+        return entity({
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(CAP, 2),
+            energy: CAP,
+            lanes,
+        })
+    }
+
+    function busyGathererLane(seconds: number): Lane {
+        return ServerContract.Types.lane.from({
+            lane_key: UInt8.from(laneKeyForModule(0)),
+            schedule: ServerContract.Types.schedule.from({
+                started: TimePoint.fromMilliseconds(NOW.getTime()),
+                tasks: [
+                    ServerContract.Types.task.from({
+                        type: UInt8.from(TaskType.GATHER),
+                        duration: UInt32.from(seconds),
+                        cancelable: UInt8.from(0),
+                        cargo: [],
+                        couplings: [],
+                    }),
+                ],
+            }),
+        })
+    }
+
+    const uncapped = buildGatherPlan(ship(), STRATUM, {quantity: 500}, OPTS)
+
+    test('a plan whose last gather ends exactly one epoch after now keeps its full amount', () => {
+        const plan = buildGatherPlan(
+            ship(),
+            STRATUM,
+            {quantity: 500},
+            {...OPTS, epochtime: uncapped.totalSeconds}
+        )
+        expect(plan.cycles).toEqual(uncapped.cycles)
+        expect(plan.cap).toBe('requested')
+    })
+
+    test('one second less trims the plan to the largest amount that still ends inside the epoch', () => {
+        const epochtime = uncapped.totalSeconds - 1
+        const plan = buildGatherPlan(ship(), STRATUM, {quantity: 500}, {...OPTS, epochtime})
+        expect(plan.cap).toBe('horizon')
+        expect(plan.totalOre).toBeLessThan(500)
+        expect(plan.totalSeconds).toBeLessThanOrEqual(epochtime)
+        const oneMore = buildGatherPlan(ship(), STRATUM, {quantity: plan.totalOre + 1}, OPTS)
+        expect(oneMore.totalSeconds).toBeGreaterThan(epochtime)
+    })
+
+    test('work already queued on the gatherer lane counts against the epoch', () => {
+        const busy = 3_600
+        const epochtime = uncapped.totalSeconds
+        const plan = buildGatherPlan(ship([busyGathererLane(busy)]), STRATUM, 'max', {
+            ...OPTS,
+            epochtime,
+        })
+        expect(plan.cap).toBe('horizon')
+        expect(plan.totalOre).toBeLessThan(500)
+        expect(busy + plan.totalSeconds).toBeLessThanOrEqual(epochtime)
+        const oneMore = buildGatherPlan(ship(), STRATUM, {quantity: plan.totalOre + 1}, OPTS)
+        expect(busy + oneMore.totalSeconds).toBeGreaterThan(epochtime)
+    })
+
+    test('a run across recipients stops at the epoch, and each recipient starts where the previous one ended', () => {
+        const sinks = [
+            {id: 'ship', holdRoom: 300},
+            {id: 'container', holdRoom: 400},
+        ]
+        const {holdRoom: _, ...multiOpts} = OPTS
+        const full = buildMultiGatherPlan(ship(), STRATUM, {quantity: 500}, sinks, multiOpts)
+        const epochtime = full.totalSeconds - 1
+        const plan = buildMultiGatherPlan(ship(), STRATUM, {quantity: 500}, sinks, {
+            ...multiOpts,
+            epochtime,
+        })
+        expect(plan.cap).toBe('horizon')
+        expect(plan.allocations.map((a) => a.id)).toEqual(['ship', 'container'])
+        expect(plan.allocations[0].quantity).toBe(300)
+        expect(plan.allocations[1].quantity).toBeLessThan(200)
+        expect(plan.totalSeconds).toBeLessThanOrEqual(epochtime)
     })
 })
 
