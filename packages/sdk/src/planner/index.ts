@@ -44,6 +44,7 @@ export interface GatherPlan {
     reachingCount: number
     totalLimpets: number
     warnings: string[]
+    endEnergy: number
 }
 
 export interface BuildGatherPlanOpts {
@@ -52,6 +53,22 @@ export interface BuildGatherPlanOpts {
     holdRoom: number
     reserveRemaining: number
     now: Date
+    startEnergy?: number
+}
+
+export interface GatherSink {
+    id: string
+    holdRoom: number
+}
+
+export interface GatherAllocation {
+    id: string
+    quantity: number
+    plan: GatherPlan
+}
+
+export interface MultiGatherPlan extends GatherPlan {
+    allocations: GatherAllocation[]
 }
 
 const MAX_CYCLES = 10_000
@@ -158,7 +175,7 @@ export function buildGatherPlan(
 
     const capacity = entity.generator.capacity.toNumber()
     const rechargeRate = entity.generator.recharge.toNumber()
-    let energy = Number(projectRemainingAt(entity, now).energy)
+    let energy = opts.startEnergy ?? Number(projectRemainingAt(entity, now).energy)
 
     const requested = target === 'max' ? Infinity : target.quantity
     let fillTarget = requested
@@ -224,6 +241,66 @@ export function buildGatherPlan(
         reachingCount: reaching.length,
         totalLimpets: entity.gatherer_lanes.length,
         warnings,
+        endEnergy: energy,
+    }
+}
+
+export function buildMultiGatherPlan(
+    entity: GatherPlanEntity,
+    stratum: number,
+    target: PlanTarget,
+    sinks: GatherSink[],
+    opts: Omit<BuildGatherPlanOpts, 'holdRoom'>
+): MultiGatherPlan {
+    const reaching = entity.gatherer_lanes.filter((l) => l.depth.toNumber() >= stratum)
+    if (reaching.length === 0) throw new Error('no gatherer reaches this stratum')
+    if (!entity.generator) throw new Error('entity has no generator')
+
+    const totalRoom = sinks.reduce((sum, sink) => sum + Math.max(0, sink.holdRoom), 0)
+    const requested = target === 'max' ? Infinity : target.quantity
+    let fillTarget = requested
+    let cap: FillCap = 'requested'
+    if (totalRoom < fillTarget) {
+        fillTarget = totalRoom
+        cap = 'hold'
+    }
+    if (opts.reserveRemaining < fillTarget) {
+        fillTarget = opts.reserveRemaining
+        cap = 'reserve'
+    }
+    let left = Math.max(0, Math.floor(fillTarget))
+
+    const allocations: GatherAllocation[] = []
+    let energy = opts.startEnergy
+    let reserve = opts.reserveRemaining
+    for (const sink of sinks) {
+        const quantity = Math.min(left, Math.max(0, Math.floor(sink.holdRoom)))
+        if (quantity <= 0) continue
+        const plan = buildGatherPlan(
+            entity,
+            stratum,
+            {quantity},
+            {...opts, holdRoom: quantity, reserveRemaining: reserve, startEnergy: energy}
+        )
+        if (plan.totalOre <= 0) break
+        allocations.push({id: sink.id, quantity: plan.totalOre, plan})
+        energy = plan.endEnergy
+        reserve -= plan.totalOre
+        left -= plan.totalOre
+    }
+
+    const cycles = allocations.flatMap((a) => a.plan.cycles)
+    return {
+        cycles,
+        cycleCount: cycles.length,
+        totalOre: allocations.reduce((s, a) => s + a.plan.totalOre, 0),
+        totalSeconds: allocations.reduce((s, a) => s + a.plan.totalSeconds, 0),
+        cap,
+        reachingCount: reaching.length,
+        totalLimpets: entity.gatherer_lanes.length,
+        warnings: [...new Set(allocations.flatMap((a) => a.plan.warnings))],
+        endEnergy: energy ?? Number(projectRemainingAt(entity, opts.now).energy),
+        allocations,
     }
 }
 

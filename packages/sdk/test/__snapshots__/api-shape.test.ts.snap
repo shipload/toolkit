@@ -488,6 +488,7 @@ exports[`module export surface 1`] = `
   "buildImmutableData",
   "buildJobCancelRoute",
   "buildMintAssetAction",
+  "buildMultiGatherPlan",
   "calcCargoItemMass",
   "calcCargoMass",
   "calcClusterIntake",

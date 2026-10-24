@@ -872,6 +872,7 @@ export * from './subscriptions'
 export {
     allocateProportional,
     buildGatherPlan,
+    buildMultiGatherPlan,
     gatherEnergyCost,
     maxQtyForCharge,
     planParallelTransfer,
@@ -881,12 +882,15 @@ export {
 export type {
     BuildGatherPlanOpts,
     FillCap,
+    GatherAllocation,
     GatherCycle,
     GatherLane,
     GatherLimpet,
     GatherPlan,
     GatherPlanEntity,
+    GatherSink,
     LanePlanEntry,
+    MultiGatherPlan,
     PlanTarget,
     SingleGatherInput,
     SingleGatherPlan,

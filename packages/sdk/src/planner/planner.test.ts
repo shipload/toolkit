@@ -11,6 +11,7 @@ import {
     splitCost,
     maxQtyForCharge,
     buildGatherPlan,
+    buildMultiGatherPlan,
 } from './index'
 
 type ModuleEntry = ServerContract.Types.module_entry
@@ -346,6 +347,109 @@ describe('buildGatherPlan', () => {
         const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
         expect(plan.cycles[0].rechargeBefore).toBe(false)
         expect(plan.cycles[0].rechargeSeconds).toBe(0)
+    })
+
+    test('reports the energy left after the last cycle', () => {
+        const e = entity({
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
+        })
+        const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, OPTS)
+        const cost = splitCost(e.gatherer_lanes, 50, STRATUM, OPTS.itemMass, OPTS.richness)
+        expect(plan.endEnergy).toBeGreaterThan(0)
+        expect(plan.endEnergy).toBeLessThanOrEqual(60_000_000 - cost + 1)
+    })
+
+    test('starts from the given energy in place of the projected energy', () => {
+        const e = entity({
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(60_000_000, 2000),
+            energy: 60_000_000,
+        })
+        const plan = buildGatherPlan(e, STRATUM, {quantity: 50}, {...OPTS, startEnergy: 0})
+        expect(plan.cycles[0].rechargeBefore).toBe(true)
+    })
+})
+
+describe('buildMultiGatherPlan', () => {
+    const STRATUM = 100
+    const OPTS = {richness: 500, itemMass: 10, reserveRemaining: 1_000_000, now: NOW}
+
+    function gatherer(capacity = 60_000_000, energy = capacity) {
+        return entity({
+            gatherer_lanes: [gathererLane(0, 700, 1_250_000, 5000)],
+            generator: energyStats(capacity, 2),
+            energy,
+        })
+    }
+
+    const SINKS = [
+        {id: 'ship', holdRoom: 300},
+        {id: 'container', holdRoom: 400},
+    ]
+
+    function allocated(plan: ReturnType<typeof buildMultiGatherPlan>) {
+        return plan.allocations.map((a) => [a.id, a.quantity])
+    }
+
+    test('fills each recipient in order before starting the next', () => {
+        const plan = buildMultiGatherPlan(gatherer(), STRATUM, {quantity: 500}, SINKS, OPTS)
+        expect(allocated(plan)).toEqual([
+            ['ship', 300],
+            ['container', 200],
+        ])
+        expect(plan.totalOre).toBe(500)
+        expect(plan.cap).toBe('requested')
+    })
+
+    test('leaves out recipients the amount does not reach', () => {
+        const plan = buildMultiGatherPlan(gatherer(), STRATUM, {quantity: 200}, SINKS, OPTS)
+        expect(allocated(plan)).toEqual([['ship', 200]])
+    })
+
+    test('max fills the combined room', () => {
+        const plan = buildMultiGatherPlan(gatherer(), STRATUM, 'max', SINKS, OPTS)
+        expect(allocated(plan)).toEqual([
+            ['ship', 300],
+            ['container', 400],
+        ])
+        expect(plan.cap).toBe('hold')
+    })
+
+    test('max stops at the reserve', () => {
+        const plan = buildMultiGatherPlan(gatherer(), STRATUM, 'max', SINKS, {
+            ...OPTS,
+            reserveRemaining: 450,
+        })
+        expect(allocated(plan)).toEqual([
+            ['ship', 300],
+            ['container', 150],
+        ])
+        expect(plan.cap).toBe('reserve')
+    })
+
+    test('each recipient starts from the energy the previous one leaves', () => {
+        const e = gatherer(40_000)
+        const plan = buildMultiGatherPlan(e, STRATUM, {quantity: 500}, SINKS, OPTS)
+        const [first, second] = plan.allocations
+        const expected = buildGatherPlan(
+            e,
+            STRATUM,
+            {quantity: 200},
+            {...OPTS, holdRoom: 200, startEnergy: first.plan.endEnergy}
+        )
+        expect(second.plan.cycles).toEqual(expected.cycles)
+        expect(plan.cycles).toEqual([...first.plan.cycles, ...second.plan.cycles])
+        expect(plan.totalSeconds).toBe(first.plan.totalSeconds + second.plan.totalSeconds)
+        expect(plan.endEnergy).toBe(second.plan.endEnergy)
+    })
+
+    test('no recipients yields an empty plan capped by hold', () => {
+        const plan = buildMultiGatherPlan(gatherer(), STRATUM, 'max', [], OPTS)
+        expect(plan.cycleCount).toBe(0)
+        expect(plan.allocations).toEqual([])
+        expect(plan.cap).toBe('hold')
     })
 })
 
