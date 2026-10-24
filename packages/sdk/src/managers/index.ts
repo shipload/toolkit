@@ -39,7 +39,6 @@ export type {
     InfluenceStanding,
     Ballot,
     BallotVote,
-    NodeProgress,
     QueuedSeat,
     VoteOption,
     VoteStandings,

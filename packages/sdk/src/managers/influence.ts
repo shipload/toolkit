@@ -46,12 +46,7 @@ export interface CharterProgress {
     ballotId: bigint
     settling: boolean
     queue: QueuedSeat[]
-    progress: NodeProgress[]
-}
-
-export interface NodeProgress {
-    nodeId: number
-    amount: bigint
+    progress: bigint
 }
 
 export interface ContributePreviewRow {
@@ -269,10 +264,7 @@ export class InfluenceManager extends BaseManager {
                 progress: big(seat.progress),
                 gap: big(seat.gap),
             })),
-            progress: result.progress.map((p) => ({
-                nodeId: Number(p.node_id),
-                amount: big(p.amount),
-            })),
+            progress: big(result.progress),
         }
     }
 
