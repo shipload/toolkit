@@ -89,6 +89,28 @@ describe('taskCargoChanges task coverage', () => {
         expect(changes).toHaveLength(1)
         expect(changes[0].direction).toBe('in')
     })
+
+    test('an individuated stack keeps its entity identity and a bare stack carries none', () => {
+        const task = ServerContract.Types.task.from({
+            type: TaskType.UNDEPLOY,
+            duration: 60,
+            cancelable: 0,
+            cargo: [
+                ServerContract.Types.cargo_item.from({
+                    item_id: 10200,
+                    stats: 0,
+                    modules: [],
+                    quantity: 1,
+                    entity_id: 2,
+                }),
+                cargoItem(401, 100),
+            ],
+            couplings: [],
+        })
+        const [individuated, bare] = taskCargoChanges(task)
+        expect(individuated.entity_id).toBe(2n)
+        expect('entity_id' in bare).toBe(false)
+    })
 })
 
 describe('taskCargoChangesChecked', () => {

@@ -146,13 +146,27 @@ export function stackIdentityEqual(a: CargoStack, b: CargoStack): boolean {
     )
 }
 
-export function stackKey(s: CargoStack): string {
-    const installed = s.modules
+export function cargoModulesKey(modules: readonly ServerContract.Types.module_entry[]): string {
+    return modules
         .map((m, i) => (m.installed ? `${i}=${m.installed.item_id}.${m.installed.stats}` : ''))
         .filter((part) => part !== '')
-    const modulesPart = installed.length > 0 ? `:${installed.join(',')}` : ''
-    const identityPart = s.entity_id ? `#${s.entity_id.toString()}` : ''
-    return `${s.item_id.toNumber()}:${s.stats.toString()}${modulesPart}${identityPart}`
+        .join(',')
+}
+
+export function cargoIdentityKey(
+    itemId: number,
+    stats: {toString(): string},
+    modules: readonly ServerContract.Types.module_entry[],
+    entityId = ''
+): string {
+    const modulesKey = cargoModulesKey(modules)
+    const modulesPart = modulesKey !== '' ? `:${modulesKey}` : ''
+    const identityPart = entityId !== '' && entityId !== '0' ? `#${entityId}` : ''
+    return `${itemId}:${stats.toString()}${modulesPart}${identityPart}`
+}
+
+export function stackKey(s: CargoStack): string {
+    return cargoIdentityKey(s.item_id.toNumber(), s.stats, s.modules, s.entity_id?.toString() ?? '')
 }
 
 export function stacksEqual(a: CargoStack, b: CargoStack): boolean {

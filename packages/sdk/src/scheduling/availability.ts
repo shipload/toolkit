@@ -1,4 +1,5 @@
 import type {ServerContract} from '../contracts'
+import {cargoIdentityKey} from '../capabilities/storage'
 import {HoldKind, TaskType} from '../types'
 import * as schedule from './schedule'
 import {taskCargoRule} from './task-effects'
@@ -140,24 +141,17 @@ export function taskCargoEffect(task: Task): CargoEffect {
     }
 }
 
-function refKey(itemId: number, stats: bigint, modules: ModuleEntry[], entityId: string): string {
-    const base = `${itemId}:${stats.toString()}`
-    const normalizedEntityId = entityId !== '0' ? entityId : ''
-    if (modules.length === 0 && normalizedEntityId === '') return base
-    return `${base}:modules=${JSON.stringify(modules)}:entity=${normalizedEntityId}`
-}
-
 export function cargoKey(item: CargoItem): string {
-    return refKey(
+    return cargoIdentityKey(
         item.item_id.toNumber(),
-        BigInt(item.stats.toString()),
+        item.stats,
         item.modules ?? [],
         item.entity_id?.toString() ?? ''
     )
 }
 
 export function cargoInputKey(input: CargoInput): string {
-    return refKey(input.itemId, input.stats, input.modules ?? [], '')
+    return cargoIdentityKey(input.itemId, input.stats, input.modules ?? [])
 }
 
 function cargoQuantity(item: CargoItem): bigint {

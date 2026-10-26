@@ -1,6 +1,10 @@
 import {describe, expect, test} from 'bun:test'
+import {moduleSlotTypeToCode} from '../capabilities/modules'
+import {ITEM_ORE_T1, ITEM_PROSPECTOR_T1A_PACKED} from '../data/item-ids'
+import {getEntityLayout} from '../data/recipes-runtime'
 import {HoldKind, ServerContract, TaskType} from '../index-module'
 import {
+    availableForItem,
     calcCounterpartDelivery,
     cargoReadyAt,
     type CargoInput,
@@ -116,6 +120,66 @@ describe('cargoReadyAt', () => {
         const result = cargoReadyAt(e, demand)
         expect(result).toEqual(EPOCH)
         expect(result).not.toEqual(laterCompletesAt)
+    })
+})
+
+describe('an empty module layout and [] are one stack for availability and readiness', () => {
+    const hull = ITEM_PROSPECTOR_T1A_PACKED
+    const hullStats = 777
+    const completesAt = new Date('2026-06-19T00:01:00.000Z')
+    const later = new Date('2026-06-19T01:00:00.000Z')
+
+    function emptyLayout() {
+        const layout = getEntityLayout(hull)
+        if (!layout || layout.slots.length === 0) throw new Error('hull has no module layout')
+        return layout.slots.map((slot) => ({
+            type: moduleSlotTypeToCode(slot.type),
+            installed: null,
+        }))
+    }
+
+    function hullItem(modules: unknown[], quantity: number) {
+        return ServerContract.Types.cargo_item.from({
+            item_id: hull,
+            stats: hullStats,
+            modules,
+            quantity,
+        })
+    }
+
+    test('a pending UNLOAD with modules [] reserves the sized-empty-layout row', () => {
+        const e = entity(
+            [hullItem(emptyLayout(), 1)],
+            [task({type: TaskType.UNLOAD, cargo: [hullItem([], 1)]})]
+        )
+        expect(availableForItem(projectedCargoAvailableAt(e, later), hull)).toBe(0n)
+    })
+
+    test('a pending CRAFT consuming modules [] reduces the sized-empty-layout stack', () => {
+        const e = entity(
+            [hullItem(emptyLayout(), 2)],
+            [
+                task({
+                    type: TaskType.CRAFT,
+                    cargo: [hullItem([], 1), cargoItem(ITEM_ORE_T1, 0, 1)],
+                }),
+            ]
+        )
+        expect(availableForItem(projectedCargoAvailableAt(e, later), hull)).toBe(1n)
+    })
+
+    test('a demand naming [] is ready when the craft producing an empty-layout stack completes', () => {
+        const e = entity(
+            [],
+            [
+                task({
+                    type: TaskType.CRAFT,
+                    cargo: [cargoItem(ITEM_ORE_T1, 0, 1), hullItem(emptyLayout(), 1)],
+                }),
+            ]
+        )
+        const demand: CargoInput[] = [{itemId: hull, stats: BigInt(hullStats), quantity: 1}]
+        expect(cargoReadyAt(e, demand)).toEqual(completesAt)
     })
 })
 

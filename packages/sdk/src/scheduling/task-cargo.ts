@@ -9,6 +9,7 @@ export interface TaskCargoChange {
     stats: bigint
     modules: ServerContract.Types.module_entry[]
     quantity: number
+    entity_id?: bigint
 }
 
 export type TaskCargoResult =
@@ -19,12 +20,14 @@ function toChange(
     item: ServerContract.Types.cargo_item,
     direction: TaskCargoDirection
 ): TaskCargoChange {
+    const entityId = BigInt(item.entity_id?.toString() ?? '0')
     return {
         direction,
         item_id: Number(item.item_id),
         stats: BigInt(item.stats.toString()),
         modules: item.modules ?? [],
         quantity: Number(item.quantity),
+        ...(entityId !== 0n ? {entity_id: entityId} : {}),
     }
 }
 
