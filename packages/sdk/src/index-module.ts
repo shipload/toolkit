@@ -606,6 +606,26 @@ export {
 } from './derivation/build-methods'
 export type {BuildMethod} from './derivation/build-methods'
 
+export {canSetGoal, deriveGoal, deriveGoals, isShipItem, measureGoal} from './goals'
+export type {
+    Goal,
+    GoalCoordinates,
+    GoalCredit,
+    GoalCreditPlace,
+    GoalEntity,
+    GoalHoldings,
+    GoalHunt,
+    GoalHuntStat,
+    GoalMeasure,
+    GoalNode,
+    GoalPlan,
+    GoalStatTargets,
+    GoalStep,
+    GoalStepKind,
+    GoalStock,
+    GoalStockPlace,
+} from './goals'
+
 export {
     computeShipHullCapabilities,
     computeEngineCapabilities,
