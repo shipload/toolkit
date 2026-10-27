@@ -54,8 +54,6 @@ export const GROUP_HAUL_CAPACITY_EXCEEDED =
     'Group travel requires sufficient hauler capacity for all non-self-propelled entities.'
 export const CANCEL_GROUP_IN_RANGE =
     'Cannot cancel a grouped task together with other tasks; cancel it on its own with a count of 1.'
-export const CANCEL_GROUP_NOT_AT_TAIL =
-    'Cannot cancel: another group member has tasks queued after its grouped task; cancel those first.'
 export const CANCEL_GROUP_BELOW_LATER_TASK =
     'Cannot cancel: another group member has tasks after the grouped task on this worker lane; cancel those first.'
 export const PLOT_CANCEL_NOT_ALLOWED =
@@ -81,7 +79,6 @@ export const CANCEL_REFUSALS: readonly string[] = [
     SHIP_NO_TASKS_TO_CANCEL,
     CANCEL_GROUP_IN_RANGE,
     GROUP_NOT_FOUND,
-    CANCEL_GROUP_NOT_AT_TAIL,
     CANCEL_GROUP_BELOW_LATER_TASK,
     CANCEL_TASK_COMPLETE,
     CANCEL_TASK_NEVER,
