@@ -311,15 +311,46 @@ test('craft with both target and slot includes both', () => {
 })
 
 test('craftjob without a shuttled by omits the field', () => {
-    const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)])
+    const action = sl.actions.craftjob(1, 2, 10001, 1, [{source_id: 1, items: [cargo(10201, 1)]}])
     const data = action.decodeData(ServerContract.abi)
     expect(data.shuttled_by).toBeNull()
 })
 
 test('craftjob with a shuttled by passes it through', () => {
-    const action = sl.actions.craftjob(1, 2, 10001, 1, [cargo(10201, 1)], 5)
+    const action = sl.actions.craftjob(
+        1,
+        2,
+        10001,
+        1,
+        [{source_id: 1, items: [cargo(10201, 1)]}],
+        5
+    )
     const data = action.decodeData(ServerContract.abi)
     expect(String(data.shuttled_by)).toBe('5')
+})
+
+test('craftjob and buildjob split inputs between the ship and a depot', () => {
+    const sources = [
+        {source_id: 1, items: [cargo(10201, 1)]},
+        {source_id: 9, items: [cargo(10202, 2)]},
+    ]
+    for (const action of [
+        sl.actions.craftjob(1, 2, 10001, 1, sources),
+        sl.actions.buildjob(1, 2, 10001, sources),
+    ]) {
+        const data = action.decodeData(ServerContract.abi)
+        expect(data.sources.map((src: {source_id: unknown}) => String(src.source_id))).toEqual([
+            '1',
+            '9',
+        ])
+        expect(Number(data.sources[1].items[0].quantity)).toBe(2)
+    }
+})
+
+test('claimcraft to a depot names the depot as receiver with no carrier', () => {
+    const data = sl.actions.claimcraft(1, 9).decodeData(ServerContract.abi)
+    expect(String(data.ship_id)).toBe('9')
+    expect(data.shuttled_by).toBeNull()
 })
 
 test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their shuttled by', () => {
@@ -328,8 +359,9 @@ test('claimcraft, buildjob, cancelbuild, depotstore and depottake pass their shu
     )
     expect(
         String(
-            sl.actions.buildjob(1, 2, 10001, [cargo(10201, 1)], 5).decodeData(ServerContract.abi)
-                .shuttled_by
+            sl.actions
+                .buildjob(1, 2, 10001, [{source_id: 1, items: [cargo(10201, 1)]}], 5)
+                .decodeData(ServerContract.abi).shuttled_by
         )
     ).toBe('5')
     expect(String(sl.actions.cancelbuild(1, 5).decodeData(ServerContract.abi).shuttled_by)).toBe(

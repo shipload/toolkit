@@ -543,6 +543,7 @@ describe('ActionsManager', () => {
             'dbgbarrier',
             'dbglaneclock',
             'dbgstart',
+            'dbgaddtask',
             // internal / notification actions — not player-initiated
             'chkcollect',
             'configlog',

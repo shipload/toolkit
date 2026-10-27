@@ -30,9 +30,11 @@ test('craftjob builds action with ship, workshop and inputs, no socket', async (
         'workshop_id',
         'recipe_id',
         'quantity',
-        'inputs',
+        'sources',
         'shuttled_by',
     ])
+    const sources = decoded.sources as {source_id: unknown}[]
+    expect(sources.map((src) => String(src.source_id))).toEqual(['1003'])
 })
 
 test('craftjob buildAction forwards --shuttled-by as the last SDK action argument', async () => {

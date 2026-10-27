@@ -42,6 +42,8 @@ export type ShuttleReasonCode =
     | 'plot-recipe'
     | 'not-ready'
     | 'bumped-short'
+    | 'job-sources'
+    | 'depot-receiver'
     | 'unknown'
 
 export interface ShuttleMissingItem {
@@ -127,6 +129,11 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'Deposit would exceed plot recipe requirement.': 'plot-recipe',
     'craft job is not finished yet': 'not-ready',
     'no bumped drop-off holds that much of this item here': 'bumped-short',
+    'a booking needs at least one input source': 'job-sources',
+    "inputs come from the booking ship or the owner's depot at this station": 'job-sources',
+    'inputs can come from one depot only': 'job-sources',
+    "the depot is not at the job's station": 'depot-receiver',
+    'a depot receives a pick-up directly, without a carrier': 'depot-receiver',
 }
 
 export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
@@ -140,6 +147,8 @@ export const BOOKING_LEVEL_CODES: ReadonlySet<ShuttleReasonCode> = new Set([
     'no-storage',
     'not-ready',
     'bumped-short',
+    'job-sources',
+    'depot-receiver',
     'bundle-too-large',
     'duplicate-item',
 ])
@@ -360,7 +369,7 @@ export class ShuttleManager extends BaseManager {
         workshopId: UInt64Type
         recipeId: UInt16Type
         quantity: UInt32Type
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
+        sources: ServerContract.ActionParams.Type.cluster_source[]
         candidates: UInt64Type[]
         recharge?: boolean
     }): Promise<ShuttleOptions> {
@@ -369,7 +378,7 @@ export class ShuttleManager extends BaseManager {
             workshop_id: UInt64.from(req.workshopId),
             recipe_id: UInt16.from(req.recipeId),
             quantity: UInt32.from(req.quantity),
-            inputs: req.inputs,
+            sources: req.sources,
             candidates: req.candidates.map((c) => UInt64.from(c)),
             recharge: req.recharge ?? false,
         })
@@ -379,14 +388,14 @@ export class ShuttleManager extends BaseManager {
         targetId: UInt64Type
         dockId: UInt64Type
         targetItemId: UInt16Type
-        inputs: ServerContract.ActionParams.Type.cargo_item[]
+        sources: ServerContract.ActionParams.Type.cluster_source[]
         candidates: UInt64Type[]
     }): Promise<ShuttleOptions> {
         return this.query('getbuildopts', {
             target_id: UInt64.from(req.targetId),
             dock_id: UInt64.from(req.dockId),
             target_item_id: UInt16.from(req.targetItemId),
-            inputs: req.inputs,
+            sources: req.sources,
             candidates: req.candidates.map((c) => UInt64.from(c)),
         })
     }

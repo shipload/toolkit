@@ -530,7 +530,7 @@ export class ActionsManager extends BaseManager {
         workshopId: UInt64Type,
         recipeId: UInt16Type,
         quantity: UInt32Type,
-        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        sources: ServerContract.ActionParams.Type.cluster_source[],
         shuttledBy?: UInt64Type
     ): Action {
         const params: ServerContract.ActionParams.craftjob = {
@@ -538,7 +538,7 @@ export class ActionsManager extends BaseManager {
             workshop_id: UInt64.from(workshopId),
             recipe_id: UInt16.from(recipeId),
             quantity: UInt32.from(quantity),
-            inputs,
+            sources,
         }
         if (shuttledBy !== undefined) {
             params.shuttled_by = UInt64.from(shuttledBy)
@@ -619,14 +619,14 @@ export class ActionsManager extends BaseManager {
         targetId: UInt64Type,
         dockId: UInt64Type,
         targetItemId: UInt16Type,
-        inputs: ServerContract.ActionParams.Type.cargo_item[],
+        sources: ServerContract.ActionParams.Type.cluster_source[],
         shuttledBy?: UInt64Type
     ): Action {
         const params: ServerContract.ActionParams.buildjob = {
             target_id: UInt64.from(targetId),
             dock_id: UInt64.from(dockId),
             target_item_id: UInt16.from(targetItemId),
-            inputs,
+            sources,
         }
         if (shuttledBy !== undefined) {
             params.shuttled_by = UInt64.from(shuttledBy)

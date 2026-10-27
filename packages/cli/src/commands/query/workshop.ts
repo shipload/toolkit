@@ -315,7 +315,7 @@ export async function loadShuttleOptions(
         workshopId,
         recipeId,
         quantity,
-        inputs: cargoInputs,
+        sources: [{source_id: shipId, items: cargoInputs}],
         candidates: pool,
         recharge,
     })

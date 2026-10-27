@@ -61,7 +61,7 @@ describe('ShuttleManager', () => {
             workshopId: 9,
             recipeId: 1,
             quantity: 2,
-            inputs: [],
+            sources: [],
             candidates: [],
             recharge: true,
         })
@@ -79,7 +79,7 @@ describe('ShuttleManager', () => {
             return {options: [rawOption()]}
         })
 
-        const buildInputs = [{item_id: 1}] as never
+        const buildSources = [{source_id: 1, items: [{item_id: 1}]}] as never
         const storeItems = [{item_id: 2}] as never
         const takeItems = [{item_id: 3}] as never
 
@@ -87,7 +87,7 @@ describe('ShuttleManager', () => {
             targetId: 1,
             dockId: 2,
             targetItemId: 3,
-            inputs: buildInputs,
+            sources: buildSources,
             candidates: [4],
         })
         await m.claim({jobId: 5, shipId: 6, candidates: [7]})
@@ -106,7 +106,7 @@ describe('ShuttleManager', () => {
             target_id: UInt64.from(1),
             dock_id: UInt64.from(2),
             target_item_id: UInt16.from(3),
-            inputs: buildInputs,
+            sources: buildSources,
             candidates: [UInt64.from(4)],
         })
         expect(calls[1].data).toEqual({
@@ -183,7 +183,7 @@ describe('ShuttleManager', () => {
             workshopId: 9,
             recipeId: 10001,
             quantity: 1,
-            inputs: [],
+            sources: [],
             candidates: [],
         })
         const blocked = out.options[0].blocked!
@@ -302,7 +302,7 @@ describe('ShuttleManager', () => {
             workshopId: 9,
             recipeId: 1,
             quantity: 1,
-            inputs: [],
+            sources: [],
             candidates: [7],
         })
         expect(out.blocked).toBeUndefined()
@@ -378,6 +378,14 @@ describe('ShuttleManager', () => {
             ['ship departs before the shuttle completes', 'departs'],
             ['giver has insufficient giveable cargo', 'cargo-not-aboard'],
             ['Entity cargo capacity would be exceeded.', 'no-capacity'],
+            ['a booking needs at least one input source', 'job-sources'],
+            [
+                "inputs come from the booking ship or the owner's depot at this station",
+                'job-sources',
+            ],
+            ['inputs can come from one depot only', 'job-sources'],
+            ["the depot is not at the job's station", 'depot-receiver'],
+            ['a depot receives a pick-up directly, without a carrier', 'depot-receiver'],
             ['No recipe found for plot target.', 'plot-recipe'],
             ['Item is not part of the plot target recipe.', 'plot-recipe'],
             ['Deposit would exceed plot recipe requirement.', 'plot-recipe'],
@@ -419,6 +427,8 @@ describe('ShuttleManager', () => {
             'no-storage',
             'not-ready',
             'bumped-short',
+            'job-sources',
+            'depot-receiver',
             'bundle-too-large',
             'duplicate-item',
         ])

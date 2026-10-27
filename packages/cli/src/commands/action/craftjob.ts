@@ -57,7 +57,7 @@ export async function buildAction(opts: CraftjobOpts, shipload?: Shipload): Prom
         opts.workshopId,
         opts.recipeId,
         opts.quantity,
-        cargoInputs,
+        [{source_id: opts.entityId, items: cargoInputs}],
         opts.shuttledBy
     )
 }
@@ -99,7 +99,7 @@ export async function resolveAutoShuttledBy(
         workshopId,
         recipeId,
         quantity,
-        inputs: cargoInputs,
+        sources: [{source_id: ctx.entityId, items: cargoInputs}],
         candidates,
     })
     if (!shuttleOptions.auto) {
