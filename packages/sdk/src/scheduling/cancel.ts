@@ -333,18 +333,6 @@ function cargo_return_refusal(
     return undefined
 }
 
-// Mirrors group_tail_lane_key in cancel.cpp.
-function group_tail_lane_key(lanes: readonly Lane[], groupId: string): number | undefined {
-    for (const l of lanes) {
-        const tasks = l.schedule.tasks
-        if (tasks.length === 0) continue
-        const tail = tasks[tasks.length - 1]
-        if (tail.entitygroup !== undefined && tail.entitygroup.toString() === groupId)
-            return l.lane_key.toNumber()
-    }
-    return undefined
-}
-
 // Mirrors lane_tail_group in cancel.cpp.
 function lane_tail_group(lanes: readonly Lane[], laneKey: number): string | undefined {
     for (const l of lanes) {
@@ -352,10 +340,6 @@ function lane_tail_group(lanes: readonly Lane[], laneKey: number): string | unde
         return l.schedule.tasks[l.schedule.tasks.length - 1].entitygroup?.toString()
     }
     return undefined
-}
-
-function lanesReferenceGroup(lanes: readonly Lane[], groupId: string): boolean {
-    return lanes.some((l) => l.schedule.tasks.some((t) => t.entitygroup?.toString() === groupId))
 }
 
 function consumersFed(
@@ -833,20 +817,13 @@ export function cancelEligibility(
     for (const pid of participants) {
         const p = ctx.entity(pid)
         if (!p) continue
-        let participantLane = laneKey
         if (pid !== selfId && lane_tail_group(p.lanes, laneKey) !== groupId) {
             const addressed = p.lanes.find((l) => l.lane_key.equals(laneKey))
             if (addressed?.schedule.tasks.some((t) => t.entitygroup?.toString() === groupId))
                 return refuseGroup(CancelBlockReason.GROUP_BELOW_LATER_TASK, p)
-            const found = group_tail_lane_key(p.lanes, groupId)
-            if (found === undefined) {
-                if (lanesReferenceGroup(p.lanes, groupId))
-                    return refuseGroup(CancelBlockReason.GROUP_NOT_AT_TAIL, p)
-                continue
-            }
-            participantLane = found
+            continue
         }
-        const result = cancel_entity_impl(ctx, p, participantLane, 1)
+        const result = cancel_entity_impl(ctx, p, laneKey, 1)
         if (result.refusal) return finish(result)
         if (pid === selfId) primary = result
         else cascade.push(pid)

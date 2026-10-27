@@ -129,6 +129,28 @@ describe('cancelEligibility — grouped tasks', () => {
         expect(plan.ok).toBe(true)
         expect(plan.cascade).toEqual([])
     })
+    test('a participant without the group on the addressed lane is skipped', () => {
+        const later = '2026-06-19T00:01:00'
+        const tug = ServerContract.Types.entity_info.from({
+            ...JSON.parse(JSON.stringify(entity([]))),
+            lanes: [
+                {lane_key: 0, schedule: {started: later, tasks: [task({group: 42})]}},
+                {lane_key: 255, schedule: {started: later, tasks: [task({group: 42})]}},
+            ],
+        })
+        const towed = ServerContract.Types.entity_info.from({
+            ...JSON.parse(JSON.stringify(entity([task({group: 42})], later))),
+            id: 2,
+            type: 'container',
+        })
+        const plan = cancelEligibility(tug, 255, 0, {
+            now,
+            groupParticipants: new Map([['42', ['1', '2']]]),
+            counterparts: new Map([['2', towed]]),
+        })
+        expect(plan.ok).toBe(true)
+        expect(plan.cascade).toEqual([])
+    })
     test('group id 0 is a group', () => {
         const e = entity([task({}), task({group: 0}), task({})])
         expect(cancelEligibility(e, 0, 0, {now}).blockedReason).toBe(
