@@ -67,10 +67,11 @@ describe('buildImmutableData', () => {
         const entries = buildImmutableData(ITEM_PLATE, 1, encodeStats([512, 333, 250]), 0, 0)
         expect(layout(entries).slice(1, 4)).toEqual([
             ['strength', 'uint16'],
-            ['density', 'uint16'],
             ['tolerance', 'uint16'],
+            ['density', 'uint16'],
         ])
-        expect(value(entries, 'tolerance')).toBe(250)
+        expect(value(entries, 'tolerance')).toBe(333)
+        expect(value(entries, 'density')).toBe(250)
     })
 
     test('module layout pins the Limpet Bay T1 raw stats and no derived fields', () => {
@@ -81,12 +82,10 @@ describe('buildImmutableData', () => {
             ['quantity', 'uint32'],
             ['strength', 'uint16'],
             ['tolerance', 'uint16'],
-            ['saturation', 'uint16'],
             ...COMMON_TAIL,
         ])
         expect(value(entries, 'strength')).toBe(500)
         expect(value(entries, 'tolerance')).toBe(600)
-        expect(value(entries, 'saturation')).toBe(400)
         expect(getWrappedSchema(ITEM_GATHERER_T1)?.name).toBe('limpetbay.v1')
     })
 

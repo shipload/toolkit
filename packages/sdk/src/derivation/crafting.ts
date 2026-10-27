@@ -3,8 +3,14 @@ import type {ResourceCategory} from '../types'
 import {getRecipe, type Recipe} from '../data/recipes-runtime'
 import {getItem} from '../data/catalog'
 import {findStatDefinition, getStatDefinitions, type StatDefinition} from './stats'
-import {deriveResourceStats} from './stratum'
+import {deriveResourceStats, STAT_MEAN, STAT_WORD_SLOTS} from './stratum'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
+
+export const STAT_SOURCE_MEAN = 255
+
+export function isMeanSource(src: {inputIndex: number}): boolean {
+    return src.inputIndex === STAT_SOURCE_MEAN
+}
 
 export interface StackInput {
     quantity: number
@@ -45,6 +51,10 @@ export function getItemStatKeys(itemId: number): string[] {
     if (itemId === ITEM_SHIP_T1_PACKED) return ['strength', 'density', '', '']
     const recipe = getRecipe(itemId)
     if (!recipe) return []
+    if (item.type === 'component') {
+        const resourceKeys = getItemStatKeys(recipe.inputs[0].itemId)
+        return recipe.statSlots.map((_, i) => resourceKeys[i] ?? '')
+    }
     return recipe.statSlots.map((slot) => keyForStatSlot(recipe, slot))
 }
 
@@ -52,7 +62,7 @@ function keyForStatSlot(
     recipe: Recipe,
     slot: {sources: {inputIndex: number; statIndex: number}[]}
 ): string {
-    const src = slot.sources[0]
+    const src = slot.sources.find((s) => !isMeanSource(s))
     if (!src) return ''
     return keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
 }
@@ -76,6 +86,7 @@ export function traceResourceStatKeys(itemId: number, statIndex: number): string
     const slot = recipe?.statSlots[statIndex]
     if (!recipe || !slot) return []
     const keys = slot.sources.flatMap((src) => {
+        if (isMeanSource(src)) return []
         const input = recipe.inputs[src.inputIndex]
         return input ? traceResourceStatKeys(input.itemId, src.statIndex) : []
     })
@@ -154,7 +165,7 @@ export function usedInputStatKeys(outputItemId: number): string[][] {
     const usedIdx = recipe.inputs.map(() => new Set<number>())
     for (const slot of recipe.statSlots) {
         for (const src of slot.sources) {
-            usedIdx[src.inputIndex]?.add(src.statIndex)
+            if (!isMeanSource(src)) usedIdx[src.inputIndex]?.add(src.statIndex)
         }
     }
     return recipe.inputs.map((input, i) => {
@@ -212,9 +223,11 @@ export function computeComponentStats(
     const recipe = getRecipe(componentId)
     if (!recipe) return []
 
-    return recipe.statSlots.map((slot) => {
+    const keys = getItemStatKeys(componentId)
+    return recipe.statSlots.map((slot, i) => {
         const src = slot.sources[0]
-        const key = keyForStatSlot(recipe, slot)
+        const key = keys[i] ?? ''
+        if (src && isMeanSource(src)) return {key, value: STAT_MEAN}
         const input = src ? recipe.inputs[src.inputIndex] : undefined
         const inputItem = input ? getItem(input.itemId) : undefined
         if (!inputItem || inputItem.type !== 'resource' || !inputItem.category) {
@@ -242,20 +255,25 @@ export function computeEntityStats(
         blendedByComponent[Number(compId)] = blendComponentStacks(stacks)
     }
 
-    return recipe.statSlots.map((slot) => {
-        const slotKey = keyForStatSlot(recipe, slot)
+    const slotKeys = getItemStatKeys(itemId)
+    return recipe.statSlots.map((slot, i) => {
+        const slotKey = slotKeys[i] ?? ''
         if (slot.sources.length === 0) return {key: slotKey, value: 1}
-        let weightedSum = 0
-        let totalWeight = 0
+        let sum = 0
+        let count = 0
         for (const src of slot.sources) {
+            if (isMeanSource(src)) {
+                sum += STAT_MEAN
+                count++
+                continue
+            }
             const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
             const input = recipe.inputs[src.inputIndex]
             if (!input) continue
-            const weight = recipe.blendWeights?.[src.inputIndex] ?? 1
-            weightedSum += (blendedByComponent[input.itemId]?.[key] ?? 0) * weight
-            totalWeight += weight
+            sum += blendedByComponent[input.itemId]?.[key] ?? 0
+            count++
         }
-        const value = totalWeight > 0 ? Math.floor(weightedSum / totalWeight) : 0
+        const value = count > 0 ? Math.floor(sum / count) : 0
         return {key: slotKey, value: Math.max(1, Math.min(999, value))}
     })
 }
@@ -280,7 +298,9 @@ function decodeStackStats(itemId: number, stats: UInt64): Record<string, number>
         return decodeCraftedItemStats(itemId, BigInt(stats.toString()))
     }
     const s = BigInt(stats.toString())
-    return {stat1: decodeStat(s, 0), stat2: decodeStat(s, 1), stat3: decodeStat(s, 2)}
+    return Object.fromEntries(
+        Array.from({length: STAT_WORD_SLOTS}, (_, i) => [`stat${i + 1}`, decodeStat(s, i)])
+    )
 }
 
 export function computeInputMass(itemId: number): number {
@@ -393,48 +413,26 @@ export function computeCraftedOutputStats(
         blendedByItem[Number(id)] = blendComponentStacks(stacks)
     }
 
+    const sourceValue = (src: {inputIndex: number; statIndex: number}): number => {
+        if (isMeanSource(src)) return STAT_MEAN
+        const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
+        const input = recipe.inputs[src.inputIndex]
+        if (!input) return 0
+        const inputItem = getItem(input.itemId)
+        if (inputItem.type === 'resource' && inputItem.category) {
+            return blendStacks(decodedByCategory[inputItem.category] ?? [], key)
+        }
+        return blendedByItem[input.itemId]?.[key] ?? 0
+    }
+
     const out: number[] = []
     for (const slot of recipe.statSlots) {
         if (slot.sources.length === 0) {
             out.push(0)
             continue
         }
-        if (slot.sources.length === 1) {
-            const src = slot.sources[0]
-            const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
-            const input = recipe.inputs[src.inputIndex]
-            let value = 0
-            if (input) {
-                const inputItem = getItem(input.itemId)
-                if (inputItem.type === 'resource' && inputItem.category) {
-                    value = blendStacks(decodedByCategory[inputItem.category] ?? [], key)
-                } else {
-                    value = blendedByItem[input.itemId]?.[key] ?? 0
-                }
-            }
-            out.push(Math.max(1, Math.min(999, value)))
-        } else {
-            let weightedSum = 0
-            let totalWeight = 0
-            for (const src of slot.sources) {
-                const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
-                const input = recipe.inputs[src.inputIndex]
-                const weight = recipe.blendWeights[src.inputIndex] ?? 1
-                let value = 0
-                if (input) {
-                    const inputItem = getItem(input.itemId)
-                    if (inputItem.type === 'resource' && inputItem.category) {
-                        value = blendStacks(decodedByCategory[inputItem.category] ?? [], key)
-                    } else {
-                        value = blendedByItem[input.itemId]?.[key] ?? 0
-                    }
-                }
-                weightedSum += value * weight
-                totalWeight += weight
-            }
-            const blended = totalWeight > 0 ? Math.floor(weightedSum / totalWeight) : 0
-            out.push(Math.max(1, Math.min(999, blended)))
-        }
+        const sum = slot.sources.reduce((acc, src) => acc + sourceValue(src), 0)
+        out.push(Math.max(1, Math.min(999, Math.floor(sum / slot.sources.length))))
     }
     return UInt64.from(encodeStats(out))
 }
@@ -451,5 +449,7 @@ export function computeCraftedOutputStats(
  */
 export function encodeGatheredCargoStats(depositSeed: bigint): UInt64 {
     const raw = deriveResourceStats(depositSeed)
-    return UInt64.from(encodeStats([raw.stat1, raw.stat2, raw.stat3]))
+    return UInt64.from(
+        encodeStats([raw.stat1, raw.stat2, raw.stat3, STAT_MEAN, STAT_MEAN, STAT_MEAN])
+    )
 }

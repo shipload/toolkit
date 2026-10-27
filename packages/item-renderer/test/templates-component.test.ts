@@ -15,7 +15,6 @@ test('renderComponent ranges mode shows stat abbreviations with no values', () =
     const resolved = resolveItem(item.item_id)
     const svg = renderComponent(item, resolved, {mode: 'ranges'})
     expect(svg).toContain('STR')
-    expect(svg).toContain('DEN')
     expect(svg).not.toMatch(/>\d{3}<\/text>/)
     expect(svg).not.toContain('COMPONENT')
     expect(svg).toContain('Mass')

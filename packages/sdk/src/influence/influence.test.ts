@@ -79,7 +79,7 @@ describe('quality', () => {
     })
 
     test('a crafted component reports its recipe slot count', () => {
-        expect(getStatCount(ITEM_PLATE)).toBe(3)
+        expect(getStatCount(ITEM_PLATE)).toBe(6)
     })
 })
 

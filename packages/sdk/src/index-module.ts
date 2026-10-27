@@ -590,7 +590,10 @@ export {
     blendCrossGroup,
     computeInputMass,
     computeCraftedOutputStats,
+    STAT_SOURCE_MEAN,
+    isMeanSource,
 } from './derivation/crafting'
+export {STAT_MEAN, RESOURCE_STAT_COUNT, STAT_WORD_SLOTS} from './derivation/stratum'
 export type {StackInput, CategoryStacks, RecipeSlotInput, ItemStatSlot} from './derivation/crafting'
 
 export {
@@ -612,6 +615,7 @@ export {
     computeLoaderCapabilities,
     computeCrafterCapabilities,
     computeBuilderCapabilities,
+    withPositionalModuleStats,
     computeWarehouseHullCapabilities,
     computeDepotHullCapabilities,
     computeStorageCapabilities,

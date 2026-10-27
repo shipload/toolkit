@@ -1,6 +1,6 @@
 {
-  "catalog_hash": "ff8f34790f1945fb4f458cc5b9f84dd9ba1ebce970e1190d119d04c375f33243",
-  "generated_at": "2026-10-17T17:51:07.540Z",
+  "catalog_hash": "a7bc8bb5df36e9491b56e1dd16ac9db1d9682c874177ac9408589cb3822e3b2a",
+  "generated_at": "2026-10-26T23:49:51.870Z",
   "cases": [
     {
       "name": "ship-travel-step0",
@@ -767,8 +767,7 @@
             "item_id": 301,
             "stats": 0,
             "modules": [],
-            "quantity": 5,
-            "id": 0
+            "quantity": 5
           }
         ],
         "caps": {
@@ -883,7 +882,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -1021,7 +1020,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -1049,10 +1048,9 @@
         "cargo": [
           {
             "item_id": 401,
-            "stats": 335874213,
+            "stats": "240051105177077925",
             "modules": [],
-            "quantity": 1,
-            "id": 0
+            "quantity": 1
           }
         ],
         "caps": {
@@ -1168,7 +1166,7 @@
                     },
                     {
                       "item_id": 10001,
-                      "stats": 1049601,
+                      "stats": "240051105064768513",
                       "modules": [],
                       "quantity": 1
                     }
@@ -1205,8 +1203,7 @@
             "item_id": 101,
             "stats": 0,
             "modules": [],
-            "quantity": 10,
-            "id": 1000000
+            "quantity": 10
           }
         ],
         "caps": {
@@ -1322,7 +1319,7 @@
                     },
                     {
                       "item_id": 10001,
-                      "stats": 1049601,
+                      "stats": "240051105064768513",
                       "modules": [],
                       "quantity": 1
                     }
@@ -1357,10 +1354,9 @@
         "cargo": [
           {
             "item_id": 10001,
-            "stats": 1049601,
+            "stats": "240051105064768513",
             "modules": [],
-            "quantity": 1,
-            "id": 0
+            "quantity": 1
           }
         ],
         "caps": {
@@ -1625,8 +1621,7 @@
             "item_id": 101,
             "stats": 12345,
             "modules": [],
-            "quantity": 10,
-            "id": 1000000
+            "quantity": 10
           }
         ],
         "caps": {
@@ -1838,10 +1833,9 @@
         "cargo": [
           {
             "item_id": 401,
-            "stats": 335874213,
+            "stats": "240051105177077925",
             "modules": [],
-            "quantity": 1,
-            "id": 0
+            "quantity": 1
           }
         ],
         "modules": [
@@ -1936,7 +1930,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -1970,10 +1964,9 @@
         "cargo": [
           {
             "item_id": 401,
-            "stats": 335874213,
+            "stats": "240051105177077925",
             "modules": [],
-            "quantity": 2,
-            "id": 0
+            "quantity": 2
           }
         ],
         "modules": [
@@ -2068,7 +2061,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -2088,7 +2081,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -2212,7 +2205,7 @@
                   "cargo": [
                     {
                       "item_id": 401,
-                      "stats": 335874213,
+                      "stats": "240051105177077925",
                       "modules": [],
                       "quantity": 1
                     }
@@ -2246,10 +2239,9 @@
         "cargo": [
           {
             "item_id": 10001,
-            "stats": 1049601,
+            "stats": "240051105064768513",
             "modules": [],
-            "quantity": 1,
-            "id": 0
+            "quantity": 1
           }
         ],
         "modules": [
@@ -2345,7 +2337,7 @@
                     },
                     {
                       "item_id": 10001,
-                      "stats": 1049601,
+                      "stats": "240051105064768513",
                       "modules": [],
                       "quantity": 1
                     }

@@ -289,7 +289,6 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
             expect(predecessors.length).toBe(1)
             expect(predecessors[0].input.quantity).toBe(1)
             expect(getItem(predecessors[0].input.itemId).tier).toBeLessThanOrEqual(2)
-            expect(recipe.blendWeights).toEqual([])
             for (const slot of recipe.statSlots) {
                 expect(slot.sources.length).toBe(2)
                 expect(
@@ -437,11 +436,10 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
         }
     })
 
-    test('WP-CP-20-t1 T1 has 10 components of two shapes and 10 craftable modules of 600 components each', () => {
+    test('WP-CP-20-t1 T1 has 10 single-input components and 10 craftable modules of 600 components each', () => {
         const components = outputsOf('component', 1)
-        const singleInput = components.filter((id) => getRecipe(id)!.inputs.length === 1)
-        expect(singleInput.length).toBe(5)
-        expect(components.length - singleInput.length).toBe(5)
+        expect(components.length).toBe(10)
+        for (const id of components) expect(getRecipe(id)!.inputs.length).toBe(1)
         const modules = outputsOf('module', 1)
         expect(modules.length).toBe(10)
         for (const id of modules) {

@@ -78,21 +78,27 @@ test('computeCraftedOutputStats agrees with computeEntityStats for the donor ble
     }
 })
 
-test('getItemStatSlots names a blended module slot after every source stat', () => {
+test('getItemStatSlots names a blended slot after every live source stat', () => {
+    const slot = getItemStatSlots(ITEM_PROSPECTOR_T1A_PACKED).find((s) => s.index === 2)!
+    expect(slot.label).toBe('Saturation + Plasticity')
+    expect(slot.abbreviation).toBe('SAT+PLA')
+    expect(slot.key).toBe('saturation')
+})
+
+test('getItemStatSlots drops a source held at the mean from the label', () => {
     const slots = getItemStatSlots(ITEM_ENGINE_T1)
-    expect(slots.map((s) => s.label)).toEqual(['Volatility + Reactivity', 'Thermal'])
-    expect(slots.map((s) => s.abbreviation)).toEqual(['VOL+REA', 'THM'])
-    expect(slots[0].key).toBe('volatility')
+    expect(slots.map((s) => s.label)).toEqual(['Volatility', 'Thermal'])
 })
 
 test('getItemStatSlots keeps a single-source slot to its one stat', () => {
     const slots = getItemStatSlots(ITEM_PLASMA_CELL)
-    expect(slots.map((s) => s.label)).toEqual(['Volatility', 'Thermal', 'Reactivity'])
+    expect(slots.map((s) => s.label)).toEqual(['Volatility', 'Reactivity', 'Thermal'])
 })
 
 test('getItemStatSlots leads each slot with the stat that keys it', () => {
     for (const recipe of getAllRecipes()) {
         for (const slot of getItemStatSlots(recipe.outputItemId)) {
+            if (!slot.sources.some((s) => s.key === slot.key)) continue
             expect(slot.sources[0].key, String(recipe.outputItemId)).toBe(slot.key)
         }
     }

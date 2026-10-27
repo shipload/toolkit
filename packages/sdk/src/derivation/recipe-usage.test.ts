@@ -9,7 +9,6 @@ import {
     ITEM_SENSOR,
     ITEM_SENSOR_T2,
     ITEM_RESIN,
-    ITEM_FRAME,
     ITEM_PLATE,
     ITEM_BEAM,
     ITEM_GATHERER_T1,
@@ -37,14 +36,14 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     )
 })
 
-test('Frame feeds the gatherer drain stat', () => {
-    const consumers = getRecipeConsumers(ITEM_FRAME)
+test('Beam feeds the gatherer yield stat', () => {
+    const consumers = getRecipeConsumers(ITEM_BEAM)
     const gatherer = consumers.find((c) => c.outputItemId === ITEM_GATHERER_T1)
     expect(gatherer).toBeDefined()
-    const drain = gatherer?.statFlows.find(
-        (f) => f.capability === 'Gathering' && f.attribute === 'drain'
+    const yieldFlow = gatherer?.statFlows.find(
+        (f) => f.capability === 'Gathering' && f.attribute === 'yield'
     )
-    expect(drain).toBeDefined()
+    expect(yieldFlow).toBeDefined()
 })
 
 test('Sensor is a mass-only sink in the Extractor recipe', () => {
@@ -58,18 +57,12 @@ test('getResourceDemand returns the resource tonnage for a single-resource compo
     expect(getResourceDemand(ITEM_PLATE)).toEqual({ore: 10})
 })
 
-test('getResourceDemand traces a dual-resource component to both resources', () => {
-    expect(getResourceDemand(ITEM_BEAM)).toEqual({ore: 5, gas: 5})
+test('getResourceDemand traces a Machined component to its one resource', () => {
+    expect(getResourceDemand(ITEM_BEAM)).toEqual({ore: 10})
 })
 
 test('getResourceDemand recurses through a module to raw resources', () => {
-    // Gatherer = 300 Beam (5 ore + 5 gas each) + 300 Frame (5 regolith + 5 biomass each)
-    expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({
-        ore: 1500,
-        gas: 1500,
-        regolith: 1500,
-        biomass: 1500,
-    })
+    expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({ore: 3000, regolith: 3000})
 })
 
 test('getResourceDemand scales by quantity', () => {

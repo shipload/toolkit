@@ -477,6 +477,26 @@ export type ModuleCapabilities =
 
 export type ModuleCapabilityKind = ModuleCapabilities['kind']
 
+export function withPositionalModuleStats(
+    itemId: number,
+    stats: bigint,
+    decoded: Record<string, number>
+): Record<string, number> {
+    switch (getModuleCapabilityType(itemId)) {
+        case MODULE_GATHERER:
+            return {
+                ...decoded,
+                strength: decodeStat(stats, 0),
+                tolerance: decodeStat(stats, 1),
+                saturation: decodeStat(stats, 2),
+            }
+        case MODULE_CRAFTER:
+            return {...decoded, fineness: decodeStat(stats, 0), conductivity: decodeStat(stats, 1)}
+        default:
+            return decoded
+    }
+}
+
 export function computeModuleCapabilities(
     itemId: number,
     stats: bigint,
@@ -485,7 +505,11 @@ export function computeModuleCapabilities(
     const modType = getModuleCapabilityType(itemId)
     if (modType === 0xff) return undefined
     const tier = getItem(itemId).tier
-    const decodedStats = decodeCraftedItemStats(itemId, stats)
+    const decodedStats = withPositionalModuleStats(
+        itemId,
+        stats,
+        decodeCraftedItemStats(itemId, stats)
+    )
 
     switch (modType) {
         case MODULE_ENGINE: {
@@ -507,14 +531,7 @@ export function computeModuleCapabilities(
             }
         }
         case MODULE_GATHERER: {
-            const caps = computeGathererCapabilities(
-                {
-                    strength: decodeStat(stats, 0),
-                    tolerance: decodeStat(stats, 1),
-                    saturation: decodeStat(stats, 2),
-                },
-                tier
-            )
+            const caps = computeGathererCapabilities(decodedStats, tier)
             return {
                 kind: 'gatherer',
                 tier,

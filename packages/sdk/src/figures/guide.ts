@@ -98,11 +98,25 @@ export function getModuleFigureSources(itemId: number): FigureSource[] | undefin
     })
 }
 
-function resourceBaseline(itemId: number, packed: bigint): Record<string, number> {
+export function resourceBaseline(itemId: number, packed: bigint): Record<string, number> {
     const values = decodeStats(packed, getItemStatKeys(itemId).length)
     const baseline: Record<string, number> = {}
     for (const [index, value] of values.entries()) {
-        for (const key of traceResourceStatKeys(itemId, index)) baseline[key] ??= value
+        const keys = traceResourceStatKeys(itemId, index).filter((key) => !(key in baseline))
+        if (keys.length === 0) continue
+        const slotAt = (x: number) =>
+            computeStatsFromResources(itemId, {
+                ...baseline,
+                ...Object.fromEntries(keys.map((key) => [key, x])),
+            })[index]
+        let lo = 1
+        let hi = 999
+        while (lo < hi) {
+            const mid = Math.floor((lo + hi) / 2)
+            if (slotAt(mid) < value) lo = mid + 1
+            else hi = mid
+        }
+        for (const key of keys) baseline[key] = lo
     }
     return baseline
 }

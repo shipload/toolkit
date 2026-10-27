@@ -26,7 +26,7 @@ describe("formatItemStats", () => {
 describe("formatItemStats components", () => {
 	test("labels component stats with the abbreviation of each slot", () => {
 		expect(formatItemStats(ITEM_PLASMA_CELL, encodeStats([500, 400, 300]))).toBe(
-			"VOL 500 / THM 400 / REA 300",
+			"VOL 500 / REA 400 / THM 300",
 		);
 	});
 });

@@ -29,7 +29,11 @@ import {
 import {registerMockItem} from '../item-mock'
 import {makeShipFixture, makeTask} from '../helpers'
 
-function getStack(cargo: CargoStack[], item_id: number, stats?: number): CargoStack | undefined {
+function getStack(
+    cargo: CargoStack[],
+    item_id: number,
+    stats?: number | string
+): CargoStack | undefined {
     const statsKey = stats === undefined ? '0' : String(stats)
     return cargo.find((s) => s.item_id.toNumber() === item_id && s.stats.toString() === statsKey)
 }
@@ -862,7 +866,7 @@ describe('projection — anchor identity', () => {
                     getStack(
                         projected.cargo,
                         stack.item_id.toNumber(),
-                        Number(stack.stats)
+                        stack.stats.toString()
                     )?.quantity.toNumber(),
                     stack.quantity.toNumber(),
                     `item ${stack.item_id} doubled at the anchor`

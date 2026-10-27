@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {
+    ITEM_BEAM,
     ITEM_CRAFTER_T1,
     ITEM_GENERATOR_T1,
     ITEM_RESONATOR,
@@ -79,18 +80,17 @@ describe('maxCraftable', () => {
     test('matches factory-12 craftable capacity with and without a pending craft', () => {
         const recipe = getRecipe(ITEM_RESONATOR)!
 
-        expect(maxCraftable(fixture(false), recipe, CRAFTER_SPEED, NOW)).toBe(673)
-        expect(maxCraftable(fixture(true), recipe, CRAFTER_SPEED, NOW)).toBe(672)
+        expect(maxCraftable(fixture(false), recipe, CRAFTER_SPEED, NOW)).toBe(360)
+        expect(maxCraftable(fixture(true), recipe, CRAFTER_SPEED, NOW)).toBe(359)
     })
 
     test('counts completed-but-unsettled crafts as already spent (cargo drained to 3x 101)', () => {
-        const recipe = getRecipe(ITEM_RESONATOR)!
+        const recipe = getRecipe(ITEM_BEAM)!
         expect(maxCraftable(factory12(), recipe, FACTORY_12_CRAFTER_SPEED, FACTORY_12_NOW)).toBe(0)
     })
 
     test('credits an in-transit load by delaying the craft until inputs are ready', () => {
-        const recipe = getRecipe(ITEM_RESONATOR)!
-        // Symmetric 5+5 recipe makes crystal (201) the binding input here: 271 craftable.
+        const recipe = getRecipe(ITEM_BEAM)!
         expect(
             maxCraftable(
                 factory12({incomingLoad: true}),
@@ -98,6 +98,6 @@ describe('maxCraftable', () => {
                 FACTORY_12_CRAFTER_SPEED,
                 FACTORY_12_NOW
             )
-        ).toBe(271)
+        ).toBe(182)
     })
 })

@@ -100,13 +100,13 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            assert.equal(stats.length, 3)
+            assert.equal(stats.length, 6)
             const str = stats.find((s) => s.key === 'strength')
             const den = stats.find((s) => s.key === 'density')
             const tol = stats.find((s) => s.key === 'tolerance')
             assert.equal(str!.value, 517)
-            assert.equal(den!.value, 262)
-            assert.equal(tol!.value, 250)
+            assert.equal(den!.value, 213)
+            assert.equal(tol!.value, 213)
         })
 
         test('resin from biomass stacks blends weighted average', () => {
@@ -125,17 +125,16 @@ describe('Crafting', () => {
                     ],
                 },
             ])
-            assert.equal(stats.length, 3)
+            assert.equal(stats.length, 6)
             const sat = stats.find((s) => s.key === 'saturation')
             const pla = stats.find((s) => s.key === 'plasticity')
             const ins = stats.find((s) => s.key === 'insulation')
             assert.equal(sat!.value, 560)
-            assert.equal(pla!.value, 560)
-            assert.equal(ins!.value, 560)
+            assert.equal(pla!.value, 213)
+            assert.equal(ins!.value, 213)
         })
 
         test('frame from regolith (single-source)', () => {
-            // Recipe 10002 statSlots: [regolith hardness, regolith cohesion, regolith fineness, biomass saturation].
             const stats = computeComponentStats(ITEM_FRAME, [
                 {
                     category: 'regolith',
@@ -146,22 +145,16 @@ describe('Crafting', () => {
                         },
                     ],
                 },
-                {
-                    category: 'biomass',
-                    stacks: [
-                        {quantity: 20, stats: {plasticity: 400, insulation: 200, saturation: 800}},
-                    ],
-                },
             ])
-            assert.equal(stats.length, 4)
-            const hard = stats.find((s) => s.key === 'hardness')
-            const comp = stats.find((s) => s.key === 'cohesion')
-            const fin = stats.find((s) => s.key === 'fineness')
-            const sat = stats.find((s) => s.key === 'saturation')
-            assert.equal(hard!.value, 200)
-            assert.equal(comp!.value, 500)
-            assert.equal(fin!.value, 700)
-            assert.equal(sat!.value, 800)
+            assert.equal(stats.length, 6)
+            assert.deepEqual(
+                stats.map((s) => s.value),
+                [213, 213, 700, 213, 213, 213]
+            )
+            assert.deepEqual(
+                stats.slice(0, 3).map((s) => s.key),
+                ['cohesion', 'hardness', 'fineness']
+            )
         })
     })
 
@@ -182,7 +175,7 @@ describe('Crafting', () => {
 
     describe('Decode Crafted Item', () => {
         test('decode plate seed', () => {
-            const seed = encodeStats([450, 300])
+            const seed = encodeStats([450, 213, 300])
             const stats = decodeCraftedItemStats(ITEM_PLATE, seed)
             assert.equal(stats['strength'], 450)
             assert.equal(stats['density'], 300)
@@ -297,73 +290,29 @@ describe('Crafting', () => {
             assert.equal(decoded['thermal'], thm)
         })
 
-        test('multi-input multi-category component (Frame from regolith + biomass)', () => {
+        test('single-input component holds the mean outside its live slot (Frame from regolith)', () => {
             const regolithSeed = 0x1111222233334444n
-            const biomassSeed = 0xaaaabbbbccccddddn
             const slotInputs: RecipeSlotInput[] = [
                 {
                     itemId: 200,
                     category: 'regolith',
                     stacks: [{quantity: 10, stats: regolithSeed}],
                 },
-                {
-                    itemId: 500,
-                    category: 'biomass',
-                    stacks: [{quantity: 20, stats: biomassSeed}],
-                },
             ]
             const outputStats = computeCraftedOutputStats(ITEM_FRAME, slotInputs)
-
-            const rawR = {
-                stat1: decodeStat(regolithSeed, 0),
-                stat2: decodeStat(regolithSeed, 1),
-                stat3: decodeStat(regolithSeed, 2),
-            }
-            const rawB = {
-                stat1: decodeStat(biomassSeed, 0),
-                stat2: decodeStat(biomassSeed, 1),
-                stat3: decodeStat(biomassSeed, 2),
-            }
-            const expectedStats = computeComponentStats(ITEM_FRAME, [
-                {
-                    category: 'regolith',
-                    stacks: [
-                        {
-                            quantity: 10,
-                            stats: {
-                                cohesion: rawR.stat1,
-                                hardness: rawR.stat2,
-                                fineness: rawR.stat3,
-                            },
-                        },
-                    ],
-                },
-                {
-                    category: 'biomass',
-                    stacks: [
-                        {
-                            quantity: 20,
-                            stats: {
-                                plasticity: rawB.stat1,
-                                insulation: rawB.stat2,
-                                saturation: rawB.stat3,
-                            },
-                        },
-                    ],
-                },
+            assert.deepEqual(decodeStats(BigInt(outputStats.toString()), 6), [
+                213,
+                213,
+                Math.max(1, decodeStat(regolithSeed, 2)),
+                213,
+                213,
+                213,
             ])
-            const decoded = decodeCraftedItemStats(ITEM_FRAME, BigInt(outputStats.toString()))
-            const hard = expectedStats.find((s) => s.key === 'hardness')!.value
-            const comp = expectedStats.find((s) => s.key === 'cohesion')!.value
-            assert.equal(decoded['hardness'], hard)
-            assert.equal(decoded['cohesion'], comp)
-            assert.equal(decoded['hardness'], rawR.stat2)
-            assert.equal(decoded['cohesion'], rawR.stat1)
         })
 
         test('entity recipe (Container packed from plate + frame)', () => {
-            const hullSeedA = encodeStats([500, 300])
-            const hullSeedB = encodeStats([700, 400])
+            const hullSeedA = encodeStats([500, 213, 300])
+            const hullSeedB = encodeStats([700, 213, 400])
             const liningSeed = encodeStats([600, 800])
 
             const slotInputs: RecipeSlotInput[] = [

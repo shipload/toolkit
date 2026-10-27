@@ -16,7 +16,7 @@ test('renderWhereUsed shows the fabricator drain flow', () => {
 test('renderWhereUsed marks a mass-only consumer as a sink', () => {
     const out = renderWhereUsed(ITEM_REACTOR, getRecipeConsumers(ITEM_REACTOR))
     expect(out).toContain('Reactor')
-    expect(out).toContain('1 sink-only')
+    expect(out).toContain('2 sink-only')
     expect(out).toMatch(/Warp Drive.*sink|sink.*Warp Drive/s)
 })
 

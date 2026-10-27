@@ -17,7 +17,6 @@ export interface Recipe {
     outputMass: number
     inputs: RecipeInput[]
     statSlots: StatSlot[]
-    blendWeights: number[]
     sourceSubclasses?: number[]
 }
 

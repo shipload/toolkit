@@ -128,9 +128,15 @@ export function deriveResourceStats(seed: bigint): ResourceStats {
     }
 }
 
+export const STAT_CURVE_SCALE = 0.24
+const GAMMA_ONE_HALF = 0.886226925452758
+export const STAT_MEAN = Math.trunc(999 * STAT_CURVE_SCALE * GAMMA_ONE_HALF + 1)
+export const RESOURCE_STAT_COUNT = 3
+export const STAT_WORD_SLOTS = 6
+
 export function resourceStatFromRaw(raw: number): number {
     const u = raw / 4294967296
-    let x = 0.24 * Math.sqrt(-Math.log(1 - u))
+    let x = STAT_CURVE_SCALE * Math.sqrt(-Math.log(1 - u))
     if (x > 1) x = 1
     let val = Math.floor(x * 999) + 1
     if (val > 999) val = 999

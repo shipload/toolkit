@@ -34,6 +34,7 @@ import {
     computeBaseCapacity,
     computeBaseHullmassFromStats,
     computeStorageCapabilities,
+    withPositionalModuleStats,
 } from '../derivation/capabilities'
 import {applySlotMultiplierUint32} from '../entities/slot-multiplier'
 import {toWholeEnergy} from '../nft/description'
@@ -266,12 +267,12 @@ function computeCapabilityGroup(
 // Recipe-less higher-tier modules reuse the T1 stat layout of their module type.
 function decodeModuleStats(id: number, big: bigint): Record<string, number> {
     const decoded = decodeCraftedItemStats(id, big)
-    if (Object.keys(decoded).length > 0) return decoded
+    if (Object.keys(decoded).length > 0) return withPositionalModuleStats(id, big, decoded)
     const moduleType = getItem(id).moduleType
     if (!moduleType) return decoded
     const t1 = getModules({moduleType, tier: 1})[0]
     if (!t1) return decoded
-    return decodeCraftedItemStats(Number(t1.id), big)
+    return withPositionalModuleStats(id, big, decodeCraftedItemStats(Number(t1.id), big))
 }
 
 function resolveModule(id: number, stats?: UInt64Type): ResolvedItem {

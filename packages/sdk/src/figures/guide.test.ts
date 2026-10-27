@@ -24,6 +24,7 @@ import {CATEGORY_LABELS, type ResourceCategory} from '../types'
 import {
     gatherFromFigures,
     getModuleFigureSources,
+    resourceBaseline,
     STAT_HIGH,
     STAT_LOW,
     sweepModuleFigures,
@@ -88,15 +89,11 @@ function moduleItemIds(): number[] {
 
 describe('getModuleFigureSources', () => {
     test('one figure per activity', () => {
-        expect(sourcesOf(ITEM_ENGINE_T1, 'drain')).toEqual(['Volatility', 'Reactivity', 'Thermal'])
+        expect(sourcesOf(ITEM_ENGINE_T1, 'drain')).toEqual(['Volatility'])
         expect(sourcesOf(ITEM_GENERATOR_T1, 'recharge')).toEqual(['Reflectivity'])
-        expect(sourcesOf(ITEM_GATHERER_T1, 'yield')).toEqual(['Strength', 'Density'])
-        expect(sourcesOf(ITEM_CRAFTER_T1, 'speed')).toEqual(['Fineness', 'Cohesion'])
-        expect(sourcesOf(ITEM_LOADER_T1, 'transfer')).toEqual([
-            'Insulation',
-            'Plasticity',
-            'Saturation',
-        ])
+        expect(sourcesOf(ITEM_GATHERER_T1, 'yield')).toEqual(['Density'])
+        expect(sourcesOf(ITEM_CRAFTER_T1, 'speed')).toEqual([])
+        expect(sourcesOf(ITEM_LOADER_T1, 'transfer')).toEqual(['Plasticity'])
         expect(sourcesOf(ITEM_LOADER_T1, 'shuttles')).toEqual([])
     })
 
@@ -137,22 +134,20 @@ describe('sweepModuleFigures', () => {
     const rowAt = (values: number[], key: string) =>
         getModuleFigures(ITEM_ENGINE_T1, encodeStats(values))!.rows.find((r) => r.key === key)!
 
-    test('Engine Speed against its volatility and reactivity', () => {
+    test('Engine Speed against its volatility', () => {
         const speed = sweepModuleFigures(ITEM_ENGINE_T1, STARTER)!.find((s) => s.key === 'speed')!
         expect(speed.current.text).toBe('38 ly/hr')
         expect(speed.sweeps.map((s) => [s.stat.label, s.low.text, s.high.text])).toEqual([
             ['Volatility', '35 ly/hr', '42 ly/hr'],
-            ['Reactivity', '35 ly/hr', '42 ly/hr'],
         ])
-        expect(speed.sweeps.map((s) => s.stat.category)).toEqual(['gas', 'gas'])
+        expect(speed.sweeps.map((s) => s.stat.category)).toEqual(['gas'])
     })
 
     test('holds the other stats at the sample', () => {
         const drain = sweepModuleFigures(ITEM_ENGINE_T1, STARTER)!.find((s) => s.key === 'drain')!
         const volatility = drain.sweeps.find((s) => s.stat.key === 'volatility')!
-        const thermal = drain.sweeps.find((s) => s.stat.key === 'thermal')!
         expect(volatility.high).toEqual(rowAt([606, 213], 'drain'))
-        expect(thermal.high).toEqual(rowAt([213, 999], 'drain'))
+        expect(drain.sweeps.map((s) => s.stat.key)).toEqual(['volatility'])
     })
 
     test('sweeps from explicit resource stats', () => {
@@ -161,29 +156,18 @@ describe('sweepModuleFigures', () => {
             reactivity: 400,
             thermal: 500,
         })!.find((s) => s.key === 'speed')!
-        const reactivity = speed.sweeps.find((s) => s.stat.key === 'reactivity')!
-        expect(reactivity.high).toEqual(rowAt([799, 500], 'speed'))
+        const volatility = speed.sweeps.find((s) => s.stat.key === 'volatility')!
+        expect(volatility.low).toEqual(rowAt([107, 213], 'speed'))
     })
 
     test('starts every sweep from resources that reproduce the packed stats', () => {
         for (const id of moduleItemIds()) {
-            const count = getItemStatKeys(id).length
-            const samples = [
-                Array(count).fill(213),
-                Array(count).fill(STAT_LOW),
-                Array(count).fill(STAT_HIGH),
-                Array.from({length: count}, (_, i) => (((i + 1) * 337) % 998) + 1),
-            ]
-            for (const values of samples) {
+            for (const sample of [213, STAT_LOW, STAT_HIGH, 640]) {
+                const resources = Object.fromEntries(RESOURCE_KEYS.map((key) => [key, sample]))
+                const values = computeStatsFromResources(id, resources)
                 const packed = encodeStats(values)
-                const baseline: Record<string, number> = {}
-                values.forEach((value, i) => {
-                    for (const key of traceResourceStatKeys(id, i)) baseline[key] ??= value
-                })
-                expect({id, values: computeStatsFromResources(id, baseline)}).toEqual({
-                    id,
-                    values: decodeStats(packed, count),
-                })
+                const baseline = resourceBaseline(id, packed)
+                expect({id, values: computeStatsFromResources(id, baseline)}).toEqual({id, values})
                 const sweeps = sweepModuleFigures(id, packed)!
                 expect(sweeps.map((s) => s.current)).toEqual(getModuleFigures(id, packed)!.rows)
                 for (const figure of sweeps) {
