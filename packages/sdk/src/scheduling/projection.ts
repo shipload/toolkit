@@ -16,7 +16,6 @@ import {
     ENTITY_CARGO_NOT_LOADED,
 } from '../errors'
 import {getEntityLayout, getRecipe, type RecipeInput} from '../data/recipes-runtime'
-import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {computeEntityCapabilities, computeLoaderDockedMass} from '../derivation/capabilities'
 import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
@@ -119,21 +118,17 @@ function recomputeCaps(entity: Projectable): ProjectedCaps | undefined {
     const itemId = Number(
         typeof entity.item_id === 'number' ? entity.item_id : entity.item_id.value
     )
-    const hullStats = decodeCraftedItemStats(itemId, entity.stats)
     const shipHull = getPackedEntityType(itemId)?.equals(ENTITY_SHIP) ?? false
-    if (hullStats.strength === undefined) hullStats.strength = decodeStat(entity.stats, 0)
-    if (hullStats.hardness === undefined) hullStats.hardness = decodeStat(entity.stats, 2)
-    // Non-ship hullmass is positional on slot 1 (compute_capabilities.cpp:138); a ship sums all five, so naming slot 1 twice would double-count it.
-    if (!shipHull && hullStats.density === undefined) {
-        hullStats.density = decodeStat(entity.stats, 1)
-    }
-    // The retired Ship T1 recipe only assigned names to its first two stat slots.
-    // Its on-chain entity row still carries five packed channels, and the ship hull
-    // formula deliberately consumes all five. Keep the unlabelled channels internal
-    // to projection so replay remains contract-parity until deployment replaces it.
-    if (itemId === ITEM_SHIP_T1_PACKED) {
-        hullStats.__legacyShipChannel3 = decodeStat(entity.stats, 3)
-        hullStats.__legacyShipChannel4 = decodeStat(entity.stats, 4)
+    // A ship sums its five packed channels positionally, whatever names its recipe gives them.
+    const hullStats = shipHull
+        ? Object.fromEntries(
+              [0, 1, 2, 3, 4].map((slot) => [`channel${slot}`, decodeStat(entity.stats!, slot)])
+          )
+        : decodeCraftedItemStats(itemId, entity.stats)
+    if (!shipHull) {
+        if (hullStats.strength === undefined) hullStats.strength = decodeStat(entity.stats, 0)
+        if (hullStats.hardness === undefined) hullStats.hardness = decodeStat(entity.stats, 2)
+        if (hullStats.density === undefined) hullStats.density = decodeStat(entity.stats, 1)
     }
     const layout = getEntityLayout(itemId)?.slots ?? []
     const installed = toInstalledModules(entity.modules)

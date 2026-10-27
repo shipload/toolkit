@@ -1521,7 +1521,7 @@
           "type": "uint16"
         },
         {
-          "name": "hardness",
+          "name": "cohesion",
           "type": "uint16"
         },
         {
@@ -1529,23 +1529,11 @@
           "type": "uint16"
         },
         {
-          "name": "saturation",
-          "type": "uint16"
-        },
-        {
           "name": "volatility",
           "type": "uint16"
         },
         {
-          "name": "reactivity",
-          "type": "uint16"
-        },
-        {
           "name": "conductivity",
-          "type": "uint16"
-        },
-        {
-          "name": "resonance",
           "type": "uint16"
         },
         {

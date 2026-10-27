@@ -112,7 +112,7 @@ describe('computeEntitySheet on a starter Prospector', () => {
         )
         expect(total.value).toBe(caps.hullmass / 10)
         expect(total.breakdown?.map((l) => [l.label, l.text])).toEqual([
-            ['Hull', '3,931 t'],
+            ['Hull', '3,717 t'],
             ['Modules', '2,880 t'],
             ['Cargo', '0 t'],
         ])
@@ -282,8 +282,8 @@ describe('previewModuleFit', () => {
             s.rows.map((r) => [r.label, r.before?.text, r.after?.text, r.headline, r.changed]),
         ])
         expect(summary).toEqual([
-            ['movement', [['Speed', '41 ly/hr', '41 ly/hr', true, false]]],
-            ['mass', [['Total', '7,280 t', '7,280 t', true, false]]],
+            ['movement', [['Speed', '42 ly/hr', '42 ly/hr', true, false]]],
+            ['mass', [['Total', '7,040 t', '7,040 t', true, false]]],
             [
                 'energy',
                 [

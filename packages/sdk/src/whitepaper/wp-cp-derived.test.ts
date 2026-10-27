@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test'
 import {getItem, itemIds} from '../data/catalog'
+import {getComponentProcess} from '../data/component-process'
 import {
     ALL_ENTITY_TYPES,
     ENTITY_SHIP,
@@ -104,9 +105,9 @@ describe('WP-CP-01 and WP-CP-03: mass conservation', () => {
         }
     })
 
-    test('WP-CP-01-ship the Roustabout hull weighs more than the components it takes', () => {
+    test('WP-CP-01-ship the Roustabout hull weighs 3,200 t from 3,600 t of components', () => {
         const roustabout = 10210
-        expect(tonnes(inputMass(roustabout))).toBe(3000)
+        expect(tonnes(inputMass(roustabout))).toBe(3600)
         expect(tonnes(getRecipe(roustabout)!.outputMass)).toBe(3200)
     })
 
@@ -156,19 +157,19 @@ describe('WP-CP-02: end-to-end keep and burn', () => {
         }
     })
 
-    test('WP-CP-02-hull the Roustabout hull keeps 3,200 t of 7,500 t of resources', () => {
-        expect(tonnes(rawResourceMass(10210))).toBe(7500)
+    test('WP-CP-02-hull the Roustabout hull keeps 3,200 t of 9,000 t of resources', () => {
+        expect(tonnes(rawResourceMass(10210))).toBe(9000)
         expect(tonnes(getRecipe(10210)!.outputMass)).toBe(3200)
     })
 
-    test('WP-CP-02-specialist a specialist hull keeps 4,400 t of 15,000 t, counting its Roustabout donor', () => {
+    test('WP-CP-02-specialist a specialist hull keeps 4,160 t of 15,000 t, counting its Roustabout donor', () => {
         for (const id of shipRecipes().filter((i) => rungOf(i) === 1.5)) {
             expect(tonnes(rawResourceMass(id))).toBe(15000)
-            expect(tonnes(getRecipe(id)!.outputMass)).toBe(4400)
+            expect(tonnes(getRecipe(id)!.outputMass)).toBe(4160)
         }
     })
 
-    test('WP-CP-02-fit a fully fit Roustabout keeps 6,080 t of 25,500 t and a fully fit specialist 7,280 t of 33,000 t', () => {
+    test('WP-CP-02-fit a fully fit Roustabout keeps 6,080 t of 27,000 t and a fully fit specialist 7,040 t of 33,000 t', () => {
         const fitted = (id: number) => {
             const sockets = getEntityLayout(id)!.slots.length
             const module = outputsOf('module', 1)[0]
@@ -178,18 +179,18 @@ describe('WP-CP-02: end-to-end keep and burn', () => {
             }
         }
         const roustabout = fitted(10210)
-        expect(tonnes(roustabout.raw)).toBe(25500)
+        expect(tonnes(roustabout.raw)).toBe(27000)
         expect(tonnes(roustabout.kept)).toBe(6080)
-        expect(roustabout.kept / roustabout.raw).toBeCloseTo(0.2384, 4)
-        expect(tonnes(roustabout.raw - roustabout.kept)).toBe(19420)
+        expect(roustabout.kept / roustabout.raw).toBeCloseTo(0.2252, 4)
+        expect(tonnes(roustabout.raw - roustabout.kept)).toBe(20920)
 
         const specialists = shipRecipes().filter((i) => rungOf(i) === 1.5)
         expect(specialists.length).toBe(6)
         for (const id of specialists) {
             const s = fitted(id)
             expect(tonnes(s.raw)).toBe(33000)
-            expect(tonnes(s.kept)).toBe(7280)
-            expect(s.kept / s.raw).toBeCloseTo(0.2206, 4)
+            expect(tonnes(s.kept)).toBe(7040)
+            expect(s.kept / s.raw).toBeCloseTo(0.2133, 4)
         }
     })
 
@@ -266,7 +267,7 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
         }
     })
 
-    test('WP-CP-07-predecessor each T2 module, ship and container takes one predecessor and blends every stat 50/50', () => {
+    test('WP-CP-07-predecessor each T2 module, ship and container takes one predecessor; a module or container blends every stat 50/50 and a ship blends its step channels and carries the rest', () => {
         const isKind = (id: number, kind: string) => getPackedEntityType(id)?.toString() === kind
         const t2 = recipeIds.filter(
             (id) =>
@@ -290,7 +291,8 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
             expect(predecessors[0].input.quantity).toBe(1)
             expect(getItem(predecessors[0].input.itemId).tier).toBeLessThanOrEqual(2)
             for (const slot of recipe.statSlots) {
-                expect(slot.sources.length).toBe(2)
+                if (isShipItem(id)) expect(slot.sources.length).toBeLessThanOrEqual(2)
+                else expect(slot.sources.length).toBe(2)
                 expect(
                     slot.sources.filter((s) => s.inputIndex === predecessors[0].index).length
                 ).toBe(1)
@@ -323,21 +325,21 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
         for (const id of shipRecipes()) expect(getItem(id).tier).toBeLessThanOrEqual(2)
     })
 
-    test('WP-CP-10-step-cost each ship step takes 150 x 1.2^(t-1) of five components rounded to 25', () => {
+    test('WP-CP-10-step-cost a First step takes three Refined parts and a Second step two, 300 of each at T1 and 350 at T2', () => {
         for (const id of shipRecipes()) {
-            const tier = getItem(id).tier
-            const expected = Math.round((150 * 1.2 ** (tier - 1)) / 25) * 25
+            const expected = getItem(id).tier === 1 ? 300 : 350
             const parts = getRecipe(id)!.inputs.filter(
                 (i) => getItem(i.itemId).type === 'component'
             )
-            expect(parts.length).toBe(5)
-            for (const part of parts) expect(part.quantity).toBe(expected)
+            expect(parts.length).toBe(Number.isInteger(rungOf(id)) ? 3 : 2)
+            for (const part of parts) {
+                expect(part.quantity).toBe(expected)
+                expect(getComponentProcess(part.itemId)).toBe('refined')
+            }
         }
-        expect(Math.round(150 / 25) * 25).toBe(150)
-        expect(Math.round((150 * 1.2) / 25) * 25).toBe(175)
     })
 
-    test('WP-CP-10-tonnage a component costs 10 + 2(t-1) t, so a step takes 1,500 t then 2,100 t of each of five resources', () => {
+    test('WP-CP-10-tonnage a component costs 10 + 2(t-1) t, so a step takes 3,000 t then 4,200 t of each resource it draws on', () => {
         for (const id of recipeIds.filter((i) => getItem(i).type === 'component')) {
             expect(tonnes(inputMass(id))).toBe(10 + 2 * (getItem(id).tier - 1))
         }
@@ -354,14 +356,14 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
             }
             return totals
         }
-        for (const [id, tonnage] of [
-            [10210, 1500],
-            [10211, 1500],
-            [11212, 2100],
-            [11213, 2100],
+        for (const [id, tonnage, resources] of [
+            [10210, 3000, 3],
+            [10211, 3000, 2],
+            [11212, 4200, 3],
+            [11213, 4200, 2],
         ]) {
             const totals = perResource(id)
-            expect(totals.size).toBe(5)
+            expect(totals.size).toBe(resources)
             for (const value of totals.values()) expect(value).toBe(tonnage)
         }
     })
@@ -369,9 +371,9 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
     test('WP-CP-11-masses packed ship masses follow the ladder and equal each crafted ship base hullmass', () => {
         const mass = (id: number) => tonnes(getItem(id).mass)
         expect(mass(10210)).toBe(3200)
-        expect(mass(10211)).toBe(4400)
-        expect(mass(11212)).toBe(6080)
-        expect(mass(11213)).toBe(7760)
+        expect(mass(10211)).toBe(4160)
+        expect(mass(11212)).toBe(6176)
+        expect(mass(11213)).toBe(7520)
         for (const id of shipRecipes()) {
             expect(getEntityLayout(id)!.baseHullmass).toBe(getItem(id).mass)
         }

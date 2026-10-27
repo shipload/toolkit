@@ -8,18 +8,18 @@ import {
 import {
     ITEM_SENSOR,
     ITEM_SENSOR_T2,
-    ITEM_RESIN,
     ITEM_PLATE,
     ITEM_BEAM,
     ITEM_GATHERER_T1,
     ITEM_CRAFTER_T1,
     ITEM_BUILDER_T1,
     ITEM_EXTRACTOR_T2_PACKED,
-    ITEM_ROUSTABOUT_T1A_PACKED,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
+    ITEM_WRIGHT_T1A_PACKED,
     ITEM_TUG_T1A_PACKED,
     ITEM_PORTER_T1A_PACKED,
+    ITEM_SMITH_T1A_PACKED,
 } from '../data/item-ids'
 
 test('getAllRecipes returns the full catalog including the gatherer', () => {
@@ -32,7 +32,16 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR)
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
-        [ITEM_CRAFTER_T1, ITEM_BUILDER_T1, ITEM_ROUSTABOUT_T1A_PACKED].sort((a, b) => a - b)
+        [
+            ITEM_CRAFTER_T1,
+            ITEM_BUILDER_T1,
+            ITEM_PROSPECTOR_T1A_PACKED,
+            ITEM_TENDER_T1A_PACKED,
+            ITEM_WRIGHT_T1A_PACKED,
+            ITEM_TUG_T1A_PACKED,
+            ITEM_PORTER_T1A_PACKED,
+            ITEM_SMITH_T1A_PACKED,
+        ].sort((a, b) => a - b)
     )
 })
 
@@ -69,9 +78,9 @@ test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Resin as consumed by seven recipes', () => {
+test('getComponentDemand reports Sensor as consumed by eight recipes', () => {
     const demand = getComponentDemand()
-    const resin = demand.find((d) => d.itemId === ITEM_RESIN)
-    expect(resin).toBeDefined()
-    expect(resin?.consumerCount).toBe(7)
+    const sensor = demand.find((d) => d.itemId === ITEM_SENSOR)
+    expect(sensor).toBeDefined()
+    expect(sensor?.consumerCount).toBe(8)
 })

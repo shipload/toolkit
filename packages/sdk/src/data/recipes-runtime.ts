@@ -41,7 +41,6 @@ for (const e of entities as any[]) entitiesById.set(e.entityItemId, e as EntityL
 export function getRecipe(outputItemId: number): Recipe | undefined {
     return recipesById.get(outputItemId)
 }
-
 export function getEntityLayout(entityItemId: number): EntityLayout | undefined {
     return entitiesById.get(entityItemId)
 }

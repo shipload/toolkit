@@ -82,13 +82,10 @@ describe('wrapped-asset schema parity with the contract catalog', () => {
         const ship = getWrappedSchemas().find((s) => s.name === 'ship.v1')
         expect(ship && wrappedSchemaStatFields(ship)).toEqual([
             'strength',
-            'hardness',
+            'cohesion',
             'plasticity',
-            'saturation',
             'volatility',
-            'reactivity',
             'conductivity',
-            'resonance',
         ])
     })
 })

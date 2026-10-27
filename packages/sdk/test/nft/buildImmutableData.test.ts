@@ -104,7 +104,7 @@ describe('buildImmutableData', () => {
             ['entity_id', 'uint64'],
             ['quantity', 'uint32'],
             ['strength', 'uint16'],
-            ['hardness', 'uint16'],
+            ['cohesion', 'uint16'],
             ['plasticity', 'uint16'],
             ['volatility', 'uint16'],
             ['conductivity', 'uint16'],

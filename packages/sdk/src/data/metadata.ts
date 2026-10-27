@@ -50,7 +50,7 @@ export const itemFamilies: Record<string, ItemFamily> = {
     },
     frame: {
         name: 'Frame',
-        description: 'Goes into Limpet Bays, Cargo Holds, and hulls.',
+        description: 'Goes into Limpet Bays and Cargo Holds.',
         color: '#C4A57B',
         process: 'machined',
     },
@@ -62,13 +62,13 @@ export const itemFamilies: Record<string, ItemFamily> = {
     },
     resonator: {
         name: 'Resonator',
-        description: 'Goes into Power Cores, Tractor Beams, Warp Drives, and hulls.',
+        description: 'Goes into Power Cores, Tractor Beams, and Warp Drives.',
         color: '#4ADBFF',
         process: 'machined',
     },
     beam: {
         name: 'Beam',
-        description: 'Goes into Limpet Bays and hulls.',
+        description: 'Goes into Limpet Bays.',
         color: '#7B8D9E',
         process: 'machined',
     },
@@ -92,13 +92,13 @@ export const itemFamilies: Record<string, ItemFamily> = {
     },
     reactor: {
         name: 'Reactor',
-        description: 'Goes into Fabricators, Warp Drives, and hulls.',
+        description: 'Goes into Fabricators and Warp Drives.',
         color: '#B877FF',
         process: 'machined',
     },
     resin: {
         name: 'Resin',
-        description: 'Goes into Tractor Beams and hulls.',
+        description: 'Goes into Tractor Beams.',
         color: '#5A8B3E',
         process: 'machined',
     },

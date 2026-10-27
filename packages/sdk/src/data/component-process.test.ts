@@ -1,14 +1,18 @@
 import {describe, expect, test} from 'bun:test'
 import {
     ITEM_BEAM,
+    ITEM_CERAMIC,
     ITEM_ENGINE_T1,
     ITEM_ORE_T1,
+    ITEM_PLASMA_CELL,
     ITEM_PLATE,
     ITEM_PLATE_T2,
+    ITEM_POLYMER,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_PROSPECTOR_T2A_PACKED,
     ITEM_PROSPECTOR_T2B_PACKED,
     ITEM_ROUSTABOUT_T1A_PACKED,
+    ITEM_SENSOR,
     ITEM_STORAGE_T1,
 } from './item-ids'
 import {getComponents} from './catalog'
@@ -21,6 +25,10 @@ function inputsOf(itemId: number) {
     if (!recipe) throw new Error(`no recipe for ${itemId}`)
     return recipe.inputs
 }
+
+const REFINED_FIVE = [ITEM_PLATE, ITEM_CERAMIC, ITEM_POLYMER, ITEM_PLASMA_CELL, ITEM_SENSOR].map(
+    (itemId) => ({itemId, quantity: 150})
+)
 
 describe('component process', () => {
     test('every component at every tier is refined or machined, five of each per tier', () => {
@@ -61,26 +69,21 @@ describe('component process', () => {
 })
 
 describe('completeComponentSet', () => {
-    test('recognises the hull First and Second step recipes', () => {
-        expect(completeComponentSet(inputsOf(ITEM_ROUSTABOUT_T1A_PACKED))).toEqual({
+    test('a ship step takes fewer than five parts, so no step is a complete set', () => {
+        for (const itemId of [
+            ITEM_ROUSTABOUT_T1A_PACKED,
+            ITEM_PROSPECTOR_T1A_PACKED,
+            ITEM_PROSPECTOR_T2A_PACKED,
+            ITEM_PROSPECTOR_T2B_PACKED,
+        ])
+            expect(completeComponentSet(inputsOf(itemId))).toBeNull()
+    })
+
+    test('five refined parts of one tier are a complete set', () => {
+        expect(completeComponentSet(REFINED_FIVE)).toEqual({
             process: 'refined',
             tier: 1,
             quantity: 150,
-        })
-        expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T1A_PACKED))).toEqual({
-            process: 'machined',
-            tier: 1,
-            quantity: 150,
-        })
-        expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T2A_PACKED))).toEqual({
-            process: 'refined',
-            tier: 2,
-            quantity: 175,
-        })
-        expect(completeComponentSet(inputsOf(ITEM_PROSPECTOR_T2B_PACKED))).toEqual({
-            process: 'machined',
-            tier: 2,
-            quantity: 175,
         })
     })
 
@@ -89,29 +92,26 @@ describe('completeComponentSet', () => {
     })
 
     test('unequal quantities keep the set but drop the shared quantity', () => {
-        const inputs = inputsOf(ITEM_ROUSTABOUT_T1A_PACKED).map((input, index) =>
+        const inputs = REFINED_FIVE.map((input, index) =>
             index === 0 ? {...input, quantity: 50} : input
         )
         expect(completeComponentSet(inputs)).toEqual({process: 'refined', tier: 1, quantity: null})
     })
 
     test('one machined part among four refined is not a set', () => {
-        const inputs = inputsOf(ITEM_ROUSTABOUT_T1A_PACKED).map((input, index) =>
+        const inputs = REFINED_FIVE.map((input, index) =>
             index === 0 ? {...input, itemId: ITEM_BEAM} : input
         )
         expect(completeComponentSet(inputs)).toBeNull()
     })
 
     test('a repeated family is not a set', () => {
-        const inputs = inputsOf(ITEM_ROUSTABOUT_T1A_PACKED).map((input) => ({
-            ...input,
-            itemId: ITEM_PLATE,
-        }))
+        const inputs = REFINED_FIVE.map((input) => ({...input, itemId: ITEM_PLATE}))
         expect(completeComponentSet(inputs)).toBeNull()
     })
 
     test('mixed tiers are not a set', () => {
-        const inputs = inputsOf(ITEM_ROUSTABOUT_T1A_PACKED).map((input, index) =>
+        const inputs = REFINED_FIVE.map((input, index) =>
             index === 0 ? {...input, itemId: ITEM_PLATE_T2} : input
         )
         expect(completeComponentSet(inputs)).toBeNull()

@@ -1,6 +1,7 @@
 import {UInt64} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
 import {getRecipe, type Recipe} from '../data/recipes-runtime'
+import recipes from '../data/recipes.json'
 import {getItem} from '../data/catalog'
 import {findStatDefinition, getStatDefinitions, type StatDefinition} from './stats'
 import {deriveResourceStats, STAT_MEAN, STAT_WORD_SLOTS} from './stratum'
@@ -55,7 +56,24 @@ export function getItemStatKeys(itemId: number): string[] {
         const resourceKeys = getItemStatKeys(recipe.inputs[0].itemId)
         return recipe.statSlots.map((_, i) => resourceKeys[i] ?? '')
     }
-    return recipe.statSlots.map((slot) => keyForStatSlot(recipe, slot))
+    return recipe.statSlots.map((slot, index) => {
+        const key = keyForStatSlot(recipe, slot)
+        if (key || item.type !== 'entity') return key
+        return wokenStatKey(itemId, index)
+    })
+}
+
+function wokenStatKey(itemId: number, index: number): string {
+    for (const next of recipes as unknown as Recipe[]) {
+        if (!next.sourceSubclasses?.includes(itemId)) continue
+        for (const src of next.statSlots[index]?.sources ?? []) {
+            if (isMeanSource(src)) continue
+            const input = next.inputs[src.inputIndex]
+            if (input && !next.sourceSubclasses?.includes(input.itemId))
+                return getItemStatKeys(input.itemId)[src.statIndex] ?? ''
+        }
+    }
+    return ''
 }
 
 function keyForStatSlot(
