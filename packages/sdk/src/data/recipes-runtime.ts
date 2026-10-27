@@ -9,7 +9,7 @@ export interface RecipeInput {
 }
 
 export interface StatSlot {
-    sources: {inputIndex: number; statIndex: number}[]
+    sources: {inputIndex: number; statIndex: number; weight?: number}[]
 }
 
 export interface Recipe {

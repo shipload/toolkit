@@ -234,7 +234,7 @@ interface LoopResult {
 }
 
 function unloadLoader(stat: number) {
-    const caps = computeLoaderCapabilities({insulation: stat, plasticity: stat}, 1)
+    const caps = computeLoaderCapabilities({hardness: stat, fineness: stat}, 1)
     return {thrust: caps.thrust, payload: caps.payload}
 }
 

@@ -66,20 +66,20 @@ import {getEntityLayout, type EntitySlot} from '../data/recipes-runtime'
 import {computeTravelDrain} from '../nft/description'
 import {computeEffectiveModuleStat} from './stat-scaling'
 
-function makeGathererStats(strength: number, tolerance: number, saturation: number): bigint {
-    return encodeStats([strength, tolerance, saturation, 0])
+function makeGathererStats(density: number, tolerance: number, thermal: number): bigint {
+    return encodeStats([density, tolerance, thermal])
 }
 
-function makeCrafterStats(fineness: number, conductivity: number): bigint {
-    return encodeStats([fineness, conductivity])
+function makeCrafterStats(reactivity: number, reflectivity: number): bigint {
+    return encodeStats([reactivity, reflectivity])
 }
 
-function makeLoaderStats(insulation: number, plasticity: number): bigint {
-    return encodeStats([insulation, plasticity])
+function makeLoaderStats(hardness: number, fineness: number): bigint {
+    return encodeStats([hardness, fineness])
 }
 
-function makeBuilderStats(resonance: number, fineness: number): bigint {
-    return encodeStats([resonance, fineness])
+function makeBuilderStats(hardness: number, fineness: number): bigint {
+    return encodeStats([hardness, fineness])
 }
 
 test('computeBaseCapacity uses the structure formula for structure entities', () => {
@@ -159,8 +159,8 @@ test('computeEntityCapabilities emits gathererLanes alongside legacy gatherer su
     expect(result.gathererLanes![1].slotIndex).toBe(1)
 
     // Yields are amp-scaled and distinct
-    const caps1 = computeGathererCapabilities({strength: 300, tolerance: 200, saturation: 400}, 1)
-    const caps2 = computeGathererCapabilities({strength: 500, tolerance: 100, saturation: 300}, 1)
+    const caps1 = computeGathererCapabilities({density: 300, tolerance: 200, thermal: 400}, 1)
+    const caps2 = computeGathererCapabilities({density: 500, tolerance: 100, thermal: 300}, 1)
     const expectedYield1 = applySlotMultiplier(caps1.yield, 100)
     const expectedYield2 = applySlotMultiplier(caps2.yield, 100)
     expect(result.gathererLanes![0].yield).toBe(expectedYield1)
@@ -197,7 +197,7 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     expect(result.crafterLanes!.length).toBe(1)
     expect(result.crafterLanes![0].slotIndex).toBe(0)
 
-    const caps = computeCrafterCapabilities({fineness: 400, conductivity: 300}, 1)
+    const caps = computeCrafterCapabilities({reactivity: 400, reflectivity: 300}, 1)
     const expectedSpeed = applySlotMultiplier(caps.speed, 120)
     expect(result.crafterLanes![0].speed).toBe(expectedSpeed)
     expect(result.crafterLanes![0].drain).toBe(caps.drain)
@@ -208,14 +208,14 @@ test('computeEntityCapabilities emits crafterLanes alongside legacy crafter sum'
     expect(result.crafter!.speed).toBe(expectedSpeed)
 })
 
-test('builder capabilities read canonical resonance and fineness slots', () => {
-    expect(computeBuilderCapabilities({resonance: 500, fineness: 330}, 1)).toEqual({
+test('builder capabilities read canonical hardness and fineness slots', () => {
+    expect(computeBuilderCapabilities({hardness: 500, fineness: 330}, 1)).toEqual({
         speed: 500,
         drain: 20_000,
     })
 })
 
-test('computeEntityCapabilities emits a Builder lane from resonance and fineness', () => {
+test('computeEntityCapabilities emits a Builder lane from hardness and fineness', () => {
     const modules: InstalledModule[] = [
         {slotIndex: 0, itemId: ITEM_BUILDER_T1, stats: makeBuilderStats(500, 330)},
     ]
@@ -239,7 +239,7 @@ test('computeEntityCapabilities emits loaderLanes alongside legacy loaders sum',
     expect(result.loaderLanes!.length).toBe(1)
     expect(result.loaderLanes![0].slotIndex).toBe(0)
 
-    const caps = computeLoaderCapabilities({insulation: 600, plasticity: 500}, 1)
+    const caps = computeLoaderCapabilities({hardness: 600, fineness: 500}, 1)
     expect(result.loaderLanes![0].payload).toBe(caps.payload)
     expect(result.loaderLanes![0].thrust).toBe(applySlotMultiplier(caps.thrust, 80))
     expect(result.loaderLanes![0].outputPct).toBe(80)
@@ -260,35 +260,35 @@ test('generator capacity and recharge are denominated to milli-energy', () => {
 })
 
 describe('generator Resonance curve', () => {
-    test('Resonance at or below 213 keeps the shared 500-per-point slope', () => {
+    test('Reflectivity at or below 213 keeps the shared 500-per-point slope', () => {
         expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 213}, 1).capacity).toBe(
             1_406_500
         )
-        expect(computeGeneratorCapabilities({resonance: 150, reflectivity: 213}, 1).capacity).toBe(
+        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 150}, 1).capacity).toBe(
             1_375_000
         )
     })
 
-    test('Resonance above 213 counts 1,000 per raw point with no soft cap', () => {
-        expect(computeGeneratorCapabilities({resonance: 500, reflectivity: 213}, 1).capacity).toBe(
+    test('Reflectivity above 213 counts 1,000 per raw point with no soft cap', () => {
+        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 500}, 1).capacity).toBe(
             1_693_500
         )
-        expect(computeGeneratorCapabilities({resonance: 214, reflectivity: 213}, 1).capacity).toBe(
+        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 214}, 1).capacity).toBe(
             1_407_500
         )
     })
 
-    test('reflectivity keeps the tapered effective stat', () => {
-        expect(computeGeneratorCapabilities({resonance: 213, reflectivity: 500}, 1).recharge).toBe(
+    test('resonance keeps the tapered effective stat', () => {
+        expect(computeGeneratorCapabilities({resonance: 500, reflectivity: 213}, 1).recharge).toBe(
             Math.floor(2000 + computeEffectiveModuleStat(500) * 6)
         )
     })
 
-    test('NFT description mirror takes raw Resonance', () => {
-        for (const resonance of [0, 150, 213, 214, 416, 545, 999]) {
+    test('NFT description mirror takes raw Reflectivity', () => {
+        for (const reflectivity of [0, 150, 213, 214, 416, 545, 999]) {
             for (const tier of [1, 2, 10]) {
-                expect(computeGeneratorCap(resonance, tier)).toBe(
-                    computeGeneratorCapabilities({resonance, reflectivity: 0}, tier).capacity
+                expect(computeGeneratorCap(reflectivity, tier)).toBe(
+                    computeGeneratorCapabilities({resonance: 0, reflectivity}, tier).capacity
                 )
             }
         }
@@ -319,7 +319,7 @@ describe('Range floor', () => {
     })
 
     test('a Cargo Hold that would push Range below 5 ly is capped at the floor', () => {
-        const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213, 213])}
+        const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213])}
         const caps = computeEntityCapabilities(
             {},
             ITEM_ROUSTABOUT_T1A_PACKED,
@@ -351,7 +351,7 @@ describe('Range floor', () => {
         const battery = {
             slotIndex: 2,
             itemId: ITEM_BATTERY_T1,
-            stats: encodeStats([213, 213, 213, 213]),
+            stats: encodeStats([213]),
         }
         const caps = computeEntityCapabilities(
             {},
@@ -381,7 +381,7 @@ test('engine and generator capabilities use tapered quality consistently', () =>
     ]
 
     const result = computeEntityCapabilities({}, ITEM_ROUSTABOUT_T1A_PACKED, modules, layout)
-    const engines = computeEngineCapabilities({volatility: 500, thermal: 500}, 1)
+    const engines = computeEngineCapabilities({thermal: 500, reactivity: 500}, 1)
 
     expect(result.engines).toEqual({
         thrust: engines.thrust,
@@ -393,17 +393,17 @@ test('engine and generator capabilities use tapered quality consistently', () =>
 })
 
 test('gatherer/crafter/hauler drains are denominated', () => {
-    expect(computeGathererCapabilities({strength: 0, hardness: 0, saturation: 213}, 1).drain).toBe(
+    expect(computeGathererCapabilities({density: 0, tolerance: 0, thermal: 213}, 1).drain).toBe(
         1_967_500
     )
-    expect(computeCrafterCapabilities({fineness: 0, conductivity: 213}, 1).drain).toBe(23_546)
+    expect(computeCrafterCapabilities({reactivity: 0, reflectivity: 213}, 1).drain).toBe(23_546)
 })
 
-test('gatherer depth accepts canonical tolerance and legacy recipe-labelled hardness', () => {
-    expect(computeGathererCapabilities({strength: 0, tolerance: 213, saturation: 0}, 2).depth).toBe(
+test('gatherer depth reads tolerance', () => {
+    expect(computeGathererCapabilities({density: 0, tolerance: 213, thermal: 0}, 2).depth).toBe(
         4_343
     )
-    expect(computeGathererCapabilities({strength: 0, hardness: 213, saturation: 0}, 1).depth).toBe(
+    expect(computeGathererCapabilities({density: 0, tolerance: 213, thermal: 0}, 1).depth).toBe(
         1_565
     )
 })

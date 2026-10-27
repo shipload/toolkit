@@ -217,7 +217,7 @@ function maxLegs(ship: Ship, tiles: number): number[] {
     return legs
 }
 
-const UNLOADER = computeLoaderCapabilities({insulation: MEAN_STAT, plasticity: MEAN_STAT}, 1)
+const UNLOADER = computeLoaderCapabilities({hardness: MEAN_STAT, fineness: MEAN_STAT}, 1)
 
 function sdkLoop(ship: Ship, tiles: number, g: Ground = BASELINE, epochSeconds = EPOCH_SECONDS) {
     const mass = getItem(T1_RESOURCE).mass

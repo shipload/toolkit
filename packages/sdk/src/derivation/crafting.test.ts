@@ -4,10 +4,9 @@ import {ITEM_BUILDER_T1} from '../data/item-ids'
 
 describe('usedInputStatKeys', () => {
     test('maps each input to the stat keys the blend actually consumes', () => {
-        // Ceramic.hardness feeds the output's resonance slot; a name match would miss it.
         expect(usedInputStatKeys(ITEM_BUILDER_T1)).toEqual([
-            ['resonance'],
             ['hardness', 'fineness'],
+            ['saturation'],
         ])
     })
 

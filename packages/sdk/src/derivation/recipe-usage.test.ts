@@ -11,8 +11,6 @@ import {
     ITEM_PLATE,
     ITEM_BEAM,
     ITEM_GATHERER_T1,
-    ITEM_CRAFTER_T1,
-    ITEM_BUILDER_T1,
     ITEM_EXTRACTOR_T2_PACKED,
     ITEM_PROSPECTOR_T1A_PACKED,
     ITEM_TENDER_T1A_PACKED,
@@ -33,8 +31,6 @@ test('getRecipeConsumers lists every recipe that consumes Sensor', () => {
     const ids = consumers.map((c) => c.outputItemId).sort((a, b) => a - b)
     expect(ids).toEqual(
         [
-            ITEM_CRAFTER_T1,
-            ITEM_BUILDER_T1,
             ITEM_PROSPECTOR_T1A_PACKED,
             ITEM_TENDER_T1A_PACKED,
             ITEM_WRIGHT_T1A_PACKED,
@@ -71,16 +67,16 @@ test('getResourceDemand traces a Machined component to its one resource', () => 
 })
 
 test('getResourceDemand recurses through a module to raw resources', () => {
-    expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({ore: 3000, regolith: 3000})
+    expect(getResourceDemand(ITEM_GATHERER_T1)).toEqual({ore: 3000, gas: 3000})
 })
 
 test('getResourceDemand scales by quantity', () => {
     expect(getResourceDemand(ITEM_PLATE, 3)).toEqual({ore: 30})
 })
 
-test('getComponentDemand reports Sensor as consumed by eight recipes', () => {
+test('getComponentDemand reports Sensor as consumed by six recipes', () => {
     const demand = getComponentDemand()
     const sensor = demand.find((d) => d.itemId === ITEM_SENSOR)
     expect(sensor).toBeDefined()
-    expect(sensor?.consumerCount).toBe(8)
+    expect(sensor?.consumerCount).toBe(6)
 })

@@ -46,13 +46,13 @@ export function computeEngineCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {thrust: number; drain: number} {
-    const vol = computeEffectiveModuleStat(stats.volatility)
     const thm = computeEffectiveModuleStat(stats.thermal)
+    const rea = computeEffectiveModuleStat(stats.reactivity)
     return {
         thrust: Math.floor(
-            ((400 + Math.floor((vol * 3) / 4)) * moduleTierPct(ENGINE_THRUST_TIER_PCT, tier)) / 100
+            ((400 + Math.floor((thm * 3) / 4)) * moduleTierPct(ENGINE_THRUST_TIER_PCT, tier)) / 100
         ),
-        drain: 2 * Math.max(30, 50 - Math.floor(thm / 70)),
+        drain: 2 * Math.max(30, 50 - Math.floor(rea / 70)),
     }
 }
 
@@ -60,14 +60,14 @@ export function computeGeneratorCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {capacity: number; recharge: number} {
-    const res = computeGeneratorResonanceCapacity(stats.resonance)
-    const ref = computeEffectiveModuleStat(stats.reflectivity)
+    const ref = computeGeneratorResonanceCapacity(stats.reflectivity)
+    const res = computeEffectiveModuleStat(stats.resonance)
     return {
         capacity: Math.floor(
-            ((1_300_000 + res) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier)) / 100
+            ((1_300_000 + ref) * moduleTierPct(GENERATOR_CAPACITY_TIER_PCT, tier)) / 100
         ),
         recharge: Math.floor(
-            ((2000 + ref * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier)) / 100
+            ((2000 + res * 6) * moduleTierPct(GENERATOR_RECHARGE_TIER_PCT, tier)) / 100
         ),
     }
 }
@@ -114,12 +114,9 @@ export function computeGathererCapabilities(
     drain: number
     depth: number
 } {
-    const str = stats.strength
-    const con = stats.saturation
-    // Gatherer capabilities are positional in the contract: packed slot 1 is tolerance.
-    // T1 recipe presentation historically labels that blended slot as hardness, so retain
-    // that fallback for callers that only have recipe-decoded named stats.
-    const tol = stats.tolerance ?? stats.hardness
+    const str = stats.density
+    const con = stats.thermal
+    const tol = stats.tolerance
 
     return {
         yield: computeGathererYield(str, tier),
@@ -132,12 +129,12 @@ export function computeLoaderCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {payload: number; thrust: number; quantity: number} {
-    const insulation = stats.insulation
-    const plasticity = stats.plasticity
+    const hardness = stats.hardness
+    const fineness = stats.fineness
     return {
-        payload: computeLoaderPayload(insulation),
+        payload: computeLoaderPayload(hardness),
         thrust: Math.floor(
-            ((1 + Math.floor((plasticity * plasticity) / 10000)) *
+            ((1 + Math.floor((fineness * fineness) / 10000)) *
                 moduleTierPct(LOADER_THRUST_TIER_PCT, tier)) /
                 100
         ),
@@ -149,13 +146,13 @@ export function computeCrafterCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {speed: number; drain: number} {
-    const fin = stats.fineness
-    const con = stats.conductivity
+    const rea = stats.reactivity
+    const ref = stats.reflectivity
     return {
         speed: Math.floor(
-            ((100 + Math.floor((fin * 4) / 5)) * moduleTierPct(CRAFTER_SPEED_TIER_PCT, tier)) / 100
+            ((100 + Math.floor((rea * 4) / 5)) * moduleTierPct(CRAFTER_SPEED_TIER_PCT, tier)) / 100
         ),
-        drain: Math.max(5000, 30000 - Math.floor((con * 1000) / 33)),
+        drain: Math.max(5000, 30000 - Math.floor((ref * 1000) / 33)),
     }
 }
 
@@ -163,12 +160,11 @@ export function computeBuilderCapabilities(
     stats: Record<string, number>,
     tier: number
 ): {speed: number; drain: number} {
-    const resonance = stats.resonance
+    const hardness = stats.hardness
     const fineness = stats.fineness
     return {
         speed: Math.floor(
-            ((100 + Math.floor((resonance * 4) / 5)) *
-                moduleTierPct(BUILDER_SPEED_TIER_PCT, tier)) /
+            ((100 + Math.floor((hardness * 4) / 5)) * moduleTierPct(BUILDER_SPEED_TIER_PCT, tier)) /
                 100
         ),
         drain: Math.max(5000, 30000 - Math.floor((fineness * 1000) / 33)),
@@ -183,14 +179,14 @@ export function computeHaulerCapabilities(
     efficiency: number
     drain: number
 } {
-    const resonance = stats.resonance
-    const plasticity = stats.plasticity
-    const conductivity = stats.conductivity
+    const insulation = stats.insulation
+    const reflectivity = stats.reflectivity
+    const saturation = stats.saturation
 
     return {
-        capacity: computeHaulerCapacity(resonance, tier),
-        efficiency: 2000 + plasticity * 6,
-        drain: computeHaulerDrain(conductivity, tier),
+        capacity: computeHaulerCapacity(insulation, tier),
+        efficiency: 2000 + reflectivity * 6,
+        drain: computeHaulerDrain(saturation, tier),
     }
 }
 
@@ -213,13 +209,8 @@ export function computeStorageCapabilities(
     drain: number
 } {
     return {
-        capacity: computeCargoBayCapacity(
-            stats.strength ?? 0,
-            stats.density ?? 0,
-            stats.hardness ?? 0,
-            tier
-        ),
-        drain: computeCargoBayDrain(stats.cohesion ?? 0, tier),
+        capacity: computeCargoBayCapacity(stats.density ?? 0, tier),
+        drain: computeCargoBayDrain(stats.tolerance ?? 0, tier),
     }
 }
 
@@ -230,13 +221,7 @@ export function computeBatteryCapabilities(
     capacity: number
 } {
     return {
-        capacity: computeBatteryBankCapacity(
-            stats.volatility ?? 0,
-            stats.thermal ?? 0,
-            stats.plasticity ?? 0,
-            stats.insulation ?? 0,
-            tier
-        ),
+        capacity: computeBatteryBankCapacity(stats.saturation ?? 0, tier),
     }
 }
 
@@ -483,15 +468,8 @@ export function withPositionalModuleStats(
     decoded: Record<string, number>
 ): Record<string, number> {
     switch (getModuleCapabilityType(itemId)) {
-        case MODULE_GATHERER:
-            return {
-                ...decoded,
-                strength: decodeStat(stats, 0),
-                tolerance: decodeStat(stats, 1),
-                saturation: decodeStat(stats, 2),
-            }
-        case MODULE_CRAFTER:
-            return {...decoded, fineness: decodeStat(stats, 0), conductivity: decodeStat(stats, 1)}
+        case MODULE_WARP:
+            return {...decoded, reflectivity: decodeStat(stats, 0)}
         default:
             return decoded
     }
@@ -518,7 +496,7 @@ export function computeModuleCapabilities(
                 kind: 'engine',
                 tier,
                 thrust: applySlotMultiplier(caps.thrust, outputPct),
-                thermal: computeEffectiveModuleStat(decodedStats.thermal ?? 0),
+                thermal: computeEffectiveModuleStat(decodedStats.reactivity ?? 0),
             }
         }
         case MODULE_GENERATOR: {

@@ -15,8 +15,14 @@ describe('SLOT_FORMULAS', () => {
         assert.deepEqual(Object.keys(SLOT_FORMULAS.gatherer).sort(), ['0', '1', '2'])
     })
 
-    test('storage reads slots 0/1/2/3', () => {
-        assert.deepEqual(Object.keys(SLOT_FORMULAS.storage).sort(), ['0', '1', '2', '3'])
+    test('storage reads capacity and drain slots only', () => {
+        assert.deepEqual(Object.keys(SLOT_FORMULAS.storage).sort(), ['0', '1'])
+        assert.equal(SLOT_FORMULAS.storage[0].attribute, 'capacity')
+        assert.equal(SLOT_FORMULAS.storage[1].attribute, 'drain')
+    })
+
+    test('battery reads slot 0 only', () => {
+        assert.deepEqual(Object.keys(SLOT_FORMULAS.battery).sort(), ['0'])
     })
 
     test('hauler reads only slots 0/1/2 (slot 3 dead, 4th attr deferred)', () => {

@@ -98,7 +98,7 @@ describe('WP-CP-01 and WP-CP-03: mass conservation', () => {
 
     test('WP-CP-01-module T1 modules turn 2,400 t of components into 960 t', () => {
         const modules = outputsOf('module', 1)
-        expect(modules.length).toBe(10)
+        expect(modules.length).toBe(9)
         for (const id of modules) {
             expect(tonnes(inputMass(id))).toBe(2400)
             expect(tonnes(getRecipe(id)!.outputMass)).toBe(960)
@@ -291,11 +291,17 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
             expect(predecessors[0].input.quantity).toBe(1)
             expect(getItem(predecessors[0].input.itemId).tier).toBeLessThanOrEqual(2)
             for (const slot of recipe.statSlots) {
-                if (isShipItem(id)) expect(slot.sources.length).toBeLessThanOrEqual(2)
-                else expect(slot.sources.length).toBe(2)
-                expect(
-                    slot.sources.filter((s) => s.inputIndex === predecessors[0].index).length
-                ).toBe(1)
+                const fromPredecessor = slot.sources.filter(
+                    (s) => s.inputIndex === predecessors[0].index
+                )
+                expect(fromPredecessor.length).toBe(1)
+                if (isShipItem(id)) {
+                    expect(slot.sources.length).toBeLessThanOrEqual(2)
+                    continue
+                }
+                const weightOf = (s: {weight?: number}) => s.weight ?? 1
+                const total = slot.sources.reduce((sum, s) => sum + weightOf(s), 0)
+                expect(weightOf(fromPredecessor[0]) * 2).toBe(total)
             }
         }
         expect(withPredecessor).toBe(9 + 18 + 1)
@@ -438,12 +444,12 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
         }
     })
 
-    test('WP-CP-20-t1 T1 has 10 single-input components and 10 craftable modules of 600 components each', () => {
+    test('WP-CP-20-t1 T1 has 10 single-input components and 9 craftable modules of 600 components each', () => {
         const components = outputsOf('component', 1)
         expect(components.length).toBe(10)
         for (const id of components) expect(getRecipe(id)!.inputs.length).toBe(1)
         const modules = outputsOf('module', 1)
-        expect(modules.length).toBe(10)
+        expect(modules.length).toBe(9)
         for (const id of modules) {
             const total = getRecipe(id)!.inputs.reduce((sum, i) => sum + i.quantity, 0)
             expect(total).toBe(600)
@@ -478,12 +484,13 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
         expect(t2Ship).toBeGreaterThan(9600)
     })
 
-    test('WP-CP-24-modules 11 T1 module items, 10 with a recipe, and ANY sockets run at 60 on the Roustabout and 80 on the legacy Ship', () => {
+    test('WP-CP-24-modules 11 T1 module items, 9 with a recipe, and ANY sockets run at 60 on the Roustabout and 80 on the legacy Ship', () => {
         const items = catalogItems().filter((i) => i.type === 'module' && i.tier === 1)
         expect(items.length).toBe(11)
-        expect(outputsOf('module', 1).length).toBe(10)
+        expect(outputsOf('module', 1).length).toBe(9)
         const launcher = items.find((i) => i.moduleType === 'launcher')!
         expect(getRecipe(launcher.id)).toBeUndefined()
+        expect(getRecipe(10107)).toBeUndefined()
         const anyPcts = new Map<number, number[]>()
         for (const id of [10210, 10201]) {
             anyPcts.set(

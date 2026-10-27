@@ -227,7 +227,7 @@ describe('computeEntitySheet sections for movement modules', () => {
 describe('computeEntitySheet at the Range floor', () => {
     const core = {slotIndex: 0, itemId: ITEM_GENERATOR_T1, stats: encodeStats([213, 213])}
     const engine = {slotIndex: 1, itemId: ITEM_ENGINE_T1, stats: encodeStats([213, 213])}
-    const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213, 213])}
+    const hold = {slotIndex: 2, itemId: ITEM_STORAGE_T1, stats: encodeStats([213, 213])}
 
     test('a starter Roustabout with a Cargo Hold shows the floor line and a Range note', () => {
         const sheet = computeEntitySheet({
@@ -239,15 +239,15 @@ describe('computeEntitySheet at the Range floor', () => {
         expect(drain.text).toBe('225 energy/ly')
         expect(drain.breakdown?.map((l) => [l.label, l.text])).toEqual([
             ['Engines', '225 energy/ly'],
-            ['Cargo Hold', '11.3 energy/ly'],
-            ['Range floor', '-10.7 energy/ly'],
+            ['Cargo Hold', '9.3 energy/ly'],
+            ['Range floor', '-8.7 energy/ly'],
         ])
         const sum = drain.breakdown!.reduce((total, l) => total + l.value, 0)
         expect(sum).toBeCloseTo(drain.value, 9)
         const range = rowOf(sheet, 'energy', 'range')
         expect(range.text).toBe('5.0 ly')
         expect(range.note).toBe(
-            'Every ship reaches at least 5.0 ly on a full charge. This ship needs 11 energy/ly less drain to fly farther.'
+            'Every ship reaches at least 5.0 ly on a full charge. This ship needs 9 energy/ly less drain to fly farther.'
         )
     })
 

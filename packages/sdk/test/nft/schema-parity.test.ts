@@ -25,9 +25,9 @@ function sdkStatNames(itemId: number): string[] {
 }
 
 describe('wrapped-asset schema parity with the contract catalog', () => {
-    test('the catalog carries 32 schemas named <base>.v1', () => {
+    test('the catalog carries 31 schemas named <base>.v1', () => {
         const names = getWrappedSchemas().map((s) => s.name)
-        expect(names).toHaveLength(32)
+        expect(names).toHaveLength(31)
         for (const name of names) expect(name).toMatch(/^[a-z]{1,9}\.v1$/)
     })
 

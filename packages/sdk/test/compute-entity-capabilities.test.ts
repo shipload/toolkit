@@ -72,15 +72,9 @@ describe('computeEntityCapabilities', () => {
         expect(computeCargoBayDrain(500, 2)).toBe(5_906)
     })
 
-    test('Cargo Hold capacity uses three stats while Cohesion only improves drain', () => {
-        const low = computeStorageCapabilities(
-            {strength: 999, density: 999, hardness: 999, cohesion: 1},
-            1
-        )
-        const high = computeStorageCapabilities(
-            {strength: 999, density: 999, hardness: 999, cohesion: 999},
-            1
-        )
+    test('Cargo Hold capacity reads density while tolerance only improves drain', () => {
+        const low = computeStorageCapabilities({density: 999, tolerance: 1}, 1)
+        const high = computeStorageCapabilities({density: 999, tolerance: 999}, 1)
         expect(low.capacity).toBe(600_000)
         expect(high.capacity).toBe(low.capacity)
         expect(high.drain).toBeLessThan(low.drain)
@@ -295,8 +289,8 @@ describe('computeEntityCapabilities', () => {
             modules,
             SHIP_LAYOUT
         )
-        expect(result.hauler?.capacity).toBe(6)
-        expect(result.hauler?.capacityByTier).toEqual([{tier: 2, capacity: 6}])
+        expect(result.hauler?.capacity).toBe(4)
+        expect(result.hauler?.capacityByTier).toEqual([{tier: 2, capacity: 4}])
     })
 
     test('launcher modules aggregate charge and velocity with slot amp and flat drain', () => {

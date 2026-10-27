@@ -80,12 +80,14 @@ describe('buildImmutableData', () => {
 
         expect(layout(entries)).toEqual([
             ['quantity', 'uint32'],
-            ['strength', 'uint16'],
+            ['density', 'uint16'],
             ['tolerance', 'uint16'],
+            ['thermal', 'uint16'],
             ...COMMON_TAIL,
         ])
-        expect(value(entries, 'strength')).toBe(500)
+        expect(value(entries, 'density')).toBe(500)
         expect(value(entries, 'tolerance')).toBe(600)
+        expect(value(entries, 'thermal')).toBe(400)
         expect(getWrappedSchema(ITEM_GATHERER_T1)?.name).toBe('limpetbay.v1')
     })
 
@@ -119,8 +121,8 @@ describe('buildImmutableData', () => {
         expect(value(entries, 'module_stats')).toEqual([String(core), String(engine), '0'])
         expect(value(entries, 'loadout')).toBe(
             [
-                'Slot 1: Power Core T1 (resonance 300, reflectivity 250)',
-                'Slot 2: Engine T1 (volatility 213, thermal 213)',
+                'Slot 1: Power Core T1 (reflectivity 300, resonance 250)',
+                'Slot 2: Engine T1 (thermal 213, reactivity 213)',
                 'Slot 3: empty',
             ].join('\n')
         )
@@ -151,7 +153,7 @@ describe('buildImmutableData', () => {
         expect(value(entries, 'fineness')).toBe(444)
         expect(value(entries, 'loadout')).toBe(
             [
-                'Slot 1: Shuttle Bay T2 (insulation 321, plasticity 123)',
+                'Slot 1: Shuttle Bay T2 (hardness 321, fineness 123)',
                 'Slot 2: empty',
                 'Slot 3: empty',
                 'Slot 4: empty',

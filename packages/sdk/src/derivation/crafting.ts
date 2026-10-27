@@ -280,16 +280,17 @@ export function computeEntityStats(
         let sum = 0
         let count = 0
         for (const src of slot.sources) {
+            const weight = src.weight ?? 1
             if (isMeanSource(src)) {
-                sum += STAT_MEAN
-                count++
+                sum += STAT_MEAN * weight
+                count += weight
                 continue
             }
             const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
             const input = recipe.inputs[src.inputIndex]
             if (!input) continue
-            sum += blendedByComponent[input.itemId]?.[key] ?? 0
-            count++
+            sum += (blendedByComponent[input.itemId]?.[key] ?? 0) * weight
+            count += weight
         }
         const value = count > 0 ? Math.floor(sum / count) : 0
         return {key: slotKey, value: Math.max(1, Math.min(999, value))}
@@ -431,7 +432,7 @@ export function computeCraftedOutputStats(
         blendedByItem[Number(id)] = blendComponentStacks(stacks)
     }
 
-    const sourceValue = (src: {inputIndex: number; statIndex: number}): number => {
+    const sourceValue = (src: {inputIndex: number; statIndex: number; weight?: number}): number => {
         if (isMeanSource(src)) return STAT_MEAN
         const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
         const input = recipe.inputs[src.inputIndex]
@@ -449,8 +450,9 @@ export function computeCraftedOutputStats(
             out.push(0)
             continue
         }
-        const sum = slot.sources.reduce((acc, src) => acc + sourceValue(src), 0)
-        out.push(Math.max(1, Math.min(999, Math.floor(sum / slot.sources.length))))
+        const sum = slot.sources.reduce((acc, src) => acc + sourceValue(src) * (src.weight ?? 1), 0)
+        const weight = slot.sources.reduce((acc, src) => acc + (src.weight ?? 1), 0)
+        out.push(Math.max(1, Math.min(999, Math.floor(sum / weight))))
     }
     return UInt64.from(encodeStats(out))
 }

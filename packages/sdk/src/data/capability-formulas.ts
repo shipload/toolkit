@@ -54,9 +54,7 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     },
     storage: {
         0: {capability: 'Storage', attribute: 'capacity'},
-        1: {capability: 'Storage', attribute: 'capacity'},
-        2: {capability: 'Storage', attribute: 'capacity'},
-        3: {capability: 'Storage', attribute: 'capacity'},
+        1: {capability: 'Storage', attribute: 'drain'},
     },
     hauler: {
         0: {capability: 'Hauling', attribute: 'capacity'},
@@ -68,9 +66,6 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     },
     battery: {
         0: {capability: 'Energy', attribute: 'capacity'},
-        1: {capability: 'Energy', attribute: 'capacity'},
-        2: {capability: 'Energy', attribute: 'capacity'},
-        3: {capability: 'Energy', attribute: 'capacity'},
     },
     'ship-t1': ENTITY_HULL_SLOTS,
     'container-t1': ENTITY_HULL_SLOTS,

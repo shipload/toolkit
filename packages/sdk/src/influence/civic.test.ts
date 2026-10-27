@@ -192,12 +192,7 @@ describe('the fourteen nodes reproduce the chain-fitted buildings', () => {
                 if (bay <= i) {
                     expect(stats(depot, slot)).toEqual({
                         itemId: ITEM_STORAGE_T1,
-                        stats: [
-                            CHARTER_BASELINE_STAT,
-                            CHARTER_BASELINE_STAT,
-                            CHARTER_BASELINE_STAT,
-                            CHARTER_BASELINE_STAT,
-                        ],
+                        stats: [CHARTER_BASELINE_STAT, CHARTER_BASELINE_STAT],
                     })
                 } else {
                     expect(depot.modules[slot].installed).toBeUndefined()
@@ -233,7 +228,7 @@ describe('grant mechanics', () => {
         const withSecondLoader = fitCivicModules(raised, 1)
         expect(stats({modules: withSecondLoader}, 1).stats).toEqual([50, 50])
         const withBay = fitCivicModules(withSecondLoader, 1)
-        expect(stats({modules: withBay}, 2).stats).toEqual([0, 0, 0, 0])
+        expect(stats({modules: withBay}, 2).stats).toEqual([0, 0])
         const withSecondBay = fitCivicModules(
             raiseCivicStat(withBay, {
                 kind: CIVIC_GRANT_RUNG,
@@ -243,7 +238,7 @@ describe('grant mechanics', () => {
             }),
             1
         )
-        expect(stats({modules: withSecondBay}, 3).stats).toEqual([7, 7, 7, 7])
+        expect(stats({modules: withSecondBay}, 3).stats).toEqual([7, 7])
     })
 
     test('a rung caps at the civic speed cap', () => {

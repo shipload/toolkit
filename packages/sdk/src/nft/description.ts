@@ -107,8 +107,8 @@ export const computeBuilderSpeed = (resonance: number, tier: number): number =>
     idiv((100 + idiv(resonance * 4, 5)) * moduleTierPct(BUILDER_SPEED_TIER_PCT, tier), 100)
 export const computeBuilderDrain = (fineness: number): number =>
     Math.max(5000, 30000 - idiv(fineness * 1000, 33))
-export const computeHaulerCapacity = (fin: number, tier: number): number =>
-    Math.max(tier, tier + idiv(fin, 400))
+export const computeHaulerCapacity = (stat: number, tier: number): number =>
+    Math.min(1 + idiv(stat * (tier + 2), 1350), 2 + idiv(Math.max(tier, 1) - 1, 3))
 export const computeHaulerEfficiency = (con: number): number => 2000 + con * 6
 export const supportDrainTierPercent = (tier: number): number => {
     const clampedTier = Math.min(10, Math.max(1, Math.trunc(tier)))
@@ -122,27 +122,14 @@ export const computeCargoBayDrain = (cohesion: number, tier: number): number =>
     idiv(computeT1LogisticsDrain(cohesion) * 3 * supportDrainTierPercent(tier), 400)
 export const computeWarpRange = (stat: number, tier: number): number =>
     idiv((100 + stat * 3) * moduleTierPct(WARP_RANGE_TIER_PCT, tier), 100)
-export const computeCargoBayCapacity = (
-    strength: number,
-    density: number,
-    hardness: number,
-    tier: number
-): number =>
+export const computeCargoBayCapacity = (stat: number, tier: number): number =>
     idiv(
-        (100_000 + idiv((strength + density + hardness) * 500_000, 2997)) *
-            moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, tier),
+        (100_000 + idiv(stat * 500_000, 999)) * moduleTierPct(CARGO_BAY_CAPACITY_TIER_PCT, tier),
         100
     )
-export const computeBatteryBankCapacity = (
-    volatility: number,
-    thermal: number,
-    plasticity: number,
-    insulation: number,
-    tier: number
-): number =>
+export const computeBatteryBankCapacity = (stat: number, tier: number): number =>
     idiv(
-        (2_500_000 + idiv((volatility + thermal + plasticity + insulation) * 7_500_000, 3996)) *
-            moduleTierPct(BATTERY_CAPACITY_TIER_PCT, tier),
+        (2_500_000 + idiv(stat * 7_500_000, 999)) * moduleTierPct(BATTERY_CAPACITY_TIER_PCT, tier),
         100
     )
 

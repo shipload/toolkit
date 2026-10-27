@@ -33,8 +33,8 @@ describe('deriveStatMappings', () => {
         assert.deepEqual(getStatMappingsForStat('Tolerance'), [])
     })
 
-    test('Volatility drives Energy.capacity', () => {
-        const tuples = getStatMappingsForStat('Volatility').map(
+    test('Saturation drives Energy.capacity', () => {
+        const tuples = getStatMappingsForStat('Saturation').map(
             (m) => `${m.capability}.${m.attribute}`
         )
         assert.deepInclude(tuples, 'Energy.capacity')
@@ -60,11 +60,11 @@ describe('producer (source) is always present', () => {
         assert.isTrue(mappings.every((m) => typeof m.source === 'string' && m.source.length > 0))
     })
 
-    test('Energy.capacity is produced by the Battery Bank', () => {
+    test('Energy.capacity is produced by the Power Core and the Battery Bank', () => {
         const rows = getStatMappingsForCapability('Energy').filter(
             (m) => m.attribute === 'capacity'
         )
-        assert.deepEqual([...new Set(rows.map((m) => m.source))], ['Battery Bank'])
+        assert.deepEqual([...new Set(rows.map((m) => m.source))], ['Power Core', 'Battery Bank'])
     })
 
     test('Storage.capacity splits across a module and the entity Hull', () => {
@@ -87,11 +87,17 @@ describe('producer (source) is always present', () => {
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
         Strength: ['Storage.capacity'],
-        Density: ['Gathering.yield'],
-        Conductivity: ['Crafting.drain'],
-        Reflectivity: ['Energy.recharge', 'Hauling.capacity', 'Warp.range'],
-        Volatility: ['Energy.capacity', 'Movement.thrust'],
-        Plasticity: ['Energy.capacity', 'Loading.thrust'],
+        Density: ['Gathering.depth', 'Gathering.yield', 'Storage.capacity'],
+        Reflectivity: [
+            'Crafting.drain',
+            'Crafting.speed',
+            'Energy.capacity',
+            'Hauling.capacity',
+            'Hauling.efficiency',
+        ],
+        Thermal: ['Crafting.speed', 'Gathering.depth', 'Gathering.drain', 'Movement.thrust'],
+        Fineness: ['Build.drain', 'Build.speed', 'Loading.thrust'],
+        Saturation: ['Build.speed', 'Energy.capacity', 'Hauling.capacity', 'Hauling.drain'],
     }
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {
@@ -107,12 +113,13 @@ describe('stat coverage', () => {
 })
 
 describe('producer-join helpers', () => {
-    test('Build attributes read only held stats, so no stat drives them', () => {
-        assert.deepEqual(getStatMappingsForCapability('Build'), [])
+    test('Build attributes trace Fineness and Saturation, the live sources of the Assembly Arm', () => {
+        const stats = new Set(getStatMappingsForCapability('Build').map((m) => m.stat))
+        assert.deepEqual([...stats].sort(), ['Fineness', 'Saturation'])
     })
 
     test('getProducersForAttribute returns the distinct producers', () => {
-        assert.strictEqual(getProducersForAttribute('Energy', 'capacity').length, 1)
+        assert.strictEqual(getProducersForAttribute('Energy', 'capacity').length, 2)
         assert.strictEqual(getProducersForAttribute('Movement', 'thrust').length, 1)
     })
 
@@ -124,11 +131,11 @@ describe('producer-join helpers', () => {
 
     test('getCapabilityAttributeRows expands multi-producer attributes', () => {
         const rows = getCapabilityAttributeRows()
-        assert.strictEqual(rows.length, capabilityAttributes.length + 1)
+        assert.strictEqual(rows.length, capabilityAttributes.length + 2)
         const energyCap = rows.filter(
             (r) => r.capability === 'Energy' && r.attribute === 'capacity'
         )
-        assert.strictEqual(energyCap.length, 1)
+        assert.strictEqual(energyCap.length, 2)
         assert.isTrue(
             energyCap.every((r) => typeof r.source === 'string' && (r.source as string).length > 0)
         )

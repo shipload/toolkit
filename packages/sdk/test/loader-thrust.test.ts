@@ -19,8 +19,8 @@ describe('quadratic loader thrust curve (1 + floor(pla^2 / 10000))', () => {
         expect(computeLoaderThrust(pla, 1)).toBe(expected)
     })
 
-    test.each(cases)('computeLoaderCapabilities mirror matches at pla=%i', (pla, expected) => {
-        const caps = computeLoaderCapabilities({insulation: 0, plasticity: pla}, 1)
+    test.each(cases)('computeLoaderCapabilities mirror matches at fineness=%i', (pla, expected) => {
+        const caps = computeLoaderCapabilities({hardness: 0, fineness: pla}, 1)
         expect(caps.thrust).toBe(expected)
     })
 })

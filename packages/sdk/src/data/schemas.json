@@ -931,11 +931,11 @@
           "type": "uint32"
         },
         {
-          "name": "volatility",
+          "name": "thermal",
           "type": "uint16"
         },
         {
-          "name": "thermal",
+          "name": "reactivity",
           "type": "uint16"
         },
         {
@@ -988,11 +988,11 @@
           "type": "uint32"
         },
         {
-          "name": "resonance",
+          "name": "reflectivity",
           "type": "uint16"
         },
         {
-          "name": "reflectivity",
+          "name": "resonance",
           "type": "uint16"
         },
         {
@@ -1045,11 +1045,15 @@
           "type": "uint32"
         },
         {
-          "name": "strength",
+          "name": "density",
           "type": "uint16"
         },
         {
           "name": "tolerance",
+          "type": "uint16"
+        },
+        {
+          "name": "thermal",
           "type": "uint16"
         },
         {
@@ -1102,11 +1106,11 @@
           "type": "uint32"
         },
         {
-          "name": "insulation",
+          "name": "hardness",
           "type": "uint16"
         },
         {
-          "name": "plasticity",
+          "name": "fineness",
           "type": "uint16"
         },
         {
@@ -1159,7 +1163,11 @@
           "type": "uint32"
         },
         {
-          "name": "conductivity",
+          "name": "reactivity",
+          "type": "uint16"
+        },
+        {
+          "name": "reflectivity",
           "type": "uint16"
         },
         {
@@ -1212,19 +1220,11 @@
           "type": "uint32"
         },
         {
-          "name": "strength",
-          "type": "uint16"
-        },
-        {
           "name": "density",
           "type": "uint16"
         },
         {
-          "name": "hardness",
-          "type": "uint16"
-        },
-        {
-          "name": "cohesion",
+          "name": "tolerance",
           "type": "uint16"
         },
         {
@@ -1277,15 +1277,15 @@
           "type": "uint32"
         },
         {
-          "name": "resonance",
+          "name": "insulation",
           "type": "uint16"
         },
         {
-          "name": "plasticity",
+          "name": "reflectivity",
           "type": "uint16"
         },
         {
-          "name": "conductivity",
+          "name": "saturation",
           "type": "uint16"
         },
         {
@@ -1338,64 +1338,11 @@
           "type": "uint32"
         },
         {
-          "name": "resonance",
+          "name": "hardness",
           "type": "uint16"
         },
         {
           "name": "fineness",
-          "type": "uint16"
-        },
-        {
-          "name": "stats",
-          "type": "uint64"
-        },
-        {
-          "name": "origin_x",
-          "type": "int32"
-        },
-        {
-          "name": "origin_y",
-          "type": "int32"
-        },
-        {
-          "name": "img",
-          "type": "image"
-        },
-        {
-          "name": "deposit_amount",
-          "type": "uint64"
-        },
-        {
-          "name": "deposit_token",
-          "type": "uint64"
-        },
-        {
-          "name": "deposit_symbol",
-          "type": "uint64"
-        },
-        {
-          "name": "description",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "warpdrive.v1",
-      "fields": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "item_id",
-          "type": "uint16"
-        },
-        {
-          "name": "quantity",
-          "type": "uint32"
-        },
-        {
-          "name": "reflectivity",
           "type": "uint16"
         },
         {
@@ -1448,19 +1395,7 @@
           "type": "uint32"
         },
         {
-          "name": "volatility",
-          "type": "uint16"
-        },
-        {
-          "name": "thermal",
-          "type": "uint16"
-        },
-        {
-          "name": "plasticity",
-          "type": "uint16"
-        },
-        {
-          "name": "insulation",
+          "name": "saturation",
           "type": "uint16"
         },
         {
@@ -2301,10 +2236,6 @@
     {
       "itemId": 10106,
       "schema": "tractor.v1"
-    },
-    {
-      "itemId": 10107,
-      "schema": "warpdrive.v1"
     },
     {
       "itemId": 10108,
