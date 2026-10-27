@@ -1,13 +1,5 @@
 import {describe, expect, test} from 'bun:test'
-import {
-    decodeCraftedItemStats,
-    getItem,
-    getRecipe,
-    getWrappedSchema,
-    getWrappedSchemaItemIds,
-    getWrappedSchemas,
-    wrappedSchemaStatFields,
-} from '../../src'
+import {getRecipe, getWrappedSchema, getWrappedSchemas} from '../../src'
 import {
     ITEM_CONSTRUCTION_DOCK_T1_PACKED,
     ITEM_DEPOT_T1_PACKED,
@@ -20,10 +12,6 @@ import {
 } from '../../src/data/item-ids'
 import catalogItems from '../../src/data/items.json'
 
-function sdkStatNames(itemId: number): string[] {
-    return Object.keys(decodeCraftedItemStats(itemId, 0n))
-}
-
 describe('wrapped-asset schema parity with the contract catalog', () => {
     test('the catalog carries 31 schemas named <base>.v1', () => {
         const names = getWrappedSchemas().map((s) => s.name)
@@ -31,28 +19,14 @@ describe('wrapped-asset schema parity with the contract catalog', () => {
         for (const name of names) expect(name).toMatch(/^[a-z]{1,9}\.v1$/)
     })
 
-    test("every item's SDK stat names equal its schema's stat fields", () => {
-        const mismatches: string[] = []
+    test('no schema carries a per-stat field', () => {
         for (const schema of getWrappedSchemas()) {
-            const fields = wrappedSchemaStatFields(schema)
-            const itemIds = getWrappedSchemaItemIds(schema.name)
-            const union = new Set<string>()
-            for (const itemId of itemIds) {
-                const names = sdkStatNames(itemId)
-                for (const n of names) union.add(n)
-                const expected =
-                    getItem(itemId).type === 'entity'
-                        ? fields.filter((f) => names.includes(f))
-                        : fields
-                if (names.join(',') !== expected.join(',')) {
-                    mismatches.push(`${itemId} ${schema.name}: [${names}] != [${expected}]`)
-                }
-            }
-            if ([...union].sort().join(',') !== [...fields].sort().join(',')) {
-                mismatches.push(`${schema.name}: union [${[...union]}] != fields [${fields}]`)
-            }
+            const names = schema.fields.map((f) => f.name)
+            expect(names.indexOf('stats')).toBe(names.indexOf('quantity') + 1)
+            expect(schema.fields.filter((f) => f.type === 'uint16').map((f) => f.name)).toEqual([
+                'item_id',
+            ])
         }
-        expect(mismatches).toEqual([])
     })
 
     test('every gathered or craftable item has a schema', () => {
@@ -76,16 +50,5 @@ describe('wrapped-asset schema parity with the contract catalog', () => {
         ]) {
             expect(getWrappedSchema(itemId)).toBeUndefined()
         }
-    })
-
-    test('the ship schema carries both recipe lines as one union', () => {
-        const ship = getWrappedSchemas().find((s) => s.name === 'ship.v1')
-        expect(ship && wrappedSchemaStatFields(ship)).toEqual([
-            'strength',
-            'cohesion',
-            'plasticity',
-            'volatility',
-            'conductivity',
-        ])
     })
 })

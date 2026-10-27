@@ -1018,7 +1018,6 @@ exports[`module export surface 1`] = `
   "wormholeAt",
   "wormholeAtRegionEndpoint",
   "wrapCostKey",
-  "wrappedSchemaStatFields",
   "yieldThresholdAt",
 ]
 `;

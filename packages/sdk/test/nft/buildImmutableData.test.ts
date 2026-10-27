@@ -40,58 +40,37 @@ const COMMON_TAIL: [string, string][] = [
 ]
 
 describe('buildImmutableData', () => {
-    test('resource (ore) writes its three stats between quantity and stats', () => {
+    test('resource (ore) writes only the packed stats word', () => {
         const stats = encodeStats([200, 150, 99])
         const entries = buildImmutableData(ITEM_ORE_T1, 10, stats, -5, 7)
 
-        expect(layout(entries)).toEqual([
-            ['quantity', 'uint32'],
-            ['strength', 'uint16'],
-            ['tolerance', 'uint16'],
-            ['density', 'uint16'],
-            ...COMMON_TAIL,
-        ])
+        expect(layout(entries)).toEqual([['quantity', 'uint32'], ...COMMON_TAIL])
         expect(value(entries, 'quantity')).toBe(10)
         expect(value(entries, 'stats')).toBe(String(stats))
         expect(value(entries, 'origin_x')).toBe(-5)
         expect(value(entries, 'origin_y')).toBe(7)
-        expect(value(entries, 'strength')).toBe(200)
-        expect(value(entries, 'tolerance')).toBe(150)
-        expect(value(entries, 'density')).toBe(99)
         expect(String(value(entries, 'img'))).toMatch(
             /^https:\/\/item\.shiploadgame\.com\/item\/[A-Za-z0-9_-]+\.png$/
         )
     })
 
-    test('component (plate) names its stats from its recipe', () => {
-        const entries = buildImmutableData(ITEM_PLATE, 1, encodeStats([512, 333, 250]), 0, 0)
-        expect(layout(entries).slice(1, 4)).toEqual([
-            ['strength', 'uint16'],
-            ['tolerance', 'uint16'],
-            ['density', 'uint16'],
-        ])
-        expect(value(entries, 'tolerance')).toBe(333)
-        expect(value(entries, 'density')).toBe(250)
+    test('component (plate) writes only the packed stats word', () => {
+        const stats = encodeStats([512, 333, 250])
+        const entries = buildImmutableData(ITEM_PLATE, 1, stats, 0, 0)
+        expect(layout(entries)).toEqual([['quantity', 'uint32'], ...COMMON_TAIL])
+        expect(value(entries, 'stats')).toBe(String(stats))
     })
 
-    test('module layout pins the Limpet Bay T1 raw stats and no derived fields', () => {
+    test('module layout pins the Limpet Bay T1 packed stats and no named fields', () => {
         const stats = encodeStats([500, 600, 400])
         const entries = buildImmutableData(ITEM_GATHERER_T1, 1, stats, 0, 0)
 
-        expect(layout(entries)).toEqual([
-            ['quantity', 'uint32'],
-            ['density', 'uint16'],
-            ['tolerance', 'uint16'],
-            ['thermal', 'uint16'],
-            ...COMMON_TAIL,
-        ])
-        expect(value(entries, 'density')).toBe(500)
-        expect(value(entries, 'tolerance')).toBe(600)
-        expect(value(entries, 'thermal')).toBe(400)
+        expect(layout(entries)).toEqual([['quantity', 'uint32'], ...COMMON_TAIL])
+        expect(value(entries, 'stats')).toBe(String(stats))
         expect(getWrappedSchema(ITEM_GATHERER_T1)?.name).toBe('limpetbay.v1')
     })
 
-    test('ship layout pins entity_id, the hull stats of its own line, and the loadout', () => {
+    test('ship layout pins entity_id, the packed hull stats, and the loadout', () => {
         const hull = encodeStats([101, 202, 303, 404, 505])
         const core = encodeStats([300, 250])
         const engine = encodeStats([213, 213])
@@ -105,18 +84,13 @@ describe('buildImmutableData', () => {
         expect(layout(entries)).toEqual([
             ['entity_id', 'uint64'],
             ['quantity', 'uint32'],
-            ['strength', 'uint16'],
-            ['cohesion', 'uint16'],
-            ['plasticity', 'uint16'],
-            ['volatility', 'uint16'],
-            ['conductivity', 'uint16'],
             ...COMMON_TAIL,
             ['module_items', 'UINT16_VEC'],
             ['module_stats', 'UINT64_VEC'],
             ['loadout', 'string'],
         ])
         expect(value(entries, 'entity_id')).toBe('77')
-        expect(value(entries, 'conductivity')).toBe(505)
+        expect(value(entries, 'stats')).toBe(String(hull))
         expect(value(entries, 'module_items')).toEqual([ITEM_GENERATOR_T1, ITEM_ENGINE_T1, 0])
         expect(value(entries, 'module_stats')).toEqual([String(core), String(engine), '0'])
         expect(value(entries, 'loadout')).toBe(
@@ -129,7 +103,7 @@ describe('buildImmutableData', () => {
         expect(getWrappedSchema(ITEM_ROUSTABOUT_T1A_PACKED)?.name).toBe('ship.v1')
     })
 
-    test('structure layout pins the Warehouse hull stats and loadout', () => {
+    test('structure layout pins the Warehouse packed hull stats and loadout', () => {
         const hull = encodeStats([111, 222])
         const bay = encodeStats([321, 123])
         const modules = [
@@ -141,16 +115,14 @@ describe('buildImmutableData', () => {
         ]
         const entries = buildImmutableData(ITEM_WAREHOUSE_T2_PACKED, 1, hull, 0, 0, modules)
 
-        expect(layout(entries).slice(0, 6)).toEqual([
+        expect(layout(entries).slice(0, 4)).toEqual([
             ['entity_id', 'uint64'],
             ['quantity', 'uint32'],
-            ['cohesion', 'uint16'],
-            ['plasticity', 'uint16'],
             ['stats', 'uint64'],
             ['origin_x', 'int32'],
         ])
         expect(value(entries, 'entity_id')).toBe('0')
-        expect(value(entries, 'plasticity')).toBe(222)
+        expect(value(entries, 'stats')).toBe(String(hull))
         expect(value(entries, 'loadout')).toBe(
             [
                 'Slot 1: Shuttle Bay T2 (hardness 321, fineness 123)',

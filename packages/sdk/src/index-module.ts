@@ -785,7 +785,6 @@ export {
     getWrappedSchema,
     getWrappedSchemas,
     getWrappedSchemaItemIds,
-    wrappedSchemaStatFields,
 } from './nft/schemas'
 export type {WrappedSchema} from './nft/schemas'
 export type {

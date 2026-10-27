@@ -1,6 +1,5 @@
 import {Serializer} from '@wharfkit/antelope'
 import {getItem} from '../data/catalog'
-import {decodeCraftedItemStats} from '../derivation/crafting'
 import {Types as ServerTypes} from '../contracts/server'
 import {buildEntityLoadout} from './description'
 import {getWrappedSchema} from './schemas'
@@ -109,9 +108,6 @@ export function buildImmutableData(
         ['deposit_token', '0'],
         ['deposit_symbol', '0'],
     ])
-    for (const [key, value] of Object.entries(decodeCraftedItemStats(itemId, stats))) {
-        values.set(key, value)
-    }
     if (isEntity) {
         const moduleItems = slots.map((m) => (m.installed ? Number(m.installed.item_id) : 0))
         const moduleStats = slots.map((m) => (m.installed ? BigInt(m.installed.stats) : 0n))

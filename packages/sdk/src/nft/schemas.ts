@@ -22,8 +22,3 @@ export function getWrappedSchema(itemId: number): WrappedSchema | undefined {
 export function getWrappedSchemaItemIds(schemaName: string): number[] {
     return schemasJson.templates.filter((t) => t.schema === schemaName).map((t) => t.itemId)
 }
-
-export function wrappedSchemaStatFields(schema: WrappedSchema): string[] {
-    const names = schema.fields.map((f) => f.name)
-    return names.slice(names.indexOf('quantity') + 1, names.indexOf('stats'))
-}
