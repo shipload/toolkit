@@ -26,6 +26,10 @@ const ENTITY_HULL_SLOTS: Record<number, SlotConsumer> = {
     2: {capability: 'Storage', attribute: 'capacity'},
 }
 
+const STRUCTURE_HULL_SLOTS: Record<number, SlotConsumer> = {
+    1: {capability: 'Hull', attribute: 'mass'},
+}
+
 export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer>> = {
     engine: {
         0: {capability: 'Movement', attribute: 'thrust'},
@@ -69,7 +73,7 @@ export const SLOT_FORMULAS: Record<SlotConsumerKind, Record<number, SlotConsumer
     },
     'ship-t1': ENTITY_HULL_SLOTS,
     'container-t1': ENTITY_HULL_SLOTS,
-    'warehouse-t2': ENTITY_HULL_SLOTS,
-    'extractor-t2': ENTITY_HULL_SLOTS,
+    'warehouse-t2': STRUCTURE_HULL_SLOTS,
+    'extractor-t2': STRUCTURE_HULL_SLOTS,
     'container-t2': ENTITY_HULL_SLOTS,
 }

@@ -2538,6 +2538,102 @@
     "outputMass": 51200,
     "inputs": [
       {
+        "itemId": 11008,
+        "quantity": 1000
+      },
+      {
+        "itemId": 11007,
+        "quantity": 1000
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 11203,
+    "outputMass": 30400,
+    "inputs": [
+      {
+        "itemId": 11006,
+        "quantity": 1000
+      },
+      {
+        "itemId": 11003,
+        "quantity": 1000
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 11204,
+    "outputMass": 30400,
+    "inputs": [
+      {
+        "itemId": 11007,
+        "quantity": 1000
+      },
+      {
+        "itemId": 11006,
+        "quantity": 1000
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 11207,
+    "outputMass": 38400,
+    "inputs": [
+      {
         "itemId": 11001,
         "quantity": 1000
       },
@@ -2554,125 +2650,6 @@
             "statIndex": 0
           }
         ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 1,
-            "statIndex": 2
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "outputItemId": 11203,
-    "outputMass": 30400,
-    "inputs": [
-      {
-        "itemId": 11008,
-        "quantity": 600
-      },
-      {
-        "itemId": 11006,
-        "quantity": 600
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": []
-      }
-    ]
-  },
-  {
-    "outputItemId": 11204,
-    "outputMass": 30400,
-    "inputs": [
-      {
-        "itemId": 11008,
-        "quantity": 600
-      },
-      {
-        "itemId": 11007,
-        "quantity": 600
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 2
-          }
-        ]
-      },
-      {
-        "sources": [
-          {
-            "inputIndex": 0,
-            "statIndex": 1
-          }
-        ]
-      },
-      {
-        "sources": []
-      }
-    ]
-  },
-  {
-    "outputItemId": 11207,
-    "outputMass": 38400,
-    "inputs": [
-      {
-        "itemId": 11005,
-        "quantity": 200
-      },
-      {
-        "itemId": 11010,
-        "quantity": 200
-      }
-    ],
-    "statSlots": [
-      {
-        "sources": []
       },
       {
         "sources": [
@@ -2690,11 +2667,11 @@
     "inputs": [
       {
         "itemId": 11001,
-        "quantity": 600
+        "quantity": 1000
       },
       {
         "itemId": 11003,
-        "quantity": 600
+        "quantity": 1000
       }
     ],
     "statSlots": [
@@ -2709,16 +2686,10 @@
       {
         "sources": [
           {
-            "inputIndex": 0,
-            "statIndex": 2
+            "inputIndex": 1,
+            "statIndex": 0
           }
         ]
-      },
-      {
-        "sources": []
-      },
-      {
-        "sources": []
       }
     ]
   },

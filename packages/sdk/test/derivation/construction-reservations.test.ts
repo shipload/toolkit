@@ -14,7 +14,7 @@ import {
     SCHEDULE_START,
 } from './construction-fixtures'
 
-const PLATE = 11001
+const CERAMIC = 11008
 const FRAME = 10002
 
 describe('ConstructionManager.reservationsFrom', () => {
@@ -33,7 +33,7 @@ describe('ConstructionManager.reservationsFrom', () => {
                     type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
-                    cargo: [{itemId: PLATE, qty: 5}],
+                    cargo: [{itemId: CERAMIC, qty: 5}],
                 }),
                 makeTask({
                     type: TaskType.UNLOAD,
@@ -45,7 +45,7 @@ describe('ConstructionManager.reservationsFrom', () => {
         })
         const result = mgr.reservationsFrom(UInt64.from(10), [hauler])
         expect(result.map((r) => [Number(r.targetEntityId), r.itemId, r.quantity])).toEqual([
-            [1101, PLATE, 5],
+            [1101, CERAMIC, 5],
             [1102, FRAME, 3],
         ])
     })
@@ -58,7 +58,7 @@ describe('ConstructionManager.reservationsFrom', () => {
                     type: TaskType.LOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
-                    cargo: [{itemId: PLATE, qty: 5}],
+                    cargo: [{itemId: CERAMIC, qty: 5}],
                 }),
             ],
         })
@@ -74,7 +74,7 @@ describe('ConstructionManager.reservationsFrom', () => {
                     type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
-                    cargo: [{itemId: PLATE, qty: 5}],
+                    cargo: [{itemId: CERAMIC, qty: 5}],
                 }),
             ],
         })
@@ -89,13 +89,13 @@ describe('ConstructionManager.reservationsFrom', () => {
                     type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
-                    cargo: [{itemId: PLATE, qty: 3}],
+                    cargo: [{itemId: CERAMIC, qty: 3}],
                 }),
                 makeTask({
                     type: TaskType.UNLOAD,
                     duration: 60,
                     target: entityRef('plot', 1101),
-                    cargo: [{itemId: PLATE, qty: 4}],
+                    cargo: [{itemId: CERAMIC, qty: 4}],
                 }),
             ],
         })
@@ -182,7 +182,7 @@ describe('partitionSources netting against reservations', () => {
         const plot = makePlot()
         const target = mgr.getTarget(plot, [])!
         const ship = makeLoaderShip(10)
-        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+        const cargo = [makeCargoRow(10, 100, CERAMIC, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
         expect(sources[0].relevantCargo[0].available).toBe(80)
@@ -201,12 +201,12 @@ describe('partitionSources netting against reservations', () => {
                         type: TaskType.UNLOAD,
                         duration: 60,
                         target: entityRef('plot', 9999),
-                        cargo: [{itemId: PLATE, qty: 30}],
+                        cargo: [{itemId: CERAMIC, qty: 30}],
                     }),
                 ],
             })
         )
-        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+        const cargo = [makeCargoRow(10, 100, CERAMIC, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
         expect(sources[0].relevantCargo[0].available).toBe(50)
@@ -225,12 +225,12 @@ describe('partitionSources netting against reservations', () => {
                         type: TaskType.LOAD,
                         duration: 60,
                         target: entityRef('plot', 9999),
-                        cargo: [{itemId: PLATE, qty: 30}],
+                        cargo: [{itemId: CERAMIC, qty: 30}],
                     }),
                 ],
             })
         )
-        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+        const cargo = [makeCargoRow(10, 100, CERAMIC, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
         expect(sources[0].relevantCargo[0].available).toBe(80)
@@ -243,7 +243,7 @@ describe('partitionSources netting against reservations', () => {
         const shuttle = makeTask({
             type: TaskType.SHUTTLE,
             duration: 60,
-            cargo: [{itemId: PLATE, qty: 30}],
+            cargo: [{itemId: CERAMIC, qty: 30}],
         })
         shuttle.couplings.push(
             ServerContract.Types.coupling.from({
@@ -264,7 +264,7 @@ describe('partitionSources netting against reservations', () => {
                 tasks: [shuttle],
             })
         )
-        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+        const cargo = [makeCargoRow(10, 100, CERAMIC, 80)]
 
         expect(mgr.reservationsFrom(UInt64.from(10), [ship])).toEqual([])
         const sources = mgr.partitionSources(target, [ship], cargo).eligible
@@ -284,12 +284,12 @@ describe('partitionSources netting against reservations', () => {
                         type: TaskType.UNLOAD,
                         duration: 60,
                         target: entityRef('plot', 9999),
-                        cargo: [{itemId: PLATE, qty: 80}],
+                        cargo: [{itemId: CERAMIC, qty: 80}],
                     }),
                 ],
             })
         )
-        const cargo = [makeCargoRow(10, 100, PLATE, 80)]
+        const cargo = [makeCargoRow(10, 100, CERAMIC, 80)]
 
         const sources = mgr.eligibleSources(target, [ship], cargo)
         expect(sources).toEqual([])

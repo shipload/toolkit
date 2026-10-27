@@ -58,6 +58,7 @@ describe('SLOT_FORMULAS', () => {
             'extractor-t2',
             'container-t2',
         ])
+        const structureRecordedSlot0 = new Set<SlotConsumerKind>(['warehouse-t2', 'extractor-t2'])
 
         for (const recipe of recipes) {
             const kind = ITEM_ID_TO_KIND[recipe.outputItemId]
@@ -67,6 +68,7 @@ describe('SLOT_FORMULAS', () => {
                 if (recipe.statSlots[i].sources.length === 0) continue
                 if (kind === 'gatherer' && i === 3) continue
                 if (hullReservedSlot3.has(kind) && i === 3) continue
+                if (structureRecordedSlot0.has(kind) && i === 0) continue
                 assert.property(
                     formula,
                     String(i),

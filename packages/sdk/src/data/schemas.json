@@ -1618,19 +1618,11 @@
           "type": "uint32"
         },
         {
-          "name": "strength",
+          "name": "cohesion",
           "type": "uint16"
         },
         {
-          "name": "density",
-          "type": "uint16"
-        },
-        {
-          "name": "hardness",
-          "type": "uint16"
-        },
-        {
-          "name": "fineness",
+          "name": "plasticity",
           "type": "uint16"
         },
         {
@@ -1699,11 +1691,11 @@
           "type": "uint32"
         },
         {
-          "name": "fineness",
+          "name": "conductivity",
           "type": "uint16"
         },
         {
-          "name": "hardness",
+          "name": "volatility",
           "type": "uint16"
         },
         {
@@ -1772,11 +1764,11 @@
           "type": "uint32"
         },
         {
-          "name": "fineness",
+          "name": "plasticity",
           "type": "uint16"
         },
         {
-          "name": "hardness",
+          "name": "conductivity",
           "type": "uint16"
         },
         {
@@ -1845,7 +1837,11 @@
           "type": "uint32"
         },
         {
-          "name": "plasticity",
+          "name": "strength",
+          "type": "uint16"
+        },
+        {
+          "name": "cohesion",
           "type": "uint16"
         },
         {
@@ -1918,7 +1914,7 @@
           "type": "uint16"
         },
         {
-          "name": "density",
+          "name": "volatility",
           "type": "uint16"
         },
         {

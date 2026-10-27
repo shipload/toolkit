@@ -16,6 +16,8 @@ import {
     computeShipHullCapabilities,
     computeStructureBaseCapacity,
     computeWarehouseHullCapabilities,
+    STRUCTURE_BASE_CAPACITY,
+    WAREHOUSE_BASE_CAPACITY,
     gathererDepthForTier,
 } from '../derivation/capabilities'
 import {DEPTH_THRESHOLD_T3, DEPTH_THRESHOLD_T4, DEPTH_THRESHOLD_T5} from '../derivation/resources'
@@ -214,41 +216,32 @@ describe('WP-CP-18: input selection payoff', () => {
             [0.01, 1.89],
         ]
         for (const [share, multiplier] of expected) {
-            const selected = topShare(share)
-            const dual = warehouseCap(selected) / warehouseCap(floor)
-            const ship = shipCap(selected) / shipCap(floor)
-            expect(Math.abs(dual - multiplier)).toBeLessThan(0.01)
+            const ship = shipCap(topShare(share)) / shipCap(floor)
             expect(Math.abs(ship - multiplier)).toBeLessThan(0.01)
         }
     })
 
     test('WP-CP-18-god-roll all counted stats at 999 pay 4.09x over the unselected baseline', () => {
         const floor = mean(sortedStats())
-        expect(Math.abs(warehouseCap(999) / warehouseCap(floor) - 4.09)).toBeLessThan(0.01)
         expect(Math.abs(shipCap(999) / shipCap(floor) - 4.09)).toBeLessThan(0.01)
-        expect(warehouseCap(999) / warehouseCap(0)).toBeCloseTo(6, 3)
+        expect(shipCap(999) / shipCap(0)).toBeCloseTo(6, 3)
     })
 
     test('WP-CP-18-bounded the payoff rises with the selected share and never passes the god-roll', () => {
-        const caps = [1, 0.5, 0.25, 0.1, 0.01].map((s) => warehouseCap(topShare(s)))
+        const caps = [1, 0.5, 0.25, 0.1, 0.01].map((s) => shipCap(topShare(s)))
         for (let i = 1; i < caps.length; i++) expect(caps[i]).toBeGreaterThan(caps[i - 1])
-        expect(caps[caps.length - 1]).toBeLessThan(warehouseCap(999))
+        expect(caps[caps.length - 1]).toBeLessThan(shipCap(999))
     })
 
-    test('WP-CP-18-single-source a hull that counts one structural stat pays the square root of those multipliers', () => {
-        const floor = mean(sortedStats())
-        const single = (stat: number) => computeStructureBaseCapacity({strength: 0, hardness: stat})
-        const expected: [number, number][] = [
-            [0.25, 1.15],
-            [0.1, 1.22],
-            [0.01, 1.37],
-        ]
-        for (const [share, multiplier] of expected) {
-            expect(Math.abs(single(topShare(share)) / single(floor) - multiplier)).toBeLessThan(
-                0.01
-            )
+    test('WP-CP-18-structures a structure pays nothing for selection: its capacity is the mean-roll constant', () => {
+        const structure = (stat: number) =>
+            computeStructureBaseCapacity({strength: stat, hardness: stat})
+        for (const stat of [0, topShare(0.25), topShare(0.01), 999]) {
+            expect(warehouseCap(stat)).toBe(WAREHOUSE_BASE_CAPACITY)
+            expect(structure(stat)).toBe(STRUCTURE_BASE_CAPACITY)
         }
-        expect(Math.abs(single(999) / single(floor) - 2.02)).toBeLessThan(0.01)
+        expect(tonnes(WAREHOUSE_BASE_CAPACITY)).toBeCloseTo(146_525, 0)
+        expect(tonnes(STRUCTURE_BASE_CAPACITY)).toBeCloseTo(32_235.5, 1)
     })
 })
 

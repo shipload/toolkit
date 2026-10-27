@@ -130,7 +130,7 @@ describe('buildImmutableData', () => {
     })
 
     test('structure layout pins the Warehouse hull stats and loadout', () => {
-        const hull = encodeStats([111, 222, 333, 444])
+        const hull = encodeStats([111, 222])
         const bay = encodeStats([321, 123])
         const modules = [
             {type: 0, installed: {item_id: ITEM_LOADER_T2, stats: bay}},
@@ -144,13 +144,13 @@ describe('buildImmutableData', () => {
         expect(layout(entries).slice(0, 6)).toEqual([
             ['entity_id', 'uint64'],
             ['quantity', 'uint32'],
-            ['strength', 'uint16'],
-            ['density', 'uint16'],
-            ['hardness', 'uint16'],
-            ['fineness', 'uint16'],
+            ['cohesion', 'uint16'],
+            ['plasticity', 'uint16'],
+            ['stats', 'uint64'],
+            ['origin_x', 'int32'],
         ])
         expect(value(entries, 'entity_id')).toBe('0')
-        expect(value(entries, 'fineness')).toBe(444)
+        expect(value(entries, 'plasticity')).toBe(222)
         expect(value(entries, 'loadout')).toBe(
             [
                 'Slot 1: Shuttle Bay T2 (hardness 321, fineness 123)',

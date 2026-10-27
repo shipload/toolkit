@@ -4,6 +4,7 @@ import {renderWhereUsed, renderDemand, renderResourceDemand} from './recipe'
 
 const ITEM_SENSOR = 10006
 const ITEM_SENSOR_T2 = 11006
+const ITEM_MINING_RIG_T2 = 11203
 const ITEM_RESIN = 10010
 const ITEM_RESONATOR = 10004
 
@@ -16,7 +17,10 @@ test('renderWhereUsed shows the hull slot fed by Sensor', () => {
 })
 
 test('renderWhereUsed marks a mass-only consumer as a sink', () => {
-    const out = renderWhereUsed(ITEM_SENSOR_T2, getRecipeConsumers(ITEM_SENSOR_T2))
+    const consumers = getRecipeConsumers(ITEM_SENSOR_T2).map((c) =>
+        c.outputItemId === ITEM_MINING_RIG_T2 ? {...c, statFlows: []} : c
+    )
+    const out = renderWhereUsed(ITEM_SENSOR_T2, consumers)
     expect(out).toContain('Sensor')
     expect(out).toContain('1 sink-only')
     expect(out).toMatch(/Mining Rig.*sink|sink.*Mining Rig/s)

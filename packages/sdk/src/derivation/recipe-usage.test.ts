@@ -51,11 +51,12 @@ test('Beam feeds the gatherer yield stat', () => {
     expect(yieldFlow).toBeDefined()
 })
 
-test('Sensor is a mass-only sink in the Extractor recipe', () => {
+test('Sensor is recorded on the Extractor but feeds no capability', () => {
     const consumers = getRecipeConsumers(ITEM_SENSOR_T2)
     const extractor = consumers.find((c) => c.outputItemId === ITEM_EXTRACTOR_T2_PACKED)
-    expect(extractor).toBeDefined()
-    expect(extractor?.statFlows).toHaveLength(0)
+    expect(extractor?.quantity).toBe(1000)
+    expect(extractor?.statFlows).toHaveLength(1)
+    expect(extractor?.statFlows[0].capability).toBeUndefined()
 })
 
 test('getResourceDemand returns the resource tonnage for a single-resource component', () => {

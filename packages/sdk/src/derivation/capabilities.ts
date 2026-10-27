@@ -329,9 +329,11 @@ const CAPACITY_FN_BY_NAME: Partial<
     structure: computeStructureBaseCapacity,
 }
 
-export function computeStructureBaseCapacity(stats: Record<string, number>): number {
-    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
-    return Math.floor(220000 * 6 ** (statSum / 1998.0))
+export const STRUCTURE_BASE_CAPACITY = 322_355
+export const WAREHOUSE_BASE_CAPACITY = 1_465_251
+
+export function computeStructureBaseCapacity(_stats: Record<string, number>): number {
+    return STRUCTURE_BASE_CAPACITY
 }
 
 export function computeBaseCapacity(itemId: number, stats: Record<string, number>): number {
@@ -367,11 +369,9 @@ export function computeWarehouseHullCapabilities(stats: Record<string, number>):
     hullmass: number
     capacity: number
 } {
-    const statSum = (stats.strength ?? 0) + (stats.hardness ?? 0)
-    const exponent = statSum / 1998.0
     return {
         hullmass: computeBaseHullmassFromStats(ITEM_WAREHOUSE_T2_PACKED, stats),
-        capacity: Math.floor(1000000 * 6 ** exponent),
+        capacity: WAREHOUSE_BASE_CAPACITY,
     }
 }
 

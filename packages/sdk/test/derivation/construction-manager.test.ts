@@ -54,7 +54,7 @@ describe('ConstructionManager.getTarget', () => {
 describe('ConstructionManager.eligibleSources / unreachableSources', () => {
     const OWNER = Name.from('alice.gm')
     const COORDS = ServerContract.Types.coordinates.from({x: Int64.from(4), y: Int64.from(3)})
-    const INPUT_ITEM_ID = 11001
+    const INPUT_ITEM_ID = 11008
 
     function makePlot() {
         return ServerContract.Types.entity_row.from({

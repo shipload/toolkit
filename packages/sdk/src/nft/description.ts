@@ -12,6 +12,8 @@ import {
     LOADER_THRUST_TIER_PCT,
     CARGO_BAY_CAPACITY_TIER_PCT,
     BATTERY_CAPACITY_TIER_PCT,
+    STRUCTURE_BASE_CAPACITY,
+    WAREHOUSE_BASE_CAPACITY,
 } from '../derivation/capabilities'
 import {getItem, tryGetItem} from '../data/catalog'
 import type {ModuleType} from '../types'
@@ -56,14 +58,12 @@ export function computeBaseCapacityContainer(stats: bigint): number {
     return Math.floor(141_000 * 6 ** (s / 1998))
 }
 
-export function computeBaseCapacityStructure(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(220_000 * 6 ** (s / 1998))
+export function computeBaseCapacityStructure(_stats: bigint): number {
+    return STRUCTURE_BASE_CAPACITY
 }
 
-export function computeBaseCapacityWarehouse(stats: bigint): number {
-    const s = decodeStat(stats, 0) + decodeStat(stats, 2)
-    return Math.floor(1_000_000 * 6 ** (s / 1998))
+export function computeBaseCapacityWarehouse(_stats: bigint): number {
+    return WAREHOUSE_BASE_CAPACITY
 }
 
 export function computeBaseCapacityDepot(stats: bigint): number {

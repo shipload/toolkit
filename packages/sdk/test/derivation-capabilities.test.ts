@@ -8,6 +8,8 @@ import {
     computeShipHullCapabilities,
     gathererDepthForTier,
     GATHERER_DEPTH_TABLE,
+    STRUCTURE_BASE_CAPACITY,
+    WAREHOUSE_BASE_CAPACITY,
 } from '../src/derivation/capabilities'
 import {
     ITEM_CONTAINER_T1_PACKED,
@@ -36,17 +38,17 @@ describe('computeBaseCapacity', () => {
         expect(computeBaseCapacity(ITEM_SHIP_T1_PACKED, stats)).toBeGreaterThan(0)
     })
 
-    test('extractor and factory use the structure formula', () => {
-        const structure = applyCapacityTier(Math.floor(220_000 * 6 ** (200 / 1998)), 2)
+    test('extractor and factory take the structure constant whatever their stats', () => {
+        const structure = applyCapacityTier(STRUCTURE_BASE_CAPACITY, 2)
+        const rolled = {strength: 999, hardness: 999, cohesion: 999, density: 999}
         expect(computeBaseCapacity(ITEM_EXTRACTOR_T2_PACKED, stats)).toBe(structure)
-        expect(computeBaseCapacity(ITEM_FACTORY_T2_PACKED, stats)).toBe(structure)
+        expect(computeBaseCapacity(ITEM_FACTORY_T2_PACKED, rolled)).toBe(structure)
     })
 
-    test('warehouse retains its own 1M base capacity curve', () => {
-        const base = Math.floor(1_000_000 * 6 ** (200 / 1998))
-        expect(computeBaseCapacity(ITEM_WAREHOUSE_T2_PACKED, stats)).toBe(
-            applyCapacityTier(base, 2)
-        )
+    test('warehouse takes its own constant whatever its stats', () => {
+        const warehouse = applyCapacityTier(WAREHOUSE_BASE_CAPACITY, 2)
+        expect(computeBaseCapacity(ITEM_WAREHOUSE_T2_PACKED, stats)).toBe(warehouse)
+        expect(computeBaseCapacity(ITEM_WAREHOUSE_T2_PACKED, {})).toBe(warehouse)
     })
 
     test('container T1 uses its own 141k base capacity curve', () => {
