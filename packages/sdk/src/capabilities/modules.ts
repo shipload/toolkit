@@ -84,3 +84,31 @@ export function slotAcceptsModule(slot: EntitySlot, moduleItemId: number): boole
     if (!moduleAccepts(moduleSlotTypeToCode(slot.type), moduleType)) return false
     return getItem(moduleItemId).tier <= slot.maxTier
 }
+
+export interface ReslottedModules<T extends {itemId: number}> {
+    slots: (T | null)[]
+    displaced: T[]
+    displacedMass: number
+}
+
+export function reslotModules<T extends {itemId: number}>(
+    installed: readonly (T | null | undefined)[],
+    targetSlots: readonly EntitySlot[]
+): ReslottedModules<T> {
+    const slots: (T | null)[] = targetSlots.map(() => null)
+    const displaced: T[] = []
+    let displacedMass = 0
+    for (const module of installed) {
+        if (!module) continue
+        const slot = targetSlots.findIndex(
+            (s, i) => slots[i] === null && slotAcceptsModule(s, module.itemId)
+        )
+        if (slot >= 0) {
+            slots[slot] = module
+            continue
+        }
+        displaced.push(module)
+        displacedMass += getItem(module.itemId).mass
+    }
+    return {slots, displaced, displacedMass}
+}

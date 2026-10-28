@@ -950,6 +950,7 @@ exports[`module export surface 1`] = `
   "regionOf",
   "removeFromStacks",
   "renderDescription",
+  "reslotModules",
   "resolveItem",
   "resolveItemCategory",
   "resolveLaneBuilder",
