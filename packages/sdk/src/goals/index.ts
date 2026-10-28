@@ -537,6 +537,22 @@ export function deriveGoal(goal: Goal, holdings: GoalHoldings): GoalPlan {
     return deriveGoals([goal], holdings)[0]
 }
 
+export function sequenceGoal(plan: GoalPlan): GoalStep[] {
+    const done = new Set<string>()
+    const left = plan.steps.map((s) => ({...s, waiting: false}))
+    const out: GoalStep[] = []
+    while (left.length > 0) {
+        const open = left.map((s) => ({...s, dependsOn: s.dependsOn.filter((id) => !done.has(id))}))
+        const next = orderReady(open, plan.hunts)[0]
+        if (!next) break
+        const index = left.findIndex((s) => s.id === next.id)
+        out.push(plan.steps.find((s) => s.id === next.id)!)
+        done.add(next.id)
+        left.splice(index, 1)
+    }
+    return out
+}
+
 export interface GoalMeasure {
     actions: number
     gathers: number

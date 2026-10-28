@@ -606,7 +606,7 @@ export {
 } from './derivation/build-methods'
 export type {BuildMethod} from './derivation/build-methods'
 
-export {canSetGoal, deriveGoal, deriveGoals, isShipItem, measureGoal} from './goals'
+export {canSetGoal, deriveGoal, deriveGoals, isShipItem, measureGoal, sequenceGoal} from './goals'
 export {statFlow, statFlowByResource, statFlowPlates, statSlotLabel} from './goals/stat-flow'
 export type {
     StatFlowAttribute,

@@ -5,6 +5,7 @@ import {
     deriveGoal,
     deriveGoals,
     measureGoal,
+    sequenceGoal,
     type GoalHoldings,
     type GoalMeasure,
 } from './index'
@@ -230,5 +231,37 @@ describe('deriveGoal', () => {
         )
         expect(plan.ready.map((s) => s.id)).toEqual(['collect-workshop:10009', 'gather:101'])
         expect(plan.hunts.map((h) => h.category)).toEqual(['ore'])
+    })
+})
+
+describe('sequenceGoal', () => {
+    test('walks the ready set one step at a time, each booking before the next gather', () => {
+        const plan = deriveGoal(
+            {itemId: 10102, quantity: 1, ship: 'new'},
+            {stock: [], entities: []}
+        )
+        expect(sequenceGoal(plan).map((s) => s.id)).toEqual([
+            'gather:101',
+            'book:10005',
+            'pickup:10005',
+            'gather:301',
+            'book:10009',
+            'pickup:10009',
+            'book:10102',
+            'pickup:10102',
+            'install:10102',
+        ])
+    })
+
+    test('a running job is walked as a pick-up the sequence waits on', () => {
+        const plan = deriveGoal(
+            {itemId: 10101, quantity: 1},
+            {stock: [{itemId: 10004, quantity: 600, place: 'job'}], entities: []}
+        )
+        expect(sequenceGoal(plan).map((s) => s.id)).toEqual([
+            'collect-job:10004',
+            'book:10101',
+            'pickup:10101',
+        ])
     })
 })
