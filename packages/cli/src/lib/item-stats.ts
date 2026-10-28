@@ -4,7 +4,7 @@ import {
 	FIGURE_SECTION_LABELS,
 	formatMass,
 	getItem,
-	getItemStatSlots,
+	getCarriedItemStatSlots,
 	getStatDefinitions,
 	isModuleItem,
 	MODULE_FIGURE_SECTION,
@@ -33,7 +33,7 @@ function formatResourceStats(itemId: number, stats: bigint): string {
 function formatComponentStats(itemId: number, stats: bigint): string {
 	if (stats === 0n) return "";
 	const parts: string[] = [];
-	for (const slot of getItemStatSlots(itemId)) {
+	for (const slot of getCarriedItemStatSlots(itemId)) {
 		const value = decodeStat(stats, slot.index);
 		if (value === 0) continue;
 		parts.push(statPair(slot.abbreviation, value));

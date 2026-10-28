@@ -20,7 +20,7 @@ import {
     MODULE_LOADER,
     MODULE_STORAGE,
 } from '../capabilities/modules'
-import {decodeCraftedItemStats, decodeStat, getItemStatSlots} from '../derivation/crafting'
+import {decodeCraftedItemStats, decodeStat, getCarriedItemStatSlots} from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
 import {
     computeCrafterCapabilities,
@@ -128,18 +128,20 @@ function resolveComponent(id: number, stats?: UInt64Type): ResolvedItem {
     let resolvedStats: ResolvedItemStat[] | undefined
     if (stats !== undefined) {
         const decoded = decodeCraftedItemStats(id, toBigStats(stats))
-        const slotByKey = new Map(getItemStatSlots(id).map((slot) => [slot.key, slot]))
-        resolvedStats = Object.entries(decoded).map(([key, value]) => {
-            const slot = slotByKey.get(key)
-            return {
-                key,
-                label: slot?.label ?? key,
-                abbreviation: slot?.abbreviation ?? key.slice(0, 3).toUpperCase(),
-                value,
-                color: '#9BADB8',
-                inverted: slot?.sources.length === 1 ? slot.sources[0].inverted : undefined,
-            }
-        })
+        const slotByKey = new Map(getCarriedItemStatSlots(id).map((slot) => [slot.key, slot]))
+        resolvedStats = Object.entries(decoded)
+            .filter(([key]) => slotByKey.has(key))
+            .map(([key, value]) => {
+                const slot = slotByKey.get(key)
+                return {
+                    key,
+                    label: slot?.label ?? key,
+                    abbreviation: slot?.abbreviation ?? key.slice(0, 3).toUpperCase(),
+                    value,
+                    color: '#9BADB8',
+                    inverted: slot?.sources.length === 1 ? slot.sources[0].inverted : undefined,
+                }
+            })
     }
     return {
         itemId: id,

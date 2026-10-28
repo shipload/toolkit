@@ -581,6 +581,7 @@ export {
     decodeCraftedItemStats,
     usedInputStatKeys,
     getItemStatSlots,
+    getCarriedItemStatSlots,
     traceResourceStatKeys,
     blendStacks,
     computeComponentStats,

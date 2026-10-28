@@ -117,6 +117,7 @@ export interface ItemStatSlot {
     label: string
     abbreviation: string
     sources: StatDefinition[]
+    meanHeld: boolean
 }
 
 export function getItemStatSlots(itemId: number): ItemStatSlot[] {
@@ -129,7 +130,16 @@ export function getItemStatSlots(itemId: number): ItemStatSlot[] {
         if (sources.length === 0) {
             const own = findStatDefinition(key)?.definition
             return own
-                ? [{index, key, label: own.label, abbreviation: own.abbreviation, sources: [own]}]
+                ? [
+                      {
+                          index,
+                          key,
+                          label: own.label,
+                          abbreviation: own.abbreviation,
+                          sources: [own],
+                          meanHeld: getItem(itemId).type !== 'resource',
+                      },
+                  ]
                 : []
         }
         return [
@@ -139,9 +149,14 @@ export function getItemStatSlots(itemId: number): ItemStatSlot[] {
                 label: sources.map((s) => s.label).join(' + '),
                 abbreviation: sources.map((s) => s.abbreviation).join('+'),
                 sources,
+                meanHeld: false,
             },
         ]
     })
+}
+
+export function getCarriedItemStatSlots(itemId: number): ItemStatSlot[] {
+    return getItemStatSlots(itemId).filter((slot) => !slot.meanHeld)
 }
 
 function statRecordFromResources(
