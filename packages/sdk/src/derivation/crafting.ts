@@ -172,9 +172,29 @@ function statRecordFromResources(
     }
     const keys = getItemStatKeys(itemId)
     const values = computeStatsFromResources(itemId, resources)
-    return Object.fromEntries(
-        keys.flatMap((key, i) => (key && values[i] !== undefined ? [[key, values[i]]] : []))
-    )
+    return Object.fromEntries([
+        ...keys.flatMap((key, i) => (key && values[i] !== undefined ? [[key, values[i]]] : [])),
+        ...values.map((value, i) => [slotKey(i), value]),
+    ])
+}
+
+// two slots of a crafted input can share a stat name, so a source reads its slot by position
+const slotKey = (index: number) => `#${index}`
+
+function decodeCraftedSlots(itemId: number, stats: bigint): Record<string, number> {
+    const out = decodeCraftedItemStats(itemId, stats)
+    getItemStatKeys(itemId).forEach((_, i) => {
+        out[slotKey(i)] = decodeStat(stats, i)
+    })
+    return out
+}
+
+function craftedSourceValue(
+    blended: Record<string, number> | undefined,
+    statIndex: number,
+    key: string
+) {
+    return blended?.[slotKey(statIndex)] ?? blended?.[key] ?? 0
 }
 
 export function computeStatsFromResources(
@@ -304,7 +324,7 @@ export function computeEntityStats(
             const key = keyForRecipeInputStat(recipe, src.inputIndex, src.statIndex)
             const input = recipe.inputs[src.inputIndex]
             if (!input) continue
-            sum += (blendedByComponent[input.itemId]?.[key] ?? 0) * weight
+            sum += craftedSourceValue(blendedByComponent[input.itemId], src.statIndex, key) * weight
             count += weight
         }
         const value = count > 0 ? Math.floor(sum / count) : 0
@@ -435,7 +455,7 @@ export function computeCraftedOutputStats(
             for (const s of slot.stacks) {
                 list.push({
                     quantity: s.quantity,
-                    stats: decodeCraftedItemStats(slot.itemId, s.stats),
+                    stats: decodeCraftedSlots(slot.itemId, s.stats),
                 })
             }
         }
@@ -456,7 +476,7 @@ export function computeCraftedOutputStats(
         if (inputItem.type === 'resource' && inputItem.category) {
             return blendStacks(decodedByCategory[inputItem.category] ?? [], key)
         }
-        return blendedByItem[input.itemId]?.[key] ?? 0
+        return craftedSourceValue(blendedByItem[input.itemId], src.statIndex, key)
     }
 
     const out: number[] = []

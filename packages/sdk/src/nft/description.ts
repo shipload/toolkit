@@ -1,5 +1,5 @@
 import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
-import {decodeCraftedItemStats, decodeStat} from '../derivation/crafting'
+import {decodeStat, getItemStatKeys} from '../derivation/crafting'
 import {
     gathererDepthForTier,
     moduleTierPct,
@@ -163,7 +163,9 @@ export function moduleDisplayName(itemId: number): string {
 export function formatLoadoutLine(slot: number, itemId: number, stats: bigint): string {
     const label = `Slot ${slot + 1}: `
     if (itemId === 0) return `${label}empty`
-    const named = Object.entries(decodeCraftedItemStats(itemId, stats))
+    const named = getItemStatKeys(itemId)
+        .map((key, i) => [key, decodeStat(stats, i)] as const)
+        .filter(([key]) => key)
     const statText =
         named.length > 0 ? ` (${named.map(([key, value]) => `${key} ${value}`).join(', ')})` : ''
     return `${label}${moduleDisplayName(itemId)} T${getItem(itemId).tier}${statText}`

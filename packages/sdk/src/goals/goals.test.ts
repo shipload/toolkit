@@ -87,13 +87,13 @@ describe('deriveGoal', () => {
             {itemId: 10100, quantity: 1},
             {
                 stock: [
-                    {itemId: 10009, quantity: 400, place: 'depot', location: {x: 3, y: 4}},
-                    {itemId: 10009, quantity: 200, place: 'hold', entityId: 'a'},
+                    {itemId: 10003, quantity: 400, place: 'depot', location: {x: 3, y: 4}},
+                    {itemId: 10003, quantity: 200, place: 'hold', entityId: 'a'},
                 ],
                 entities: STARTER.entities,
             }
         )
-        const part = plan.nodes.find((n) => n.itemId === 10009)!
+        const part = plan.nodes.find((n) => n.itemId === 10003)!
         expect(part.shortfall).toBe(0)
         expect(part.credited).toEqual([
             {place: 'hold', quantity: 200, entityId: 'a', location: undefined},
@@ -126,25 +126,25 @@ describe('deriveGoal', () => {
             {itemId: 10100, quantity: 1},
             {
                 stock: [
-                    {itemId: 10009, quantity: 300, place: 'workshop'},
-                    {itemId: 10009, quantity: 300, place: 'job'},
+                    {itemId: 10003, quantity: 300, place: 'workshop'},
+                    {itemId: 10003, quantity: 300, place: 'job'},
                 ],
                 entities: [],
             }
         )
-        const collect = plan.steps.filter((s) => s.kind === 'pickup' && s.itemId === 10009)
+        const collect = plan.steps.filter((s) => s.kind === 'pickup' && s.itemId === 10003)
         expect(collect.map((s) => [s.id, s.quantity, s.waiting])).toEqual([
-            ['collect-workshop:10009', 300, false],
-            ['collect-job:10009', 300, true],
+            ['collect-workshop:10003', 300, false],
+            ['collect-job:10003', 300, true],
         ])
         const book = plan.steps.find((s) => s.id === 'book:10100')!
-        expect(book.dependsOn).toEqual(['collect-workshop:10009', 'collect-job:10009'])
-        expect(plan.ready.map((s) => s.id)).toEqual(['collect-workshop:10009'])
+        expect(book.dependsOn).toEqual(['collect-workshop:10003', 'collect-job:10003'])
+        expect(plan.ready.map((s) => s.id)).toEqual(['collect-workshop:10003'])
     })
 
     test('a higher goal claims stock before a lower one', () => {
         const holdings: GoalHoldings = {
-            stock: [{itemId: 10009, quantity: 600, place: 'hold'}],
+            stock: [{itemId: 10003, quantity: 600, place: 'hold'}],
             entities: [],
         }
         const [first, second] = deriveGoals(
@@ -154,13 +154,13 @@ describe('deriveGoal', () => {
             ],
             holdings
         )
-        expect(first.nodes.find((n) => n.itemId === 10009)!.shortfall).toBe(0)
-        expect(second.nodes.find((n) => n.itemId === 10009)!.shortfall).toBe(600)
+        expect(first.nodes.find((n) => n.itemId === 10003)!.shortfall).toBe(0)
+        expect(second.nodes.find((n) => n.itemId === 10003)!.shortfall).toBe(600)
     })
 
     test('stock below a stat target shows as held but is not credited', () => {
-        const low = encodeStats([0, 0, 100])
-        const high = encodeStats([0, 0, 900])
+        const low = encodeStats([100, 0, 0])
+        const high = encodeStats([900, 0, 0])
         const plan = deriveGoal(
             {itemId: 10100, quantity: 1, statTargets: {gas: 500}},
             {
@@ -178,7 +178,7 @@ describe('deriveGoal', () => {
             {
                 category: 'gas',
                 target: 500,
-                stats: [expect.objectContaining({resourceItemId: 301, statIndex: 2})],
+                stats: [expect.objectContaining({resourceItemId: 301, statIndex: 0})],
             },
         ])
     })
@@ -256,10 +256,10 @@ describe('sequenceGoal', () => {
     test('a running job is walked as a pick-up the sequence waits on', () => {
         const plan = deriveGoal(
             {itemId: 10101, quantity: 1},
-            {stock: [{itemId: 10004, quantity: 600, place: 'job'}], entities: []}
+            {stock: [{itemId: 10006, quantity: 600, place: 'job'}], entities: []}
         )
         expect(sequenceGoal(plan).map((s) => s.id)).toEqual([
-            'collect-job:10004',
+            'collect-job:10006',
             'book:10101',
             'pickup:10101',
         ])

@@ -5,7 +5,7 @@ import {
     ITEM_ENGINE_T1,
     ITEM_GENERATOR_T1,
     ITEM_CRAFTER_T1,
-    ITEM_REACTOR,
+    ITEM_PLASMA_CELL,
     ITEM_SHIP_T1_PACKED,
 } from '../data/item-ids'
 import {getRecipe} from '../data/recipes-runtime'
@@ -39,9 +39,9 @@ function crafterSpeed(entity: ReturnType<typeof ship>): number {
     return rollupCrafter(entity.crafter_lanes)!.speed.toNumber()
 }
 
-function reactor(quantity: number) {
+function plasmaCell(quantity: number) {
     return ServerContract.Types.cargo_item.from({
-        item_id: UInt16.from(ITEM_REACTOR),
+        item_id: UInt16.from(ITEM_PLASMA_CELL),
         quantity: UInt32.from(quantity),
         stats: UInt64.from(0),
         modules: [],
@@ -59,7 +59,7 @@ describe('maxCraftable — incoming', () => {
         const recipe = getRecipe(ITEM_ENGINE_T1)!
         const entity = ship([])
         const incoming: IncomingSource[] = [
-            {holdId: '1', until: new Date(NOW.getTime() - 1000), items: [reactor(1800)]},
+            {holdId: '1', until: new Date(NOW.getTime() - 1000), items: [plasmaCell(1800)]},
         ]
 
         expect(maxCraftable(entity, recipe, crafterSpeed(entity), NOW)).toBe(0)
@@ -73,7 +73,7 @@ describe('maxCraftable — incoming', () => {
             {
                 holdId: '1',
                 until: new Date(NOW.getTime() + 1_000_000_000),
-                items: [reactor(1800)],
+                items: [plasmaCell(1800)],
             },
         ]
 

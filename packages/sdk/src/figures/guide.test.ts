@@ -1,7 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {UInt16, UInt32} from '@wharfkit/antelope'
 import {calc_gather_duration, calc_gather_energy} from '../capabilities/gathering'
-import {getItem, getItems} from '../data/catalog'
+import {getItems} from '../data/catalog'
 import {
     ITEM_CRAFTER_T1,
     ITEM_ENGINE_T1,
@@ -11,12 +11,9 @@ import {
 } from '../data/item-ids'
 import {getRecipe} from '../data/recipes-runtime'
 import {
-    computeComponentStats,
-    computeEntityStats,
     computeStatsFromResources,
     decodeStats,
     encodeStats,
-    getItemStatKeys,
     traceResourceStatKeys,
 } from '../derivation/crafting'
 import {getStatDefinitions} from '../derivation/stats'
@@ -49,39 +46,6 @@ function sourcesOf(itemId: number, key: string) {
         ?.stats.map((s) => s.label)
 }
 
-function categoryRecord(category: ResourceCategory, values: Record<string, number>) {
-    return Object.fromEntries(getStatDefinitions(category).map((d) => [d.key, values[d.key]]))
-}
-
-function chainStats(itemId: number, values: Record<string, number>): number[] {
-    const recipe = getRecipe(itemId)!
-    const inputs = recipe.inputs.map((input) => getItem(input.itemId))
-    if (inputs.every((item) => item.type === 'resource')) {
-        const categories = [...new Set(inputs.map((item) => item.category!))]
-        return computeComponentStats(
-            itemId,
-            categories.map((category) => ({
-                category,
-                stacks: [{quantity: 1, stats: categoryRecord(category, values)}],
-            }))
-        ).map((s) => s.value)
-    }
-    const stacks: Record<number, {quantity: number; stats: Record<string, number>}[]> = {}
-    for (const [i, input] of recipe.inputs.entries()) {
-        const item = inputs[i]
-        let stats: Record<string, number>
-        if (item.type === 'resource') {
-            stats = categoryRecord(item.category!, values)
-        } else {
-            const keys = getItemStatKeys(input.itemId)
-            const inner = chainStats(input.itemId, values)
-            stats = Object.fromEntries(keys.map((key, k) => [key, inner[k]]))
-        }
-        stacks[input.itemId] = [{quantity: 1, stats}]
-    }
-    return computeEntityStats(itemId, stacks).map((s) => s.value)
-}
-
 function moduleItemIds(): number[] {
     return getItems()
         .map((item) => item.id)
@@ -90,12 +54,16 @@ function moduleItemIds(): number[] {
 
 describe('getModuleFigureSources', () => {
     test('one figure per activity', () => {
-        expect(sourcesOf(ITEM_ENGINE_T1, 'drain')).toEqual(['Thermal'])
-        expect(sourcesOf(ITEM_GENERATOR_T1, 'recharge')).toEqual([])
-        expect(sourcesOf(ITEM_GENERATOR_T1, 'capacity')).toEqual(['Reflectivity'])
+        expect(sourcesOf(ITEM_ENGINE_T1, 'drain')).toEqual(['Volatility'])
+        expect(sourcesOf(ITEM_GENERATOR_T1, 'recharge')).toEqual(['Conductivity'])
+        expect(sourcesOf(ITEM_GENERATOR_T1, 'capacity')).toEqual(['Conductivity'])
         expect(sourcesOf(ITEM_GATHERER_T1, 'yield')).toEqual(['Density'])
-        expect(sourcesOf(ITEM_CRAFTER_T1, 'speed')).toEqual(['Thermal', 'Reflectivity'])
-        expect(sourcesOf(ITEM_LOADER_T1, 'transfer')).toEqual(['Fineness'])
+        expect(sourcesOf(ITEM_CRAFTER_T1, 'speed')).toEqual([
+            'Reactivity',
+            'Thermal',
+            'Reflectivity',
+        ])
+        expect(sourcesOf(ITEM_LOADER_T1, 'transfer')).toEqual(['Cohesion'])
         expect(sourcesOf(ITEM_LOADER_T1, 'shuttles')).toEqual([])
     })
 
@@ -107,7 +75,10 @@ describe('getModuleFigureSources', () => {
             const sources = getModuleFigureSources(id)!
             for (const key of RESOURCE_KEYS) {
                 const at = (value: number) =>
-                    getModuleFigures(id, encodeStats(chainStats(id, {...mid, [key]: value})))!.rows
+                    getModuleFigures(
+                        id,
+                        encodeStats(computeStatsFromResources(id, {...mid, [key]: value}))
+                    )!.rows
                 const low = at(STAT_LOW)
                 const high = at(STAT_HIGH)
                 for (const [i, source] of sources.entries()) {
@@ -168,20 +139,20 @@ describe('sweepModuleFigures', () => {
     const rowAt = (values: number[], key: string) =>
         getModuleFigures(ITEM_ENGINE_T1, encodeStats(values))!.rows.find((r) => r.key === key)!
 
-    test('Engine Speed against its thermal', () => {
+    test('Engine Speed against its volatility', () => {
         const speed = sweepModuleFigures(ITEM_ENGINE_T1, STARTER)!.find((s) => s.key === 'speed')!
         expect(speed.current.text).toBe('38 ly/hr')
         expect(speed.sweeps.map((s) => [s.stat.label, s.low.text, s.high.text])).toEqual([
-            ['Thermal', '35 ly/hr', '42 ly/hr'],
+            ['Volatility', '35 ly/hr', '42 ly/hr'],
         ])
         expect(speed.sweeps.map((s) => s.stat.category)).toEqual(['gas'])
     })
 
     test('holds the other stats at the sample', () => {
         const drain = sweepModuleFigures(ITEM_ENGINE_T1, STARTER)!.find((s) => s.key === 'drain')!
-        const thermal = drain.sweeps.find((s) => s.stat.key === 'thermal')!
-        expect(thermal.high).toEqual(rowAt([606, 213], 'drain'))
-        expect(drain.sweeps.map((s) => s.stat.key)).toEqual(['thermal'])
+        const volatility = drain.sweeps.find((s) => s.stat.key === 'volatility')!
+        expect(volatility.high).toEqual(rowAt([606, 999], 'drain'))
+        expect(drain.sweeps.map((s) => s.stat.key)).toEqual(['volatility'])
     })
 
     test('sweeps from explicit resource stats', () => {
@@ -190,8 +161,8 @@ describe('sweepModuleFigures', () => {
             reactivity: 400,
             thermal: 500,
         })!.find((s) => s.key === 'speed')!
-        const thermal = speed.sweeps.find((s) => s.stat.key === 'thermal')!
-        expect(thermal.low).toEqual(rowAt([107, 213], 'speed'))
+        const volatility = speed.sweeps.find((s) => s.stat.key === 'volatility')!
+        expect(volatility.low).toEqual(rowAt([107, 1], 'speed'))
     })
 
     test('starts every sweep from resources that reproduce the packed stats within 2', () => {

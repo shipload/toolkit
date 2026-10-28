@@ -462,17 +462,31 @@ export type ModuleCapabilities =
 
 export type ModuleCapabilityKind = ModuleCapabilities['kind']
 
+const MODULE_FORMULA_KEYS: Record<number, readonly string[]> = {
+    [MODULE_ENGINE]: ['thermal', 'reactivity'],
+    [MODULE_GENERATOR]: ['reflectivity', 'resonance'],
+    [MODULE_GATHERER]: ['density', 'tolerance', 'thermal'],
+    [MODULE_LOADER]: ['hardness', 'fineness'],
+    [MODULE_STORAGE]: ['density', 'tolerance'],
+    [MODULE_CRAFTER]: ['reactivity', 'reflectivity'],
+    [MODULE_BUILDER]: ['hardness', 'fineness'],
+    [MODULE_HAULER]: ['insulation', 'reflectivity', 'saturation'],
+    [MODULE_BATTERY]: ['saturation'],
+    [MODULE_WARP]: ['reflectivity'],
+}
+
 export function withPositionalModuleStats(
     itemId: number,
     stats: bigint,
     decoded: Record<string, number>
 ): Record<string, number> {
-    switch (getModuleCapabilityType(itemId)) {
-        case MODULE_WARP:
-            return {...decoded, reflectivity: decodeStat(stats, 0)}
-        default:
-            return decoded
-    }
+    const keys = MODULE_FORMULA_KEYS[getModuleCapabilityType(itemId)]
+    if (!keys) return decoded
+    const out = {...decoded}
+    keys.forEach((key, slot) => {
+        out[key] = decodeStat(stats, slot)
+    })
+    return out
 }
 
 export function computeModuleCapabilities(

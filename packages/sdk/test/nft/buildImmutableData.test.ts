@@ -95,8 +95,8 @@ describe('buildImmutableData', () => {
         expect(value(entries, 'module_stats')).toEqual([String(core), String(engine), '0'])
         expect(value(entries, 'loadout')).toBe(
             [
-                'Slot 1: Power Core T1 (reflectivity 300, resonance 250)',
-                'Slot 2: Engine T1 (thermal 213, reactivity 213)',
+                'Slot 1: Power Core T1 (conductivity 300, conductivity 250)',
+                'Slot 2: Engine T1 (volatility 213, volatility 213)',
                 'Slot 3: empty',
             ].join('\n')
         )
@@ -125,7 +125,7 @@ describe('buildImmutableData', () => {
         expect(value(entries, 'stats')).toBe(String(hull))
         expect(value(entries, 'loadout')).toBe(
             [
-                'Slot 1: Shuttle Bay T2 (hardness 321, fineness 123)',
+                'Slot 1: Shuttle Bay T2 (cohesion 321, cohesion 123)',
                 'Slot 2: empty',
                 'Slot 3: empty',
                 'Slot 4: empty',

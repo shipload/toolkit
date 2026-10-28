@@ -92,7 +92,7 @@ test('computeCraftedOutputStats agrees with computeEntityStats for the donor ble
 
 test('getItemStatSlots drops a source held at the mean from the label', () => {
     const slots = getItemStatSlots(ITEM_ENGINE_T1)
-    expect(slots.map((s) => s.label)).toEqual(['Thermal', 'Reactivity'])
+    expect(slots.map((s) => s.label)).toEqual(['Volatility', 'Volatility'])
 })
 
 test('getItemStatSlots keeps a single-source slot to its one stat', () => {

@@ -10,6 +10,8 @@ import {
 const LIMPET_BAY_T2 = 11102
 const LIMPET_BAY_T1 = 10102
 const BEAM_T2 = 11005
+const CONTAINER_T1 = 10200
+const PLATE = 10001
 const ORE_T1 = 101
 const ORE_T2 = 102
 const GAS_T2 = 302
@@ -35,14 +37,16 @@ describe('statFlow', () => {
     })
 
     test('a component slot held at the mean is marked fixed and has no resource beneath it', () => {
-        const depth = statFlow(LIMPET_BAY_T2)[1]
-        const fixed = depth.sources.find((s) => s.fixed)!
-        expect(fixed).toMatchObject({
-            itemId: BEAM_T2,
-            label: 'Tolerance',
+        const mass = statFlow(CONTAINER_T1)[1]
+        expect(mass.sources[0]).toMatchObject({
+            itemId: PLATE,
+            label: 'Density',
+            fixed: true,
             sources: [],
         })
-        expect(depth.fixed).toBe(false)
+        expect(mass.fixed).toBe(true)
+        expect(statFlow(CONTAINER_T1)[0].fixed).toBe(false)
+        expect(statFlow(LIMPET_BAY_T2).every((a) => !a.fixed)).toBe(true)
     })
 
     test('labels resource stats by category and unknown recipes trace to nothing', () => {
@@ -66,8 +70,10 @@ describe('statFlowByResource', () => {
         expect(rows).toEqual([
             `${ORE_T2}:Density ${BEAM_T2}>Yield:50 ${BEAM_T2}>Depth:17`,
             `${ORE_T1}:Density 10005>${LIMPET_BAY_T1}>Yield:50 10005>${LIMPET_BAY_T1}>Depth:17`,
-            `${GAS_T2}:Thermal 11009>Depth:17 11009>Drain:50`,
-            `301:Thermal 10009>${LIMPET_BAY_T1}>Depth:17 10009>${LIMPET_BAY_T1}>Drain:50`,
+            `${ORE_T2}:Tolerance ${BEAM_T2}>Depth:17`,
+            `${ORE_T1}:Tolerance 10005>${LIMPET_BAY_T1}>Depth:17`,
+            `${GAS_T2}:Thermal 11009>Drain:50`,
+            `301:Thermal 10009>${LIMPET_BAY_T1}>Drain:50`,
         ])
     })
 })
@@ -88,9 +94,14 @@ describe('statFlowPlates', () => {
     test('expands only the goal own parts and stops at the item it upgrades from', () => {
         expect(rows(LIMPET_BAY_T2)).toEqual([
             `Yield: gather:${ORE_T2}:Density:${BEAM_T2}:50 upgrade:${LIMPET_BAY_T1}:50`,
-            `Depth: gather:${ORE_T2}:Density:${BEAM_T2}:17 gather:${GAS_T2}:Thermal:11009:17 upgrade:${LIMPET_BAY_T1}:50 fixed:${BEAM_T2}:17`,
+            `Depth: gather:${ORE_T2}:Tolerance:${BEAM_T2}:17 gather:${ORE_T2}:Density:${BEAM_T2}:17 upgrade:${LIMPET_BAY_T1}:50`,
             `Drain: gather:${GAS_T2}:Thermal:11009:50 upgrade:${LIMPET_BAY_T1}:50`,
         ])
+    })
+
+    test('a source held at the mean shows as a fixed row', () => {
+        const mass = statFlowPlates(CONTAINER_T1).find((p) => p.label === 'Mass')!
+        expect(mass.rows).toEqual([{kind: 'fixed', itemId: PLATE, share: 1}])
     })
 
     test('a hull upgrade keeps every row count small however long its lineage', () => {

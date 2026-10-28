@@ -35,6 +35,7 @@ import {
     ITEM_PLATE_T2,
     ITEM_PLASMA_CELL,
     type RecipeSlotInput,
+    withPositionalModuleStats,
 } from '$lib'
 
 describe('Crafting', () => {
@@ -109,7 +110,7 @@ describe('Crafting', () => {
             assert.equal(tol!.value, 213)
         })
 
-        test('resin from biomass stacks blends weighted average', () => {
+        test('resin from biomass stacks blends weighted average into insulation and saturation', () => {
             const stats = computeComponentStats(ITEM_RESIN, [
                 {
                     category: 'biomass',
@@ -130,8 +131,8 @@ describe('Crafting', () => {
             const pla = stats.find((s) => s.key === 'plasticity')
             const ins = stats.find((s) => s.key === 'insulation')
             assert.equal(sat!.value, 560)
+            assert.equal(ins!.value, 560)
             assert.equal(pla!.value, 213)
-            assert.equal(ins!.value, 213)
         })
 
         test('frame from regolith (single-source)', () => {
@@ -149,7 +150,7 @@ describe('Crafting', () => {
             assert.equal(stats.length, 6)
             assert.deepEqual(
                 stats.map((s) => s.value),
-                [213, 213, 700, 213, 213, 213]
+                [213, 200, 700, 213, 213, 213]
             )
             assert.deepEqual(
                 stats.slice(0, 3).map((s) => s.key),
@@ -190,19 +191,31 @@ describe('Crafting', () => {
             assert.equal(stats['fineness'], 700)
         })
 
-        test('decoded hauler stats use input stat key names', () => {
+        test('decoded hauler stats use the stat names of the first source in each slot', () => {
             const seed = encodeStats([500, 500, 500, 500])
             const decoded = decodeCraftedItemStats(ITEM_HAULER_T1, seed)
             assert.property(decoded, 'insulation')
-            assert.property(decoded, 'reflectivity')
-            assert.property(decoded, 'saturation')
-            assert.notProperty(decoded, 'resonance')
+            assert.property(decoded, 'resonance')
+            assert.notProperty(decoded, 'reflectivity')
+            assert.notProperty(decoded, 'saturation')
             assert.notProperty(decoded, 'plasticity')
             assert.notProperty(decoded, 'conductivity')
             assert.notProperty(decoded, 'cohesion')
             assert.notProperty(decoded, 'capacity')
             assert.notProperty(decoded, 'efficiency')
             assert.notProperty(decoded, 'drain')
+        })
+
+        test('positional module stats fill the hauler formula keys by slot', () => {
+            const seed = encodeStats([100, 200, 300, 400])
+            const decoded = withPositionalModuleStats(
+                ITEM_HAULER_T1,
+                seed,
+                decodeCraftedItemStats(ITEM_HAULER_T1, seed)
+            )
+            assert.equal(decoded['insulation'], 100)
+            assert.equal(decoded['reflectivity'], 200)
+            assert.equal(decoded['saturation'], 300)
         })
     })
 
@@ -292,7 +305,7 @@ describe('Crafting', () => {
             assert.equal(decoded['thermal'], thm)
         })
 
-        test('single-input component holds the mean outside its live slot (Frame from regolith)', () => {
+        test('single-input machined component holds the mean outside its two live slots (Frame from regolith)', () => {
             const regolithSeed = 0x1111222233334444n
             const slotInputs: RecipeSlotInput[] = [
                 {
@@ -304,7 +317,7 @@ describe('Crafting', () => {
             const outputStats = computeCraftedOutputStats(ITEM_FRAME, slotInputs)
             assert.deepEqual(decodeStats(BigInt(outputStats.toString()), 6), [
                 213,
-                213,
+                Math.max(1, decodeStat(regolithSeed, 1)),
                 Math.max(1, decodeStat(regolithSeed, 2)),
                 213,
                 213,

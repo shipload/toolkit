@@ -29,15 +29,18 @@ describe('deriveStatMappings', () => {
         assert.deepInclude(tuples, 'Storage.capacity')
     })
 
-    test('a stat held at the mean drives nothing', () => {
-        assert.deepEqual(getStatMappingsForStat('Tolerance'), [])
+    test('Tolerance drives only Gathering.depth', () => {
+        const tuples = getStatMappingsForStat('Tolerance').map(
+            (m) => `${m.capability}.${m.attribute}`
+        )
+        assert.deepEqual(tuples, ['Gathering.depth'])
     })
 
-    test('Saturation drives Energy.capacity', () => {
+    test('Saturation drives Build.speed', () => {
         const tuples = getStatMappingsForStat('Saturation').map(
             (m) => `${m.capability}.${m.attribute}`
         )
-        assert.deepInclude(tuples, 'Energy.capacity')
+        assert.deepInclude(tuples, 'Build.speed')
     })
 
     test('getStatMappingsForCapability filters correctly', () => {
@@ -86,18 +89,21 @@ describe('producer (source) is always present', () => {
 
 describe('stat coverage', () => {
     const expected: Record<string, string[]> = {
-        Strength: ['Storage.capacity'],
-        Density: ['Gathering.depth', 'Gathering.yield', 'Storage.capacity'],
-        Reflectivity: [
-            'Crafting.drain',
-            'Crafting.speed',
-            'Energy.capacity',
-            'Hauling.capacity',
-            'Hauling.efficiency',
-        ],
-        Thermal: ['Crafting.speed', 'Gathering.depth', 'Gathering.drain', 'Movement.thrust'],
-        Fineness: ['Build.drain', 'Build.speed', 'Loading.thrust'],
-        Saturation: ['Build.speed', 'Energy.capacity', 'Hauling.capacity', 'Hauling.drain'],
+        Strength: ['Storage.capacity', 'Storage.drain'],
+        Tolerance: ['Gathering.depth'],
+        Density: ['Gathering.depth', 'Gathering.yield'],
+        Conductivity: ['Energy.capacity', 'Energy.recharge'],
+        Resonance: ['Hauling.drain', 'Hauling.efficiency'],
+        Reflectivity: ['Crafting.speed', 'Hauling.capacity'],
+        Volatility: ['Hull.mass', 'Movement.drain', 'Movement.thrust'],
+        Reactivity: ['Crafting.drain', 'Crafting.speed'],
+        Thermal: ['Crafting.speed', 'Gathering.drain'],
+        Cohesion: ['Loading.mass', 'Loading.thrust'],
+        Hardness: ['Build.drain', 'Build.speed'],
+        Fineness: ['Build.drain', 'Build.speed'],
+        Plasticity: ['Energy.capacity', 'Hull.mass'],
+        Insulation: ['Hauling.capacity', 'Hauling.drain'],
+        Saturation: ['Build.speed', 'Hauling.capacity'],
     }
 
     for (const [stat, expectedTuples] of Object.entries(expected)) {
@@ -113,9 +119,9 @@ describe('stat coverage', () => {
 })
 
 describe('producer-join helpers', () => {
-    test('Build attributes trace Fineness and Saturation, the live sources of the Assembly Arm', () => {
+    test('Build attributes trace Hardness, Fineness and Saturation, the sources of the Assembly Arm', () => {
         const stats = new Set(getStatMappingsForCapability('Build').map((m) => m.stat))
-        assert.deepEqual([...stats].sort(), ['Fineness', 'Saturation'])
+        assert.deepEqual([...stats].sort(), ['Fineness', 'Hardness', 'Saturation'])
     })
 
     test('getProducersForAttribute returns the distinct producers', () => {
