@@ -24,6 +24,7 @@ import {CATEGORY_LABELS, type ResourceCategory} from '../types'
 import {
     gatherFromFigures,
     getModuleFigureSources,
+    moduleFigureRanges,
     resourceBaseline,
     STAT_HIGH,
     STAT_LOW,
@@ -128,6 +129,38 @@ describe('getModuleFigureSources', () => {
 
     test('non-modules have no sources', () => {
         expect(getModuleFigureSources(1)).toBeUndefined()
+    })
+})
+
+describe('moduleFigureRanges', () => {
+    test('an Engine range spans only what its carried stat can reach', () => {
+        const ranges = moduleFigureRanges(ITEM_ENGINE_T1)
+        const sweeps = sweepModuleFigures(ITEM_ENGINE_T1, STARTER)!
+        const reach = (key: string) => {
+            const sweep = sweeps.find((s) => s.key === key)!.sweeps[0]
+            return [sweep.low.text, sweep.high.text].sort()
+        }
+        const range = (key: string) => {
+            const r = ranges.find((x) => x.key === key)!
+            return [r.min.text, r.max.text].sort()
+        }
+        expect(range('speed')).toEqual(reach('speed'))
+        expect(range('drain')).toEqual(reach('drain'))
+    })
+
+    test('a figure no stat moves has a single value', () => {
+        for (const id of moduleItemIds()) {
+            const sources = getModuleFigureSources(id) ?? []
+            for (const r of moduleFigureRanges(id)) {
+                const moved = sources.find((s) => s.key === r.key)?.stats.length ?? 0
+                if (moved > 0) continue
+                expect({id, key: r.key, text: r.max.text}).toEqual({
+                    id,
+                    key: r.key,
+                    text: r.min.text,
+                })
+            }
+        }
     })
 })
 

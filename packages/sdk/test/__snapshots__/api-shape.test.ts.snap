@@ -899,6 +899,7 @@ exports[`module export surface 1`] = `
   "mintCost",
   "moduleAccepts",
   "moduleDisplayName",
+  "moduleFigureRanges",
   "moduleIcon",
   "moduleSlotTypeToCode",
   "nearbyWormholes",

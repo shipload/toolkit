@@ -156,6 +156,36 @@ export function sweepModuleFigures(
     }))
 }
 
+export interface FigureRange {
+    key: string
+    label: string
+    min: Figure
+    max: Figure
+}
+
+export function moduleFigureRanges(itemId: number): FigureRange[] {
+    const sources = getModuleFigureSources(itemId)
+    if (!sources) return []
+    const keys = [...new Set(sources.flatMap((source) => source.stats.map((stat) => stat.key)))]
+    const ranges = new Map<string, FigureRange>()
+    for (let mask = 0; mask < 2 ** keys.length; mask++) {
+        const resources = Object.fromEntries(
+            keys.map((key, i) => [key, (mask >> i) & 1 ? STAT_HIGH : STAT_LOW])
+        )
+        const stats = encodeStats(computeStatsFromResources(itemId, resources))
+        for (const row of getModuleFigures(itemId, stats)?.rows ?? []) {
+            const range = ranges.get(row.key)
+            if (!range) {
+                ranges.set(row.key, {key: row.key, label: row.label, min: row, max: row})
+                continue
+            }
+            if (row.value < range.min.value) range.min = row
+            if (row.value > range.max.value) range.max = row
+        }
+    }
+    return [...ranges.values()]
+}
+
 export interface GatherFigures {
     yieldPerMinute: number
     drainPerMinute: number
