@@ -121,7 +121,7 @@ interface Pool {
 
 interface StatGate {
     category: ResourceCategory
-    statIndex: number
+    statIndices: number[]
     target: number
 }
 
@@ -140,36 +140,45 @@ export function isShipItem(itemId: number): boolean {
     return getTemplateMeta(itemId)?.kind.equals(ENTITY_SHIP) ?? false
 }
 
-function liveSlot(recipe: Recipe): number {
-    return recipe.statSlots.findIndex((slot) => slot.sources.some((s) => !isMeanSource(s)))
+function liveSlots(recipe: Recipe): number[] {
+    return recipe.statSlots.flatMap((slot, i) =>
+        slot.sources.some((s) => !isMeanSource(s)) ? [i] : []
+    )
 }
 
-function resourceCarryIndex(component: Recipe): number | undefined {
-    const slot = component.statSlots[liveSlot(component)]
-    return slot?.sources.find((s) => !isMeanSource(s))?.statIndex
+function inputReads(recipe: Recipe, slots: number[] | undefined, inputIndex: number): number[] {
+    const read = (slots ?? recipe.statSlots.map((_, i) => i)).flatMap(
+        (i) =>
+            recipe.statSlots[i]?.sources
+                .filter((s) => !isMeanSource(s) && s.inputIndex === inputIndex)
+                .map((s) => s.statIndex) ?? []
+    )
+    return [...new Set(read)]
 }
 
-function statGate(goal: Goal, itemId: number, carryIndex?: number): StatGate | undefined {
+function statGate(goal: Goal, itemId: number, reads?: number[]): StatGate | undefined {
     if (!goal.statTargets) return undefined
     const item = getItem(itemId)
     if (item.type === 'resource') {
         const category = item.category as ResourceCategory
         const target = goal.statTargets[category]
-        if (target === undefined || carryIndex === undefined) return undefined
-        return {category, statIndex: carryIndex, target}
+        if (target === undefined || !reads?.length) return undefined
+        return {category, statIndices: reads, target}
     }
     if (item.type !== 'component') return undefined
     const recipe = getRecipe(itemId)
     if (!recipe) return undefined
     const category = getItem(recipe.inputs[0].itemId).category as ResourceCategory
     const target = goal.statTargets[category]
-    if (target === undefined) return undefined
-    return {category, statIndex: liveSlot(recipe), target}
+    const live = liveSlots(recipe)
+    const statIndices = reads ? reads.filter((i) => live.includes(i)) : live
+    if (target === undefined || statIndices.length === 0) return undefined
+    return {category, statIndices, target}
 }
 
 function meetsGate(line: GoalStock, gate: StatGate | undefined): boolean {
     if (!gate || line.stats === undefined) return true
-    return decodeStat(line.stats, gate.statIndex) >= gate.target
+    return gate.statIndices.every((i) => decodeStat(line.stats!, i) >= gate.target)
 }
 
 function buildPool(holdings: GoalHoldings): Pool {
@@ -284,38 +293,44 @@ function nodeFor(d: Derivation, itemId: number): GoalNode {
     return node
 }
 
-function expand(d: Derivation, node: GoalNode, units: number, ship?: string): void {
+function expand(
+    d: Derivation,
+    node: GoalNode,
+    units: number,
+    ship?: string,
+    slots?: number[]
+): void {
     node.shortfall += units
     const recipe = getRecipe(node.itemId)
     if (!recipe || units <= 0) return
-    const carry = getItem(node.itemId).type === 'component' ? resourceCarryIndex(recipe) : undefined
-    for (const input of recipe.inputs) {
+    recipe.inputs.forEach((input, i) => {
         if (!node.inputs.includes(input.itemId)) node.inputs.push(input.itemId)
         const isEntity = getItem(input.itemId).type === 'entity'
-        need(d, input.itemId, input.quantity * units, carry, isEntity ? ship : undefined)
-    }
+        const reads = inputReads(recipe, slots, i)
+        need(d, input.itemId, input.quantity * units, reads, isEntity ? ship : undefined)
+    })
 }
 
 function need(
     d: Derivation,
     itemId: number,
     quantity: number,
-    carry: number | undefined,
+    reads: number[],
     ship: string | undefined
 ): void {
     const node = nodeFor(d, itemId)
     node.needed += quantity
     const item = getItem(itemId)
-    if (carry !== undefined) {
+    if (item.type === 'resource') {
         const set = d.carries.get(itemId) ?? new Set<number>()
-        set.add(carry)
+        for (const index of reads) set.add(index)
         d.carries.set(itemId, set)
     }
     let left = quantity
     if (item.type === 'entity') left -= creditEntities(d, node, left, ship)
     if (item.type === 'module') left -= creditInstalled(d, node, left)
-    left -= creditStock(d, node, left, STOCK_ORDER, statGate(d.goal, itemId, carry))
-    expand(d, node, left, ship)
+    left -= creditStock(d, node, left, STOCK_ORDER, statGate(d.goal, itemId, reads))
+    expand(d, node, left, ship, reads)
 }
 
 type RootRoute = 'install' | 'deploy' | 'upgrade' | 'plot' | 'hand'

@@ -183,6 +183,50 @@ describe('deriveGoal', () => {
         ])
     })
 
+    test('a hunt names each stat the goal reads, two from a Machined part', () => {
+        const plan = deriveGoal({itemId: 10102, quantity: 1}, {stock: [], entities: []})
+        expect(plan.hunts.map((h) => [h.category, h.stats.map((s) => s.stat.key)])).toEqual([
+            ['ore', ['density', 'tolerance']],
+            ['gas', ['thermal']],
+        ])
+    })
+
+    test('a stat target credits stock only when every stat the goal reads meets it', () => {
+        const oneLow = encodeStats([900, 100, 900])
+        const bothHigh = encodeStats([100, 900, 900])
+        const plan = deriveGoal(
+            {itemId: 10102, quantity: 1, statTargets: {ore: 500}},
+            {
+                stock: [
+                    {itemId: 101, quantity: 3000, place: 'hold', stats: oneLow},
+                    {itemId: 101, quantity: 1000, place: 'hold', stats: bothHigh},
+                ],
+                entities: [],
+            }
+        )
+        const ore = plan.nodes.find((n) => n.itemId === 101)!
+        expect(ore.belowTarget).toBe(3000)
+        expect(ore.shortfall).toBe(ore.needed - 1000)
+    })
+
+    test('a stat target never gates a part on the mean-held slots its consumer reads', () => {
+        const plan = deriveGoal(
+            {itemId: 10200, quantity: 1, statTargets: {regolith: 400}},
+            {
+                stock: [
+                    {
+                        itemId: 10008,
+                        quantity: 600,
+                        place: 'hold',
+                        stats: encodeStats([900, 213, 213, 213, 213, 213]),
+                    },
+                ],
+                entities: [],
+            }
+        )
+        expect(plan.nodes.find((n) => n.itemId === 10008)!.shortfall).toBe(0)
+    })
+
     test('an installed Power Core feeds a craft only when another ship carries a generator', () => {
         const goal = {itemId: 11101, quantity: 1}
         const alone = deriveGoal(goal, STARTER)
