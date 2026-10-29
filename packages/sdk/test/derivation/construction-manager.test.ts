@@ -119,13 +119,15 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
         itemId: number,
         qty: number,
         stats: bigint | number = 0n,
-        modules: ServerContract.Types.module_entry[] = []
+        modules: ServerContract.Types.module_entry[] = [],
+        sequenceId?: number
     ) {
         return ServerContract.Types.cargo_row.from({
             id: UInt64.from(cargoStackFloor(entityId, itemId) + BigInt(rowId)),
             quantity: UInt64.from(qty),
             stats: UInt64.from(stats),
             modules,
+            sequence_id: sequenceId === undefined ? undefined : UInt64.from(sequenceId),
         })
     }
 
@@ -213,7 +215,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
             }))
         ).toEqual([
             {
-                key: `${INPUT_ITEM_ID}#0#`,
+                key: `${INPUT_ITEM_ID}:0`,
                 itemId: INPUT_ITEM_ID,
                 available: 8,
                 reserved: 0,
@@ -221,7 +223,7 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
                 rowId: (cargoStackFloor(10, INPUT_ITEM_ID) + 100n).toString(),
             },
             {
-                key: `${INPUT_ITEM_ID}#42#`,
+                key: `${INPUT_ITEM_ID}:42`,
                 itemId: INPUT_ITEM_ID,
                 available: 5,
                 reserved: 0,
@@ -229,6 +231,21 @@ describe('ConstructionManager.eligibleSources / unreachableSources', () => {
                 rowId: (cargoStackFloor(10, INPUT_ITEM_ID) + 101n).toString(),
             },
         ])
+    })
+    test('keeps same-item cargo stacks distinct by sequence id', () => {
+        const mgr = new ConstructionManager({} as any)
+        const plot = makePlot()
+        const target = mgr.getTarget(plot, [])!
+        const hauler = makeShipWithLoader(10, OWNER, COORDS)
+
+        const first = makeCargoRow(10, 100, INPUT_ITEM_ID, 1, 0n, [], 7)
+        const second = makeCargoRow(10, 101, INPUT_ITEM_ID, 1, 0n, [], 8)
+
+        const sources = mgr.eligibleSources(target, [hauler], [first, second])
+        const keys = sources[0].relevantCargo.map((c) => c.key)
+
+        expect(keys).toHaveLength(2)
+        expect(new Set(keys).size).toBe(2)
     })
 })
 

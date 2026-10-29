@@ -5,6 +5,7 @@ import {PlotManager} from './plot'
 import {cargoRowEntityId, cargoRowItemId} from '../utils/cargo'
 import {getItem} from '../data/catalog'
 import {calc_build_duration} from '../capabilities/crafting'
+import {cargoIdentityKey} from '../capabilities/storage'
 import {computeLoaderDockedMass} from '../derivation/capabilities'
 import {getLanes, getTasks, isIdle} from '../scheduling/schedule'
 import {HoldKind, TaskType} from '../types'
@@ -295,17 +296,13 @@ function coordsEqual(
     return a.x.equals(b.x) && a.y.equals(b.y)
 }
 
-function moduleKey(module: ServerContract.Types.module_entry): string {
-    const installed = module.installed
-    if (!installed) return `${module.type.toNumber()}:empty`
-
-    return `${module.type.toNumber()}:${installed.item_id.toNumber()}:${installed.stats.toString()}`
-}
-
 function sourceStackKey(cargo: ServerContract.Types.cargo_row): string {
-    return `${cargoRowItemId(cargo)}#${cargo.stats.toString()}#${(cargo.modules ?? [])
-        .map(moduleKey)
-        .join(',')}`
+    return cargoIdentityKey(
+        cargoRowItemId(cargo),
+        cargo.stats,
+        cargo.modules ?? [],
+        cargo.sequence_id?.toString() ?? ''
+    )
 }
 
 function matchRelevantCargo(
