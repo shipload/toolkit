@@ -535,6 +535,8 @@ describe('ActionsManager', () => {
             'rekeycargo',
             'rekeyjobs',
             'dropplayers',
+            'normcomps',
+            'normwords',
             'dbgjobs',
             'dbgpick',
             'dbgplace',
