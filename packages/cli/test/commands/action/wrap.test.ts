@@ -85,3 +85,35 @@ test('selectStack picks one candidate by sequence id', () => {
 test('selectStack rejects a quantity above the stack', () => {
     expect(() => selectStack(cargo, {itemId: 301, stackId: 7n}, 11n)).toThrow(/requested 11/)
 })
+
+const moduleVariants = [
+    {item_id: 10201n, quantity: 1n, stats: 5n, modules: [{type: 1, installed: undefined}]},
+    {
+        item_id: 10201n,
+        quantity: 1n,
+        stats: 5n,
+        modules: [{type: 1, installed: {item_id: 10100, stats: 8n}}],
+    },
+]
+
+test('selectStack picks the stack whose installed modules the arguments name', () => {
+    const installed = [
+        ServerTypes.module_entry.from({type: 1, installed: {item_id: 10100, stats: 8}}),
+    ]
+    const stack = selectStack(
+        moduleVariants,
+        {itemId: 10201, stackId: 5n},
+        1n,
+        undefined,
+        installed
+    )
+    expect(Number(stack.modules[0].installed?.item_id)).toBe(10100)
+    const empty = selectStack(moduleVariants, {itemId: 10201, stackId: 5n}, 1n, undefined, [])
+    expect(empty.modules[0].installed).toBeUndefined()
+})
+
+test('selectStack lists module variants when no modules are named', () => {
+    expect(() => selectStack(moduleVariants, {itemId: 10201, stackId: 5n}, 1n)).toThrow(
+        /More than one cargo stack[\s\S]*installed 0=10100\.8/
+    )
+})

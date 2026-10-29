@@ -1,7 +1,8 @@
-import {ServerTypes, type Shipload} from '@shipload/sdk'
+import {cargoModulesKey, ServerTypes, type Shipload} from '@shipload/sdk'
 import type {Action} from '@wharfkit/antelope'
 import {Command, Option} from 'commander'
 import {ALL_ENTITY_TYPES, type ParsedCargoRef, parseCargoRef, parseUint64} from '../../lib/args'
+import {parseModulesJson} from '../../lib/cargo-build'
 import {formatCargoRef, safeItemName} from '../../lib/cargo-table'
 import {getShipload} from '../../lib/client'
 import type {EntityContext, EntitySubcommand} from '../../lib/entity-scope'
@@ -31,21 +32,27 @@ interface WrapCliOptions {
     track?: boolean
     claimRam?: boolean
     entityId?: bigint
+    modules?: string
 }
 
 type SnapshotStack = EntitySnapshot['cargo'][number]
 
+function installedKey(modules: readonly unknown[] | undefined): string {
+    return cargoModulesKey((modules ?? []) as ServerTypes.module_entry[])
+}
+
 function describeStack(c: SnapshotStack): string {
-    const mods = (c.modules ?? []).length
+    const installed = installedKey(c.modules) || 'none'
     const seq = c.entity_id ? `, sequence id ${c.entity_id}` : ''
-    return `  ${c.quantity}× ${safeItemName(Number(c.item_id))} (modules ${mods}${seq})`
+    return `  ${c.quantity}× ${safeItemName(Number(c.item_id))} (installed ${installed}${seq})`
 }
 
 export function selectStack(
     cargo: EntitySnapshot['cargo'],
     ref: ParsedCargoRef,
     quantity: bigint,
-    sequenceId?: bigint
+    sequenceId?: bigint,
+    modules?: ServerTypes.module_entry[]
 ): ServerTypes.cargo_item {
     const label = formatCargoRef(ref.itemId, ref.stackId)
     let matches = cargo.filter(
@@ -63,10 +70,19 @@ export function selectStack(
             throw new ValidationError(`No cargo matches ${label} with sequence id ${sequenceId}.`)
         }
     }
+    if (modules !== undefined) {
+        const wanted = installedKey(modules)
+        matches = matches.filter((c) => installedKey(c.modules) === wanted)
+        if (matches.length === 0) {
+            throw new ValidationError(
+                `No cargo matches ${label} with installed modules ${wanted || 'none'}.`
+            )
+        }
+    }
     if (matches.length > 1) {
         throw new ValidationError(
             `More than one cargo stack matches ${label}:\n${matches.map(describeStack).join('\n')}`,
-            'Pass --entity-id <sequence-id> to choose one.'
+            'Pass --modules <json> or --entity-id <sequence-id> to choose one.'
         )
     }
     const stack = matches[0]
@@ -95,7 +111,9 @@ export async function runWrap(
 ): Promise<void> {
     const actions = await withValidation(async () => {
         const snap = await getEntitySnapshot(ctx.entityId)
-        const stack = selectStack(snap.cargo, ref, quantity, options.entityId)
+        const modules =
+            options.modules === undefined ? undefined : parseModulesJson(options.modules)
+        const stack = selectStack(snap.cargo, ref, quantity, options.entityId, modules)
         return buildAction({
             owner,
             entityId: ctx.entityId,
@@ -159,6 +177,12 @@ Use \`shiploadcli ship N inventory\` to list item ids and stack ids.`
                     '--entity-id <sequence-id>',
                     'sequence id of the stack, to choose between stacks with the same item and stats'
                 ).argParser(parseUint64)
+            )
+            .addOption(
+                new Option(
+                    '--modules <json>',
+                    'modules vector of the stack, to choose between stacks that differ only by installed modules (JSON array)'
+                )
             )
             .option(
                 '--claim-ram',
