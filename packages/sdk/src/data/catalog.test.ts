@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test'
 import {getComponents, getItem, getItems, itemTypeIndex, typeLabel} from './catalog'
 import {getRecipe} from './recipes-runtime'
+import {EntityClass, getKindMeta, getPackedEntityType} from './kind-registry'
 import items from './items.json'
 import {itemFamilies, itemFamilyKey} from './metadata'
 
@@ -92,6 +93,31 @@ describe('component descriptions', () => {
                 const plain = name === 'hull' ? 'hulls' : name
                 expect(consumers.get(item.family)?.has(plain), `${item.name} -> ${plain}`).toBe(
                     true
+                )
+            }
+        }
+    })
+})
+
+describe('structure recipes', () => {
+    const isStructure = (itemId: number) => {
+        const kind = getPackedEntityType(itemId)
+        const classification = kind ? getKindMeta(kind)?.classification : undefined
+        return (
+            classification === EntityClass.OrbitalStructure ||
+            classification === EntityClass.PlanetaryStructure
+        )
+    }
+
+    test('take no packed entity, so a plot deposit never names a sequence id', () => {
+        const structures = getItems().filter(
+            (item) => item.type === 'entity' && isStructure(item.id) && getRecipe(item.id)
+        )
+        expect(structures.length).toBeGreaterThan(0)
+        for (const output of structures) {
+            for (const input of getRecipe(output.id)!.inputs) {
+                expect(getItem(input.itemId).type, `${output.name} <- ${input.itemId}`).not.toBe(
+                    'entity'
                 )
             }
         }
