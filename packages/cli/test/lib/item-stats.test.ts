@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { encodeStats, ITEM_PLASMA_CELL } from "@shipload/sdk";
+import { encodeStats, ITEM_BEAM, ITEM_PLASMA_CELL } from "@shipload/sdk";
 import { formatItemStats } from "../../src/lib/item-stats";
 
 describe("formatItemStats", () => {
@@ -24,9 +24,10 @@ describe("formatItemStats", () => {
 });
 
 describe("formatItemStats components", () => {
-	test("labels component stats with the abbreviation of each slot", () => {
-		expect(formatItemStats(ITEM_PLASMA_CELL, encodeStats([500, 400, 300]))).toBe(
-			"VOL 500 / REA 400 / THM 300",
+	test("labels only the slots a component carries", () => {
+		expect(formatItemStats(ITEM_PLASMA_CELL, encodeStats([500, 213, 213]))).toBe("VOL 500");
+		expect(formatItemStats(ITEM_BEAM, encodeStats([213, 500, 400, 213, 213, 213]))).toBe(
+			"TOL 500 / DEN 400",
 		);
 	});
 });
