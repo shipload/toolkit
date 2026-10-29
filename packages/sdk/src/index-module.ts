@@ -395,6 +395,7 @@ export {
     pickFabricator,
     socketTail,
     JOB_QUEUE_CAP,
+    CIVIC_SETTLE_LIMIT,
     jobStatus,
     jobStatusLabel,
     jobDropoffTask,

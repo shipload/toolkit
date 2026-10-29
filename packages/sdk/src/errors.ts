@@ -139,3 +139,10 @@ export const BALLOT_NONE_DUE = 'no ballots are due'
 export function isSettling(error: unknown): boolean {
     return error instanceof Error && error.message.includes(BALLOT_SETTLING)
 }
+
+export const CIVIC_BAYS_UNSETTLED =
+    "the Depot's shuttle bays have deliveries still to settle; resolve the Depot and retry"
+
+export function isBaysUnsettled(error: unknown): boolean {
+    return error instanceof Error && error.message.includes(CIVIC_BAYS_UNSETTLED)
+}

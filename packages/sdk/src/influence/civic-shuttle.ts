@@ -1,9 +1,9 @@
 import type {UInt64} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 import {getItem} from '../data/catalog'
-import {JOB_QUEUE_CAP} from '../scheduling/jobs'
+import {CIVIC_SETTLE_LIMIT, JOB_QUEUE_CAP} from '../scheduling/jobs'
 import {laneKeyForModule, resolveLaneLoader} from '../scheduling/lanes'
-import {orderedTasks, type ScheduleData} from '../scheduling/schedule'
+import {orderedTasks, resolveOrder, type ScheduleData} from '../scheduling/schedule'
 import {HoldKind, TaskCancelable, TaskType} from '../types'
 
 type CargoItem = ServerContract.Types.cargo_item
@@ -18,6 +18,7 @@ export interface CivicShuttleBay {
     outputPct: number
     queued: number
     full: boolean
+    unsettled: boolean
     gapped: boolean
 }
 
@@ -34,16 +35,45 @@ function unfinishedTasks(lane: Lane | undefined, now: Date): number {
     return count
 }
 
+// Mirrors lanes.hpp lanes_left_landed: bays still fronted by a landed task once the first `budget` landed tasks settle.
+export function lanesLeftLanded(lanes: Lane[], now: Date, budget: number): number[] {
+    const nowMs = now.getTime()
+    const out: number[] = []
+    if (budget === 0) {
+        for (const lane of lanes) {
+            const front = lane.schedule.tasks[0]
+            if (!front) continue
+            const frontEnd =
+                lane.schedule.started.toDate().getTime() + front.duration.toNumber() * 1000
+            if (frontEnd <= nowMs) out.push(lane.lane_key.toNumber())
+        }
+        return out
+    }
+    let settled = 0
+    for (const entry of orderedTasks({lanes})) {
+        if (entry.completesAt.getTime() > nowMs) break
+        if (settled < budget) {
+            settled++
+            continue
+        }
+        if (!out.includes(entry.laneKey)) out.push(entry.laneKey)
+    }
+    return out
+}
+
+// The default budget is the booking's: its bay prologue settles CIVIC_SETTLE_LIMIT landed tasks before it picks.
 export function civicShuttleBays(
     modules: ModuleEntry[],
     entityItemId: number,
     lanes: Lane[],
     now: Date = new Date(),
-    minStart?: Date
+    minStart?: Date,
+    settleBudget: number = CIVIC_SETTLE_LIMIT
 ): CivicShuttleBay[] {
     const bays: CivicShuttleBay[] = []
     const nowMs = now.getTime()
     const startMs = minStart?.getTime() ?? nowMs
+    const unsettled = lanesLeftLanded(lanes, now, settleBudget)
     for (let slotIndex = 0; slotIndex < modules.length; slotIndex++) {
         const installed = modules[slotIndex].installed
         if (!installed) continue
@@ -60,6 +90,7 @@ export function civicShuttleBays(
             outputPct: loader.outputPct,
             queued,
             full: queued >= JOB_QUEUE_CAP,
+            unsettled: unsettled.includes(laneKey),
             gapped: needsIdleGap(lane, startMs, nowMs),
         })
     }
@@ -82,22 +113,23 @@ function needsIdleGap(lane: Lane | undefined, startMs: number, nowMs: number): b
     return floorSecond(startMs) > laneEndMs(lane, floorSecond(nowMs))
 }
 
-// Mirrors cargo.cpp pick_earliest_loader_lane: earliest finish among bays below the queue cap that need no idle gap.
+// Mirrors cargo.cpp pick_earliest_loader_lane: earliest finish among settled bays below the queue cap that need no idle gap.
 export function selectCivicShuttleBay(
     modules: ModuleEntry[],
     entityItemId: number,
     lanes: Lane[],
     now: Date = new Date(),
     durationFor: (bay: CivicShuttleBay) => number = () => 0,
-    minStart?: Date
+    minStart?: Date,
+    settleBudget: number = CIVIC_SETTLE_LIMIT
 ): CivicShuttleBay | undefined {
-    const bays = civicShuttleBays(modules, entityItemId, lanes, now, minStart)
+    const bays = civicShuttleBays(modules, entityItemId, lanes, now, minStart, settleBudget)
     const nowMs = now.getTime()
     const floorMs = Math.max(nowMs, minStart?.getTime() ?? nowMs)
     let best: CivicShuttleBay | undefined
     let bestEnd = Infinity
     for (const bay of bays) {
-        if (bay.full || bay.gapped) continue
+        if (bay.full || bay.unsettled || bay.gapped) continue
         const lane = lanes.find((l) => l.lane_key.toNumber() === bay.laneKey)
         const start = Math.max(laneEndMs(lane, nowMs), floorMs)
         const end = start + durationFor(bay) * 1000
@@ -106,7 +138,34 @@ export function selectCivicShuttleBay(
             bestEnd = end
         }
     }
-    return best ?? bays.find((bay) => !bay.full) ?? bays[0]
+    if (best) return best
+    // resolve_civic_carrier refuses in this order: every bay booked, then an unsettled bay, then the arrival gap
+    if (bays.every((bay) => bay.full)) return bays[0]
+    return (
+        bays.find((bay) => bay.unsettled && !bay.full) ??
+        bays.find((bay) => bay.unsettled) ??
+        bays.find((bay) => !bay.full)
+    )
+}
+
+// Count-less civic resolves (CIVIC_SETTLE_LIMIT tasks each) that reach the backlog's end, or entityIds' last due task.
+export function civicSettleRounds(
+    entity: ScheduleData,
+    now: Date,
+    entityIds?: Array<UInt64 | string | number>
+): number {
+    const due = resolveOrder(entity, now)
+    let depth = due.length
+    if (entityIds) {
+        const ids = new Set(entityIds.map((id) => String(id)))
+        depth = 0
+        due.forEach((event, i) => {
+            if (event.task.couplings.some((c) => ids.has(String(c.counterpart.entity_id)))) {
+                depth = i + 1
+            }
+        })
+    }
+    return Math.ceil(depth / CIVIC_SETTLE_LIMIT)
 }
 
 export interface PendingCivicTransfer {

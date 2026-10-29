@@ -27,6 +27,7 @@ export type ShuttleReasonCode =
     | 'not-stored'
     | 'no-storage'
     | 'bays-booked'
+    | 'bays-unsettled'
     | 'bay-not-ready'
     | 'bundle-too-large'
     | 'duplicate-item'
@@ -106,6 +107,8 @@ const REASON_CODES: Record<string, ShuttleReasonCode> = {
     'entity has no storage': 'no-storage',
     'target entity has no storage': 'no-storage',
     "the building's shuttle bays are fully booked": 'bays-booked',
+    "the Depot's shuttle bays have deliveries still to settle; resolve the Depot and retry":
+        'bays-unsettled',
     'a shuttle bay only takes cargo that is ready to load now; book this once your ship and its cargo are here, or send it on your own shuttle':
         'bay-not-ready',
     'a shuttle bay only takes cargo that is ready to load now; book this once the cargo is here':

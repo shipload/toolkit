@@ -50,12 +50,16 @@ function holdOn(counterpartId: number, kind: HoldKind = HoldKind.PULL) {
 
 function entity(
     id: number,
-    opts: {lanes?: ServerContract.Types.lane[]; holds?: ServerContract.Types.hold[]} = {}
+    opts: {
+        lanes?: ServerContract.Types.lane[]
+        holds?: ServerContract.Types.hold[]
+        owner?: string
+    } = {}
 ): ServerContract.Types.entity_info {
     return ServerContract.Types.entity_info.from({
         projected_at: 0,
         id: UInt64.from(id),
-        owner: Name.from('alice'),
+        owner: Name.from(opts.owner ?? 'alice'),
         type: Name.from('warehouse'),
         entity_name: '',
         coordinates: ServerContract.Types.coordinates.from({x: 0, y: 0}),
@@ -73,6 +77,25 @@ function entity(
 }
 
 const ACTION = sl.actions.warp(99, {x: 1, y: 2})
+
+// A Depot bay of 60s shuttles, started in the past, delivering to each receiver in turn.
+function bayLane(receivers: number[]) {
+    const coupling = (id: number, kind: HoldKind) => ({
+        counterpart: {entity_type: 'warehouse', entity_id: id},
+        hold: 1,
+        kind,
+    })
+    return ServerContract.Types.lane.from({
+        lane_key: UInt8.from(1),
+        schedule: {
+            started: PAST.toISOString().slice(0, -1),
+            tasks: receivers.map((id) => ({
+                ...task(TaskType.SHUTTLE, 60),
+                couplings: [coupling(90, HoldKind.PULL), coupling(id, HoldKind.PUSH)],
+            })),
+        },
+    })
+}
 
 function resolvedIds(actions: ReturnType<typeof composeIdleResolve>): string[] {
     return actions
@@ -154,5 +177,28 @@ describe('composeIdleResolve', () => {
 
         expect(resolvedIds(result)).toEqual(['5'])
         expect(result.length).toBe(2)
+    })
+
+    test('a Depot counterpart resolves once per 16 tasks ahead of the blocker', () => {
+        const blocker = entity(5, {holds: [holdOn(7)]})
+        const receivers = [...Array.from({length: 19}, (_, i) => 100 + i), 5]
+        const depot = entity(7, {lanes: [bayLane(receivers)], owner: 'eon.shipload'})
+        const lookup = (cid: UInt64) => (cid.equals(UInt64.from(7)) ? depot : undefined)
+
+        expect(resolvedIds(composeIdleResolve(blocker, ACTION, sl.actions, NOW, lookup))).toEqual([
+            '7',
+            '7',
+        ])
+    })
+
+    test('a player-owned counterpart resolves once, since its resolve settles everything', () => {
+        const blocker = entity(5, {holds: [holdOn(7)]})
+        const receivers = [...Array.from({length: 19}, (_, i) => 100 + i), 5]
+        const counterpart = entity(7, {lanes: [bayLane(receivers)]})
+        const lookup = (cid: UInt64) => (cid.equals(UInt64.from(7)) ? counterpart : undefined)
+
+        expect(resolvedIds(composeIdleResolve(blocker, ACTION, sl.actions, NOW, lookup))).toEqual([
+            '7',
+        ])
     })
 })

@@ -16,6 +16,16 @@ test('formatShuttleReason prints the energy values for a ship-energy rejection',
     expect(out).not.toMatch(BANNED)
 })
 
+test('formatShuttleReason tells the player to settle the Depot for a bays-unsettled rejection', () => {
+    const reason: ShuttleReason = {
+        code: 'bays-unsettled',
+        reason: "the Depot's shuttle bays have deliveries still to settle; resolve the Depot and retry",
+    }
+    const out = formatShuttleReason(reason)
+    expect(out).toContain('resolve the Depot')
+    expect(out).not.toMatch(BANNED)
+})
+
 test('formatShuttleReason prints the opening time for a bays-booked rejection', () => {
     const reason: ShuttleReason = {
         code: 'bays-booked',

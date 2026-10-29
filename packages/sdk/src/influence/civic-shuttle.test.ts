@@ -3,11 +3,13 @@ import {expect, test} from 'bun:test'
 import type {ServerContract} from '../contracts'
 import {encodeStats} from '../derivation/crafting'
 import {ITEM_DEPOT_T1_PACKED, ITEM_LOADER_T1, ITEM_STORAGE_T1} from '../data/item-ids'
-import {JOB_QUEUE_CAP} from '../scheduling/jobs'
+import {CIVIC_SETTLE_LIMIT, JOB_QUEUE_CAP} from '../scheduling/jobs'
 import {HoldKind, TaskType} from '../types'
 import {
+    civicSettleRounds,
     civicShuttleBays,
     civicTransfersFrom,
+    lanesLeftLanded,
     pendingCivicTransfers,
     selectCivicShuttleBay,
     type CivicShuttleBay,
@@ -115,15 +117,78 @@ test('a bay is full at the job queue cap', () => {
 
 const AFTER = new Date(T0.getTime() + 3_600_000)
 
-test('a landed booking leaves the bay free, since booking clears it', () => {
-    const filled = Array.from({length: JOB_QUEUE_CAP}, () => shuttleTask(20, 21))
-    const lanes = [makeLane(1, filled)]
+test('a landed booking leaves the bay free when the booking settles it', () => {
+    const landed = Array.from({length: CIVIC_SETTLE_LIMIT}, () => shuttleTask(20, 21))
+    const lanes = [makeLane(1, landed)]
     const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)
     expect(bays[0].queued).toBe(0)
     expect(bays[0].full).toBe(false)
+    expect(bays[0].unsettled).toBe(false)
     expect(selectCivicShuttleBay(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)?.laneKey).toBe(
         1
     )
+})
+
+test('a bay still fronted by a landed task after the booking settles 16 is unsettled', () => {
+    const landed = Array.from({length: CIVIC_SETTLE_LIMIT + 1}, () => shuttleTask(20, 21))
+    const lanes = [makeLane(1, landed)]
+    const bays = civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)
+    expect(bays[0].full).toBe(false)
+    expect(bays.map((b) => b.unsettled)).toEqual([true, false])
+    expect(selectCivicShuttleBay(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)?.laneKey).toBe(
+        2
+    )
+})
+
+test('the 16 settled tasks follow resolve order across bays', () => {
+    const lanes = [
+        makeLane(
+            1,
+            Array.from({length: 14}, () => shuttleTask(20, 21))
+        ),
+        makeLane(
+            2,
+            Array.from({length: 4}, () => shuttleTask(22, 23))
+        ),
+    ]
+    expect(lanesLeftLanded(lanes, AFTER, CIVIC_SETTLE_LIMIT)).toEqual([1])
+    expect(lanesLeftLanded(lanes, AFTER, 18)).toEqual([])
+})
+
+test('with no settle budget every bay whose front has landed is unsettled', () => {
+    const lanes = [makeLane(1, [shuttleTask(20, 21)]), makeLane(2, [shuttleTask(22, 23)])]
+    expect(lanesLeftLanded(lanes, T0, 0)).toEqual([])
+    expect(lanesLeftLanded(lanes, AFTER, 0)).toEqual([1, 2])
+    expect(
+        civicShuttleBays(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER, undefined, 0).map(
+            (b) => b.unsettled
+        )
+    ).toEqual([true, true])
+})
+
+test('selectCivicShuttleBay reports an unsettled bay when every open bay is unsettled', () => {
+    const landed = () => Array.from({length: CIVIC_SETTLE_LIMIT}, () => shuttleTask(20, 21))
+    const lanes = [makeLane(1, landed()), makeLane(2, landed())]
+    const bay = selectCivicShuttleBay(depotModules(), ITEM_DEPOT_T1_PACKED, lanes, AFTER)
+    expect(bay?.unsettled).toBe(true)
+    expect(bay?.full).toBe(false)
+})
+
+test('civicSettleRounds counts the 16-task resolves a backlog needs', () => {
+    const lanes = [
+        makeLane(
+            1,
+            Array.from({length: 40}, (_, i) => shuttleTask(100 + i, 50))
+        ),
+    ]
+    const depot = {lanes} as never
+    expect(civicSettleRounds(depot, T0)).toBe(0)
+    expect(civicSettleRounds(depot, AFTER)).toBe(3)
+    expect(civicSettleRounds(depot, AFTER, [100])).toBe(1)
+    expect(civicSettleRounds(depot, AFTER, [115])).toBe(1)
+    expect(civicSettleRounds(depot, AFTER, [116])).toBe(2)
+    expect(civicSettleRounds(depot, AFTER, [50])).toBe(3)
+    expect(civicSettleRounds(depot, AFTER, [999])).toBe(0)
 })
 
 test('a bay part-way through its queue counts only what is still unfinished', () => {

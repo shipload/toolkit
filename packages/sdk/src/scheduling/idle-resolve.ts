@@ -1,5 +1,7 @@
 import type {Action, UInt64} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
+import {civicSettleRounds} from '../influence/civic-shuttle'
+import {isCivicEntity} from '../influence/civic'
 import type {ActionsManager} from '../managers/actions'
 import {hasResolvable, type ScheduleData} from './schedule'
 
@@ -17,14 +19,14 @@ export function composeIdleResolve(
     now: Date,
     lookupCounterpart?: CounterpartLookup
 ): Action[] {
-    const ids: UInt64[] = []
+    const resolves: Action[] = []
     const seen = new Set<string>()
 
-    const add = (id: UInt64) => {
+    const add = (id: UInt64, rounds = 1) => {
         const key = id.toString()
         if (seen.has(key)) return
         seen.add(key)
-        ids.push(id)
+        for (let i = 0; i < rounds; i++) resolves.push(actions.resolve(id))
     }
 
     if (hasResolvable(blocker, now)) {
@@ -37,9 +39,13 @@ export function composeIdleResolve(
             const counterpartId = hold.counterpart.entity_id
             const counterpart = lookupCounterpart(counterpartId)
             if (!counterpart || !hasResolvable(counterpart, now)) continue
-            add(counterpartId)
+            const rounds = civicSettleRounds(counterpart, now, [blocker.id])
+            // only a civic entity's resolve stops at CIVIC_SETTLE_LIMIT; it belongs to the account every action names
+            const civic =
+                rounds > 1 && isCivicEntity(counterpart, actions.resolve(counterpartId).account)
+            add(counterpartId, civic ? rounds : 1)
         }
     }
 
-    return [...ids.map((id) => actions.resolve(id)), action]
+    return [...resolves, action]
 }

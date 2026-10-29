@@ -45,8 +45,10 @@ export {
     type CivicLoaderStats,
 } from './duration'
 export {
+    civicSettleRounds,
     civicShuttleBays,
     civicTransfersFrom,
+    lanesLeftLanded,
     pendingCivicTransfers,
     selectCivicShuttleBay,
     type CivicShuttleBay,

@@ -39,6 +39,7 @@ export interface JobLane {
 }
 
 export const JOB_QUEUE_CAP = 50
+export const CIVIC_SETTLE_LIMIT = 16
 
 function activeOn(jobs: JobWindow[], socket: number, now: Date): JobWindow[] {
     return jobs

@@ -42,7 +42,7 @@ export const SUBCOMMAND: EntitySubcommand = {
             .addHelpText('before', 'Requires: entity with completed tasks.\n')
             .option(
                 '--count <n>',
-                'number of tasks to resolve (default: all completed)',
+                'number of tasks to resolve (default: all completed; a Depot settles at most 16)',
                 parseUint64
             )
             .action(async (opts: {count?: bigint}) => {

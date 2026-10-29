@@ -36,6 +36,8 @@ export function formatShuttleReason(r: ShuttleReason): string {
             return at
                 ? `The building's shuttle bays are fully booked; the next opening is ${at}.`
                 : "The building's shuttle bays are fully booked."
+        case 'bays-unsettled':
+            return "The Depot's shuttle bays have deliveries still to settle; resolve the Depot and retry."
         case 'queue-full':
             return at
                 ? `The Fabricator queue is full; the next opening is ${at}.`
