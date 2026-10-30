@@ -15,7 +15,7 @@ export function buildSetWrapCost(itemType: number, tier: number, amount: bigint)
 export function register(parent: Command): void {
     const cmd = parent
         .command('set-wrap-cost')
-        .description('Set the NFT wrap cost for an item type & tier')
+        .description('Set the wrap cost for an item type & tier')
         .requiredOption('--item-type <n>', 'item type', parseUint8)
         .requiredOption('--tier <n>', 'tier', parseUint8)
         .requiredOption('--amount <n>', 'cost amount (integer)', parseUint64)

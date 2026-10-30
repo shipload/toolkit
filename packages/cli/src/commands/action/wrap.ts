@@ -145,11 +145,11 @@ export async function runWrap(
 
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'wrap',
-    description: 'Wrap cargo into an NFT for the specified owner',
+    description: 'Wrap cargo into a wrapped item for the specified owner',
     appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('wrap')
-            .description('Wrap cargo into an NFT for the specified owner')
+            .description('Wrap cargo into a wrapped item for the specified owner')
             .addHelpText(
                 'before',
                 'Requires: deployed entity at a nexus with loaders; caller owns the entity.\n' +
@@ -159,7 +159,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'after',
                 `
 Example:
-  # Wrap 5 units of item 301 (stack 214202522) into an NFT for alice at nexus 3
+  # Wrap 5 units of item 301 (stack 214202522) into a wrapped item for alice at nexus 3
   shiploadcli ship 1 wrap alice 3 301:214202522 5
 
 Use \`shiploadcli ship N inventory\` to list item ids and stack ids.`
@@ -190,7 +190,7 @@ Use \`shiploadcli ship N inventory\` to list item ids and stack ids.`
             )
             .option(
                 '--no-claim-ram',
-                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the NFT is consumed or burned'
+                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the wrapped item is consumed or burned'
             )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)

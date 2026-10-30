@@ -14,7 +14,7 @@ export function buildSetWrapFee(feePct: number, feeAccount: string): Action {
 export function register(parent: Command): void {
     const cmd = parent
         .command('set-wrap-fee')
-        .description('Set the NFT wrap fee percentage and recipient account')
+        .description('Set the wrap fee percentage and recipient account')
         .requiredOption('--fee-pct <n>', 'fee in basis points / contract units', parseUint16)
         .requiredOption('--fee-account <name>', 'account that receives the fee')
         .action(async (opts: {feePct: number; feeAccount: string}, command: Command) => {

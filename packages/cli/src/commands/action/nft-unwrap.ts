@@ -12,11 +12,11 @@ interface UnwrapCliOptions {
 
 export function buildUnwrapCommand(): Command {
     return new Command('unwrap')
-        .description("Deposit an NFT into a host entity's cargo")
+        .description("Deposit a wrapped item into a host entity's cargo")
         .addHelpText(
             'before',
             `Submits two actions in one transaction: atomicassets::transfer(to=${platformContractName}, memo="unwrap") + ${gameContractName}::placecargo.\n` +
-                'Requires: caller owns the host entity; host has loaders; capacity headroom for the unwrapped mass.\n'
+                'Requires: caller owns the host ship or warehouse; host is at the Wrap Nexus where the item was wrapped; capacity headroom for the unwrapped mass.\n'
         )
         .addHelpText(
             'after',
@@ -24,7 +24,7 @@ export function buildUnwrapCommand(): Command {
 Examples:
   shiploadcli nft unwrap 1099511700123 6
 
-Use \`shiploadcli nft\` to list NFTs and \`shiploadcli ship <id>\` / \`shiploadcli warehouse <id>\` to inspect hosts.`
+Use \`shiploadcli nft\` to list wrapped assets and \`shiploadcli ship <id>\` / \`shiploadcli warehouse <id>\` to inspect hosts.`
         )
         .argument('<asset-id>', 'atomicassets asset id to unwrap', parseUint64)
         .argument('<host-id>', 'host entity id receiving the cargo', parseUint64)
@@ -41,7 +41,7 @@ Use \`shiploadcli nft\` to list NFTs and \`shiploadcli ship <id>\` / \`shiploadc
             )
             const result = await transact(
                 {actions},
-                {description: `Unwrapping NFT ${assetId} into host ${hostId}`}
+                {description: `Unwrapping wrapped asset ${assetId} into host ${hostId}`}
             )
             await maybeAwaitAndPrint(hostId, opts, result)
         })

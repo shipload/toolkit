@@ -107,7 +107,7 @@ function formatStatsField(itemId: number, stats: bigint, raw: boolean): string {
 
 export function renderPretty(owner: string, rows: NftRow[], opts: {raw?: boolean} = {}): string {
     if (rows.length === 0) {
-        return `NFTs (${owner}): none in collection '${collectionName}'.`
+        return `Wrapped assets (${owner}): none in collection '${collectionName}'.`
     }
     const table = new Table({
         head: ['Asset ID', 'Item', 'Qty', 'Mass', 'Origin', 'Stats', 'Schema', 'Template'],
@@ -150,7 +150,7 @@ export function renderPretty(owner: string, rows: NftRow[], opts: {raw?: boolean
         .split('\n')
         .map((l) => l.trimEnd())
         .join('\n')
-    return [`NFTs for ${owner} (${rows.length}):`, body].join('\n')
+    return [`Wrapped assets for ${owner} (${rows.length}):`, body].join('\n')
 }
 
 function rowsToJson(owner: string, rows: NftRow[]): unknown {
@@ -175,7 +175,9 @@ function rowsToJson(owner: string, rows: NftRow[]): unknown {
 export function register(program: Command): void {
     const nft = program
         .command('nft')
-        .description(`List Shipload NFTs owned by an account (collection '${collectionName}')`)
+        .description(
+            `List Shipload wrapped assets owned by an account (collection '${collectionName}')`
+        )
         .argument('[account]', 'account to inspect (defaults to configured actor)')
         .option('--item <id>', 'filter by item id', parseUint32)
         .option('--json', 'emit JSON instead of formatted text')

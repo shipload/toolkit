@@ -6,10 +6,10 @@ import {getAccountName, transact} from '../../lib/session'
 
 export function buildClaimCommand(): Command {
     return new Command('claim')
-        .description('Claim RAM payment for a wrapped NFT, releasing the wrap gate')
+        .description('Claim RAM payment for a wrapped asset, releasing the wrap gate')
         .addHelpText(
             'before',
-            `Submits ${atomicAssetsContractName}::setrampayer(new_payer=<you>, asset_id). Reassigns the NFT's RAM payer to you and fires the logrampayer event that releases the wrap gate.\n` +
+            `Submits ${atomicAssetsContractName}::setrampayer(new_payer=<you>, asset_id). Reassigns the asset's RAM payer to you and fires the logrampayer event that releases the wrap gate.\n` +
                 'Requires: you own the asset and are not already its ram_payer.\n'
         )
         .addHelpText(
@@ -18,7 +18,7 @@ export function buildClaimCommand(): Command {
 Examples:
   shiploadcli nft claim 1099511627778
 
-Use \`shiploadcli nft\` to list your NFTs and their ram_payer.`
+Use \`shiploadcli nft\` to list your wrapped assets and their ram_payer.`
         )
         .argument('<asset-id>', 'atomicassets asset id to claim RAM for', parseUint64)
         .action(async (assetId: bigint) => {
@@ -27,7 +27,7 @@ Use \`shiploadcli nft\` to list your NFTs and their ram_payer.`
             const action = sl.actions.setRamPayer(Name.from(owner), UInt64.from(assetId))
             await transact(
                 {action},
-                {description: `Claiming RAM payer of NFT ${assetId} for ${owner}`}
+                {description: `Claiming RAM payer of wrapped asset ${assetId} for ${owner}`}
             )
         })
 }

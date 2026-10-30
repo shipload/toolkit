@@ -58,7 +58,7 @@ function selectLane(
     if (active.length > 1) {
         const keys = active.map((l) => l.laneKey).join(', ')
         throw new ValidationError(
-            `entity has pending tasks on multiple lanes (${keys}) — pass --lane <key> to choose one.`
+            `entity has pending tasks on multiple timelines (${keys}); pass --lane <key> to choose one.`
         )
     }
     return active[0].laneKey
@@ -157,7 +157,7 @@ export async function runCancel(
     await transact(
         {action},
         {
-            description: `Cancelling ${count} task(s)${rangeHint} on lane ${laneKey} for ${ctx.entityType} ${ctx.entityId}`,
+            description: `Cancelling ${count} task(s)${rangeHint} on timeline ${laneKey} for ${ctx.entityType} ${ctx.entityId}`,
         }
     )
 }
@@ -169,7 +169,7 @@ const HELP_BEFORE = `Forms:
 
 --all and --from check the cancel first and print why the game would refuse it; <count> is sent as given.
 
-Lane: defaults to the entity's sole active lane; pass --lane <key> when several lanes are busy.
+Timeline: defaults to the entity's sole active timeline; pass --lane <key> when several timelines are busy.
 Requires: pending task that is cancelable.
 `
 
@@ -188,7 +188,7 @@ export const SUBCOMMAND: EntitySubcommand = {
                 'cancel from task index (0-indexed) through the tail',
                 parseUint32
             )
-            .option('--lane <key>', 'worker lane to cancel from (0 = mobility)', parseUint8)
+            .option('--lane <key>', 'timeline to cancel from (0 = mobility)', parseUint8)
             .action(async (count: bigint | undefined, opts: CancelFlags) => {
                 await runCancel(ctx, count, opts)
             }),

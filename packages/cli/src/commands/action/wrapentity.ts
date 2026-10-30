@@ -33,7 +33,7 @@ export async function runWrapEntity(
         const actions = await buildAction(ctx, owner, nexusId, options.claimRam)
         const result = await transact(
             {actions},
-            {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into NFT`}
+            {description: `Wrapping ${ctx.entityType}:${ctx.entityId} into a wrapped asset`}
         )
         await maybeAwaitAndPrint(ctx.entityId, options, result)
     })
@@ -42,11 +42,11 @@ export async function runWrapEntity(
 export const SUBCOMMAND: EntitySubcommand = {
     name: 'wrapentity',
     description:
-        'Wrap this deployed entity into an NFT (must be at a nexus, empty cargo + schedule)',
+        'Wrap this deployed entity into a wrapped asset (must be at a nexus, empty cargo + schedule)',
     appliesTo: ALL_ENTITY_TYPES,
     build: (ctx) =>
         new Command('wrapentity')
-            .description('Wrap this deployed entity into an NFT')
+            .description('Wrap this deployed entity into a wrapped asset')
             .addHelpText('before', 'Requires: at a nexus, empty cargo, empty schedule.\n')
             .addHelpText(
                 'after',
@@ -62,7 +62,7 @@ Example:
             )
             .option(
                 '--no-claim-ram',
-                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the NFT is consumed or burned'
+                'Skip the bundled setlastpayer RAM claim, leaving the wrap gate set until the wrapped asset is consumed or burned'
             )
             .addOption(WAIT_OPTION)
             .addOption(TRACK_OPTION)

@@ -13,12 +13,12 @@ interface DeployCliOptions {
 export function buildDeployCommand(): Command {
     return new Command('deploy')
         .description(
-            'Deploy a packed-entity NFT as a live entity at the nexus where it was wrapped'
+            'Deploy a wrapped ship or container as a live entity at the nexus where it was wrapped'
         )
         .addHelpText(
             'before',
             `Submits two actions in one transaction: atomicassets::transfer(to=${platformContractName}, memo="unwrap") + ${gameContractName}::placeentity.\n` +
-                "The NFT is burned and a new entity row is emplaced at the NFT's Wrap Nexus. A ship with a generator\n" +
+                "The wrapped asset is burned and a new entity row is emplaced at the asset's Wrap Nexus. A ship with a generator\n" +
                 'spawns at zero energy with a recharge task queued, which you can cancel.\n'
         )
         .addHelpText(
@@ -27,7 +27,7 @@ export function buildDeployCommand(): Command {
 Examples:
   shiploadcli nft deploy 1099511700123
 
-Use \`shiploadcli nft\` to list NFTs you own and their asset_ids.`
+Use \`shiploadcli nft\` to list wrapped assets you own and their asset_ids.`
         )
         .argument('<asset-id>', 'atomicassets asset id to deploy', parseUint64)
         .addOption(WAIT_OPTION)
@@ -37,6 +37,9 @@ Use \`shiploadcli nft\` to list NFTs you own and their asset_ids.`
             const sl = await getShipload()
 
             const actions = sl.actions.unwrapEntityTx(Name.from(owner), UInt64.from(assetId))
-            await transact({actions}, {description: `Deploying NFT ${assetId} at its Wrap Nexus`})
+            await transact(
+                {actions},
+                {description: `Deploying wrapped asset ${assetId} at its Wrap Nexus`}
+            )
         })
 }

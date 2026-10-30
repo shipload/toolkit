@@ -26,12 +26,12 @@ interface NftInfo {
 export function renderPretty(input: NftInfo): string {
     const schemas = input.schemas ?? []
     const templates = input.templates ?? []
-    const lines = [`NFT schemas (${schemas.length}):`]
+    const lines = [`Wrapped-asset schemas (${schemas.length}):`]
     for (const s of schemas) {
         const fields = s.fields.map((f) => `${f.name}:${f.field_type}`).join(', ')
         lines.push(`  ${s.schema_name}  [${fields}]`)
     }
-    lines.push('', `NFT templates (${templates.length}):`)
+    lines.push('', `Wrapped-asset templates (${templates.length}):`)
     for (const t of templates) {
         const templateId = Number(t.template_id ?? 0)
         const tpl = templateId ? String(templateId) : '—'
@@ -50,7 +50,7 @@ export function render(input: NftInfo, raw: boolean): string {
 export function register(program: Command): void {
     program
         .command('nftinfo')
-        .description('List NFT schemas and item→schema templates')
+        .description('List wrapped-asset schemas and item→schema templates')
         .option('--raw', 'emit raw JSON')
         .option('--json', 'emit JSON instead of formatted text')
         .action(async (options: {raw?: boolean; json?: boolean}) => {

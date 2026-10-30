@@ -354,7 +354,7 @@ export function createTrackView(opts: TrackViewOpts): View {
         },
         {
             key: 'l',
-            label: 'lane',
+            label: 'timeline',
             enabled: () => state.modal === null && semanticLaneKeys(state.tick.snap).length > 0,
             action: () => {
                 state.laneFilter = nextLaneFilter(state.tick.snap, state.laneFilter)
@@ -585,7 +585,7 @@ function laneBody(t: SnapshotTick, laneFilter: number | null): VChild[] {
     const lines: VChild[] = []
 
     if (sections.length === 0) {
-        lines.push(Text({content: '  no lane schedules', fg: '#888888'}))
+        lines.push(Text({content: '  no scheduled timelines', fg: '#888888'}))
     }
 
     for (const section of sections) {

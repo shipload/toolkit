@@ -395,7 +395,7 @@ describe('createTrackView', () => {
             expect(called).toBe(1)
             expect(joined).toContain('Gather')
             expect(joined).toContain('mob · ready to resolve')
-            expect(joined).not.toContain('no lane schedules')
+            expect(joined).not.toContain('no scheduled timelines')
         } finally {
             await view?.dispose()
             setSystemTime()
@@ -587,7 +587,7 @@ describe('createTrackView', () => {
         })
         const l = view.keys.all().find((h) => h.key === 'l')
         const a = view.keys.all().find((h) => h.key === 'a')
-        expect(l?.label).toBe('lane')
+        expect(l?.label).toBe('timeline')
         expect(a?.label).toBe('all')
 
         const r = fakeRenderer()

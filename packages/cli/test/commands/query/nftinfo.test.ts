@@ -19,10 +19,10 @@ test('nftinfo renders schemas and templates', () => {
         ],
     }
     const out = render(input as any, false)
-    expect(out).toContain('NFT schemas (1)')
+    expect(out).toContain('Wrapped-asset schemas (1)')
     expect(out).toContain('v1.ore')
     expect(out).toContain('quantity:uint64')
-    expect(out).toContain('NFT templates (2)')
+    expect(out).toContain('Wrapped-asset templates (2)')
     expect(out).toContain('20001')
     expect(out).toContain('v1.plate')
 })
