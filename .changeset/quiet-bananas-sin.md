@@ -1,0 +1,76 @@
+---
+"@shipload/cli": patch
+"@shipload/image-renderer": patch
+"@shipload/item-renderer": patch
+"@shipload/oracle": patch
+"@shipload/sdk": patch
+---
+
+- Show only carried component slots in the CLI and item cards
+- Mirror the single and paired module recipes in the SDK
+- Mirror the six-slot component shape in the SDK
+- Close stalled epochs with the beacon's committed secret
+- Report an unlinked oracle close as unauthorized
+- Tag legacy oracle secrets with the running chain
+- Key the oracle secret store to the chain
+- Move to Wharf 4.0.2
+- Close an overdue epoch as the oracle with fresh entropy
+- Move the toolkit to Wharf 4.0.1
+- Preflight platform fund collection in oracle maintenance
+- Format the oracle race classifier test
+- Treat a lost reveal race as a normal beacon outcome
+- Close an overdue epoch from the oracle beacon tick
+- Mirror the ranked ballot in the SDK and page the oracle settlement
+- Inline the base tsconfig into every package
+- Collect fund income and market fees on a slow interval
+- Collapse an all-idle maintenance pass into one log line
+- Log beacon ticks on change and show the next boundary
+- Gate the oracle maintenance sweeps on contract reads
+- Add the voteready ballot settlement tick
+- Add mintready, charterready and tend heartbeat ticks
+- Multi-oracle epoch system
+- Add script to preseed secret
+- Update Dockerfile
+- Migrated shipload/oracle into toolkit
+- Word shiploadcli help as wrapped items and timelines
+- Correct the second ship's mass in the shiploadcli guide
+- Mirror the 16-task Depot settlement in the SDK and CLI
+- Let shiploadcli wrap pick a stack by its installed modules
+- Hide mean-held stat slots from item stats in the SDK
+- Book craft and build jobs from cluster sources in the SDK
+- Mirror the re-paired structure recipes in the SDK
+- Read players from company rows and drop the join action
+- Read a craft job by its id in place of the dropped owner index
+- Wrap cargo by stack reference in the SDK and CLI
+- Regenerate the server bindings for owner-scoped depot storage
+- Drop unwrap transit and place entities at their Wrap Nexus
+- Skip oracle fund sweeps when the fund permission is not wired
+- Use shiploadsb for the CLI's Sandbox permission
+- Stop CLI commands when PLAYER_CONFIG names a missing file
+- Resolve CLI contract accounts from config.ini when the player config fails to load
+- Describe signing-link handoffs as pending and fix the nearby hint
+- Take whole influence in the CLI sandbox credit
+- Report which strand check refuses a cancel
+- Regenerate the server bindings for the normcomps and normwords migrations
+- Guard structure recipes against packed entity inputs
+- Key construction source stacks by the shared cargo identity
+- Regenerate the sandbox bindings from the cut contract
+- Trace the stats a goal reads down its tree in the SDK
+- Read module slots by position and mirror the rewired stat tree in the SDK
+- Range module figures over the stats their components carry
+- Walk a goal's ready set one step at a time in the SDK
+- Trace which gathered stats feed each figure in the SDK
+- Reslot installed modules onto an upgraded hull in the SDK
+- Derive goals and measure them in the SDK
+- Drop named stat fields from wrapped-item immutable data
+- Mirror the three-part and two-part ship steps in the SDK
+- Drop the grouped-cancel tail refusal from the SDK cancel mirror
+- Skip group participants without the addressed lane in the SDK cancel mirror
+- Key SDK cargo stacks by installed modules only
+- Exclude the dbgdebit and dbgoldcargo debug actions from the sync guard
+- Read cargo rows by their entity, item and stack-hash key in the SDK
+- Read charter progress as one amount on the world
+- Cap gather plans at the one-epoch booking horizon
+- Plan one gather run across several recipients
+- Add the parking epoch to the ballot credit binding
+- Treat wormhole endpoints as empty locations in the SDK
