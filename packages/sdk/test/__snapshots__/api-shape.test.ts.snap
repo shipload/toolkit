@@ -89,6 +89,7 @@ exports[`module export surface 1`] = `
   "CRAFT_NOT_ENOUGH_ENERGY",
   "CRUISE_TRANSITION_DISTANCE",
   "CancelBlockReason",
+  "CancelStrandCheck",
   "ClusterManager",
   "ConstructionManager",
   "Coordinates",

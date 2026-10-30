@@ -431,6 +431,7 @@ export type {CounterpartLookup, IdleResolveTarget} from './scheduling/idle-resol
 export {
     cancelEligibility,
     CancelBlockReason,
+    CancelStrandCheck,
     CANCEL_REFUSAL_REASONS,
     cancelRefusalMessage,
 } from './scheduling/cancel'

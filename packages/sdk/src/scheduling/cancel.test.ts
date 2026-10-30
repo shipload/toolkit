@@ -3,6 +3,7 @@ import {ServerContract, TaskType, TaskCancelable, HoldKind} from '../index-modul
 import {
     cancelEligibility,
     CancelBlockReason,
+    CancelStrandCheck,
     CANCEL_REFUSAL_REASONS,
     cancelRefusalMessage,
 } from './cancel'
@@ -394,9 +395,53 @@ describe('cancelEligibility — feasibility', () => {
             loader_lanes: [],
             holds: [],
         })
-        expect(cancelEligibility(e, 1, 0, {now: upcoming}).blockedReason).toBe(
-            CancelBlockReason.WOULD_STRAND
-        )
+        const plan = cancelEligibility(e, 1, 0, {now: upcoming})
+        expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND)
+        expect(plan.strandCheck).toBe(CancelStrandCheck.INPUTS)
+    })
+
+    test('WOULD_STRAND names the energy check when a surviving draw is unfunded', () => {
+        const load = ServerContract.Types.task.from({
+            type: TaskType.LOAD,
+            duration: 50,
+            cancelable: TaskCancelable.ALWAYS,
+            cargo: [],
+            couplings: [],
+        })
+        const draw = ServerContract.Types.task.from({
+            type: TaskType.GATHER,
+            duration: 50,
+            cancelable: TaskCancelable.NEVER,
+            cargo: [],
+            couplings: [],
+            energy_cost: 10,
+        })
+        const e = ServerContract.Types.entity_info.from({
+            projected_at: 0,
+            type: 'ship',
+            id: 1,
+            owner: 'player.gm',
+            entity_name: 'S',
+            coordinates: {x: 0, y: 0, z: 0},
+            item_id: 1,
+            cargomass: 0,
+            capacity: 1_000_000,
+            energy: 0,
+            cargo: [],
+            modules: [],
+            lanes: [
+                {lane_key: 1, schedule: {started: '2026-06-19T00:00:00', tasks: [load]}},
+                {lane_key: 2, schedule: {started: '2026-06-19T00:00:00', tasks: [draw]}},
+            ],
+            gatherer_lanes: [],
+            crafter_lanes: [],
+            builder_lanes: [],
+            loader_lanes: [],
+            holds: [],
+        })
+        const plan = cancelEligibility(e, 1, 0, {now: upcoming})
+        expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND)
+        expect(plan.strandCheck).toBe(CancelStrandCheck.ENERGY)
     })
 
     test('benign cancel on independent lane does NOT strand', () => {
@@ -604,6 +649,7 @@ describe('cancelEligibility — cross-entity strand (counterpart queued consumer
         })
         expect(plan.ok).toBe(false)
         expect(plan.blockedReason).toBe(CancelBlockReason.WOULD_STRAND_COUNTERPART)
+        expect(plan.strandCheck).toBe(CancelStrandCheck.INPUTS)
         expect(plan.blockedByCounterpart?.entity_id.toNumber()).toBe(2)
     })
 

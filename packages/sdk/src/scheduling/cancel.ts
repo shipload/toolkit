@@ -41,6 +41,16 @@ export enum CancelBlockReason {
     INCONSISTENT = 'INCONSISTENT',
 }
 
+// The post-cancel feasibility check that refused, mirroring STRAND_* in entity_registry.hpp.
+export enum CancelStrandCheck {
+    INPUTS = 'INPUTS',
+    PEAK_CAPACITY = 'PEAK_CAPACITY',
+    ADMITTED_SITE = 'ADMITTED_SITE',
+    INCOMING_SITE = 'INCOMING_SITE',
+    ENERGY = 'ENERGY',
+    CAPPER = 'CAPPER',
+}
+
 // Each contract refusal in errors.CANCEL_REFUSALS and the reason the preview reports for it.
 export const CANCEL_REFUSAL_REASONS: ReadonlyMap<string, CancelBlockReason> = new Map([
     [errors.PLOT_CANCEL_NOT_ALLOWED, CancelBlockReason.PLOT],
@@ -105,6 +115,7 @@ export interface CancelPlan {
     ok: boolean
     blockedReason?: CancelBlockReason
     blockedByCounterpart?: EntityRef
+    strandCheck?: CancelStrandCheck
     needs?: CancelNeeds
     cascade?: string[]
     range: {count: number; taskIndices: number[]}
@@ -135,6 +146,7 @@ const CO_LOCATED_HOLD_KINDS = new Set<number>([
 interface Refusal {
     reason: CancelBlockReason
     counterpart?: EntityRef
+    strandCheck?: CancelStrandCheck
 }
 
 class CancelContext {
@@ -384,7 +396,7 @@ function post_cancel_queue_feasible(
     row: EntityInfo,
     lanes: Lane[],
     excludedHoldIds: readonly string[] = []
-): boolean {
+): CancelStrandCheck | undefined {
     const probe = withRow(row, {lanes})
     const pending = schedule.unappliedTasks(probe)
 
@@ -399,17 +411,18 @@ function post_cancel_queue_feasible(
             },
             excludedHoldIds
         )
-        if (complete && !consumersFed(row, pending, incoming)) return false
+        if (complete && !consumersFed(row, pending, incoming)) return CancelStrandCheck.INPUTS
     }
 
-    if (!incoming_fits(probe, new Date(0), 0, capacityOf(row))) return false
+    if (!incoming_fits(probe, new Date(0), 0, capacityOf(row)))
+        return CancelStrandCheck.PEAK_CAPACITY
 
     let pos: Coordinates = row.coordinates
     for (const p of pending) {
         const at = p.task.coordinates
         if (at === undefined) continue
         if (isMobilityTask(p.task.type.toNumber())) pos = at
-        else if (!sameSite(at, pos)) return false
+        else if (!sameSite(at, pos)) return CancelStrandCheck.ADMITTED_SITE
     }
 
     const positionAt = (atMs: number): Coordinates => {
@@ -445,11 +458,12 @@ function post_cancel_queue_feasible(
             }
         }
         if (!site) site = projectEntity(cp as unknown as Projectable).location
-        if (!sameSite(positionAt(h.until.toDate().getTime()), site)) return false
+        if (!sameSite(positionAt(h.until.toDate().getTime()), site))
+            return CancelStrandCheck.INCOMING_SITE
     }
 
     if (!energyDrawsFunded(probe as unknown as Projectable, row.energy ? row.energy.toNumber() : 0))
-        return false
+        return CancelStrandCheck.ENERGY
 
     for (const l of lanes) {
         const capper = l.schedule.tasks.find((t) => schedule.isCapperTaskType(t.type.toNumber()))
@@ -460,12 +474,13 @@ function post_cancel_queue_feasible(
             (capper.subject !== undefined && capper.subject.entity_id.toString() === selfId)
         if (applies) {
             const end = projectEntity(probe as unknown as Projectable)
-            if (end.cargo.some((c) => Number(c.quantity.toString()) > 0)) return false
+            if (end.cargo.some((c) => Number(c.quantity.toString()) > 0))
+                return CancelStrandCheck.CAPPER
         }
         break
     }
 
-    return true
+    return undefined
 }
 
 interface ImplResult {
@@ -489,8 +504,12 @@ function cancel_entity_impl(
         releasedHolds: [],
         abandonsRunning: false,
     }
-    const refuse = (reason: CancelBlockReason, counterpart?: EntityRef): ImplResult => ({
-        refusal: {reason, counterpart},
+    const refuse = (
+        reason: CancelBlockReason,
+        counterpart?: EntityRef,
+        strandCheck?: CancelStrandCheck
+    ): ImplResult => ({
+        refusal: {reason, counterpart, ...(strandCheck ? {strandCheck} : {})},
         effects,
     })
     const now = ctx.input.now
@@ -592,8 +611,8 @@ function cancel_entity_impl(
         paired.push(found)
     }
 
-    if (!post_cancel_queue_feasible(ctx, entity, working))
-        return refuse(CancelBlockReason.WOULD_STRAND)
+    const selfStrand = post_cancel_queue_feasible(ctx, entity, working)
+    if (selfStrand) return refuse(CancelBlockReason.WOULD_STRAND, undefined, selfStrand)
 
     // What this cancel puts back on the entity, read off each cancelled task's own projection delta.
     let restoredMass = 0
@@ -629,8 +648,8 @@ function cancel_entity_impl(
     for (const [id, entry] of released) {
         const cp = ctx.entity(id)
         if (!cp) continue
-        if (!post_cancel_queue_feasible(ctx, cp, cp.lanes, entry.holdIds))
-            return refuse(CancelBlockReason.WOULD_STRAND_COUNTERPART, entry.ref)
+        const strand = post_cancel_queue_feasible(ctx, cp, cp.lanes, entry.holdIds)
+        if (strand) return refuse(CancelBlockReason.WOULD_STRAND_COUNTERPART, entry.ref, strand)
     }
 
     const massOf = (items: readonly CargoItem[]) =>
@@ -758,6 +777,7 @@ export function cancelEligibility(
                 ok: false,
                 blockedReason: result.refusal.reason,
                 blockedByCounterpart: result.refusal.counterpart,
+                ...(result.refusal.strandCheck ? {strandCheck: result.refusal.strandCheck} : {}),
                 range,
                 effects: {
                     refunds: [],
