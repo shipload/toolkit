@@ -6,8 +6,6 @@ import {getLocalShipload} from '../../helpers/shipload'
 test('claimplot builds action with the right name', async () => {
     const action = await buildAction(
         {
-            entityType: 'ship',
-            entityId: 1n,
             targetItemId: 11,
             hubId: 5n,
             gx: 2,
@@ -18,11 +16,9 @@ test('claimplot builds action with the right name', async () => {
     expect(action.name.toString()).toBe('claimplot')
 })
 
-test('claimplot encodes target_item_id, cluster slot, and entity id', async () => {
+test('claimplot encodes target_item_id and the cluster slot, with no builder', async () => {
     const action = await buildAction(
         {
-            entityType: 'ship',
-            entityId: 42n,
             targetItemId: 11,
             hubId: 5n,
             gx: -1,
@@ -31,7 +27,6 @@ test('claimplot encodes target_item_id, cluster slot, and entity id', async () =
         getLocalShipload()
     )
     const decoded = action.decodeData(ServerTypes.claimplot)
-    expect(decoded.builder_id.toString()).toBe('42')
     expect(decoded.target_item_id.toString()).toBe('11')
     expect(decoded.slot.hub.toString()).toBe('5')
     expect(decoded.slot.gx.toString()).toBe('-1')

@@ -26,10 +26,10 @@ test('deploy omits the slot when none is provided', () => {
 })
 
 test('claimplot builds with a cluster slot, including negative cell coords', () => {
-    const action = sl.actions.claimplot(1, 10202, {hub: 5, gx: -1, gy: 0})
+    const action = sl.actions.claimplot(10202, {hub: 5, gx: -1, gy: 0})
     expect(String(action.name)).toBe('claimplot')
     const data = action.decodeData(ServerContract.abi)
-    expect(String(data.builder_id)).toBe('1')
+    expect(data.builder_id).toBeUndefined()
     expect(Number(data.target_item_id)).toBe(10202)
     expect(String(data.slot.hub)).toBe('5')
     expect(Number(data.slot.gx)).toBe(-1)

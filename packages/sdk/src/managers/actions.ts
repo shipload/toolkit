@@ -701,9 +701,8 @@ export class ActionsManager extends BaseManager {
         return this.server.action('upgrade', params)
     }
 
-    claimplot(entityId: UInt64Type, targetItemId: UInt16Type, slot: ClusterSlotType): Action {
+    claimplot(targetItemId: UInt16Type, slot: ClusterSlotType): Action {
         return this.server.action('claimplot', {
-            builder_id: UInt64.from(entityId),
             target_item_id: UInt16.from(targetItemId),
             slot: {hub: UInt64.from(slot.hub), gx: slot.gx, gy: slot.gy},
         })
