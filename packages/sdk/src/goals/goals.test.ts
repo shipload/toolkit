@@ -4,6 +4,7 @@ import {
     canSetGoal,
     deriveGoal,
     deriveGoals,
+    isShipItem,
     measureGoal,
     sequenceGoal,
     type GoalHoldings,
@@ -30,9 +31,9 @@ const T2_STRAIGHT_OR_MUTATION = [
 
 const TABLE: Row[] = [
     ['Roustabout', [10210], row(12, 3, 4, 4, 1, 7, 3)],
-    ['T1 specialist', T1_SPECIALISTS, row(8, 2, 3, 3, 0, 6, 2)],
-    ['T2 tier entry', T2_ENTRIES, row(11, 3, 4, 4, 0, 8, 3)],
-    ['T2 straight or mutation', T2_STRAIGHT_OR_MUTATION, row(8, 2, 3, 3, 0, 6, 2)],
+    ['T1 specialist', T1_SPECIALISTS, row(7, 2, 2, 2, 1, 6, 2)],
+    ['T2 tier entry', T2_ENTRIES, row(10, 3, 3, 3, 1, 8, 3)],
+    ['T2 straight or mutation', T2_STRAIGHT_OR_MUTATION, row(7, 2, 2, 2, 1, 6, 2)],
     ['Engine T1', [10100], row(6, 1, 2, 2, 1, 3, 1)],
     ['Power Core T1', [10101], row(6, 1, 2, 2, 1, 3, 1)],
     ['Shuttle Bay T1', [10103], row(6, 1, 2, 2, 1, 3, 1)],
@@ -52,7 +53,7 @@ const TABLE: Row[] = [
     ['Assembly Arm T2', [11110], row(9, 2, 3, 3, 1, 5, 2)],
     ['Tractor Beam T2', [11106], row(9, 2, 3, 3, 1, 5, 2)],
     ['Container T1', [10200], row(9, 2, 3, 3, 1, 5, 2)],
-    ['Container T2', [11200], row(8, 2, 3, 3, 0, 5, 2)],
+    ['Container T2', [11200], row(7, 2, 2, 2, 1, 5, 2)],
     ['Station Hub', [11207], row(9, 2, 3, 3, 1, 5, 2)],
     ['Warehouse', [11202], row(8, 2, 3, 2, 1, 5, 2)],
     ['Mining Rig', [11203], row(8, 2, 3, 2, 1, 5, 2)],
@@ -239,13 +240,77 @@ describe('deriveGoal', () => {
         expect(paired.nodes.find((n) => n.itemId === 10101)!.credited[0].place).toBe('installed')
     })
 
-    test('a named ship climbs the ladder from its own hull', () => {
+    test('a named ship climbs the ladder from its own hull, one upgrade per rung', () => {
         const plan = deriveGoal({itemId: 11213, quantity: 1, ship: 'a'}, STARTER)
-        const hulls = plan.steps.filter((s) => s.kind === 'book').map((s) => s.itemId)
-        expect(hulls).toEqual(expect.arrayContaining([10211, 11212, 11213]))
+        const upgrades = plan.steps.filter((s) => s.kind === 'upgrade')
+        expect(upgrades.map((s) => s.itemId)).toEqual([10211, 11212, 11213])
+        expect(upgrades[1].dependsOn).toContain('upgrade:10211')
+        expect(upgrades[2].dependsOn).toContain('upgrade:11212')
+        expect(plan.steps.some((s) => s.kind === 'book' && isShipItem(s.itemId))).toBe(false)
         expect(plan.nodes.find((n) => n.itemId === 10210)!.credited).toEqual([
             {place: 'entity', quantity: 1, entityId: 'a', location: undefined},
         ])
+    })
+
+    test('a named ship ends the plan in an upgrade after its parts arrive', () => {
+        const plan = deriveGoal(
+            {itemId: 10213, quantity: 1, ship: 'r'},
+            {stock: [], entities: [{id: 'r', itemId: 10210, installed: [10101, 10100]}]}
+        )
+        const upgrade = plan.steps.find((s) => s.id === 'upgrade:10213')!
+        expect(upgrade.dependsOn).toEqual(['pickup:10003', 'pickup:10006'])
+        expect(plan.steps.some((s) => s.id === 'book:10213' || s.id === 'pickup:10213')).toBe(false)
+    })
+
+    test('a named ship of a second accepted hull is the donor of a mutation', () => {
+        const plan = deriveGoal(
+            {itemId: 11214, quantity: 1, ship: 'm'},
+            {stock: [], entities: [{id: 'm', itemId: 11221, installed: []}]}
+        )
+        expect(plan.steps.filter((s) => s.kind === 'upgrade').map((s) => s.id)).toEqual([
+            'upgrade:11214',
+        ])
+        expect(plan.nodes.find((n) => n.itemId === 11212)!.credited).toEqual([
+            {place: 'entity', quantity: 1, entityId: 'm', location: undefined},
+        ])
+    })
+
+    test('an upgrade goal with no ship builds a packed donor and leaves deployed ones alone', () => {
+        const plan = deriveGoal(
+            {itemId: 10213, quantity: 1},
+            {stock: [], entities: [{id: 'r', itemId: 10210, installed: []}]}
+        )
+        expect(plan.nodes.find((n) => n.itemId === 10210)!.credited).toEqual([])
+        expect(plan.steps.map((s) => s.id)).toEqual(
+            expect.arrayContaining(['book:10210', 'pickup:10210', 'book:10213', 'pickup:10213'])
+        )
+        expect(plan.steps.some((s) => s.kind === 'upgrade')).toBe(false)
+        expect(plan.steps.find((s) => s.id === 'book:10213')!.dependsOn).toContain('pickup:10210')
+    })
+
+    test('a packed donor in a hold feeds an upgrade goal with no ship', () => {
+        const plan = deriveGoal(
+            {itemId: 10213, quantity: 2},
+            {stock: [{itemId: 10210, quantity: 1, place: 'hold', entityId: 'x'}], entities: []}
+        )
+        const donor = plan.nodes.find((n) => n.itemId === 10210)!
+        expect(donor.credited).toEqual([
+            {place: 'hold', quantity: 1, entityId: 'x', location: undefined},
+        ])
+        expect(donor.shortfall).toBe(1)
+        expect(plan.steps.find((s) => s.id === 'book:10213')!.quantity).toBe(2)
+    })
+
+    test('owned upgraded hulls, deployed or packed, count toward a goal with no ship', () => {
+        const plan = deriveGoal(
+            {itemId: 10213, quantity: 2},
+            {
+                stock: [{itemId: 10213, quantity: 1, place: 'hold', entityId: 'x'}],
+                entities: [{id: 'w', itemId: 10213, installed: []}],
+            }
+        )
+        expect(plan.finished).toBe(true)
+        expect(plan.steps).toEqual([])
     })
 
     test('a named ship that already is the target finishes the goal', () => {

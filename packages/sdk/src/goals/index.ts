@@ -61,7 +61,7 @@ export interface GoalNode {
     inputs: number[]
 }
 
-export type GoalStepKind = 'gather' | 'book' | 'pickup' | 'claim-plot' | 'install'
+export type GoalStepKind = 'gather' | 'book' | 'pickup' | 'claim-plot' | 'install' | 'upgrade'
 
 export interface GoalStep {
     id: string
@@ -212,11 +212,18 @@ function addCredit(node: GoalNode, credit: GoalCredit): void {
     else node.credited.push(credit)
 }
 
-function creditEntities(d: Derivation, node: GoalNode, want: number, only?: string): number {
+function creditEntities(
+    d: Derivation,
+    node: GoalNode,
+    want: number,
+    only?: string,
+    accepts?: number[]
+): number {
     let left = want
     for (const e of d.pool.entities) {
         if (left <= 0) break
-        if (e.used || e.entity.itemId !== node.itemId) continue
+        if (e.used) continue
+        if (e.entity.itemId !== node.itemId && !accepts?.includes(e.entity.itemId)) continue
         if (only !== undefined && e.entity.id !== only) continue
         e.used = true
         left--
@@ -307,7 +314,9 @@ function expand(
         if (!node.inputs.includes(input.itemId)) node.inputs.push(input.itemId)
         const isEntity = getItem(input.itemId).type === 'entity'
         const reads = inputReads(recipe, slots, i)
-        need(d, input.itemId, input.quantity * units, reads, isEntity ? ship : undefined)
+        if (isEntity)
+            need(d, input.itemId, input.quantity * units, reads, ship, recipe.sourceSubclasses)
+        else need(d, input.itemId, input.quantity * units, reads)
     })
 }
 
@@ -316,7 +325,8 @@ function need(
     itemId: number,
     quantity: number,
     reads: number[],
-    ship: string | undefined
+    ship?: string,
+    accepts?: number[]
 ): void {
     const node = nodeFor(d, itemId)
     node.needed += quantity
@@ -327,9 +337,12 @@ function need(
         d.carries.set(itemId, set)
     }
     let left = quantity
-    if (item.type === 'entity') left -= creditEntities(d, node, left, ship)
-    if (item.type === 'module') left -= creditInstalled(d, node, left)
-    left -= creditStock(d, node, left, STOCK_ORDER, statGate(d.goal, itemId, reads))
+    if (item.type === 'entity' && ship !== undefined) {
+        left -= creditEntities(d, node, left, ship, accepts)
+    } else {
+        if (item.type === 'module') left -= creditInstalled(d, node, left)
+        left -= creditStock(d, node, left, STOCK_ORDER, statGate(d.goal, itemId, reads))
+    }
     expand(d, node, left, ship, reads)
 }
 
@@ -339,7 +352,9 @@ function rootRoute(goal: Goal, recipe: Recipe): RootRoute {
     const item = getItem(goal.itemId)
     if (item.type === 'module') return goal.ship !== undefined ? 'install' : 'hand'
     if (item.type !== 'entity') return 'hand'
-    if (recipe.inputs.some((i) => getItem(i.itemId).type === 'entity')) return 'upgrade'
+    if (recipe.inputs.some((i) => getItem(i.itemId).type === 'entity')) {
+        return goal.ship !== undefined ? 'upgrade' : 'deploy'
+    }
     return isPlotBuildable(goal.itemId) ? 'plot' : 'deploy'
 }
 
@@ -350,7 +365,7 @@ function deriveRoot(d: Derivation, recipe: Recipe): {route: RootRoute; finished:
     node.needed = goal.quantity
     let finished = 0
     if (route === 'install') finished = creditInstalled(d, node, goal.quantity, goal.ship)
-    else if (route === 'upgrade' && goal.ship !== undefined) {
+    else if (route === 'upgrade') {
         const target = d.pool.entities.find((e) => e.entity.id === goal.ship)
         if (target && !target.used && target.entity.itemId === goal.itemId) {
             finished = creditEntities(d, node, 1, goal.ship)
@@ -441,6 +456,16 @@ function deriveSteps(d: Derivation, route: RootRoute, finished: number): GoalSte
                     itemId: node.itemId,
                     quantity: node.shortfall,
                     dependsOn: [],
+                }
+                steps.push(step)
+                ids.push(step.id)
+            } else if (route === 'upgrade' && getRecipe(node.itemId)?.sourceSubclasses?.length) {
+                const step: GoalStep = {
+                    id: `upgrade:${node.itemId}`,
+                    kind: 'upgrade',
+                    itemId: node.itemId,
+                    quantity: node.shortfall,
+                    dependsOn: node.inputs.flatMap((i) => delivers.get(i) ?? []),
                 }
                 steps.push(step)
                 ids.push(step.id)
@@ -630,7 +655,7 @@ export function measureGoal(itemId: number): GoalMeasure {
     const bookings = count('book')
     const pickups = count('pickup')
     const deploys = rootRoute(goal, getRecipe(itemId)!) === 'deploy' ? 1 : 0
-    const placements = count('install', 'claim-plot') + deploys
+    const placements = count('install', 'claim-plot', 'upgrade') + deploys
     return {
         actions: gathers + bookings + pickups + placements,
         gathers,
