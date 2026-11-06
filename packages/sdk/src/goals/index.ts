@@ -61,7 +61,14 @@ export interface GoalNode {
     inputs: number[]
 }
 
-export type GoalStepKind = 'gather' | 'book' | 'pickup' | 'claim-plot' | 'install' | 'upgrade'
+export type GoalStepKind =
+    | 'gather'
+    | 'book'
+    | 'pickup'
+    | 'claim-plot'
+    | 'remove'
+    | 'install'
+    | 'upgrade'
 
 export interface GoalStep {
     id: string
@@ -130,6 +137,7 @@ interface Derivation {
     pool: Pool
     nodes: Map<number, GoalNode>
     carries: Map<number, Set<number>>
+    swap?: string
 }
 
 export function canSetGoal(itemId: number): boolean {
@@ -195,15 +203,6 @@ function buildPool(holdings: GoalHoldings): Pool {
     return {lines, entities}
 }
 
-function hasGenerator(e: PoolEntity): boolean {
-    return e.entity.installed.some((id) => getItem(id).moduleType === 'generator')
-}
-
-function canLift(pool: Pool, owner: PoolEntity, itemId: number): boolean {
-    if (getItem(itemId).moduleType !== 'generator') return true
-    return pool.entities.some((e) => e !== owner && hasGenerator(e))
-}
-
 function addCredit(node: GoalNode, credit: GoalCredit): void {
     const same = node.credited.find(
         (c) => c.place === credit.place && c.entityId === credit.entityId
@@ -237,14 +236,13 @@ function creditEntities(
     return want - left
 }
 
-function creditInstalled(d: Derivation, node: GoalNode, want: number, only?: string): number {
+function creditInstalled(d: Derivation, node: GoalNode, want: number, ship: string): number {
     let left = want
     for (const e of d.pool.entities) {
-        if (only !== undefined && e.entity.id !== only) continue
+        if (e.entity.id !== ship) continue
         for (const m of e.modules) {
             if (left <= 0) break
             if (m.used || m.itemId !== node.itemId) continue
-            if (only === undefined && !canLift(d.pool, e, m.itemId)) continue
             m.used = true
             left--
             addCredit(node, {
@@ -340,7 +338,9 @@ function need(
     if (item.type === 'entity' && ship !== undefined) {
         left -= creditEntities(d, node, left, ship, accepts)
     } else {
-        if (item.type === 'module') left -= creditInstalled(d, node, left)
+        if (item.type === 'module' && d.swap !== undefined) {
+            left -= creditInstalled(d, node, left, d.swap)
+        }
         left -= creditStock(d, node, left, STOCK_ORDER, statGate(d.goal, itemId, reads))
     }
     expand(d, node, left, ship, reads)
@@ -364,7 +364,7 @@ function deriveRoot(d: Derivation, recipe: Recipe): {route: RootRoute; finished:
     const node = nodeFor(d, goal.itemId)
     node.needed = goal.quantity
     let finished = 0
-    if (route === 'install') finished = creditInstalled(d, node, goal.quantity, goal.ship)
+    if (route === 'install') finished = creditInstalled(d, node, goal.quantity, goal.ship!)
     else if (route === 'upgrade') {
         const target = d.pool.entities.find((e) => e.entity.id === goal.ship)
         if (target && !target.used && target.entity.itemId === goal.itemId) {
@@ -381,6 +381,7 @@ function deriveRoot(d: Derivation, recipe: Recipe): {route: RootRoute; finished:
         left -= creditStock(d, node, left, ['workshop', 'job'], gate)
     }
     const donorShip = route === 'upgrade' ? goal.ship : undefined
+    if (route === 'install') d.swap = goal.ship
     expand(d, node, left, donorShip)
     return {route, finished}
 }
@@ -391,6 +392,7 @@ function stepRank(step: GoalStep): number {
         case 'claim-plot':
             return 0
         case 'pickup':
+        case 'remove':
             return 1
         case 'gather':
             return 2
@@ -434,6 +436,18 @@ function deriveSteps(d: Derivation, route: RootRoute, finished: number): GoalSte
         const item = getItem(node.itemId)
         const waitingAt = (place: GoalCreditPlace): number =>
             node.credited.filter((c) => c.place === place).reduce((s, c) => s + c.quantity, 0)
+        const removed = node.itemId === rootId ? 0 : waitingAt('installed')
+        if (removed > 0) {
+            const step: GoalStep = {
+                id: `remove:${node.itemId}`,
+                kind: 'remove',
+                itemId: node.itemId,
+                quantity: removed,
+                dependsOn: [],
+            }
+            steps.push(step)
+            ids.push(step.id)
+        }
         for (const place of ['workshop', 'job'] as const) {
             const quantity = waitingAt(place)
             if (quantity <= 0) continue
@@ -655,7 +669,7 @@ export function measureGoal(itemId: number): GoalMeasure {
     const bookings = count('book')
     const pickups = count('pickup')
     const deploys = rootRoute(goal, getRecipe(itemId)!) === 'deploy' ? 1 : 0
-    const placements = count('install', 'claim-plot', 'upgrade') + deploys
+    const placements = count('remove', 'install', 'claim-plot', 'upgrade') + deploys
     return {
         actions: gathers + bookings + pickups + placements,
         gathers,

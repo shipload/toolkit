@@ -43,15 +43,15 @@ const TABLE: Row[] = [
     ['Fabricator T1', [10104], row(9, 2, 3, 3, 1, 5, 2)],
     ['Assembly Arm T1', [10110], row(9, 2, 3, 3, 1, 5, 2)],
     ['Tractor Beam T1', [10106], row(9, 2, 3, 3, 1, 5, 2)],
-    ['Engine T2', [11100], row(6, 1, 2, 2, 1, 3, 1)],
-    ['Power Core T2', [11101], row(11, 2, 4, 4, 1, 3, 1)],
-    ['Shuttle Bay T2', [11103], row(6, 1, 2, 2, 1, 3, 1)],
-    ['Cargo Hold T2', [11105], row(6, 1, 2, 2, 1, 3, 1)],
-    ['Battery Bank T2', [11108], row(6, 1, 2, 2, 1, 3, 1)],
-    ['Limpet Bay T2', [11102], row(9, 2, 3, 3, 1, 5, 2)],
-    ['Fabricator T2', [11104], row(9, 2, 3, 3, 1, 5, 2)],
-    ['Assembly Arm T2', [11110], row(9, 2, 3, 3, 1, 5, 2)],
-    ['Tractor Beam T2', [11106], row(9, 2, 3, 3, 1, 5, 2)],
+    ['Engine T2', [11100], row(7, 1, 2, 2, 2, 3, 1)],
+    ['Power Core T2', [11101], row(7, 1, 2, 2, 2, 3, 1)],
+    ['Shuttle Bay T2', [11103], row(7, 1, 2, 2, 2, 3, 1)],
+    ['Cargo Hold T2', [11105], row(7, 1, 2, 2, 2, 3, 1)],
+    ['Battery Bank T2', [11108], row(7, 1, 2, 2, 2, 3, 1)],
+    ['Limpet Bay T2', [11102], row(10, 2, 3, 3, 2, 5, 2)],
+    ['Fabricator T2', [11104], row(10, 2, 3, 3, 2, 5, 2)],
+    ['Assembly Arm T2', [11110], row(10, 2, 3, 3, 2, 5, 2)],
+    ['Tractor Beam T2', [11106], row(10, 2, 3, 3, 2, 5, 2)],
     ['Container T1', [10200], row(9, 2, 3, 3, 1, 5, 2)],
     ['Container T2', [11200], row(7, 2, 2, 2, 1, 5, 2)],
     ['Station Hub', [11207], row(9, 2, 3, 3, 1, 5, 2)],
@@ -228,16 +228,41 @@ describe('deriveGoal', () => {
         expect(plan.nodes.find((n) => n.itemId === 10008)!.shortfall).toBe(0)
     })
 
-    test('an installed Power Core feeds a craft only when another ship carries a generator', () => {
-        const goal = {itemId: 11101, quantity: 1}
-        const alone = deriveGoal(goal, STARTER)
-        expect(alone.steps.some((s) => s.id === 'book:10101')).toBe(true)
-        const paired = deriveGoal(goal, {
-            stock: [],
-            entities: [...STARTER.entities, {id: 'b', itemId: 10210, installed: [10101]}],
+    test('a module installed on a ship never feeds a craft for another goal', () => {
+        const plan = deriveGoal({itemId: 11100, quantity: 1}, STARTER)
+        expect(plan.steps.some((s) => s.id === 'book:10100')).toBe(true)
+        expect(plan.steps.some((s) => s.kind === 'remove')).toBe(false)
+        expect(plan.nodes.find((n) => n.itemId === 10100)!.credited).toEqual([])
+    })
+
+    test("a module goal on a ship swaps out that ship's own predecessor", () => {
+        const plan = deriveGoal(
+            {itemId: 11100, quantity: 1, ship: 'b'},
+            {
+                stock: [],
+                entities: [
+                    ...STARTER.entities,
+                    {id: 'b', itemId: 10210, installed: [10101, 10100]},
+                ],
+            }
+        )
+        expect(plan.nodes.find((n) => n.itemId === 10100)!.credited).toEqual([
+            {place: 'installed', quantity: 1, entityId: 'b', location: undefined},
+        ])
+        expect(plan.steps.find((s) => s.id === 'remove:10100')).toMatchObject({
+            kind: 'remove',
+            quantity: 1,
+            dependsOn: [],
         })
-        expect(paired.steps.some((s) => s.id === 'book:10101')).toBe(false)
-        expect(paired.nodes.find((n) => n.itemId === 10101)!.credited[0].place).toBe('installed')
+        expect(plan.steps.find((s) => s.id === 'book:11100')!.dependsOn).toContain('remove:10100')
+        expect(plan.steps.some((s) => s.id === 'book:10100')).toBe(false)
+        expect(plan.steps.at(-1)!.id).toBe('install:11100')
+    })
+
+    test('a swap crafts a fresh predecessor for each unit past what the ship carries', () => {
+        const plan = deriveGoal({itemId: 11100, quantity: 2, ship: 'a'}, STARTER)
+        expect(plan.steps.find((s) => s.id === 'remove:10100')!.quantity).toBe(1)
+        expect(plan.steps.find((s) => s.id === 'book:10100')!.quantity).toBe(1)
     })
 
     test('a named ship climbs the ladder from its own hull, one upgrade per rung', () => {
