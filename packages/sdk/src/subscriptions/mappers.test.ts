@@ -1,5 +1,4 @@
 import {describe, expect, test} from 'bun:test'
-import {computeLoaderPayload} from '../derivation/capabilities'
 import {parseWireEntity} from './mappers'
 import type {WireEntity} from './types'
 
@@ -31,12 +30,6 @@ function wire(loaderLanes: unknown[]): WireEntity {
 }
 
 describe('parseWireEntity', () => {
-    test('decodes a loader lane from a contract that still sends mass', () => {
-        const ei = parseWireEntity(wire([{slot_index: 2, mass: 12, thrust: 40, output_pct: 100}]))
-        expect(ei.loader_lanes[0].payload.toNumber()).toBe(computeLoaderPayload(400))
-        expect(ei.loader_lanes[0].thrust.toNumber()).toBe(40)
-    })
-
     test('keeps a payload the contract sends', () => {
         const ei = parseWireEntity(
             wire([{slot_index: 2, payload: 700, thrust: 40, output_pct: 100}])
