@@ -7,7 +7,7 @@ import {
     getItemStatKeys,
     traceResourceStatKeys,
 } from '../derivation/crafting'
-import {getStatDefinitions} from '../derivation/stats'
+import {findStatDefinition, getStatDefinitions} from '../derivation/stats'
 import {CATEGORY_LABELS, MASS_UNITS_PER_TONNE, PRECISION, type ResourceCategory} from '../types'
 import type {GathererStats} from '../types/capabilities'
 import {getModuleFigures} from './module'
@@ -20,9 +20,9 @@ const STAT_MID = 500
 
 const CATEGORIES = Object.keys(CATEGORY_LABELS) as ResourceCategory[]
 
-const STAT_LABELS: Record<string, string> = Object.fromEntries(
-    CATEGORIES.flatMap((category) => getStatDefinitions(category).map((d) => [d.key, d.label]))
-)
+function statLabel(key: string): string {
+    return findStatDefinition(key)?.definition.label ?? key
+}
 
 const STAT_CATEGORY: Record<string, ResourceCategory> = Object.fromEntries(
     CATEGORIES.flatMap((category) => getStatDefinitions(category).map((d) => [d.key, category]))
@@ -91,7 +91,7 @@ export function getModuleFigureSources(itemId: number): FigureSource[] | undefin
             label: row.label,
             stats: [...new Set(keys)].map((key) => ({
                 key,
-                label: STAT_LABELS[key] ?? key,
+                label: statLabel(key),
                 category: STAT_CATEGORY[key],
             })),
         }

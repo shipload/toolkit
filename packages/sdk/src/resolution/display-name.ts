@@ -7,6 +7,14 @@ import {
     MODULE_TIER_PREFIXES,
 } from '../types'
 import {formatMass as defaultFormatMass} from '../format'
+import {compose, defineText, formatNumber as defaultFormatNumber, text} from '../text/registry'
+
+defineText({
+    'compose.describe.resource': '{tier} {category} · {stats} · {mass}',
+    'compose.describe.resource-bare': '{tier} {category} · {mass}',
+    'compose.describe.item': '{tier} {name} · {mass}',
+    'compose.stat-value': '{label} {value}',
+})
 
 interface DisplayNameInputCommon {
     tier: number
@@ -32,7 +40,7 @@ function tierPrefix(item: DisplayNameInput): string | null {
 
 function rootName(item: DisplayNameInput): string {
     if (itemTypeOf(item) !== 'resource') return item.name
-    return item.category ? CATEGORY_LABELS[item.category] : 'Resource'
+    return item.category ? CATEGORY_LABELS[item.category] : text('category.resource')
 }
 
 // Tier-free display name: includes the resource tier adjective / component-module
@@ -40,28 +48,32 @@ function rootName(item: DisplayNameInput): string {
 export function baseName(item: DisplayNameInput): string {
     const prefix = tierPrefix(item)
     const root = rootName(item)
-    return prefix ? `${prefix} ${root}` : root
+    return prefix ? compose('compose.resource-name', {tier: prefix, category: root}) : root
 }
 
 export function displayName(item: DisplayNameInput): string {
-    return `${baseName(item)} (T${item.tier})`
+    return compose('compose.tier-suffix', {name: baseName(item), tier: String(item.tier)})
 }
 
 export interface DescribeOptions {
-    translate?: (key: string) => string
     formatNumber?: (n: number) => string
     formatMass?: (mass: number) => string
 }
 
 export function describeItem(resolved: ResolvedItem, opts?: DescribeOptions): string {
     const massFmt = opts?.formatMass ?? defaultFormatMass
+    const numberFmt = opts?.formatNumber ?? defaultFormatNumber
     const mass = massFmt(resolved.mass)
-    const tier = `T${resolved.tier}`
+    const tier = compose('compose.tier-tag', {tier: String(resolved.tier)})
     if (resolved.itemType === 'resource') {
-        const cat = resolved.category ? CATEGORY_LABELS[resolved.category] : 'Resource'
-        const header = `${tier} ${cat}`
-        const stats = resolved.stats?.map((s) => `${s.label} ${s.value}`).join(', ')
-        return [header, stats, mass].filter(Boolean).join(' · ')
+        const category = resolved.category
+            ? CATEGORY_LABELS[resolved.category]
+            : text('category.resource')
+        const stats = resolved.stats
+            ?.map((s) => compose('compose.stat-value', {label: s.label, value: numberFmt(s.value)}))
+            .join(text('compose.separator.list'))
+        if (!stats) return compose('compose.describe.resource-bare', {tier, category, mass})
+        return compose('compose.describe.resource', {tier, category, stats, mass})
     }
-    return `${tier} ${resolved.name} · ${mass}`
+    return compose('compose.describe.item', {tier, name: resolved.name, mass})
 }

@@ -1,3 +1,5 @@
+import {textFields, textRecord} from '../text/registry'
+
 export interface CapabilityAttribute {
     capability: string
     attribute: string
@@ -5,10 +7,12 @@ export interface CapabilityAttribute {
 }
 
 export interface StatMapping {
-    stat: string
+    statKey: string
+    readonly stat: string
     capability: string
     attribute: string
-    source: string // producing module/role, always present
+    sourceKey: string
+    readonly source: string
 }
 
 export interface CapabilityAttributeRow {
@@ -32,7 +36,56 @@ export const capabilityNames: string[] = [
     'Hauling',
 ]
 
-export const capabilityAttributes: CapabilityAttribute[] = [
+const CAPABILITY_LABELS: Record<string, string> = textRecord(
+    {
+        hull: 'Hull',
+        storage: 'Storage',
+        movement: 'Movement',
+        energy: 'Energy',
+        loading: 'Loading',
+        gathering: 'Gathering',
+        warp: 'Warp',
+        crafting: 'Crafting',
+        build: 'Build',
+        launch: 'Launch',
+        hauling: 'Hauling',
+        engine: 'Engine',
+        generator: 'Generator',
+        gatherer: 'Gatherer',
+    },
+    (key) => `capability.${key}.label`
+)
+
+const ATTRIBUTE_LABELS: Record<string, string> = textRecord(
+    {
+        thrust: 'Thrust',
+        drain: 'Drain',
+        capacity: 'Capacity',
+        recharge: 'Recharge',
+        yield: 'Yield',
+        depth: 'Depth',
+        payload: 'Payload',
+        quantity: 'Quantity',
+        speed: 'Speed',
+        efficiency: 'Efficiency',
+        'cargo-capacity': 'Cargo Capacity',
+        'energy-capacity': 'Energy Capacity',
+        mass: 'Mass',
+        range: 'Range',
+        quality: 'Quality',
+    },
+    (key) => `attribute.${key}.label`
+)
+
+export function capabilityLabel(capability: string): string {
+    return CAPABILITY_LABELS[capability.toLowerCase()] ?? capability
+}
+
+export function attributeLabel(attribute: string): string {
+    return ATTRIBUTE_LABELS[attribute] ?? attribute
+}
+
+const CAPABILITY_ATTRIBUTES: CapabilityAttribute[] = [
     {capability: 'Hull', attribute: 'mass', description: 'Total mass of the hull'},
     {
         capability: 'Storage',
@@ -99,6 +152,14 @@ export const capabilityAttributes: CapabilityAttribute[] = [
         description: 'Fixed normal-travel drain contributed by an installed Tractor Beam',
     },
 ]
+
+export const capabilityAttributes: CapabilityAttribute[] = CAPABILITY_ATTRIBUTES.map((row) =>
+    textFields(
+        {...row},
+        {description: row.description},
+        () => `capability.${row.capability.toLowerCase()}.${row.attribute}.description`
+    )
+)
 
 const invertedAttributes = new Set(['drain', 'mass'])
 

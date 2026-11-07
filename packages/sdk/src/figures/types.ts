@@ -1,4 +1,5 @@
 import type {ModuleCapabilityKind} from '../derivation/capabilities'
+import {textRecord} from '../text/registry'
 
 export type FigureSectionKey =
     | 'movement'
@@ -13,18 +14,56 @@ export type FigureSectionKey =
     | 'storage'
     | 'launch'
 
-export const FIGURE_SECTION_LABELS: Record<FigureSectionKey, string> = {
-    movement: 'Movement',
-    mass: 'Mass',
-    energy: 'Energy',
-    gathering: 'Gathering',
-    crafting: 'Crafting',
-    building: 'Building',
-    shuttling: 'Shuttling',
-    towing: 'Towing',
-    warp: 'Warp',
-    storage: 'Storage',
-    launch: 'Launch',
+export const FIGURE_SECTION_LABELS: Record<FigureSectionKey, string> = textRecord(
+    {
+        movement: 'Movement',
+        mass: 'Mass',
+        energy: 'Energy',
+        gathering: 'Gathering',
+        crafting: 'Crafting',
+        building: 'Building',
+        shuttling: 'Shuttling',
+        towing: 'Towing',
+        warp: 'Warp',
+        storage: 'Storage',
+        launch: 'Launch',
+    },
+    (key) => `figure-section.${key}.label`
+)
+
+const FIGURE_LABELS: Record<string, string> = textRecord(
+    {
+        speed: 'Speed',
+        drain: 'Drain',
+        capacity: 'Capacity',
+        recharge: 'Recharge',
+        tows: 'Tows',
+        handling: 'Handling',
+        jump: 'Jump distance',
+        yield: 'Yield',
+        depth: 'Depth',
+        transfer: 'Transfer',
+        payload: 'Payload',
+        shuttles: 'Shuttles',
+        charge: 'Charge',
+        launchSpeed: 'Launch speed',
+        emptyHold: 'Empty hold',
+        fullHold: 'Full hold',
+        hull: 'Hull',
+        modules: 'Modules',
+        cargo: 'Cargo',
+        total: 'Total',
+        range: 'Range',
+        engines: 'Engines',
+        rangeFloor: 'Range floor',
+        travelDrain: 'Travel drain',
+        perCharge: 'Per charge',
+    },
+    (key) => `figure.${key}.label`
+)
+
+export function figureLabel(key: string): string {
+    return FIGURE_LABELS[key] ?? key
 }
 
 export const MODULE_FIGURE_SECTION: Record<ModuleCapabilityKind, FigureSectionKey> = {
@@ -46,6 +85,7 @@ export interface Figure {
     label: string
     value: number
     unit: string
+    number: string
     text: string
     note?: string
 }

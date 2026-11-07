@@ -1,5 +1,7 @@
 import {Name, type NameType} from '@wharfkit/antelope'
 import kindRegistryJson from './kind-registry.json'
+import {itemFamilyKey} from './metadata'
+import {SDK_TEXT, textFields} from '../text/registry'
 
 export const CAP_WRAP = 0x01
 export const CAP_UNDEPLOY = 0x02
@@ -77,13 +79,15 @@ const KIND_META: Map<string, KindMeta> = (() => {
                 `kind-registry: unknown classification "${r.classification}" for kind ${r.kind}`
             )
         }
-        m.set(r.kind, {
+        const meta = {
             kind: Name.from(r.kind),
             classification: cls,
             capabilityFlags: r.capabilityFlags,
             zCoord: r.zCoord,
             defaultLabel: r.defaultLabel,
-        })
+        }
+        textFields(meta, {defaultLabel: r.defaultLabel}, () => `kind.${r.kind}.label`)
+        m.set(r.kind, meta)
     }
     return m
 })()
@@ -95,12 +99,19 @@ export const ALL_ENTITY_TYPES: readonly EntityTypeName[] = Object.freeze([
 const TEMPLATE_BY_ITEM_ID: Map<number, TemplateMeta> = (() => {
     const m = new Map<number, TemplateMeta>()
     for (const r of kindRegistryJson.templates as RawTemplateEntry[]) {
-        m.set(r.itemId, {
+        const meta = {
             itemId: r.itemId,
             kind: Name.from(r.kind),
             displayLabel: r.displayLabel,
             baseCapacityFn: r.baseCapacityFn,
-        })
+        }
+        if (r.displayLabel) {
+            const familyId = `family.${itemFamilyKey(r.itemId)}.name`
+            const id =
+                SDK_TEXT[familyId] === r.displayLabel ? familyId : `template.${r.itemId}.label`
+            textFields(meta, {displayLabel: r.displayLabel}, () => id)
+        }
+        m.set(r.itemId, meta)
     }
     return m
 })()

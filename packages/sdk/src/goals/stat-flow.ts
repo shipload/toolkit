@@ -5,6 +5,10 @@ import {KIND_TO_ITEM_ID} from '../derivation/capability-mappings'
 import {getItemStatSlots, isMeanSource} from '../derivation/crafting'
 import {getStatName} from '../derivation/stats'
 import type {ResourceCategory} from '../types'
+import {attributeLabel} from '../data/capabilities'
+import {compose, defineText} from '../text/registry'
+
+defineText({'compose.stat-ordinal': 'Stat {n}'})
 
 export interface StatFlowSource {
     itemId: number
@@ -24,10 +28,12 @@ export interface StatFlowAttribute {
 
 export interface StatFlowLink {
     itemId: number
+    slot: number
     label: string
 }
 
 export interface StatFlowFeed {
+    attributeSlot: number
     attribute: string
     share: number
     path: StatFlowLink[]
@@ -44,21 +50,20 @@ const KIND_BY_ITEM = new Map<number, SlotConsumerKind>(
     (Object.entries(KIND_TO_ITEM_ID) as [SlotConsumerKind, number][]).map(([k, id]) => [id, k])
 )
 
-function capitalize(word: string): string {
-    return word.charAt(0).toUpperCase() + word.slice(1)
-}
-
 export function statSlotLabel(itemId: number, slot: number): string {
     const item = getItem(itemId)
     if (item.type === 'resource') {
         return item.category
             ? getStatName(item.category as ResourceCategory, slot as 0 | 1 | 2).label
-            : `Stat ${slot + 1}`
+            : compose('compose.stat-ordinal', {n: slot + 1})
     }
     const kind = (item.moduleType as SlotConsumerKind | undefined) ?? KIND_BY_ITEM.get(itemId)
     const consumer = kind ? SLOT_FORMULAS[kind]?.[slot] : undefined
-    if (consumer) return capitalize(consumer.attribute)
-    return getItemStatSlots(itemId).find((s) => s.index === slot)?.label ?? `Stat ${slot + 1}`
+    if (consumer) return attributeLabel(consumer.attribute)
+    return (
+        getItemStatSlots(itemId).find((s) => s.index === slot)?.label ??
+        compose('compose.stat-ordinal', {n: slot + 1})
+    )
 }
 
 function traceSlot(recipe: Recipe, slot: number, seen: Set<number>): StatFlowSource[] {
@@ -117,6 +122,7 @@ export function statFlow(itemId: number): StatFlowAttribute[] {
 export function statFlowByResource(itemId: number): StatFlowResource[] {
     const out = new Map<string, StatFlowResource>()
     const walk = (
+        attributeSlot: number,
         attribute: string,
         sources: StatFlowSource[],
         share: number,
@@ -137,20 +143,23 @@ export function statFlowByResource(itemId: number): StatFlowResource[] {
                     }
                     out.set(key, entry)
                 }
-                const route = path.map((p) => `${p.itemId}:${p.label}`).join('>')
+                const route = path.map((p) => `${p.itemId}:${p.slot}`).join('>')
                 const same = entry.feeds.find(
                     (f) =>
-                        f.attribute === attribute &&
-                        f.path.map((p) => `${p.itemId}:${p.label}`).join('>') === route
+                        f.attributeSlot === attributeSlot &&
+                        f.path.map((p) => `${p.itemId}:${p.slot}`).join('>') === route
                 )
                 if (same) same.share += at
-                else entry.feeds.push({attribute, share: at, path})
+                else entry.feeds.push({attributeSlot, attribute, share: at, path})
                 continue
             }
-            walk(attribute, s.sources, at, [{itemId: s.itemId, label: s.label}, ...path])
+            walk(attributeSlot, attribute, s.sources, at, [
+                {itemId: s.itemId, slot: s.slot, label: s.label},
+                ...path,
+            ])
         }
     }
-    for (const attr of statFlow(itemId)) walk(attr.label, attr.sources, 1, [])
+    for (const attr of statFlow(itemId)) walk(attr.slot, attr.label, attr.sources, 1, [])
     return [...out.values()]
 }
 
@@ -158,6 +167,7 @@ export type StatFlowRow =
     | {
           kind: 'gather'
           itemId: number
+          statIndex: number
           stat: string
           share: number
           through: number[]
@@ -179,7 +189,7 @@ const ROW_ORDER: Record<StatFlowRow['kind'], number> = {
 
 function sameRow(a: StatFlowRow, b: StatFlowRow): boolean {
     if (a.kind !== b.kind || a.itemId !== b.itemId) return false
-    return a.kind !== 'gather' || b.kind !== 'gather' || a.stat === b.stat
+    return a.kind !== 'gather' || b.kind !== 'gather' || a.statIndex === b.statIndex
 }
 
 export function statFlowPlates(itemId: number): StatFlowPlate[] {
@@ -201,6 +211,7 @@ export function statFlowPlates(itemId: number): StatFlowPlate[] {
                         add({
                             kind: 'gather',
                             itemId: s.itemId,
+                            statIndex: s.slot,
                             stat: s.label,
                             share: at,
                             through,

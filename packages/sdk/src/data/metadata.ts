@@ -1,4 +1,5 @@
 import items from './items.json'
+import {textFields, textRecord} from '../text/registry'
 
 export type ComponentProcess = 'refined' | 'machined'
 
@@ -9,11 +10,46 @@ export interface ItemFamily {
     process?: ComponentProcess
 }
 
+export type SlotKey =
+    | 'engine'
+    | 'generator'
+    | 'gatherer'
+    | 'loader'
+    | 'storage'
+    | 'builder'
+    | 'hauler'
+    | 'crafter'
+    | 'launcher'
+    | 'utility'
+    | 'aux'
+
 export interface EntityMetadata {
-    moduleSlotLabels?: string[]
+    moduleSlots: SlotKey[]
+    readonly moduleSlotLabels: string[]
 }
 
-export const itemFamilies: Record<string, ItemFamily> = {
+const SLOT_LABELS: Record<SlotKey, string> = textRecord(
+    {
+        engine: 'Engine',
+        generator: 'Power Core',
+        gatherer: 'Limpet Bay',
+        loader: 'Shuttle Bay',
+        storage: 'Cargo Hold',
+        builder: 'Assembly Arm',
+        hauler: 'Tractor Beam',
+        crafter: 'Fabricator',
+        launcher: 'Drive Coil',
+        utility: 'Utility Bay',
+        aux: 'Auxiliary System',
+    },
+    (key) => `slot.${key}.label`
+)
+
+export function slotLabel(key: SlotKey): string {
+    return SLOT_LABELS[key]
+}
+
+const FAMILIES: Record<string, ItemFamily> = {
     // === Resources ===
     ore: {
         name: 'Ore',
@@ -294,6 +330,17 @@ export const itemFamilies: Record<string, ItemFamily> = {
     },
 }
 
+export const itemFamilies: Record<string, ItemFamily> = Object.fromEntries(
+    Object.entries(FAMILIES).map(([key, family]) => [
+        key,
+        textFields(
+            {...family},
+            {name: family.name, description: family.description},
+            (field) => `family.${key}.${field}`
+        ),
+    ])
+)
+
 const COMPONENT_FAMILIES = [
     'plate',
     'frame',
@@ -385,77 +432,58 @@ export function getItemFamily(itemId: number): ItemFamily | undefined {
     return key === undefined ? undefined : itemFamilies[key]
 }
 
-export const entityMetadata: Record<number, EntityMetadata> = {
-    10201: {
-        moduleSlotLabels: ['Engine', 'Power Core', 'Limpet Bay', 'Shuttle Bay', 'Cargo Hold'],
-    },
-    10210: {moduleSlotLabels: ['Power Core', 'Engine', 'Utility Bay']},
-    10211: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
-    10212: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
-    10213: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm']},
-    10214: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
-    10215: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
-    10218: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator']},
-    10202: {
-        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
-    },
-    10203: {moduleSlotLabels: ['Power Core', 'Limpet Bay']},
-    10204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
-    10205: {moduleSlotLabels: ['Power Core', 'Drive Coil']},
-    10206: {moduleSlotLabels: ['Cargo Hold', 'Cargo Hold', 'Cargo Hold']},
-    10208: {
-        moduleSlotLabels: ['Fabricator', 'Fabricator', 'Fabricator', 'Fabricator', 'Fabricator'],
-    },
-    10209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
-    10219: {
-        moduleSlotLabels: [
-            'Shuttle Bay',
-            'Shuttle Bay',
-            'Cargo Hold',
-            'Cargo Hold',
-            'Cargo Hold',
-            'Cargo Hold',
-        ],
-    },
-    11212: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay']},
-    11213: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Limpet Bay'],
-    },
-    11214: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Cargo Hold'],
-    },
-    11215: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay']},
-    11216: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Shuttle Bay'],
-    },
-    11217: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm']},
-    11218: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Assembly Arm'],
-    },
-    11219: {moduleSlotLabels: ['Power Core', 'Engine', 'Tractor Beam']},
-    11220: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Tractor Beam'],
-    },
-    11221: {moduleSlotLabels: ['Power Core', 'Engine', 'Cargo Hold']},
-    11222: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Cargo Hold'],
-    },
-    11223: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator']},
-    11224: {
-        moduleSlotLabels: ['Power Core', 'Engine', 'Auxiliary System', 'Fabricator'],
-    },
-    11225: {moduleSlotLabels: ['Power Core', 'Engine', 'Limpet Bay', 'Tractor Beam']},
-    11226: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay', 'Cargo Hold']},
-    11227: {moduleSlotLabels: ['Power Core', 'Engine', 'Shuttle Bay', 'Tractor Beam']},
-    11228: {moduleSlotLabels: ['Power Core', 'Engine', 'Fabricator', 'Cargo Hold']},
-    11229: {moduleSlotLabels: ['Power Core', 'Engine', 'Assembly Arm', 'Cargo Hold']},
-    11202: {
-        moduleSlotLabels: ['Shuttle Bay', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold', 'Cargo Hold'],
-    },
-    11203: {moduleSlotLabels: ['Power Core', 'Limpet Bay']},
-    11204: {moduleSlotLabels: ['Power Core', 'Fabricator']},
-    11209: {moduleSlotLabels: ['Power Core', 'Assembly Arm']},
+const ENTITY_SLOTS: Record<number, SlotKey[]> = {
+    10201: ['engine', 'generator', 'gatherer', 'loader', 'storage'],
+    10210: ['generator', 'engine', 'utility'],
+    10211: ['generator', 'engine', 'gatherer'],
+    10212: ['generator', 'engine', 'loader'],
+    10213: ['generator', 'engine', 'builder'],
+    10214: ['generator', 'engine', 'hauler'],
+    10215: ['generator', 'engine', 'storage'],
+    10218: ['generator', 'engine', 'crafter'],
+    10202: ['loader', 'storage', 'storage', 'storage', 'storage'],
+    10203: ['generator', 'gatherer'],
+    10204: ['generator', 'crafter'],
+    10205: ['generator', 'launcher'],
+    10206: ['storage', 'storage', 'storage'],
+    10208: ['crafter', 'crafter', 'crafter', 'crafter', 'crafter'],
+    10209: ['generator', 'builder'],
+    10219: ['loader', 'loader', 'storage', 'storage', 'storage', 'storage'],
+    11212: ['generator', 'engine', 'gatherer'],
+    11213: ['generator', 'engine', 'aux', 'gatherer'],
+    11214: ['generator', 'engine', 'gatherer', 'storage'],
+    11215: ['generator', 'engine', 'loader'],
+    11216: ['generator', 'engine', 'aux', 'loader'],
+    11217: ['generator', 'engine', 'builder'],
+    11218: ['generator', 'engine', 'aux', 'builder'],
+    11219: ['generator', 'engine', 'hauler'],
+    11220: ['generator', 'engine', 'aux', 'hauler'],
+    11221: ['generator', 'engine', 'storage'],
+    11222: ['generator', 'engine', 'aux', 'storage'],
+    11223: ['generator', 'engine', 'crafter'],
+    11224: ['generator', 'engine', 'aux', 'crafter'],
+    11225: ['generator', 'engine', 'gatherer', 'hauler'],
+    11226: ['generator', 'engine', 'loader', 'storage'],
+    11227: ['generator', 'engine', 'loader', 'hauler'],
+    11228: ['generator', 'engine', 'crafter', 'storage'],
+    11229: ['generator', 'engine', 'builder', 'storage'],
+    11202: ['loader', 'storage', 'storage', 'storage', 'storage'],
+    11203: ['generator', 'gatherer'],
+    11204: ['generator', 'crafter'],
+    11209: ['generator', 'builder'],
 }
+
+export const entityMetadata: Record<number, EntityMetadata> = Object.fromEntries(
+    Object.entries(ENTITY_SLOTS).map(([id, moduleSlots]) => [
+        id,
+        {
+            moduleSlots,
+            get moduleSlotLabels() {
+                return moduleSlots.map(slotLabel)
+            },
+        },
+    ])
+)
 
 for (const raw of items as RawItem[]) {
     const key = itemFamilyKey(raw.id)

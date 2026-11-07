@@ -6,6 +6,7 @@ import {getItem} from '../data/catalog'
 import {findStatDefinition, getStatDefinitions, type StatDefinition} from './stats'
 import {deriveResourceStats, STAT_MEAN, STAT_WORD_SLOTS} from './stratum'
 import {ITEM_SHIP_T1_PACKED} from '../data/item-ids'
+import {compose} from '../text/registry'
 
 export const STAT_SOURCE_MEAN = 255
 
@@ -146,7 +147,9 @@ export function getItemStatSlots(itemId: number): ItemStatSlot[] {
             {
                 index,
                 key,
-                label: sources.map((s) => s.label).join(' + '),
+                label: sources
+                    .map((s) => s.label)
+                    .reduce((a, b) => compose('compose.plus', {a, b})),
                 abbreviation: sources.map((s) => s.abbreviation).join('+'),
                 sources,
                 meanHeld: false,

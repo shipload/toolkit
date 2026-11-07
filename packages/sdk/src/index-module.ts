@@ -161,8 +161,8 @@ export {
     categoryFromIndex,
     categoryLabelFromIndex,
 } from './data/catalog'
-export {getItemFamily, itemFamilies, itemFamilyKey} from './data/metadata'
-export type {ComponentProcess, ItemFamily} from './data/metadata'
+export {getItemFamily, itemFamilies, itemFamilyKey, slotLabel} from './data/metadata'
+export type {ComponentProcess, ItemFamily, SlotKey} from './data/metadata'
 export {
     COMPONENT_PROCESS_ORDER,
     completeComponentSet,
@@ -553,6 +553,8 @@ export {
     capabilityAttributes,
     isInvertedAttribute,
     getCapabilityAttributes,
+    capabilityLabel,
+    attributeLabel,
 } from './data/capabilities'
 export type {CapabilityAttribute, StatMapping, CapabilityAttributeRow} from './data/capabilities'
 
@@ -564,6 +566,7 @@ export {
     getProducersForAttribute,
     getCapabilityAttributeRows,
     sourceLabelForOutput,
+    sourceKeyForOutput,
 } from './derivation/capability-mappings'
 export {SLOT_FORMULAS} from './data/capability-formulas'
 export type {SlotConsumer, SlotConsumerKind} from './data/capability-formulas'
@@ -696,7 +699,10 @@ export {
     SHEET_HEADLINES,
     FIGURE_SECTION_LABELS,
     MODULE_FIGURE_SECTION,
-    WARP_JUMP_NOTE,
+    warpJumpNote,
+    makeFigure,
+    figureLabel,
+    withUnit,
     formatDistance,
     formatDistanceValue,
     formatPerDistance,
@@ -778,6 +784,7 @@ export {resolveItem} from './resolution/resolve-item'
 export type {
     ResolvedItem,
     ResolvedItemStat,
+    ResolvedAttribute,
     ResolvedAttributeGroup,
     ResolvedModuleSlot,
     ResolvedItemType,
@@ -907,6 +914,8 @@ export {
 } from './format'
 export * from './coordinates'
 
+export {SDK_TEXT, setTranslator} from './text/registry'
+export type {Translator, TextTranslator, NumberFormatter} from './text/registry'
 export {displayName, baseName, describeItem} from './resolution/display-name'
 export type {DescribeOptions} from './resolution/display-name'
 

@@ -20,7 +20,7 @@ import {
     ITEM_CONTAINER_T2_PACKED,
 } from '../data/item-ids'
 import type {StatMapping, CapabilityAttributeRow} from '../data/capabilities'
-import {capabilityAttributes} from '../data/capabilities'
+import {capabilityAttributes, capabilityLabel} from '../data/capabilities'
 
 export const KIND_TO_ITEM_ID: Record<SlotConsumerKind, number> = {
     engine: ITEM_ENGINE_T1,
@@ -75,7 +75,12 @@ function traceToRawCategoryStat(
 // Producing role for a capability·attribute: entity hull slots all roll up to "Hull"; modules use their own name.
 export function sourceLabelForOutput(itemId: number): string {
     const item = getItem(itemId)
-    return item.type === 'entity' ? 'Hull' : item.name
+    return item.type === 'entity' ? capabilityLabel('hull') : item.name
+}
+
+export function sourceKeyForOutput(itemId: number): string {
+    const item = getItem(itemId)
+    return item.type === 'entity' ? 'hull' : item.family
 }
 
 let cached: StatMapping[] | undefined
@@ -91,7 +96,7 @@ export function deriveStatMappings(): StatMapping[] {
         const itemId = KIND_TO_ITEM_ID[kind]
         const recipe = getRecipe(itemId)
         if (!recipe) continue
-        const source = sourceLabelForOutput(itemId)
+        const sourceKey = sourceKeyForOutput(itemId)
         for (const [slotIdxStr, consumer] of Object.entries(slots)) {
             const slotIdx = Number(slotIdxStr)
             const slot = recipe.statSlots[slotIdx]
@@ -99,14 +104,20 @@ export function deriveStatMappings(): StatMapping[] {
             for (const src of slot.sources) {
                 const stat = traceToRawCategoryStat(recipe, src)
                 if (!stat) continue
-                const key = `${stat.label}|${consumer.capability}|${consumer.attribute}|${source}`
+                const key = `${stat.key}|${consumer.capability}|${consumer.attribute}|${sourceKey}`
                 if (seen.has(key)) continue
                 seen.add(key)
                 out.push({
-                    stat: stat.label,
+                    statKey: stat.key,
+                    get stat() {
+                        return stat.label
+                    },
                     capability: consumer.capability,
                     attribute: consumer.attribute,
-                    source,
+                    sourceKey,
+                    get source() {
+                        return sourceLabelForOutput(itemId)
+                    },
                 })
             }
         }
@@ -120,7 +131,7 @@ export function getStatMappings(): StatMapping[] {
 }
 
 export function getStatMappingsForStat(stat: string): StatMapping[] {
-    return deriveStatMappings().filter((m) => m.stat === stat)
+    return deriveStatMappings().filter((m) => m.statKey === stat || m.stat === stat)
 }
 
 export function getStatMappingsForCapability(capability: string): StatMapping[] {
@@ -132,8 +143,8 @@ export function getProducersForAttribute(capability: string, attribute: string):
     const out: string[] = []
     for (const m of deriveStatMappings()) {
         if (m.capability !== capability || m.attribute !== attribute) continue
-        if (seen.has(m.source)) continue
-        seen.add(m.source)
+        if (seen.has(m.sourceKey)) continue
+        seen.add(m.sourceKey)
         out.push(m.source)
     }
     return out

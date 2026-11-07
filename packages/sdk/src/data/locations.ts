@@ -1,3 +1,5 @@
+import {textFields} from '../text/registry'
+
 export interface PlanetSubtypeInfo {
     id: number
     label: string
@@ -5,7 +7,7 @@ export interface PlanetSubtypeInfo {
     paletteType: string
 }
 
-const planetSubtypes: PlanetSubtypeInfo[] = [
+const PLANET_SUBTYPES: PlanetSubtypeInfo[] = [
     {
         id: 0,
         label: 'Gas Giant',
@@ -43,6 +45,14 @@ const planetSubtypes: PlanetSubtypeInfo[] = [
         paletteType: 'industrial',
     },
 ]
+
+const planetSubtypes: PlanetSubtypeInfo[] = PLANET_SUBTYPES.map((subtype) =>
+    textFields(
+        {...subtype},
+        {label: subtype.label, description: subtype.description},
+        (field) => `planet.${subtype.paletteType}.${field}`
+    )
+)
 
 export function getPlanetSubtypes(): PlanetSubtypeInfo[] {
     return planetSubtypes

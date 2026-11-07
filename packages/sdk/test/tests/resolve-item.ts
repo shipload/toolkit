@@ -135,9 +135,9 @@ describe('resolveItem', () => {
         assert.equal(group.capability, 'Hauling')
         assert.lengthOf(group.attributes, 3)
 
-        assert.deepEqual(group.attributes[0], {label: 'Capacity', value: 2})
-        assert.deepEqual(group.attributes[1], {label: 'Efficiency', value: 5000})
-        assert.deepEqual(group.attributes[2], {label: 'Drain', value: 9})
+        assert.deepEqual(group.attributes[0], {key: 'capacity', label: 'Capacity', value: 2})
+        assert.deepEqual(group.attributes[1], {key: 'efficiency', label: 'Efficiency', value: 5000})
+        assert.deepEqual(group.attributes[2], {key: 'drain', label: 'Drain', value: 9})
     })
 })
 

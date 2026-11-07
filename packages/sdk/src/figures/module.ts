@@ -18,209 +18,201 @@ import {
     travelDrainPerLy,
 } from './reference'
 import {
-    formatDistance,
-    formatFigureTonnes,
+    formatDistanceValue,
+    formatFigureTonnesValue,
     formatFixed,
-    formatPerDistance,
-    formatTonnesRate,
+    formatTonnesRateValue,
     signed,
+    withUnit,
 } from './format'
+import {compose, defineText, text} from '../text/registry'
 import {
     FIGURE_SECTION_LABELS,
+    figureLabel,
     MODULE_FIGURE_SECTION,
     type Figure,
     type ModuleFigures,
 } from './types'
 import {MASS_UNITS_PER_TONNE} from '../types'
 
-export const WARP_JUMP_NOTE = 'Spends a full charge; the hold must be empty.'
+defineText({
+    'figure.warp.note': 'Spends a full charge; the hold must be empty.',
+    'figure.tows.one': '{count} container, T{tier} and below',
+    'figure.tows.many': '{count} containers, T{tier} and below',
+    'figure.handling.text': '+{value}% travel time per towed container, plus its weight',
+})
 
-export function speedFigure(key: string, label: string, lyPerHour: number): Figure {
-    return {key, label, value: lyPerHour, unit: 'ly/hr', text: `${formatFixed(lyPerHour)} ly/hr`}
-}
-
-export function travelDrainFigure(key: string, label: string, drainMilli: number): Figure {
-    const value = travelDrainPerLy(drainMilli)
-    return {key, label, value, unit: 'energy/ly', text: formatPerDistance(value)}
-}
-
-export function energyFigure(key: string, label: string, milli: number, plus = false): Figure {
-    const value = milliToEnergy(milli)
-    const text = `${formatFixed(value)} energy`
-    return {key, label, value, unit: 'energy', text: plus ? signed(text) : text}
-}
-
-export function rechargeFigure(
+export function makeFigure(
     key: string,
-    label: string,
-    milliPerSecond: number,
+    value: number,
+    unit: string,
+    number: string,
     plus = false
 ): Figure {
+    const shown = plus ? signed(number) : number
+    return {key, label: figureLabel(key), value, unit, number: shown, text: withUnit(unit, shown)}
+}
+
+export function speedFigure(key: string, lyPerHour: number): Figure {
+    return makeFigure(key, lyPerHour, 'ly/hr', formatFixed(lyPerHour))
+}
+
+export function travelDrainFigure(key: string, drainMilli: number): Figure {
+    const value = travelDrainPerLy(drainMilli)
+    return makeFigure(key, value, 'energy/ly', formatDistanceValue(value))
+}
+
+export function energyFigure(key: string, milli: number, plus = false): Figure {
+    const value = milliToEnergy(milli)
+    return makeFigure(key, value, 'energy', formatFixed(value), plus)
+}
+
+export function rechargeFigure(key: string, milliPerSecond: number, plus = false): Figure {
     const value = rechargePerMinute(milliPerSecond)
-    const text = `${formatFixed(value)} energy/min`
-    return {key, label, value, unit: 'energy/min', text: plus ? signed(text) : text}
+    return makeFigure(key, value, 'energy/min', formatFixed(value), plus)
 }
 
-export function tonnesFigure(key: string, label: string, massUnits: number, plus = false): Figure {
-    const text = formatFigureTonnes(massUnits)
-    return {
+export function tonnesFigure(key: string, massUnits: number, plus = false): Figure {
+    return makeFigure(
         key,
-        label,
-        value: massUnits / MASS_UNITS_PER_TONNE,
-        unit: 't',
-        text: plus ? signed(text) : text,
-    }
+        massUnits / MASS_UNITS_PER_TONNE,
+        't',
+        formatFigureTonnesValue(massUnits),
+        plus
+    )
 }
 
-export function distanceFigure(key: string, label: string, ly: number): Figure {
-    return {key, label, value: ly, unit: 'ly', text: formatDistance(ly)}
+export function distanceFigure(key: string, ly: number): Figure {
+    return makeFigure(key, ly, 'ly', formatDistanceValue(ly))
 }
 
-export function yieldFigure(key: string, label: string, yieldValue: number): Figure {
+export function yieldFigure(key: string, yieldValue: number): Figure {
     const value = referenceYieldPerMinute(yieldValue)
-    return {key, label, value, unit: 't/min', text: formatTonnesRate(value, 1)}
+    return makeFigure(key, value, 't/min', formatTonnesRateValue(value, 1))
 }
 
-export function depthFigure(key: string, label: string, depth: number): Figure {
-    return {key, label, value: depth, unit: 'km', text: `${formatFixed(depth)} km`}
+export function depthFigure(key: string, depth: number): Figure {
+    return makeFigure(key, depth, 'km', formatFixed(depth))
 }
 
-export function gatherDrainFigure(key: string, label: string, drain: number): Figure {
+export function gatherDrainFigure(key: string, drain: number): Figure {
     const value = gatherDrainPerMinute(drain)
-    return {key, label, value, unit: 'energy/min', text: `${formatFixed(value, 1)} energy/min`}
+    return makeFigure(key, value, 'energy/min', formatFixed(value, 1))
 }
 
-export function inputSpeedFigure(key: string, label: string, speed: number): Figure {
+export function inputSpeedFigure(key: string, speed: number): Figure {
     const value = inputTonnesPerMinute(speed)
-    return {key, label, value, unit: 't/min', text: formatTonnesRate(value, 1)}
+    return makeFigure(key, value, 't/min', formatTonnesRateValue(value, 1))
 }
 
-export function craftDrainFigure(key: string, label: string, drain: number): Figure {
+export function craftDrainFigure(key: string, drain: number): Figure {
     const value = craftDrainPerKiloTonne(drain)
-    return {key, label, value, unit: 'energy/k t', text: `${formatFixed(value)} energy/k t`}
+    return makeFigure(key, value, 'energy/k t', formatFixed(value))
 }
 
-export function transferFigure(
-    key: string,
-    label: string,
-    thrust: number,
-    payload: number
-): Figure {
+export function transferFigure(key: string, thrust: number, payload: number): Figure {
     const value = referenceTransferPerMinute(thrust, payload)
-    return {key, label, value, unit: 't/min', text: formatTonnesRate(value, 0)}
+    return makeFigure(key, value, 't/min', formatTonnesRateValue(value, 0))
 }
 
-export function payloadFigure(key: string, label: string, payload: number): Figure {
+export function payloadFigure(key: string, payload: number): Figure {
     const value = payloadPercent(payload)
-    return {key, label, value, unit: '%', text: `${formatFixed(value, 1)}%`}
+    return makeFigure(key, value, '%', formatFixed(value, 1))
 }
 
-export function countFigure(key: string, label: string, count: number): Figure {
-    return {key, label, value: count, unit: '', text: formatFixed(count)}
+export function countFigure(key: string, count: number): Figure {
+    return makeFigure(key, count, '', formatFixed(count))
 }
 
 export function towsText(byTier: {tier: number; capacity: number}[]): string {
     return byTier
-        .map(
-            ({tier, capacity}) =>
-                `${formatFixed(capacity)} ${capacity === 1 ? 'container' : 'containers'}, T${tier} and below`
+        .map(({tier, capacity}) =>
+            compose(capacity === 1 ? 'figure.tows.one' : 'figure.tows.many', {
+                count: formatFixed(capacity),
+                tier: String(tier),
+            })
         )
-        .join('; ')
+        .join(text('compose.separator.clauses'))
 }
 
-export function towsFigure(
-    key: string,
-    label: string,
-    byTier: {tier: number; capacity: number}[]
-): Figure {
+export function towsFigure(key: string, byTier: {tier: number; capacity: number}[]): Figure {
     const value = byTier.reduce((sum, entry) => sum + entry.capacity, 0)
-    return {key, label, value, unit: 'containers', text: towsText(byTier)}
+    const shown = towsText(byTier)
+    return {key, label: figureLabel(key), value, unit: 'containers', number: shown, text: shown}
 }
 
-export function handlingFigure(key: string, label: string, efficiency: number): Figure {
+export function handlingFigure(key: string, efficiency: number): Figure {
     const value = handlingPercentPerContainer(efficiency)
-    return {
-        key,
-        label,
-        value,
-        unit: '%',
-        text: `+${formatFixed(value)}% travel time per towed container, plus its weight`,
-    }
+    const shown = compose('figure.handling.text', {value: formatFixed(value)})
+    return {key, label: figureLabel(key), value, unit: '%', number: shown, text: shown}
 }
 
-export function jumpFigure(key: string, label: string, range: number): Figure {
-    return {...distanceFigure(key, label, range), note: WARP_JUMP_NOTE}
+export function warpJumpNote(): string {
+    return text('figure.warp.note')
+}
+
+export function jumpFigure(key: string, range: number): Figure {
+    return {...distanceFigure(key, range), note: warpJumpNote()}
 }
 
 function moduleRows(caps: ModuleCapabilities): Figure[] {
     switch (caps.kind) {
         case 'engine':
             return [
-                speedFigure('speed', 'Speed', cruiseSpeedLyPerHour(caps.thrust, REFERENCE_MASS)),
-                travelDrainFigure('drain', 'Drain', computeTravelDrain(caps.thrust, caps.thermal)),
+                speedFigure('speed', cruiseSpeedLyPerHour(caps.thrust, REFERENCE_MASS)),
+                travelDrainFigure('drain', computeTravelDrain(caps.thrust, caps.thermal)),
             ]
         case 'generator':
             return [
-                energyFigure('capacity', 'Capacity', caps.capacity, true),
-                rechargeFigure('recharge', 'Recharge', caps.recharge, true),
+                energyFigure('capacity', caps.capacity, true),
+                rechargeFigure('recharge', caps.recharge, true),
             ]
         case 'battery':
-            return [energyFigure('capacity', 'Capacity', caps.capacity, true)]
+            return [energyFigure('capacity', caps.capacity, true)]
         case 'storage':
             return [
-                tonnesFigure('capacity', 'Capacity', caps.capacity, true),
-                travelDrainFigure('drain', 'Drain', caps.drain),
+                tonnesFigure('capacity', caps.capacity, true),
+                travelDrainFigure('drain', caps.drain),
             ]
         case 'hauler':
             return [
-                towsFigure('tows', 'Tows', [{tier: caps.tier, capacity: caps.capacity}]),
-                handlingFigure('handling', 'Handling', caps.efficiency),
-                travelDrainFigure('drain', 'Drain', caps.drain),
+                towsFigure('tows', [{tier: caps.tier, capacity: caps.capacity}]),
+                handlingFigure('handling', caps.efficiency),
+                travelDrainFigure('drain', caps.drain),
             ]
         case 'warp':
-            return [jumpFigure('jump', 'Jump distance', caps.range)]
+            return [jumpFigure('jump', caps.range)]
         case 'launcher':
             return [
-                {
-                    key: 'charge',
-                    label: 'Charge',
-                    value: launchChargePerMinute(caps.chargeRate),
-                    unit: 't/min',
-                    text: formatTonnesRate(launchChargePerMinute(caps.chargeRate), 1),
-                },
-                {
-                    key: 'launchSpeed',
-                    label: 'Launch speed',
-                    value: caps.velocity,
-                    unit: 'ly/s',
-                    text: `${formatFixed(caps.velocity)} ly/s`,
-                },
-                {
-                    key: 'drain',
-                    label: 'Drain',
-                    value: launchDrainPerKiloTonneLy(caps.drain),
-                    unit: 'energy/k t per ly',
-                    text: `${formatFixed(launchDrainPerKiloTonneLy(caps.drain))} energy/k t per ly`,
-                },
+                makeFigure(
+                    'charge',
+                    launchChargePerMinute(caps.chargeRate),
+                    't/min',
+                    formatTonnesRateValue(launchChargePerMinute(caps.chargeRate), 1)
+                ),
+                makeFigure('launchSpeed', caps.velocity, 'ly/s', formatFixed(caps.velocity)),
+                makeFigure(
+                    'drain',
+                    launchDrainPerKiloTonneLy(caps.drain),
+                    'energy/k t per ly',
+                    formatFixed(launchDrainPerKiloTonneLy(caps.drain))
+                ),
             ]
         case 'gatherer':
             return [
-                yieldFigure('yield', 'Yield', caps.yield),
-                depthFigure('depth', 'Depth', caps.depth),
-                gatherDrainFigure('drain', 'Drain', caps.drain),
+                yieldFigure('yield', caps.yield),
+                depthFigure('depth', caps.depth),
+                gatherDrainFigure('drain', caps.drain),
             ]
         case 'loader':
             return [
-                transferFigure('transfer', 'Transfer', caps.thrust, caps.payload),
-                payloadFigure('payload', 'Payload', caps.payload),
-                countFigure('shuttles', 'Shuttles', caps.quantity),
+                transferFigure('transfer', caps.thrust, caps.payload),
+                payloadFigure('payload', caps.payload),
+                countFigure('shuttles', caps.quantity),
             ]
         case 'crafter':
         case 'builder':
-            return [
-                inputSpeedFigure('speed', 'Speed', caps.speed),
-                craftDrainFigure('drain', 'Drain', caps.drain),
-            ]
+            return [inputSpeedFigure('speed', caps.speed), craftDrainFigure('drain', caps.drain)]
     }
 }
 

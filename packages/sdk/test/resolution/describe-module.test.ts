@@ -6,6 +6,7 @@ import {
     describeModuleForSlot,
     type ModuleDescription,
     renderDescription,
+    setTranslator,
     type ResolvedItem,
     type ResolvedModuleSlot,
 } from '../../src/index-module'
@@ -13,10 +14,10 @@ import {
 describe('describeModule', () => {
     test('Engine produces the expected description', () => {
         const input: CapabilityInput = {
-            capability: 'Engine',
+            key: 'engine',
             attributes: [
-                {label: 'Thrust', value: 1025},
-                {label: 'Drain', value: 40},
+                {key: 'thrust', value: 1025},
+                {key: 'drain', value: 40},
             ],
         }
         const desc = describeModule(input)
@@ -31,10 +32,10 @@ describe('describeModule', () => {
 
     test('Generator produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Generator',
+            key: 'generator',
             attributes: [
-                {label: 'Capacity', value: 450},
-                {label: 'Recharge', value: 197},
+                {key: 'capacity', value: 450},
+                {key: 'recharge', value: 197},
             ],
         })
         expect(desc?.id).toBe('module.generator.description')
@@ -47,11 +48,11 @@ describe('describeModule', () => {
 
     test('Gatherer produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Gatherer',
+            key: 'gatherer',
             attributes: [
-                {label: 'Yield', value: 600},
-                {label: 'Drain', value: 300},
-                {label: 'Depth', value: 350},
+                {key: 'yield', value: 600},
+                {key: 'drain', value: 300},
+                {key: 'depth', value: 350},
             ],
         })
         expect(desc?.id).toBe('module.gatherer.description')
@@ -64,11 +65,11 @@ describe('describeModule', () => {
 
     test('Loader produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Loading',
+            key: 'loading',
             attributes: [
-                {label: 'Payload', value: 705},
-                {label: 'Thrust', value: 100},
-                {label: 'Quantity', value: 1},
+                {key: 'payload', value: 705},
+                {key: 'thrust', value: 100},
+                {key: 'quantity', value: 1},
             ],
         })
         expect(desc?.id).toBe('module.loading.description')
@@ -81,10 +82,10 @@ describe('describeModule', () => {
 
     test('Crafter produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Crafting',
+            key: 'crafting',
             attributes: [
-                {label: 'Speed', value: 580},
-                {label: 'Drain', value: 15},
+                {key: 'speed', value: 580},
+                {key: 'drain', value: 15},
             ],
         })
         expect(desc?.id).toBe('module.crafting.description')
@@ -97,8 +98,8 @@ describe('describeModule', () => {
 
     test('Storage capability produces the Cargo Bay capacity description', () => {
         const desc = describeModule({
-            capability: 'Storage',
-            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
+            key: 'storage',
+            attributes: [{key: 'cargo-capacity', value: 60_000_000}],
         })
         expect(desc?.id).toBe('module.storage.description')
         expect(desc?.template).toBe('adds {capacity} cargo capacity')
@@ -108,8 +109,8 @@ describe('describeModule', () => {
 
     test('Energy capability with only Energy Capacity produces the Battery Bank description', () => {
         const desc = describeModule({
-            capability: 'Energy',
-            attributes: [{label: 'Energy Capacity', value: 10_000}],
+            key: 'energy',
+            attributes: [{key: 'energy-capacity', value: 10_000}],
         })
         expect(desc?.id).toBe('module.energy-capacity.description')
         expect(desc?.template).toBe('adds {capacity} energy capacity')
@@ -119,11 +120,11 @@ describe('describeModule', () => {
 
     test('Hauler produces the expected description', () => {
         const desc = describeModule({
-            capability: 'Hauling',
+            key: 'hauling',
             attributes: [
-                {label: 'Capacity', value: 4},
-                {label: 'Efficiency', value: 80},
-                {label: 'Drain', value: 25},
+                {key: 'capacity', value: 4},
+                {key: 'efficiency', value: 80},
+                {key: 'drain', value: 25},
             ],
         })
         expect(desc?.id).toBe('module.hauling.description')
@@ -136,12 +137,12 @@ describe('describeModule', () => {
 
     test('Unknown capability returns null', () => {
         expect(
-            describeModule({capability: 'Teleporter', attributes: [{label: 'Range', value: 99}]})
+            describeModule({key: 'teleporter', attributes: [{key: 'range', value: 99}]})
         ).toBeNull()
     })
 
     test('Empty attributes returns null', () => {
-        expect(describeModule({capability: 'Engine', attributes: []})).toBeNull()
+        expect(describeModule({key: 'engine', attributes: []})).toBeNull()
     })
 })
 
@@ -194,20 +195,20 @@ describe('describeModuleForItem', () => {
             itemType: 'module',
             attributes: [
                 {
-                    capability: 'Engine',
+                    key: 'engine',
                     attributes: [
-                        {label: 'Thrust', value: 700},
-                        {label: 'Drain', value: 45},
+                        {key: 'thrust', value: 700},
+                        {key: 'drain', value: 45},
                     ],
                 },
             ],
         } as unknown as ResolvedItem
         const viaItem = describeModuleForItem(r)
         const viaDirect = describeModule({
-            capability: 'Engine',
+            key: 'engine',
             attributes: [
-                {label: 'Thrust', value: 700},
-                {label: 'Drain', value: 45},
+                {key: 'thrust', value: 700},
+                {key: 'drain', value: 45},
             ],
         })
         expect(viaItem).toEqual(viaDirect)
@@ -220,10 +221,10 @@ describe('describeModuleForSlot', () => {
         expect(describeModuleForSlot(slot)).toBeNull()
     })
 
-    test('Slot missing name returns null', () => {
+    test('Slot missing capability key returns null', () => {
         const slot = {
             installed: true,
-            attributes: [{label: 'Thrust', value: 100}],
+            attributes: [{key: 'thrust', value: 100}],
         } as unknown as ResolvedModuleSlot
         expect(describeModuleForSlot(slot)).toBeNull()
     })
@@ -240,17 +241,18 @@ describe('describeModuleForSlot', () => {
         const slot = {
             installed: true,
             name: 'Engine',
+            capabilityKey: 'engine',
             attributes: [
-                {label: 'Thrust', value: 598},
-                {label: 'Drain', value: 47},
+                {key: 'thrust', value: 598},
+                {key: 'drain', value: 47},
             ],
         } as unknown as ResolvedModuleSlot
         const viaSlot = describeModuleForSlot(slot)
         const viaDirect = describeModule({
-            capability: 'Engine',
+            key: 'engine',
             attributes: [
-                {label: 'Thrust', value: 598},
-                {label: 'Drain', value: 47},
+                {key: 'thrust', value: 598},
+                {key: 'drain', value: 47},
             ],
         })
         expect(viaSlot).toEqual(viaDirect)
@@ -260,13 +262,13 @@ describe('describeModuleForSlot', () => {
         const slot = {
             installed: true,
             name: 'Cargo Hold',
-            capability: 'Storage',
-            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
+            capabilityKey: 'storage',
+            attributes: [{key: 'cargo-capacity', value: 60_000_000}],
         } as unknown as ResolvedModuleSlot
         const viaSlot = describeModuleForSlot(slot)
         const viaDirect = describeModule({
-            capability: 'Storage',
-            attributes: [{label: 'Cargo Capacity', value: 60_000_000}],
+            key: 'storage',
+            attributes: [{key: 'cargo-capacity', value: 60_000_000}],
         })
         expect(viaSlot).toEqual(viaDirect)
     })
@@ -291,23 +293,32 @@ describe('renderDescription', () => {
         expect(highlighted).toEqual(['1,025', '40'])
     })
 
-    test('translate hook swaps template via id', () => {
-        const translate = (id: string, fallback: string) =>
-            id === 'module.engine.description'
-                ? 'génère {thrust} de poussée tout en consommant {drain} énergie par distance'
-                : fallback
-        const spans = renderDescription(engineDesc, {translate})
-        const text = spans.map((s) => s.text).join('')
-        expect(text).toBe('génère 1,025 de poussée tout en consommant 40 énergie par distance')
+    test('registered translator swaps template via id', () => {
+        setTranslator({
+            text: (id, fallback) =>
+                id === 'module.engine.description'
+                    ? 'génère {thrust} de poussée tout en consommant {drain} énergie par distance'
+                    : fallback,
+        })
+        try {
+            const spans = renderDescription(engineDesc)
+            const text = spans.map((s) => s.text).join('')
+            expect(text).toBe('génère 1,025 de poussée tout en consommant 40 énergie par distance')
+        } finally {
+            setTranslator(undefined)
+        }
     })
 
-    test('translate hook fallback preserved when it returns the fallback arg', () => {
-        const translate = (_id: string, fallback: string) => fallback
-        const spans = renderDescription(engineDesc, {translate})
-        const text = spans.map((s) => s.text).join('')
-        expect(text).toBe(
-            'generates 1,025 thrust for travel while draining 40 energy per distance travelled'
-        )
+    test('registered number formatter applies to params', () => {
+        setTranslator({number: (n) => n.toLocaleString('de-DE')})
+        try {
+            const spans = renderDescription(engineDesc)
+            expect(spans.map((s) => s.text).join('')).toBe(
+                'generates 1.025 thrust for travel while draining 40 energy per distance travelled'
+            )
+        } finally {
+            setTranslator(undefined)
+        }
     })
 
     test('formatNumber hook swaps number formatting', () => {

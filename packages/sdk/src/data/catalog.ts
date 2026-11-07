@@ -1,6 +1,7 @@
 import {UInt16, type UInt16Type} from '@wharfkit/antelope'
 import items from './items.json'
 import {getItemFamily, itemFamilyKey} from './metadata'
+import {textRecord} from '../text/registry'
 import {
     CATEGORY_LABELS,
     type Item,
@@ -20,8 +21,12 @@ for (const raw of items as any[]) {
     itemsById.set(raw.id, {
         id: raw.id,
         family,
-        name: meta.name,
-        description: meta.description,
+        get name() {
+            return meta.name
+        },
+        get description() {
+            return meta.description
+        },
         color: meta.color,
         mass: raw.mass,
         type: raw.type,
@@ -99,12 +104,15 @@ export function resolveItemCategory(id: number): ResourceCategory | undefined {
     return item?.category
 }
 
-const TYPE_LABEL_BY_STRING: Record<ItemType, string> = {
-    resource: 'Resource',
-    component: 'Component',
-    module: 'Module',
-    entity: 'Entity',
-}
+const TYPE_LABEL_BY_STRING: Record<ItemType, string> = textRecord(
+    {
+        resource: 'Resource',
+        component: 'Component',
+        module: 'Module',
+        entity: 'Entity',
+    },
+    (type) => `type.${type}.label`
+)
 
 const TYPE_BY_INDEX: ItemType[] = ['resource', 'component', 'module', 'entity']
 

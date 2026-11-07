@@ -1,4 +1,5 @@
 import chartersJson from '../data/charters.json'
+import {textRecord} from '../text/registry'
 import {
     CHARTER_NONE,
     CIVIC_GRANT_LEVEL_GATE,
@@ -38,10 +39,13 @@ export function charterNode(nodeId: number): CharterNode | undefined {
 
 export type CharterIneligibility = 'already-taken' | 'prereq-missing'
 
-export const CHARTER_INELIGIBILITY_MESSAGES: Record<CharterIneligibility, string> = {
-    'already-taken': 'charter is already completed at this world',
-    'prereq-missing': 'charter prerequisites are not completed',
-}
+export const CHARTER_INELIGIBILITY_MESSAGES: Record<CharterIneligibility, string> = textRecord(
+    {
+        'already-taken': 'charter is already completed at this world',
+        'prereq-missing': 'charter prerequisites are not completed',
+    },
+    (reason) => `charter.ineligible.${reason}`
+)
 
 export interface BuiltCharter {
     nodeId: number

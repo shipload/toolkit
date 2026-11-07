@@ -1,4 +1,5 @@
-import type {ResourceCategory} from '../types'
+import {CATEGORY_LABELS, type ResourceCategory} from '../types'
+import {defineText, text} from '../text/registry'
 import {categoryColors} from './colors'
 
 export interface CategoryInfo {
@@ -9,7 +10,7 @@ export interface CategoryInfo {
     color: string
 }
 
-const categories: CategoryInfo[] = [
+const CATEGORIES: CategoryInfo[] = [
     {
         id: 'ore',
         name: 'Ore',
@@ -46,6 +47,23 @@ const categories: CategoryInfo[] = [
         color: categoryColors.biomass,
     },
 ]
+
+const categories: CategoryInfo[] = CATEGORIES.map((c) => {
+    defineText({[`category.${c.id}.description`]: c.description})
+    return {
+        id: c.id,
+        get name() {
+            return CATEGORY_LABELS[c.id]
+        },
+        get label() {
+            return CATEGORY_LABELS[c.id]
+        },
+        get description() {
+            return text(`category.${c.id}.description`)
+        },
+        color: c.color,
+    }
+})
 
 export function getCategoryInfo(): CategoryInfo[]
 export function getCategoryInfo(id: ResourceCategory): CategoryInfo | undefined

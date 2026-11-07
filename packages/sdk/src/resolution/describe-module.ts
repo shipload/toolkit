@@ -1,4 +1,5 @@
 import type {ResolvedItem, ResolvedModuleSlot} from './resolve-item'
+import {defineText, formatNumber as defaultFormatNumber, hasText, text} from '../text/registry'
 
 export interface TextSpan {
     text: string
@@ -6,8 +7,8 @@ export interface TextSpan {
 }
 
 export interface CapabilityInput {
-    capability: string
-    attributes: {label: string; value: number}[]
+    key: string
+    attributes: {key: string; value: number}[]
 }
 
 export interface ModuleDescription {
@@ -18,7 +19,6 @@ export interface ModuleDescription {
 }
 
 export interface RenderDescriptionOptions {
-    translate?: (id: string, fallback: string) => string
     formatNumber?: (n: number) => string
     formatParam?: (paramName: string, value: number, descId: string) => string | undefined
 }
@@ -28,7 +28,7 @@ interface TemplateSpec {
     template: string
     params: readonly [string, string][]
     highlightKeys: readonly string[]
-    derive?: Record<string, (get: (label: string) => number) => number>
+    derive?: Record<string, (get: (key: string) => number) => number>
 }
 
 const TEMPLATES: Record<string, TemplateSpec> = {
@@ -37,8 +37,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         template:
             'generates {thrust} thrust for travel while draining {drain} energy per distance travelled',
         params: [
-            ['thrust', 'Thrust'],
-            ['drain', 'Drain'],
+            ['thrust', 'thrust'],
+            ['drain', 'drain'],
         ],
         highlightKeys: ['thrust', 'drain'],
     },
@@ -47,8 +47,8 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         template:
             'holds {capacity} maximum energy and restores {recharge} energy each minute while recharging',
         params: [
-            ['capacity', 'Capacity'],
-            ['recharge', 'Recharge'],
+            ['capacity', 'capacity'],
+            ['recharge', 'recharge'],
         ],
         highlightKeys: ['capacity', 'recharge'],
     },
@@ -57,42 +57,42 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         template:
             'mines resources at {yield} yield to a max depth of {depth} while draining {drain} energy per minute',
         params: [
-            ['yield', 'Yield'],
-            ['depth', 'Depth'],
+            ['yield', 'yield'],
+            ['depth', 'depth'],
         ],
         highlightKeys: ['yield', 'depth', 'drain'],
         derive: {
-            drain: (get) => Math.round((get('Drain') / 10000) * 60 * 10) / 10,
+            drain: (get) => Math.round((get('drain') / 10000) * 60 * 10) / 10,
         },
     },
     loading: {
         id: 'module.loading.description',
         template: 'generates {thrust} thrust and launches loads that are {payload}% cargo',
-        params: [['thrust', 'Thrust']],
+        params: [['thrust', 'thrust']],
         highlightKeys: ['thrust', 'payload'],
         derive: {
-            payload: (get) => get('Payload') / 10,
+            payload: (get) => get('payload') / 10,
         },
     },
     crafting: {
         id: 'module.crafting.description',
         template: 'manufactures items at {speed} speed while draining {drain} energy per minute',
-        params: [['speed', 'Speed']],
+        params: [['speed', 'speed']],
         highlightKeys: ['speed', 'drain'],
         derive: {
-            drain: (get) => Math.round(((get('Drain') * get('Speed')) / 150000) * 60 * 10) / 10,
+            drain: (get) => Math.round(((get('drain') * get('speed')) / 150000) * 60 * 10) / 10,
         },
     },
     storage: {
         id: 'module.storage.description',
         template: 'adds {capacity} cargo capacity',
-        params: [['capacity', 'Cargo Capacity']],
+        params: [['capacity', 'cargo-capacity']],
         highlightKeys: ['capacity'],
     },
     energy: {
         id: 'module.energy-capacity.description',
         template: 'adds {capacity} energy capacity',
-        params: [['capacity', 'Energy Capacity']],
+        params: [['capacity', 'energy-capacity']],
         highlightKeys: ['capacity'],
     },
     hauling: {
@@ -100,26 +100,27 @@ const TEMPLATES: Record<string, TemplateSpec> = {
         template:
             'locks onto up to {capacity} targets at {efficiency} efficiency while draining {drain} energy per distance travelled per target',
         params: [
-            ['capacity', 'Capacity'],
-            ['efficiency', 'Efficiency'],
-            ['drain', 'Drain'],
+            ['capacity', 'capacity'],
+            ['efficiency', 'efficiency'],
+            ['drain', 'drain'],
         ],
         highlightKeys: ['capacity', 'efficiency', 'drain'],
     },
 }
 
+for (const spec of Object.values(TEMPLATES)) defineText({[spec.id]: spec.template})
+
 export function describeModule(input: CapabilityInput): ModuleDescription | null {
     if (!input.attributes || input.attributes.length === 0) return null
-    const key = input.capability.toLowerCase()
-    const spec = TEMPLATES[key]
+    const spec = TEMPLATES[input.key]
     if (!spec) return null
     const params: Record<string, number | string> = {}
-    for (const [paramName, attrLabel] of spec.params) {
-        const attr = input.attributes.find((a) => a.label === attrLabel)
+    for (const [paramName, attrKey] of spec.params) {
+        const attr = input.attributes.find((a) => a.key === attrKey)
         if (attr) params[paramName] = attr.value
     }
     if (spec.derive) {
-        const get = (label: string) => input.attributes.find((a) => a.label === label)?.value ?? 0
+        const get = (key: string) => input.attributes.find((a) => a.key === key)?.value ?? 0
         for (const [paramName, fn] of Object.entries(spec.derive)) {
             params[paramName] = fn(get)
         }
@@ -136,23 +137,21 @@ export function describeModuleForItem(resolved: ResolvedItem): ModuleDescription
     if (resolved.itemType !== 'module') return null
     const group = resolved.attributes?.[0]
     if (!group) return null
-    return describeModule({capability: group.capability, attributes: group.attributes})
+    return describeModule({key: group.key, attributes: group.attributes})
 }
 
 export function describeModuleForSlot(slot: ResolvedModuleSlot): ModuleDescription | null {
     if (!slot.installed || !slot.attributes) return null
-    const capability = slot.capability ?? slot.name
-    if (!capability) return null
-    return describeModule({capability, attributes: slot.attributes})
+    if (!slot.capabilityKey) return null
+    return describeModule({key: slot.capabilityKey, attributes: slot.attributes})
 }
 
 export function renderDescription(
     desc: ModuleDescription,
     options?: RenderDescriptionOptions
 ): TextSpan[] {
-    const translate = options?.translate ?? ((_id: string, fallback: string) => fallback)
-    const formatNumber = options?.formatNumber ?? ((n: number) => n.toLocaleString('en-US'))
-    const tpl = translate(desc.id, desc.template)
+    const formatNumber = options?.formatNumber ?? defaultFormatNumber
+    const tpl = hasText(desc.id) ? text(desc.id) : desc.template
 
     const spans: TextSpan[] = []
     const regex = /\{([A-Za-z_][A-Za-z0-9_]*)\}/g

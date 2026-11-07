@@ -657,7 +657,7 @@ function measureSetup(itemId: number): {goal: Goal; holdings: GoalHoldings} {
 }
 
 function nounKey(itemId: number): string {
-    return isShipItem(itemId) ? `hull:${itemId}` : getItem(itemId).name
+    return isShipItem(itemId) ? `hull:${itemId}` : getItem(itemId).family
 }
 
 export function measureGoal(itemId: number): GoalMeasure {

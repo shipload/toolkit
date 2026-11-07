@@ -9,6 +9,7 @@ import {
 } from '@wharfkit/antelope'
 import {ServerContract} from './contracts'
 import {COORD_MAX, COORD_MIN} from './coordinates/constants'
+import {compose, defineText, textRecord} from './text/registry'
 
 export const PRECISION = 10000
 export const MASS_UNITS_PER_TONNE = 10
@@ -183,29 +184,42 @@ export type ModuleType =
     | 'catcher'
     | 'aux'
 
-export const RESOURCE_TIER_ADJECTIVES: Record<number, string> = {
-    1: 'Crude',
-    2: 'Dense',
-    3: 'Pure',
-    4: 'Prime',
-    5: 'Pristine',
-    6: 'Radiant',
-    7: 'Exotic',
-    8: 'Mythic',
-    9: 'Cosmic',
-    10: 'Ascendant',
-}
+export const RESOURCE_TIER_ADJECTIVES: Record<number, string> = textRecord(
+    {
+        1: 'Crude',
+        2: 'Dense',
+        3: 'Pure',
+        4: 'Prime',
+        5: 'Pristine',
+        6: 'Radiant',
+        7: 'Exotic',
+        8: 'Mythic',
+        9: 'Cosmic',
+        10: 'Ascendant',
+    },
+    (tier) => `tier.resource.${tier}`
+)
 
 export const COMPONENT_TIER_PREFIXES: Record<number, string> = {}
 export const MODULE_TIER_PREFIXES: Record<number, string> = {}
 
-export const CATEGORY_LABELS: Record<ResourceCategory, string> = {
-    ore: 'Ore',
-    crystal: 'Crystal',
-    gas: 'Gas',
-    regolith: 'Regolith',
-    biomass: 'Biomass',
-}
+export const CATEGORY_LABELS: Record<ResourceCategory, string> = textRecord(
+    {
+        ore: 'Ore',
+        crystal: 'Crystal',
+        gas: 'Gas',
+        regolith: 'Regolith',
+        biomass: 'Biomass',
+    },
+    (category) => `category.${category}`
+)
+
+defineText({
+    'compose.tier-suffix': '{name} (T{tier})',
+    'compose.tier-tag': 'T{tier}',
+    'compose.resource-name': '{tier} {category}',
+    'category.resource': 'Resource',
+})
 
 export interface Item {
     id: number
@@ -221,9 +235,9 @@ export interface Item {
 }
 
 export function formatTier(tier: number): string {
-    return 'T' + tier
+    return compose('compose.tier-tag', {tier: String(tier)})
 }
 
 export function tierAdjective(tier: number): string {
-    return RESOURCE_TIER_ADJECTIVES[tier] ?? `T${tier}`
+    return RESOURCE_TIER_ADJECTIVES[tier] ?? formatTier(tier)
 }

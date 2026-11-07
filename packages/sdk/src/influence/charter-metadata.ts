@@ -13,27 +13,40 @@ import {
     CIVIC_STAT_TRANSFER_SPEED,
     CIVIC_WORKSHOP,
 } from './constants'
+import {compose, defineText, textFields, textRecord} from '../text/registry'
 
-const BUILDING_LABELS: Record<number, string> = {
-    [CIVIC_WORKSHOP]: 'Workshop',
-    [CIVIC_NEXUS]: 'Nexus',
-    [CIVIC_DOCK]: 'Construction Dock',
-    [CIVIC_DEPOT]: 'Depot',
-}
+const BUILDING_LABELS: Record<number, string> = textRecord(
+    {
+        [CIVIC_WORKSHOP]: 'Workshop',
+        [CIVIC_NEXUS]: 'Nexus',
+        [CIVIC_DOCK]: 'Construction Dock',
+        [CIVIC_DEPOT]: 'Depot',
+    },
+    (building) => `civic.building.${building}.label`
+)
 
-const STAT_LABELS: Record<number, string> = {
-    [CIVIC_STAT_CRAFT_SPEED]: 'crafting speed',
-    [CIVIC_STAT_BUILD_SPEED]: 'build speed',
-    [CIVIC_STAT_TRANSFER_SPEED]: 'transfer speed',
-    [CIVIC_STAT_STORAGE_CAPACITY]: 'storage capacity',
-}
+const STAT_LABELS: Record<number, string> = textRecord(
+    {
+        [CIVIC_STAT_CRAFT_SPEED]: 'crafting speed',
+        [CIVIC_STAT_BUILD_SPEED]: 'build speed',
+        [CIVIC_STAT_TRANSFER_SPEED]: 'transfer speed',
+        [CIVIC_STAT_STORAGE_CAPACITY]: 'storage capacity',
+    },
+    (stat) => `civic.stat.${stat}.label`
+)
+
+defineText({
+    'civic.building.unknown': 'Building {id}',
+    'civic.stat.unknown': 'Stat {id}',
+    'charter.unknown': 'Charter {id}',
+})
 
 export function civicBuildingLabel(building: number): string {
-    return BUILDING_LABELS[building] ?? `Building ${building}`
+    return BUILDING_LABELS[building] ?? compose('civic.building.unknown', {id: String(building)})
 }
 
 export function civicStatLabel(stat: number): string {
-    return STAT_LABELS[stat] ?? `Stat ${stat}`
+    return STAT_LABELS[stat] ?? compose('civic.stat.unknown', {id: String(stat)})
 }
 
 export interface CharterMeta {
@@ -41,7 +54,7 @@ export interface CharterMeta {
     summary: string
 }
 
-export const charterMetadata: Record<number, CharterMeta> = {
+const CHARTER_METADATA: Record<number, CharterMeta> = {
     10001: {
         name: 'Communal Workshop',
         summary: 'Shared crafting for anyone at this world',
@@ -124,8 +137,19 @@ export const charterMetadata: Record<number, CharterMeta> = {
     },
 }
 
+export const charterMetadata: Record<number, CharterMeta> = Object.fromEntries(
+    Object.entries(CHARTER_METADATA).map(([nodeId, meta]) => [
+        nodeId,
+        textFields(
+            {...meta},
+            {name: meta.name, summary: meta.summary},
+            (field) => `charter.${nodeId}.${field}`
+        ),
+    ])
+)
+
 export function charterName(nodeId: number): string {
-    return charterMetadata[nodeId]?.name ?? `Charter ${nodeId}`
+    return charterMetadata[nodeId]?.name ?? compose('charter.unknown', {id: String(nodeId)})
 }
 
 export function charterSummary(nodeId: number): string {

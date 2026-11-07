@@ -1,10 +1,11 @@
 import {UInt16, UInt64} from '@wharfkit/antelope'
 import type {UInt16Type, UInt64Type} from '@wharfkit/antelope'
 import type {ResourceCategory} from '../types'
-import {getItem, getModules} from '../data/catalog'
+import {getItem, getModules, typeLabel} from '../data/catalog'
 import {ENTITY_SHIP, getPackedEntityType} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
-import {entityMetadata, getItemFamily} from '../data/metadata'
+import {entityMetadata, getItemFamily, slotLabel} from '../data/metadata'
+import {attributeLabel, capabilityLabel} from '../data/capabilities'
 import type {ComponentProcess} from '../data/metadata'
 import {getComponentProcess} from '../data/component-process'
 import {
@@ -51,18 +52,27 @@ export interface ResolvedItemStat {
     inverted?: boolean
 }
 
+export interface ResolvedAttribute {
+    key: string
+    label: string
+    value: number
+}
+
 export interface ResolvedAttributeGroup {
+    key: string
     capability: string
-    attributes: {label: string; value: number}[]
+    attributes: ResolvedAttribute[]
 }
 
 export type ResolvedItemType = 'resource' | 'component' | 'module' | 'entity'
 
 export interface ResolvedModuleSlot {
     name?: string
+    capabilityKey?: string
     capability?: string
     installed: boolean
-    attributes?: {label: string; value: number}[]
+    attributes?: ResolvedAttribute[]
+    slotKey?: string
     slotLabel?: string
     slotType?: string
     outputPct?: number
@@ -166,96 +176,139 @@ function computeCapabilityGroup(
         case MODULE_ENGINE: {
             const caps = computeEngineCapabilities(stats, tier)
             return {
-                capability: 'Engine',
+                key: 'engine',
+                capability: capabilityLabel('engine'),
                 attributes: [
-                    {label: 'Thrust', value: caps.thrust},
-                    {label: 'Drain', value: caps.drain},
+                    {key: 'thrust', label: attributeLabel('thrust'), value: caps.thrust},
+                    {key: 'drain', label: attributeLabel('drain'), value: caps.drain},
                 ],
             }
         }
         case MODULE_GENERATOR: {
             const caps = computeGeneratorCapabilities(stats, tier)
             return {
-                capability: 'Generator',
+                key: 'generator',
+                capability: capabilityLabel('generator'),
                 attributes: [
-                    {label: 'Capacity', value: toWholeEnergy(caps.capacity)},
-                    {label: 'Recharge', value: toWholeEnergy(caps.recharge * 60)},
+                    {
+                        key: 'capacity',
+                        label: attributeLabel('capacity'),
+                        value: toWholeEnergy(caps.capacity),
+                    },
+                    {
+                        key: 'recharge',
+                        label: attributeLabel('recharge'),
+                        value: toWholeEnergy(caps.recharge * 60),
+                    },
                 ],
             }
         }
         case MODULE_GATHERER: {
             const caps = computeGathererCapabilities(stats, tier)
             return {
-                capability: 'Gatherer',
+                key: 'gatherer',
+                capability: capabilityLabel('gatherer'),
                 attributes: [
-                    {label: 'Yield', value: caps.yield},
-                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
-                    {label: 'Depth', value: caps.depth},
+                    {key: 'yield', label: attributeLabel('yield'), value: caps.yield},
+                    {
+                        key: 'drain',
+                        label: attributeLabel('drain'),
+                        value: toWholeEnergy(caps.drain),
+                    },
+                    {key: 'depth', label: attributeLabel('depth'), value: caps.depth},
                 ],
             }
         }
         case MODULE_LOADER: {
             const caps = computeLoaderCapabilities(stats, tier)
             return {
-                capability: 'Loading',
+                key: 'loading',
+                capability: capabilityLabel('loading'),
                 attributes: [
-                    {label: 'Payload', value: caps.payload},
-                    {label: 'Thrust', value: caps.thrust},
-                    {label: 'Quantity', value: caps.quantity},
+                    {key: 'payload', label: attributeLabel('payload'), value: caps.payload},
+                    {key: 'thrust', label: attributeLabel('thrust'), value: caps.thrust},
+                    {key: 'quantity', label: attributeLabel('quantity'), value: caps.quantity},
                 ],
             }
         }
         case MODULE_CRAFTER: {
             const caps = computeCrafterCapabilities(stats, tier)
             return {
-                capability: 'Crafting',
+                key: 'crafting',
+                capability: capabilityLabel('crafting'),
                 attributes: [
-                    {label: 'Speed', value: caps.speed},
-                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
+                    {key: 'speed', label: attributeLabel('speed'), value: caps.speed},
+                    {
+                        key: 'drain',
+                        label: attributeLabel('drain'),
+                        value: toWholeEnergy(caps.drain),
+                    },
                 ],
             }
         }
         case MODULE_BUILDER: {
             const caps = computeBuilderCapabilities(stats, tier)
             return {
-                capability: 'Build',
+                key: 'build',
+                capability: capabilityLabel('build'),
                 attributes: [
-                    {label: 'Speed', value: caps.speed},
-                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
+                    {key: 'speed', label: attributeLabel('speed'), value: caps.speed},
+                    {
+                        key: 'drain',
+                        label: attributeLabel('drain'),
+                        value: toWholeEnergy(caps.drain),
+                    },
                 ],
             }
         }
         case MODULE_HAULER: {
             const caps = computeHaulerCapabilities(stats, tier)
             return {
-                capability: 'Hauling',
+                key: 'hauling',
+                capability: capabilityLabel('hauling'),
                 attributes: [
-                    {label: 'Capacity', value: caps.capacity},
-                    {label: 'Efficiency', value: caps.efficiency},
-                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
+                    {key: 'capacity', label: attributeLabel('capacity'), value: caps.capacity},
+                    {
+                        key: 'efficiency',
+                        label: attributeLabel('efficiency'),
+                        value: caps.efficiency,
+                    },
+                    {
+                        key: 'drain',
+                        label: attributeLabel('drain'),
+                        value: toWholeEnergy(caps.drain),
+                    },
                 ],
             }
         }
         case MODULE_STORAGE: {
             const caps = computeStorageCapabilities(stats, tier)
             return {
-                capability: 'Storage',
+                key: 'storage',
+                capability: capabilityLabel('storage'),
                 attributes: [
                     {
-                        label: 'Cargo Capacity',
+                        key: 'cargo-capacity',
+                        label: attributeLabel('cargo-capacity'),
                         value: applySlotMultiplierUint32(caps.capacity, outputPct),
                     },
-                    {label: 'Drain', value: toWholeEnergy(caps.drain)},
+                    {
+                        key: 'drain',
+                        label: attributeLabel('drain'),
+                        value: toWholeEnergy(caps.drain),
+                    },
                 ],
             }
         }
         case MODULE_BATTERY: {
             const caps = computeBatteryCapabilities(stats, tier)
             return {
-                capability: 'Energy',
+                key: 'energy',
+                capability: capabilityLabel('energy'),
                 attributes: [
                     {
-                        label: 'Energy Capacity',
+                        key: 'energy-capacity',
+                        label: attributeLabel('energy-capacity'),
                         value: toWholeEnergy(applySlotMultiplierUint32(caps.capacity, outputPct)),
                     },
                 ],
@@ -342,20 +395,24 @@ function resolveEntity(
         const hullCaps = hullCapsForEntity(id, decoded, bigStats)
         attributes = [
             {
-                capability: 'Hull',
+                key: 'hull',
+                capability: capabilityLabel('hull'),
                 attributes: [
-                    {label: 'Mass', value: hullCaps.hullmass},
-                    {label: 'Capacity', value: hullCaps.capacity},
+                    {key: 'mass', label: attributeLabel('mass'), value: hullCaps.hullmass},
+                    {key: 'capacity', label: attributeLabel('capacity'), value: hullCaps.capacity},
                 ],
             },
         ]
     }
 
     if (layout && layout.slots.length > 0) {
-        const slotLabels = entityMetadata[id]?.moduleSlotLabels ?? []
+        const slotKeys = entityMetadata[id]?.moduleSlots ?? []
         moduleSlots = layout.slots.map((slot, i) => {
+            const slotKey = slotKeys[i]
+            const slotName = slotKey ? slotLabel(slotKey) : slot.type
             const slotInfo = {
-                slotLabel: slotLabels[i] ?? slot.type,
+                slotKey,
+                slotLabel: slotName,
                 slotType: slot.type,
                 outputPct: slot.outputPct,
                 maxTier: slot.maxTier,
@@ -366,18 +423,19 @@ function resolveEntity(
                 const modStats = BigInt(mod.installed.stats.toString())
                 const decodedStats = decodeModuleStats(modItemId, modStats)
                 const modType = getModuleCapabilityType(modItemId)
-                let modName = 'Module'
+                let modName = typeLabel('module')
                 let modTier = 1
                 try {
                     const modItem = getItem(modItemId)
                     modName = modItem.name
                     modTier = modItem.tier
                 } catch {
-                    modName = getItemFamily(modItemId)?.name ?? 'Module'
+                    modName = getItemFamily(modItemId)?.name ?? typeLabel('module')
                 }
                 const group = computeCapabilityGroup(modType, decodedStats, modTier, slot.outputPct)
                 return {
                     name: modName,
+                    capabilityKey: group?.key,
                     capability: group?.capability,
                     installed: true,
                     attributes: group?.attributes,
@@ -385,7 +443,7 @@ function resolveEntity(
                 }
             }
             return {
-                name: slotLabels[i] ?? slot.type,
+                name: slotName,
                 installed: false,
                 ...slotInfo,
             }

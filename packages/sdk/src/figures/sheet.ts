@@ -14,7 +14,7 @@ import {
     type ComputedCapabilities,
     type ModuleCapabilities,
 } from '../derivation/capabilities'
-import {moduleDisplayName} from '../nft/description'
+import {compose, defineText} from '../text/registry'
 import type {ServerContract} from '../contracts'
 import {MASS_UNITS_PER_TONNE} from '../types'
 import {
@@ -24,7 +24,7 @@ import {
     milliToEnergy,
     travelDrainPerLy,
 } from './reference'
-import {formatDistance, formatFixed} from './format'
+import {formatDistance, formatFixed, withUnit} from './format'
 import {
     countFigure,
     craftDrainFigure,
@@ -35,6 +35,7 @@ import {
     handlingFigure,
     inputSpeedFigure,
     jumpFigure,
+    makeFigure,
     rechargeFigure,
     speedFigure,
     tonnesFigure,
@@ -45,6 +46,7 @@ import {
 } from './module'
 import {
     FIGURE_SECTION_LABELS,
+    figureLabel,
     type EntitySheet,
     type Figure,
     type FigureLine,
@@ -55,6 +57,11 @@ import {
     type SheetSectionDiff,
     type WorkerGroup,
 } from './types'
+
+defineText({
+    'figure.range-floor.note':
+        'Every ship reaches at least {distance} on a full charge. This ship needs {gap} less drain to fly farther.',
+})
 
 export const SHEET_SECTION_ORDER: readonly FigureSectionKey[] = [
     'movement',
@@ -196,7 +203,7 @@ function contextFor(
 
 function line(f: FittedModule, figure: Figure): FigureLine {
     return {
-        label: moduleDisplayName(f.module.itemId),
+        label: getItem(f.module.itemId).name,
         value: figure.value,
         unit: figure.unit,
         text: figure.text,
@@ -206,21 +213,14 @@ function line(f: FittedModule, figure: Figure): FigureLine {
     }
 }
 
-function plainLine(label: string, figure: Figure): FigureLine {
-    return {label, value: figure.value, unit: figure.unit, text: figure.text}
-}
-
-function numberPart(figure: Figure): string {
-    const suffix = figure.unit ? ` ${figure.unit}` : ''
-    return suffix && figure.text.endsWith(suffix)
-        ? figure.text.slice(0, -suffix.length)
-        : figure.text
+function plainLine(figure: Figure): FigureLine {
+    return {label: figure.label, value: figure.value, unit: figure.unit, text: figure.text}
 }
 
 export function collapseWorkers(figures: Figure[]): WorkerGroup[] {
     const groups: WorkerGroup[] = []
     for (const figure of figures) {
-        const text = numberPart(figure)
+        const text = figure.number
         const group = groups.find((g) => g.text === text)
         if (group) group.count += 1
         else groups.push({count: 1, value: figure.value, text})
@@ -229,23 +229,25 @@ export function collapseWorkers(figures: Figure[]): WorkerGroup[] {
 }
 
 export function formatWorkerGroups(groups: WorkerGroup[], unit: string): string {
-    const body = groups.map((g) => (g.count > 1 ? `${g.count} × ${g.text}` : g.text)).join(' + ')
-    return unit ? `${body} ${unit}` : body
+    const body = groups
+        .map((g) =>
+            g.count > 1
+                ? compose('compose.times', {count: formatFixed(g.count), value: g.text})
+                : g.text
+        )
+        .reduce((a, b) => compose('compose.plus', {a, b}))
+    return withUnit(unit, body)
 }
 
-function workerRow(
-    key: string,
-    label: string,
-    figures: Figure[],
-    fitted: FittedModule[]
-): SheetRow {
+function workerRow(key: string, figures: Figure[], fitted: FittedModule[]): SheetRow {
     const groups = collapseWorkers(figures)
     const unit = figures[0]?.unit ?? ''
     return {
         key,
-        label,
+        label: figureLabel(key),
         value: Math.max(0, ...groups.map((g) => g.value)),
         unit,
+        number: formatWorkerGroups(groups, ''),
         text: formatWorkerGroups(groups, unit),
         headline: false,
         workers: groups,
@@ -278,23 +280,18 @@ function movementSection(ctx: SheetContext): SheetRow[] {
     const engines = ctx.caps.engines
     if (!engines) return []
     const current = totalMass(ctx, ctx.cargoMass)
-    const empty = speedFigure(
-        'emptyHold',
-        'Empty hold',
-        cruiseSpeedLyPerHour(engines.thrust, totalMass(ctx, 0))
-    )
+    const empty = speedFigure('emptyHold', cruiseSpeedLyPerHour(engines.thrust, totalMass(ctx, 0)))
     const full = speedFigure(
         'fullHold',
-        'Full hold',
         cruiseSpeedLyPerHour(engines.thrust, totalMass(ctx, ctx.caps.capacity))
     )
     const perEngine = ofKind(ctx.fitted, 'engine').map((f) =>
-        line(f, speedFigure('speed', 'Speed', cruiseSpeedLyPerHour(f.caps.thrust, current)))
+        line(f, speedFigure('speed', cruiseSpeedLyPerHour(f.caps.thrust, current)))
     )
     return [
-        row(speedFigure('speed', 'Speed', cruiseSpeedLyPerHour(engines.thrust, current)), [
-            plainLine(empty.label, empty),
-            plainLine(full.label, full),
+        row(speedFigure('speed', cruiseSpeedLyPerHour(engines.thrust, current)), [
+            plainLine(empty),
+            plainLine(full),
             ...perEngine,
         ]),
     ]
@@ -305,18 +302,20 @@ function massSection(ctx: SheetContext): SheetRow[] {
     const modules = ctx.caps.hullmass - ctx.hullBase.hullmass
     const workers = workerMass(ctx)
     const lines = [
-        plainLine('Hull', tonnesFigure('hull', 'Hull', ctx.hullBase.hullmass)),
-        plainLine('Modules', tonnesFigure('modules', 'Modules', modules)),
-        plainLine('Cargo', tonnesFigure('cargo', 'Cargo', ctx.cargoMass)),
+        plainLine(tonnesFigure('hull', ctx.hullBase.hullmass)),
+        plainLine(tonnesFigure('modules', modules)),
+        plainLine(tonnesFigure('cargo', ctx.cargoMass)),
     ]
-    if (workers > 0)
-        lines.push(plainLine('Shuttles', tonnesFigure('shuttles', 'Shuttles', workers)))
-    return [row(tonnesFigure('total', 'Total', totalMass(ctx, ctx.cargoMass)), lines)]
+    if (workers > 0) lines.push(plainLine(tonnesFigure('shuttles', workers)))
+    return [row(tonnesFigure('total', totalMass(ctx, ctx.cargoMass)), lines)]
 }
 
 function rangeFloorNote(floorReductionMilli: number): string {
     const gap = Math.max(1, Math.ceil(travelDrainPerLy(-floorReductionMilli)))
-    return `Every ship reaches at least ${formatDistance(RANGE_FLOOR_LY)} on a full charge. This ship needs ${gap} energy/ly less drain to fly farther.`
+    return compose('figure.range-floor.note', {
+        distance: formatDistance(RANGE_FLOOR_LY),
+        gap: withUnit('energy/ly', formatFixed(gap)),
+    })
 }
 
 function energySection(ctx: SheetContext): SheetRow[] {
@@ -329,43 +328,36 @@ function energySection(ctx: SheetContext): SheetRow[] {
     if (generator) {
         const capacityLines = ctx.fitted.flatMap((f) =>
             f.caps.kind === 'generator' || f.caps.kind === 'battery'
-                ? [line(f, energyFigure('capacity', 'Capacity', f.caps.capacity, true))]
+                ? [line(f, energyFigure('capacity', f.caps.capacity, true))]
                 : []
         )
-        rows.push(row(energyFigure('capacity', 'Capacity', generator.capacity), capacityLines))
+        rows.push(row(energyFigure('capacity', generator.capacity), capacityLines))
         rows.push(
             row(
-                rechargeFigure('recharge', 'Recharge', generator.recharge),
+                rechargeFigure('recharge', generator.recharge),
                 ofKind(ctx.fitted, 'generator').map((f) =>
-                    line(f, rechargeFigure('recharge', 'Recharge', f.caps.recharge, true))
+                    line(f, rechargeFigure('recharge', f.caps.recharge, true))
                 )
             )
         )
         if (travelDrain && travelDrain.total > 0) {
-            const range = distanceFigure('range', 'Range', generator.capacity / travelDrain.total)
+            const range = distanceFigure('range', generator.capacity / travelDrain.total)
             rows.push(
                 row(floorReduction < 0 ? {...range, note: rangeFloorNote(floorReduction)} : range)
             )
         }
     }
     if (travelDrain) {
-        const lines: FigureLine[] = [
-            plainLine('Engines', travelDrainFigure('engines', 'Engines', travelDrain.engine)),
-        ]
+        const lines: FigureLine[] = [plainLine(travelDrainFigure('engines', travelDrain.engine))]
         for (const f of ctx.fitted) {
             if (f.caps.kind === 'storage' || f.caps.kind === 'hauler') {
-                lines.push(line(f, travelDrainFigure('drain', 'Drain', f.caps.drain)))
+                lines.push(line(f, travelDrainFigure('drain', f.caps.drain)))
             }
         }
         if (floorReduction < 0) {
-            lines.push(
-                plainLine(
-                    'Range floor',
-                    travelDrainFigure('rangeFloor', 'Range floor', floorReduction)
-                )
-            )
+            lines.push(plainLine(travelDrainFigure('rangeFloor', floorReduction)))
         }
-        rows.push(row(travelDrainFigure('travelDrain', 'Travel drain', travelDrain.total), lines))
+        rows.push(row(travelDrainFigure('travelDrain', travelDrain.total), lines))
     }
     return rows
 }
@@ -387,32 +379,23 @@ function gatheringSection(ctx: SheetContext): SheetRow[] {
     return [
         workerRow(
             'yield',
-            'Yield',
-            bays.map((f) => yieldFigure('yield', 'Yield', f.caps.yield)),
+            bays.map((f) => yieldFigure('yield', f.caps.yield)),
             bays
         ),
         workerRow(
             'depth',
-            'Depth',
-            bays.map((f) => depthFigure('depth', 'Depth', f.caps.depth)),
+            bays.map((f) => depthFigure('depth', f.caps.depth)),
             bays
         ),
         workerRow(
             'drain',
-            'Drain',
-            bays.map((f) => gatherDrainFigure('drain', 'Drain', f.caps.drain)),
+            bays.map((f) => gatherDrainFigure('drain', f.caps.drain)),
             bays
         ),
         ...perChargeRow(ctx, (capacity) => {
             if (drainPerMinute <= 0) return undefined
             const minutes = milliToEnergy(capacity) / drainPerMinute
-            return {
-                key: 'perCharge',
-                label: 'Per charge',
-                value: minutes,
-                unit: 'min',
-                text: `${formatFixed(minutes)} min`,
-            }
+            return makeFigure('perCharge', minutes, 'min', formatFixed(minutes))
         }),
     ]
 }
@@ -428,20 +411,18 @@ function workSection(ctx: SheetContext, kind: 'crafter' | 'builder'): SheetRow[]
     return [
         workerRow(
             'speed',
-            'Speed',
-            workers.map((f) => inputSpeedFigure('speed', 'Speed', f.caps.speed)),
+            workers.map((f) => inputSpeedFigure('speed', f.caps.speed)),
             workers
         ),
         workerRow(
             'drain',
-            'Drain',
-            workers.map((f) => craftDrainFigure('drain', 'Drain', f.caps.drain)),
+            workers.map((f) => craftDrainFigure('drain', f.caps.drain)),
             workers
         ),
         ...perChargeRow(ctx, (capacity) => {
             if (drainRate <= 0) return undefined
             const tonnes = (milliToEnergy(capacity) * 1000 * speedSum) / drainRate
-            return tonnesFigure('perCharge', 'Per charge', tonnes * MASS_UNITS_PER_TONNE)
+            return tonnesFigure('perCharge', tonnes * MASS_UNITS_PER_TONNE)
         }),
     ]
 }
@@ -452,11 +433,10 @@ function shuttlingSection(ctx: SheetContext): SheetRow[] {
     return [
         workerRow(
             'transfer',
-            'Transfer',
-            bays.map((f) => transferFigure('transfer', 'Transfer', f.caps.thrust, f.caps.payload)),
+            bays.map((f) => transferFigure('transfer', f.caps.thrust, f.caps.payload)),
             bays
         ),
-        row(countFigure('shuttles', 'Shuttles', bays.length)),
+        row(countFigure('shuttles', bays.length)),
     ]
 }
 
@@ -466,17 +446,14 @@ function towingSection(ctx: SheetContext): SheetRow[] {
     const beams = ofKind(ctx.fitted, 'hauler')
     return [
         row(
-            towsFigure('tows', 'Tows', hauler.capacityByTier),
+            towsFigure('tows', hauler.capacityByTier),
             beams.map((f) =>
-                line(
-                    f,
-                    towsFigure('tows', 'Tows', [{tier: f.caps.tier, capacity: f.caps.capacity}])
-                )
+                line(f, towsFigure('tows', [{tier: f.caps.tier, capacity: f.caps.capacity}]))
             )
         ),
         row(
-            handlingFigure('handling', 'Handling', hauler.efficiency),
-            beams.map((f) => line(f, handlingFigure('handling', 'Handling', f.caps.efficiency)))
+            handlingFigure('handling', hauler.efficiency),
+            beams.map((f) => line(f, handlingFigure('handling', f.caps.efficiency)))
         ),
     ]
 }
@@ -486,10 +463,8 @@ function warpSection(ctx: SheetContext): SheetRow[] {
     if (!warp) return []
     return [
         row(
-            jumpFigure('jump', 'Jump distance', warp.range),
-            ofKind(ctx.fitted, 'warp').map((f) =>
-                line(f, distanceFigure('jump', 'Jump distance', f.caps.range))
-            )
+            jumpFigure('jump', warp.range),
+            ofKind(ctx.fitted, 'warp').map((f) => line(f, distanceFigure('jump', f.caps.range)))
         ),
     ]
 }
@@ -498,12 +473,12 @@ function storageSection(ctx: SheetContext): SheetRow[] {
     if (ctx.caps.capacity <= 0) return []
     const lines: FigureLine[] = []
     if (ctx.hullBase.capacity > 0) {
-        lines.push(plainLine('Hull', tonnesFigure('hull', 'Hull', ctx.hullBase.capacity)))
+        lines.push(plainLine(tonnesFigure('hull', ctx.hullBase.capacity)))
     }
     for (const f of ofKind(ctx.fitted, 'storage')) {
-        lines.push(line(f, tonnesFigure('capacity', 'Capacity', f.caps.capacity, true)))
+        lines.push(line(f, tonnesFigure('capacity', f.caps.capacity, true)))
     }
-    return [row(tonnesFigure('capacity', 'Capacity', ctx.caps.capacity), lines)]
+    return [row(tonnesFigure('capacity', ctx.caps.capacity), lines)]
 }
 
 const SECTION_BUILDERS: Record<string, (ctx: SheetContext) => SheetRow[]> = {

@@ -1,4 +1,5 @@
 import type {NameType} from '@wharfkit/antelope'
+import {textRecord} from '../text/registry'
 import type {ServerContract} from '../contracts'
 import {isCivicEntity} from '../influence/civic'
 import {HoldKind, TaskType} from '../types'
@@ -423,14 +424,17 @@ export function pickupsInFlight(tasks: OrderedTask[], building?: number): Pickup
         }))
 }
 
-const JOB_STATUS_LABELS: Record<JobStatus, string> = {
-    booked: 'Booked',
-    dropping: 'Dropping off',
-    queued: 'Queued',
-    crafting: 'Crafting',
-    ready: 'Ready for Pickup',
-    pickingup: 'Picking up',
-}
+const JOB_STATUS_LABELS: Record<JobStatus, string> = textRecord(
+    {
+        booked: 'Booked',
+        dropping: 'Dropping off',
+        queued: 'Queued',
+        crafting: 'Crafting',
+        ready: 'Ready for Pickup',
+        pickingup: 'Picking up',
+    },
+    (status) => `job.status.${status}`
+)
 
 export function jobStatusLabel(status: JobStatus): string {
     return JOB_STATUS_LABELS[status]

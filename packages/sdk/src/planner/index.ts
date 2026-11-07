@@ -1,4 +1,5 @@
 import type {GathererStats} from '../types/capabilities'
+import {compose, defineText, text} from '../text/registry'
 import type {ServerContract} from '../contracts'
 import {calc_gather_duration, calc_gather_energy} from '../capabilities/gathering'
 import {calc_rechargetime} from '../travel/travel'
@@ -6,6 +7,11 @@ import {projectRemainingAt, type Projectable} from '../scheduling/projection'
 import {laneKeyForModule, placedStart, selectGatherLane} from '../scheduling/lanes'
 import {LANE_BARRIER} from '../scheduling/schedule'
 import {TaskType} from '../types'
+
+defineText({
+    'planner.warning.limpets-out-of-reach': "{blocked} of {total} limpets can't reach this depth",
+    'planner.warning.gather-exceeds-charge': 'a single gather cannot fit within one full charge',
+})
 
 export type GatherLane = ServerContract.Types.gatherer_lane
 
@@ -227,7 +233,10 @@ function planGather(
     const blocked = entity.gatherer_lanes.length - reaching.length
     if (blocked > 0) {
         warnings.push(
-            `${blocked} of ${entity.gatherer_lanes.length} limpets can't reach this depth`
+            compose('planner.warning.limpets-out-of-reach', {
+                blocked,
+                total: entity.gatherer_lanes.length,
+            })
         )
     }
 
@@ -288,7 +297,7 @@ function planGather(
     while (remaining > 0 && guard++ < MAX_CYCLES) {
         let batch = maxQtyForCharge(reaching, remaining, capacity, stratum, itemMass, richness)
         if (batch <= 0) {
-            warnings.push('a single gather cannot fit within one full charge')
+            warnings.push(text('planner.warning.gather-exceeds-charge'))
             break
         }
 

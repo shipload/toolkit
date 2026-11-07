@@ -1,4 +1,5 @@
 import type {ResourceCategory} from '../types'
+import {textFields} from '../text/registry'
 
 export interface StatDefinition {
     key: string
@@ -114,12 +115,22 @@ const BIOMASS_STATS: StatDefinition[] = [
     },
 ]
 
+function translated(defs: StatDefinition[]): StatDefinition[] {
+    return defs.map((def) =>
+        textFields(
+            {...def},
+            {label: def.label, abbreviation: def.abbreviation, purpose: def.purpose},
+            (field) => `stat.${def.key}.${field}`
+        )
+    )
+}
+
 const STAT_MAP: Record<ResourceCategory, StatDefinition[]> = {
-    ore: ORE_STATS,
-    crystal: CRYSTAL_STATS,
-    gas: GAS_STATS,
-    regolith: REGOLITH_STATS,
-    biomass: BIOMASS_STATS,
+    ore: translated(ORE_STATS),
+    crystal: translated(CRYSTAL_STATS),
+    gas: translated(GAS_STATS),
+    regolith: translated(REGOLITH_STATS),
+    biomass: translated(BIOMASS_STATS),
 }
 
 export function getStatDefinitions(category: ResourceCategory): StatDefinition[] {
