@@ -333,6 +333,108 @@
       "kind": "asmblyard",
       "displayLabel": "Assembly Yard",
       "baseCapacityFn": "structure"
+    },
+    {
+      "itemId": 12202,
+      "kind": "warehouse",
+      "displayLabel": "",
+      "baseCapacityFn": "warehouse"
+    },
+    {
+      "itemId": 12203,
+      "kind": "extractor",
+      "displayLabel": "",
+      "baseCapacityFn": "structure"
+    },
+    {
+      "itemId": 12204,
+      "kind": "factory",
+      "displayLabel": "",
+      "baseCapacityFn": "structure"
+    },
+    {
+      "itemId": 12207,
+      "kind": "hub",
+      "displayLabel": "",
+      "baseCapacityFn": ""
+    },
+    {
+      "itemId": 12209,
+      "kind": "asmblyard",
+      "displayLabel": "Assembly Yard",
+      "baseCapacityFn": "structure"
+    },
+    {
+      "itemId": 12212,
+      "kind": "ship",
+      "displayLabel": "Prospector",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12214,
+      "kind": "ship",
+      "displayLabel": "Dredger",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12215,
+      "kind": "ship",
+      "displayLabel": "Tender",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12217,
+      "kind": "ship",
+      "displayLabel": "Wright",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12219,
+      "kind": "ship",
+      "displayLabel": "Tug",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12221,
+      "kind": "ship",
+      "displayLabel": "Porter",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12223,
+      "kind": "ship",
+      "displayLabel": "Smith",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12225,
+      "kind": "ship",
+      "displayLabel": "Trawler",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12226,
+      "kind": "ship",
+      "displayLabel": "Steward",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12227,
+      "kind": "ship",
+      "displayLabel": "Wrangler",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12228,
+      "kind": "ship",
+      "displayLabel": "Artisan",
+      "baseCapacityFn": "ship"
+    },
+    {
+      "itemId": 12229,
+      "kind": "ship",
+      "displayLabel": "Outfitter",
+      "baseCapacityFn": "ship"
     }
   ]
 }

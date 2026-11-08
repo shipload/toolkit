@@ -11,6 +11,8 @@ import {
     ITEM_PROSPECTOR_T2A_PACKED,
     ITEM_PROSPECTOR_T2B_PACKED,
     ITEM_DREDGER_T2A_PACKED,
+    ITEM_DREDGER_T3A_PACKED,
+    ITEM_TENDER_T3A_PACKED,
     ITEM_STEWARD_T2A_PACKED,
     ITEM_WRANGLER_T2A_PACKED,
     ITEM_ARTISAN_T2A_PACKED,
@@ -76,6 +78,15 @@ test('a convergent mutation is one recipe reached from each donor', () => {
     expect(fromTender).toBe(fromTug!)
 })
 
+test('eligibleUpgrades takes a T2 Second-step hull to its own T3 tier entry only', () => {
+    expect(eligibleUpgrades(ITEM_TENDER_T2B_PACKED).map((r) => r.outputItemId)).toEqual([
+        ITEM_TENDER_T3A_PACKED,
+    ])
+    expect(eligibleUpgrades(ITEM_DREDGER_T2A_PACKED).map((r) => r.outputItemId)).toEqual([
+        ITEM_DREDGER_T3A_PACKED,
+    ])
+})
+
 test('eligibleUpgrades is empty for an item with no upgrade edges', () => {
-    expect(eligibleUpgrades(ITEM_TENDER_T2B_PACKED)).toEqual([])
+    expect(eligibleUpgrades(ITEM_TENDER_T3A_PACKED)).toEqual([])
 })

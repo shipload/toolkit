@@ -4,6 +4,7 @@ import {getRecipe} from './recipes-runtime'
 import {EntityClass, getKindMeta, getPackedEntityType} from './kind-registry'
 import items from './items.json'
 import {itemFamilies, itemFamilyKey} from './metadata'
+import {isPlotBuildable} from '../derivation/build-methods'
 
 describe('itemTypeIndex', () => {
     test('agrees with typeLabel for every item in the catalog', () => {
@@ -109,9 +110,20 @@ describe('structure recipes', () => {
         )
     }
 
-    test('take no packed entity, so a plot deposit never names a sequence id', () => {
+    test('that take a packed donor are upgrades, never plot targets', () => {
+        const upgrades = getItems().filter(
+            (item) =>
+                item.type === 'entity' &&
+                isStructure(item.id) &&
+                getRecipe(item.id)?.sourceSubclasses?.length
+        )
+        expect(upgrades.length).toBeGreaterThan(0)
+        for (const output of upgrades) expect(isPlotBuildable(output.id)).toBe(false)
+    })
+
+    test('that a plot can build take no packed entity, so a plot deposit never names a sequence id', () => {
         const structures = getItems().filter(
-            (item) => item.type === 'entity' && isStructure(item.id) && getRecipe(item.id)
+            (item) => item.type === 'entity' && isPlotBuildable(item.id)
         )
         expect(structures.length).toBeGreaterThan(0)
         for (const output of structures) {

@@ -2112,6 +2112,114 @@
     {
       "itemId": 11229,
       "schema": "ship.v1"
+    },
+    {
+      "itemId": 12001,
+      "schema": "plate.v1"
+    },
+    {
+      "itemId": 12002,
+      "schema": "frame.v1"
+    },
+    {
+      "itemId": 12003,
+      "schema": "plasma.v1"
+    },
+    {
+      "itemId": 12004,
+      "schema": "resonator.v1"
+    },
+    {
+      "itemId": 12005,
+      "schema": "beam.v1"
+    },
+    {
+      "itemId": 12006,
+      "schema": "sensor.v1"
+    },
+    {
+      "itemId": 12007,
+      "schema": "polymer.v1"
+    },
+    {
+      "itemId": 12008,
+      "schema": "ceramic.v1"
+    },
+    {
+      "itemId": 12009,
+      "schema": "reactor.v1"
+    },
+    {
+      "itemId": 12010,
+      "schema": "resin.v1"
+    },
+    {
+      "itemId": 12202,
+      "schema": "warehouse.v1"
+    },
+    {
+      "itemId": 12203,
+      "schema": "miningrig.v1"
+    },
+    {
+      "itemId": 12204,
+      "schema": "factory.v1"
+    },
+    {
+      "itemId": 12207,
+      "schema": "station.v1"
+    },
+    {
+      "itemId": 12209,
+      "schema": "asmblyard.v1"
+    },
+    {
+      "itemId": 12212,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12214,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12215,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12217,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12219,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12221,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12223,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12225,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12226,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12227,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12228,
+      "schema": "ship.v1"
+    },
+    {
+      "itemId": 12229,
+      "schema": "ship.v1"
     }
   ]
 }

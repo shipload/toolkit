@@ -65,6 +65,7 @@ const PROSPECTOR_T1 = 10211
 const PROSPECTOR_T2A = 11212
 const PROSPECTOR_T2B = 11213
 const DREDGER = 11214
+const DREDGER_T3 = 12214
 const TRAWLER = 11225
 const SHIP_T1 = 10201
 const SMITH_T1 = 10218
@@ -419,15 +420,20 @@ describe('GM-08 gear factor', () => {
         expect(equalRolls).toBeLessThan(2.2)
     })
 
-    test('WP-GM-08-04 the Dredger leads every craftable gatherer hull on a 10-tile loop', () => {
-        for (const stat of [MEAN_STAT, GOOD_STAT]) {
-            const craftable = gathererShipTemplates()
-                .filter((t) => t.itemId !== SHIP_T1)
-                .map((t) => bestLoadout(t.itemId, stat, 10))
-            const best = craftable.reduce((a, b) =>
-                b.result.tonnesPerEpoch > a.result.tonnesPerEpoch ? b : a
-            )
-            expect(best.itemId).toBe(DREDGER)
+    test('WP-GM-08-04 the Dredger leads every craftable gatherer hull of its tier or below on a 10-tile loop', () => {
+        for (const [dredger, maxTier] of [
+            [DREDGER, 2],
+            [DREDGER_T3, 3],
+        ]) {
+            for (const stat of [MEAN_STAT, GOOD_STAT]) {
+                const craftable = gathererShipTemplates()
+                    .filter((t) => t.itemId !== SHIP_T1 && getItem(t.itemId).tier <= maxTier)
+                    .map((t) => bestLoadout(t.itemId, stat, 10))
+                const best = craftable.reduce((a, b) =>
+                    b.result.tonnesPerEpoch > a.result.tonnesPerEpoch ? b : a
+                )
+                expect(best.itemId).toBe(dredger)
+            }
         }
     })
 })

@@ -398,6 +398,23 @@ const ENTITY_FAMILIES: Record<number, string> = {
     11227: 'wrangler',
     11228: 'artisan',
     11229: 'outfitter',
+    12202: 'warehouse',
+    12203: 'mining-rig',
+    12204: 'factory',
+    12207: 'station-hub',
+    12209: 'assembly-yard',
+    12212: 'prospector',
+    12214: 'dredger',
+    12215: 'tender',
+    12217: 'wright',
+    12219: 'tug',
+    12221: 'porter',
+    12223: 'smith',
+    12225: 'trawler',
+    12226: 'steward',
+    12227: 'wrangler',
+    12228: 'artisan',
+    12229: 'outfitter',
 }
 
 interface RawItem {

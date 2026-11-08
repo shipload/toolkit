@@ -19,7 +19,8 @@ export function availableBuildMethods(itemId: number): BuildMethod[] {
 
     if (
         kindMeta.classification === EntityClass.OrbitalStructure &&
-        !kindMeta.kind.equals(ENTITY_HUB)
+        !kindMeta.kind.equals(ENTITY_HUB) &&
+        !recipe.sourceSubclasses?.length
     ) {
         return ['craft+deploy', 'plot']
     }

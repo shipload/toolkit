@@ -309,24 +309,26 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
         }
     })
 
-    test('WP-CP-09-ladder ships sit on four rungs with one socket granted per tier at the Second step', () => {
+    test('WP-CP-09-ladder ships sit on five rungs with one socket granted per tier at the Second step', () => {
         const byRung = new Map<number, number[]>()
         for (const id of shipRecipes()) {
             const rung = rungOf(id)
             byRung.set(rung, [...(byRung.get(rung) ?? []), getEntityLayout(id)!.slots.length])
         }
-        expect([...byRung.keys()].sort()).toEqual([1, 1.5, 2, 2.5])
+        expect([...byRung.keys()].sort()).toEqual([1, 1.5, 2, 2.5, 3])
         const sockets = (rung: number) => [...new Set(byRung.get(rung))]
         expect(sockets(1)).toEqual([3])
         expect(sockets(1.5)).toEqual([3])
         expect(sockets(2)).toEqual([3])
         expect(sockets(2.5).sort()).toEqual([4])
-        for (const id of shipRecipes()) expect(getItem(id).tier).toBeLessThanOrEqual(2)
+        expect(sockets(3).sort()).toEqual([4])
+        for (const id of shipRecipes()) expect(getItem(id).tier).toBeLessThanOrEqual(3)
     })
 
-    test('WP-CP-10-step-cost a First step takes three Refined parts and a Second step two, 300 of each at T1 and 350 at T2', () => {
+    test('WP-CP-10-step-cost a First step takes three Refined parts and a Second step two, 300 of each at T1, 350 at T2 and 450 at T3', () => {
+        const countByTier: Record<number, number> = {1: 300, 2: 350, 3: 450}
         for (const id of shipRecipes()) {
-            const expected = getItem(id).tier === 1 ? 300 : 350
+            const expected = countByTier[getItem(id).tier]
             const parts = getRecipe(id)!.inputs.filter(
                 (i) => getItem(i.itemId).type === 'component'
             )
@@ -428,11 +430,11 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
         }
     })
 
-    test('WP-CP-16-recipes no recipe consumes a resource above T2', () => {
+    test('WP-CP-16-recipes no recipe consumes a resource above T3', () => {
         for (const id of recipeIds) {
             for (const input of getRecipe(id)!.inputs) {
                 const item = getItem(input.itemId)
-                if (item.type === 'resource') expect(item.tier).toBeLessThanOrEqual(2)
+                if (item.type === 'resource') expect(item.tier).toBeLessThanOrEqual(3)
             }
         }
     })
@@ -450,7 +452,7 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
         }
     })
 
-    test('WP-CP-21-structures every craftable station structure is T2 and the T1 Mass Driver and Catcher have no recipe', () => {
+    test('WP-CP-21-structures every craftable station structure is T2 or a T3 upgraded from its T2, and the T1 Mass Driver and Catcher have no recipe', () => {
         const structures = recipeIds.filter((id) => {
             const type = getPackedEntityType(id)
             return (
@@ -459,8 +461,16 @@ describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
                 getEntityClass(type) === EntityClass.OrbitalStructure
             )
         })
-        expect(structures.length).toBe(5)
-        for (const id of structures) expect(getItem(id).tier).toBe(2)
+        expect(structures.length).toBe(10)
+        for (const id of structures) {
+            const donor = donorOf(id)
+            if (getItem(id).tier === 2) {
+                expect(donor).toBeUndefined()
+                continue
+            }
+            expect(getItem(id).tier).toBe(3)
+            expect(donor).toBe(id - 1000)
+        }
         expect(getRecipe(10205)).toBeUndefined()
         expect(getRecipe(10206)).toBeUndefined()
     })
