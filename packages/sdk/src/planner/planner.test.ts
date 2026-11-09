@@ -264,7 +264,7 @@ describe('buildGatherPlan', () => {
         expect(plan.totalSeconds).toBe(expected)
     })
 
-    test('excludes limpets that cannot reach the stratum and warns', () => {
+    test('excludes limpets that cannot reach the stratum and counts them', () => {
         const e = entity({
             gatherer_lanes: [
                 gathererLane(0, 700, 1_250_000, 5000), // reaches 100
@@ -276,7 +276,8 @@ describe('buildGatherPlan', () => {
         const plan = buildGatherPlan(e, STRATUM, {quantity: 100}, OPTS)
         expect(plan.cycles[0].limpets).toHaveLength(1)
         expect(plan.cycles[0].limpets[0].slot).toBe(0)
-        expect(plan.warnings.some((w) => w.includes("can't reach"))).toBe(true)
+        expect(plan.reachingCount).toBe(1)
+        expect(plan.totalLimpets).toBe(2)
     })
 
     test('reports structured limpet reach counts (all reaching)', () => {

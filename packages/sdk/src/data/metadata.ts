@@ -147,12 +147,12 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     generator: {
         name: 'Power Core',
-        description: 'Stores and recharges the energy work spends.',
+        description: 'Stores energy and recharges it.',
         color: '#4ADBFF',
     },
     gatherer: {
         name: 'Limpet Bay',
-        description: 'Gathers resources from a deposit.',
+        description: 'Sends limpets to gather resources from a deposit.',
         color: '#7B8D9E',
     },
     loader: {
@@ -172,7 +172,7 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     hauler: {
         name: 'Tractor Beam',
-        description: 'Tows entities along with the ship.',
+        description: 'Hauls Containers along with the ship.',
         color: '#4ADBFF',
     },
     warp: {
@@ -192,14 +192,14 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     builder: {
         name: 'Assembly Arm',
-        description: 'Claims plots, builds them out, and upgrades ships alongside.',
+        description: 'Claims plots, builds them out, and upgrades ships at the same location.',
         color: '#FFB347',
     },
 
     // === Entities ===
     container: {
         name: 'Container',
-        description: 'Cargo storage that a Tractor Beam tows.',
+        description: 'Cargo storage that a Tractor Beam hauls.',
         color: '#7B8D9E',
     },
     ship: {
@@ -245,22 +245,23 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     workshop: {
         name: 'Workshop',
-        description: 'Public Fabricators. Book a job and collect the output when it finishes.',
+        description:
+            'Holds Fabricators any player can book; finished output waits there for pickup.',
         color: '#B877FF',
     },
     'construction-dock': {
         name: 'Construction Dock',
-        description: 'Public upgrades for ships at the location.',
+        description: 'Upgrades ships for any player at the world.',
         color: '#FFB347',
     },
     nexus: {
         name: 'Nexus',
-        description: 'Where players wrap, unwrap, and deploy assets.',
+        description: 'Wraps, unwraps, and deploys items for players.',
         color: '#FFD24C',
     },
     depot: {
         name: 'Depot',
-        description: 'Public storage and shuttle service at the world.',
+        description: 'Stores cargo for every player at the world and shuttles it in and out.',
         color: '#EAB308',
     },
     roustabout: {
@@ -285,7 +286,7 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     tug: {
         name: 'Tug',
-        description: 'A towing ship.',
+        description: 'A ship that hauls Containers.',
         color: '#4AE898',
     },
     porter: {
@@ -300,32 +301,32 @@ const FAMILIES: Record<string, ItemFamily> = {
     },
     dredger: {
         name: 'Dredger',
-        description: 'A gathering ship with a hold for longer runs.',
+        description: 'A gathering ship with a Cargo Hold for longer runs.',
         color: '#4AE898',
     },
     trawler: {
         name: 'Trawler',
-        description: 'A gathering ship that tows a container for longer runs.',
+        description: 'A gathering ship that hauls a Container for longer runs.',
         color: '#4AE898',
     },
     steward: {
         name: 'Steward',
-        description: 'A transfer ship with a hold for the cargo it moves.',
+        description: 'A transfer ship with a Cargo Hold for the cargo it moves.',
         color: '#4AE898',
     },
     wrangler: {
         name: 'Wrangler',
-        description: 'A transfer ship that also tows.',
+        description: 'A transfer ship that also hauls Containers.',
         color: '#4AE898',
     },
     artisan: {
         name: 'Artisan',
-        description: 'A crafting ship with a hold for its materials.',
+        description: 'A crafting ship with a Cargo Hold for its materials.',
         color: '#4AE898',
     },
     outfitter: {
         name: 'Outfitter',
-        description: 'A construction ship with a hold for upgrade materials.',
+        description: 'A construction ship with a Cargo Hold for upgrade materials.',
         color: '#4AE898',
     },
 }

@@ -53,10 +53,10 @@ describe('getModuleFigures starter T1 rows', () => {
     })
 
     test('Tractor Beam', () => {
-        expect(getModuleFigures(ITEM_HAULER_T1, STARTER)?.sectionLabel).toBe('Towing')
+        expect(getModuleFigures(ITEM_HAULER_T1, STARTER)?.sectionLabel).toBe('Hauling')
         expect(rows(ITEM_HAULER_T1)).toEqual([
-            ['Tows', '1 container, T1 and below'],
-            ['Handling', '+10% travel time per towed container, plus its weight'],
+            ['Hauls', '1 container, T1 and below'],
+            ['Handling', '+10% travel time per hauled container, plus its mass'],
             ['Drain', '12.3 energy/ly'],
         ])
     })

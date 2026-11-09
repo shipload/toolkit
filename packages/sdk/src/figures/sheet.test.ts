@@ -188,8 +188,8 @@ describe('computeEntitySheet sections for movement modules', () => {
             ],
         })
         expect(texts(sheet, 'towing')).toEqual([
-            ['Tows', '1 container, T1 and below'],
-            ['Handling', '+10% travel time per towed container, plus its weight'],
+            ['Hauls', '1 container, T1 and below'],
+            ['Handling', '+10% travel time per hauled container, plus its mass'],
         ])
         expect(section(sheet, 'towing').headline).toBe('tows')
         expect(

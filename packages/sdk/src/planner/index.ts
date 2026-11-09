@@ -1,5 +1,4 @@
 import type {GathererStats} from '../types/capabilities'
-import {compose, defineText, text} from '../text/registry'
 import type {ServerContract} from '../contracts'
 import {calc_gather_duration, calc_gather_energy} from '../capabilities/gathering'
 import {calc_rechargetime} from '../travel/travel'
@@ -7,11 +6,6 @@ import {projectRemainingAt, type Projectable} from '../scheduling/projection'
 import {laneKeyForModule, placedStart, selectGatherLane} from '../scheduling/lanes'
 import {LANE_BARRIER} from '../scheduling/schedule'
 import {TaskType} from '../types'
-
-defineText({
-    'planner.warning.limpets-out-of-reach': "{blocked} of {total} limpets can't reach this depth",
-    'planner.warning.gather-exceeds-charge': 'a single gather cannot fit within one full charge',
-})
 
 export type GatherLane = ServerContract.Types.gatherer_lane
 
@@ -51,7 +45,6 @@ export interface GatherPlan {
     cap: FillCap
     reachingCount: number
     totalLimpets: number
-    warnings: string[]
     endEnergy: number
 }
 
@@ -224,21 +217,10 @@ function planGather(
     startingClock?: GatherClock
 ): {plan: GatherPlan; clock?: GatherClock} {
     const {richness, itemMass, holdRoom, reserveRemaining, now} = opts
-    const warnings: string[] = []
 
     const reaching = entity.gatherer_lanes.filter((l) => l.depth.toNumber() >= stratum)
     if (reaching.length === 0) throw new Error('no gatherer reaches this stratum')
     if (!entity.generator) throw new Error('entity has no generator')
-
-    const blocked = entity.gatherer_lanes.length - reaching.length
-    if (blocked > 0) {
-        warnings.push(
-            compose('planner.warning.limpets-out-of-reach', {
-                blocked,
-                total: entity.gatherer_lanes.length,
-            })
-        )
-    }
 
     const capacity = entity.generator.capacity.toNumber()
     const rechargeRate = entity.generator.recharge.toNumber()
@@ -296,10 +278,7 @@ function planGather(
     let guard = 0
     while (remaining > 0 && guard++ < MAX_CYCLES) {
         let batch = maxQtyForCharge(reaching, remaining, capacity, stratum, itemMass, richness)
-        if (batch <= 0) {
-            warnings.push(text('planner.warning.gather-exceeds-charge'))
-            break
-        }
+        if (batch <= 0) break
 
         let built = buildCycle(batch)
         if (clock && !withinHorizon(clock, built.cycle)) {
@@ -334,7 +313,6 @@ function planGather(
             cap,
             reachingCount: reaching.length,
             totalLimpets: entity.gatherer_lanes.length,
-            warnings,
             endEnergy: energy,
         },
         clock,
@@ -400,7 +378,6 @@ export function buildMultiGatherPlan(
         cap,
         reachingCount: reaching.length,
         totalLimpets: entity.gatherer_lanes.length,
-        warnings: [...new Set(allocations.flatMap((a) => a.plan.warnings))],
         endEnergy: energy ?? Number(projectRemainingAt(entity, opts.now).energy),
         allocations,
     }

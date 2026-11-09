@@ -2,7 +2,6 @@ import {afterEach, describe, expect, test} from 'bun:test'
 import {
     computeEntitySheet,
     describeItem,
-    describeModuleForItem,
     displayName,
     encodeStats,
     getCapabilityAttributeRows,
@@ -103,23 +102,8 @@ describe('SDK_TEXT', () => {
 })
 
 describe('logic is independent of display text', () => {
-    test('resolveItem and describeModuleForItem', () => {
-        expectSameLogic(() =>
-            getItems().map((item) => {
-                const resolved = resolveItem(item.id, STATS)
-                return {resolved, description: describeModuleForItem(resolved)}
-            })
-        )
-    })
-
-    test('module descriptions keep their params under translation', () => {
-        const {english, translated} = underBoth(() =>
-            getItems()
-                .filter((item) => item.type === 'module')
-                .map((item) => describeModuleForItem(resolveItem(item.id, STATS))?.params ?? null)
-        )
-        expect(translated).toEqual(english)
-        expect((english as unknown[]).filter(Boolean).length).toBeGreaterThan(0)
+    test('resolveItem', () => {
+        expectSameLogic(() => getItems().map((item) => resolveItem(item.id, STATS)))
     })
 
     test('stat mappings and capability rows', () => {

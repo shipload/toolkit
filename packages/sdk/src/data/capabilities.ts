@@ -95,31 +95,35 @@ const CAPABILITY_ATTRIBUTES: CapabilityAttribute[] = [
     {
         capability: 'Storage',
         attribute: 'drain',
-        description: 'Fixed normal-travel drain contributed by an installed Cargo Hold',
+        description: 'Travel drain an installed Cargo Hold adds',
     },
     {capability: 'Movement', attribute: 'thrust', description: 'Propulsion force'},
     {
         capability: 'Movement',
         attribute: 'drain',
-        description: 'Total installed energy consumed per tile of normal travel',
+        description: 'Energy spent per light-year of travel',
     },
     {
         capability: 'Energy',
         attribute: 'capacity',
         description: 'Energy capacity from Power Cores and installed Battery Bank modules',
     },
-    {capability: 'Energy', attribute: 'recharge', description: 'Energy regeneration rate'},
-    {capability: 'Loading', attribute: 'mass', description: 'Weight of the loader unit itself'},
-    {capability: 'Loading', attribute: 'thrust', description: 'Loading speed/force'},
+    {
+        capability: 'Energy',
+        attribute: 'recharge',
+        description: 'Energy restored per minute while recharging',
+    },
+    {capability: 'Loading', attribute: 'mass', description: 'Mass of the shuttle itself'},
+    {capability: 'Loading', attribute: 'thrust', description: 'Shuttle thrust'},
     {
         capability: 'Loading',
         attribute: 'quantity',
-        description: 'Number of cargo items moved per load operation',
+        description: 'Cargo items moved per shuttle trip',
     },
     {capability: 'Gathering', attribute: 'yield', description: 'Mass gathered per second'},
     {capability: 'Gathering', attribute: 'drain', description: 'Energy consumed per gather'},
-    {capability: 'Gathering', attribute: 'depth', description: 'Maximum gather depth'},
-    {capability: 'Warp', attribute: 'range', description: 'Maximum warp distance'},
+    {capability: 'Gathering', attribute: 'depth', description: 'Deepest stratum a limpet reaches'},
+    {capability: 'Warp', attribute: 'range', description: 'Jump distance of one warp'},
     {capability: 'Crafting', attribute: 'speed', description: 'Crafting time per item'},
     {
         capability: 'Crafting',
@@ -139,17 +143,17 @@ const CAPABILITY_ATTRIBUTES: CapabilityAttribute[] = [
     {
         capability: 'Hauling',
         attribute: 'capacity',
-        description: 'Number of targets the haul beam can lock onto simultaneously',
+        description: 'Containers the Tractor Beam can haul at once',
     },
     {
         capability: 'Hauling',
         attribute: 'efficiency',
-        description: 'Thrust penalty reduction per hauled target',
+        description: 'How much less each hauled container slows the ship',
     },
     {
         capability: 'Hauling',
         attribute: 'drain',
-        description: 'Fixed normal-travel drain contributed by an installed Tractor Beam',
+        description: 'Travel drain an installed Tractor Beam adds',
     },
 ]
 

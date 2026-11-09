@@ -14,20 +14,19 @@ const ORE_STATS: StatDefinition[] = [
         key: 'strength',
         label: 'Strength',
         abbreviation: 'STR',
-        purpose: 'Raw structural/mechanical force',
+        purpose: 'How much load the ore bears before it fails',
     },
     {
         key: 'tolerance',
         label: 'Tolerance',
         abbreviation: 'TOL',
-        purpose: 'Ability to withstand heat, pressure, and stress extremes',
+        purpose: 'How well the ore holds up under heat, pressure, and stress',
     },
     {
         key: 'density',
         label: 'Density',
         abbreviation: 'DEN',
-        purpose:
-            'Lowers the hull mass of containers and structures, and raises Limpet Bay yield and Cargo Hold capacity',
+        purpose: 'How much mass the ore packs into its volume',
     },
 ]
 
@@ -36,19 +35,19 @@ const CRYSTAL_STATS: StatDefinition[] = [
         key: 'conductivity',
         label: 'Conductivity',
         abbreviation: 'CON',
-        purpose: 'Efficiency of energy/signal transfer through crystalline lattice',
+        purpose: 'How freely energy passes through the crystal lattice',
     },
     {
         key: 'resonance',
         label: 'Resonance',
         abbreviation: 'RES',
-        purpose: 'Frequency tuning and piezoelectric response; storage and amplification',
+        purpose: 'How strongly the crystal vibrates in a field',
     },
     {
         key: 'reflectivity',
         label: 'Reflectivity',
         abbreviation: 'REF',
-        purpose: 'Optical refraction and reflection; lenses, mirrors, focus',
+        purpose: 'How much light the crystal bends and reflects',
     },
 ]
 
@@ -57,19 +56,19 @@ const GAS_STATS: StatDefinition[] = [
         key: 'volatility',
         label: 'Volatility',
         abbreviation: 'VOL',
-        purpose: 'Energy release potential for propulsion and force',
+        purpose: 'How much energy the gas releases when it burns',
     },
     {
         key: 'reactivity',
         label: 'Reactivity',
         abbreviation: 'REA',
-        purpose: 'Chemical interaction speed for processing and penetration',
+        purpose: 'How fast the gas reacts with other materials',
     },
     {
         key: 'thermal',
         label: 'Thermal',
         abbreviation: 'THM',
-        purpose: 'Heat capacity for thermal management',
+        purpose: 'How much heat the gas absorbs',
     },
 ]
 
@@ -78,19 +77,19 @@ const REGOLITH_STATS: StatDefinition[] = [
         key: 'cohesion',
         label: 'Cohesion',
         abbreviation: 'COH',
-        purpose: 'Raises Fabricator speed and lowers Cargo Hold drain',
+        purpose: 'How tightly the grains bind together',
     },
     {
         key: 'hardness',
         label: 'Hardness',
         abbreviation: 'HRD',
-        purpose: 'Particle hardness; cutting surfaces, abrasives, wear resistance',
+        purpose: 'How hard each grain is',
     },
     {
         key: 'fineness',
         label: 'Fineness',
         abbreviation: 'FIN',
-        purpose: 'Grain size: fine powder for smooth composites and sintering',
+        purpose: 'How fine the grains are',
     },
 ]
 
@@ -99,19 +98,19 @@ const BIOMASS_STATS: StatDefinition[] = [
         key: 'plasticity',
         label: 'Plasticity',
         abbreviation: 'PLA',
-        purpose: 'Flexibility and deformation under load',
+        purpose: 'How far the biomass bends under load without breaking',
     },
     {
         key: 'insulation',
         label: 'Insulation',
         abbreviation: 'INS',
-        purpose: 'Thermal and electrical blocking capacity',
+        purpose: 'How well the biomass blocks heat and current',
     },
     {
         key: 'saturation',
         label: 'Saturation',
         abbreviation: 'SAT',
-        purpose: 'Concentration of useful organic compounds per unit',
+        purpose: 'How much useful organic compound each unit holds',
     },
 ]
 

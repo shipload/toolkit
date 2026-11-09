@@ -1,18 +1,5 @@
-import {CHARTER_REGISTRY, type CharterGrant, type CharterNode} from './charters'
-import {
-    CHARTER_NONE,
-    CIVIC_DEPOT,
-    CIVIC_DOCK,
-    CIVIC_GRANT_LEVEL_GATE,
-    CIVIC_GRANT_MODULE,
-    CIVIC_GRANT_RUNG,
-    CIVIC_NEXUS,
-    CIVIC_STAT_BUILD_SPEED,
-    CIVIC_STAT_CRAFT_SPEED,
-    CIVIC_STAT_STORAGE_CAPACITY,
-    CIVIC_STAT_TRANSFER_SPEED,
-    CIVIC_WORKSHOP,
-} from './constants'
+import {CHARTER_REGISTRY} from './charters'
+import {CHARTER_NONE, CIVIC_DEPOT, CIVIC_DOCK, CIVIC_NEXUS, CIVIC_WORKSHOP} from './constants'
 import {compose, defineText, textFields, textRecord} from '../text/registry'
 
 const BUILDING_LABELS: Record<number, string> = textRecord(
@@ -25,28 +12,13 @@ const BUILDING_LABELS: Record<number, string> = textRecord(
     (building) => `civic.building.${building}.label`
 )
 
-const STAT_LABELS: Record<number, string> = textRecord(
-    {
-        [CIVIC_STAT_CRAFT_SPEED]: 'crafting speed',
-        [CIVIC_STAT_BUILD_SPEED]: 'build speed',
-        [CIVIC_STAT_TRANSFER_SPEED]: 'transfer speed',
-        [CIVIC_STAT_STORAGE_CAPACITY]: 'storage capacity',
-    },
-    (stat) => `civic.stat.${stat}.label`
-)
-
 defineText({
     'civic.building.unknown': 'Building {id}',
-    'civic.stat.unknown': 'Stat {id}',
-    'charter.unknown': 'Charter {id}',
+    'charter.unknown': 'Node {id}',
 })
 
 export function civicBuildingLabel(building: number): string {
     return BUILDING_LABELS[building] ?? compose('civic.building.unknown', {id: String(building)})
-}
-
-export function civicStatLabel(stat: number): string {
-    return STAT_LABELS[stat] ?? compose('civic.stat.unknown', {id: String(stat)})
 }
 
 export interface CharterMeta {
@@ -57,83 +29,83 @@ export interface CharterMeta {
 const CHARTER_METADATA: Record<number, CharterMeta> = {
     10001: {
         name: 'Communal Workshop',
-        summary: 'Shared crafting for anyone at this world',
+        summary: 'Gives this world Fabricators any visitor can use for free',
     },
     10100201: {
-        name: 'Workshop tune-up I',
-        summary: "Raises the Workshop's Fabricator stats",
+        name: 'Workshop Tune-Up I',
+        summary: 'Speeds up crafting at the Workshop',
     },
     10100202: {
-        name: 'Workshop tune-up II',
-        summary: "Raises the Workshop's Fabricator stats",
+        name: 'Workshop Tune-Up II',
+        summary: 'Speeds up crafting at the Workshop',
     },
     10100203: {
-        name: 'Workshop tune-up III',
-        summary: "Raises the Workshop's Fabricator stats",
+        name: 'Workshop Tune-Up III',
+        summary: 'Speeds up crafting at the Workshop',
     },
     10100204: {
-        name: 'Workshop tune-up IV',
-        summary: "Raises the Workshop's Fabricator stats",
+        name: 'Workshop Tune-Up IV',
+        summary: 'Speeds up crafting at the Workshop',
     },
     20001: {
         name: 'Civic Nexus',
-        summary: 'Advances the world to Tier II; wrap items for trade here',
+        summary: 'Raises the world to Tier II and lets players wrap items here',
     },
     30100001: {
         name: 'Construction Dock',
-        summary: 'Ships queue here for upgrades',
+        summary: 'Upgrades ships for any player at this world',
     },
     30100301: {
-        name: 'Dock tune-up I',
-        summary: "Raises the Dock's Assembly Arm stats",
+        name: 'Dock Tune-Up I',
+        summary: 'Speeds up ship upgrades at the Construction Dock',
     },
     30100302: {
-        name: 'Dock tune-up II',
-        summary: "Raises the Dock's Assembly Arm stats",
+        name: 'Dock Tune-Up II',
+        summary: 'Speeds up ship upgrades at the Construction Dock',
     },
     30100303: {
-        name: 'Dock tune-up III',
-        summary: "Raises the Dock's Assembly Arm stats",
+        name: 'Dock Tune-Up III',
+        summary: 'Speeds up ship upgrades at the Construction Dock',
     },
     30100304: {
-        name: 'Dock tune-up IV',
-        summary: "Raises the Dock's Assembly Arm stats",
+        name: 'Dock Tune-Up IV',
+        summary: 'Speeds up ship upgrades at the Construction Dock',
     },
     40100001: {
         name: 'Public Depot',
-        summary: 'Storage at this world for every player',
+        summary: 'Gives every player storage at this world',
     },
     40100101: {
         name: 'Depot Cargo Hold I',
-        summary: 'Raises what each player can keep at the depot',
+        summary: 'Raises what each player can keep at the Depot',
     },
     40100102: {
         name: 'Depot Cargo Hold II',
-        summary: 'Raises what each player can keep at the depot',
+        summary: 'Raises what each player can keep at the Depot',
     },
     40100103: {
         name: 'Depot Cargo Hold III',
-        summary: 'Raises what each player can keep at the depot',
+        summary: 'Raises what each player can keep at the Depot',
     },
     40100104: {
         name: 'Depot Cargo Hold IV',
-        summary: 'Raises what each player can keep at the depot',
+        summary: 'Raises what each player can keep at the Depot',
     },
     40100401: {
         name: 'Depot Shuttle Bay I',
-        summary: 'Moves cargo in and out of the depot faster',
+        summary: 'Moves cargo into and out of the Depot faster',
     },
     40100402: {
         name: 'Depot Shuttle Bay II',
-        summary: 'Moves cargo in and out of the depot faster',
+        summary: 'Moves cargo into and out of the Depot faster',
     },
     40100403: {
         name: 'Depot Shuttle Bay III',
-        summary: 'Moves cargo in and out of the depot faster',
+        summary: 'Moves cargo into and out of the Depot faster',
     },
     40100404: {
         name: 'Depot Shuttle Bay IV',
-        summary: 'Moves cargo in and out of the depot faster',
+        summary: 'Moves cargo into and out of the Depot faster',
     },
 }
 
@@ -156,98 +128,10 @@ export function charterSummary(nodeId: number): string {
     return charterMetadata[nodeId]?.summary ?? ''
 }
 
-export interface CharterGateSignature {
-    kind: 'gate'
-    buildingLabel: string
-    level: number
-}
-
-export interface CharterModuleSignature {
-    kind: 'module'
-    buildingLabel: string
-    count: number
-    rank: number
-    rankCount: number
-}
-
-export interface CharterRungSignature {
-    kind: 'rung'
-    buildingLabel: string
-    statLabel: string
-    rank: number
-    rankCount: number
-}
-
-export type CharterSignature = CharterGateSignature | CharterModuleSignature | CharterRungSignature
-
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
 export function romanNumeral(rank: number): string {
     return ROMAN[rank - 1] ?? String(rank)
-}
-
-function headlineGrant(node: CharterNode): CharterGrant | undefined {
-    return (
-        node.grants.find((grant) => grant.kind === CIVIC_GRANT_LEVEL_GATE) ??
-        node.grants.find((grant) => grant.kind === CIVIC_GRANT_MODULE) ??
-        node.grants.find((grant) => grant.kind === CIVIC_GRANT_RUNG)
-    )
-}
-
-function headlineSiblings(headline: CharterGrant): CharterNode[] {
-    return CHARTER_REGISTRY.filter((other) => {
-        const grant = headlineGrant(other)
-        return (
-            grant !== undefined &&
-            grant.kind === headline.kind &&
-            grant.building === headline.building &&
-            grant.stat === headline.stat
-        )
-    })
-}
-
-function rungRank(node: CharterNode, siblings: CharterNode[]): number {
-    const byId = new Map(siblings.map((sibling) => [sibling.nodeId, sibling]))
-    const seen = new Set<number>([node.nodeId])
-    let current: CharterNode | undefined = node
-    let rank = 1
-    while (current) {
-        const previousId = current.prereqs.find((id) => byId.has(id) && !seen.has(id))
-        if (previousId === undefined) return rank
-        seen.add(previousId)
-        current = byId.get(previousId)
-        rank += 1
-    }
-    return rank
-}
-
-export function charterSignature(node: CharterNode): CharterSignature | undefined {
-    const grant = headlineGrant(node)
-    if (!grant) return undefined
-    if (grant.kind === CIVIC_GRANT_LEVEL_GATE) {
-        return {
-            kind: 'gate',
-            buildingLabel: civicBuildingLabel(grant.building),
-            level: grant.value,
-        }
-    }
-    const siblings = headlineSiblings(grant)
-    if (grant.kind === CIVIC_GRANT_MODULE) {
-        return {
-            kind: 'module',
-            buildingLabel: civicBuildingLabel(grant.building),
-            count: grant.value,
-            rank: rungRank(node, siblings),
-            rankCount: siblings.length,
-        }
-    }
-    return {
-        kind: 'rung',
-        buildingLabel: civicBuildingLabel(grant.building),
-        statLabel: civicStatLabel(grant.stat),
-        rank: rungRank(node, siblings),
-        rankCount: siblings.length,
-    }
 }
 
 for (const node of CHARTER_REGISTRY) {

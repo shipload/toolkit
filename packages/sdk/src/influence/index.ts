@@ -66,7 +66,6 @@ export {
     charterRungValue,
     charterSingletonMandate,
     charterModuleCount,
-    CHARTER_INELIGIBILITY_MESSAGES,
     CHARTER_REGISTRY,
     eligibleCharters,
     type BuiltCharter,
@@ -87,15 +86,10 @@ export {
 export {
     charterMetadata,
     charterName,
-    charterSignature,
     charterSummary,
     civicBuildingLabel,
-    civicStatLabel,
     romanNumeral,
-    type CharterGateSignature,
     type CharterMeta,
-    type CharterRungSignature,
-    type CharterSignature,
 } from './charter-metadata'
 export {
     CIVIC_STAT_DEFS,

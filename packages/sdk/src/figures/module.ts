@@ -39,7 +39,7 @@ defineText({
     'figure.warp.note': 'Spends a full charge; the hold must be empty.',
     'figure.tows.one': '{count} container, T{tier} and below',
     'figure.tows.many': '{count} containers, T{tier} and below',
-    'figure.handling.text': '+{value}% travel time per towed container, plus its weight',
+    'figure.handling.text': '+{value}% travel time per hauled container, plus its mass',
 })
 
 export function makeFigure(
