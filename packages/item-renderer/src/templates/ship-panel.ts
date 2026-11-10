@@ -17,14 +17,14 @@ import {
     BOTTOM_PAD,
 } from './_shared.ts'
 
-const HULL_MASS_LABELS = new Set(['mass', 'capacity'])
+const HULL_MASS_KEYS = new Set(['mass', 'capacity'])
 
 const ENTITY_COLOR = tokens.colors.brand.cyan
 
 export interface ShipPanelSlot {
     name?: string
     installed: boolean
-    capability?: string
+    capabilityKey?: string
     rows?: FigureRow[]
 }
 
@@ -33,14 +33,16 @@ export interface ShipPanelProps {
     tier: number
     quantity?: number
     location?: {x: number; y: number}
-    attributes: {capability: string; attributes: {label: string; value: number}[]}[]
+    attributes: {
+        key: string
+        capability: string
+        attributes: {key: string; label: string; value: number}[]
+    }[]
     slots: ShipPanelSlot[]
 }
 
-function formatHullValue(label: string, value: number): string {
-    return HULL_MASS_LABELS.has(label.toLowerCase())
-        ? formatMassScaled(value)
-        : value.toLocaleString('en-US')
+function formatHullValue(key: string, value: number): string {
+    return HULL_MASS_KEYS.has(key) ? formatMassScaled(value) : value.toLocaleString('en-US')
 }
 
 function fallbackEntityCode(name: string): string {
@@ -84,10 +86,10 @@ export function renderShipPanel(props: ShipPanelProps): string {
     const innerW = w - pad * 2
     const quantity = props.quantity ?? 0
 
-    const hullGroup = props.attributes?.find((g) => g.capability.toLowerCase() === 'hull')
+    const hullGroup = props.attributes?.find((g) => g.key === 'hull')
     const hullAttrs = (hullGroup?.attributes ?? []).map((a) => ({
         label: a.label,
-        value: formatHullValue(a.label, a.value),
+        value: formatHullValue(a.key, a.value),
     }))
     const metaRows = props.location
         ? [{label: 'Location', value: formatLocation(props.location)}, ...hullAttrs]
@@ -105,14 +107,14 @@ export function renderShipPanel(props: ShipPanelProps): string {
     let lastContentBottom = slotsYStart
     props.slots.forEach((slot, i) => {
         const accentColor = slot.installed
-            ? capabilityColor(slot.capability ?? slot.name ?? 'Module')
+            ? capabilityColor(slot.capabilityKey ?? '')
             : ENTITY_COLOR
         modulesSvg += moduleSlot({
             x: pad,
             y,
             width: innerW,
             installed: slot.installed,
-            name: slot.name ?? slot.capability,
+            name: slot.name,
             rows: slot.rows,
             accentColor,
         })

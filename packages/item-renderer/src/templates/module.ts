@@ -8,6 +8,17 @@ import {text} from '../primitives/text.ts'
 import {quantityBadge} from '../primitives/quantity-badge.ts'
 import {figureRows} from '../primitives/figure-rows.ts'
 import {tokens} from '../tokens/index.ts'
+
+const CAPABILITY_KEY_FOR_KIND: Record<string, string> = {
+    engine: 'engine',
+    generator: 'generator',
+    gatherer: 'gatherer',
+    loader: 'loading',
+    crafter: 'crafting',
+    builder: 'build',
+    hauler: 'hauling',
+    storage: 'storage',
+}
 import {
     shortCode,
     formatMass,
@@ -55,7 +66,9 @@ export function renderModule(
     const {svg: metaSvg, height: metaH} = metaRowBlock(pad, metaYStart, innerW, metaRows)
     const bodyYStart = metaYStart + metaH + META_BLOCK_GAP
 
-    const iconColor = group ? capabilityColor(group.capability) : capabilityColor(capabilityName)
+    const iconColor = capabilityColor(
+        group?.key ?? CAPABILITY_KEY_FOR_KIND[figures?.kind ?? ''] ?? ''
+    )
 
     const capLabel = (figures?.sectionLabel ?? capabilityName).toUpperCase()
     const capHeader = text({

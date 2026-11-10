@@ -17,7 +17,7 @@ function slotToPanelSlot(slot: ResolvedModuleSlot, module?: PackedModule): ShipP
     return {
         name: slot.name,
         installed: true,
-        capability: slot.capability,
+        capabilityKey: slot.capabilityKey,
         rows: figureRowsFor(figures),
     }
 }

@@ -99,9 +99,9 @@ test('Hauler template wraps its long Handling figure', () => {
     const item = FIXTURES.haulerT1
     const resolved = resolveItem(item.item_id, item.stats, item.modules)
     const svg = renderModule(item, resolved)
-    expect(svg).toContain('>TOWING</text>')
-    expect(svg).toContain('>+11% travel time per towed</text>')
-    expect(svg).toContain('>container, plus its weight</text>')
+    expect(svg).toContain('>HAULING</text>')
+    expect(svg).toContain('>+11% travel time per</text>')
+    expect(svg).toContain('>hauled container, plus its</text>')
 })
 
 test('renderModule ranges mode shows the activity heading without figures', () => {
