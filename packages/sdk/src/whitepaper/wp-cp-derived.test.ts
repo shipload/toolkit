@@ -325,8 +325,8 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
         for (const id of shipRecipes()) expect(getItem(id).tier).toBeLessThanOrEqual(3)
     })
 
-    test('WP-CP-10-step-cost a First step takes three Refined parts and a Second step two, 300 of each at T1, 350 at T2 and 450 at T3', () => {
-        const countByTier: Record<number, number> = {1: 300, 2: 350, 3: 450}
+    test('WP-CP-10-step-cost a First step takes three Refined parts and a Second step two, 300 of each at T1, 350 at T2 and 400 at T3', () => {
+        const countByTier: Record<number, number> = {1: 300, 2: 350, 3: 400}
         for (const id of shipRecipes()) {
             const expected = countByTier[getItem(id).tier]
             const parts = getRecipe(id)!.inputs.filter(
