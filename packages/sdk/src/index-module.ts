@@ -475,6 +475,7 @@ export {
     hasSourceCoupling,
     hasIncomingCoupling,
     isHostedCivicLeg,
+    isDepotContribution,
 } from './scheduling/availability'
 export type {CargoInput, IncomingHoldEntity, IncomingSource} from './scheduling/availability'
 

@@ -1168,6 +1168,15 @@ export class ActionsManager extends BaseManager {
         ]
     }
 
+    contributeFromDepot(
+        player: NameType,
+        depotId: UInt64Type,
+        location: CoordinatesType,
+        bundle: ServerContract.ActionParams.Type.cargo_item[]
+    ): Action[] {
+        return this.contribute(player, depotId, location, bundle)
+    }
+
     collect(player: NameType, location: CoordinatesType): Action {
         return this.server.action('collect', {
             player: Name.from(player),

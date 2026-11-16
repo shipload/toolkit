@@ -12,6 +12,7 @@ import {
     hasSourceCoupling,
     incomingSources,
     type IncomingSource,
+    isDepotContribution,
     projectedCargoAvailableAt,
     taskCargoEffect,
 } from './availability'
@@ -380,5 +381,30 @@ describe('incomingSources', () => {
             craftTask([cargoItem(9, 0, 1)], [coupledTo(1, RECEIVER, HoldKind.GATHER)]),
         ])
         expect(incomingSources(to, () => from)).toHaveLength(0)
+    })
+})
+
+describe('a Depot contribution', () => {
+    function contribution(subjectType: string) {
+        return ServerContract.Types.task.from({
+            type: TaskType.CONTRIBUTE,
+            duration: 60,
+            cancelable: 0,
+            cargo: [cargoItem(ITEM_ORE_T1, 0, 5)],
+            couplings: [],
+            subject: {entity_type: subjectType, entity_id: 5},
+        })
+    }
+
+    test('names the player in its subject and moves no cargo on the Depot', () => {
+        const fromDepot = contribution('bob')
+        expect(isDepotContribution(fromDepot)).toBe(true)
+        expect(taskCargoEffect(fromDepot)).toEqual({added: [], removed: []})
+    })
+
+    test('a contribution from a hold keeps the pin tag and removes its bundle', () => {
+        const fromHold = contribution('infpin')
+        expect(isDepotContribution(fromHold)).toBe(false)
+        expect(taskCargoEffect(fromHold).removed).toHaveLength(1)
     })
 })

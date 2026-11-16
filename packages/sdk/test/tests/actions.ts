@@ -158,6 +158,18 @@ describe('ActionsManager', () => {
         })
     })
 
+    describe('contributeFromDepot', () => {
+        const bundle = [{item_id: 101, stats: 12345, modules: [], quantity: 10}]
+
+        test('names the Depot as the contributing entity', () => {
+            const fromDepot = shipload.actions.contributeFromDepot('alice', 7, {x: 3, y: -4}, bundle)
+            const direct = shipload.actions.contribute('alice', 7, {x: 3, y: -4}, bundle)
+            assert.equal(fromDepot.length, 2)
+            assert.equal(fromDepot[0].data.hexString, direct[0].data.hexString)
+            assert.equal(fromDepot[1].data.hexString, direct[1].data.hexString)
+        })
+    })
+
     describe('load', () => {
         test('creates load action with single item', () => {
             const action = shipload.actions.load(1, 2, [

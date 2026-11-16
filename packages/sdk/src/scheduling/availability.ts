@@ -1,3 +1,4 @@
+import {Name} from '@wharfkit/antelope'
 import type {ServerContract} from '../contracts'
 import {cargoIdentityKey} from '../capabilities/storage'
 import {HoldKind, TaskType} from '../types'
@@ -116,8 +117,19 @@ export function isHostedCivicLeg(task: Task): boolean {
     )
 }
 
+const CONTRIBUTE_PIN_TAG = Name.from('infpin')
+
+// Mirrors depot_contribution: the subject names the player, and the bundle left the Depot's stock at booking.
+export function isDepotContribution(task: Task): boolean {
+    return (
+        task.type.toNumber() === TaskType.CONTRIBUTE &&
+        !!task.subject &&
+        !task.subject.entity_type.equals(CONTRIBUTE_PIN_TAG)
+    )
+}
+
 export function taskCargoEffect(task: Task): CargoEffect {
-    if (isHostedCivicLeg(task)) return {added: [], removed: []}
+    if (isHostedCivicLeg(task) || isDepotContribution(task)) return {added: [], removed: []}
     switch (taskCargoRule(task.type.toNumber())) {
         case 'all-in':
         case 'undeploy':

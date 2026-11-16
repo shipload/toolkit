@@ -879,6 +879,7 @@ exports[`module export surface 1`] = `
   "isContainer",
   "isCraftedItem",
   "isDepot",
+  "isDepotContribution",
   "isExtractor",
   "isFactory",
   "isFull",
