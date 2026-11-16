@@ -47,7 +47,9 @@ function assignModulesToSlots(
 
     for (const mod of modules) {
         const modType = getModuleCapabilityType(mod.itemId)
-        const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType, onStructure))
+        const slotIdx = result.findIndex(
+            (r) => !r.installed && moduleAccepts(r.type, modType, onStructure)
+        )
         if (slotIdx === -1) {
             let modName: string
             try {

@@ -25,11 +25,7 @@ export interface ModuleEntry {
     installed?: PackedModule
 }
 
-export function moduleAccepts(
-    slotType: number,
-    moduleType: number,
-    onStructure: boolean
-): boolean {
+export function moduleAccepts(slotType: number, moduleType: number, onStructure: boolean): boolean {
     if (slotType === MODULE_AUX) {
         return (
             moduleType === MODULE_GENERATOR ||
