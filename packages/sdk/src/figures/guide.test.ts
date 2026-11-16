@@ -73,15 +73,20 @@ describe('getModuleFigureSources', () => {
         const mid = Object.fromEntries(RESOURCE_KEYS.map((key) => [key, 500]))
         for (const id of ids) {
             const sources = getModuleFigureSources(id)!
-            for (const key of RESOURCE_KEYS) {
+            const sweeps = RESOURCE_KEYS.map((key) => {
                 const at = (value: number) =>
                     getModuleFigures(
                         id,
                         encodeStats(computeStatsFromResources(id, {...mid, [key]: value}))
                     )!.rows
-                const low = at(STAT_LOW)
-                const high = at(STAT_HIGH)
+                return {key, low: at(STAT_LOW), high: at(STAT_HIGH)}
+            })
+            const pinned = sources.map((_, i) =>
+                sweeps.every(({low, high}) => low[i].value === high[i].value)
+            )
+            for (const {key, low, high} of sweeps) {
                 for (const [i, source] of sources.entries()) {
+                    if (pinned[i]) continue
                     expect({
                         item: id,
                         figure: source.key,

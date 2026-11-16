@@ -911,6 +911,69 @@
     "tier": 3
   },
   {
+    "id": 12100,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "engine"
+  },
+  {
+    "id": 12101,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "generator"
+  },
+  {
+    "id": 12102,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "gatherer"
+  },
+  {
+    "id": 12103,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "loader"
+  },
+  {
+    "id": 12104,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "crafter"
+  },
+  {
+    "id": 12105,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "storage"
+  },
+  {
+    "id": 12106,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "hauler"
+  },
+  {
+    "id": 12108,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "battery"
+  },
+  {
+    "id": 12110,
+    "mass": 19584,
+    "type": "module",
+    "tier": 3,
+    "subtype": "builder"
+  },
+  {
     "id": 12202,
     "mass": 104960,
     "type": "entity",

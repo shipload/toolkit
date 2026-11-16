@@ -2154,6 +2154,42 @@
       "schema": "resin.v1"
     },
     {
+      "itemId": 12100,
+      "schema": "engine.v1"
+    },
+    {
+      "itemId": 12101,
+      "schema": "powercore.v1"
+    },
+    {
+      "itemId": 12102,
+      "schema": "limpetbay.v1"
+    },
+    {
+      "itemId": 12103,
+      "schema": "shuttle.v1"
+    },
+    {
+      "itemId": 12104,
+      "schema": "fabricatr.v1"
+    },
+    {
+      "itemId": 12105,
+      "schema": "cargohold.v1"
+    },
+    {
+      "itemId": 12106,
+      "schema": "tractor.v1"
+    },
+    {
+      "itemId": 12108,
+      "schema": "battery.v1"
+    },
+    {
+      "itemId": 12110,
+      "schema": "asmarm.v1"
+    },
+    {
       "itemId": 12202,
       "schema": "warehouse.v1"
     },

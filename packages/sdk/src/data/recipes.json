@@ -4644,6 +4644,465 @@
     ]
   },
   {
+    "outputItemId": 12100,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12003,
+        "quantity": 600
+      },
+      {
+        "itemId": 11100,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0,
+            "weight": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12101,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12006,
+        "quantity": 600
+      },
+      {
+        "itemId": 11101,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0,
+            "weight": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12102,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12005,
+        "quantity": 300
+      },
+      {
+        "itemId": 12009,
+        "quantity": 300
+      },
+      {
+        "itemId": 11102,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1,
+            "weight": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12103,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12008,
+        "quantity": 600
+      },
+      {
+        "itemId": 11103,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1,
+            "weight": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12104,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12009,
+        "quantity": 300
+      },
+      {
+        "itemId": 12004,
+        "quantity": 300
+      },
+      {
+        "itemId": 11104,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0,
+            "weight": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12105,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12001,
+        "quantity": 600
+      },
+      {
+        "itemId": 11105,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0,
+            "weight": 2
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12106,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12004,
+        "quantity": 300
+      },
+      {
+        "itemId": 12010,
+        "quantity": 300
+      },
+      {
+        "itemId": 11106,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0,
+            "weight": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 2,
+            "weight": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12108,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12007,
+        "quantity": 600
+      },
+      {
+        "itemId": 11108,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 255,
+            "statIndex": 0
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 0,
+            "weight": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "outputItemId": 12110,
+    "outputMass": 19584,
+    "inputs": [
+      {
+        "itemId": 12002,
+        "quantity": 300
+      },
+      {
+        "itemId": 12010,
+        "quantity": 300
+      },
+      {
+        "itemId": 11110,
+        "quantity": 1
+      }
+    ],
+    "statSlots": [
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 1,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 0,
+            "weight": 3
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "inputIndex": 0,
+            "statIndex": 1
+          },
+          {
+            "inputIndex": 0,
+            "statIndex": 2
+          },
+          {
+            "inputIndex": 2,
+            "statIndex": 1,
+            "weight": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
     "outputItemId": 12202,
     "outputMass": 104960,
     "inputs": [
