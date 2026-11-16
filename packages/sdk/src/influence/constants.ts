@@ -19,6 +19,15 @@ export const DECOMP_MAX_DEPTH = 8
 export const DECOMP_RAW_MASS_MAX = 1_000_000
 export const DECOMP_PROCESSED_MASS_MAX = 1_000_000
 
+export const INFLUENCE_COMPONENT_WEIGHTED_SQ_FP_MAX =
+    BigInt(DECOMP_RAW_MASS_MAX) *
+    BigInt(DECOMP_MAX_BUCKETS) *
+    INFLUENCE_WEIGHT_FP_MAX *
+    3n *
+    999n *
+    999n *
+    INFLUENCE_NEED_FP_MAX
+
 export const RESOURCE_ORE = 0
 export const RESOURCE_GAS = 1
 export const RESOURCE_REGOLITH = 2
@@ -70,7 +79,11 @@ export const CHARTER_MAX_PREREQS = 4
 export const CHARTER_MAX_GRANTS = 4
 
 export const INFLUENCE_D1_SEED = 45_369
-export const DEMAND_TRIPLE_SEED = {peak: 20_000n, base: 10_000n, floor: 1_000n}
+export const DEMAND_CONFIG_SEED = {
+    rankFp: [13_000n, 10_000n, 8_000n],
+    peakFp: [16_000n, 14_000n, 12_000n, 10_000n],
+    floor: 1_000n,
+}
 
 export function poolKey(category: number, tier: number, grade: number): bigint {
     return (BigInt(category) << 16n) | (BigInt(tier) << 8n) | BigInt(grade)

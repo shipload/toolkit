@@ -5,6 +5,7 @@ import {MASS_UNITS_PER_TONNE} from '../types'
 import {categoryIndex} from './categories'
 import {
     INFLUENCE_ATOMIC_PER_POINT,
+    INFLUENCE_COMPONENT_WEIGHTED_SQ_FP_MAX,
     INFLUENCE_MASS_MAX,
     INFLUENCE_NEED_FP_MAX,
     INFLUENCE_WEIGHT_FP_MAX,
@@ -14,7 +15,7 @@ import {
 } from './constants'
 import {findDecomp} from './decomp'
 import type {DemandView} from './demand'
-import {needForCategory} from './demand'
+import {needForCell} from './demand'
 import {getStatCount, statsSumSq} from './quality'
 
 const RESOURCE_STAT_COUNT = 3
@@ -48,7 +49,9 @@ export function weightedQualityAtomic(
             BigInt(d1) *
             BigInt(NEED_FP_SCALE)) /
         BigInt(INFLUENCE_ATOMIC_PER_POINT)
-    return num / den
+    const q = num / den
+    if (q > UINT64_MAX) throw new Error('influence: value overflow')
+    return q
 }
 
 export function resourceValueAtomic(
@@ -65,33 +68,28 @@ export function resourceValueAtomic(
     return weightedQualityAtomic(mass * weightFp, sumSq, nStats, d1, needFp)
 }
 
-export function componentBaseAtomic(weightedKeptSqFp: bigint, d1: number): bigint {
-    return weightedQualityAtomic(
-        weightedKeptSqFp,
-        1,
-        RESOURCE_STAT_COUNT,
-        d1,
-        BigInt(NEED_FP_SCALE)
-    )
+export function componentBaseAtomic(weightedKeptSqNeedFp: bigint, d1: number): bigint {
+    return weightedQualityAtomic(weightedKeptSqNeedFp, 1, RESOURCE_STAT_COUNT, d1, 1n)
 }
 
 interface KeptWeights {
     weightedKeptSq: bigint
+    weightedKeptSqNeed: bigint
     weightedMass: bigint
 }
 
-function keptWeights(item: ValuedItem, pricing: InfluencePricing): KeptWeights {
+function keptWeights(item: ValuedItem, demand: DemandView, pricing: InfluencePricing): KeptWeights {
     const recipe = getRecipe(item.itemId)
     if (!recipe) throw new Error('item has no decomposition')
     let weightedKeptSq = 0n
+    let weightedKeptSqNeed = 0n
     let weightedMass = 0n
     recipe.inputs.forEach((input, i) => {
         const def = getItem(input.itemId)
         if (def.category === undefined) throw new Error('component input is not a resource')
+        const category = categoryIndex(def.category)
         const weight =
-            BigInt(def.mass) *
-            BigInt(input.quantity) *
-            pricing.weight(categoryIndex(def.category), def.tier)
+            BigInt(def.mass) * BigInt(input.quantity) * pricing.weight(category, def.tier)
         weightedMass += weight
         let keptSq = 0
         recipe.statSlots.forEach((slot, k) => {
@@ -99,9 +97,14 @@ function keptWeights(item: ValuedItem, pricing: InfluencePricing): KeptWeights {
             const stat = decodeStat(item.stats, k)
             keptSq += stat * stat
         })
-        weightedKeptSq += weight * BigInt(keptSq)
+        const term = weight * BigInt(keptSq)
+        weightedKeptSq += term
+        if (keptSq > 0) weightedKeptSqNeed += term * needForCell(demand, category, def.tier)
     })
-    return {weightedKeptSq, weightedMass}
+    if (weightedKeptSqNeed > INFLUENCE_COMPONENT_WEIGHTED_SQ_FP_MAX) {
+        throw new Error('influence: component weighted mass out of range')
+    }
+    return {weightedKeptSq, weightedKeptSqNeed, weightedMass}
 }
 
 export function componentEffortAtomic(processedMassPerUnit: number, quantity: number): bigint {
@@ -128,7 +131,7 @@ export function valueCargoItem(
         const sumSq = statsSumSq(item.stats, nStats)
         const category = categoryIndex(def.category)
         const weightFp = pricing.weight(category, def.tier)
-        const needFp = needForCategory(demand, category)
+        const needFp = needForCell(demand, category, def.tier)
         const perUnit = resourceValueAtomic(
             BigInt(def.mass),
             weightFp,
@@ -145,7 +148,10 @@ export function valueCargoItem(
     const entry = findDecomp(item.itemId)
     if (!entry) throw new Error('item has no decomposition')
 
-    const perUnit = componentBaseAtomic(keptWeights(item, pricing).weightedKeptSq, pricing.d1)
+    const perUnit = componentBaseAtomic(
+        keptWeights(item, demand, pricing).weightedKeptSqNeed,
+        pricing.d1
+    )
     const total = perUnit * BigInt(item.quantity)
     if (total > UINT64_MAX) throw new Error('influence: component value overflow')
 
@@ -172,6 +178,7 @@ export interface ComponentValuation {
     processedMass: number
     weight: number
     quality: number
+    need: number
     baseAtomic: bigint
     effortAtomic: bigint
     totalAtomic: bigint
@@ -201,7 +208,7 @@ export function explainCargoItem(
             mass: BigInt(def.mass) * BigInt(item.quantity),
             weight: Number(pricing.weight(category, def.tier)) / WEIGHT_FP_SCALE,
             quality,
-            need: Number(needForCategory(demand, category)) / NEED_FP_SCALE,
+            need: Number(needForCell(demand, category, def.tier)) / NEED_FP_SCALE,
             totalAtomic,
             points,
         }
@@ -211,7 +218,7 @@ export function explainCargoItem(
     if (!entry) throw new Error('item has no decomposition')
     let rawMass = 0
     for (const bucket of entry.buckets) rawMass += bucket.rawMass
-    const {weightedKeptSq, weightedMass} = keptWeights(item, pricing)
+    const {weightedKeptSq, weightedKeptSqNeed, weightedMass} = keptWeights(item, demand, pricing)
     const quality =
         weightedMass === 0n
             ? 0
@@ -223,6 +230,10 @@ export function explainCargoItem(
         processedMass: entry.processedMass * item.quantity,
         weight: rawMass === 0 ? 0 : Number(weightedMass) / (rawMass * WEIGHT_FP_SCALE),
         quality,
+        need:
+            weightedKeptSq === 0n
+                ? 0
+                : Number(weightedKeptSqNeed) / (Number(weightedKeptSq) * NEED_FP_SCALE),
         baseAtomic: totalAtomic - effortAtomic,
         effortAtomic,
         totalAtomic,

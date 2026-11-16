@@ -8,10 +8,11 @@ import {
     citizenryName,
     contributeDuration,
     decayActive,
+    demandConfigFromRow,
     deriveDemand,
     pricingFromWeights,
     valueCargoItem,
-    type DemandTriple,
+    type DemandConfig,
     type DemandView,
     isCivicEntity,
     type ValuedItem,
@@ -153,12 +154,12 @@ export class InfluenceManager extends BaseManager {
         }
     }
 
-    async getDemandConfig(): Promise<DemandTriple> {
+    async getDemandConfig(): Promise<DemandConfig> {
         const row = (await this.server.table('infdemand').get()) as
             | ServerContract.Types.infdemand_row
             | undefined
         if (!row) throw new Error('influence demand config is unset')
-        return {peak: big(row.peak), base: big(row.base), floor: big(row.floor)}
+        return demandConfigFromRow(row)
     }
 
     async getQualityDivisor(): Promise<number> {
@@ -176,12 +177,12 @@ export class InfluenceManager extends BaseManager {
     async getDemand(location: CoordinatesType): Promise<DemandView> {
         const game = await this.getGame()
         const state = await this.getState()
-        const triple = await this.getDemandConfig()
+        const config = await this.getDemandConfig()
         return deriveDemand({
             gameSeed: game.config.seed,
             epochSeed: state.epochSeed,
             coordinates: location,
-            triple,
+            config,
         })
     }
 

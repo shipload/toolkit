@@ -4,7 +4,7 @@ import {ITEM_ORE_T1, ITEM_PLATE, ITEM_CRYSTAL_T1} from '../data/item-ids'
 import {categoryIndex} from './categories'
 import {
     CHARTER_WORKSHOP_COST,
-    DEMAND_TRIPLE_SEED,
+    DEMAND_CONFIG_SEED,
     INFLUENCE_ATOMIC_PER_POINT,
     INFLUENCE_D1_SEED,
     NEED_FP_SCALE,
@@ -12,16 +12,27 @@ import {
 import {decayActive, normalizeActive} from './decay'
 import {
     buildDemand,
+    cellNeed,
+    DEMAND_TIER_WEIGHTS,
+    type DemandView,
     deriveDemand,
     lackingMaskFrom,
-    needForCategory,
-    pickAcuteCategory,
+    needForCell,
+    pickPeakTier,
     popcount5,
+    rankedCategories,
+    rankLacking,
 } from './demand'
 import {findDecomp, DECOMP_REGISTRY} from './decomp'
 import {contributeDuration} from './duration'
 import {getStatCount, statsSumSq} from './quality'
-import {explainCargoItem, pricingFromWeights, valueCargoItem, valueContribution} from './valuation'
+import {
+    componentEffortAtomic,
+    explainCargoItem,
+    pricingFromWeights,
+    valueCargoItem,
+    valueContribution,
+} from './valuation'
 import {getItems} from '../data/catalog'
 import {citizenryName, citizenryPatternCount} from './citizenry'
 import citizenryAdjectives from '../data/citizenry-adjectives.json'
@@ -41,7 +52,30 @@ const pricing = pricingFromWeights(
     ).flat()
 )
 
-const baseDemand = buildDemand(0, 255, DEMAND_TRIPLE_SEED)
+function demandOf(need: (category: number, tier: number) => bigint): DemandView {
+    return {
+        abundantMask: 0,
+        lackingMask: 0x1f,
+        rank: [0, 0, 0, 0, 0],
+        peakTier: [0, 0, 0, 0, 0],
+        needFp: Array.from({length: 5}, (_, c) =>
+            Array.from({length: 10}, (_, t) => need(c, t + 1))
+        ),
+    }
+}
+
+const baseDemand = demandOf(() => BigInt(NEED_FP_SCALE))
+
+function wordBytes(words: number[]): number[] {
+    const bytes = new Array<number>(64).fill(0)
+    words.forEach((w, i) => {
+        bytes[i * 4] = (w >>> 24) & 0xff
+        bytes[i * 4 + 1] = (w >>> 16) & 0xff
+        bytes[i * 4 + 2] = (w >>> 8) & 0xff
+        bytes[i * 4 + 3] = w & 0xff
+    })
+    return bytes
+}
 
 describe('decay', () => {
     test('zero epochs is the identity', () => {
@@ -89,31 +123,85 @@ describe('demand', () => {
         expect(popcount5(0b11010)).toBe(3)
     })
 
-    test('the acute pick indexes the lacking set only', () => {
-        const lacking = 0b10010
-        expect(pickAcuteCategory(lacking, 0)).toBe(1)
-        expect(pickAcuteCategory(lacking, 1)).toBe(4)
-        expect(pickAcuteCategory(lacking, 2)).toBe(1)
+    test('the rank shuffle permutes the lacking set with one word per step', () => {
+        const lacking = 0b10110
+        expect(rankLacking(lacking, wordBytes([0, 0]))).toEqual([2, 4, 1])
+        expect(rankLacking(lacking, wordBytes([2, 1]))).toEqual([1, 2, 4])
+        expect(rankLacking(lacking, wordBytes([1, 0]))).toEqual([4, 1, 2])
+        expect(rankLacking(0b00010, wordBytes([7, 7]))).toEqual([1])
+        expect(() => rankLacking(0, wordBytes([]))).toThrow('location has no lacking category')
     })
 
-    test('the triple assigns peak, base and floor', () => {
-        const view = buildDemand(0b00001, 1, DEMAND_TRIPLE_SEED)
-        expect(needForCategory(view, 0)).toBe(DEMAND_TRIPLE_SEED.floor)
-        expect(needForCategory(view, 1)).toBe(DEMAND_TRIPLE_SEED.peak)
-        expect(needForCategory(view, 2)).toBe(DEMAND_TRIPLE_SEED.base)
+    test('the tier roll follows the cumulative weights', () => {
+        let cum = 0
+        DEMAND_TIER_WEIGHTS.forEach((w, i) => {
+            expect(pickPeakTier(cum)).toBe(i + 1)
+            expect(pickPeakTier(cum + w - 1)).toBe(i + 1)
+            cum += w
+        })
+        expect(cum).toBe(10_000)
+        expect(pickPeakTier(10_000)).toBe(1)
+        expect(pickPeakTier(0xffffffff)).toBe(pickPeakTier(0xffffffff % 10_000))
     })
 
-    test('the acute pick rotates with the epoch seed, not the game seed', () => {
+    test('a cell pays its rank rate times the peak bonus for its distance', () => {
+        const words = [0, 0, 0, 0, 0, 2784 + 2592 + 1998, 0, 0, 9999]
+        const view = buildDemand(0b00101, wordBytes(words), DEMAND_CONFIG_SEED)
+        expect(rankedCategories(view)).toEqual([3, 4, 1])
+        expect(view.rank).toEqual([0, 3, 0, 1, 2])
+        expect(view.peakTier).toEqual([0, 4, 0, 1, 10])
+        for (let t = 1; t <= 10; t++) {
+            expect(needForCell(view, 0, t)).toBe(DEMAND_CONFIG_SEED.floor)
+            expect(needForCell(view, 2, t)).toBe(DEMAND_CONFIG_SEED.floor)
+        }
+        expect(needForCell(view, 3, 1)).toBe(20_800n)
+        expect(needForCell(view, 3, 2)).toBe(18_200n)
+        expect(needForCell(view, 3, 3)).toBe(15_600n)
+        expect(needForCell(view, 3, 10)).toBe(13_000n)
+        expect(needForCell(view, 4, 10)).toBe(16_000n)
+        expect(needForCell(view, 4, 9)).toBe(14_000n)
+        expect(needForCell(view, 4, 8)).toBe(12_000n)
+        expect(needForCell(view, 4, 1)).toBe(10_000n)
+        expect(needForCell(view, 1, 4)).toBe(12_800n)
+        expect(needForCell(view, 1, 2)).toBe(9_600n)
+        expect(needForCell(view, 1, 7)).toBe(8_000n)
+        expect(cellNeed(13_000n, 16_000n)).toBe(20_800n)
+    })
+
+    test('an Industrial world ranks its one lacking category first', () => {
+        const view = buildDemand(0b11101, wordBytes([5, 5, 0, 0, 0, 0]), DEMAND_CONFIG_SEED)
+        expect(view.rank).toEqual([0, 1, 0, 0, 0])
+        expect(view.peakTier[1]).toBe(1)
+        expect(needForCell(view, 1, 1)).toBe(20_800n)
+        expect(needForCell(view, 1, 5)).toBe(13_000n)
+    })
+
+    test('a world lacking more categories than ranks refuses', () => {
+        const config = {...DEMAND_CONFIG_SEED, rankFp: [13_000n, 10_000n]}
+        expect(() => buildDemand(0b00001, wordBytes([]), config)).toThrow(
+            'location lacks more categories than demand ranks'
+        )
+    })
+
+    test('ranks and peaks move with the epoch seed, not the game seed', () => {
         const gameSeed = Checksum256.hash(Buffer.from('game'))
         const coordinates = WORLD
-        const picks = new Set<number>()
+        const firsts = new Set<number>()
+        const peaks = new Set<number>()
         for (let i = 0; i < 24; i++) {
             const epochSeed = Checksum256.hash(Buffer.from(`epoch-${i}`))
-            picks.add(
-                deriveDemand({gameSeed, epochSeed, coordinates, triple: DEMAND_TRIPLE_SEED}).acute
-            )
+            const view = deriveDemand({
+                gameSeed,
+                epochSeed,
+                coordinates,
+                config: DEMAND_CONFIG_SEED,
+            })
+            const [first] = rankedCategories(view)
+            firsts.add(first)
+            peaks.add(view.peakTier[first])
         }
-        expect(picks.size).toBeGreaterThan(1)
+        expect(firsts.size).toBeGreaterThan(1)
+        expect(peaks.size).toBeGreaterThan(1)
     })
 
     test('the composition partition is stable across epochs', () => {
@@ -123,7 +211,7 @@ describe('demand', () => {
         for (let i = 0; i < 8; i++) {
             const epochSeed = Checksum256.hash(Buffer.from(`epoch-${i}`))
             masks.add(
-                deriveDemand({gameSeed, epochSeed, coordinates, triple: DEMAND_TRIPLE_SEED})
+                deriveDemand({gameSeed, epochSeed, coordinates, config: DEMAND_CONFIG_SEED})
                     .abundantMask
             )
         }
@@ -157,7 +245,9 @@ describe('decomposition', () => {
 
 describe('explainCargoItem', () => {
     test('factors reproduce valueCargoItem for every valuable catalog item', () => {
-        const acute = buildDemand(0, categoryIndex('regolith'), DEMAND_TRIPLE_SEED)
+        const acute = demandOf((c, t) =>
+            c === categoryIndex('regolith') ? 20_800n : 1_000n * BigInt(t)
+        )
         for (const def of getItems()) {
             if (def.type !== 'resource' && def.type !== 'component') continue
             const item = {itemId: Number(def.id), quantity: 7, stats: packStats(363, 535, 246)}
@@ -167,7 +257,9 @@ describe('explainCargoItem', () => {
     })
 
     test('a resource explains mass, weight, quality and need', () => {
-        const acute = buildDemand(0, categoryIndex('crystal'), DEMAND_TRIPLE_SEED)
+        const acute = demandOf((c, t) =>
+            c === categoryIndex('crystal') && t === 1 ? 20_000n : BigInt(NEED_FP_SCALE)
+        )
         const explained = explainCargoItem(
             {itemId: ITEM_CRYSTAL_T1, quantity: 5000, stats: packStats(PAR)},
             acute,
@@ -212,8 +304,10 @@ describe('valuation', () => {
         expect(value).toBe(BigInt(INFLUENCE_ATOMIC_PER_POINT))
     })
 
-    test('the acute multiplier doubles a resource', () => {
-        const acute = buildDemand(0, categoryIndex('crystal'), DEMAND_TRIPLE_SEED)
+    test('a doubled cell need doubles a resource', () => {
+        const acute = demandOf((c, t) =>
+            c === categoryIndex('crystal') && t === 1 ? 20_000n : BigInt(NEED_FP_SCALE)
+        )
         const item = {itemId: ITEM_CRYSTAL_T1, quantity: 3, stats: packStats(PAR)}
         expect(valueCargoItem(item, acute, pricing)).toBe(
             valueCargoItem(item, baseDemand, pricing) * 2n
@@ -248,12 +342,37 @@ describe('valuation', () => {
         expect(many).toBe(one * 40n)
     })
 
-    test('components ignore demand entirely', () => {
-        const acute = buildDemand(0, categoryIndex('ore'), DEMAND_TRIPLE_SEED)
+    test('a component follows the cell need of each input it decomposes into', () => {
         const item = {itemId: ITEM_PLATE, quantity: 5, stats: packStats(PAR)}
-        expect(valueCargoItem(item, acute, pricing)).toBe(valueCargoItem(item, baseDemand, pricing))
+        const effort = componentEffortAtomic(findDecomp(ITEM_PLATE)!.processedMass, 5)
+        const base = valueCargoItem(item, baseDemand, pricing) - effort
+        const doubled = demandOf(() => 20_000n)
+        expect(valueCargoItem(item, doubled, pricing) - effort).toBe(base * 2n)
+        const elsewhere = demandOf((c) => (c === categoryIndex('ore') ? 10_000n : 20_000n))
+        expect(valueCargoItem(item, elsewhere, pricing)).toBe(
+            valueCargoItem(item, baseDemand, pricing)
+        )
+        const explained = explainCargoItem(item, doubled, pricing)
+        if (explained.kind !== 'component') throw new Error('expected component')
+        expect(explained.need).toBe(2)
     })
 
+    test('a component reads only the cell of its input, not its neighbours', () => {
+        const ore = categoryIndex('ore')
+        const item = {itemId: ITEM_PLATE, quantity: 3, stats: packStats(PAR)}
+        const effort = componentEffortAtomic(findDecomp(ITEM_PLATE)!.processedMass, 3)
+        const base = valueCargoItem(item, baseDemand, pricing) - effort
+        const inputCell = demandOf((c, t) => (c === ore && t === 1 ? 16_000n : 8_000n))
+        const scaled = valueCargoItem(item, inputCell, pricing) - effort
+        expect(scaled - (base * 16n) / 10n).toBeGreaterThanOrEqual(0n)
+        expect(scaled - (base * 16n) / 10n).toBeLessThanOrEqual(1n)
+        const nextTier = demandOf((c, t) =>
+            c === ore && t === 2 ? 16_000n : BigInt(NEED_FP_SCALE)
+        )
+        expect(valueCargoItem(item, nextTier, pricing)).toBe(
+            valueCargoItem(item, baseDemand, pricing)
+        )
+    })
     test('quality scales quadratically within the per-unit floor tolerance', () => {
         const single = valueCargoItem(
             {itemId: ITEM_ORE_T1, quantity: 100, stats: packStats(100)},
