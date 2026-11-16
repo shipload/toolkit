@@ -20,7 +20,12 @@ import {
     WAREHOUSE_BASE_CAPACITY,
     gathererDepthForTier,
 } from '../derivation/capabilities'
-import {DEPTH_THRESHOLD_T3, DEPTH_THRESHOLD_T4, DEPTH_THRESHOLD_T5} from '../derivation/resources'
+import {
+    DEPTH_THRESHOLD_T3,
+    DEPTH_THRESHOLD_T4,
+    DEPTH_THRESHOLD_T5,
+    DEPTH_THRESHOLD_T6,
+} from '../derivation/resources'
 import {deriveResourceStats} from '../derivation/stratum'
 import {MASS_UNITS_PER_TONNE} from '../types'
 
@@ -340,7 +345,7 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
         }
     })
 
-    test('WP-CP-10-tonnage a component costs 10 + 2(t-1) t, so a step takes 3,000 t then 4,200 t of each resource it draws on', () => {
+    test('WP-CP-10-tonnage a component costs 10 + 2(t-1) t, so a step takes 3,000 t, 4,200 t and 5,600 t of each resource it draws on', () => {
         for (const id of recipeIds.filter((i) => getItem(i).type === 'component')) {
             expect(tonnes(inputMass(id))).toBe(10 + 2 * (getItem(id).tier - 1))
         }
@@ -362,6 +367,8 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
             [10211, 3000, 2],
             [11212, 4200, 3],
             [11213, 4200, 2],
+            [12212, 5600, 3],
+            [12214, 5600, 3],
         ]) {
             const totals = perResource(id)
             expect(totals.size).toBe(resources)
@@ -406,12 +413,24 @@ describe('WP-CP-08 to CP-12: ids and the ladder', () => {
 })
 
 describe('WP-CP-16 and CP-20 to CP-31: catalog facts', () => {
-    test('WP-CP-16-depth a T2 gatherer reaches stratum 12,989 at most, so T5 and above are out of reach', () => {
+    test('WP-CP-16-depth a T3 gatherer reaches stratum 22,984 at most, so T6 and above are out of reach', () => {
         expect(gathererDepthForTier(999, 1)).toBe(5495)
         expect(gathererDepthForTier(999, 2)).toBe(12989)
+        expect(gathererDepthForTier(999, 3)).toBe(22984)
         expect(gathererDepthForTier(999, 2)).toBeGreaterThan(DEPTH_THRESHOLD_T4)
         expect(gathererDepthForTier(0, 2)).toBeLessThan(DEPTH_THRESHOLD_T3)
         expect(gathererDepthForTier(999, 2)).toBeLessThan(DEPTH_THRESHOLD_T5)
+        expect(gathererDepthForTier(0, 3)).toBeLessThan(DEPTH_THRESHOLD_T4)
+        expect(gathererDepthForTier(999, 3)).toBeGreaterThan(DEPTH_THRESHOLD_T5)
+        expect(gathererDepthForTier(999, 3)).toBeLessThan(DEPTH_THRESHOLD_T6)
+    })
+
+    test('WP-CP-16-t3-tolerance a T3 gatherer reaches T4 strata at tolerance 313 and T5 strata at 938, and at the crafted cap of 737 reaches stratum 18,792', () => {
+        expect(gathererDepthForTier(312, 3)).toBeLessThan(DEPTH_THRESHOLD_T4)
+        expect(gathererDepthForTier(313, 3)).toBeGreaterThanOrEqual(DEPTH_THRESHOLD_T4)
+        expect(gathererDepthForTier(937, 3)).toBeLessThan(DEPTH_THRESHOLD_T5)
+        expect(gathererDepthForTier(938, 3)).toBeGreaterThanOrEqual(DEPTH_THRESHOLD_T5)
+        expect(gathererDepthForTier(737, 3)).toBe(18792)
     })
 
     test('WP-CP-16-tolerance a T2 gatherer reaches T3 strata at tolerance 273 and T4 strata at 910, and a T1 gatherer never reaches T4', () => {
