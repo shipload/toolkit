@@ -138,6 +138,13 @@ export function getPackedEntityType(itemId: number): Name | null {
     return TEMPLATE_BY_ITEM_ID.get(itemId)?.kind ?? null
 }
 
+export function isStructureHull(itemId: number): boolean {
+    const kind = TEMPLATE_BY_ITEM_ID.get(itemId)?.kind
+    if (!kind) return false
+    const c = KIND_META.get(nameKey(kind))?.classification
+    return c === EntityClass.OrbitalStructure || c === EntityClass.PlanetaryStructure
+}
+
 export function kindCan(kind: NameType | EntityTypeName, cap: number): boolean {
     const m = KIND_META.get(nameKey(kind))
     return m !== undefined && (m.capabilityFlags & cap) !== 0

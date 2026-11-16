@@ -861,6 +861,11 @@
         "type": "storage",
         "outputPct": 100,
         "maxTier": 3
+      },
+      {
+        "type": "storage",
+        "outputPct": 100,
+        "maxTier": 3
       }
     ],
     "baseHullmass": 1000
@@ -871,6 +876,11 @@
       {
         "type": "generator",
         "outputPct": 200,
+        "maxTier": 3
+      },
+      {
+        "type": "aux",
+        "outputPct": 100,
         "maxTier": 3
       },
       {
@@ -887,6 +897,11 @@
       {
         "type": "generator",
         "outputPct": 200,
+        "maxTier": 3
+      },
+      {
+        "type": "aux",
+        "outputPct": 100,
         "maxTier": 3
       },
       {
@@ -908,6 +923,11 @@
       {
         "type": "generator",
         "outputPct": 200,
+        "maxTier": 3
+      },
+      {
+        "type": "aux",
+        "outputPct": 100,
         "maxTier": 3
       },
       {

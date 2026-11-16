@@ -898,6 +898,7 @@ exports[`module export surface 1`] = `
   "isSettling",
   "isShip",
   "isShipItem",
+  "isStructureHull",
   "isSubscriptionsDebugEnabled",
   "isValidWormholePair",
   "isWarehouse",

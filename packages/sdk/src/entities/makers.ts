@@ -2,7 +2,7 @@ import {Name, TimePoint, UInt16, UInt32, UInt64, UInt8} from '@wharfkit/antelope
 import type {NameType, UInt64Type} from '@wharfkit/antelope'
 import {ServerContract} from '../contracts'
 import {Entity} from './entity'
-import {getKindMeta, getTemplateMeta} from '../data/kind-registry'
+import {getKindMeta, getTemplateMeta, isStructureHull} from '../data/kind-registry'
 import type {EntityTypeName} from '../data/kind-registry'
 import {getEntityLayout} from '../data/recipes-runtime'
 import type {EntitySlot} from '../data/recipes-runtime'
@@ -38,7 +38,8 @@ export interface EntityStateInput {
 function assignModulesToSlots(
     slots: EntitySlot[],
     modules: PackedModuleInput[],
-    entityLabel: string
+    entityLabel: string,
+    onStructure: boolean
 ): ServerContract.Types.module_entry[] {
     const result: Array<{type: number; installed?: ServerContract.Types.packed_module}> = slots.map(
         (s) => ({type: moduleSlotTypeToCode(s.type), installed: undefined})
@@ -46,7 +47,7 @@ function assignModulesToSlots(
 
     for (const mod of modules) {
         const modType = getModuleCapabilityType(mod.itemId)
-        const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType))
+        const slotIdx = result.findIndex((r) => !r.installed && moduleAccepts(r.type, modType, onStructure))
         if (slotIdx === -1) {
             let modName: string
             try {
@@ -122,7 +123,12 @@ export function makeEntity(packedItemId: number, state: EntityStateInput): Entit
         if (state.capacity !== undefined) info.capacity = UInt32.from(state.capacity)
     } else {
         const entityLabel = getKindMeta(template.kind)?.defaultLabel ?? kind
-        const moduleEntries = assignModulesToSlots(layout, mods, entityLabel)
+        const moduleEntries = assignModulesToSlots(
+            layout,
+            mods,
+            entityLabel,
+            isStructureHull(packedItemId)
+        )
         info.modules = moduleEntries
 
         const installed = packedModulesToInstalled(moduleEntries)

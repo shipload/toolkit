@@ -25,12 +25,16 @@ export interface ModuleEntry {
     installed?: PackedModule
 }
 
-export function moduleAccepts(slotType: number, moduleType: number): boolean {
+export function moduleAccepts(
+    slotType: number,
+    moduleType: number,
+    onStructure: boolean
+): boolean {
     if (slotType === MODULE_AUX) {
         return (
             moduleType === MODULE_GENERATOR ||
-            moduleType === MODULE_ENGINE ||
-            moduleType === MODULE_BATTERY
+            moduleType === MODULE_BATTERY ||
+            (moduleType === MODULE_ENGINE && !onStructure)
         )
     }
     return slotType === MODULE_ANY || slotType === moduleType
@@ -78,10 +82,14 @@ export function moduleSlotTypeToCode(slotType: string): number {
     }
 }
 
-export function slotAcceptsModule(slot: EntitySlot, moduleItemId: number): boolean {
+export function slotAcceptsModule(
+    slot: EntitySlot,
+    moduleItemId: number,
+    onStructure: boolean
+): boolean {
     const moduleType = getModuleCapabilityType(moduleItemId)
     if (moduleType === 0xff) return false
-    if (!moduleAccepts(moduleSlotTypeToCode(slot.type), moduleType)) return false
+    if (!moduleAccepts(moduleSlotTypeToCode(slot.type), moduleType, onStructure)) return false
     return getItem(moduleItemId).tier <= slot.maxTier
 }
 
@@ -93,7 +101,8 @@ export interface ReslottedModules<T extends {itemId: number}> {
 
 export function reslotModules<T extends {itemId: number}>(
     installed: readonly (T | null | undefined)[],
-    targetSlots: readonly EntitySlot[]
+    targetSlots: readonly EntitySlot[],
+    onStructure: boolean
 ): ReslottedModules<T> {
     const slots: (T | null)[] = targetSlots.map(() => null)
     const displaced: T[] = []
@@ -101,7 +110,7 @@ export function reslotModules<T extends {itemId: number}>(
     for (const module of installed) {
         if (!module) continue
         const slot = targetSlots.findIndex(
-            (s, i) => slots[i] === null && slotAcceptsModule(s, module.itemId)
+            (s, i) => slots[i] === null && slotAcceptsModule(s, module.itemId, onStructure)
         )
         if (slot >= 0) {
             slots[slot] = module

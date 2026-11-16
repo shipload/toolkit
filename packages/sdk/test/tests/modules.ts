@@ -30,13 +30,13 @@ import {
 
 describe('modules', () => {
     test('MODULE_ANY accepts any module type', () => {
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_ENGINE))
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_GENERATOR))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_ENGINE, false))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_GENERATOR, false))
     })
 
     test('typed slot only accepts matching type', () => {
-        assert.isTrue(moduleAccepts(MODULE_ENGINE, MODULE_ENGINE))
-        assert.isFalse(moduleAccepts(MODULE_ENGINE, MODULE_GENERATOR))
+        assert.isTrue(moduleAccepts(MODULE_ENGINE, MODULE_ENGINE, false))
+        assert.isFalse(moduleAccepts(MODULE_ENGINE, MODULE_GENERATOR, false))
     })
 
     test('getModuleCapabilityType returns correct type', () => {
@@ -51,18 +51,18 @@ describe('modules', () => {
     })
 
     test('MODULE_ANY accepts new module types', () => {
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_GATHERER))
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_LOADER))
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_CRAFTER))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_GATHERER, false))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_LOADER, false))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_CRAFTER, false))
     })
 
     test('typed slots accept matching new types', () => {
-        assert.isTrue(moduleAccepts(MODULE_GATHERER, MODULE_GATHERER))
-        assert.isFalse(moduleAccepts(MODULE_GATHERER, MODULE_ENGINE))
-        assert.isTrue(moduleAccepts(MODULE_LOADER, MODULE_LOADER))
-        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_GENERATOR))
-        assert.isTrue(moduleAccepts(MODULE_CRAFTER, MODULE_CRAFTER))
-        assert.isFalse(moduleAccepts(MODULE_CRAFTER, MODULE_GATHERER))
+        assert.isTrue(moduleAccepts(MODULE_GATHERER, MODULE_GATHERER, false))
+        assert.isFalse(moduleAccepts(MODULE_GATHERER, MODULE_ENGINE, false))
+        assert.isTrue(moduleAccepts(MODULE_LOADER, MODULE_LOADER, false))
+        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_GENERATOR, false))
+        assert.isTrue(moduleAccepts(MODULE_CRAFTER, MODULE_CRAFTER, false))
+        assert.isFalse(moduleAccepts(MODULE_CRAFTER, MODULE_GATHERER, false))
     })
 
     test('getModuleCapabilityType returns correct type for new modules', () => {
@@ -78,11 +78,11 @@ describe('modules', () => {
     })
 
     test('MODULE_ANY accepts MODULE_HAULER', () => {
-        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_HAULER))
+        assert.isTrue(moduleAccepts(MODULE_ANY, MODULE_HAULER, false))
     })
 
     test('MODULE_LOADER slot rejects MODULE_HAULER', () => {
-        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_HAULER))
+        assert.isFalse(moduleAccepts(MODULE_LOADER, MODULE_HAULER, false))
     })
 
     test('getModuleCapabilityType returns MODULE_HAULER for ITEM_HAULER_T1', () => {
@@ -93,14 +93,20 @@ describe('modules', () => {
         assert.isTrue(isModuleItem(ITEM_HAULER_T1))
     })
 
-    test('MODULE_AUX slot accepts generator, engine, and battery modules', () => {
-        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_GENERATOR))
-        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_ENGINE))
-        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_BATTERY))
+    test('MODULE_AUX slot on a ship accepts generator, engine, and battery modules', () => {
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_GENERATOR, false))
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_ENGINE, false))
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_BATTERY, false))
+    })
+
+    test('MODULE_AUX slot on a structure refuses an engine', () => {
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_GENERATOR, true))
+        assert.isFalse(moduleAccepts(MODULE_AUX, MODULE_ENGINE, true))
+        assert.isTrue(moduleAccepts(MODULE_AUX, MODULE_BATTERY, true))
     })
 
     test('MODULE_AUX slot rejects MODULE_GATHERER', () => {
-        assert.isFalse(moduleAccepts(MODULE_AUX, MODULE_GATHERER))
+        assert.isFalse(moduleAccepts(MODULE_AUX, MODULE_GATHERER, false))
     })
 
     test('T2 modules missing from the old hand-maintained switch resolve to a real capability type', () => {

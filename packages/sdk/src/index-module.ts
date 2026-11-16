@@ -504,6 +504,7 @@ export {
     ENTITY_ASSEMBLY_YARD,
     getEntityClass,
     getPackedEntityType,
+    isStructureHull,
     getKindMeta,
     getTemplateMeta,
     kindCan,

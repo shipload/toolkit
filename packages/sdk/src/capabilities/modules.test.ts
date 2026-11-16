@@ -8,7 +8,8 @@ import {
     ITEM_GENERATOR_T2,
     ITEM_LOADER_T1,
 } from '../data/item-ids'
-import {reslotModules} from './modules'
+import {isStructureHull} from '../data/kind-registry'
+import {reslotModules, slotAcceptsModule} from './modules'
 
 const gathererHull = getEntityLayout(11203)?.slots ?? []
 
@@ -17,7 +18,7 @@ test('reslotModules places each module in the first free slot of its type', () =
     const generator = {itemId: ITEM_GENERATOR_T1}
     const gatherer = {itemId: ITEM_GATHERER_T1}
     const loader = {itemId: ITEM_LOADER_T1}
-    const out = reslotModules([engine, generator, null, gatherer, loader], gathererHull)
+    const out = reslotModules([engine, generator, null, gatherer, loader], gathererHull, true)
     expect(out.slots).toEqual([generator, gatherer])
     expect(out.displaced).toEqual([engine, loader])
     expect(out.displacedMass).toBe(getItem(ITEM_ENGINE_T1).mass + getItem(ITEM_LOADER_T1).mass)
@@ -26,7 +27,18 @@ test('reslotModules places each module in the first free slot of its type', () =
 test('reslotModules displaces a second module once its slot type is taken', () => {
     const first = {itemId: ITEM_GENERATOR_T1}
     const second = {itemId: ITEM_GENERATOR_T2}
-    const out = reslotModules([first, second], gathererHull)
+    const out = reslotModules([first, second], gathererHull, true)
     expect(out.slots).toEqual([first, null])
     expect(out.displaced).toEqual([second])
+})
+
+test('a structure Aux slot refuses an Engine that a ship Aux slot takes', () => {
+    const rigT3 = getEntityLayout(12203)?.slots ?? []
+    const aux = rigT3[1]
+    expect(aux.type).toBe('aux')
+    expect(slotAcceptsModule(aux, ITEM_ENGINE_T1, true)).toBe(false)
+    expect(slotAcceptsModule(aux, ITEM_ENGINE_T1, false)).toBe(true)
+    expect(slotAcceptsModule(aux, ITEM_GENERATOR_T1, true)).toBe(true)
+    expect(isStructureHull(12203)).toBe(true)
+    expect(isStructureHull(12215)).toBe(false)
 })
