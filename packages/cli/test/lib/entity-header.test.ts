@@ -40,8 +40,8 @@ describe("renderEntityFull modules", () => {
 			modules: [fitted(9, 10106, encodeStats([500, 500, 500]))],
 		});
 		expect(out).toMatch(/#0 \(Towing\):\s+Tractor Beam \(T1\)/);
-		expect(out).toContain("Towing:");
-		expect(out).toMatch(/Tows:\s+\d+ containers?, T1 and below/);
+		expect(out).toContain("Hauling:");
+		expect(out).toMatch(/Hauls:\s+\d+ containers?, T1 and below/);
 		expect(out).toContain("Handling:");
 		expect(out).not.toContain("energy/tile");
 	});
