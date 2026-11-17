@@ -170,21 +170,39 @@ export function wormholesInBox(
     }))
 }
 
+export interface DepthRange {
+    from?: number
+    to?: number
+}
+
 export async function scanCells(
     gameSeed: string,
     epochSeed: string,
-    cells: Coord[]
+    cells: Coord[],
+    range?: DepthRange
 ): Promise<DerivedCell[]> {
     await scanReady()
-    return scanCellsCore(gameSeed, epochSeed, cells)
+    return scanCellsCore(gameSeed, epochSeed, cells, range)
 }
 
 // Sync sibling of scanCells; caller must warm the instance via scanReady() first.
-export function scanCellsSync(gameSeed: string, epochSeed: string, cells: Coord[]): DerivedCell[] {
-    return scanCellsCore(gameSeed, epochSeed, cells)
+export function scanCellsSync(
+    gameSeed: string,
+    epochSeed: string,
+    cells: Coord[],
+    range?: DepthRange
+): DerivedCell[] {
+    return scanCellsCore(gameSeed, epochSeed, cells, range)
 }
 
-function scanCellsCore(gameSeed: string, epochSeed: string, cells: Coord[]): DerivedCell[] {
+function scanCellsCore(
+    gameSeed: string,
+    epochSeed: string,
+    cells: Coord[],
+    range: DepthRange = {}
+): DerivedCell[] {
+    const from = Math.max(1, range.from ?? 1)
+    const to = Math.min(0xffffffff, range.to ?? 0xffffffff)
     const e = ex()
     const mem = e.memory as WebAssembly.Memory
     const write = (b: Uint8Array) => {
@@ -203,12 +221,12 @@ function scanCellsCore(gameSeed: string, epochSeed: string, cells: Coord[]): Der
     const locOut = e.malloc(cells.length * 8)
     let cap = Math.max(64, cells.length * 8)
     let depOut = e.malloc(cap * 40)
-    let n = e.scan_cells(gp, ep, cp, cells.length, locOut, depOut, cap)
+    let n = e.scan_cells(gp, ep, cp, cells.length, from, to, locOut, depOut, cap)
     if (n < 0) {
         e.free(depOut)
         cap = -n
         depOut = e.malloc(cap * 40)
-        n = e.scan_cells(gp, ep, cp, cells.length, locOut, depOut, cap)
+        n = e.scan_cells(gp, ep, cp, cells.length, from, to, locOut, depOut, cap)
     }
     const locView = new DataView(mem.buffer, locOut, cells.length * 8)
     const depView = new DataView(mem.buffer, depOut, n * 40)
