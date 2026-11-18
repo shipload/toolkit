@@ -6,7 +6,11 @@ The player needs an Antelope account on the target network and a wallet that can
 
 ## Bootstrap
 
-Run these once per account, in order. Each step says what to confirm before moving on.
+Run these once per account, in order. Each step says what to confirm before moving on. The player may have done steps 2 and 3 on the Guide page already, so check first:
+
+    shiploadcli entities
+
+If the account owns a ship in the world, run step 1 and skip to step 4.
 
 1. Write a config and name the account:
 
@@ -19,17 +23,17 @@ Run these once per account, in order. Each step says what to confirm before movi
 
    From here the CLI signs game actions with the restricted key. Any action that key cannot sign comes back as a wallet signing link; give it to the player and continue once they report it signed.
 
-2. Register a company:
+2. Register a company. This prints a wallet signing link:
 
        shiploadcli foundcompany
 
-3. Claim and deploy the starter ship (testnet only; `claimstarter` does not exist on a real network):
+3. Get the first ship and deploy it:
 
        shiploadcli claimstarter
        shiploadcli nft
        shiploadcli nft deploy <asset-id>
 
-   `nft` lists the wrapped ship and its asset id. Deploying unwraps it into a live ship at the nexus where it was wrapped, and the ship recharges there.
+   `claimstarter` exists only on the Jungle 4 testnet and mints one free Roustabout per account. On any other network the player buys a wrapped Roustabout in the Market at https://dev.shiploadgame.com/market; ask them to, and continue once `nft` lists it. `nft` lists the wrapped ship and its asset id. `nft deploy` prints a wallet signing link, because it moves the asset out of the account. Deploying unwraps the ship into a live ship at the nexus where it was wrapped, with no energy and a recharge task queued.
 
 4. Confirm:
 
@@ -98,9 +102,17 @@ The binding constraint is haul: the ship carries far less than 27,000 t, so the 
 
 A different goal (the best possible gatherer, a warehouse in a rich region) leads to a different route through the same model.
 
+## The first objective
+
+If the player names no objective, work toward a second ship, then keep every ship working. A second ship doubles gathering, and every ship after it adds another, so the long game is more entities working at once. Once the account owns two or more ships, plan for all of them each session: give every idle entity work before you wait, and route them so they do not draw down the same stratum or wait on each other at a Workshop.
+
 ## Autonomy
 
 Routine steps toward the player's objective are yours to take without asking. Report at milestones, at real choices the player should make, and when you are blocked. When queued work finishes hours from now, report what you queued, schedule your return, and carry on when it lands. Record your reasoning in the notes file so the next session can pick it up.
+
+## Status reports
+
+The player can watch their ships on the map at https://dev.shiploadgame.com, and may ask you instead. When they ask how things are going, run `entities` and each entity's `tasks`, then answer in a few lines: where each entity is, what it is doing, when that finishes, and how far the objective has come.
 
 ## The notes file
 
