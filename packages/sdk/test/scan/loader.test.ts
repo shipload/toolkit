@@ -5,6 +5,8 @@ import {
     deriveStrata,
     deriveLocationStatic,
     deriveLocationSize,
+    COORD_MAX,
+    COORD_MIN,
 } from '../../src'
 
 const GAME = '11'.repeat(32)
@@ -26,6 +28,20 @@ describe('@shipload/sdk/scan location API', () => {
                 if (t !== 0) ref.push({x, y, locType: t})
             }
         expect(systemsInBox(GAME, xMin, yMin, xMax, yMax)).toEqual(ref)
+    })
+    test('systemsInBox clamps a box reaching past the coordinate limit', async () => {
+        await scanReady()
+        const inside = systemsInBox(GAME, COORD_MAX - 60, COORD_MAX - 60, COORD_MAX, COORD_MAX)
+        expect(inside.length).toBeGreaterThan(0)
+        expect(
+            systemsInBox(GAME, COORD_MAX - 60, COORD_MAX - 60, COORD_MAX + 40, COORD_MAX + 40)
+        ).toEqual(inside)
+        const low = systemsInBox(GAME, COORD_MIN, COORD_MIN, COORD_MIN + 60, COORD_MIN + 60)
+        expect(low.length).toBeGreaterThan(0)
+        expect(
+            systemsInBox(GAME, COORD_MIN - 40, COORD_MIN - 40, COORD_MIN + 60, COORD_MIN + 60)
+        ).toEqual(low)
+        expect(systemsInBox(GAME, COORD_MAX + 1, 0, COORD_MAX + 50, 50)).toEqual([])
     })
     test('sync call works without prior scanReady (self-instantiate)', async () => {
         expect(typeof getLocationType(GAME, 5000, 5000)).toBe('number')

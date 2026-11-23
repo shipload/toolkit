@@ -1,3 +1,4 @@
+import {COORD_MAX, COORD_MIN} from '../coordinates/constants'
 import {SCAN_WASM_B64} from './scan-wasm.base64'
 
 const stubImports: WebAssembly.Imports = new Proxy(
@@ -55,6 +56,11 @@ function boxScan<T>(
     yMax: number,
     decode: (dv: DataView, o: number) => T
 ): T[] {
+    xMin = Math.max(xMin, COORD_MIN)
+    yMin = Math.max(yMin, COORD_MIN)
+    xMax = Math.min(xMax, COORD_MAX)
+    yMax = Math.min(yMax, COORD_MAX)
+    if (xMin > xMax || yMin > yMax) return []
     const e = ex()
     const mem = e.memory as WebAssembly.Memory
     const g = e.malloc(32)
