@@ -332,9 +332,15 @@ export {
     contractRouteHeuristic,
 } from './travel/route-build'
 
-export {estimateTrip, planWormholeRoute, wormholeTrips} from './travel/wormhole-route'
+export {
+    estimateTrip,
+    planWormholeRoute,
+    simulateJumpRoute,
+    wormholeTrips,
+} from './travel/wormhole-route'
 export type {
     EstimateTripParams,
+    JumpRouteSim,
     PlanWormholeRouteParams,
     RouteJump,
     TripEstimate,

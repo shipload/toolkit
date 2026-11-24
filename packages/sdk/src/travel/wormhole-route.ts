@@ -263,6 +263,45 @@ function carriedMovers(
     })
 }
 
+export interface JumpRouteSim {
+    legs: RouteSim['legs']
+    legsBefore: number
+    jumpStartsAt: number
+    jumpSeconds: number
+    totalSeconds: number
+    reachable: boolean
+}
+
+export function simulateJumpRoute(
+    movers: readonly RouteMoverInput[],
+    waypoints: readonly Coord[],
+    jump: RouteJump,
+    origin: Coord,
+    recharge: boolean
+): JumpRouteSim {
+    const before = simulateRoute([...movers], waypoints.slice(0, jump.legsBefore), origin, recharge)
+    const barrier = movers.reduce(
+        (mx, m) => Math.max(mx, m.priorMobilityEnd, m.narrowBarrierEnd),
+        0
+    )
+    const jumpStartsAt = jump.legsBefore > 0 ? before.totalSeconds : barrier
+    const elapsed = jumpStartsAt + jump.seconds
+    const after = simulateRoute(
+        carriedMovers(movers, before, elapsed),
+        waypoints.slice(jump.legsBefore),
+        jump.exit,
+        recharge
+    )
+    return {
+        legs: [...before.legs, ...after.legs],
+        legsBefore: jump.legsBefore,
+        jumpStartsAt,
+        jumpSeconds: jump.seconds,
+        totalSeconds: elapsed + after.totalSeconds,
+        reachable: before.reachable && after.reachable,
+    }
+}
+
 export interface EstimateTripParams {
     seed: Checksum256Type | null
     origin: Coord
@@ -282,23 +321,18 @@ export function estimateTrip(params: EstimateTripParams): TripEstimate {
     const [trip] = seed ? wormholeTrips(seed, origin, dest, perLegReach, maxLegs) : []
     if (trip) {
         const legsBefore = legsOver(dist(origin, trip.entrance), perLegReach)
-        const before = simulateRoute(
-            [...movers],
-            straightWaypoints(origin, trip.entrance, legsBefore),
+        const jump = {entrance: trip.entrance, exit: trip.exit, seconds: trip.seconds, legsBefore}
+        const sim = simulateJumpRoute(
+            movers,
+            [
+                ...straightWaypoints(origin, trip.entrance, legsBefore),
+                ...straightWaypoints(trip.exit, dest, trip.legs - legsBefore),
+            ],
+            jump,
             origin,
             true
         )
-        const after = simulateRoute(
-            carriedMovers(movers, before, before.totalSeconds + trip.seconds),
-            straightWaypoints(trip.exit, dest, trip.legs - legsBefore),
-            trip.exit,
-            true
-        )
-        jumped = {
-            legs: trip.legs,
-            seconds: before.totalSeconds + trip.seconds + after.totalSeconds,
-            jump: {entrance: trip.entrance, exit: trip.exit, seconds: trip.seconds, legsBefore},
-        }
+        jumped = {legs: trip.legs, seconds: sim.totalSeconds, jump}
         if (contractRouteHeuristic(movers)(origin, dest) >= jumped.seconds) return jumped
     }
 

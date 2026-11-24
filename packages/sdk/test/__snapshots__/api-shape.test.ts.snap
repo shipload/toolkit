@@ -1034,6 +1034,7 @@ exports[`module export surface 1`] = `
   "setTranslator",
   "shuttleCandidates",
   "shuttleReasonCode",
+  "simulateJumpRoute",
   "simulateRoute",
   "slotAcceptsModule",
   "slotLabel",

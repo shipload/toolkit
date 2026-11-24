@@ -1,7 +1,12 @@
 import {describe, expect, test} from 'bun:test'
 import {Checksum256} from '@wharfkit/antelope'
 import {sdkSystemGraph, type Coord, type RouteLegCost} from '../../src/travel/route-planner'
-import {estimateTrip, planWormholeRoute, wormholeTrips} from '../../src/travel/wormhole-route'
+import {
+    estimateTrip,
+    planWormholeRoute,
+    simulateJumpRoute,
+    wormholeTrips,
+} from '../../src/travel/wormhole-route'
 import {isValidWormholePair} from '../../src/derivation/wormhole'
 import type {RouteMoverInput} from '../../src/travel/route-simulator'
 import * as scan from '../../src/scan'
@@ -144,5 +149,52 @@ describe('estimateTrip', () => {
         })
         expect(estimate.jump).toBeUndefined()
         expect(estimate.legs).toBe(Math.ceil(Math.hypot(ENTRANCE.x, ENTRANCE.y) / REACH))
+    })
+})
+
+describe('simulateJumpRoute', () => {
+    const jumpSeconds = 7200
+    const nearEntrance: Coord = {x: ENTRANCE.x + 4, y: ENTRANCE.y}
+    const pastExit: Coord = {x: EXIT.x + 3, y: EXIT.y}
+
+    test('the legs after the jump start at the exit and the total adds the transit', () => {
+        const sim = simulateJumpRoute(
+            [ship],
+            [ENTRANCE, pastExit],
+            {entrance: ENTRANCE, exit: EXIT, seconds: jumpSeconds, legsBefore: 1},
+            nearEntrance,
+            true
+        )
+        expect(sim.reachable).toBe(true)
+        expect(sim.legs.map((l) => l.from)).toEqual([nearEntrance, EXIT])
+        expect(sim.jumpStartsAt).toBe(sim.legs[0].flightSeconds + sim.legs[0].rechargeSeconds)
+        expect(sim.totalSeconds).toBe(
+            sim.jumpStartsAt + jumpSeconds + sim.legs[1].rechargeSeconds + sim.legs[1].flightSeconds
+        )
+    })
+
+    test('energy spent before the jump is still spent after it', () => {
+        const sim = simulateJumpRoute(
+            [ship],
+            [ENTRANCE, pastExit],
+            {entrance: ENTRANCE, exit: EXIT, seconds: jumpSeconds, legsBefore: 1},
+            nearEntrance,
+            true
+        )
+        expect(sim.legs[0].rechargeBefore).toBe(false)
+        expect(sim.legs[1].rechargeBefore).toBe(true)
+    })
+
+    test('a jump from where the ship stands waits for its queued travel', () => {
+        const sim = simulateJumpRoute(
+            [{...ship, priorMobilityEnd: 500}],
+            [pastExit],
+            {entrance: ENTRANCE, exit: EXIT, seconds: jumpSeconds, legsBefore: 0},
+            ENTRANCE,
+            true
+        )
+        expect(sim.jumpStartsAt).toBe(500)
+        expect(sim.legs[0].rechargeBefore).toBe(false)
+        expect(sim.totalSeconds).toBe(500 + jumpSeconds + sim.legs[0].flightSeconds)
     })
 })
