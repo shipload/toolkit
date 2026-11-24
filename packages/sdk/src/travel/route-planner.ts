@@ -92,31 +92,36 @@ export function planRoute(params: PlanRouteParams): RouteResult {
         params.heuristicCost?.(c, dest) ??
         (params.legCost ? 0 : Math.ceil(dist(c, dest) / perLegReach))
 
-    const gScore = new Map<string, number>([[key(origin), 0]])
-    const cameFrom = new Map<string, Coord>()
-    const frontier: {coord: Coord; legs: number; cost: number; f: number; remaining: number}[] = [
-        {coord: origin, legs: 0, cost: 0, f: heuristic(origin), remaining: straightLine},
-    ]
+    const keyOf = searchKey(origin)
+    const corridorBound = straightLine + corridorSlack
+    const inCorridor = (c: Coord): boolean => {
+        if (corridorBound === Number.POSITIVE_INFINITY) return true
+        const ox = c.x - origin.x
+        const oy = c.y - origin.y
+        const tx = c.x - dest.x
+        const ty = c.y - dest.y
+        const fast = Math.sqrt(ox * ox + oy * oy) + Math.sqrt(tx * tx + ty * ty)
+        if (Math.abs(fast - corridorBound) > 1e-6 * (1 + Math.abs(corridorBound))) {
+            return fast < corridorBound
+        }
+        return dist(origin, c) + dist(c, dest) <= corridorBound
+    }
+    const gScore = new Map<SearchKey, number>([[keyOf(origin), 0]])
+    const cameFrom = new Map<SearchKey, Coord>()
+    const frontier = new FrontierHeap()
+    frontier.push({coord: origin, legs: 0, cost: 0, f: heuristic(origin), remaining: straightLine})
 
     let furthest = origin
     let furthestRemaining = dist(origin, dest)
     let expansions = 0
     let cappedByMaxLegs = false
 
-    while (frontier.length > 0) {
-        let bestIdx = 0
-        for (let i = 1; i < frontier.length; i++) {
-            const a = frontier[i]
-            const b = frontier[bestIdx]
-            if (a.f < b.f || (a.f === b.f && a.remaining < b.remaining)) {
-                bestIdx = i
-            }
-        }
-        const current = frontier.splice(bestIdx, 1)[0]
-        if (current.cost !== gScore.get(key(current.coord))) continue
+    while (frontier.size > 0) {
+        const current = frontier.pop()
+        if (current.cost !== gScore.get(keyOf(current.coord))) continue
 
         if (sameCoord(current.coord, dest)) {
-            return reconstruct(cameFrom, origin, dest)
+            return reconstruct(cameFrom, keyOf, origin, dest)
         }
 
         if (current.remaining < furthestRemaining) {
@@ -127,9 +132,7 @@ export function planRoute(params: PlanRouteParams): RouteResult {
         if (++expansions > nodeBudget) break
 
         for (const n of graph.nearby(current.coord, perLegReach)) {
-            const inCorridor =
-                dist(origin, n.coord) + dist(n.coord, dest) <= straightLine + corridorSlack
-            if (!inCorridor) continue
+            if (!inCorridor(n.coord)) continue
 
             const tentativeLegs = current.legs + 1
             if (tentativeLegs > maxLegs) {
@@ -145,7 +148,7 @@ export function planRoute(params: PlanRouteParams): RouteResult {
             if (evaluatedCost === null) continue
             const legCost = evaluatedCost ?? 1
             if (!(legCost >= 0) || !Number.isFinite(legCost)) continue
-            const nk = key(n.coord)
+            const nk = keyOf(n.coord)
             const nextCost = current.cost + legCost
             if (nextCost < (gScore.get(nk) ?? Infinity)) {
                 gScore.set(nk, nextCost)
@@ -167,23 +170,108 @@ export function planRoute(params: PlanRouteParams): RouteResult {
             ok: false,
             reason: 'max-legs',
             furthest,
-            partialWaypoints: reconstructWaypoints(cameFrom, origin, furthest),
+            partialWaypoints: reconstructWaypoints(cameFrom, keyOf, origin, furthest),
         }
     }
     return {
         ok: false,
         reason: 'no-path',
         furthest,
-        partialWaypoints: reconstructWaypoints(cameFrom, origin, furthest),
+        partialWaypoints: reconstructWaypoints(cameFrom, keyOf, origin, furthest),
     }
 }
 
-function reconstructWaypoints(cameFrom: Map<string, Coord>, origin: Coord, target: Coord): Coord[] {
+type SearchKey = number | string
+
+const KEY_SPAN = 2 ** 25
+
+// Exact numeric key for integer cells within 2^25 of the origin; anything else keeps the string key.
+function searchKey(origin: Coord): (c: Coord) => SearchKey {
+    return (c) => {
+        const dx = c.x - origin.x
+        const dy = c.y - origin.y
+        if (
+            Number.isInteger(dx) &&
+            Number.isInteger(dy) &&
+            dx > -KEY_SPAN &&
+            dx < KEY_SPAN &&
+            dy > -KEY_SPAN &&
+            dy < KEY_SPAN
+        ) {
+            return (dx + KEY_SPAN) * 2 * KEY_SPAN + (dy + KEY_SPAN)
+        }
+        return key(c)
+    }
+}
+
+interface FrontierNode {
+    coord: Coord
+    legs: number
+    cost: number
+    f: number
+    remaining: number
+}
+
+type QueuedNode = FrontierNode & {seq: number}
+
+const before = (a: QueuedNode, b: QueuedNode): boolean =>
+    a.f < b.f ||
+    (a.f === b.f && (a.remaining < b.remaining || (a.remaining === b.remaining && a.seq < b.seq)))
+
+class FrontierHeap {
+    private nodes: QueuedNode[] = []
+    private nextSeq = 0
+
+    get size(): number {
+        return this.nodes.length
+    }
+
+    push(node: FrontierNode): void {
+        const nodes = this.nodes
+        let i = nodes.length
+        const item = {...node, seq: this.nextSeq++}
+        nodes.push(item)
+        while (i > 0) {
+            const parent = (i - 1) >> 1
+            if (!before(item, nodes[parent])) break
+            nodes[i] = nodes[parent]
+            i = parent
+        }
+        nodes[i] = item
+    }
+
+    pop(): QueuedNode {
+        const nodes = this.nodes
+        const top = nodes[0]
+        const last = nodes.pop()!
+        const n = nodes.length
+        if (n === 0) return top
+        let i = 0
+        for (;;) {
+            const left = 2 * i + 1
+            if (left >= n) break
+            const right = left + 1
+            const child = right < n && before(nodes[right], nodes[left]) ? right : left
+            if (!before(nodes[child], last)) break
+            nodes[i] = nodes[child]
+            i = child
+        }
+        nodes[i] = last
+        return top
+    }
+}
+
+function reconstructWaypoints(
+    cameFrom: Map<SearchKey, Coord>,
+    keyOf: (c: Coord) => SearchKey,
+    origin: Coord,
+    target: Coord
+): Coord[] {
     if (sameCoord(target, origin)) return []
     const path: Coord[] = [target]
     let cur = target
     while (!sameCoord(cur, origin)) {
-        const prev = cameFrom.get(key(cur))
+        const prev = cameFrom.get(keyOf(cur))
         if (!prev) break
         path.unshift(prev)
         cur = prev
@@ -191,12 +279,17 @@ function reconstructWaypoints(cameFrom: Map<string, Coord>, origin: Coord, targe
     return path.slice(1)
 }
 
-function reconstruct(cameFrom: Map<string, Coord>, origin: Coord, dest: Coord): RoutePlan {
+function reconstruct(
+    cameFrom: Map<SearchKey, Coord>,
+    keyOf: (c: Coord) => SearchKey,
+    origin: Coord,
+    dest: Coord
+): RoutePlan {
     const path: Coord[] = [dest]
     let cur = dest
     let totalDistance = 0
     while (!sameCoord(cur, origin)) {
-        const prev = cameFrom.get(key(cur))
+        const prev = cameFrom.get(keyOf(cur))
         if (!prev) break
         totalDistance += dist(prev, cur)
         path.unshift(prev)
@@ -258,25 +351,47 @@ function wasmSystemGraph(s: Checksum256, seedHex: string, scan: ScanProvider): S
             scan.getLocationType(seedHex, c.x, c.y) !== 0 || wormholeAt(s, c.x, c.y) !== null,
         nearby: (c, reachTiles) => {
             const r = Math.floor(reachTiles)
-            const seen = new Set<string>([`${c.x},${c.y}`])
+            const outside = (reachTiles + 1) ** 2
             const out: Neighbor[] = []
             const bx0 = Math.floor((c.x - r) / SCAN_BUCKET)
             const bx1 = Math.floor((c.x + r) / SCAN_BUCKET)
             const by0 = Math.floor((c.y - r) / SCAN_BUCKET)
             const by1 = Math.floor((c.y + r) / SCAN_BUCKET)
+            const xLow = c.x - r - 1
+            const xHigh = c.x + r + 1
             for (let bx = bx0; bx <= bx1; bx++) {
+                const bxMin = bx * SCAN_BUCKET
+                const gapX = Math.max(0, bxMin - c.x, c.x - (bxMin + SCAN_BUCKET - 1))
                 for (let by = by0; by <= by1; by++) {
-                    for (const cell of bucketSystems(bx, by)) {
-                        const dist = Math.hypot(cell.x - c.x, cell.y - c.y)
+                    const byMin = by * SCAN_BUCKET
+                    const gapY = Math.max(0, byMin - c.y, c.y - (byMin + SCAN_BUCKET - 1))
+                    if (gapX * gapX + gapY * gapY > outside) continue
+                    const cells = bucketSystems(bx, by)
+                    let lo = 0
+                    let hi = cells.length
+                    while (lo < hi) {
+                        const mid = (lo + hi) >> 1
+                        if (cells[mid].x < xLow) lo = mid + 1
+                        else hi = mid
+                    }
+                    for (let i = lo; i < cells.length; i++) {
+                        const cell = cells[i]
+                        if (cell.x > xHigh) break
+                        const dx = cell.x - c.x
+                        const dy = cell.y - c.y
+                        if (dx * dx + dy * dy > outside) continue
+                        if (dx === 0 && dy === 0) continue
+                        const dist = Math.hypot(dx, dy)
                         if (dist > reachTiles) continue
-                        const k = `${cell.x},${cell.y}`
-                        if (seen.has(k)) continue
-                        seen.add(k)
                         out.push({coord: {x: cell.x, y: cell.y}, dist})
                     }
                 }
             }
-            for (const coord of nearbyWormholes(s, c.x, c.y, reachTiles)) {
+            const wormholes = nearbyWormholes(s, c.x, c.y, reachTiles)
+            if (wormholes.length === 0) return out
+            const seen = new Set<string>([`${c.x},${c.y}`])
+            for (const n of out) seen.add(`${n.coord.x},${n.coord.y}`)
+            for (const coord of wormholes) {
                 const k = `${coord.x},${coord.y}`
                 if (seen.has(k)) continue
                 seen.add(k)

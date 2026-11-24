@@ -8,6 +8,8 @@ import {
     type SystemGraph,
 } from '../../src/travel/route-planner'
 import * as scan from '../../src/scan'
+import {contractRouteHeuristic, contractRouteLegCost} from '../../src/travel/route-build'
+import type {RouteMoverInput} from '../../src/travel/route-simulator'
 
 function gridGraph(systems: Coord[]): SystemGraph {
     const set = new Set(systems.map((s) => `${s.x},${s.y}`))
@@ -131,6 +133,44 @@ describe('planRoute', () => {
         expect(destinationEdges).toBeGreaterThan(0)
     })
 
+    test('a system exactly on the corridor edge stays in the corridor', () => {
+        const graph = gridGraph([
+            {x: 3, y: 4},
+            {x: 6, y: 0},
+        ])
+        const params = {origin: {x: 0, y: 0}, dest: {x: 6, y: 0}, perLegReach: 5.5, graph}
+        const onEdge = planRoute({...params, corridorSlack: 4})
+        expect(onEdge.ok).toBe(true)
+        if (!onEdge.ok) return
+        expect(onEdge.waypoints).toEqual([
+            {x: 3, y: 4},
+            {x: 6, y: 0},
+        ])
+        const outside = planRoute({...params, corridorSlack: 3.999})
+        expect(outside.ok).toBe(false)
+    })
+
+    test('routes through systems far from the origin', () => {
+        const far = 2 ** 25
+        const graph = gridGraph([
+            {x: far - 1, y: 0},
+            {x: far, y: 0},
+            {x: 2 * far, y: 0},
+        ])
+        const result = planRoute({
+            origin: {x: 0, y: 0},
+            dest: {x: 2 * far, y: 0},
+            perLegReach: far,
+            graph,
+        })
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.waypoints).toEqual([
+            {x: far, y: 0},
+            {x: 2 * far, y: 0},
+        ])
+    })
+
     test('rejects an empty destination cell', () => {
         const graph = gridGraph([{x: 10, y: 0}])
         const result = planRoute({
@@ -211,6 +251,96 @@ describe('planRoute partial path on failure', () => {
 describe('MAX_LEGS', () => {
     test('is the single-trip hop cap of 12', () => {
         expect(MAX_LEGS).toBe(12)
+    })
+})
+
+describe('planRoute on a seeded galaxy', () => {
+    const SEED = Checksum256.hash(Bytes.from('test-game-seed', 'utf8'))
+    const origin = {x: -1, y: 0}
+    const coords = (pairs: [number, number][]): Coord[] => pairs.map(([x, y]) => ({x, y}))
+
+    function batteryMover(reach: number): RouteMoverInput {
+        const capacity = 7417917
+        return {
+            ref: {entityType: 'ship', entityId: 74},
+            hasMovement: true,
+            engines: {thrust: 701, drain: Math.floor(capacity / reach)},
+            generator: {capacity, recharge: 4851},
+            mass: 309090,
+            energy: capacity,
+            priorMobilityEnd: 0,
+            narrowBarrierEnd: 0,
+        }
+    }
+
+    function route(reach: number, dest: Coord, nodeBudget?: number) {
+        const movers = [batteryMover(reach)]
+        return planRoute({
+            origin,
+            dest,
+            perLegReach: reach,
+            graph: sdkSystemGraph(SEED, scan),
+            maxLegs: 64,
+            nodeBudget,
+            legCost: contractRouteLegCost(movers),
+            heuristicCost: contractRouteHeuristic(movers),
+        })
+    }
+
+    test('a short-reach ship keeps its waypoints', () => {
+        const result = route(6, {x: 79, y: 58})
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.waypoints).toEqual(
+            coords([
+                [4, 1],
+                [7, 1],
+                [8, 6],
+                [10, 9],
+                [12, 11],
+                [14, 15],
+                [19, 18],
+                [20, 19],
+                [22, 24],
+                [26, 27],
+                [29, 32],
+                [33, 30],
+                [39, 30],
+                [42, 33],
+                [45, 38],
+                [48, 43],
+                [53, 46],
+                [58, 48],
+                [63, 51],
+                [66, 53],
+                [69, 55],
+                [74, 55],
+                [79, 58],
+            ])
+        )
+    })
+
+    test('a 43 ly ship keeps its waypoints', () => {
+        const result = route(43, {x: 402, y: 301}, 20000)
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.waypoints).toEqual(
+            coords([
+                [21, 18],
+                [54, 42],
+                [84, 64],
+                [117, 91],
+                [151, 116],
+                [183, 140],
+                [217, 165],
+                [251, 191],
+                [278, 211],
+                [307, 232],
+                [338, 254],
+                [369, 276],
+                [402, 301],
+            ])
+        )
     })
 })
 
