@@ -332,6 +332,17 @@ export {
     contractRouteHeuristic,
 } from './travel/route-build'
 
+export {estimateTrip, planWormholeRoute, wormholeTrips} from './travel/wormhole-route'
+export type {
+    EstimateTripParams,
+    PlanWormholeRouteParams,
+    RouteJump,
+    TripEstimate,
+    WormholeRoutePlan,
+    WormholeRouteResult,
+    WormholeTrip,
+} from './travel/wormhole-route'
+
 export * as schedule from './scheduling/schedule'
 export {LANE_MOBILITY, LANE_BARRIER} from './scheduling/schedule'
 export {appliedTaskCount, unappliedTasks} from './scheduling/schedule'

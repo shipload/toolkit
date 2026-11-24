@@ -766,6 +766,7 @@ exports[`module export surface 1`] = `
   "entityToRouteMover",
   "estimateDealTravelTime",
   "estimateTravelTime",
+  "estimateTrip",
   "estimateUnwrapDuration",
   "explainCargoItem",
   "feistel",
@@ -976,6 +977,7 @@ exports[`module export surface 1`] = `
   "planRoute",
   "planRouteWithRetry",
   "planSingleGather",
+  "planWormholeRoute",
   "poolKey",
   "popcount5",
   "previewCharterGrants",
@@ -1086,6 +1088,7 @@ exports[`module export surface 1`] = `
   "workshopAvailability",
   "wormholeAt",
   "wormholeAtRegionEndpoint",
+  "wormholeTrips",
   "wrapCostKey",
   "yieldThresholdAt",
 ]
