@@ -17,6 +17,7 @@ export function planRouteWithRetry(input: {
     perLegReach: number
     graph: SystemGraph
     maxLegs?: number
+    nodeBudget?: number
     legCost?: RouteLegCost
     heuristicCost?: RouteHeuristicCost
 }): RouteResult {

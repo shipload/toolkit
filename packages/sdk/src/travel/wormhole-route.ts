@@ -132,6 +132,7 @@ export interface PlanWormholeRouteParams {
     perLegReach: number
     graph: SystemGraph
     maxLegs: number
+    nodeBudget?: number
     legCost: RouteLegCost
     heuristicCost?: RouteHeuristicCost
 }
@@ -140,7 +141,7 @@ function planJumpTrip(
     params: PlanWormholeRouteParams,
     trip: WormholeTrip
 ): WormholeRoutePlan | null {
-    const {origin, dest, perLegReach, graph, maxLegs, legCost, heuristicCost} = params
+    const {origin, dest, perLegReach, graph, maxLegs, nodeBudget, legCost, heuristicCost} = params
     // The ship arrives at the entrance mid-trip, so that leg pays its recharge like any other stop.
     const enRoute: RouteLegCost = (leg) => legCost({...leg, isDestination: false})
     let before: Coord[] = []
@@ -151,6 +152,7 @@ function planJumpTrip(
             perLegReach,
             graph,
             maxLegs,
+            nodeBudget,
             legCost: enRoute,
             heuristicCost,
         })
@@ -167,6 +169,7 @@ function planJumpTrip(
             perLegReach,
             graph,
             maxLegs: remaining,
+            nodeBudget,
             legCost,
             heuristicCost,
         })
@@ -195,7 +198,8 @@ function planJumpTrip(
 
 // At most one jump; the plain route is kept when it is at least as fast.
 export function planWormholeRoute(params: PlanWormholeRouteParams): WormholeRouteResult {
-    const {seed, origin, dest, perLegReach, graph, maxLegs, legCost, heuristicCost} = params
+    const {seed, origin, dest, perLegReach, graph, maxLegs, nodeBudget, legCost, heuristicCost} =
+        params
     if (!graph.hasSystem(dest)) return {ok: false, reason: 'empty-destination'}
 
     let plain: WormholeRouteResult = {ok: false, reason: 'max-legs'}
@@ -206,6 +210,7 @@ export function planWormholeRoute(params: PlanWormholeRouteParams): WormholeRout
             perLegReach,
             graph,
             maxLegs,
+            nodeBudget,
             legCost,
             heuristicCost,
         })

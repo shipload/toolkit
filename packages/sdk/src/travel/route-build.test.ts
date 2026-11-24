@@ -64,6 +64,16 @@ test('a non-no-path failure returns immediately without retrying', () => {
     expect(hasSystemCalls()).toBe(1)
 })
 
+test('the node budget reaches every attempt', () => {
+    const graph = latticeGraph()
+    const args = {origin: {x: 0, y: 0}, dest: {x: 40, y: 3}, perLegReach: 5, graph, maxLegs: 64}
+
+    expect(planRouteWithRetry(args).ok).toBe(true)
+    const starved = planRouteWithRetry({...args, nodeBudget: 1})
+    expect(starved.ok).toBe(false)
+    if (!starved.ok) expect(starved.reason).toBe('no-path')
+})
+
 function latticeGraph(): SystemGraph {
     return {
         hasSystem: () => true,

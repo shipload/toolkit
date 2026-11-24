@@ -124,6 +124,16 @@ describe('planWormholeRoute', () => {
         expect(result).toEqual({ok: false, reason: 'max-legs'})
     })
 
+    test('the node budget reaches the plain search and both sides of a jump', () => {
+        const args = {seed: LIVE_SEED, origin: HOME, perLegReach: REACH, graph, legCost}
+        expect(planWormholeRoute({...args, dest: ENTRANCE, maxLegs: 128, nodeBudget: 1}).ok).toBe(
+            false
+        )
+        expect(planWormholeRoute({...args, dest: FAR_ROW, maxLegs: 128, nodeBudget: 1}).ok).toBe(
+            false
+        )
+    })
+
     test('a target under 50,000 ly never jumps', () => {
         const result = planWormholeRoute({
             seed: LIVE_SEED,
