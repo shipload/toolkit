@@ -1,7 +1,6 @@
 import type {Checksum256Type} from '@wharfkit/antelope'
 import {regionOf, WH, wormholeAtRegionEndpoint} from '../derivation/wormhole'
 import {calc_transit_duration} from './travel'
-import {planRoute} from './route-planner'
 import type {
     Coord,
     RouteFailure,
@@ -146,7 +145,7 @@ function planJumpTrip(
     const enRoute: RouteLegCost = (leg) => legCost({...leg, isDestination: false})
     let before: Coord[] = []
     if (!sameCoord(origin, trip.entrance)) {
-        const plan = planRoute({
+        const plan = planRouteWithRetry({
             origin,
             dest: trip.entrance,
             perLegReach,
@@ -162,7 +161,7 @@ function planJumpTrip(
     if (!sameCoord(trip.exit, dest)) {
         const remaining = maxLegs - before.length
         if (remaining < 1) return null
-        const plan = planRoute({
+        const plan = planRouteWithRetry({
             origin: trip.exit,
             dest,
             perLegReach,

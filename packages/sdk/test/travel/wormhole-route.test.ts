@@ -94,6 +94,23 @@ describe('planWormholeRoute', () => {
         )
     })
 
+    test('a 5 ly ship widens the search to reach the entrance', () => {
+        const result = planWormholeRoute({
+            seed: LIVE_SEED,
+            origin: HOME,
+            dest: FAR_ROW,
+            perLegReach: 5,
+            graph,
+            maxLegs: 160,
+            legCost,
+        })
+        expect(result.ok).toBe(true)
+        if (!result.ok) return
+        expect(result.jump?.exit).toEqual(EXIT)
+        expect(result.jump?.legsBefore).toBe(120)
+        expect(result.legs).toBe(145)
+    })
+
     test('under the cap the far row has no route', () => {
         const result = planWormholeRoute({
             seed: LIVE_SEED,
